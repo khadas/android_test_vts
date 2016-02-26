@@ -18,8 +18,6 @@
 
 #include <stdio.h>
 
-#include <tinyxml2.h>
-
 TEST(set_light, set_light_std) {
   printf("Test set_light %s\n", __FUNCTION__);
 }
