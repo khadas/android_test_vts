@@ -88,7 +88,6 @@ common_additional_dependencies := $(LOCAL_PATH)/Android.mk $(LOCAL_PATH)/../Andr
 # -----------------------------------------------------------------------------
 
 libHalLightsStandardTests_src_files := \
-    hal_lights_basic_test.cpp \
 
 libHalLightsStandardTests_cflags := \
     $(test_cflags) \
