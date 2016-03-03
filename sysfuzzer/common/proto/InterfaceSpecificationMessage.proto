@@ -1,0 +1,114 @@
+// Copyright 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package android.vts;
+
+
+// Class of a target component.
+enum ComponentClass {
+  UNKNOWN_CLASS = 0;
+  // For a HAL shared library.
+  HAL = 1;
+  // For a shared library which is not a HAL (e.g., standard library).
+  SHAREDLIB = 2;
+  // For a HAL which uses HIDL (HAL Interface Definition Language).
+  HAL_HIDL = 3;
+}
+
+
+// Type of a target component.
+enum ComponentType {
+  UNKNOWN_TYPE = 0;
+  // For an audio submodule.
+  AUDIO = 1;
+  // For a camera submodule.
+  CAMERA = 2;
+  // For a GPS submodule.
+  GPS = 3;
+  // For a Lights sensor submodule.
+  LIGHT = 4;
+}
+
+
+// To specify a call flow event.
+message CallFlowSpecificationMessage {
+  // true if for a function call event.
+  optional bool entry = 1 [default = false];
+  // true if for an exit event from a function.
+  optional bool exit = 2 [default = false];
+  // a list of functions that can be called after this event.
+  optional bytes next = 11;
+}
+
+
+// To specify a function.
+message FunctionSpecificationMessage {
+  // the function name.
+  optional bytes name = 1;
+
+  // data type of the return value.
+  optional bytes return_type = 11;
+
+  // a list of arguments.
+  repeated ArgumentSpecificationMessage arg = 21;
+
+  // a specification of the call flows of the function.
+  repeated CallFlowSpecificationMessage callflow = 31;
+}
+
+
+message PrimitiveDataValueMessage {
+  optional int32 int32 = 1;
+  optional uint32 uint32 = 2;
+  optional float float = 3;
+  optional double double = 4;
+  optional bytes bytes = 5;
+}
+
+
+// To specify a function argument.
+message ArgumentSpecificationMessage {
+  // Data type of the argument to describe the corresponding C/C++ data type.
+  optional bytes primitive_type = 1;
+  // Instance type of the argument to describe the semantic information.
+  optional bytes aggregate_type = 2;
+
+  // true if the argument is an input.
+  optional bool is_input = 11 [default = true];
+  // true if the argument is an output.
+  optional bool is_output = 12 [default = false];
+
+  // the actual values.
+  repeated PrimitiveDataValueMessage values = 21;
+}
+
+
+// To specify an interface of a component
+message InterfaceSpecificationMessage {
+  // Class, type, and version of a target component.
+  optional ComponentClass component_class = 1;
+  optional ComponentType component_type = 2;
+  optional float component_type_version = 3 [default = 1.0];
+
+  // The name of original C/C++ data structure.
+  optional bytes original_data_structure_name = 1001;
+
+  // a list of headers that need to be imported in order to use the component.
+  repeated bytes header = 1002;
+
+  // a list of functions exposed by the component.
+  repeated FunctionSpecificationMessage api = 2001;
+}
