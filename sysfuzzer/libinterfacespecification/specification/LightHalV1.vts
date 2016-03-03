@@ -1,0 +1,21 @@
+component_class: HAL
+component_type: LIGHT
+component_version: 1.0
+
+original_data_structure_name: "struct light_device_t"
+
+header: "<hardware/hardware.h>"
+header: "<hardware/lights.h>"
+
+api: {
+  name: "set_light"
+  return_type: "int32_t"
+  arg: {
+    data_type: "pointer"
+    instance_type: "struct light_device_t*"
+  }
+  arg: {
+    data_type: "pointer"
+    instance_type: "struct light_state_t*"
+  }
+}
