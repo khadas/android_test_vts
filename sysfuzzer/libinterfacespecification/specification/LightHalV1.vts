@@ -1,6 +1,6 @@
 component_class: HAL
 component_type: LIGHT
-component_version: 1.0
+component_type_version: 1.0
 
 original_data_structure_name: "struct light_device_t"
 
@@ -11,11 +11,11 @@ api: {
   name: "set_light"
   return_type: "int32_t"
   arg: {
-    data_type: "pointer"
-    instance_type: "struct light_device_t*"
+    primitive_type: "pointer"
+    aggregate_type: "struct light_device_t*"
   }
   arg: {
-    data_type: "pointer"
-    instance_type: "struct light_state_t*"
+    primitive_type: "pointer"
+    aggregate_type: "struct light_state_t*"
   }
 }
