@@ -26,6 +26,7 @@ LOCAL_MODULE_STEM_64 := $(LOCAL_MODULE)64
 
 LOCAL_SHARED_LIBRARIES += \
     libdl \
+    libhardware \
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libHalLightsTests \
@@ -88,6 +89,7 @@ common_additional_dependencies := $(LOCAL_PATH)/Android.mk $(LOCAL_PATH)/../Andr
 # -----------------------------------------------------------------------------
 
 libHalLightsStandardTests_src_files := \
+    hal_lights_basic_test.cpp
 
 libHalLightsStandardTests_cflags := \
     $(test_cflags) \
@@ -171,6 +173,7 @@ common_hallights-unit-tests_c_includes := \
 
 common_hallights-unit-tests_shared_libraries_target := \
     libdl \
+    libhardware \
     libpagemap \
     libdl_preempt_test_1 \
     libdl_preempt_test_2 \
