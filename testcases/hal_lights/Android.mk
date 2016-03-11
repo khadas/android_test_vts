@@ -173,6 +173,7 @@ common_hallights-unit-tests_c_includes := \
 
 common_hallights-unit-tests_shared_libraries_target := \
     libdl \
+    libhardware \
     libpagemap \
     libdl_preempt_test_1 \
     libdl_preempt_test_2 \
