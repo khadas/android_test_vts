@@ -18,6 +18,59 @@
 
 #include <stdio.h>
 
-TEST(set_light, set_light_std) {
-  printf("Test set_light %s\n", __FUNCTION__);
+#include <hardware/hardware.h>
+#include <hardware/lights.h>
+
+#include <iostream>
+
+using namespace std;
+
+namespace {
+
+// VTS structural testcase for HAL Lights basic functionalities.
+class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
+
+ protected:
+  VtsStructuralTestHalLightsBasicTest() {
+    int rc = hw_get_module_by_class(LIGHTS_HARDWARE_MODULE_ID, NULL, &module_);
+    if (rc || !module_) {
+      cerr << "could not find any lights HAL module." << endl;
+      module_ = NULL;
+      return;
+    }
+
+    rc = module_->methods->open(
+        module_, LIGHT_ID_NOTIFICATIONS,
+        reinterpret_cast<struct hw_device_t**>(&device_));
+    if (rc || !device_) {
+      cerr << "could not open a lights HAL device." << endl;
+      module_ = NULL;
+      return;
+    }
+  }
+
+  virtual ~VtsStructuralTestHalLightsBasicTest() {
+  }
+
+  virtual void SetUp() {
+    // define operations to execute before running each testcase.
+  }
+
+  virtual void TearDown() {
+    // define operations to execute after running each testcase.
+  }
+
+  // a light device which is open.
+  struct light_device_t* device_;
+
+ private:
+  const struct hw_module_t* module_;
+};
+
+TEST_F(VtsStructuralTestHalLightsBasicTest, example) {
+  ASSERT_TRUE(device_);
+  struct light_state_t* arg = NULL;
+  EXPECT_EQ(0, device_->set_light(device_, arg));
 }
+
+}  // namespace
