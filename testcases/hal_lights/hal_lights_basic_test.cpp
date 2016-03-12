@@ -67,7 +67,9 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
   struct light_device_t* device_;
 
  private:
+#if 0
   const struct hw_module_t* module_;
+#endif
 };
 
 TEST_F(VtsStructuralTestHalLightsBasicTest, example) {
