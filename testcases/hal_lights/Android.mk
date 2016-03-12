@@ -224,6 +224,7 @@ include $(LOCAL_PATH)/../Android.build.mk
 #   adb shell /data/nativetest/hallights-unit-tests-static/hallights-unit-tests-static64
 # -----------------------------------------------------------------------------
 hallights-unit-tests-static_whole_static_libraries := \
+    libHalLightsTests \
     libVtsGtestMain \
 
 hallights-unit-tests-static_static_libraries := \
