@@ -43,45 +43,9 @@ LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_EXECUTABLE)
 
-ifeq ($(HOST_OS)-$(HOST_ARCH),$(filter $(HOST_OS)-$(HOST_ARCH),linux-x86 linux-x86_64))
-include $(CLEAR_VARS)
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := $(list_executable)
-LOCAL_MULTILIB := both
-# Use the 32 bit list executable since it will include some 32 bit only tests.
-LOCAL_MODULE_STEM_32 := $(LOCAL_MODULE)32
-LOCAL_MODULE_STEM_64 := $(LOCAL_MODULE)64
-
-LOCAL_LDLIBS += \
-    -lrt -ldl -lutil \
-
-LOCAL_WHOLE_STATIC_LIBRARIES += \
-    libHalLightsTests \
-    libVtsGtestMain \
-
-LOCAL_STATIC_LIBRARIES += \
-    libbase \
-    liblog \
-    libcutils \
-
-LOCAL_CXX_STL := libc++
-
-include $(BUILD_HOST_NATIVE_TEST)
-endif  # ifeq ($(HOST_OS)-$(HOST_ARCH),$(filter $(HOST_OS)-$(HOST_ARCH),linux-x86 linux-x86_64))
-
-
-# -----------------------------------------------------------------------------
-# Unit tests.
-# -----------------------------------------------------------------------------
-
-ifeq ($(HOST_OS)-$(HOST_ARCH),$(filter $(HOST_OS)-$(HOST_ARCH),linux-x86 linux-x86_64))
-build_host := true
-else
+# VTS testcase isn't designed to be run on host due to its dependencies to
+# libhardware or other android runtime.
 build_host := false
-endif
-
 common_additional_dependencies := $(LOCAL_PATH)/Android.mk $(LOCAL_PATH)/../Android.build.mk
 
 # -----------------------------------------------------------------------------
@@ -217,37 +181,3 @@ hallights-unit-tests-gcc_c_includes := $(common_hallights-unit-tests_c_includes)
 hallights-unit-tests-gcc_shared_libraries_target := $(common_hallights-unit-tests_shared_libraries_target)
 hallights-unit-tests-gcc_static_libraries_target := $(common_hallights-unit-tests_static_libraries_target)
 include $(LOCAL_PATH)/../Android.build.mk
-
-# -----------------------------------------------------------------------------
-# Tests for the device linked against hallights's static library. Run with:
-#   adb shell /data/nativetest/hallights-unit-tests-static/hallights-unit-tests-static32
-#   adb shell /data/nativetest/hallights-unit-tests-static/hallights-unit-tests-static64
-# -----------------------------------------------------------------------------
-hallights-unit-tests-static_whole_static_libraries := \
-    libHalLightsTests \
-    libVtsGtestMain \
-
-hallights-unit-tests-static_static_libraries := \
-    libm \
-    libc \
-    libc++_static \
-    libdl \
-    libtinyxml2 \
-    liblog \
-    libbase \
-
-hallights-unit-tests-static_force_static_executable := true
-
-# libc and libc++ both define std::nothrow. libc's is a private symbol, but this
-# still causes issues when linking libc.a and libc++.a, since private isn't
-# effective until it has been linked. To fix this, just allow multiple symbol
-# definitions for the static tests.
-hallights-unit-tests-static_ldflags := -Wl,--allow-multiple-definition
-
-module := hallights-unit-tests-static
-module_tag := optional
-build_type := target
-build_target := NATIVE_TEST
-include $(LOCAL_PATH)/../Android.build.mk
-
-include $(call first-makefiles-under,$(LOCAL_PATH))

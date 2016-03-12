@@ -32,8 +32,6 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
 
  protected:
   VtsStructuralTestHalLightsBasicTest() {
-#if 0
-    // TODO(yim): re-enable
     int rc = hw_get_module_by_class(LIGHTS_HARDWARE_MODULE_ID, NULL, &module_);
     if (rc || !module_) {
       cerr << "could not find any lights HAL module." << endl;
@@ -49,7 +47,6 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
       module_ = NULL;
       return;
     }
-#endif
   }
 
   virtual ~VtsStructuralTestHalLightsBasicTest() {
@@ -67,9 +64,7 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
   struct light_device_t* device_;
 
  private:
-#if 0
   const struct hw_module_t* module_;
-#endif
 };
 
 TEST_F(VtsStructuralTestHalLightsBasicTest, example) {
