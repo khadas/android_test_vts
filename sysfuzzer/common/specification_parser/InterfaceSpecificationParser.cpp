@@ -18,7 +18,10 @@
 
 #include <stdio.h>
 
+#include <fstream>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/text_format.h>
@@ -43,7 +46,7 @@ bool InterfaceSpecificationParser::parse(
   }
   str_stream << in_file.rdbuf();
   in_file.close();
-const string data = str_stream.str();
+  const string data = str_stream.str();
 
   if (!google::protobuf::TextFormat::MergeFromString(data, is_message)) {
     cerr << __FUNCTION__ << ": Can't parse a given proto file "
