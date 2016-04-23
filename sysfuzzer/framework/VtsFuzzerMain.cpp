@@ -39,6 +39,9 @@ using namespace android;
 
 #define INTERFACE_SPEC_LIB_FILENAME "libvts_interfacespecification.so"
 
+// the default epoch count where an epoch is the time for a fuzz test run
+// (e.g., a function call).
+static const int kDefaultEpochCount = 100;
 
 // Dumps usage on stderr.
 static void usage() {
@@ -60,15 +63,17 @@ static void usage() {
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",     no_argument,       NULL, 'h'},
-    {"class",    required_argument, NULL, 'c'},
-    {"type",     required_argument, NULL, 't'},
-    {"version",  required_argument, NULL, 'v'},
-    {"spec_dir", required_argument, NULL, 's'},
-    {NULL,       0,                 NULL, 0}};
+    {"help",        no_argument,       NULL, 'h'},
+    {"class",       required_argument, NULL, 'c'},
+    {"type",        required_argument, NULL, 't'},
+    {"version",     required_argument, NULL, 'v'},
+    {"epoch_count", optional_argument, NULL, 'e'},
+    {"spec_dir",    required_argument, NULL, 's'},
+    {NULL,          0,                 NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
+  int epoch_count = kDefaultEpochCount;
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
 
   while (true) {
@@ -113,6 +118,13 @@ int main(int argc, char* const argv[]) {
       case 'v':
         target_version = atof(optarg);
         break;
+      case 'e':
+        epoch_count = atoi(optarg);
+        if (epoch_count <= 0) {
+          fprintf(stderr, "epoch_count must be > 0");
+          return 2;
+        }
+        break;
       case 's':
         spec_dir_path = string(optarg);
         break;
@@ -129,7 +141,8 @@ int main(int argc, char* const argv[]) {
     return 2;
   }
 
-  android::vts::SpecificationBuilder spec_builder(spec_dir_path);
+  android::vts::SpecificationBuilder spec_builder(
+      spec_dir_path, epoch_count);
   cout << "Result: "
       << spec_builder.Process(argv[optind],
                               INTERFACE_SPEC_LIB_FILENAME,

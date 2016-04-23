@@ -30,8 +30,10 @@
 namespace android {
 namespace vts {
 
-SpecificationBuilder::SpecificationBuilder(const string dir_path)
-    : dir_path_(dir_path) {}
+SpecificationBuilder::SpecificationBuilder(
+    const string dir_path, int epoch_count)
+    : dir_path_(dir_path),
+      epoch_count_(epoch_count) {}
 
 
 vts::InterfaceSpecificationMessage*
@@ -96,8 +98,7 @@ bool SpecificationBuilder::Process(
     return false;
   }
   if (!fuzzer->LoadTargetComponent(dll_file_name)) return -1;
-  // TODO: make 10 configurable.
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < epoch_count_; i++) {
     fuzzer->Fuzz(*interface_specification_message);
   }
   return true;
