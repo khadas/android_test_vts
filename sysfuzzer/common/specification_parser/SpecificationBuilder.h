@@ -39,7 +39,7 @@ class SpecificationBuilder {
  public:
   // Constructor where the first argument is the path of a dir which contains
   // all available interface specification files.
-  SpecificationBuilder(const string dir_path);
+  SpecificationBuilder(const string dir_path, int epoch_count);
 
   // scans the dir and returns an interface specification for a requested
   // component.
@@ -57,6 +57,8 @@ class SpecificationBuilder {
  private:
   // the path of a dir which contains interface specification ASCII proto files.
   const string dir_path_;
+  // the total number of epochs
+  const int epoch_count_;
 };
 
 }  // namespace vts
