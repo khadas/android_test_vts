@@ -9,7 +9,9 @@ header: "<hardware/lights.h>"
 
 api: {
   name: "set_light"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   arg: {
     primitive_type: "pointer"
     aggregate_type: "struct light_device_t*"
