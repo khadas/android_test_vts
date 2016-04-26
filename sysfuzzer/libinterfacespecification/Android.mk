@@ -22,8 +22,6 @@ LOCAL_MODULE := libvts_interfacespecification
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  specification/CameraHalV1.vts \
-  specification/GpsHalV1.vts \
   specification/LightHalV1.vts \
 
 LOCAL_C_INCLUDES := \
