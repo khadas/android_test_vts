@@ -24,6 +24,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   vts_datatype.cpp \
   hal_light.cpp \
+  hal_gps.cpp \
 
 LOCAL_C_INCLUDES := \
   bionic \

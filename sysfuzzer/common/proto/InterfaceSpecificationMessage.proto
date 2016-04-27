@@ -26,6 +26,8 @@ enum ComponentClass {
   SHAREDLIB = 2;
   // For a HAL which uses HIDL (HAL Interface Definition Language).
   HAL_HIDL = 3;
+  // For a submodule of a shared library HAL .
+  HAL_SUBMODULE = 4;
 }
 
 
