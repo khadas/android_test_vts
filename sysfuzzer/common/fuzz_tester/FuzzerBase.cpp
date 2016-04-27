@@ -44,7 +44,7 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
 
 
 bool FuzzerBase::Fuzz(const vts::InterfaceSpecificationMessage& message,
-                      void* result) {
+                      void** result) {
   cout << "Fuzzing target component: "
       << "class " << message.component_class()
       << " type " << message.component_type()
@@ -57,6 +57,7 @@ bool FuzzerBase::Fuzz(const vts::InterfaceSpecificationMessage& message,
   }
   return true;
 }
+
 
 }  // namespace vts
 }  // namespace android
