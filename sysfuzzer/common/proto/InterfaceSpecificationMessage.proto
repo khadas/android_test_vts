@@ -54,13 +54,22 @@ message CallFlowSpecificationMessage {
 }
 
 
+// A message for either primitive or aggregate data type.
+message DataType {
+  // Data type to describe the corresponding C/C++ data type.
+  optional bytes primitive_type = 1;
+  // Instance type to describe the semantic information.
+  optional bytes aggregate_type = 2;
+}
+
+
 // To specify a function.
 message FunctionSpecificationMessage {
   // the function name.
   optional bytes name = 1;
 
   // data type of the return value.
-  optional bytes return_type = 11;
+  optional DataType return_type = 11;
 
   // a list of arguments.
   repeated ArgumentSpecificationMessage arg = 21;

@@ -6,7 +6,9 @@ original_data_structure_name: "GpsInterface"
 
 api: {
   name: "init"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   arg: {
     primitive_type: "function_pointer"
     aggregate_type: "GpsCallbacks *"
@@ -19,7 +21,9 @@ api: {
 
 api: {
   name: "start"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   callflow: {
     next: "stop"
   }
@@ -27,7 +31,9 @@ api: {
 
 api: {
   name: "stop"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   callflow: {
     next: "cleanup"
   }
@@ -35,7 +41,9 @@ api: {
 
 api: {
   name: "cleanup"
-  return_type: "void"
+  return_type: {
+    primitive_type: "void"
+  }
   callflow: {
     exit: true
     next: "cleanup"
@@ -44,7 +52,9 @@ api: {
 
 api: {
   name: "inject_time"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   arg: {
     primitive_type: "int64_t"
     aggregate_type: "GpsUtcTime"
@@ -60,7 +70,9 @@ api: {
 
 api: {
   name: "inject_location"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   arg: {
     primitive_type: "double"
     aggregate_type: "latitude"
@@ -77,7 +89,9 @@ api: {
 
 api: {
   name: "delete_aiding_data"
-  return_type: "void"
+  return_type: {
+    primitive_type: "void"
+  }
   arg: {
     primitive_type: "uint16_t"
     aggregate_type: "flags"
@@ -86,7 +100,9 @@ api: {
 
 api: {
   name: "set_position_mode"
-  return_type: "int32_t"
+  return_type: {
+    primitive_type: "int32_t"
+  }
   arg: {
     primitive_type: "uint32_t"
     aggregate_type: "GpsPositionMode"
@@ -111,7 +127,9 @@ api: {
 
 api: {
   name: "get_extension"
-  return_type: "void_pointer"
+  return_type: {
+    primitive_type: "void_pointer"
+  }
   arg: {
     primitive_type: "char_pointer"
   }
