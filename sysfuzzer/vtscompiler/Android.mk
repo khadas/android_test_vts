@@ -23,7 +23,6 @@ LOCAL_MODULE_HOST_OS := darwin linux
 
 LOCAL_CPP_EXTENSION := .cpp
 LOCAL_SRC_FILES := \
-  $(COMPILER_SRC_FILES) \
   VtsCompilerMain.cpp \
 
 LOCAL_C_INCLUDES := \
