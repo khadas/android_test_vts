@@ -99,7 +99,8 @@ bool SpecificationBuilder::Process(
   }
   if (!fuzzer->LoadTargetComponent(dll_file_name)) return -1;
   for (int i = 0; i < epoch_count_; i++) {
-    fuzzer->Fuzz(*interface_specification_message);
+    void* result;
+    fuzzer->Fuzz(*interface_specification_message, result);
   }
   return true;
 }
