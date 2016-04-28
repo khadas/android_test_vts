@@ -244,7 +244,7 @@ void Translate(
       << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg," << endl;
-  h_ss << "            void* result);" << endl;
+  h_ss << "            void** result);" << endl;
   if (message.component_class() == HAL_SUBMODULE) {
     // hal_submodule_codegen.GenerateClassHeaderBody();
     h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
@@ -263,7 +263,7 @@ void Translate(
   if (message.component_class() == HAL) {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
     cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
-    cpp_ss << "    void* result) {" << endl;
+    cpp_ss << "    void** result) {" << endl;
     cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
     cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
@@ -294,9 +294,9 @@ void Translate(
       cpp_ss << "    ";
       if (api.return_type().has_primitive_type()
           && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "result = NULL;" << endl;
+        cpp_ss << "*result = NULL;" << endl;
       } else {
-        cpp_ss << "result = const_cast<void*>(reinterpret_cast<const void*>(";
+        cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
       }
       cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
           << "*>(device_)->" << api.name() << "(";
@@ -323,7 +323,7 @@ void Translate(
   } else if (message.component_class() == HAL_SUBMODULE) {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
     cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
-    cpp_ss << "    void* result) {" << endl;
+    cpp_ss << "    void** result) {" << endl;
     cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
     cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
@@ -347,6 +347,7 @@ void Translate(
           cpp_ss << GetCppInstanceType(arg);
         }
         cpp_ss << ";" << endl;
+        cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count << " << endl;" << endl;
         arg_count++;
       }
 
@@ -354,9 +355,9 @@ void Translate(
       cpp_ss << "    ";
       if (api.return_type().has_primitive_type()
           && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "result = NULL;" << endl;
+        cpp_ss << "*result = NULL;" << endl;
       } else {
-        cpp_ss << "result = const_cast<void*>(reinterpret_cast<const void*>(";
+        cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
       }
       cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
           << "*>(submodule_)->" << api.name() << "(";
@@ -402,7 +403,8 @@ void Translate(
   cpp_ss << "}  // namespace android" << endl;
   cpp_ss << endl << endl;
 
-  if (message.component_class() == HAL) {
+  if (message.component_class() == HAL
+      || message.component_class() == HAL_SUBMODULE) {
     cpp_ss << "extern \"C\" {" << endl;
     cpp_ss << ss.str() << " {" << endl;
     cpp_ss << "  return (android::vts::FuzzerBase*) "
