@@ -17,9 +17,12 @@
 #ifndef __VTS_SYSFUZZER_COMMON_SPECPARSER_SPECBUILDER_H__
 #define __VTS_SYSFUZZER_COMMON_SPECPARSER_SPECBUILDER_H__
 
+#include <queue>
 #include <string>
 
 #include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+
+#include "fuzz_tester/FuzzerWrapper.h"
 
 
 using namespace std;
@@ -32,6 +35,7 @@ using namespace std;
 namespace android {
 namespace vts {
 
+class FuzzerBase;
 class InterfaceSpecification;
 
 // Builder of an interface specification.
@@ -44,7 +48,14 @@ class SpecificationBuilder {
   // scans the dir and returns an interface specification for a requested
   // component.
   vts::InterfaceSpecificationMessage* FindInterfaceSpecification(
-      const int target_class, const int target_type, const float target_version);
+      const int target_class, const int target_type, const float target_version,
+      const string submodule_name = "");
+
+  // Returns FuzzBase for a given interface specification, and adds all the
+  // found functions to the fuzzing job queue.
+  FuzzerBase* GetFuzzerBaseAndAddAllFunctionsToQueue(
+      const vts::InterfaceSpecificationMessage& iface_spec_msg,
+      const char* dll_file_name);
 
   // Main function for the VTS system fuzzer where dll_file_name is the path of
   // a target component, spec_lib_file_path is the path of a specification
@@ -55,10 +66,14 @@ class SpecificationBuilder {
       int target_class, int target_type, float target_version);
 
  private:
+  // A FuzzerWrapper instance.
+  FuzzerWrapper wrapper_;
   // the path of a dir which contains interface specification ASCII proto files.
   const string dir_path_;
   // the total number of epochs
   const int epoch_count_;
+  // fuzzing job queue.
+  queue<pair<vts::FunctionSpecificationMessage*, FuzzerBase*>> job_queue_;
 };
 
 }  // namespace vts
