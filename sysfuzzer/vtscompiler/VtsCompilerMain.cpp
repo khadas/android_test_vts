@@ -54,31 +54,6 @@ int vts_fs_mkdirs(const char* file_path, mode_t mode) {
 }
 
 
-string ComponentClassToString(int component_class) {
-  switch(component_class) {
-    case UNKNOWN_CLASS: return "unknown_class";
-    case HAL: return "hal";
-    case SHAREDLIB: return "sharedlib";
-    case HAL_HIDL: return "hal_hidl";
-    case HAL_SUBMODULE: return "hal_submodule";
-  }
-  cerr << "invalid component_class " << component_class << endl;
-  exit(-1);
-}
-
-
-string ComponentTypeToString(int component_type) {
-  switch(component_type) {
-    case UNKNOWN_TYPE: return "unknown_type";
-    case AUDIO: return "audio";
-    case CAMERA: return "camera";
-    case GPS: return "gps";
-    case LIGHT: return "light";
-  }
-  cerr << "invalid component_type " << component_type << endl;
-  exit(-1);
-}
-
 // Returns the C/C++ variable type name of a given data type.
 string GetCppVariableType(const std::string primitive_type_string) {
   const char* primitive_type = primitive_type_string.c_str();
@@ -113,8 +88,7 @@ string GetCppVariableType(const std::string primitive_type_string) {
     return "void*";
   }
 
-  cerr << __FILE__ << ":" << __LINE__ << " "
-      << "unknown primitive_type " << primitive_type << endl;
+  cerr << "unknown primitive_type " << primitive_type << endl;
   exit(-1);
 }
 
@@ -136,37 +110,12 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg) {
   if (arg.has_aggregate_type()) {
     if (!strcmp(arg.aggregate_type().c_str(), "struct light_state_t*")) {
       return "GenerateLightState()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsCallbacks*")) {
-      return "GenerateGpsCallbacks()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsUtcTime")) {
-      return "GenerateGpsUtcTime()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_latitude")) {
-      return "GenerateLatitude()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_longitude")) {
-      return "GenerateLongitude()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_accuracy")) {
-      return "GenerateGpsAccuracy()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_flags_uint16")) {
-      return "GenerateGpsFlagsUint16()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsPositionMode")) {
-      return "GenerateGpsPositionMode()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsPositionRecurrence")) {
-      return "GenerateGpsPositionRecurrence()";
     } else {
-      cerr << __FILE__ << ":" << __LINE__ << " "
-          << "unknown instance type " << arg.aggregate_type() << endl;
+      cerr << "unknown instance type " << arg.aggregate_type() << endl;
+      exit(-1);
     }
-  }
-  if (arg.has_primitive_type()) {
-    if (!strcmp(arg.primitive_type().c_str(), "uint32_t")) {
-      return "RandomUint32()";
-    } else if (!strcmp(arg.primitive_type().c_str(), "int32_t")) {
-      return "RandomInt32()";
-    } else if (!strcmp(arg.primitive_type().c_str(), "char_pointer")) {
-      return "RandomCharPointer()";
-    }
-    cerr << __FILE__ << ":" << __LINE__ << " "
-        << "unknown data type " << arg.primitive_type() << endl;
+  } else if (arg.has_primitive_type()) {
+    cerr << "unknown data type " << arg.primitive_type() << endl;
     exit(-1);
   }
   cerr << __FUNCTION__ << ": neither instance nor data type is set" << endl;
@@ -208,174 +157,69 @@ void Translate(
   cpp_ss << "namespace android {" << endl;
   cpp_ss << "namespace vts {" << endl;
 
-  string component_name = message.original_data_structure_name();
-  while (!component_name.empty()
-         && (std::isspace(component_name.back())
-             || component_name.back() == '*' )) {
-    component_name.pop_back();
-  }
-  const auto pos = component_name.find_last_of(" ");
-  if (pos != std::string::npos) {
-    component_name = component_name.substr(pos + 1);
-  }
-
-  string fuzzer_extended_class_name;
-  if (message.component_class() == HAL
-      || message.component_class() == HAL_SUBMODULE) {
-    fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
-  } else {
-    cerr << "not yet supported component_class " << message.component_class();
-    exit(-1);
-  }
-
   h_ss << "#ifndef __VTS_SPEC_" << vts_name << "__" << endl;
   h_ss << "#define __VTS_SPEC_" << vts_name << "__" << endl;
   h_ss << endl;
-  h_ss << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << endl;
+  h_ss << "#define LOG_TAG \"FuzzerExtended\"" << endl;
   h_ss << "#include <utils/Log.h>" << endl;
   h_ss << "#include \"common/fuzz_tester/FuzzerBase.h\"" << endl;
-  for (auto const& header : message.header()) {
-    h_ss << "#include " << header << endl;
-  }
   h_ss << "\n\n" << endl;
   h_ss << "namespace android {" << endl;
   h_ss << "namespace vts {" << endl;
-  h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
-      << endl;
+  h_ss << "class FuzzerExtended : public FuzzerBase {" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg);" << endl;
-  if (message.component_class() == HAL_SUBMODULE) {
-    // hal_submodule_codegen.GenerateClassHeaderBody();
-    h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
-    h_ss << "    submodule_ = submodule;" << endl;
-    h_ss << "  }" << endl;
-    h_ss << endl;
-    h_ss << " private:" << endl;
-    h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
-        << endl;
-  }
   h_ss << "};" << endl;
 
   string function_name_prefix = GetFunctionNamePrefix(message);
 
   cpp_ss << endl;
-  if (message.component_class() == HAL) {
-    cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-    cpp_ss << "    const FunctionSpecificationMessage& func_msg) {" << endl;
-    cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
-    cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
+  cpp_ss << "bool FuzzerExtended::Fuzz(" << endl;
+  cpp_ss << "    const FunctionSpecificationMessage& func_msg) {" << endl;
+  cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
+  cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
-    for (auto const& api : message.api()) {
-      std::stringstream ss;
+  for (auto const& api : message.api()) {
+    std::stringstream ss;
 
-      cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+    cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
 
-      // args - definition;
-      int arg_count = 0;
-      for (auto const& arg : api.arg()) {
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
-        cpp_ss << "arg" << arg_count << " = ";
-        if (arg_count == 0
-            && arg.has_aggregate_type()
-            && !strncmp(arg.aggregate_type().c_str(),
-                        message.original_data_structure_name().c_str(),
-                        message.original_data_structure_name().length())) {
-          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">(device_)";
-        } else {
-          cpp_ss << GetCppInstanceType(arg);
-        }
-        cpp_ss << ";" << endl;
-        arg_count++;
+    // args - definition;
+    int arg_count = 0;
+    for (auto const& arg : api.arg()) {
+      cpp_ss << "    " << GetCppVariableType(arg) << " ";
+      cpp_ss << "arg" << arg_count << " = ";
+      if (arg_count == 0
+          && arg.has_aggregate_type()
+          && !strncmp(arg.aggregate_type().c_str(),
+                      message.original_data_structure_name().c_str(),
+                      message.original_data_structure_name().length())) {
+        cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">(device_)";
+      } else {
+        cpp_ss << GetCppInstanceType(arg);
       }
-
-      // actual function call
-      cpp_ss << "    ";
-      if (api.return_type().has_primitive_type()
-          && strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "cout << \"result = \" << ";
-      } else if (api.return_type().has_aggregate_type()){
-        cpp_ss << "const " << api.return_type().aggregate_type() << " ret1 = ";
-      }
-      cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-          << "*>(device_)->" << api.name() << "(";
-      if (arg_count > 0) cpp_ss << endl;
-
-      for (int index = 0; index < arg_count; index++) {
-        cpp_ss << "      arg" << index;
-        if (index != (arg_count - 1)) {
-          cpp_ss << "," << endl;
-        }
-      }
-      cpp_ss << ");" << endl;
-
-      if (api.return_type().has_aggregate_type()) {
-        /* handle the ret1 */
-      }
-      cpp_ss << "    return true;" << endl;
-      cpp_ss << "  }" << endl;
+      cpp_ss << ";" << endl;
+      arg_count++;
     }
-    // TODO: if there were pointers, free them.
-    cpp_ss << "  return false;" << endl;
-    cpp_ss << "}" << endl;
-  } else if (message.component_class() == HAL_SUBMODULE) {
-    cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-    cpp_ss << "    const FunctionSpecificationMessage& func_msg) {" << endl;
-    cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
-    cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
-    for (auto const& api : message.api()) {
-      std::stringstream ss;
-
-      cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
-
-      // args - definition;
-      int arg_count = 0;
-      for (auto const& arg : api.arg()) {
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
-        cpp_ss << "arg" << arg_count << " = ";
-        if (arg_count == 0
-            && arg.has_aggregate_type()
-            && !strncmp(arg.aggregate_type().c_str(),
-                        message.original_data_structure_name().c_str(),
-                        message.original_data_structure_name().length())) {
-          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << "*>(submodule_)";
-        } else {
-          cpp_ss << GetCppInstanceType(arg);
-        }
-        cpp_ss << ";" << endl;
-        arg_count++;
+    // actual function call
+    // perhaps cout << return value what if it's void?
+    cpp_ss << "    reinterpret_cast<" << message.original_data_structure_name()
+        << "*>(device_)->" << api.name() << "(" << endl;
+    for (int index = 0; index < arg_count; index++) {
+      cpp_ss << "      arg" << index;
+      if (index != (arg_count - 1)) {
+        cpp_ss << "," << endl;
       }
-
-      // actual function call
-      cpp_ss << "    ";
-      if (api.return_type().has_primitive_type()
-          && strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "cout << \"result = \" << ";
-      } else if (api.return_type().has_aggregate_type()){
-        cpp_ss << "const " << api.return_type().aggregate_type() << " ret1 = ";
-      }
-      cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-          << "*>(submodule_)->" << api.name() << "(";
-      if (arg_count > 0) cpp_ss << endl;
-
-      for (int index = 0; index < arg_count; index++) {
-        cpp_ss << "      arg" << index;
-        if (index != (arg_count - 1)) {
-          cpp_ss << "," << endl;
-        }
-      }
-      cpp_ss << ");" << endl;
-
-      if (api.return_type().has_aggregate_type()){
-        // TODO: handle ret1
-      }
-      cpp_ss << "    return true;" << endl;
-      cpp_ss << "  }" << endl;
     }
-    // TODO: if there were pointers, free them.
-    cpp_ss << "  return false;" << endl;
-    cpp_ss << "}" << endl;
+    cpp_ss << ");" << endl;
+
+    cpp_ss << "    return true;" << endl;
+    cpp_ss << "  }" << endl;
   }
+  // TODO: if there were pointers, free them.
+  cpp_ss << "  return false;" << endl;
+  cpp_ss << "}" << endl;
 
   std::stringstream ss;
 
@@ -387,24 +231,19 @@ void Translate(
   ss << function_name_prefix << "(" << endl;
   ss << ")";
 
-  if (message.component_class() == HAL) {
-    h_ss << "extern \"C\" {" << endl;
-    h_ss << "extern " << ss.str() << ";" << endl;
-    h_ss << "}" << endl;
-  }
+  h_ss << "extern \"C\" {" << endl;
+  h_ss << "extern " << ss.str() << ";" << endl;
+  h_ss << "}" << endl;
 
   cpp_ss << "}  // namespace vts" << endl;
   cpp_ss << "}  // namespace android" << endl;
   cpp_ss << endl << endl;
-
-  if (message.component_class() == HAL) {
-    cpp_ss << "extern \"C\" {" << endl;
-    cpp_ss << ss.str() << " {" << endl;
-    cpp_ss << "  return (android::vts::FuzzerBase*) "
-        << "new android::vts::" << fuzzer_extended_class_name << "();" << endl;
-    cpp_ss << "}" << endl << endl;
-    cpp_ss << "}" << endl;
-  }
+  cpp_ss << "extern \"C\" {" << endl;
+  cpp_ss << ss.str() << " {" << endl;
+  cpp_ss << "  return (android::vts::FuzzerBase*) "
+      << "new android::vts::FuzzerExtended();" << endl;
+  cpp_ss << "}" << endl << endl;
+  cpp_ss << "}" << endl;
 
   h_ss << "}  // namespace vts" << endl;
   h_ss << "}  // namespace android" << endl;

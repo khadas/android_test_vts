@@ -24,20 +24,15 @@
 #ifndef __VTS_DATATYPE_H__
 #define __VTS_DATATYPE_H__
 
-#include "hal_gps.h"
 #include "hal_light.h"
-
-#define MAX_CHAR_POINTER_LENGTH 100
 
 namespace android {
 namespace vts {
 
 extern void RandomNumberGeneratorReset();
-extern uint32_t RandomUint32();
-extern int32_t RandomInt32();
-extern int64_t RandomInt64();
+extern unsigned int RandomUint32();
+extern int RandomInt32();
 extern bool RandomBool();
-extern char* RandomCharPointer();
 
 }  // namespace vts
 }  // namespace android
