@@ -243,7 +243,8 @@ void Translate(
   h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
       << endl;
   h_ss << " protected:" << endl;
-  h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg);" << endl;
+  h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg," << endl;
+  h_ss << "            void* result);" << endl;
   if (message.component_class() == HAL_SUBMODULE) {
     // hal_submodule_codegen.GenerateClassHeaderBody();
     h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
@@ -261,7 +262,8 @@ void Translate(
   cpp_ss << endl;
   if (message.component_class() == HAL) {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-    cpp_ss << "    const FunctionSpecificationMessage& func_msg) {" << endl;
+    cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
+    cpp_ss << "    void* result) {" << endl;
     cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
     cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
@@ -291,10 +293,10 @@ void Translate(
       // actual function call
       cpp_ss << "    ";
       if (api.return_type().has_primitive_type()
-          && strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "cout << \"result = \" << ";
-      } else if (api.return_type().has_aggregate_type()){
-        cpp_ss << "const " << api.return_type().aggregate_type() << " ret1 = ";
+          && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
+        cpp_ss << "result = NULL;" << endl;
+      } else {
+        cpp_ss << "result = (void*) ";
       }
       cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
           << "*>(device_)->" << api.name() << "(";
@@ -308,9 +310,6 @@ void Translate(
       }
       cpp_ss << ");" << endl;
 
-      if (api.return_type().has_aggregate_type()) {
-        /* handle the ret1 */
-      }
       cpp_ss << "    return true;" << endl;
       cpp_ss << "  }" << endl;
     }
@@ -319,7 +318,8 @@ void Translate(
     cpp_ss << "}" << endl;
   } else if (message.component_class() == HAL_SUBMODULE) {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-    cpp_ss << "    const FunctionSpecificationMessage& func_msg) {" << endl;
+    cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
+    cpp_ss << "    void* result) {" << endl;
     cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
     cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
@@ -349,10 +349,10 @@ void Translate(
       // actual function call
       cpp_ss << "    ";
       if (api.return_type().has_primitive_type()
-          && strcmp(api.return_type().primitive_type().c_str(), "void")) {
-        cpp_ss << "cout << \"result = \" << ";
-      } else if (api.return_type().has_aggregate_type()){
-        cpp_ss << "const " << api.return_type().aggregate_type() << " ret1 = ";
+          && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
+        cpp_ss << "result = NULL;" << endl;
+      } else {
+        cpp_ss << "result = (void*) ";
       }
       cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
           << "*>(submodule_)->" << api.name() << "(";
@@ -366,9 +366,6 @@ void Translate(
       }
       cpp_ss << ");" << endl;
 
-      if (api.return_type().has_aggregate_type()){
-        // TODO: handle ret1
-      }
       cpp_ss << "    return true;" << endl;
       cpp_ss << "  }" << endl;
     }
