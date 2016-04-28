@@ -28,32 +28,18 @@ void RandomNumberGeneratorReset() {
 }
 
 
-uint32_t RandomUint32() {
+unsigned int RandomUint32() {
   return (unsigned int) rand();
 }
 
 
-int32_t RandomInt32() {
+int RandomInt32() {
   return rand();
-}
-
-
-int64_t RandomInt64() {
-  int64_t num = rand();
-  return (num << 32) | rand();
 }
 
 
 bool RandomBool() {
   return (abs(rand()) % 2) == 1;
-}
-
-
-char* RandomCharPointer() {
-  int len = RandomUint32() % MAX_CHAR_POINTER_LENGTH;
-  char* buf = (char*) malloc(len);
-  buf[len - 1] = '\0';
-  return buf;
 }
 
 
