@@ -19,6 +19,7 @@
 #include <dirent.h>
 
 #include <iostream>
+#include <queue>
 #include <string>
 
 #include "fuzz_tester/FuzzerBase.h"
@@ -40,7 +41,8 @@ vts::InterfaceSpecificationMessage*
 SpecificationBuilder::FindInterfaceSpecification(
     const int target_class,
     const int target_type,
-    const float target_version) {
+    const float target_version,
+    const string submodule_name) {
   DIR* dir;
   struct dirent* ent;
 
@@ -56,9 +58,14 @@ SpecificationBuilder::FindInterfaceSpecification(
       vts::InterfaceSpecificationMessage* message =
           new vts::InterfaceSpecificationMessage();
       if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
-        if (message->component_class() == target_class
-            && message->component_type() == target_type
+        if (message->component_type() == target_type
             && message->component_type_version() == target_version) {
+          if (submodule_name.length() > 0) {
+            if (message->component_class() != HAL_SUBMODULE
+                || message->original_data_structure_name() != submodule_name) {
+              continue;
+            }
+          } else if (message->component_class() != target_class) continue;
           closedir(dir);
           return message;
         }
@@ -68,6 +75,26 @@ SpecificationBuilder::FindInterfaceSpecification(
   }
   closedir(dir);
   return NULL;
+}
+
+
+FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
+    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    const char* dll_file_name) {
+  FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
+  if (!fuzzer) {
+    cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
+    return NULL;
+  }
+  if (!fuzzer->LoadTargetComponent(dll_file_name)) return NULL;
+
+  for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
+    cout << "Add a job " << func_msg.name() << endl;
+    FunctionSpecificationMessage* func_msg_copy = func_msg.New();
+    func_msg_copy->CopyFrom(func_msg);
+    job_queue_.push(make_pair(func_msg_copy, fuzzer));
+  }
+  return fuzzer;
 }
 
 
@@ -87,24 +114,63 @@ bool SpecificationBuilder::Process(
         << " version " << target_version << endl;
     return false;
   }
-  FuzzerWrapper wrapper = FuzzerWrapper();
 
-  if (!wrapper.LoadInterfaceSpecificationLibrary(spec_lib_file_path)) {
+  if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path)) {
     return false;
   }
-  FuzzerBase* fuzzer = wrapper.GetFuzzer(*interface_specification_message);
-  if (!fuzzer) {
-    cerr << __FUNCTION__ << ": coult't get a fuzzer base class" << endl;
-    return false;
-  }
-  if (!fuzzer->LoadTargetComponent(dll_file_name)) return -1;
+
+  if (!GetFuzzerBaseAndAddAllFunctionsToQueue(
+          *interface_specification_message, dll_file_name)) return false;
+
   for (int i = 0; i < epoch_count_; i++) {
+    // by default, breath-first-searching is used.
+    if (job_queue_.empty()) {
+      cout << "no more job to process; stopping after epoch " << i << endl;
+      break;
+    }
+
+    pair<vts::FunctionSpecificationMessage*, FuzzerBase*> curr_job =
+        job_queue_.front();
+    job_queue_.pop();
+
+    vts::FunctionSpecificationMessage* func_msg = curr_job.first;
+    FuzzerBase* func_fuzzer = curr_job.second;
+
     void* result;
-    fuzzer->Fuzz(*interface_specification_message, result);
+    cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
+    func_fuzzer->Fuzz(*func_msg, &result);
+    cout << __FUNCTION__ << " " << __LINE__ << endl;
+    if (func_msg->return_type().has_aggregate_type()) {
+      if (result != NULL) {
+        // loads that interface spec and enqueues all functions.
+        cout << __FUNCTION__ << " return type: "
+            << func_msg->return_type().aggregate_type() << endl;
+        string submodule_name = func_msg->return_type().aggregate_type();
+        while (!submodule_name.empty()
+               && (std::isspace(submodule_name.back())
+                   || submodule_name.back() == '*' )) {
+          submodule_name.pop_back();
+        }
+        vts::InterfaceSpecificationMessage* iface_spec_msg =
+            FindInterfaceSpecification(
+                target_class, target_type, target_version, submodule_name);
+        if (iface_spec_msg) {
+          cout << __FUNCTION__ << " submodule found - " << submodule_name << endl;
+          if (!GetFuzzerBaseAndAddAllFunctionsToQueue(
+                  *iface_spec_msg, dll_file_name)) {
+            return false;
+          }
+        } else {
+          cout << __FUNCTION__ << " submodule not found - " << submodule_name << endl;
+        }
+      } else {
+        cout << __FUNCTION__ << " return value = NULL" << endl;
+      }
+    }
   }
+
   return true;
 }
-
 
 }  // namespace vts
 }  // namespace android
