@@ -24,6 +24,10 @@ LOCAL_MODULE_HOST_OS := darwin linux
 LOCAL_CPP_EXTENSION := .cpp
 LOCAL_SRC_FILES := \
   VtsCompilerMain.cpp \
+  VtsCompilerUtils.cpp \
+  code_gen/CodeGenBase.cpp \
+  code_gen/HalCodeGen.cpp \
+  code_gen/HalSubmoduleCodeGen.cpp \
 
 LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/android \
