@@ -38,14 +38,13 @@ class FuzzerBase {
 
   // Fuzz tests the loaded component using the provided interface specification.
   // Returns true iff the testing is conducted completely.
-  bool Fuzz(const vts::InterfaceSpecificationMessage& message, void* result);
+  bool Fuzz(const vts::InterfaceSpecificationMessage& message);
 
  protected:
   // Actual implementation of routines to test a specific function using the
   // provided function interface specification message.
   // Returns true iff the testing is conducted completely.
-  virtual bool Fuzz(const vts::FunctionSpecificationMessage& func_msg,
-                    void* result) {
+  virtual bool Fuzz(const vts::FunctionSpecificationMessage& func_msg) {
     return false;
   };
 
