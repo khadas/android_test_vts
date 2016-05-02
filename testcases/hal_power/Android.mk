@@ -71,13 +71,6 @@ libHalPowerStandardTests_static_libraries := \
 libHalPowerStandardTests_ldlibs_host := \
     -lrt \
 
-# Clang/llvm has incompatible long double (fp128) for x86_64.
-# https://llvm.org/bugs/show_bug.cgi?id=23897
-# This affects most of math_test.cpp.
-ifeq ($(TARGET_ARCH),$(filter $(TARGET_ARCH),x86_64))
-libHalPowerStandardTests_clang_target := false
-endif
-
 module := libHalPowerStandardTests
 module_tag := optional
 build_type := target
