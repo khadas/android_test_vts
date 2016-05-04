@@ -20,24 +20,34 @@
 
 #include "TcpServer.h"
 
-#define DEFAULT_FUZZER_FILE_PATH "./fuzzer"
+#define DEFAULT_FUZZER_FILE_PATH32 "./fuzzer32"
+#define DEFAULT_FUZZER_FILE_PATH64 "./fuzzer64"
 
 
 int main(int argc, char* argv[]) {
-  char* fuzzer_path;
+  char* fuzzer_path32;
+  char* fuzzer_path64;
   char* spec_dir_path = NULL;
 
   if (argc == 1) {
-      fuzzer_path = DEFAULT_FUZZER_FILE_PATH;
+      fuzzer_path32 = DEFAULT_FUZZER_FILE_PATH32;
+      fuzzer_path64 = DEFAULT_FUZZER_FILE_PATH64;
   } else if (argc == 2) {
-    fuzzer_path = argv[1];
+      fuzzer_path32 = DEFAULT_FUZZER_FILE_PATH32;
+      fuzzer_path64 = DEFAULT_FUZZER_FILE_PATH64;
+      spec_dir_path = argv[1];
   } else if (argc == 3) {
-    fuzzer_path = argv[1];
-    spec_dir_path = argv[2];
+      fuzzer_path32 = argv[1];
+      fuzzer_path64 = argv[2];
+  } else if (argc == 4) {
+      fuzzer_path32 = argv[1];
+      fuzzer_path64 = argv[2];
+      spec_dir_path = argv[3];
   } else {
-    std::cerr << "usage: vts_hal_agent "
-        << "[<fuzzer binary path> [<spec file base dir path>]]" << std::endl;
-    return -1;
+      std::cerr << "usage: vts_hal_agent "
+          << "[[<fuzzer 32-bit binary path> [<fuzzer 64-bit binary path>] "
+          << "[<spec file base dir path>]]" << std::endl;
+      return -1;
   }
 
   char* dir_path;
@@ -53,7 +63,7 @@ int main(int argc, char* argv[]) {
   chdir(dir_path);
 
   android::vts::StartTcpServer(
-      (const char*) fuzzer_path, (const char*) spec_dir_path);
-
+      (const char*) fuzzer_path32, (const char*) fuzzer_path64,
+      (const char*) spec_dir_path);
   return 0;
 }

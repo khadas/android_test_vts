@@ -10,7 +10,8 @@ LOCAL_CLANG := false
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 LOCAL_CFLAGS+= -D_ANDROID_
 
-LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
+# removed -Werror
+LOCAL_CFLAGS += -Wall -Wextra -Wno-unused-parameter
 
 LOCAL_C_INCLUDES+= $(kernel_includes)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(common_deps)
@@ -56,9 +57,14 @@ LOCAL_SRC_FILES := \
     src/mm_jpegdec_interface.c \
     src/mm_jpegdec.c
 
-LOCAL_MODULE           := libmmjpeg_interface
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
+
+LOCAL_MODULE           := libmmjpeg_interface.vts
 LOCAL_PRELINK_MODULE   := false
-LOCAL_SHARED_LIBRARIES := libdl libcutils liblog libqomx_core
+LOCAL_SHARED_LIBRARIES := libdl libcutils liblog libqomx_core.vts
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)

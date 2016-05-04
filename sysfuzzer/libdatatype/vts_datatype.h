@@ -17,6 +17,7 @@
 #ifndef __VTS_DATATYPE_H__
 #define __VTS_DATATYPE_H__
 
+#include "hal_camera.h"
 #include "hal_gps.h"
 #include "hal_light.h"
 

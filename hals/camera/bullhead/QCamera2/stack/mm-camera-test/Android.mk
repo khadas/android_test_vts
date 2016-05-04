@@ -100,16 +100,22 @@ else
         LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID
         LOCAL_CFLAGS += -DNUM_RECORDING_BUFFERS=5
 endif
-LOCAL_CFLAGS += -Wall -Wextra -Werror
+# removed -Werror
+LOCAL_CFLAGS += -Wall -Wextra
 
 LOCAL_SHARED_LIBRARIES:= \
-         libcutils libdl libmmcamera_interface
+         libcutils libdl libmmcamera_interface.vts
 
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 
-LOCAL_MODULE:= mm-qcamera-app
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
+
+LOCAL_MODULE:= mm-qcamera-app.vts
 
 include $(BUILD_EXECUTABLE)
 
@@ -211,14 +217,20 @@ else
         LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID
         LOCAL_CFLAGS += -DNUM_RECORDING_BUFFERS=5
 endif
-LOCAL_CFLAGS += -Wall -Wextra -Werror
+# removed -Werror
+LOCAL_CFLAGS += -Wall -Wextra
 
 LOCAL_SHARED_LIBRARIES:= \
-         libcutils libdl libmmcamera_interface
+         libcutils libdl libmmcamera_interface.vts
 
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 
-LOCAL_MODULE:= libmm-qcamera
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
+
+LOCAL_MODULE:= libmm-qcamera.vts
 include $(BUILD_SHARED_LIBRARY)

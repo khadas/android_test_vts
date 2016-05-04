@@ -8,8 +8,8 @@ include $(CLEAR_VARS)
 LOCAL_PATH := $(OMX_CORE_PATH)
 LOCAL_MODULE_TAGS := optional
 
-omx_core_defines:= -Werror \
-                   -g -O0
+# removed -Werror flag.
+omx_core_defines:= -g -O0
 
 LOCAL_CFLAGS := $(omx_core_defines)
 
@@ -20,7 +20,12 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/../qexif
 
 LOCAL_SRC_FILES := qomx_core.c
 
-LOCAL_MODULE           := libqomx_core
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
+
+LOCAL_MODULE           := libqomx_core.vts
 LOCAL_PRELINK_MODULE   := false
 LOCAL_SHARED_LIBRARIES := libcutils libdl
 

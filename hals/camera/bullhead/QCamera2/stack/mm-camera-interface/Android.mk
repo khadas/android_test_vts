@@ -43,11 +43,17 @@ ifneq (1,$(filter 1,$(shell echo "$$(( $(PLATFORM_SDK_VERSION) >= 17 ))" )))
   LOCAL_CFLAGS += -include bionic/libc/kernel/common/linux/socket.h
   LOCAL_CFLAGS += -include bionic/libc/kernel/common/linux/un.h
 endif
-LOCAL_CFLAGS += -Wall -Wextra -Werror
+# removed -Werror
+LOCAL_CFLAGS += -Wall -Wextra
 
 LOCAL_SRC_FILES := $(MM_CAM_FILES)
 
-LOCAL_MODULE           := libmmcamera_interface
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
+
+LOCAL_MODULE           := libmmcamera_interface.vts
 LOCAL_PRELINK_MODULE   := false
 LOCAL_SHARED_LIBRARIES := libdl libcutils liblog
 LOCAL_MODULE_TAGS := optional
