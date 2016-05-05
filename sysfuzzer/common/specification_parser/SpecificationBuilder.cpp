@@ -139,7 +139,6 @@ bool SpecificationBuilder::Process(
     void* result;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
     func_fuzzer->Fuzz(*func_msg, &result);
-    cout << __FUNCTION__ << " " << __LINE__ << endl;
     if (func_msg->return_type().has_aggregate_type()) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.
