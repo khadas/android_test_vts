@@ -22,6 +22,7 @@ LOCAL_MODULE := libvts_common
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
+  binder/VtsFuzzerBinderService.cpp \
   component_loader/DllLoader.cpp \
   fuzz_tester/FuzzerBase.cpp \
   fuzz_tester/FuzzerWrapper.cpp \
@@ -35,9 +36,13 @@ LOCAL_C_INCLUDES := \
   libcore \
   system/extras \
   external/protobuf/src \
+  frameworks/native/include \
+  system/core/include
 
 LOCAL_SHARED_LIBRARIES := \
+  libutils \
   libcutils \
+  libbinder \
   liblog \
   libdl \
   libandroid_runtime \

@@ -15,7 +15,11 @@
  */
 
 /*
- * Example usage:
+ * Example usage (for angler 64-bit devices):
+ *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib64/hw/lights.angler.so
+ *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
+ *
+ * Example usage (for GCE virtual devices):
  *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
  *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so
  *  $ fuzzer --class=hal --type=camera --version=1.0 /system/lib/hw/camera.gce_x86.so
@@ -31,8 +35,11 @@
 #include <string>
 #include <iostream>
 
+#include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "specification_parser/SpecificationBuilder.h"
+
+#include "BinderServer.h"
 
 using namespace std;
 using namespace android;
@@ -70,12 +77,14 @@ int main(int argc, char* const argv[]) {
     {"version",     required_argument, NULL, 'v'},
     {"epoch_count", optional_argument, NULL, 'e'},
     {"spec_dir",    required_argument, NULL, 's'},
+    {"server",      no_argument,       NULL, 'd'},
     {NULL,          0,                 NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
   int epoch_count = kDefaultEpochCount;
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
+  bool server = false;
 
   while (true) {
     int optionIndex = 0;
@@ -129,6 +138,9 @@ int main(int argc, char* const argv[]) {
       case 's':
         spec_dir_path = string(optarg);
         break;
+      case 'd':
+        server = true;
+        break;
       default:
         if (ic != '?') {
           fprintf(stderr, "getopt_long returned unexpected value 0x%x\n", ic);
@@ -144,12 +156,17 @@ int main(int argc, char* const argv[]) {
 
   android::vts::SpecificationBuilder spec_builder(
       spec_dir_path, epoch_count);
-  cout << "Result: "
-      << spec_builder.Process(argv[optind],
-                              INTERFACE_SPEC_LIB_FILENAME,
-                              target_class,
-                              target_type,
-                              target_version) << endl;
-  cout << endl << PASSED_MARKER << endl;
+  if (!server) {
+    bool success = spec_builder.Process(
+        argv[optind], INTERFACE_SPEC_LIB_FILENAME, target_class,
+        target_type, target_version);
+    cout << "Result: " << success << endl;
+    if (success) {
+      cout << endl << PASSED_MARKER << endl;
+    }
+  } else {
+    android::vts::StartBinderServer();
+  }
+
   return 0;
 }
