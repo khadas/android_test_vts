@@ -27,10 +27,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <utils/RefBase.h>
+
 #include <iostream>
 #include <sstream>
 
 #include "test/vts/agents/hal/proto/AndroidSystemControlMessage.pb.h"
+#include "BinderClient.h"
 
 using namespace std;
 
@@ -38,6 +41,71 @@ namespace android {
 namespace vts {
 
 const static int kTcpPort = 5001;
+
+
+AndroidSystemControlResponseMessage* RespondCheckFuzzerBinderService() {
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+
+  sp<IVtsFuzzer> binder = GetBinderClient();
+  if (binder.get()) {
+    response_msg->set_response_code(SUCCESS);
+    response_msg->set_reason("an example success reason here");
+  } else {
+    response_msg->set_response_code(FAIL);
+    response_msg->set_reason("an example failure reason here");
+  }
+  return response_msg;
+}
+
+#define MAX_FUZZER_ARGV_COUNT 30
+
+AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
+    const string& args) {
+  int pipefd[2];
+
+  cout << "starting fuzzer" << endl;
+  pipe(pipefd);
+  pid_t pid = fork();
+  ResponseCode result = FAIL;
+  if (pid == 0) {  // child
+    cout << "Exec /system/bin/fuzzer " << args << endl;
+    char* cmd;
+    asprintf(&cmd, "/system/bin/fuzzer %s", args.c_str());
+    system(cmd);
+    cout << "fuzzer done" << endl;
+    free(cmd);
+    exit(0);
+  } else if (pid > 0){
+    for (int attempt = 0; attempt < 10; attempt++) {
+      sleep(1);
+      AndroidSystemControlResponseMessage* resp = RespondCheckFuzzerBinderService();
+      if (resp->response_code() == SUCCESS) {
+        result = SUCCESS;
+        break;
+      }
+    }
+  } else {
+    cerr << "can't fork a child process to run the fuzzer." << endl;
+    return NULL;
+  }
+
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+  response_msg->set_response_code(result);
+  response_msg->set_reason("an example success reason here");
+  return response_msg;
+}
+
+
+AndroidSystemControlResponseMessage* RespondDefault() {
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+
+  response_msg->set_response_code(SUCCESS);
+  response_msg->set_reason("an example reason here");
+  return response_msg;
+}
 
 
 // handles a new session.
@@ -73,8 +141,13 @@ int HandleSession(int fd) {
         // TODO: handle by retrying
         return -1;
       }
+      buffer[len] = '\0';
 
       AndroidSystemControlCommandMessage command_msg;
+      for (int i = 0; i < len; i++) {
+        cout << int(buffer[i]) << " ";
+      }
+      cout << endl;
       if (!command_msg.ParseFromString(string(buffer))) {
         cerr << "can't parse the cmd" << endl;
         return -1;
@@ -82,12 +155,29 @@ int HandleSession(int fd) {
       cout << "type " << command_msg.command_type() << endl;
       cout << "target_name " << command_msg.target_name() << endl;
 
-      AndroidSystemControlResponseMessage response_msg;
+      AndroidSystemControlResponseMessage* response_msg = NULL;
+      switch (command_msg.command_type()) {
+        case CHECK_FUZZER_BINDER_SERVICE:
+          response_msg = RespondCheckFuzzerBinderService();
+          break;
+        case START_FUZZER_BINDER_SERVICE:
+          response_msg = RespondStartFuzzerBinderService(
+              command_msg.target_name());
+          break;
+        case GET_HALS:
+          cout << "get_hals" << endl;
+        default:
+          response_msg = RespondDefault();
+          break;
+      }
 
-      response_msg.set_response_code(SUCCESS);
-      response_msg.set_reason("an example reason here");
+      if (!response_msg) {
+        cerr << "response_msg == NULL" << endl;
+        return -1;
+      }
+
       string response_msg_str;
-      if (!response_msg.SerializeToString(&response_msg_str)) {
+      if (!response_msg->SerializeToString(&response_msg_str)) {
         cerr << "can't serialize the response message to a string." << endl;
         return -1;
       }
@@ -110,6 +200,7 @@ int HandleSession(int fd) {
         return -1;
       }
 
+      delete response_msg;
       index = 0;
     } else {
       buffer[index++] = ch;
