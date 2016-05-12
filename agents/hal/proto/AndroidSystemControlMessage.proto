@@ -16,10 +16,12 @@ syntax = "proto2";
 
 package android.vts;
 
+//import "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.proto";
+
 
 // Type of a command.
 enum CommandType {
-  UNKNOWN_TYPE = 0;
+  UNKNOWN_COMMAND_TYPE = 0;
   // To check whether fuzzer's binder service is available.
   CHECK_FUZZER_BINDER_SERVICE = 1;
   // To start a fuzzer binary service.
@@ -39,7 +41,7 @@ enum CommandType {
 
 // Type of a response.
 enum ResponseCode {
-  UNKNOWN_CODE = 0;
+  UNKNOWN_RESPONSE_CODE = 0;
   // successful
   SUCCESS = 1;
   // failed
@@ -54,6 +56,15 @@ message AndroidSystemControlCommandMessage {
 
   // The name of a target.
   optional bytes target_name = 1001;
+
+  // for when command_type == SELECT_HAL
+  // target class
+  optional int32 target_class = 2001;
+  // target type
+  optional int32 target_type = 2002;
+  // target version (should be divided by 100) - float has a compatibility issue
+  // between C/C++ and python protoc.
+  optional int32 target_version = 2003;
 }
 
 

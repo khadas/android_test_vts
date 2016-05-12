@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <dirent.h>
+
 #include <netdb.h>
 #include <netinet/in.h>
 
@@ -33,9 +35,14 @@
 #include <sstream>
 
 #include "test/vts/agents/hal/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
 #include "BinderClient.h"
 
 using namespace std;
+
+#define MAX_FUZZER_ARGV_COUNT 30
+#define TARGET_COMPONENT_DIR_PATH "/system/lib64/hw/"
+
 
 namespace android {
 namespace vts {
@@ -58,14 +65,10 @@ AndroidSystemControlResponseMessage* RespondCheckFuzzerBinderService() {
   return response_msg;
 }
 
-#define MAX_FUZZER_ARGV_COUNT 30
 
 AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
     const string& args) {
-  int pipefd[2];
-
   cout << "starting fuzzer" << endl;
-  pipe(pipefd);
   pid_t pid = fork();
   ResponseCode result = FAIL;
   if (pid == 0) {  // child
@@ -95,6 +98,96 @@ AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
   response_msg->set_response_code(result);
   response_msg->set_reason("an example success reason here");
   return response_msg;
+}
+
+
+AndroidSystemControlResponseMessage* RespondGetHals(const string& base_path) {
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+
+  ResponseCode result = FAIL;
+
+  string files = "";
+
+  DIR *dp;
+  if (!(dp = opendir(base_path.c_str()))) {
+    cerr << "Error(" << errno << ") opening " << TARGET_COMPONENT_DIR_PATH << endl;
+    return NULL;
+  }
+
+  struct dirent* dirp;
+  int len;
+  while ((dirp = readdir(dp)) != NULL) {
+    len = strlen(dirp->d_name);
+    if (len > 3 && !strcmp(&dirp->d_name[len - 3], ".so")) {
+      files += string(dirp->d_name) + " ";
+      result = SUCCESS;
+    }
+  }
+  closedir(dp);
+
+  response_msg->set_reason(files);
+  return response_msg;
+}
+
+
+AndroidSystemControlResponseMessage* RespondSelectHal(
+    const string& file_name, int target_class, int target_type,
+    float target_version) {
+  // TODO: use an attribute (client) of a newly defined class.
+  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
+  if (!client.get()) return NULL;
+
+  int32_t result = client->LoadHal(file_name, target_class, target_type,
+                                   target_version);
+  cout << "LoadHal: " << result << endl;
+
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+  if (result == 0) {
+    response_msg->set_response_code(SUCCESS);
+    response_msg->set_reason("Loaded the selected HAL.");
+  } else {
+    response_msg->set_response_code(FAIL);
+    response_msg->set_reason("Failed to load the selected HAL.");
+  }
+  return response_msg;
+}
+
+
+AndroidSystemControlResponseMessage* RespondGetFunctions() {
+  // TODO: use an attribute (client) of a newly defined class.
+  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
+  if (!client.get()) return NULL;
+
+  const char* result = client->GetFunctions();
+  cout << "GetFunctions: " << result << endl;
+
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+  if (result && strlen(result) > 0) {
+    response_msg->set_response_code(SUCCESS);
+    response_msg->set_reason(result);
+  } else {
+    response_msg->set_response_code(FAIL);
+    response_msg->set_reason("Failed to load the selected HAL.");
+  }
+  return response_msg;
+}
+
+
+AndroidSystemControlResponseMessage* RespondCallFunction(const string& file_name) {
+  // TODO: use an attribute (client) of a newly defined class.
+  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
+  if (!client.get()) return NULL;
+
+  int v = 10;
+  client->Status(v);
+  const int32_t adder = 5;
+  int32_t sum = client->Call(v, adder);
+  cout << "Addition result: " << v << " + " << adder << " = " << sum << endl;
+  client->Exit();
+  return NULL;
 }
 
 
@@ -165,7 +258,24 @@ int HandleSession(int fd) {
               command_msg.target_name());
           break;
         case GET_HALS:
-          cout << "get_hals" << endl;
+          if (command_msg.target_name().length() > 0) {
+            response_msg = RespondGetHals(command_msg.target_name());
+          } else {
+            response_msg = RespondGetHals(TARGET_COMPONENT_DIR_PATH);
+          }
+          break;
+        case SELECT_HAL:
+          response_msg = RespondSelectHal(command_msg.target_name(),
+                                          command_msg.target_class(),
+                                          command_msg.target_type(),
+                                          command_msg.target_version() / 100.0);
+          break;
+        case GET_FUNCTIONS:
+          response_msg = RespondGetFunctions();
+          break;
+        case CALL_FUNCTION:
+          response_msg = RespondCallFunction(command_msg.target_name());
+          break;
         default:
           response_msg = RespondDefault();
           break;

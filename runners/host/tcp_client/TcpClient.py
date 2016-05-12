@@ -66,7 +66,8 @@ class VtsTcpClient(object):
       self.connection.close()
       self.connection = None
 
-  def SendCommand(self, command_type, target_name):
+  def SendCommand(self, command_type, target_name, target_class=None,
+                  target_type=None, target_version=None):
     """Sends a command.
 
     Args:
@@ -79,6 +80,15 @@ class VtsTcpClient(object):
     command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage()
     command_msg.command_type = command_type
     command_msg.target_name = target_name
+
+    if target_class is not None:
+      command_msg.target_class = target_class
+
+    if target_type is not None:
+      command_msg.target_type = target_type
+
+    if target_version is not None:
+      command_msg.target_version = int(target_version * 100)
 
     message = command_msg.SerializeToString()
     message_len = len(message)

@@ -65,6 +65,13 @@ class SpecificationBuilder {
       const char* dll_file_name, const char* spec_lib_file_path,
       int target_class, int target_type, float target_version);
 
+  bool LoadTargetComponent(
+      const char* dll_file_name, const char* spec_lib_file_path,
+      int target_class, int target_type, float target_version);
+
+  // Returns the loaded interface specification message.
+  vts::InterfaceSpecificationMessage* GetInterfaceSpecification() const;
+
  private:
   // A FuzzerWrapper instance.
   FuzzerWrapper wrapper_;
@@ -74,6 +81,8 @@ class SpecificationBuilder {
   const int epoch_count_;
   // fuzzing job queue.
   queue<pair<vts::FunctionSpecificationMessage*, FuzzerBase*>> job_queue_;
+  // Loaded interface specification message.
+  vts::InterfaceSpecificationMessage* if_spec_msg_;
 };
 
 }  // namespace vts
