@@ -72,9 +72,9 @@ AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
   pid_t pid = fork();
   ResponseCode result = FAIL;
   if (pid == 0) {  // child
-    cout << "Exec /system/bin/fuzzer " << args << endl;
+    cout << "Exec fuzzer " << args << endl;
     char* cmd;
-    asprintf(&cmd, "/system/bin/fuzzer %s", args.c_str());
+    asprintf(&cmd, "fuzzer %s", args.c_str());
     system(cmd);
     cout << "fuzzer done" << endl;
     free(cmd);

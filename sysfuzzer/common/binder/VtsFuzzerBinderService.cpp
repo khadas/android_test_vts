@@ -128,7 +128,7 @@ const char* BpVtsFuzzer::Call(const string& call_payload) {
     return res;
   }
 
-  printf("len(reply) = %d\n", strlen(res));
+  printf("len(reply) = %zu\n", strlen(res));
   return res;
 }
 
@@ -153,7 +153,7 @@ const char* BpVtsFuzzer::GetFunctions() {
     return res;
   }
 
-  printf("len(reply) = %d\n", strlen(res));
+  printf("len(reply) = %zu\n", strlen(res));
   return res;
 }
 
