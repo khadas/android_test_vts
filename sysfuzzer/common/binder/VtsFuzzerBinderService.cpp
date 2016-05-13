@@ -16,6 +16,8 @@
 
 #include <stdlib.h>
 
+#include <string>
+
 #include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderService"
 #include <utils/Log.h>
@@ -29,6 +31,9 @@
 
 #include "binder/VtsFuzzerBinderService.h"
 
+using namespace std;
+
+
 namespace android {
 namespace vts {
 
@@ -41,6 +46,37 @@ void BpVtsFuzzer::Exit() {
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
   data.writeString16(String16("Exit code"));
   remote()->transact(EXIT, data, &reply, IBinder::FLAG_ONEWAY);
+}
+
+
+int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
+                             int target_type, float target_version) {
+  Parcel data;
+  Parcel reply;
+
+  data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
+  data.writeCString(path.c_str());
+  data.writeInt32(target_class);
+  data.writeInt32(target_type);
+  data.writeFloat(target_version);
+
+#ifdef VTS_FUZZER_BINDER_DEBUG
+  aout << "BpVtsFuzzer::Status request parcel:\n";
+  data.print(PLOG);
+  endl(PLOG);
+#endif
+
+  remote()->transact(LOAD_HAL, data, &reply);
+
+#ifdef VTS_FUZZER_BINDER_DEBUG
+  aout << "BpVtsFuzzer::Status response parcel:\n";
+  reply.print(PLOG);
+  endl(PLOG);
+#endif
+
+  int32_t res;
+  status_t status = reply.readInt32(&res);
+  return res;
 }
 
 
@@ -71,11 +107,10 @@ int32_t BpVtsFuzzer::Status(int32_t type) {
 }
 
 
-int32_t BpVtsFuzzer::Call(int32_t arg1, int32_t arg2) {
+const char* BpVtsFuzzer::Call(const string& call_payload) {
   Parcel data, reply;
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
-  data.writeInt32(arg1);
-  data.writeInt32(arg2);
+  data.writeCString(call_payload.c_str());
 #ifdef VTS_FUZZER_BINDER_DEBUG
   data.print(PLOG);
   endl(PLOG);
@@ -87,11 +122,40 @@ int32_t BpVtsFuzzer::Call(int32_t arg1, int32_t arg2) {
   endl(PLOG);
 #endif
 
-  int32_t res;
-  status_t status = reply.readInt32(&res);
+  const char* res = reply.readCString();
+  if (res == NULL) {
+    printf("reply == NULL\n");
+    return res;
+  }
+
+  printf("len(reply) = %d\n", strlen(res));
+  return res;
+}
+
+
+const char* BpVtsFuzzer::GetFunctions() {
+  Parcel data, reply;
+  data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
+#ifdef VTS_FUZZER_BINDER_DEBUG
+  data.print(PLOG);
+  endl(PLOG);
+#endif
+
+  remote()->transact(GET_FUNCTIONS, data, &reply);
+#ifdef VTS_FUZZER_BINDER_DEBUG
+  reply.print(PLOG);
+  endl(PLOG);
+#endif
+
+  const char* res = reply.readCString();
+  if (res == NULL) {
+    printf("reply == NULL\n");
+    return res;
+  }
+
+  printf("len(reply) = %d\n", strlen(res));
   return res;
 }
 
 }  // namespace vts
 }  // namespace android
-

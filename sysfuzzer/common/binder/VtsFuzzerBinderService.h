@@ -17,7 +17,10 @@
 #ifndef __VTS_FUZZER_BINDER_SERVICE_H__
 #define __VTS_FUZZER_BINDER_SERVICE_H__
 
+#include <string>
+
 #include <utils/RefBase.h>
+#include <utils/String8.h>
 
 #include <binder/IInterface.h>
 #include <binder/IBinder.h>
@@ -30,6 +33,9 @@
 
 #define VTS_FUZZER_BINDER_SERVICE_NAME "VtsFuzzer"
 
+using namespace std;
+
+
 namespace android {
 namespace vts {
 
@@ -38,18 +44,26 @@ class IVtsFuzzer : public IInterface {
  public:
   enum {
     EXIT = IBinder::FIRST_CALL_TRANSACTION,
+    LOAD_HAL,
     STATUS,
-    CALL
+    CALL,
+    GET_FUNCTIONS
   };
 
   // Sends an exit command.
   virtual void Exit() = 0;
 
+  // Requests to load a HAL.
+  virtual int32_t LoadHal(const string& path, int target_class,
+                          int target_type, float target_version) = 0;
+
   // Requests to return the specified status.
   virtual int32_t Status(int32_t type) = 0;
 
   // Requests to call the specified function using the provided arguments.
-  virtual int32_t Call(int32_t arg1, int32_t arg2) = 0;
+  virtual const char* Call(const string& call_payload) = 0;
+
+  virtual const char* GetFunctions() = 0;
 
   DECLARE_META_INTERFACE(VtsFuzzer);
 };
@@ -61,8 +75,11 @@ class BpVtsFuzzer : public BpInterface<IVtsFuzzer> {
   BpVtsFuzzer(const sp<IBinder>& impl) : BpInterface<IVtsFuzzer>(impl) {}
 
   void Exit();
+  int32_t LoadHal(const string& path, int target_class,
+                  int target_type, float target_version);
   int32_t Status(int32_t type);
-  int32_t Call(int32_t arg1, int32_t arg2);
+  const char* Call(const string& call_payload);
+  const char* GetFunctions();
 };
 
 }  // namespace vts

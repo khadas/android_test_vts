@@ -149,14 +149,14 @@ int main(int argc, char* const argv[]) {
     }
   }
 
-  if (optind != argc - 1) {
-    fprintf(stderr, "Must specify output file (see --help).\n");
-    return 2;
-  }
-
   android::vts::SpecificationBuilder spec_builder(
       spec_dir_path, epoch_count);
   if (!server) {
+    if (optind != argc - 1) {
+      fprintf(stderr, "Must specify output file (see --help).\n");
+      return 2;
+    }
+
     bool success = spec_builder.Process(
         argv[optind], INTERFACE_SPEC_LIB_FILENAME, target_class,
         target_type, target_version);
@@ -165,7 +165,7 @@ int main(int argc, char* const argv[]) {
       cout << endl << PASSED_MARKER << endl;
     }
   } else {
-    android::vts::StartBinderServer();
+    android::vts::StartBinderServer(spec_builder, INTERFACE_SPEC_LIB_FILENAME);
   }
 
   return 0;

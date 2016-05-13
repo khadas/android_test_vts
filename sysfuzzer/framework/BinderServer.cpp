@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
+#include "BinderServer.h"
+
+#include <stdio.h>
 #include <stdlib.h>
+
+#include <string>
+#include <iostream>
 
 #include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderServer"
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include <binder/TextOutput.h>
 #include <binder/IInterface.h>
@@ -28,7 +35,13 @@
 #include <binder/IPCThreadState.h>
 
 #include "binder/VtsFuzzerBinderService.h"
-#include "BinderServer.h"
+#include "specification_parser/SpecificationBuilder.h"
+
+#include <google/protobuf/text_format.h>
+#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+
+
+using namespace std;
 
 namespace android {
 namespace vts {
@@ -54,6 +67,26 @@ status_t BnVtsFuzzer::onTransact(
     case EXIT:
       Exit();
       break;
+    case LOAD_HAL: {
+      const char* path = data.readCString();
+      const int target_class = data.readInt32();
+      const int target_type = data.readInt32();
+      const float target_version = data.readFloat();
+      int32_t result = LoadHal(string(path), target_class, target_type,
+                               target_version);
+      ALOGD("BnVtsFuzzer::%s LoadHal(%s) -> %i",
+            __FUNCTION__, path, result);
+      if (reply == NULL) {
+        ALOGE("reply == NULL");
+        abort();
+      }
+#ifdef VTS_FUZZER_BINDER_DEBUG
+      reply->print(PLOG);
+      endl(PLOG);
+#endif
+      reply->writeInt32(result);
+      break;
+    }
     case STATUS: {
       int32_t type = data.readInt32();
       int32_t result = Status(type);
@@ -72,12 +105,11 @@ status_t BnVtsFuzzer::onTransact(
       break;
     }
     case CALL: {
-      int32_t arg1 = data.readInt32();
-      int32_t arg2 = data.readInt32();
-      int32_t result = Call(arg1, arg2);
+      const char* arg = data.readCString();
+      const char* result = Call(arg);
 
-      ALOGD("BnVtsFuzzer::%s call(%i, %i) = %i",
-            __FUNCTION__, arg1, arg2, result);
+      ALOGD("BnVtsFuzzer::%s call(%s) = %i",
+            __FUNCTION__, arg, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -86,7 +118,21 @@ status_t BnVtsFuzzer::onTransact(
       reply->print(PLOG);
       endl(PLOG);
 #endif
-      reply->writeInt32(result);
+      reply->writeCString(result);
+      break;
+    }
+    case GET_FUNCTIONS: {
+      const char* result = GetFunctions();
+
+      if (reply == NULL) {
+        ALOGE("reply == NULL");
+        abort();
+      }
+#ifdef VTS_FUZZER_BINDER_DEBUG
+      reply->print(PLOG);
+      endl(PLOG);
+#endif
+      reply->writeCString(result);
       break;
     }
     default:
@@ -97,8 +143,28 @@ status_t BnVtsFuzzer::onTransact(
 
 
 class VtsFuzzerServer : public BnVtsFuzzer {
+
+ public:
+  VtsFuzzerServer(android::vts::SpecificationBuilder& spec_builder,
+                  const char* lib_path)
+      : spec_builder_(spec_builder),
+        lib_path_(lib_path) {}
+
   void Exit() {
     printf("VtsFuzzerServer::Exit\n");
+  }
+
+  int32_t LoadHal(const string& path, int target_class,
+                  int target_type, float target_version) {
+    printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
+    bool success = spec_builder_.LoadTargetComponent(
+        path.c_str(), lib_path_, target_class, target_type, target_version);
+    cout << "Result: " << success << std::endl;
+    if (success) {
+      return 0;
+    } else {
+      return -1;
+    }
   }
 
   int32_t Status(int32_t type) {
@@ -106,16 +172,44 @@ class VtsFuzzerServer : public BnVtsFuzzer {
     return 0;
   }
 
-  int32_t Call(int32_t arg1, int32_t arg2) {
-    printf("VtsFuzzerServer::Call(%i, %i)\n", arg1, arg2);
-    return arg1 + arg2;
+  const char* Call(const string& arg) {
+    printf("VtsFuzzerServer::Call(%s)\n", arg.c_str());
+    FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
+    google::protobuf::TextFormat::MergeFromString(arg, func_msg);
+    printf("call!!!\n");
+    spec_builder_.CallFunction(func_msg);
+    return arg.c_str();
   }
+
+  const char* GetFunctions() {
+    printf("Get functions*");
+    vts::InterfaceSpecificationMessage* spec =
+        spec_builder_.GetInterfaceSpecification();
+    if (!spec) {
+      return NULL;
+    }
+    string* output = new string();
+    printf("getfunctions serial1\n");
+    if (google::protobuf::TextFormat::PrintToString(*spec, output)) {
+      printf("getfunctions length %d\n", output->length());
+      return output->c_str();
+    } else {
+      printf("can't serialize the interface spec message to a string.\n");
+      return NULL;
+    }
+  }
+
+ private:
+  android::vts::SpecificationBuilder& spec_builder_;
+  const char* lib_path_;
 };
 
 
-void StartBinderServer() {
+void StartBinderServer(android::vts::SpecificationBuilder& spec_builder,
+                       const char* lib_path) {
   defaultServiceManager()->addService(
-      String16(VTS_FUZZER_BINDER_SERVICE_NAME), new VtsFuzzerServer());
+      String16(VTS_FUZZER_BINDER_SERVICE_NAME),
+      new VtsFuzzerServer(spec_builder, lib_path));
   android::ProcessState::self()->startThreadPool();
   IPCThreadState::self()->joinThreadPool();
 }

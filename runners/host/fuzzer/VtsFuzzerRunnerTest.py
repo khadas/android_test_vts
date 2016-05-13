@@ -16,11 +16,15 @@
 #
 
 import logging
+import os
 import sys
 
 from logger import Log
 from proto import AndroidSystemControlMessage_pb2
+from proto import InterfaceSpecificationMessage_pb2
+from google.protobuf import text_format
 from tcp_client import TcpClient
+from sys import api_version
 
 
 def main(args):
@@ -39,14 +43,55 @@ def main(args):
   while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
     client.SendCommand(AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
                        "--server --class=hal --type=light --version=1.0 "
-                       "/system/lib64/hw/lights.angler.so")
+                       "none")
     resp = client.RecvResponse()
     logging.info(resp)
 
   client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
-                     "Give me the list of HALs")
+                     "/system/lib/hw/")  # /system/lib64/hw/lights.angler.so
   resp = client.RecvResponse()
   logging.info(resp)
+
+  for filename in resp.reason.strip().split(" "):
+    if "light" in filename:
+      client.SendCommand(AndroidSystemControlMessage_pb2.SELECT_HAL,
+                         os.path.join("/system/lib/hw/", filename),
+                         1,  # HAL
+                         4,  # LIGHT
+                         1.0)
+      resp = client.RecvResponse()
+      logging.info(resp)
+
+      if resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS:
+        client.SendCommand(AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
+                           "get_functions");
+        resp = client.RecvResponse()
+        logging.info(resp)
+        if resp.reason:
+          logging.info("len %d", len(resp.reason))
+          msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
+          text_format.Merge(resp.reason, msg)
+          logging.info(msg)
+
+          # (form a request with values)
+          selected_api = None
+          for api in msg.api:
+            logging.info(api.name)
+            for arg in api.arg:
+              if arg.primitive_type == "pointer":
+                value = arg.values.add();
+                value.pointer = 0
+            selected_api = api
+            break
+          logging.info(msg)
+
+          # call the first api
+          if selected_api:
+            client.SendCommand(AndroidSystemControlMessage_pb2.CALL_FUNCTION,
+                               text_format.MessageToString(selected_api));
+            resp = client.RecvResponse()
+            logging.info(resp)
+      break
 
 
 if __name__ == "__main__":
