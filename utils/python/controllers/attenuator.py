@@ -21,6 +21,7 @@ from vts.runners.host.keys import Config
 VTS_CONTROLLER_CONFIG_NAME = "Attenuator"
 VTS_CONTROLLER_REFERENCE_NAME = "attenuators"
 
+
 def create(configs, logger):
     objs = []
     for c in configs:
@@ -29,14 +30,14 @@ def create(configs, logger):
         protocol = "telnet"
         if "Protocol" in c:
             protocol = c["Protocol"]
-        module_name = "vts.utils.python.controllers.attenuator_lib.%s.%s" % (attn_model,
-            protocol)
+        module_name = "vts.utils.python.controllers.attenuator_lib.%s.%s" % (
+            attn_model, protocol)
         module = importlib.import_module(module_name)
         inst_cnt = c["InstrumentCount"]
         attn_inst = module.AttenuatorInstrument(inst_cnt)
         attn_inst.model = attn_model
         insts = attn_inst.open(c[Config.key_address.value],
-            c[Config.key_port.value])
+                               c[Config.key_port.value])
         for i in range(inst_cnt):
             attn = Attenuator(attn_inst, idx=i)
             if "Paths" in c:
@@ -48,8 +49,10 @@ def create(configs, logger):
             objs.append(attn)
     return objs
 
+
 def destroy(objs):
     return
+
 
 r"""
 Base classes which define how attenuators should be accessed, managed, and manipulated.
@@ -117,7 +120,8 @@ class AttenuatorInstrument():
         """
 
         if type(self) is AttenuatorInstrument:
-            raise NotImplementedError("Base class should not be instantiated directly!")
+            raise NotImplementedError(
+                "Base class should not be instantiated directly!")
 
         self.num_atten = num_atten
         self.max_atten = AttenuatorInstrument.INVALID_MAX_ATTEN
@@ -198,8 +202,9 @@ class Attenuator():
         self.idx = idx
         self.offset = offset
 
-        if(self.idx >= instrument.num_atten):
-            raise IndexError("Attenuator index out of range for attenuator instrument")
+        if (self.idx >= instrument.num_atten):
+            raise IndexError(
+                "Attenuator index out of range for attenuator instrument")
 
     def set_atten(self, value):
         r"""This function sets the attenuation of Attenuator.
@@ -214,10 +219,11 @@ class Attenuator():
             The requested set value+offset must be less than the maximum value.
         """
 
-        if value+self.offset > self.instrument.max_atten:
-            raise ValueError("Attenuator Value+Offset greater than Max Attenuation!")
+        if value + self.offset > self.instrument.max_atten:
+            raise ValueError(
+                "Attenuator Value+Offset greater than Max Attenuation!")
 
-        self.instrument.set_atten(self.idx, value+self.offset)
+        self.instrument.set_atten(self.idx, value + self.offset)
 
     def get_atten(self):
         r"""This function returns the current attenuation setting of Attenuator, normalized by
@@ -240,7 +246,8 @@ class Attenuator():
         float
             Returns a the max attenuation value
         """
-        if (self.instrument.max_atten == AttenuatorInstrument.INVALID_MAX_ATTEN):
+        if (self.instrument.max_atten ==
+                AttenuatorInstrument.INVALID_MAX_ATTEN):
             raise ValueError("Invalid Max Attenuator Value")
 
         return self.instrument.max_atten - self.offset

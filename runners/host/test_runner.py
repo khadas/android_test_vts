@@ -31,6 +31,7 @@ from vts.runners.host import records
 from vts.runners.host import signals
 from vts.runners.host import utils
 
+
 class TestRunner(object):
     """The class that instantiates test classes, executes test cases, and
     report results.
@@ -58,17 +59,19 @@ class TestRunner(object):
         self.running: A boolean signifies whether this test run is ongoing or
                       not.
     """
+
     def __init__(self, test_configs, run_list):
         self.test_run_info = {}
         self.test_configs = test_configs
         self.testbed_configs = self.test_configs[keys.Config.KEY_TESTBED.value]
-        self.testbed_name = self.testbed_configs[keys.Config.KEY_TESTBED_NAME.value]
+        self.testbed_name = self.testbed_configs[
+            keys.Config.KEY_TESTBED_NAME.value]
         start_time = logger.getLogFileTimestamp()
         self.id = "{}@{}".format(self.testbed_name, start_time)
         # log_path should be set before parsing configs.
-        l_path = os.path.join(self.test_configs[keys.Config.KEP_LOG_PATH.value],
-                              self.testbed_name,
-                              start_time)
+        l_path = os.path.join(
+            self.test_configs[keys.Config.KEP_LOG_PATH.value],
+            self.testbed_name, start_time)
         self.log_path = os.path.abspath(l_path)
         logger.initiateTestLogger(self.log_path, self.id, self.testbed_name)
         self.log = logging.getLogger()
@@ -93,11 +96,13 @@ class TestRunner(object):
             A dictionary where keys are test class name strings, values are
             actual test classes that can be instantiated.
         """
+
         def is_testfile_name(name, ext):
             if ext == ".py":
                 if name.endswith("Test") or name.endswith("_test"):
                     return True
             return False
+
         file_list = utils.find_files(test_paths, is_testfile_name)
         test_classes = {}
         for path, name, _ in file_list:
@@ -141,17 +146,18 @@ class TestRunner(object):
             ControllerError is raised if the module does not match the vts.runners.host
             controller interface, or one of the required members is null.
         """
-        required_attributes = ("create",
-                               "destroy",
+        required_attributes = ("create", "destroy",
                                "VTS_CONTROLLER_CONFIG_NAME")
         for attr in required_attributes:
             if not hasattr(module, attr):
-                raise signals.ControllerError(("Module %s missing required "
-                    "controller module attribute %s.") % (module.__name__,
-                                                          attr))
+                raise signals.ControllerError(
+                    ("Module %s missing required "
+                     "controller module attribute %s.") % (module.__name__,
+                                                           attr))
             if not getattr(module, attr):
                 raise signals.ControllerError(("Controller interface %s in %s "
-                    "cannot be null.") % (attr, module.__name__))
+                                               "cannot be null.") %
+                                              (attr, module.__name__))
 
     def registerController(self, module):
         """Registers a controller module for a test run.
@@ -176,8 +182,8 @@ class TestRunner(object):
         if module_ref_name in self.controller_registry:
             raise signals.ControllerError(("Controller module %s has already "
                                            "been registered. It can not be "
-                                           "registered again."
-                                           ) % module_ref_name)
+                                           "registered again.") %
+                                          module_ref_name)
         # Create controller objects.
         create = module.create
         module_config_name = module.VTS_CONTROLLER_CONFIG_NAME
@@ -191,8 +197,9 @@ class TestRunner(object):
             controller_config = copy.deepcopy(original_config)
             objects = create(controller_config, self.log)
         except:
-            self.log.exception(("Failed to initialize objects for controller "
-                                "%s, abort!"), module_config_name)
+            self.log.exception(
+                ("Failed to initialize objects for controller "
+                 "%s, abort!"), module_config_name)
             raise
         if not isinstance(objects, list):
             raise ControllerError(("Controller module %s did not return a list"
@@ -225,7 +232,8 @@ class TestRunner(object):
         Args:
             test_configs: A json object representing the test configurations.
         """
-        self.test_run_info[keys.Config.IKEY_TESTBED_NAME.value] = self.testbed_name
+        self.test_run_info[
+            keys.Config.IKEY_TESTBED_NAME.value] = self.testbed_name
         # Unpack other params.
         self.test_run_info["registerController"] = self.registerController
         self.test_run_info[keys.Config.IKEY_LOG_PATH.value] = self.log_path
@@ -233,7 +241,8 @@ class TestRunner(object):
         for item in test_configs.items():
             if item[0] not in keys.Config.RESERVED_KEYS.value:
                 user_param_pairs.append(item)
-        self.test_run_info[keys.Config.IKEY_USER_PARAM.value] = dict(user_param_pairs)
+        self.test_run_info[keys.Config.IKEY_USER_PARAM.value] = dict(
+            user_param_pairs)
 
     def runTestClass(self, test_cls_name, test_cases=None):
         """Instantiates and executes a test class.
@@ -254,7 +263,7 @@ class TestRunner(object):
             test_cls = self.test_classes[test_cls_name]
         except KeyError:
             raise USERError(("Unable to locate class %s in any of the test "
-                "paths specified.") % test_cls_name)
+                             "paths specified.") % test_cls_name)
 
         with test_cls(self.test_run_info) as test_cls_instance:
             try:
@@ -288,15 +297,15 @@ class TestRunner(object):
                     break
                 if test_case_names:
                     self.log.debug("Executing test cases %s in test class %s.",
-                                   test_case_names,
-                                   test_cls_name)
+                                   test_case_names, test_cls_name)
                 else:
                     self.log.debug("Executing test class %s", test_cls_name)
                 try:
                     self.runTestClass(test_cls_name, test_case_names)
                 except signals.TestAbortAll as e:
-                    self.log.warning(("Abort all subsequent test classes. Reason: "
-                                      "%s"), e)
+                    self.log.warning(
+                        ("Abort all subsequent test classes. Reason: "
+                         "%s"), e)
                     raise
         finally:
             self.unregisterControllers()
@@ -309,7 +318,7 @@ class TestRunner(object):
         """
         if self.running:
             msg = "\nSummary for test run %s: %s\n" % (self.id,
-                self.results.summary())
+                                                       self.results.summary())
             self._writeResultsJsonString()
             self.log.info(msg.strip())
             logger.killTestLogger(self.log)
