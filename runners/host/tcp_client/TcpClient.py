@@ -20,7 +20,7 @@ import logging
 import os
 import socket
 
-from proto import AndroidSystemControlMessage_pb2
+from vts.runners.host.proto import AndroidSystemControlMessage_pb2
 
 TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
