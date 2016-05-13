@@ -20,6 +20,7 @@
 #include <string>
 
 #include <utils/RefBase.h>
+#include <utils/String8.h>
 
 #include <binder/IInterface.h>
 #include <binder/IBinder.h>
@@ -60,7 +61,7 @@ class IVtsFuzzer : public IInterface {
   virtual int32_t Status(int32_t type) = 0;
 
   // Requests to call the specified function using the provided arguments.
-  virtual int32_t Call(int32_t arg1, int32_t arg2) = 0;
+  virtual const char* Call(const string& call_payload) = 0;
 
   virtual const char* GetFunctions() = 0;
 
@@ -77,7 +78,7 @@ class BpVtsFuzzer : public BpInterface<IVtsFuzzer> {
   int32_t LoadHal(const string& path, int target_class,
                   int target_type, float target_version);
   int32_t Status(int32_t type);
-  int32_t Call(int32_t arg1, int32_t arg2);
+  const char* Call(const string& call_payload);
   const char* GetFunctions();
 };
 

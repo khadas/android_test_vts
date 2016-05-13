@@ -92,6 +92,7 @@ message PrimitiveDataValueMessage {
   optional float float = 3;
   optional double double = 4;
   optional bytes bytes = 5;
+  optional uint32 pointer = 6;
 }
 
 
@@ -109,6 +110,8 @@ message ArgumentSpecificationMessage {
 
   // the actual values.
   repeated PrimitiveDataValueMessage values = 21;
+  // the actual value(s) for an aggregated data type.
+  repeated bytes aggregate_value = 22;
 }
 
 

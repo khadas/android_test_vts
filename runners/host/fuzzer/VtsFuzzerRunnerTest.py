@@ -22,7 +22,9 @@ import sys
 from logger import Log
 from proto import AndroidSystemControlMessage_pb2
 from proto import InterfaceSpecificationMessage_pb2
+from google.protobuf import text_format
 from tcp_client import TcpClient
+from sys import api_version
 
 
 def main(args):
@@ -66,9 +68,29 @@ def main(args):
         resp = client.RecvResponse()
         logging.info(resp)
         if resp.reason:
+          logging.info("len %d", len(resp.reason))
           msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
-          msg.ParseFromString(resp.reason)
+          text_format.Merge(resp.reason, msg)
           logging.info(msg)
+
+          # (form a request with values)
+          selected_api = None
+          for api in msg.api:
+            logging.info(api.name)
+            for arg in api.arg:
+              if arg.primitive_type == "pointer":
+                value = arg.values.add();
+                value.pointer = 0
+            selected_api = api
+            break
+          logging.info(msg)
+
+          # call the first api
+          if selected_api:
+            client.SendCommand(AndroidSystemControlMessage_pb2.CALL_FUNCTION,
+                               text_format.MessageToString(selected_api));
+            resp = client.RecvResponse()
+            logging.info(resp)
       break
 
 
