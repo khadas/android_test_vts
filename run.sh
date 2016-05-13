@@ -1,3 +1,3 @@
 #!/bin/bash
 
-export PYTHONPATH=$PYTHONPATH:..; python -m vts.runners.host.fuzzer.VtsFuzzerRunnerTest
+export PYTHONPATH=$PYTHONPATH:..; python -m vts.testcases.host.sample.SampleTestcase

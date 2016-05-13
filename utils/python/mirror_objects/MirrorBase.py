@@ -21,8 +21,20 @@ import os
 from vts.runners.host.proto import AndroidSystemControlMessage_pb2
 from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
 from vts.runners.host.tcp_client import TcpClient
+from vts.utils.python.mirror_objects import MirrorObject
 
 from google.protobuf import text_format
+
+
+COMPONENT_CLASS_DICT = {"hal": 1,
+                       "sharedlib": 2,
+                       "hal_hidl": 3,
+                       "hal_submodule": 4}
+
+COMPONENT_TYPE_DICT = {"audio": 1,
+                       "camera": 2,
+                       "gps": 3,
+                       "light": 4}
 
 
 class MirrorBase(object):
@@ -32,22 +44,26 @@ class MirrorBase(object):
   child mirror class's attributes dynamically.
 
   Attributes:
-    _target_class: string, the target class name (e.g., hal).
-    _target_type: string, the target type name (e.g., light, camera).
-    _target_version: float, the target component version (e.g., 1.0).
     _target_basepath: string, the path of a base dir which contains the
         target component files.
   """
 
-  _target_class = None
-  _target_type = None
-  _target_version = None
-  _target_basepath = "/system/lib/hw"
+  _target_basepath = "/system/lib64/hw"
 
-  def Init(self):
-    """Initializes the connection."""
+  def Init(self, target_class, target_type, target_version, target_basepath):
+    """Initializes the connection and then calls 'Build' to init attributes.
 
-    logging.info("Init a Mirror for %s", self._target_type)
+    Args:
+      target_class: string, the target class name (e.g., hal).
+      target_type: string, the target type name (e.g., light, camera).
+      target_version: float, the target component version (e.g., 1.0).
+      target_basepath: string, the base path of where a target file is stored
+          in.
+    """
+    if not target_basepath:
+      target_basepath = self._target_basepath
+
+    logging.info("Init a Mirror for %s", target_type)
     self._client = TcpClient.VtsTcpClient()
 
     self._client.Connect()
@@ -63,24 +79,25 @@ class MirrorBase(object):
       self._client.SendCommand(
           AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
           "--server --class=%s --type=%s --version=%s none" % (
-          self._target_class, self._target_type, self._target_version))
+          target_class, target_type, target_version))
       resp = self._client.RecvResponse()
       logging.debug(resp)
 
+    logging.info("target basepath: %s", target_basepath)
     self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
-                             self._target_basepath)
+                             target_basepath)
     resp = self._client.RecvResponse()
     logging.debug(resp)
 
-    target_class_id = {"hal": 1}[self._target_class]
-    target_type_id = {"light": 4}[self._target_type]
+    target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
+    target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
 
     for filename in resp.reason.strip().split(" "):
-      if self._target_type in filename:
+      if target_type in filename:
         # TODO: check more exactly (e.g., multiple hits).
         self._client.SendCommand(AndroidSystemControlMessage_pb2.SELECT_HAL,
-                                 os.path.join(self._target_basepath, filename),
-                                 target_class_id, target_type_id, self._target_version)
+                                 os.path.join(target_basepath, filename),
+                                 target_class_id, target_type_id, target_version)
         resp = self._client.RecvResponse()
         logging.debug(resp)
 
@@ -95,43 +112,19 @@ class MirrorBase(object):
             text_format.Merge(resp.reason, self._if_spec_msg)
             logging.debug(self._if_spec_msg)
 
-            self.Build(self._if_spec_msg)
+            self.Build(target_type, self._if_spec_msg)
         break
 
-  def Build(self, if_spec_msg=None):
+  def Build(self, target_type, if_spec_msg=None):
     """Builds the child class's attributes dynamically.
 
     Args:
+      target_name: string, the name of the target mirror to create.
       if_spec_msg: InterfaceSpecificationMessage_pb2 proto buf.
     """
-    logging.info("Build a Mirror for %s", self._target_type)
-
+    logging.info("Build a Mirror for %s", target_type)
     if not if_spec_msg:
       if_spec_msg = self._if_spec_msg
 
-    for api in if_spec_msg.api:
-      self.__setattr__(api.name, api)
-      logging.debug("setattr %s", api.name)
-
-  def Call(self, api_name, *args, **kwargs):
-    """Calls a target component's API.
-
-    Args:
-      api_name: string, the name of an API function to call.
-      *args: a list of arguments
-      **kwargs: a dict for the arg name and value pairs
-    """
-    func_msg = self.__getattribute__(api_name)
-
-    logging.info(func_msg)
-    for arg in func_msg.arg:
-      # TODO: use args and kwargs
-      if arg.primitive_type == "pointer":
-        value = arg.values.add();
-        value.pointer = 0
-    logging.info(func_msg)
-
-    self._client.SendCommand(AndroidSystemControlMessage_pb2.CALL_FUNCTION,
-                             text_format.MessageToString(func_msg));
-    resp = self._client.RecvResponse()
-    logging.info(resp)
+    mirror_object = MirrorObject.MirrorObject(self._client, if_spec_msg)
+    self.__setattr__(target_type, mirror_object)

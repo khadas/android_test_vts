@@ -14,10 +14,30 @@
  * limitations under the License.
  */
 
+#include <iostream>
+
 #include "TcpServer.h"
 
+#define DEFAULT_FUZZER_FILE_PATH "./fuzzer"
 
-int main(int /*argc*/, char** /*argv*/) {
-  android::vts::StartTcpServer();
+
+int main(int argc, char* argv[]) {
+  char* fuzzer_path;
+  char* spec_dir_path = NULL;
+
+  if (argc == 1) {
+      fuzzer_path = DEFAULT_FUZZER_FILE_PATH;
+  } else if (argc == 2) {
+    fuzzer_path = argv[1];
+  } else if (argc == 3) {
+    fuzzer_path = argv[1];
+    spec_dir_path = argv[2];
+  } else {
+    std::cerr << "usage: vts_hal_agent "
+        << "[<fuzzer binary path> [<spec file base dir path>]]" << std::endl;
+    return -1;
+  }
+  android::vts::StartTcpServer(
+      (const char*) fuzzer_path, (const char*) spec_dir_path);
   return 0;
 }
