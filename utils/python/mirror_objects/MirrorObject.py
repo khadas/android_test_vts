@@ -58,6 +58,7 @@ class MirrorObject(object):
       **kwargs: a dict for the arg name and value pairs
     """
     def RemoteCall(*args, **kwargs):
+      logging.info("remote call %s", api_name)
       func_msg = self.GetApi(api_name)
       if not func_msg:
         logging.fatal("unknown api name %s", api_name)

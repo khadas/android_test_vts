@@ -28,6 +28,8 @@ enum ComponentClass {
   HAL_HIDL = 3;
   // For a submodule of a shared library HAL .
   HAL_SUBMODULE = 4;
+  // For the legacy HAL.
+  LEGACY_HAL = 5;
 }
 
 
@@ -42,6 +44,8 @@ enum ComponentType {
   GPS = 3;
   // For a Lights sensor submodule.
   LIGHT = 4;
+  // For a WiFi submodule.
+  WIFI = 5;
 }
 
 

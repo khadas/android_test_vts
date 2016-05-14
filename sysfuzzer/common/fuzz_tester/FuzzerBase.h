@@ -29,7 +29,7 @@ namespace vts {
 
 class FuzzerBase {
  public:
-  FuzzerBase();
+  FuzzerBase(int target_class);
   virtual ~FuzzerBase();
 
   // Loads a target component where the argument is the file path.
@@ -52,15 +52,18 @@ class FuzzerBase {
   // a pointer to a HAL data structure of the loaded component.
   struct hw_device_t* device_;
 
+  // DLL Loader class.
+  DllLoader target_loader_;
+
  private:
   // a pointer to the string which contains the loaded component.
   const char* target_dll_path_;
 
-  // DLL Loader class.
-  DllLoader target_loader_;
-
   // function name prefix.
   const char* function_name_prefix_;
+
+  // target class
+  const int target_class_;
 };
 
 }  // namespace vts

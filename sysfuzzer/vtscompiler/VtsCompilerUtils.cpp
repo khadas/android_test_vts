@@ -134,6 +134,8 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg) {
       return "GenerateGpsPositionMode()";
     } else if (!strcmp(arg.aggregate_type().c_str(), "GpsPositionRecurrence")) {
       return "GenerateGpsPositionRecurrence()";
+    } else if (!strcmp(arg.aggregate_type().c_str(), "wifi_handle*")) {
+      return "(wifi_handle*) malloc(sizeof(wifi_handle))";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
           << "unknown instance type " << arg.aggregate_type() << endl;
