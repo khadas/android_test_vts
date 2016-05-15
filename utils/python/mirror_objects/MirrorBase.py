@@ -26,12 +26,11 @@ from vts.utils.python.mirror_objects import MirrorObject
 
 from google.protobuf import text_format
 
-
 COMPONENT_CLASS_DICT = {"hal": 1,
-                       "sharedlib": 2,
-                       "hal_hidl": 3,
-                       "hal_submodule": 4,
-                       "legacy_hal": 5}
+                        "sharedlib": 2,
+                        "hal_hidl": 3,
+                        "hal_submodule": 4,
+                        "legacy_hal": 5}
 
 COMPONENT_TYPE_DICT = {"audio": 1,
                        "camera": 2,
@@ -41,7 +40,7 @@ COMPONENT_TYPE_DICT = {"audio": 1,
 
 
 class MirrorBase(object):
-  """Base class for all host-side mirror objects.
+    """Base class for all host-side mirror objects.
 
   This creates a connection to the target-side agent and initializes the
   child mirror class's attributes dynamically.
@@ -51,10 +50,10 @@ class MirrorBase(object):
         target component files.
   """
 
-  _target_basepath = "/system/lib64/hw"
+    _target_basepath = "/system/lib64/hw"
 
-  def Init(self, target_class, target_type, target_version, target_basepath):
-    """Initializes the connection and then calls 'Build' to init attributes.
+    def Init(self, target_class, target_type, target_version, target_basepath):
+        """Initializes the connection and then calls 'Build' to init attributes.
 
     Args:
       target_class: string, the target class name (e.g., hal).
@@ -66,72 +65,75 @@ class MirrorBase(object):
     Raises:
       ComponentLoadingError when loading fails.
     """
-    if not target_basepath:
-      target_basepath = self._target_basepath
+        if not target_basepath:
+            target_basepath = self._target_basepath
 
-    logging.info("Init a Mirror for %s", target_type)
-    self._client = TcpClient.VtsTcpClient()
+        logging.info("Init a Mirror for %s", target_type)
+        self._client = TcpClient.VtsTcpClient()
 
-    self._client.Connect()
+        self._client.Connect()
 
-    # check whether the binder service is running
-    self._client.SendCommand(
-        AndroidSystemControlMessage_pb2.CHECK_FUZZER_BINDER_SERVICE,
-        "Is fuzzer running?")
-    resp = self._client.RecvResponse()
-    logging.debug(resp)
-
-    while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
-      self._client.SendCommand(
-          AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
-          "--server --class=%s --type=%s --version=%s none" % (
-          target_class, target_type, target_version))
-      resp = self._client.RecvResponse()
-      logging.debug(resp)
-
-    logging.info("target basepath: %s", target_basepath)
-    self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
-                             target_basepath)
-    resp = self._client.RecvResponse()
-    logging.debug(resp)
-
-    target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
-    target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
-
-    for filename in resp.reason.strip().split(" "):
-      if target_type in filename:
-        # TODO: check more exactly (e.g., multiple hits).
-        self._client.SendCommand(AndroidSystemControlMessage_pb2.SELECT_HAL,
-                                 filename,
-                                 target_class_id, target_type_id, target_version)
+        # check whether the binder service is running
+        self._client.SendCommand(
+            AndroidSystemControlMessage_pb2.CHECK_FUZZER_BINDER_SERVICE,
+            "Is fuzzer running?")
         resp = self._client.RecvResponse()
         logging.debug(resp)
 
-        if resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
-          raise errors.ComponentLoadingError("Target file path %s" % filename)
+        while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
+            self._client.SendCommand(
+                AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
+                "--server --class=%s --type=%s --version=%s none" % (
+                    target_class, target_type, target_version))
+            resp = self._client.RecvResponse()
+            logging.debug(resp)
 
-        self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
-                                 "get_functions");
+        logging.info("target basepath: %s", target_basepath)
+        self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
+                                 target_basepath)
         resp = self._client.RecvResponse()
         logging.debug(resp)
-        if resp.reason:
-          logging.debug("len %d", len(resp.reason))
-          self._if_spec_msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
-          text_format.Merge(resp.reason, self._if_spec_msg)
-          self.Build(target_type, self._if_spec_msg)
-        break
 
-  def Build(self, target_type, if_spec_msg=None):
-    """Builds the child class's attributes dynamically.
+        target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
+        target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
+
+        for filename in resp.reason.strip().split(" "):
+            if target_type in filename:
+                # TODO: check more exactly (e.g., multiple hits).
+                self._client.SendCommand(
+                    AndroidSystemControlMessage_pb2.SELECT_HAL, filename,
+                    target_class_id, target_type_id, target_version)
+                resp = self._client.RecvResponse()
+                logging.debug(resp)
+
+                if resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
+                    raise errors.ComponentLoadingError("Target file path %s" %
+                                                       filename)
+
+                self._client.SendCommand(
+                    AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
+                    "get_functions")
+                resp = self._client.RecvResponse()
+                logging.debug(resp)
+                if resp.reason:
+                    logging.debug("len %d", len(resp.reason))
+                    self._if_spec_msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage(
+                    )
+                    text_format.Merge(resp.reason, self._if_spec_msg)
+                    self.Build(target_type, self._if_spec_msg)
+                break
+
+    def Build(self, target_type, if_spec_msg=None):
+        """Builds the child class's attributes dynamically.
 
     Args:
       target_name: string, the name of the target mirror to create.
       if_spec_msg: InterfaceSpecificationMessage_pb2 proto buf.
     """
-    logging.info("Build a Mirror for %s", target_type)
-    if not if_spec_msg:
-      if_spec_msg = self._if_spec_msg
+        logging.info("Build a Mirror for %s", target_type)
+        if not if_spec_msg:
+            if_spec_msg = self._if_spec_msg
 
-    logging.info(if_spec_msg)
-    mirror_object = MirrorObject.MirrorObject(self._client, if_spec_msg)
-    self.__setattr__(target_type, mirror_object)
+        logging.info(if_spec_msg)
+        mirror_object = MirrorObject.MirrorObject(self._client, if_spec_msg)
+        self.__setattr__(target_type, mirror_object)
