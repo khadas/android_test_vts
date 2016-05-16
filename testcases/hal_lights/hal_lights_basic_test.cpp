@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <hardware/hardware.h>
 #include <hardware/lights.h>
@@ -69,7 +70,13 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
 
 TEST_F(VtsStructuralTestHalLightsBasicTest, example) {
   ASSERT_TRUE(device_);
-  struct light_state_t* arg = NULL;
+  struct light_state_t* arg =
+      (struct light_state_t*) malloc(sizeof(struct light_state_t));
+  arg->color = 0x80ff8000;
+  arg->flashMode = LIGHT_FLASH_NONE;
+  arg->flashOnMS = 0;
+  arg->flashOffMS = 0;
+  arg->brightnessMode = BRIGHTNESS_MODE_USER;
   EXPECT_EQ(0, device_->set_light(device_, arg));
 }
 
