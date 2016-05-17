@@ -72,8 +72,9 @@ status_t BnVtsFuzzer::onTransact(
       const int target_class = data.readInt32();
       const int target_type = data.readInt32();
       const float target_version = data.readFloat();
+      const char* module_name = data.readCString();
       int32_t result = LoadHal(string(path), target_class, target_type,
-                               target_version);
+                               target_version, string(module_name));
       ALOGD("BnVtsFuzzer::%s LoadHal(%s) -> %i",
             __FUNCTION__, path, result);
       if (reply == NULL) {
@@ -155,10 +156,12 @@ class VtsFuzzerServer : public BnVtsFuzzer {
   }
 
   int32_t LoadHal(const string& path, int target_class,
-                  int target_type, float target_version) {
+                  int target_type, float target_version,
+                  const string& module_name) {
     printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
     bool success = spec_builder_.LoadTargetComponent(
-        path.c_str(), lib_path_, target_class, target_type, target_version);
+        path.c_str(), lib_path_, target_class, target_type, target_version,
+        module_name.c_str());
     cout << "Result: " << success << std::endl;
     if (success) {
       return 0;
@@ -177,8 +180,9 @@ class VtsFuzzerServer : public BnVtsFuzzer {
     FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
     google::protobuf::TextFormat::MergeFromString(arg, func_msg);
     printf("call!!!\n");
-    spec_builder_.CallFunction(func_msg);
-    return arg.c_str();
+    const string& result = spec_builder_.CallFunction(func_msg);
+    printf("call done!!!\n");
+    return result.c_str();
   }
 
   const char* GetFunctions() {

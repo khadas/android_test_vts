@@ -58,15 +58,15 @@ class VtsTcpClient(object):
       Exception when the connection fails.
     """
         try:
-            if self._mode == "adb_forwarding":
+            if not ip:  # adb_forwarding
+                logging.info("ADB port forwarding mode - connecting to tcp:%s", port)
                 os.system("adb forward --remove tcp:%s" % port)
                 os.system("adb forward tcp:%s tcp:%s" % (port, port))
                 ip = "localhost"
-                logging.info("Connecting to %s:%s", ip, port)
                 self.connection = socket.create_connection(
                     (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
-            elif self._mode == "ssh_tunnel":
-                logging.info("Connecting to %s:%s", ip, port)
+            else:  # ssh_tunnel
+                logging.info("SSH tunnel mode - connecting to %s:%s", ip, port)
                 self.connection = socket.create_connection(
                     (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
         except socket.error as e:
@@ -87,7 +87,8 @@ class VtsTcpClient(object):
                     target_name,
                     target_class=None,
                     target_type=None,
-                    target_version=None):
+                    target_version=None,
+                    module_name=None):
         """Sends a command.
 
     Args:
@@ -97,8 +98,7 @@ class VtsTcpClient(object):
         if not self.channel:
             Connect()
 
-        command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage(
-        )
+        command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage()
         command_msg.command_type = command_type
         logging.info("sending a command (type %s)",
                      COMMAND_TYPE_NAME[command_type])
@@ -112,6 +112,9 @@ class VtsTcpClient(object):
 
         if target_version is not None:
             command_msg.target_version = int(target_version * 100)
+
+        if module_name is not None:
+            command_msg.module_name = module_name
 
         message = command_msg.SerializeToString()
         message_len = len(message)

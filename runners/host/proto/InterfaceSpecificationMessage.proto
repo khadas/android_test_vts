@@ -68,6 +68,8 @@ message DataType {
   optional bytes primitive_type = 1;
   // Instance type to describe the semantic information.
   optional bytes aggregate_type = 2;
+  // Primitive data value.
+  optional PrimitiveDataValueMessage primitive_value = 11;
 }
 
 
@@ -113,9 +115,9 @@ message ArgumentSpecificationMessage {
   optional bool is_output = 12 [default = false];
 
   // the actual values.
-  repeated PrimitiveDataValueMessage values = 21;
+  repeated PrimitiveDataValueMessage primitive_value = 21;
   // the actual value(s) for an aggregated data type.
-  repeated bytes aggregate_value = 22;
+  repeated ArgumentSpecificationMessage aggregate_value = 22;
 }
 
 

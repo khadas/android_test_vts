@@ -29,8 +29,16 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES := \
   bionic \
   libcore \
+  external/protobuf/src \
+  test/vts/sysfuzzer/common/proto \
 
 LOCAL_SHARED_LIBRARIES := \
   libcutils \
+  libvts_common \
+
+LOCAL_PROTOC_FLAGS := \
+  --proto_path=$(LOCAL_PATH)/../common/proto \
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 include $(BUILD_SHARED_LIBRARY)

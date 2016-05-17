@@ -55,7 +55,8 @@ class IVtsFuzzer : public IInterface {
 
   // Requests to load a HAL.
   virtual int32_t LoadHal(const string& path, int target_class,
-                          int target_type, float target_version) = 0;
+                          int target_type, float target_version,
+                          const string& module_name) = 0;
 
   // Requests to return the specified status.
   virtual int32_t Status(int32_t type) = 0;
@@ -76,7 +77,8 @@ class BpVtsFuzzer : public BpInterface<IVtsFuzzer> {
 
   void Exit();
   int32_t LoadHal(const string& path, int target_class,
-                  int target_type, float target_version);
+                  int target_type, float target_version,
+                  const string& module_name);
   int32_t Status(int32_t type);
   const char* Call(const string& call_payload);
   const char* GetFunctions();
