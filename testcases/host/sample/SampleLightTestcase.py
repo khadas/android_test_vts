@@ -25,10 +25,10 @@ from vts.utils.python.mirror_objects import Mirror
 from vts.utils.python.data_objects import HalLightsDataObject
 
 
-class SampleTestcase(base_test.BaseTestClass):
+class SampleLightTestcase(base_test.BaseTestClass):
     """A sample testcase for the legacy lights HAL."""
 
-    def testLight(self):
+    def testTurnOnBackgroundLight(self):
         """A simple testcase which just calls a function."""
         logging.info("testLight start")
         hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
@@ -49,8 +49,8 @@ def main(args):
     # TODO: call base_test.Main(args) instead.
     Log.SetupLogger()
     # TODO: use the test runner instead.
-    testcase = SampleTestcase({})
-    testcase.testLight()
+    testcase = SampleLightTestcase({})
+    testcase.testTurnOnBackgroundLight()
 
 
 if __name__ == "__main__":
