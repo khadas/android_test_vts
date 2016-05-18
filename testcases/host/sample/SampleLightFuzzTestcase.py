@@ -43,7 +43,7 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
             flashOffMs=200,
             brightnessMode=HalLightsDataObject.BRIGHTNESS_MODE_USER)
 
-        for iteration in range(100):
+        for iteration in range(10):
             index = 0
             for gene in genes:
                 logging.info("Gene %d", index)

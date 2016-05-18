@@ -76,6 +76,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     }
 
     // actual function call
+    GenerateCodeToStartMeasurement(cpp_ss);
     cpp_ss << "    ";
     if (api.return_type().has_primitive_type()
         && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
@@ -98,6 +99,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;
+    GenerateCodeToStopMeasurement(cpp_ss);
     cpp_ss << "cout << \"called\" << endl;" << endl;
     cpp_ss << "    return true;" << endl;
     cpp_ss << "  }" << endl;

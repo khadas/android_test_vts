@@ -14,23 +14,42 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_DATATYPE_H__
-#define __VTS_DATATYPE_H__
+#ifndef __VTS_MEASUREMENT_H__
+#define __VTS_MEASUREMENT_H__
 
-#include "hal_gps.h"
-#include "hal_light.h"
+#if USE_CTIME
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
 
-#define MAX_CHAR_POINTER_LENGTH 100
+#include <vector>
+
+using namespace std;
+
 
 namespace android {
 namespace vts {
 
-extern void RandomNumberGeneratorReset();
-extern uint32_t RandomUint32();
-extern int32_t RandomInt32();
-extern int64_t RandomInt64();
-extern bool RandomBool();
-extern char* RandomCharPointer();
+// Class to do measurements before and after calling a target function.
+class VtsMeasurement {
+ public:
+  VtsMeasurement() {}
+
+  // Starts the measurement
+  void Start();
+
+  // Stops the measurement and returns the measured values.
+  vector<float>* Stop();
+
+ private:
+  // data structure to keep the start time.
+#if USE_CTIME
+  struct timeval tv_;
+#else
+  timespec ts_;
+#endif
+};
 
 }  // namespace vts
 }  // namespace android

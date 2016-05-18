@@ -14,45 +14,28 @@
 # limitations under the License.
 #
 
-LOCAL_PATH := $(call my-dir)
+LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libvts_interfacespecification
+LOCAL_MODULE := libvts_measurement
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  specification/GpsHalV1.vts \
-  specification/GpsHalV1GpsInterface.vts \
-  specification/LightHalV1.vts \
-  specification/WifiHalV1.vts \
+  vts_measurement.cpp \
 
 LOCAL_C_INCLUDES := \
-  $(LOCAL_PATH) \
-  test/vts/sysfuzzer \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/libdatatype \
-  test/vts/sysfuzzer/libmeasurement \
-  test/vts/sysfuzzer/common \
   bionic \
   libcore \
-  device/google/gce/include \
-  system/extras \
   external/protobuf/src \
-  external/libedit/src \
-  $(TARGET_OUT_HEADERS) \
+  test/vts/sysfuzzer/common/proto \
 
 LOCAL_SHARED_LIBRARIES := \
   libcutils \
-  liblog \
-  libdl \
-  libandroid_runtime \
-  libvts_datatype \
   libvts_common \
-  libvts_measurement \
 
-LOCAL_STATIC_LIBRARIES := \
-  libelf \
+LOCAL_PROTOC_FLAGS := \
+  --proto_path=$(LOCAL_PATH)/../common/proto \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 

@@ -17,3 +17,5 @@ cp ${BASE_DIR}/out/target/product/bullhead/system/lib/libvts_datatype.so test/vt
 cp ${BASE_DIR}/out/target/product/bullhead/system/lib64/libvts_datatype.so test/vts/images/bullhead/libvts_datatype.so
 cp ${BASE_DIR}/out/target/product/bullhead/system/lib/libvts_interfacespecification.so test/vts/images/bullhead/libvts_interfacespecification32.so
 cp ${BASE_DIR}/out/target/product/bullhead/system/lib64/libvts_interfacespecification.so test/vts/images/bullhead/libvts_interfacespecification.so
+cp ${BASE_DIR}/out/target/product/bullhead/system/lib/libvts_measurement.so test/vts/images/bullhead/libvts_measurement32.so
+cp ${BASE_DIR}/out/target/product/bullhead/system/lib64/libvts_measurement.so test/vts/images/bullhead/libvts_measurement.so
