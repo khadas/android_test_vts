@@ -22,7 +22,6 @@ import time
 from vts.runners.host import base_test
 from vts.runners.host.logger import Log
 from vts.utils.python.mirror_objects import Mirror
-from vts.utils.python.data_objects import HalLightsDataObject
 
 
 class SampleLightTestcase(base_test.BaseTestClass):
@@ -33,13 +32,13 @@ class SampleLightTestcase(base_test.BaseTestClass):
         logging.info("testLight start")
         hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
         hal_mirror.InitHal("light", 1.0, module_name="backlight")
-        light_state_t = HalLightsDataObject.light_state_t(
+        arg = hal_mirror.light.light_state_t(
             color=0xffffff00,
-            flashMode=HalLightsDataObject.LIGHT_FLASH_HARDWARE,
+            flashMode=hal_mirror.light.LIGHT_FLASH_HARDWARE,
             flashOnMs=100,
             flashOffMs=200,
-            brightnessMode=HalLightsDataObject.BRIGHTNESS_MODE_USER)
-        hal_mirror.light.set_light(None, light_state_t)
+            brightnessMode=hal_mirror.light.BRIGHTNESS_MODE_USER)
+        hal_mirror.light.set_light(None, arg)
         time.sleep(5)
         logging.info("testLight end")
 

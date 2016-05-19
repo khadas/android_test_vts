@@ -55,8 +55,8 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
       cpp_ss << "    " << GetCppVariableType(arg) << " ";
       cpp_ss << "arg" << arg_count << " = ";
       if (arg_count == 0
-          && arg.has_aggregate_type()
-          && !strncmp(arg.aggregate_type().c_str(),
+          && arg.aggregate_type().size() == 1
+          && !strncmp(arg.aggregate_type(0).c_str(),
                       message.original_data_structure_name().c_str(),
                       message.original_data_structure_name().length())
           && message.original_data_structure_name().length() > 0) {
@@ -77,8 +77,8 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << ");" << endl;
 
     // actual function call
-    if (api.return_type().has_primitive_type()
-        && !strcmp(api.return_type().primitive_type().c_str(), "void")) {
+    if (api.return_type().primitive_type().size() == 1
+        && !strcmp(api.return_type().primitive_type(0).c_str(), "void")) {
       cpp_ss << "*result = NULL;" << endl;
     } else {
       cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
@@ -97,8 +97,9 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "," << endl;
       }
     }
-    if (!api.return_type().has_primitive_type()
-        || strcmp(api.return_type().primitive_type().c_str(), "void")) {
+    if (api.return_type().primitive_type().size() == 0
+        || (api.return_type().primitive_type().size() == 1
+            && strcmp(api.return_type().primitive_type(0).c_str(), "void"))) {
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;

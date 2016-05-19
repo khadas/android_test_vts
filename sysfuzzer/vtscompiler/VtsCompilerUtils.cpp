@@ -104,10 +104,15 @@ string GetCppVariableType(const std::string primitive_type_string) {
 
 
 string GetCppVariableType(ArgumentSpecificationMessage arg) {
-  if (arg.has_aggregate_type()) {
-    return arg.aggregate_type();
-  } else if (arg.has_primitive_type()) {
-    return GetCppVariableType(arg.primitive_type());
+  if (arg.aggregate_type().size() == 1) {
+    return arg.aggregate_type(0);
+  } else if (arg.primitive_type().size() == 1) {
+    return GetCppVariableType(arg.primitive_type(0));
+  } else if (arg.primitive_type().size() > 1
+             || arg.aggregate_type().size() > 1) {
+    cerr << __FUNCTION__
+        << ": aggregate type with multiple attributes; not supported" << endl;
+    exit(-1);
   }
   cerr << __FUNCTION__ << ": neither instance nor data type is set" << endl;
   exit(-1);
@@ -115,46 +120,54 @@ string GetCppVariableType(ArgumentSpecificationMessage arg) {
 
 
 string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
-  if (arg.has_aggregate_type()) {
-    if (!strcmp(arg.aggregate_type().c_str(), "struct light_state_t*")) {
+  if (arg.aggregate_type().size() == 1) {
+    if (!strcmp(arg.aggregate_type(0).c_str(), "struct light_state_t*")) {
       if (msg.length() == 0) {
         return "GenerateLightState()";
       } else {
         return "GenerateLightStateUsingMessage(" + msg + ")";
       }
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsCallbacks*")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsCallbacks*")) {
       return "GenerateGpsCallbacks()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsUtcTime")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsUtcTime")) {
       return "GenerateGpsUtcTime()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_latitude")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "vts_gps_latitude")) {
       return "GenerateLatitude()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_longitude")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "vts_gps_longitude")) {
       return "GenerateLongitude()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_accuracy")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "vts_gps_accuracy")) {
       return "GenerateGpsAccuracy()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "vts_gps_flags_uint16")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "vts_gps_flags_uint16")) {
       return "GenerateGpsFlagsUint16()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsPositionMode")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsPositionMode")) {
       return "GenerateGpsPositionMode()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "GpsPositionRecurrence")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsPositionRecurrence")) {
       return "GenerateGpsPositionRecurrence()";
-    } else if (!strcmp(arg.aggregate_type().c_str(), "wifi_handle*")) {
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "wifi_handle*")) {
       return "(wifi_handle*) malloc(sizeof(wifi_handle))";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
-          << "unknown instance type " << arg.aggregate_type() << endl;
+          << "unknown instance type " << arg.aggregate_type(0) << endl;
     }
+  } else if (arg.aggregate_type().size() > 1) {
+    cerr << __FUNCTION__
+        << ": aggregate type with multiple attributes; not supported" << endl;
+    exit(-1);
   }
-  if (arg.has_primitive_type()) {
-    if (!strcmp(arg.primitive_type().c_str(), "uint32_t")) {
+  if (arg.primitive_type().size() > 1) {
+    cerr << __FUNCTION__
+        << ": a structure with multiple attributes; not supported" << endl;
+    exit(-1);
+  } else if (arg.primitive_type().size() == 1) {
+    if (!strcmp(arg.primitive_type(0).c_str(), "uint32_t")) {
       return "RandomUint32()";
-    } else if (!strcmp(arg.primitive_type().c_str(), "int32_t")) {
+    } else if (!strcmp(arg.primitive_type(0).c_str(), "int32_t")) {
       return "RandomInt32()";
-    } else if (!strcmp(arg.primitive_type().c_str(), "char_pointer")) {
+    } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
       return "RandomCharPointer()";
     }
     cerr << __FILE__ << ":" << __LINE__ << " "
-        << "unknown data type " << arg.primitive_type() << endl;
+        << "unknown data type " << arg.primitive_type(0) << endl;
     exit(-1);
   }
   cerr << __FUNCTION__ << ": neither instance nor data type is set" << endl;
