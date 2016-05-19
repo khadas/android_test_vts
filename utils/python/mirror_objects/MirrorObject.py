@@ -14,11 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import copy
 import logging
+import random
 
 from vts.runners.host.proto import AndroidSystemControlMessage_pb2
-
+from vts.utils.python.fuzzer import FuzzerUtils
 from google.protobuf import text_format
 
 
@@ -145,16 +147,43 @@ class MirrorObject(object):
             logging.debug("generated %s", arg_msg)
             return arg_msg
 
+        def MessageFuzzer(arg_msg):
+            """Fuzz a custom message instance."""
+            if not self.GetCustomAggregateType(api_name):
+                logging.fatal("fuzz arg %s unknown", arg_msg)
+
+            index = random.randint(0, len(arg_msg.primitive_type))
+            count = 0
+            for type, name, value in zip(arg_msg.primitive_type,
+                                         arg_msg.primitive_name,
+                                         arg_msg.primitive_value):
+                if count == index:
+                    if type == "uint32_t":
+                        value.uint32_t ^= FuzzerUtils.mask_uint32_t()
+                    elif type == "int32_t":
+                        mask = FuzzerUtils.mask_int32_t()
+                        if mask == (1 << 31):
+                            value.int32_t *= -1
+                            value.int32_t += 1
+                        else:
+                            value.int32_t ^= mask
+                    else:
+                        logging.fatal("support %s", type)
+                    break
+                count += 1
+            logging.debug("fuzzed %s", arg_msg)
+            return arg_msg
+
         def ConstGenerator():
             """Dynamically generates a const variable's value."""
             arg_msg = self.GetConstType(api_name)
             if not arg_msg:
                 logging.fatal("const %s unknown", arg_msg)
+            logging.debug("check %s", api_name)
             for type, name, value in zip(arg_msg.primitive_type,
                                          arg_msg.primitive_name,
                                          arg_msg.primitive_value):
-                logging.info("for %s %s %s", type, name, value)
-                logging.debug("check %s", api_name)
+                logging.debug("for %s %s %s", type, name, value)
                 if api_name == name:
                     logging.debug("match")
                     if type == "uint32_t":
@@ -163,6 +192,9 @@ class MirrorObject(object):
                     elif type == "int32_t":
                         logging.info("return %s", value)
                         return value.int32_t
+                    elif type == "bytes":
+                        logging.info("return %s", value)
+                        return value.bytes
                     else:
                         logging.fatal("support %s", type)
                     continue
@@ -173,13 +205,21 @@ class MirrorObject(object):
             logging.info("api %s", func_msg)
             return RemoteCall
 
+        fuzz = False
+        if api_name.endswith("_fuzz"):
+          fuzz = True
+          api_name = api_name[:-5]
         arg_msg = self.GetCustomAggregateType(api_name)
         if arg_msg:
-            logging.info("arg %s", arg_msg)
-            return MessageGenerator
+            logging.debug("arg %s", arg_msg)
+            if not fuzz:
+                return MessageGenerator
+            else:
+                return MessageFuzzer
 
         arg_msg = self.GetConstType(api_name)
         if arg_msg:
             logging.info("const %s *\n%s", api_name, arg_msg)
             return ConstGenerator()
         logging.fatal("unknown api name %s", api_name)
+

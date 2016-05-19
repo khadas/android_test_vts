@@ -39,7 +39,6 @@ class SampleLightTestcase(base_test.BaseTestClass):
             flashOffMs=200,
             brightnessMode=hal_mirror.light.BRIGHTNESS_MODE_USER)
         hal_mirror.light.set_light(None, arg)
-        time.sleep(5)
         logging.info("testLight end")
 
 
