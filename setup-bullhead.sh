@@ -4,6 +4,8 @@ adb root
 adb push images/bullhead/fuzzer /data/local/tmp/fuzzer
 adb push images/bullhead/vts_hal_agent /data/local/tmp/vts_hal_agent
 adb shell mkdir /data/local/tmp/lib
+adb shell mkdir /data/local/tmp/hal
+adb shell mkdir /data/local/tmp/hal64
 adb push images/bullhead/libvts_common32.so /data/local/tmp/lib/libvts_common.so
 adb push images/bullhead/libvts_common.so /data/local/tmp/libvts_common.so
 adb push images/bullhead/libvts_interfacespecification32.so /data/local/tmp/lib/libvts_interfacespecification.so
@@ -12,6 +14,9 @@ adb push images/bullhead/libvts_datatype32.so /data/local/tmp/lib/libvts_datatyp
 adb push images/bullhead/libvts_datatype.so /data/local/tmp/libvts_datatype.so
 adb push images/bullhead/libvts_measurement32.so /data/local/tmp/lib/libvts_measurement.so
 adb push images/bullhead/libvts_measurement.so /data/local/tmp/libvts_measurement.so
+# hal
+adb push images/bullhead/hal/lights.bullhead-vts32.so /data/local/tmp/hal/lights.bullhead-vts.so
+adb push images/bullhead/hal/lights.bullhead-vts.so /data/local/tmp/hal64/lights.bullhead-vts.so
 
 adb shell mkdir /data/local/tmp/spec
 adb push sysfuzzer/libinterfacespecification/specification/CameraHalV1.vts /data/local/tmp/spec/CameraHalV1.vts
