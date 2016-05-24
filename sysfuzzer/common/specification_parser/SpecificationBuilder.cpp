@@ -167,7 +167,8 @@ bool SpecificationBuilder::LoadTargetComponent(
 
 const string empty_string = string();
 
-const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) {
+const string& SpecificationBuilder::CallFunction(
+    FunctionSpecificationMessage* func_msg) {
   if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
     return empty_string;
   }
@@ -182,8 +183,19 @@ const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* f
   }
 
   void* result;
+  func_fuzzer->FunctionCallBegin();
   cout << "Call Function " << func_msg->name() << endl;
   func_fuzzer->Fuzz(*func_msg, &result);
+  cout << __FUNCTION__ << ": called" << endl;
+
+  // set coverage data.
+  vector<unsigned>* coverage = func_fuzzer->FunctionCallEnd();
+  if (coverage && coverage->size() > 0) {
+    for (unsigned int index = 0; index < coverage->size(); index++) {
+      func_msg->mutable_coverage_data()->Add(coverage->at(index));
+    }
+  }
+
   if (func_msg->return_type().aggregate_type().size() > 0) {
     // TODO: actually handle this case.
     if (result != NULL) {
@@ -193,7 +205,10 @@ const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* f
     } else {
       cout << __FUNCTION__ << " return value = NULL" << endl;
     }
-    return *(new string("todo: support aggregate"));
+    cerr << __FUNCTION__ << " todo: support aggregate" << endl;
+    string* output = new string();
+    google::protobuf::TextFormat::PrintToString(*func_msg, output);
+    return *output;
   } else if (func_msg->return_type().primitive_type().size() > 0) {
     // TODO handle when the size > 1.
     if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
@@ -202,8 +217,7 @@ const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* f
       cout << "result " << endl;
       // todo handle more types;
       string* output = new string();
-      google::protobuf::TextFormat::PrintToString(func_msg->return_type(),
-                                                  output);
+      google::protobuf::TextFormat::PrintToString(*func_msg, output);
       return *output;
     }
   }

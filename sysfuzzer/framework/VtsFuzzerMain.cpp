@@ -19,6 +19,10 @@
  *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib64/hw/lights.angler.so
  *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
  *
+ *  $ LD_LIBRARY_PATH=/data/local/tmp ./fuzzer --class=hal --type=light \
+ *    --version=1.0 --spec_dir=/data/local/tmp/spec \
+ *    /data/local/tmp/hw64/lights.bullhead-vts.so
+ *
  * Example usage (for GCE virtual devices):
  *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
  *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so

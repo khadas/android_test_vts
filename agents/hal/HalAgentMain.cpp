@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
+
 #include <iostream>
 
 #include "TcpServer.h"
@@ -37,7 +39,21 @@ int main(int argc, char* argv[]) {
         << "[<fuzzer binary path> [<spec file base dir path>]]" << std::endl;
     return -1;
   }
+
+  char* dir_path;
+  dir_path = (char*) malloc(strlen(argv[0]) + 1);
+  strcpy(dir_path, argv[0]);
+  for (int index = strlen(argv[0]) - 2; index >= 0; index--) {
+    if (dir_path[index] == '/') {
+      dir_path[index] = '\0';
+      break;
+    }
+  }
+  printf("chdir %s\n", dir_path);
+  chdir(dir_path);
+
   android::vts::StartTcpServer(
       (const char*) fuzzer_path, (const char*) spec_dir_path);
+
   return 0;
 }

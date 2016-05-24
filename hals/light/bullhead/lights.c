@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "lights"
-#define DEBUG 0
+#define DEBUG 1
 
 #include <cutils/log.h>
 
@@ -106,6 +106,14 @@ static int rgb_to_brightness(struct light_state_t const* state)
             + (150 * ((color >> 8) & 0x00ff)) + (29 * (color & 0x00ff))) >> 8;
 }
 
+#if TEST_COMPLEX_CFG
+void simple_recursion(int recursion) {
+  if (recursion == 0) return;
+  ALOGE("simple_recursion %d", recursion);
+  simple_recursion(recursion - 1);
+}
+#endif
+
 static int set_light_backlight(struct light_device_t* dev __unused,
         struct light_state_t const* state)
 {
@@ -115,6 +123,9 @@ static int set_light_backlight(struct light_device_t* dev __unused,
     pthread_mutex_lock(&g_lock);
     err = write_int(LCD_FILE, brightness);
     pthread_mutex_unlock(&g_lock);
+#if TEST_COMPLEX_CFG
+    simple_recursion(10);
+#endif
 
     return err;
 }
@@ -256,7 +267,7 @@ struct hw_module_t HAL_MODULE_INFO_SYM = {
     .version_major = 1,
     .version_minor = 0,
     .id = LIGHTS_HARDWARE_MODULE_ID,
-    .name = "lights Module",
+    .name = "lights Module (VTS instrumented)",
     .author = "Google, Inc.",
     .methods = &lights_module_methods,
 };
