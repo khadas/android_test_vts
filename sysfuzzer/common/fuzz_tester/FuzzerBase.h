@@ -49,6 +49,13 @@ class FuzzerBase {
     return false;
   };
 
+  // Called before calling a target function.
+  void FunctionCallBegin();
+
+  // Called after calling a target function. Returns a vector which contains
+  // the code coverage info.
+  vector<unsigned>* FunctionCallEnd();
+
  protected:
   // a pointer to a HAL data structure of the loaded component.
   struct hw_device_t* device_;
@@ -65,6 +72,12 @@ class FuzzerBase {
 
   // target class
   const int target_class_;
+
+  // target component file name (without extension)
+  char* component_filename_;
+
+  // path to store the gcov output files.
+  char* gcov_output_basepath_;
 };
 
 }  // namespace vts
