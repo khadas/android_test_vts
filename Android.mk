@@ -22,7 +22,7 @@ ifeq ($(HOST_OS),linux)
 
 include $(CLEAR_VARS)
 
-VTS_PYTHON_TGZ := $(HOST_OUT)/vts_python_package/vts.tar.gz
+VTS_PYTHON_TGZ := $(HOST_OUT)/vts/vts.tar.gz
 
 $(VTS_PYTHON_TGZ): test/vts/setup.py
 	@echo "build vts python package: $(VTS_PYTHON_TGZ)"
