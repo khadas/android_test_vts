@@ -156,7 +156,7 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg) {
 }
 
 
-int vts_fs_mkdirs(const char* file_path, mode_t mode) {
+int vts_fs_mkdirs(char* file_path, mode_t mode) {
   char* p;
 
   for (p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
