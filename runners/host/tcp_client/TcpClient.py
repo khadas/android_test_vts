@@ -101,11 +101,10 @@ class VtsTcpClient(object):
       return (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS)
 
     def LaunchStubService(self, service_name, file_path, bits, target_class,
-                          target_type, target_version, module_name):
+                          target_type, target_version):
       """RPC to LAUNCH_STUB_SERVICE."""
       logging.info("service_name: %s", service_name)
       logging.info("file_path: %s", file_path)
-      logging.info("module_name: %s", module_name)
       logging.info("bits: %s", bits)
       self.SendCommand(AndroidSystemControlMessage_pb2.LAUNCH_STUB_SERVICE,
                        service_name=service_name,
@@ -113,8 +112,7 @@ class VtsTcpClient(object):
                        bits=bits,
                        target_class=target_class,
                        target_type=target_type,
-                       target_version=target_version,
-                       module_name=module_name)
+                       target_version=target_version)
       resp = self.RecvResponse()
       return (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS)
 
@@ -132,7 +130,12 @@ class VtsTcpClient(object):
       resp = self.RecvResponse()
       if (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS):
         result = InterfaceSpecificationMessage_pb2.FunctionSpecificationMessage()
-        text_format.Merge(resp.result, result)
+        if resp.result == "error":
+          raise Exception("API call error by the VTS stub.")
+        try:
+          text_format.Merge(resp.result, result)
+        except text_format.ParseError as e:
+          logging.error("Paring error\n%s\n%s", resp.result, e)
         return result
       logging.error("NOTICE - Likely a crash discovery!")
       logging.error("arg: %s", arg)

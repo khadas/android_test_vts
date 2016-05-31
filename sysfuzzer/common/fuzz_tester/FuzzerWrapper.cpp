@@ -33,8 +33,9 @@ namespace android {
 namespace vts {
 
 
-FuzzerWrapper::FuzzerWrapper() {
-}
+FuzzerWrapper::FuzzerWrapper()
+    : function_name_prefix_chars_(NULL),
+      fuzzer_base_(NULL) {}
 
 
 bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
@@ -58,6 +59,11 @@ FuzzerBase* FuzzerWrapper::GetFuzzer(
   const char* function_name_prefix_chars = function_name_prefix.c_str();
   cout << __FUNCTION__ << ": function name '"
       << function_name_prefix_chars << "'" << endl;
+  if (function_name_prefix_chars_ && function_name_prefix_chars
+      && !strcmp(function_name_prefix_chars, function_name_prefix_chars_)) {
+    return fuzzer_base_;
+  }
+
   loader_function func = dll_loader_.GetLoaderFunction(
       function_name_prefix_chars);
   if (!func) {
@@ -65,7 +71,10 @@ FuzzerBase* FuzzerWrapper::GetFuzzer(
     return NULL;
   }
   cout << __FUNCTION__ << ": function found; trying to call." << endl;
-  return func();
+  fuzzer_base_ = func();
+  function_name_prefix_chars_ = (char*) malloc(strlen(function_name_prefix_chars) + 1);
+  strcpy(function_name_prefix_chars_, function_name_prefix_chars);
+  return fuzzer_base_;
 }
 
 }  // namespace vts

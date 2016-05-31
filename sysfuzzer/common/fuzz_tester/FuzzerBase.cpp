@@ -255,7 +255,10 @@ static void RemoveDir(char *path) {
 
 
 FuzzerBase::FuzzerBase(int target_class)
-    : target_class_(target_class),
+    : device_(NULL),
+      hmi_(NULL),
+      target_dll_path_(NULL),
+      target_class_(target_class),
       component_filename_(NULL),
       gcov_output_basepath_(NULL) {}
 
@@ -275,16 +278,28 @@ void ffn() {
 }
 
 
-bool FuzzerBase::LoadTargetComponent(
-    const char* target_dll_path, const char* module_name) {
-  cout << __FUNCTION__ << ":" << __LINE__ << " entry" << endl;
-  target_dll_path_ = target_dll_path;
-  if (!target_loader_.Load(target_dll_path_)) return false;
+bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
+  if (target_dll_path && target_dll_path_
+      && !strcmp(target_dll_path, target_dll_path_)) {
+    cout << __func__ << " skip loading" << endl;
+    return true;
+  }
+
+  if (!target_loader_.Load(target_dll_path)) return false;
+  target_dll_path_ = (char*) malloc(strlen(target_dll_path) + 1);
+  strcpy(target_dll_path_, target_dll_path);
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == LEGACY_HAL) return true;
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file." << endl;
-  device_ = target_loader_.GetHWDevice(module_name);
-  cout << __FUNCTION__ << ":" << __LINE__ <<  " device_ " << device_ << endl;
+  if (target_class_ == HAL) {
+    hmi_ = target_loader_.InitConventionalHal();
+    if (!hmi_) {
+      free(target_dll_path_);
+      target_dll_path_ = NULL;
+      return false;
+    }
+  }
 #if SANCOV
   cout << __FUNCTION__ << "sancov reset " << target_loader_.SancovResetCoverage() << endl;;
 #endif
@@ -302,20 +317,29 @@ bool FuzzerBase::LoadTargetComponent(
       cout << __FUNCTION__ << ":" << __LINE__
           << " module file name: " << component_filename_ << endl;
     }
-    cout << __FUNCTION__ << ":" << __LINE__ << " module_name "
+    cout << __FUNCTION__ << ":" << __LINE__ << " target_dll_path "
         << target_dll_path_ << endl;
   }
 
 #if USE_GCOV
   cout << __FUNCTION__ << ": gcov init " << target_loader_.GcovInit(wfn, ffn) << endl;
 #endif
-  return (device_ != NULL);
+  return true;
+}
+
+
+int FuzzerBase::OpenConventionalHal(const char* module_name) {
+  cout << __func__ << endl;
+  device_ = target_loader_.OpenConventionalHal(module_name);
+  cout << __func__ << " device_" << device_ << endl;
+  if (!device_) return -1;
+  return 0;
 }
 
 
 bool FuzzerBase::Fuzz(const vts::InterfaceSpecificationMessage& message,
                       void** result) {
-  cout << "Fuzzing target component: "
+  cout << __func__ << " Fuzzing target component: "
       << "class " << message.component_class()
       << " type " << message.component_type()
       << " version " << message.component_type_version() << endl;
@@ -335,6 +359,7 @@ void FuzzerBase::FunctionCallBegin() {
   char module_basepath[4096];
   char cwd[4096];
 
+  cout << __func__ << endl;
   if (getcwd(cwd, 4096)) {
     cout << cwd << endl;
     int n = snprintf(product_path, 4096, "%s/out/target/product", cwd);
@@ -416,6 +441,7 @@ void FuzzerBase::FunctionCallBegin() {
       sprintf(gcov_output_basepath_, "%s/%s", module_basepath, target.c_str());
       RemoveDir(gcov_output_basepath_);
     }
+    // TODO: check how it works when there already is a file.
     closedir(srcdir);
   } else {
     cerr << __FUNCTION__ << ": couldn't get the pwd." << endl;
@@ -426,6 +452,7 @@ void FuzzerBase::FunctionCallBegin() {
 vector<unsigned>* FuzzerBase::FunctionCallEnd() {
   cout << __FUNCTION__ << ": gcov flush " << endl;
   std::vector<unsigned>* result = NULL;
+  cout << __func__ << endl;
 #if USE_GCOV
   target_loader_.GcovFlush();
   // find the file.

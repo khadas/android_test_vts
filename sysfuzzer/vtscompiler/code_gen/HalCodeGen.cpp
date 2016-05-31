@@ -77,6 +77,32 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
     // actual function call
     GenerateCodeToStartMeasurement(cpp_ss);
+    cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+
+    cpp_ss << "    " << message.original_data_structure_name()
+        << "* local_device = ";
+    cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
+        << "*>(" << kInstanceVariableName << ");" << endl;
+
+    cpp_ss << "    if (local_device == NULL) {" << endl;
+    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
+    cpp_ss << "      local_device = reinterpret_cast<" << message.original_data_structure_name()
+        << "*>(hmi_);" << endl;
+    cpp_ss << "    }" << endl;
+    cpp_ss << "    if (local_device == NULL) {" << endl;
+    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;" << endl;
+    cpp_ss << "      return false;" << endl;
+    cpp_ss << "    }" << endl;
+    cpp_ss << "    if (reinterpret_cast<" << message.original_data_structure_name()
+        << "*>(local_device)->" << api.name() << " == NULL";
+    cpp_ss << ") {" << endl;
+    cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
+    // todo: consider throwing an exception at least a way to tell more
+    // specifically to the caller.
+    cpp_ss << "      return false;" << endl;
+    cpp_ss << "    }" << endl;
+
+    cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
     if (api.return_type().primitive_type().size() == 1
         && !strcmp(api.return_type().primitive_type(0).c_str(), "void")) {
@@ -84,8 +110,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     } else {
       cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
     }
-    cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-        << "*>(" << kInstanceVariableName << ")->" << api.name() << "(";
+    cpp_ss << "local_device->" << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
     for (int index = 0; index < arg_count; index++) {
@@ -101,7 +126,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     }
     cpp_ss << ");" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
-    cpp_ss << "cout << \"called\" << endl;" << endl;
+    cpp_ss << "    cout << \"called\" << endl;" << endl;
     cpp_ss << "    return true;" << endl;
     cpp_ss << "  }" << endl;
   }
