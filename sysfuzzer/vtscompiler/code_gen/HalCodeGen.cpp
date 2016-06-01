@@ -39,7 +39,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
+  cpp_ss << "    FunctionSpecificationMessage& func_msg," << endl;
   cpp_ss << "    void** result) {" << endl;
   cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
@@ -64,10 +64,44 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         msg_ss << "func_msg.arg(" << arg_count << ")";
         string msg = msg_ss.str();
 
-        cpp_ss << "(" << msg << ".primitive_value_size() > 0 ";
-        cpp_ss << "|| " << msg << ".aggregate_value_size() > 0)? ";
+        if (arg.primitive_type().size() > 0) {
+          cpp_ss << "(" << msg << ".primitive_value_size() > 0)? ";
+          if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
+              || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
+              || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+            cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+          }
+          cpp_ss << "(" << msg << ".primitive_value(0)";
+
+          if (arg.primitive_type(0) == "int32_t"
+              || arg.primitive_type(0) == "uint32_t"
+              || arg.primitive_type(0) == "int64_t"
+              || arg.primitive_type(0) == "uint64_t"
+              || arg.primitive_type(0) == "int16_t"
+              || arg.primitive_type(0) == "uint16_t"
+              || arg.primitive_type(0) == "int8_t"
+              || arg.primitive_type(0) == "uint8_t"
+              || arg.primitive_type(0) == "float_t"
+              || arg.primitive_type(0) == "double_t") {
+            cpp_ss << "." << arg.primitive_type(0) << "() ";
+          } else if (!strcmp(arg.primitive_type(0).c_str(), "pointer")) {
+            cpp_ss << ".pointer() ";
+          } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
+            cpp_ss << ".pointer() ";
+          } else if (!strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+            cpp_ss << ".pointer() ";
+          } else {
+            cerr << __func__ << " ERROR unsupported type " << arg.primitive_type(0) << endl;
+            exit(-1);
+          }
+          cpp_ss << ") : ";
+        }
+
+        cpp_ss << "( (" << msg << ".aggregate_value_size() > 0)? ";
         cpp_ss << GetCppInstanceType(arg, msg);
-        cpp_ss << " : " << GetCppInstanceType(arg);
+        cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+        // TODO: use the given message and call a lib function which converts
+        // a message to a C/C++ struct.
       }
       cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
@@ -127,6 +161,19 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << ");" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
     cpp_ss << "    cout << \"called\" << endl;" << endl;
+
+    // Copy the output (call by pointer or reference cases).
+    arg_count = 0;
+    for (auto const& arg : api.arg()) {
+      if (arg.is_output()) {
+        // TODO check the return value
+        cpp_ss << "    " << GetConversionToProtobufFunctionName(arg)
+            << "(arg" << arg_count << ", "
+            << "func_msg.mutable_arg(" << arg_count << "));" << endl;
+      }
+      arg_count++;
+    }
+
     cpp_ss << "    return true;" << endl;
     cpp_ss << "  }" << endl;
   }

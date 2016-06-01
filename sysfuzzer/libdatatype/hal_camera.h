@@ -20,6 +20,8 @@
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
 
+#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+
 namespace android {
 namespace vts {
 
@@ -28,6 +30,10 @@ extern camera_module_callbacks_t* GenerateCameraModuleCallbacks();
 
 // Generates a camera_info data structure.
 extern camera_info_t* GenerateCameraInfo();
+
+// Converts camera_info to a protobuf message.
+extern bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
+                                        ArgumentSpecificationMessage* msg);
 
 }  // namespace vts
 }  // namespace android

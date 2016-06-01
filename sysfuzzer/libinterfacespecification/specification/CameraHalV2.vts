@@ -94,7 +94,11 @@ aggregate_type_definition: {
   aggregate_type: "camera_metadata_t"
   aggregate_name: "static_camera_characteristics"
   aggregate_value: {
-    int32_t: 0
+    primitive_type: "int32_t"
+    primitive_name: "xyz"
+    primitive_value: {
+      int32_t: 0
+    }
   }
 
   primitive_type: "int32_t"

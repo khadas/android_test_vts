@@ -94,20 +94,21 @@ class MirrorBase(object):
           logging.error("no target component found %s", target_type)
           return
 
+        service_name = "vts_binder_%s" % handler_name
         # check whether the binder service is running
-        if not self._client.CheckStubService(service_name=handler_name):
+        if not self._client.CheckStubService(service_name=service_name):
             # consider doing: raise errors.ComponentLoadingError(
             #    "A stub for %s already exists" % handler_name)
             target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
             target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
 
             launched = self._client.LaunchStubService(
-                service_name=handler_name, file_path=found_target_filename,
+                service_name=service_name, file_path=found_target_filename,
                 bits=bits, target_class=target_class_id,
                 target_type=target_type_id, target_version=target_version)
             if not launched:
                 raise errors.ComponentLoadingError(
-                    "Target file path %s" % filename)
+                    "Target file path %s" % found_target_filename)
 
         found_api_spec = self._client.ListApis()
         logging.debug("ListApis: %s", found_api_spec)

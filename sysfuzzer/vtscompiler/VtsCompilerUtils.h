@@ -41,6 +41,9 @@ extern string GetCppVariableType(ArgumentSpecificationMessage arg);
 extern string GetCppInstanceType(ArgumentSpecificationMessage arg,
                                  string msg = string());
 
+// Returns the name of a function which can convert the given arg to a protobuf.
+extern string GetConversionToProtobufFunctionName(ArgumentSpecificationMessage arg);
+
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);
 
