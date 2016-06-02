@@ -57,5 +57,11 @@ char* RandomCharPointer() {
 }
 
 
+void* RandomVoidPointer() {
+  int len = RandomUint32() % MAX_CHAR_POINTER_LENGTH;
+  void* buf = malloc(len);
+  return buf;
+}
+
 }  // namespace vts
 }  // namespace android

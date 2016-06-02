@@ -330,9 +330,10 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
 
 int FuzzerBase::OpenConventionalHal(const char* module_name) {
   cout << __func__ << endl;
+  if (module_name) cout << __func__ << " " << module_name << endl;
   device_ = target_loader_.OpenConventionalHal(module_name);
-  cout << __func__ << " device_" << device_ << endl;
   if (!device_) return -1;
+  cout << __func__ << " device_" << device_ << endl;
   return 0;
 }
 

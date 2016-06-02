@@ -31,11 +31,13 @@ class MirrorObject(object):
         _client: the TCP client instance.
         _if_spec_msg: the interface specification message of a host object to
             mirror.
+        _parent_path: the name of a sub struct this object mirrors.
     """
 
-    def __init__(self, client, msg):
+    def __init__(self, client, msg, parent_path=None):
         self._client = client
         self._if_spec_msg = msg
+        self._parent_path = parent_path
 
     def Open(self, module_name=None):
         """Opens the target HAL component (only for conventional HAL).
@@ -67,9 +69,26 @@ class MirrorObject(object):
         Returns:
             FunctionSpecificationMessage if found, None otherwise
         """
-        for api in self._if_spec_msg.api:
-            if api.name == api_name:
-                return copy.copy(api)
+        logging.debug("GetAPI %s for %s", api_name, self._if_spec_msg)
+        if self._if_spec_msg.api:
+            for api in self._if_spec_msg.api:
+                if api.name == api_name:
+                    return copy.copy(api)
+        return None
+
+    def GetSubStruct(self, sub_struct_name):
+        """Returns the Struct Specification Message.
+
+        Args:
+            sub_struct_name: string, the name of the target sub struct attribute.
+
+        Returns:
+            StructSpecificationMessage if found, None otherwise
+        """
+        if self._if_spec_msg.sub_struct:
+            for sub_struct in self._if_spec_msg.sub_struct:
+                if sub_struct.name == sub_struct_name:
+                    return copy.copy(sub_struct)
         return None
 
     def GetCustomAggregateType(self, type_name):
@@ -81,11 +100,16 @@ class MirrorObject(object):
         Returns:
             ArgumentSpecificationMessage if found, None otherwise
         """
-        for name, definition in zip(self._if_spec_msg.aggregate_type_name,
-                                    self._if_spec_msg.aggregate_type_definition):
-            if name != "const" and name == type_name:
-                return copy.copy(definition)
-        return None
+        try:
+            for name, definition in zip(self._if_spec_msg.aggregate_type_name,
+                                        self._if_spec_msg.aggregate_type_definition):
+                if name != "const" and name == type_name:
+                    return copy.copy(definition)
+            return None
+        except AttributeError as e:
+            # TODO: check in advance whether self._if_spec_msg Interface
+            # SpecificationMessage.
+            return None
 
     def GetConstType(self, type_name):
         """Returns the Argument Specification Message.
@@ -96,11 +120,16 @@ class MirrorObject(object):
         Returns:
             ArgumentSpecificationMessage if found, None otherwise
         """
-        for name, definition in zip(self._if_spec_msg.aggregate_type_name,
-                                    self._if_spec_msg.aggregate_type_definition):
-            if name == "const":
-                return copy.copy(definition)
-        return None
+        try:
+            for name, definition in zip(self._if_spec_msg.aggregate_type_name,
+                                        self._if_spec_msg.aggregate_type_definition):
+                if name == "const":
+                    return copy.copy(definition)
+            return None
+        except AttributeError as e:
+            # TODO: check in advance whether self._if_spec_msg Interface
+            # SpecificationMessage.
+            return None
 
     def __getattr__(self, api_name, *args, **kwargs):
         """Calls a target component's API.
@@ -116,7 +145,7 @@ class MirrorObject(object):
             if not func_msg:
                 logging.fatal("api %s unknown", func_msg)
 
-            logging.info("remote call %s", api_name)
+            logging.info("remote call %s.%s", self._parent_path, api_name)
             logging.debug("remote call %s%s", api_name, args)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
@@ -125,21 +154,21 @@ class MirrorObject(object):
                         # check whether value_msg is a message
                         # value_msg.HasField("primitive_value")
                         if isinstance(value_msg, int):
-                          pv = arg_msg.primitive_value.add()
-                          pv.int32_t = value_msg
+                            pv = arg_msg.primitive_value.add()
+                            pv.int32_t = value_msg
                         else:
-                          # TODO: check in advance (whether it's a message)
-                          logging.error("unknown type %s", type(value_msg))
-                          try:
-                              for primitive_value in value_msg.primitive_value:
-                                  pv = arg_msg.primitive_value.add()
-                                  if primitive_value.HasField("uint32_t"):
-                                      pv.uint32_t = primitive_value.uint32_t
-                                  if primitive_value.HasField("int32_t"):
-                                      pv.int32_t = primitive_value.int32_t
-                          except AttributeError as e:
-                            logging.exception(e)
-                            raise
+                            # TODO: check in advance (whether it's a message)
+                            logging.error("unknown type %s", type(value_msg))
+                            try:
+                                for primitive_value in value_msg.primitive_value:
+                                    pv = arg_msg.primitive_value.add()
+                                    if primitive_value.HasField("uint32_t"):
+                                        pv.uint32_t = primitive_value.uint32_t
+                                    if primitive_value.HasField("int32_t"):
+                                        pv.int32_t = primitive_value.int32_t
+                            except AttributeError as e:
+                                logging.exception(e)
+                                raise
                 logging.info("final msg %s", func_msg)
             else:
                 # TODO: use kwargs
@@ -150,6 +179,8 @@ class MirrorObject(object):
                         value.pointer = 0
                 logging.debug(func_msg)
 
+            if self._parent_path:
+              func_msg.parent_path = self._parent_path
             result = self._client.CallApi(text_format.MessageToString(func_msg))
             logging.debug(result)
             return result
@@ -232,11 +263,23 @@ class MirrorObject(object):
                     continue
             logging.fatal("const %s not found", arg_msg)
 
+        # handle APIs.
         func_msg = self.GetApi(api_name)
         if func_msg:
             logging.debug("api %s", func_msg)
             return RemoteCall
 
+        struct_msg = self.GetSubStruct(api_name)
+        if struct_msg:
+            logging.debug("sub_struct %s", struct_msg)
+            if self._parent_path:
+                parent_name = "%s.%s" % (self._parent_path, api_name)
+            else:
+                parent_name = api_name
+            return MirrorObjectForSubStruct(self._client, struct_msg,
+                                            parent_name)
+
+        # handle attributes.
         fuzz = False
         if api_name.endswith("_fuzz"):
           fuzz = True
@@ -255,3 +298,12 @@ class MirrorObject(object):
             return ConstGenerator()
         logging.fatal("unknown api name %s", api_name)
 
+
+class MirrorObjectForSubStruct(MirrorObject):
+    """Actual mirror object for sub struct.
+
+    Args:
+        _client: see MirrorObject
+        _if_spec_msg: see MirrorObject
+        _name: see MirrorObject
+    """

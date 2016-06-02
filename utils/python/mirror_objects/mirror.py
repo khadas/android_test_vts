@@ -19,7 +19,11 @@ from vts.utils.python.mirror_objects import MirrorBase
 
 
 class Mirror(MirrorBase.MirrorBase):
-    """HAL Mirror Object."""
+    """HAL Mirror Object.
+
+    Attributes:
+        _target_basepath: target component's base dir path in the file system.
+    """
 
     def __init__(self, target_basepath=None):
         if target_basepath:
@@ -44,11 +48,11 @@ class Mirror(MirrorBase.MirrorBase):
     def InitLegacyHal(self, target_type, target_version, target_basepath=None):
         """Initializes a legacy HAL (e.g., wifi).
 
-    Args:
-      target_type: string, the target type name (e.g., light, camera).
-      target_version: float, the target component version (e.g., 1.0).
-      target_basepath: string, the base path of where a target file is stored
-          in.
-    """
+        Args:
+          target_type: string, the target type name (e.g., light, camera).
+          target_version: float, the target component version (e.g., 1.0).
+          target_basepath: string, the base path of where a target file is stored
+              in.
+        """
         super(Mirror, self).Init("legacy_hal", target_type, target_version,
                                  target_basepath)

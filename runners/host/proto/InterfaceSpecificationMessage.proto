@@ -84,6 +84,10 @@ message FunctionSpecificationMessage {
 
   // coverage measurement data.
   repeated uint32 coverage_data = 201;
+
+  // not a user-provided variable. used by the frameworks to tell the sub
+  // struct hierarchy.
+  optional bytes parent_path = 301;
 }
 
 
@@ -138,8 +142,14 @@ message StructSpecificationMessage {
   // the sub-structure's variable name in its parent data structure.
   optional bytes name = 1;
 
+  // whether itself a pointer varaible in its parent data structure.
+  optional bool is_pointer = 2 [default = false];
+
   // a list of functions contained in the struct.
   repeated FunctionSpecificationMessage api = 1001;
+
+  // a list of structures contained in the component.
+  repeated StructSpecificationMessage sub_struct = 2001;
 }
 
 

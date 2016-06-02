@@ -19,6 +19,7 @@
 
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
+#include <hardware/camera.h>
 
 #include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
@@ -27,6 +28,18 @@ namespace vts {
 
 // Generates a camera_module_callbacks data structure.
 extern camera_module_callbacks_t* GenerateCameraModuleCallbacks();
+
+// Return the pointer to a camera_notify_callback function.
+extern camera_notify_callback GenerateCameraNotifyCallback();
+
+// Return the pointer to a camera_data_callback function.
+extern camera_data_callback GenerateCameraDataCallback();
+
+// Return the pointer to a camera_data_timestamp_callback function.
+extern camera_data_timestamp_callback GenerateCameraDataTimestampCallback();
+
+// Return the pointer to a camera_request_memory function.
+extern camera_request_memory GenerateCameraRequestMemory();
 
 // Generates a camera_info data structure.
 extern camera_info_t* GenerateCameraInfo();

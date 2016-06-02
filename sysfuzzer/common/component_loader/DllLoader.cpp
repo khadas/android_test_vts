@@ -82,7 +82,7 @@ struct hw_module_t* DllLoader::InitConventionalHal() {
 
 
 struct hw_device_t* DllLoader::OpenConventionalHal(const char* module_name) {
-  cout << __func__ << " module_name " << module_name << endl;
+  cout << __func__ << endl;
   if (!handle_) {
     cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
     return NULL;

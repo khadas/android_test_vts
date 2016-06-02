@@ -42,6 +42,13 @@ class HalCodeGen : public CodeGenBase {
       const InterfaceSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
+  void GenerateCppBodyFuzzFunction(
+      std::stringstream& cpp_ss,
+      const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name,
+      const string& parent_path);
+
   void GenerateHeaderGlobalFunctionDeclarations(
       std::stringstream& h_ss,
       const string& function_prototype);
@@ -50,6 +57,11 @@ class HalCodeGen : public CodeGenBase {
       std::stringstream& cpp_ss,
       const string& function_prototype,
       const string& fuzzer_extended_class_name);
+
+  void GenerateSubStructFuzzFunctionCall(
+      std::stringstream& cpp_ss,
+      const StructSpecificationMessage& message,
+      const string& parent_path);
 
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;

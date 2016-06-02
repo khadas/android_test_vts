@@ -2,6 +2,7 @@
 #
 PRODUCT_COPY_FILES += \
     test/vts/sysfuzzer/libinterfacespecification/specification/CameraHalV2.vts:system/etc/CameraHalV2.vts \
+    test/vts/sysfuzzer/libinterfacespecification/specification/CameraHalV2hw_device_t.vts:system/etc/CameraHalV2hw_device_t.vts \
     test/vts/sysfuzzer/libinterfacespecification/specification/GpsHalV1.vts:system/etc/GpsHalV1.vts \
     test/vts/sysfuzzer/libinterfacespecification/specification/GpsHalV1GpsInterface.vts:system/etc/GpsHalV1GpsInterface.vts \
     test/vts/sysfuzzer/libinterfacespecification/specification/LightHalV1.vts:system/etc/LightHalV1.vts \
