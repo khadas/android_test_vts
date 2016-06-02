@@ -28,7 +28,6 @@ LOCAL_SRC_FILES := \
   component_loader/DllLoader.cpp \
   fuzz_tester/FuzzerBase.cpp \
   fuzz_tester/FuzzerWrapper.cpp \
-  proto/InterfaceSpecificationMessage.proto \
   specification_parser/InterfaceSpecificationParser.cpp \
   specification_parser/SpecificationBuilder.cpp \
   utils/InterfaceSpecUtil.cpp \
@@ -40,7 +39,7 @@ LOCAL_C_INCLUDES := \
   external/protobuf/src \
   frameworks/native/include \
   test/vts/sysfuzzer/libcodecoverage \
-  system/core/include
+  system/core/include \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
@@ -50,8 +49,8 @@ LOCAL_SHARED_LIBRARIES := \
   libdl \
   libandroid_runtime \
   libvts_codecoverage \
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
+  libvts_multidevice_proto \
+  libprotobuf-cpp-full \
 
 LOCAL_MULTILIB := both
 
@@ -68,7 +67,6 @@ LOCAL_CFLAGS += -Wno-unused-parameter -Werror
 
 # Files needed for VTSC.
 LOCAL_SRC_FILES := \
-  proto/InterfaceSpecificationMessage.proto \
   specification_parser/InterfaceSpecificationParser.cpp \
   utils/InterfaceSpecUtil.cpp
 
@@ -80,7 +78,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
+  libvts_multidevice_proto_host \
 
 include $(BUILD_HOST_SHARED_LIBRARY)

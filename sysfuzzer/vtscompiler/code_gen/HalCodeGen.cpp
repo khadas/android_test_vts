@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 
@@ -39,9 +39,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage& func_msg," << endl;
+  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
   cpp_ss << "    void** result) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
+  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
   for (auto const& api : message.api()) {
@@ -61,11 +61,12 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
             << kInstanceVariableName << ")";
       } else {
         std::stringstream msg_ss;
-        msg_ss << "func_msg.arg(" << arg_count << ")";
+        msg_ss << "func_msg->arg(" << arg_count << ")";
         string msg = msg_ss.str();
 
         if (arg.primitive_type().size() > 0) {
-          cpp_ss << "(" << msg << ".primitive_value_size() > 0)? ";
+          cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
+              << msg << ".primitive_type().size() == 1)? ";
           if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
               || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
               || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
@@ -97,7 +98,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << ") : ";
         }
 
-        cpp_ss << "( (" << msg << ".aggregate_value_size() > 0)? ";
+        cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
+            << msg << ".primitive_value_size() > 0)? ";
         cpp_ss << GetCppInstanceType(arg, msg);
         cpp_ss << " : " << GetCppInstanceType(arg) << " )";
         // TODO: use the given message and call a lib function which converts
@@ -169,7 +171,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         // TODO check the return value
         cpp_ss << "    " << GetConversionToProtobufFunctionName(arg)
             << "(arg" << arg_count << ", "
-            << "func_msg.mutable_arg(" << arg_count << "));" << endl;
+            << "func_msg->mutable_arg(" << arg_count << "));" << endl;
       }
       arg_count++;
     }

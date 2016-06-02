@@ -18,45 +18,47 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vtssysfuzzer
-LOCAL_MODULE_STEM_64 := fuzzer64
-LOCAL_MODULE_STEM_32 := fuzzer32
+LOCAL_MODULE := libvts_multidevice_proto
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  VtsFuzzerMain.cpp \
-  BinderServer.cpp \
+  AndroidSystemControlMessage.proto \
+  InterfaceSpecificationMessage.proto \
+#  $(call all-proto-files-under, ./)
+
+#LOCAL_SHARED_LIBRARIES := \
+
+#LOCAL_C_INCLUDES += \
+  external/protobuf/src \
 
 LOCAL_C_INCLUDES := \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/common \
-  bionic \
-  libcore \
-  device/google/gce/include \
-  system/extras \
   external/protobuf/src \
-  frameworks/native/include \
-  system/core/include \
 
 LOCAL_SHARED_LIBRARIES := \
-  libutils \
-  libcutils \
-  liblog \
-  libbinder \
-  libdl \
-  libandroid_runtime \
-  libvts_common \
-  libvts_multidevice_proto \
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
+
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libvts_multidevice_proto_host
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_HOST_OS := darwin linux
+
+LOCAL_CFLAGS += -Wno-unused-parameter -Werror
+
+# Files needed for VTSC.
+LOCAL_SRC_FILES := \
+  AndroidSystemControlMessage.proto \
+  InterfaceSpecificationMessage.proto \
+
+LOCAL_C_INCLUDES := \
+  external/protobuf/src \
+
+LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
 
-LOCAL_STATIC_LIBRARIES := \
-  libelf \
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
-#LOCAL_PROTOC_FLAGS := \
-#  --proto_path=$(LOCAL_PATH)/../common/proto \
-
-#LOCAL_PROTOC_OPTIMIZE_TYPE := full
-
-LOCAL_MULTILIB := both
-
-include $(BUILD_EXECUTABLE)
+include $(BUILD_HOST_SHARED_LIBRARY)

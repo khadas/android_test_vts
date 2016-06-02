@@ -29,6 +29,8 @@ cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libvts_measurement.so tes
 cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libvts_measurement.so test/vts/images/${DEVICE}/64/libvts_measurement.so
 cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libvts_codecoverage.so test/vts/images/${DEVICE}/32/libvts_codecoverage.so
 cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libvts_codecoverage.so test/vts/images/${DEVICE}/64/libvts_codecoverage.so
+cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libvts_multidevice_proto.so test/vts/images/${DEVICE}/32/libvts_multidevice_proto.so
+cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libvts_multidevice_proto.so test/vts/images/${DEVICE}/64/libvts_multidevice_proto.so
 # HAL
 cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/hw/lights.bullhead-vts.so test/vts/images/${DEVICE}/32/hal/lights.bullhead-vts.so
 cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/hw/lights.bullhead-vts.so test/vts/images/${DEVICE}/64/hal/lights.bullhead-vts.so

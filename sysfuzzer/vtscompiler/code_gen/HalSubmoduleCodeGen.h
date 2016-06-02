@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "code_gen/CodeGenBase.h"
 #include "code_gen/HalCodeGen.h"

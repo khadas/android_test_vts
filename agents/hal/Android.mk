@@ -26,10 +26,6 @@ LOCAL_SRC_FILES := \
   BinderClient.cpp \
   TcpServer.cpp \
   RequestHandler.cpp \
-  $(call all-proto-files-under, proto) \
-
-LOCAL_PROTOC_FLAGS := \
-  --proto_path=$(LOCAL_PATH)/../../sysfuzzer/common/proto \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
@@ -37,6 +33,8 @@ LOCAL_SHARED_LIBRARIES := \
   libbinder \
   libvts_common \
   libc++ \
+  libvts_multidevice_proto \
+  libprotobuf-cpp-full \
 
 LOCAL_C_INCLUDES += \
   bionic \
@@ -47,7 +45,5 @@ LOCAL_C_INCLUDES += \
   test/vts/agents/hal \
   test/vts/agents/hal/proto \
   external/protobuf/src \
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 include $(BUILD_EXECUTABLE)

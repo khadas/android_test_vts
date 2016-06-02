@@ -38,7 +38,7 @@
 #include "specification_parser/SpecificationBuilder.h"
 
 #include <google/protobuf/text_format.h>
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 
 using namespace std;

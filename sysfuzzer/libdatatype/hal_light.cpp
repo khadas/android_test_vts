@@ -22,7 +22,7 @@
 
 #include <hardware/lights.h>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "vts_datatype.h"
 
@@ -58,21 +58,21 @@ light_state_t* GenerateLightState() {
 
 
 light_state_t* GenerateLightStateUsingMessage(const ArgumentSpecificationMessage& msg) {
-  cout << __FUNCTION__ << " entry" << endl;
+  cout << __func__ << " entry" << endl;
   light_state_t* state = (light_state_t*) malloc(sizeof(light_state_t));
 
   // TODO: use a dict in the proto and handle when the key is missing (i.e.,
   // randomly generate that).
   state->color = msg.primitive_value(0).uint32_t();
-  cout << __FUNCTION__ << " color " << state->color << endl;
+  cout << __func__ << " color " << state->color << endl;
   state->flashMode = msg.primitive_value(1).int32_t();
-  cout << __FUNCTION__ << " flashMode " << state->flashMode << endl;
+  cout << __func__ << " flashMode " << state->flashMode << endl;
   state->flashOnMS = msg.primitive_value(2).int32_t();
-  cout << __FUNCTION__ << " flashOnMS " << state->flashOnMS << endl;
+  cout << __func__ << " flashOnMS " << state->flashOnMS << endl;
   state->flashOffMS = msg.primitive_value(3).int32_t();
-  cout << __FUNCTION__ << " flashOffMS " << state->flashOffMS << endl;
+  cout << __func__ << " flashOffMS " << state->flashOffMS << endl;
   state->brightnessMode = msg.primitive_value(4).int32_t();
-  cout << __FUNCTION__ << " brightnessMode " << state->brightnessMode << endl;
+  cout << __func__ << " brightnessMode " << state->brightnessMode << endl;
 
   return state;
 }

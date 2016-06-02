@@ -117,31 +117,30 @@ class MirrorObject(object):
                 logging.fatal("api %s unknown", func_msg)
 
             logging.info("remote call %s", api_name)
+            logging.debug("remote call %s%s", api_name, args)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
                     logging.debug("arg msg value %s %s", arg_msg, value_msg)
-                    if value_msg:
+                    if value_msg is not None:
                         # check whether value_msg is a message
                         # value_msg.HasField("primitive_value")
                         if isinstance(value_msg, int):
                           pv = arg_msg.primitive_value.add()
                           pv.int32_t = value_msg
-                          continue
                         else:
                           # TODO: check in advance (whether it's a message)
                           logging.error("unknown type %s", type(value_msg))
-
-                        try:
-                            for primitive_value in value_msg.primitive_value:
-                                pv = arg_msg.primitive_value.add()
-                                if primitive_value.HasField("uint32_t"):
-                                    pv.uint32_t = primitive_value.uint32_t
-                                if primitive_value.HasField("int32_t"):
-                                    pv.int32_t = primitive_value.int32_t
-                        except AttributeError as e:
-                          logging.exception(e)
-                          raise
-                logging.debug("final msg %s", func_msg)
+                          try:
+                              for primitive_value in value_msg.primitive_value:
+                                  pv = arg_msg.primitive_value.add()
+                                  if primitive_value.HasField("uint32_t"):
+                                      pv.uint32_t = primitive_value.uint32_t
+                                  if primitive_value.HasField("int32_t"):
+                                      pv.int32_t = primitive_value.int32_t
+                          except AttributeError as e:
+                            logging.exception(e)
+                            raise
+                logging.info("final msg %s", func_msg)
             else:
                 # TODO: use kwargs
                 for arg in func_msg.arg:

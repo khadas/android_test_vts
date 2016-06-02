@@ -20,7 +20,7 @@
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 namespace android {
 namespace vts {
@@ -30,6 +30,10 @@ extern camera_module_callbacks_t* GenerateCameraModuleCallbacks();
 
 // Generates a camera_info data structure.
 extern camera_info_t* GenerateCameraInfo();
+
+// Generates a camera_info data structure using a given protobuf msg's values.
+extern camera_info_t* GenerateCameraInfoUsingMessage(
+    const ArgumentSpecificationMessage& msg);
 
 // Converts camera_info to a protobuf message.
 extern bool ConvertCameraInfoToProtobuf(camera_info_t* raw,

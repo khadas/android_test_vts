@@ -51,7 +51,7 @@ class SampleCameraTestcase(base_test.BaseTestClass):
         count = result.return_type.primitive_value[0].int32_t
         logging.info(count)
         for index in range(0, count):
-          arg = hal_mirror.camera.camera_info_t()
+          arg = hal_mirror.camera.camera_info_t(facing=0)
           logging.info(arg)
           logging.info(hal_mirror.camera.get_camera_info(index, arg))
         logging.info("testCamera end")

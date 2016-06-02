@@ -34,8 +34,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "test/vts/agents/hal/proto/AndroidSystemControlMessage.pb.h"
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 #include "BinderClient.h"
 #include "RequestHandler.h"
 
