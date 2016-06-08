@@ -132,11 +132,32 @@ aggregate_type_definition: {
   primitive_name: "camera_device_status_change"
   primitive_value: {
   }
+  primitive_format: "%p %d %d"
+  aggregate_value: {
+    primitive_type: "pointer"
+    primitive_name: "const struct camera_module_callbacks*"
+
+    primitive_type: "int32"
+
+    primitive_type: "int32"
+  }
 
   primitive_type: "function_pointer"
   primitive_name: "torch_mode_status_change"
   primitive_value: {
   }
+  aggregate_value: {
+    primitive_type: "pointer"
+    primitive_name: "const struct camera_module_callbacks*"
+
+    primitive_type: "pointer"
+    primitive_name: "const char*"
+
+    primitive_type: "int32"
+  }
+  primitive_format: "%p %s %d"
+
+  is_callback: true
 }
 
 
@@ -148,6 +169,7 @@ api: {
   arg: {
     aggregate_type: "camera_module_callbacks_t*"
     is_const: true
+    is_callback: true
   }
 }
 

@@ -49,6 +49,11 @@ class HalCodeGen : public CodeGenBase {
       const string& original_data_structure_name,
       const string& parent_path);
 
+  void GenerateCppBodyCallbackFunction(
+      std::stringstream& cpp_ss,
+      const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
   void GenerateHeaderGlobalFunctionDeclarations(
       std::stringstream& h_ss,
       const string& function_prototype);

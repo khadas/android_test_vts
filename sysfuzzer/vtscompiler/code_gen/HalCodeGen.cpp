@@ -46,6 +46,115 @@ void ReplaceSubString(string& original, const string& from, const string& to) {
 }
 
 
+void HalCodeGen::GenerateCppBodyCallbackFunction(
+    std::stringstream& cpp_ss,
+    const InterfaceSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+
+  if (message.aggregate_type_name_size()
+      != message.aggregate_type_definition_size()) {
+    cerr << "ERROR aggregate type's name and definition is not the equal" << endl;
+    exit(-1);
+  }
+
+  for (int i = 0; i < message.aggregate_type_name_size(); i++) {
+    // auto const& name = ;
+    const ArgumentSpecificationMessage& definition = message.aggregate_type_definition(i);
+    if (definition.is_callback()) {
+      string name = "vts_callback_" + fuzzer_extended_class_name + "_" + message.aggregate_type_name(i);
+      cpp_ss << "static int agent_port_ = -1;" << endl;
+      cpp_ss << endl;
+      cpp_ss << "class " << name << " : public FuzzerCallbackBase {" << endl;
+      cpp_ss << " public:" << endl;
+      cpp_ss << "  " << name << "(int agent_port) {" << endl;
+      cpp_ss << "      agent_port_ = agent_port;" << endl;
+      cpp_ss << "    }" << endl;
+      int primitive_format_index = 0;
+      for (const auto& primitive_type : definition.primitive_type()) {
+        if (primitive_type == "function_pointer") {
+          const string& callback_name = definition.primitive_name(
+              primitive_format_index);
+          // TODO: callback's return value is assumed to be 'void'.
+          cpp_ss << endl;
+          cpp_ss << "  static void " << callback_name << "(";
+          for (int primitive_type_index = 0;
+               primitive_type_index < definition.aggregate_value(
+                   primitive_format_index).primitive_type_size();
+               primitive_type_index++) {
+            const string& var_type = definition.aggregate_value(
+                primitive_format_index).primitive_type(primitive_type_index);
+            if (primitive_type_index != 0) {
+              cpp_ss << ", ";
+            }
+            if (var_type == "pointer") {
+              cpp_ss << definition.aggregate_value(
+                  primitive_format_index).primitive_name(primitive_type_index)
+                      << " ";
+            } else if (var_type == "char_pointer") {
+              cpp_ss << "char* ";
+            } else if (var_type == "int32") {
+              cpp_ss << "int ";
+            }
+            cpp_ss << "arg" << primitive_type_index;
+          }
+          cpp_ss << ") {" << endl;
+#if USE_VAARGS
+          cpp_ss << "    const char fmt[] = \""
+              << definition.primitive_format(primitive_format_index) << "\";"
+              << endl;
+          cpp_ss << "    va_list argp;" << endl;
+          cpp_ss << "    const char* p;" << endl;
+          cpp_ss << "    int i;" << endl;
+          cpp_ss << "    char* s;" << endl;
+          cpp_ss << "    char fmtbuf[256];" << endl;
+          cpp_ss << endl;
+          cpp_ss << "    va_start(argp, fmt);" << endl;
+          cpp_ss << endl;
+          cpp_ss << "    for (p = fmt; *p != '\\0'; p++) {" << endl;
+          cpp_ss << "      if (*p != '%') {" << endl;
+          cpp_ss << "        putchar(*p);" << endl;
+          cpp_ss << "        continue;" << endl;
+          cpp_ss << "      }" << endl;
+          cpp_ss << "      switch (*++p) {" << endl;
+          cpp_ss << "        case 'c':" << endl;
+          cpp_ss << "          i = va_arg(argp, int);" << endl;
+          cpp_ss << "          putchar(i);" << endl;
+          cpp_ss << "          break;" << endl;
+          cpp_ss << "        case 'd':" << endl;
+          cpp_ss << "          i = va_arg(argp, int);" << endl;
+          cpp_ss << "          s = itoa(i, fmtbuf, 10);" << endl;
+          cpp_ss << "          fputs(s, stdout);" << endl;
+          cpp_ss << "          break;" << endl;
+          cpp_ss << "        case 's':" << endl;
+          cpp_ss << "          s = va_arg(argp, char *);" << endl;
+          cpp_ss << "          fputs(s, stdout);" << endl;
+          cpp_ss << "          break;" << endl;
+          //cpp_ss << "        case 'p':
+          cpp_ss << "        case '%':" << endl;
+          cpp_ss << "          putchar('%');" << endl;
+          cpp_ss << "          break;" << endl;
+          cpp_ss << "      }" << endl;
+          cpp_ss << "    }" << endl;
+          cpp_ss << "    va_end(argp);" << endl;
+#endif
+          // TODO: check whether bytes is set and handle properly if not.
+          cpp_ss << "    RpcCallToAgent(GetCallbackID(\"" << callback_name
+              << "\"), agent_port_);" << endl;
+          cpp_ss << "  }" << endl;
+          cpp_ss << endl;
+
+          primitive_format_index++;
+        }
+      }
+      cpp_ss << endl;
+      cpp_ss << " private:" << endl;
+      cpp_ss << "};" << endl;
+      cpp_ss << endl;
+    }
+  }
+}
+
+
 void HalCodeGen::GenerateCppBodyFuzzFunction(
     std::stringstream& cpp_ss,
     const InterfaceSpecificationMessage& message,
@@ -59,7 +168,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result) {" << endl;
+  cpp_ss << "    void** result, int agent_port) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
       << endl;
@@ -94,65 +203,108 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
-      cpp_ss << "    " << GetCppVariableType(arg) << " ";
-      cpp_ss << "arg" << arg_count << " = ";
-      if (arg_count == 0
-          && arg.aggregate_type().size() == 1
-          && !strncmp(arg.aggregate_type(0).c_str(),
-                      message.original_data_structure_name().c_str(),
-                      message.original_data_structure_name().length())) {
-        cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
-            << kInstanceVariableName << ")";
-      } else {
-        std::stringstream msg_ss;
-        msg_ss << "func_msg->arg(" << arg_count << ")";
-        string msg = msg_ss.str();
+      if (arg.is_callback()) {
+        string name = "vts_callback_" + fuzzer_extended_class_name + "_"
+            + arg.aggregate_type(arg_count);
+        if (name.back() == '*') name.pop_back();
+        cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
+        cpp_ss << name << "(agent_port);" << endl;
+        cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
+            << arg_count << "));" << endl;
 
-        if (arg.primitive_type().size() > 0) {
-          cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
-              << msg << ".primitive_type().size() == 1)? ";
-          if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "void_pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
-            cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+        cpp_ss << "    " << GetCppVariableType(arg) << " ";
+        cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg)
+            << ") malloc(sizeof(" << GetCppVariableType(arg) << "));" << endl;
+        // TODO: think about how to free the malloced callback data structure.
+        // find the spec.
+        bool found = false;
+        for (int aggregate_index = 0;
+             aggregate_index < message.aggregate_type_name_size();
+             aggregate_index++) {
+          const ArgumentSpecificationMessage& definition =
+              message.aggregate_type_definition(aggregate_index);
+          if (definition.is_callback()) {
+            string target_name = "vts_callback_" + fuzzer_extended_class_name
+                + "_" + message.aggregate_type_name(aggregate_index);
+            if (name == target_name) {
+              for (int method_index = 0;
+                   method_index < definition.primitive_type_size();
+                   method_index++) {
+                cpp_ss << "    arg" << arg_count << "->"
+                    << definition.primitive_name(method_index)
+                    << " = arg" << arg_count << "callback->"
+                    << definition.primitive_name(method_index) << ";" << endl;
+              }
+              found = true;
+              break;
+            }
           }
-          cpp_ss << "(" << msg << ".primitive_value(0)";
-
-          if (arg.primitive_type(0) == "int32_t"
-              || arg.primitive_type(0) == "uint32_t"
-              || arg.primitive_type(0) == "int64_t"
-              || arg.primitive_type(0) == "uint64_t"
-              || arg.primitive_type(0) == "int16_t"
-              || arg.primitive_type(0) == "uint16_t"
-              || arg.primitive_type(0) == "int8_t"
-              || arg.primitive_type(0) == "uint8_t"
-              || arg.primitive_type(0) == "float_t"
-              || arg.primitive_type(0) == "double_t") {
-            cpp_ss << "." << arg.primitive_type(0) << "() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "void_pointer")) {
-            cpp_ss << ".pointer() ";
-          } else {
-            cerr << __func__ << " ERROR unsupported type " << arg.primitive_type(0) << endl;
-            exit(-1);
-          }
-          cpp_ss << ") : ";
         }
+        if (!found) {
+          cerr << __func__ << " ERROR callback's definition missing." << endl;
+          exit(-1);
+        }
+      } else {
+        cpp_ss << "    " << GetCppVariableType(arg) << " ";
+        cpp_ss << "arg" << arg_count << " = ";
+        if (arg_count == 0
+            && arg.aggregate_type().size() == 1
+            && !strncmp(arg.aggregate_type(0).c_str(),
+                        message.original_data_structure_name().c_str(),
+                        message.original_data_structure_name().length())) {
+          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
+              << kInstanceVariableName << ")";
+        } else {
+          std::stringstream msg_ss;
+          msg_ss << "func_msg->arg(" << arg_count << ")";
+          string msg = msg_ss.str();
 
-        cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
-            << msg << ".primitive_value_size() > 0)? ";
-        cpp_ss << GetCppInstanceType(arg, msg);
-        cpp_ss << " : " << GetCppInstanceType(arg) << " )";
-        // TODO: use the given message and call a lib function which converts
-        // a message to a C/C++ struct.
+          if (arg.primitive_type().size() > 0) {
+            cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
+                << msg << ".primitive_type().size() == 1)? ";
+            if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
+                || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
+                || !strcmp(arg.primitive_type(0).c_str(), "void_pointer")
+                || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+              cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+            }
+            cpp_ss << "(" << msg << ".primitive_value(0)";
+
+            if (arg.primitive_type(0) == "int32_t"
+                || arg.primitive_type(0) == "uint32_t"
+                || arg.primitive_type(0) == "int64_t"
+                || arg.primitive_type(0) == "uint64_t"
+                || arg.primitive_type(0) == "int16_t"
+                || arg.primitive_type(0) == "uint16_t"
+                || arg.primitive_type(0) == "int8_t"
+                || arg.primitive_type(0) == "uint8_t"
+                || arg.primitive_type(0) == "float_t"
+                || arg.primitive_type(0) == "double_t") {
+              cpp_ss << "." << arg.primitive_type(0) << "() ";
+            } else if (!strcmp(arg.primitive_type(0).c_str(), "pointer")) {
+              cpp_ss << ".pointer() ";
+            } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
+              cpp_ss << ".pointer() ";
+            } else if (!strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+              cpp_ss << ".pointer() ";
+            } else if (!strcmp(arg.primitive_type(0).c_str(), "void_pointer")) {
+              cpp_ss << ".pointer() ";
+            } else {
+              cerr << __func__ << " ERROR unsupported type " << arg.primitive_type(0) << endl;
+              exit(-1);
+            }
+            cpp_ss << ") : ";
+          }
+
+          cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
+              << msg << ".primitive_value_size() > 0)? ";
+          cpp_ss << GetCppInstanceType(arg, msg);
+          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+          // TODO: use the given message and call a lib function which converts
+          // a message to a C/C++ struct.
+        }
+        cpp_ss << ";" << endl;
       }
-      cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
           << " << endl;" << endl;
       arg_count++;
@@ -239,7 +391,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz_"
       << parent_path_printable + message.name() << "(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result) {" << endl;
+  cpp_ss << "    void** result, int agent_port) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;" << endl;
 
@@ -447,7 +599,7 @@ void HalCodeGen::GenerateSubStructFuzzFunctionCall(
   replace(current_path_printable.begin(), current_path_printable.end(), '.', '_');
 
   cpp_ss << "    if (func_msg->parent_path() == \"" << current_path << "\") {" << endl;
-  cpp_ss << "      return Fuzz__" << current_path_printable << "(func_msg, result);"<< endl;
+  cpp_ss << "      return Fuzz__" << current_path_printable << "(func_msg, result, agent_port);"<< endl;
   cpp_ss << "    }" << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {

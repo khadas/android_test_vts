@@ -63,6 +63,9 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
   cpp_ss << endl << endl;
+  if (message.component_class() == HAL) {
+    GenerateCppBodyCallbackFunction(cpp_ss, message, fuzzer_extended_class_name);
+  }
 
   cpp_ss << endl;
   GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
@@ -87,9 +90,13 @@ void CodeGenBase::GenerateAllHeader(
   h_ss << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << "#define __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << endl;
+  h_ss << "#include <stdio.h>" << endl;
+  h_ss << "#include <stdarg.h>" << endl;
+  h_ss << "#include <stdlib.h>" << endl;
   h_ss << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << endl;
   h_ss << "#include <utils/Log.h>" << endl;
   h_ss << "#include \"common/fuzz_tester/FuzzerBase.h\"" << endl;
+  h_ss << "#include \"common/fuzz_tester/FuzzerCallbackBase.h\"" << endl;
   for (auto const& header : message.header()) {
     h_ss << "#include " << header << endl;
   }
@@ -131,7 +138,7 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result);" << endl;
+  h_ss << "            void** result, int agent_port);" << endl;
 
   // produce Fuzz method(s) for sub_struct(s).
   for (auto const& sub_struct : message.sub_struct()) {
@@ -157,7 +164,7 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
     const StructSpecificationMessage& message, const string& parent_path) {
   h_ss << "  bool Fuzz_" << parent_path << message.name()
       << "(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result);" << endl;
+  h_ss << "            void** result, int agent_port);" << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateFuzzFunctionForSubStruct(
@@ -204,5 +211,12 @@ string CodeGenBase::GetComponentName(
   }
   return component_name;
 }
+
+
+void CodeGenBase::GenerateCppBodyCallbackFunction(
+    std::stringstream& /*cpp_ss*/,
+    const InterfaceSpecificationMessage& /*message*/,
+    const string& /*fuzzer_extended_class_name*/) {}
+
 }  // namespace vts
 }  // namespace android

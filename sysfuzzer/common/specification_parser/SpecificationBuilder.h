@@ -43,7 +43,7 @@ class SpecificationBuilder {
  public:
   // Constructor where the first argument is the path of a dir which contains
   // all available interface specification files.
-  SpecificationBuilder(const string dir_path, int epoch_count);
+  SpecificationBuilder(const string dir_path, int epoch_count, int agent_port);
 
   // scans the dir and returns an interface specification for a requested
   // component.
@@ -95,6 +95,8 @@ class SpecificationBuilder {
   char* spec_lib_file_path_;
   char* dll_file_name_;
   char* module_name_;
+  // the server socket port # of the agent.
+  int agent_port_;
 };
 
 }  // namespace vts
