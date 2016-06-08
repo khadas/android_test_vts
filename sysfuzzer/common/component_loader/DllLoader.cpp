@@ -32,7 +32,9 @@ namespace vts {
 
 
 DllLoader::DllLoader()
-    : handle_(NULL) {
+    : handle_(NULL),
+      hmi_(NULL),
+      device_(NULL) {
 }
 
 
@@ -44,7 +46,7 @@ DllLoader::~DllLoader() {
 }
 
 
-void* DllLoader::Load(const char* file_path) {
+void* DllLoader::Load(const char* file_path, bool is_conventional_hal) {
   if (!file_path) {
     cerr << __FUNCTION__ << ": file_path is NULL" << endl;
     return NULL;
@@ -57,7 +59,15 @@ void* DllLoader::Load(const char* file_path) {
     cerr << "Can't load a dll " << file_path << endl;
     return NULL;
   }
-  cout << "DLL loaded " << file_path << endl;
+  cout << __func__ << " DLL loaded " << file_path << endl;
+  if (is_conventional_hal) {
+    cout << __func__ << " setting hmi" << endl;
+    hmi_ = (struct hw_module_t*) dlsym(handle_, HAL_MODULE_INFO_SYM_AS_STR);
+    if (!hmi_) {
+      cerr << __func__ << ": " << HAL_MODULE_INFO_SYM_AS_STR << " not found"
+          << endl;
+    }
+  }
   return handle_;
 }
 

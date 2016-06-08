@@ -185,8 +185,8 @@ const string& SpecificationBuilder::CallFunction(
   if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
     return empty_string;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "loaded if_spec lib" << endl;
-  cout << __func__ << " " << func_msg->name() << endl;
+  cout << __func__ << " " << "loaded if_spec lib" << endl;
+  cout << __func__ << " " << dll_file_name_ << " " << func_msg->name() << endl;
 
   FuzzerBase* func_fuzzer = GetFuzzerBase(
       *if_spec_msg_, dll_file_name_, func_msg->name().c_str());
