@@ -99,7 +99,7 @@ void Translate(
   output_header_file_path = output_header_file_path + ".h";
 
   cout << "header: " << output_header_file_path << endl;
-  vts_fs_mkdirs(output_header_file_path.c_str(), 0777);
+  vts_fs_mkdirs(&output_header_file_path[0], 0777);
 
   ofstream header_out_file(output_header_file_path.c_str());
   if (!header_out_file.is_open()) {

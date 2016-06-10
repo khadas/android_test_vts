@@ -41,7 +41,7 @@ extern string GetCppVariableType(ArgumentSpecificationMessage arg);
 extern string GetCppInstanceType(ArgumentSpecificationMessage arg);
 
 // fs_mkdirs for VTS.
-extern int vts_fs_mkdirs(const char* file_path, mode_t mode);
+extern int vts_fs_mkdirs(char* file_path, mode_t mode);
 
 }  // namespace vts
 }  // namespace android
