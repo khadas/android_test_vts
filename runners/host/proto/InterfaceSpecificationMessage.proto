@@ -124,6 +124,8 @@ message ArgumentSpecificationMessage {
   optional bool is_output = 12 [default = false];
   // true if the argument is a constant variable.
   optional bool is_const = 13 [default = false];
+  // true if the argument is a struct with one or multiple function pointers.
+  optional bool is_callback = 14 [default = false];
 
   // the actual values.
   repeated PrimitiveDataValueMessage primitive_value = 21;
@@ -134,6 +136,9 @@ message ArgumentSpecificationMessage {
   repeated bytes primitive_name = 31;
   // the variable names of defined aggregate type attributes.
   repeated bytes aggregate_name = 32;
+
+  // the format string for the args if primitive_type is "function_pointer".
+  repeated bytes primitive_format = 33;
 }
 
 

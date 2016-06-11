@@ -24,6 +24,10 @@ from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
 from google.protobuf import text_format
 
 
+# a dict containing the IDs of the registered function pointers.
+_function_pointer_id_dict = {}
+
+
 class MirrorObject(object):
     """Actual mirror object.
 
@@ -38,6 +42,17 @@ class MirrorObject(object):
         self._client = client
         self._if_spec_msg = msg
         self._parent_path = parent_path
+
+    def GetFunctionPointerID(self, function_pointer):
+        """Returns the function pointer ID for the given one."""
+        max = 0
+        for key in _function_pointer_id_dict:
+            if _function_pointer_id_dict[key] == function_pointer:
+                return _function_pointer_id_dict[function_pointer]
+            if not max or key > max:
+                max = key
+        _function_pointer_id_dict[max + 1] = function_pointer
+        return str(max + 1)
 
     def Open(self, module_name=None):
         """Opens the target HAL component (only for conventional HAL).
@@ -158,7 +173,13 @@ class MirrorObject(object):
                             pv.int32_t = value_msg
                         else:
                             # TODO: check in advance (whether it's a message)
-                            logging.error("unknown type %s", type(value_msg))
+                            if isinstance(value_msg,
+                                          InterfaceSpecificationMessage_pb2.ArgumentSpecificationMessage):
+                              arg_msg.CopyFrom(value_msg)
+                              arg_msg.ClearField("primitive_value")
+                            else:
+                              logging.error("unknown type %s", type(value_msg))
+
                             try:
                                 for primitive_value in value_msg.primitive_value:
                                     pv = arg_msg.primitive_value.add()
@@ -166,6 +187,8 @@ class MirrorObject(object):
                                         pv.uint32_t = primitive_value.uint32_t
                                     if primitive_value.HasField("int32_t"):
                                         pv.int32_t = primitive_value.int32_t
+                                    if primitive_value.HasField("bytes"):
+                                        pv.bytes = primitive_value.bytes
                             except AttributeError as e:
                                 logging.exception(e)
                                 raise
@@ -190,24 +213,39 @@ class MirrorObject(object):
             arg_msg = self.GetCustomAggregateType(api_name)
             if not arg_msg:
                 logging.fatal("arg %s unknown", arg_msg)
-
+            logging.info("MESSAGE %s", api_name)
             for type, name, value in zip(arg_msg.primitive_type,
                                          arg_msg.primitive_name,
                                          arg_msg.primitive_value):
                 logging.debug("for %s %s %s", type, name, value)
-                # todo handle args too
                 for given_name, given_value in kwargs.iteritems():
-                    logging.debug("check %s %s", name, given_name)
+                    logging.info("check %s %s", name, given_name)
                     if given_name == name:
-                        logging.debug("match")
+                        logging.info("match type=%s", type)
                         if type == "uint32_t":
                             value.uint32_t = given_value
                         elif type == "int32_t":
                             value.int32_t = given_value
+                        elif type == "function_pointer":
+                            value.bytes = self.GetFunctionPointerID(given_value)
                         else:
                             logging.fatal("support %s", type)
                         continue
-            logging.debug("generated %s", arg_msg)
+            for type, name, value, given_value in zip(arg_msg.primitive_type,
+                                                      arg_msg.primitive_name,
+                                                      arg_msg.primitive_value,
+                                                      args):
+                logging.info("arg match type=%s", type)
+                if type == "uint32_t":
+                    value.uint32_t = given_value
+                elif type == "int32_t":
+                    value.int32_t = given_value
+                elif type == "function_pointer":
+                    value.bytes = self.GetFunctionPointerID(given_value)
+                else:
+                    logging.fatal("support %s", type)
+                continue
+            logging.info("generated %s", arg_msg)
             return arg_msg
 
         def MessageFuzzer(arg_msg):
