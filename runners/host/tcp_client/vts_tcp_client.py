@@ -20,8 +20,8 @@ import logging
 import os
 import socket
 
-from vts.runners.host.proto import AndroidSystemControlMessage_pb2
-from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
+from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
+from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
 
 from google.protobuf import text_format
 
@@ -33,6 +33,10 @@ COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      102: "LAUNCH_STUB_SERVICE",
                      201: "LIST_APIS",
                      202: "CALL_API"}
+
+
+class VtsTcpError(Exception):
+    pass
 
 
 class VtsTcpClient(object):
@@ -60,10 +64,10 @@ class VtsTcpClient(object):
             Exception when the connection fails.
         """
         try:
+            # TODO: This assumption is incorrect. Need to fix.
             if not ip:  # adb_forwarding
-                logging.info("ADB port forwarding mode - connecting to tcp:%s", port)
-                os.system("adb forward --remove tcp:%s" % port)
-                os.system("adb forward tcp:%s tcp:%s" % (port, port))
+                logging.info("ADB port forwarding mode - connecting to tcp:%s",
+                             port)
                 ip = "localhost"
                 self.connection = socket.create_connection(
                     (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
@@ -78,73 +82,84 @@ class VtsTcpClient(object):
         self.channel = self.connection.makefile(mode="brw")
 
     def Disconnect(self):
-        """Disconnects from the target device."""
+        """Disconnects from the target device.
+
+        TODO(yim): Send a msg to the target side to teardown handler session
+        and release memory before closing the socket.
+        """
         if self.connection is not None:
             self.channel = None
             self.connection.close()
             self.connection = None
 
     def ListHals(self, base_paths):
-      """RPC to LIST_HALS."""
-      self.SendCommand(AndroidSystemControlMessage_pb2.LIST_HALS,
-                       paths=base_paths)
-      resp = self.RecvResponse()
-      if (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS):
-        return resp.file_names
-      return None
+        """RPC to LIST_HALS."""
+        self.SendCommand(SysMsg_pb2.LIST_HALS, paths=base_paths)
+        resp = self.RecvResponse()
+        if (resp.response_code == SysMsg_pb2.SUCCESS):
+            return resp.file_names
+        return None
 
     def CheckStubService(self, service_name):
-      """RPC to CHECK_STUB_SERVICE."""
-      self.SendCommand(AndroidSystemControlMessage_pb2.CHECK_STUB_SERVICE,
-                       service_name=service_name)
-      resp = self.RecvResponse()
-      return (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS)
+        """RPC to CHECK_STUB_SERVICE."""
+        self.SendCommand(SysMsg_pb2.CHECK_STUB_SERVICE,
+                         service_name=service_name)
+        resp = self.RecvResponse()
+        return (resp.response_code == SysMsg_pb2.SUCCESS)
 
     def LaunchStubService(self, service_name, file_path, bits, target_class,
                           target_type, target_version):
-      """RPC to LAUNCH_STUB_SERVICE."""
-      logging.info("service_name: %s", service_name)
-      logging.info("file_path: %s", file_path)
-      logging.info("bits: %s", bits)
-      self.SendCommand(AndroidSystemControlMessage_pb2.LAUNCH_STUB_SERVICE,
-                       service_name=service_name,
-                       file_path=file_path,
-                       bits=bits,
-                       target_class=target_class,
-                       target_type=target_type,
-                       target_version=target_version)
-      resp = self.RecvResponse()
-      return (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS)
+        """RPC to LAUNCH_STUB_SERVICE."""
+        logging.info("service_name: %s", service_name)
+        logging.info("file_path: %s", file_path)
+        logging.info("bits: %s", bits)
+        self.SendCommand(SysMsg_pb2.LAUNCH_STUB_SERVICE,
+                         service_name=service_name,
+                         file_path=file_path,
+                         bits=bits,
+                         target_class=target_class,
+                         target_type=target_type,
+                         target_version=target_version)
+        resp = self.RecvResponse()
+        return (resp.response_code == SysMsg_pb2.SUCCESS)
 
     def ListApis(self):
-      """RPC to LIST_APIS."""
-      self.SendCommand(AndroidSystemControlMessage_pb2.LIST_APIS)
-      resp = self.RecvResponse()
-      if (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS):
-        return resp.spec
-      return None
+        """RPC to LIST_APIS."""
+        self.SendCommand(SysMsg_pb2.LIST_APIS)
+        resp = self.RecvResponse()
+        if (resp.response_code == SysMsg_pb2.SUCCESS):
+            return resp.spec
+        return None
 
     def CallApi(self, arg):
-      """RPC to CALL_API."""
-      self.SendCommand(AndroidSystemControlMessage_pb2.CALL_API, arg=arg)
-      resp = self.RecvResponse()
-      if (resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS):
-        result = InterfaceSpecificationMessage_pb2.FunctionSpecificationMessage()
-        if resp.result == "error":
-          raise Exception("API call error by the VTS stub.")
-        try:
-          text_format.Merge(resp.result, result)
-        except text_format.ParseError as e:
-          logging.error("Paring error\n%s\n%s", resp.result, e)
-        return result
-      logging.error("NOTICE - Likely a crash discovery!")
-      logging.error("arg: %s", arg)
-      raise Exception("RPC Error")
+        """RPC to CALL_API."""
+        self.SendCommand(SysMsg_pb2.CALL_API, arg=arg)
+        resp = self.RecvResponse()
+        resp_code = resp.response_code
+        if (resp_code == SysMsg_pb2.SUCCESS):
+            result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
+            if resp.result == "error":
+                raise VtsTcpError("API call error by the VTS stub.")
+            try:
+                text_format.Merge(resp.result, result)
+            except text_format.ParseError as e:
+                logging.error("Paring error\n%s\n%s", resp.result, e)
+            return result
+        logging.error("NOTICE - Likely a crash discovery!")
+        logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
+        raise VtsTcpError("RPC Error, response code for %s is %s" % (arg, resp_code))
 
-    def SendCommand(
-        self, command_type, paths=None, file_path=None, bits=None,
-        target_class=None, target_type=None, target_version=None,
-        module_name=None, service_name=None, arg=None):
+    def SendCommand(self,
+                    command_type,
+                    paths=None,
+                    file_path=None,
+                    bits=None,
+                    target_class=None,
+                    target_type=None,
+                    target_version=None,
+                    module_name=None,
+                    service_name=None,
+                    arg=None):
         """Sends a command.
 
         Args:
@@ -153,9 +168,9 @@ class VtsTcpClient(object):
             paths: a list of strings.
         """
         if not self.channel:
-            Connect()
+            raise VtsTcpError("channel is None, unable to send command.")
 
-        command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage()
+        command_msg = SysMsg_pb2.AndroidSystemControlCommandMessage()
         command_msg.command_type = command_type
         logging.info("sending a command (type %s)",
                      COMMAND_TYPE_NAME[command_type])
@@ -201,12 +216,11 @@ class VtsTcpClient(object):
             len = int(header.strip("\n"))
             logging.debug("resp %d bytes", len)
             data = self.channel.read(len)
-            response_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlResponseMessage(
-            )
+            response_msg = SysMsg_pb2.AndroidSystemControlResponseMessage()
             response_msg.ParseFromString(data)
             logging.debug("Response %s", "success"
-                          if response_msg.response_code ==
-                          AndroidSystemControlMessage_pb2.SUCCESS else "fail")
+                          if response_msg.response_code == SysMsg_pb2.SUCCESS
+                          else "fail")
             return response_msg
         except socket.timeout as e:
             logging.exception(e)
