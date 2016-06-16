@@ -55,15 +55,15 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   string component_name = GetComponentName(message);
 
   string fuzzer_extended_class_name;
-  if (message.component_class() == HAL
+  if (message.component_class() == HAL_CONVENTIONAL
       || message.component_class() == HAL_SUBMODULE
-      || message.component_class() == LEGACY_HAL) {
+      || message.component_class() == HAL_LEGACY) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
   GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
   cpp_ss << endl << endl;
-  if (message.component_class() == HAL) {
+  if (message.component_class() == HAL_CONVENTIONAL) {
     GenerateCppBodyCallbackFunction(cpp_ss, message, fuzzer_extended_class_name);
   }
 
@@ -131,9 +131,9 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << " public:" << endl;
   h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
 
-  if (message.component_class() == HAL) h_ss << "HAL";
+  if (message.component_class() == HAL_CONVENTIONAL) h_ss << "HAL_CONVENTIONAL";
   if (message.component_class() == HAL_SUBMODULE) h_ss << "HAL_SUBMODULE";
-  if (message.component_class() == LEGACY_HAL) h_ss << "LEGACY_HAL";
+  if (message.component_class() == HAL_LEGACY) h_ss << "HAL_LEGACY";
 
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;

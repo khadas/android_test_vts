@@ -21,7 +21,7 @@ package android.vts;
 enum ComponentClass {
   UNKNOWN_CLASS = 0;
   // For a HAL shared library.
-  HAL = 1;
+  HAL_CONVENTIONAL = 1;
   // For a shared library which is not a HAL (e.g., standard library).
   SHAREDLIB = 2;
   // For a HAL which uses HIDL (HAL Interface Definition Language).
@@ -29,7 +29,7 @@ enum ComponentClass {
   // For a submodule of a shared library HAL .
   HAL_SUBMODULE = 4;
   // For the legacy HAL.
-  LEGACY_HAL = 5;
+  HAL_LEGACY = 5;
 }
 
 

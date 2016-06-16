@@ -86,7 +86,7 @@ public class VtsFuzzTestTest extends TestCase {
 
         replayMocks();
 
-        mTest.setTargetClass("hal");
+        mTest.setTargetClass("hal_conventional");
         mTest.setTargetType("gps");
         mTest.setTargetVersion(1.0f);
         mTest.setTargetComponentPath("libunittest_foo.so");

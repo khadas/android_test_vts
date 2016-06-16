@@ -24,11 +24,11 @@ from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpe
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import mirror_object
 
-COMPONENT_CLASS_DICT = {"hal": 1,
+COMPONENT_CLASS_DICT = {"hal_conventional": 1,
                         "sharedlib": 2,
                         "hal_hidl": 3,
                         "hal_submodule": 4,
-                        "legacy_hal": 5}
+                        "hal_legacy": 5}
 
 COMPONENT_TYPE_DICT = {"audio": 1,
                        "camera": 2,
@@ -81,7 +81,7 @@ class HalMirror(object):
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
         """
-        self._CreateMirrorObject("hal",
+        self._CreateMirrorObject("hal_conventional",
                                  target_type,
                                  target_version,
                                  target_basepaths,
@@ -109,7 +109,7 @@ class HalMirror(object):
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
         """
-        self._CreateMirrorObject("legacy_hal",
+        self._CreateMirrorObject("hal_legacy",
                                  target_type,
                                  target_version,
                                  target_basepaths,
