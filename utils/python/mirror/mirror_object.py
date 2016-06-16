@@ -20,21 +20,25 @@ import logging
 import random
 
 from vts.utils.python.fuzzer import FuzzerUtils
-from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
+from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from google.protobuf import text_format
-
 
 # a dict containing the IDs of the registered function pointers.
 _function_pointer_id_dict = {}
 
+class MirrorObjectError(Exception):
+    pass
 
 class MirrorObject(object):
-    """Actual mirror object.
+    """The class that mirrors objects on the native side.
 
-    Args:
+    This class exists on the host and can be used to communicate to a
+    particular HAL in the HAL agent on the target side.
+
+    Attributes:
         _client: the TCP client instance.
         _if_spec_msg: the interface specification message of a host object to
-            mirror.
+                      mirror.
         _parent_path: the name of a sub struct this object mirrors.
     """
 
@@ -45,35 +49,40 @@ class MirrorObject(object):
 
     def GetFunctionPointerID(self, function_pointer):
         """Returns the function pointer ID for the given one."""
-        max = 0
+        max_num = 0
         for key in _function_pointer_id_dict:
             if _function_pointer_id_dict[key] == function_pointer:
                 return _function_pointer_id_dict[function_pointer]
-            if not max or key > max:
-                max = key
-        _function_pointer_id_dict[max + 1] = function_pointer
-        return str(max + 1)
+            if not max_num or key > max_num:
+                max_num = key
+        _function_pointer_id_dict[max_num + 1] = function_pointer
+        return str(max_num + 1)
 
-    def Open(self, module_name=None):
-        """Opens the target HAL component (only for conventional HAL).
+    def OpenConventionalHal(self, module_name=None):
+        """Opens the target conventional HAL component.
+
+        This is only needed for conventional HAL.
 
         Args:
             module_name: string, the name of a module to load.
         """
-        func_msg = InterfaceSpecificationMessage_pb2.FunctionSpecificationMessage()
+        func_msg = IfaceSpecMsg.FunctionSpecificationMessage()
         func_msg.name = "#Open"
-        logging.info("remote call %s", func_msg.name)
+        logging.debug("remote call %s", func_msg.name)
         if module_name:
             arg = func_msg.arg.add()
             arg.primitive_type.append("string")
             value = arg.primitive_value.add()
             value.bytes = module_name
             func_msg.return_type.primitive_type.append("int32_t")
-        logging.info("final msg %s", func_msg)
+        logging.debug("final msg %s", func_msg)
 
         result = self._client.CallApi(text_format.MessageToString(func_msg))
-        logging.info(result)
+        logging.debug(result)
         return result
+
+    def CleanUp(self):
+        self._client.Disconnect()
 
     def GetApi(self, api_name):
         """Returns the Function Specification Message.
@@ -116,8 +125,9 @@ class MirrorObject(object):
             ArgumentSpecificationMessage if found, None otherwise
         """
         try:
-            for name, definition in zip(self._if_spec_msg.aggregate_type_name,
-                                        self._if_spec_msg.aggregate_type_definition):
+            for name, definition in zip(
+                    self._if_spec_msg.aggregate_type_name,
+                    self._if_spec_msg.aggregate_type_definition):
                 if name != "const" and name == type_name:
                     return copy.copy(definition)
             return None
@@ -136,8 +146,9 @@ class MirrorObject(object):
             ArgumentSpecificationMessage if found, None otherwise
         """
         try:
-            for name, definition in zip(self._if_spec_msg.aggregate_type_name,
-                                        self._if_spec_msg.aggregate_type_definition):
+            for name, definition in zip(
+                    self._if_spec_msg.aggregate_type_name,
+                    self._if_spec_msg.aggregate_type_definition):
                 if name == "const":
                     return copy.copy(definition)
             return None
@@ -146,6 +157,7 @@ class MirrorObject(object):
             # SpecificationMessage.
             return None
 
+    # TODO: Guard against calls to this function after self.CleanUp is called.
     def __getattr__(self, api_name, *args, **kwargs):
         """Calls a target component's API.
 
@@ -158,9 +170,9 @@ class MirrorObject(object):
             """Dynamically calls a remote API."""
             func_msg = self.GetApi(api_name)
             if not func_msg:
-                logging.fatal("api %s unknown", func_msg)
+                raise MirrorObjectError("api %s unknown", func_msg)
 
-            logging.info("remote call %s.%s", self._parent_path, api_name)
+            logging.debug("remote call %s.%s", self._parent_path, api_name)
             logging.debug("remote call %s%s", api_name, args)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
@@ -173,12 +185,14 @@ class MirrorObject(object):
                             pv.int32_t = value_msg
                         else:
                             # TODO: check in advance (whether it's a message)
-                            if isinstance(value_msg,
-                                          InterfaceSpecificationMessage_pb2.ArgumentSpecificationMessage):
-                              arg_msg.CopyFrom(value_msg)
-                              arg_msg.ClearField("primitive_value")
+                            if isinstance(
+                                    value_msg,
+                                    IfaceSpecMsg.ArgumentSpecificationMessage):
+                                arg_msg.CopyFrom(value_msg)
+                                arg_msg.ClearField("primitive_value")
                             else:
-                              logging.error("unknown type %s", type(value_msg))
+                                logging.error("unknown type %s",
+                                              type(value_msg))
 
                             try:
                                 for primitive_value in value_msg.primitive_value:
@@ -192,7 +206,7 @@ class MirrorObject(object):
                             except AttributeError as e:
                                 logging.exception(e)
                                 raise
-                logging.info("final msg %s", func_msg)
+                logging.debug("final msg %s", func_msg)
             else:
                 # TODO: use kwargs
                 for arg in func_msg.arg:
@@ -203,8 +217,9 @@ class MirrorObject(object):
                 logging.debug(func_msg)
 
             if self._parent_path:
-              func_msg.parent_path = self._parent_path
-            result = self._client.CallApi(text_format.MessageToString(func_msg))
+                func_msg.parent_path = self._parent_path
+            result = self._client.CallApi(text_format.MessageToString(
+                func_msg))
             logging.debug(result)
             return result
 
@@ -212,56 +227,57 @@ class MirrorObject(object):
             """Dynamically generates a custom message instance."""
             arg_msg = self.GetCustomAggregateType(api_name)
             if not arg_msg:
-                logging.fatal("arg %s unknown", arg_msg)
-            logging.info("MESSAGE %s", api_name)
-            for type, name, value in zip(arg_msg.primitive_type,
-                                         arg_msg.primitive_name,
-                                         arg_msg.primitive_value):
-                logging.debug("for %s %s %s", type, name, value)
+                raise MirrorObjectError("arg %s unknown" % arg_msg)
+            logging.debug("MESSAGE %s", api_name)
+            for p_type, name, value in zip(arg_msg.primitive_type,
+                                           arg_msg.primitive_name,
+                                           arg_msg.primitive_value):
+                logging.debug("for %s %s %s", p_type, name, value)
                 for given_name, given_value in kwargs.iteritems():
-                    logging.info("check %s %s", name, given_name)
+                    logging.debug("check %s %s", name, given_name)
                     if given_name == name:
-                        logging.info("match type=%s", type)
-                        if type == "uint32_t":
+                        logging.debug("match p_type=%s", p_type)
+                        if p_type == "uint32_t":
                             value.uint32_t = given_value
-                        elif type == "int32_t":
+                        elif p_type == "int32_t":
                             value.int32_t = given_value
-                        elif type == "function_pointer":
-                            value.bytes = self.GetFunctionPointerID(given_value)
+                        elif p_type == "function_pointer":
+                            value.bytes = self.GetFunctionPointerID(
+                                given_value)
                         else:
-                            logging.fatal("support %s", type)
+                            raise MirrorObjectError("support %s" % p_type)
                         continue
-            for type, name, value, given_value in zip(arg_msg.primitive_type,
-                                                      arg_msg.primitive_name,
-                                                      arg_msg.primitive_value,
-                                                      args):
-                logging.info("arg match type=%s", type)
-                if type == "uint32_t":
+            for p_type, name, value, given_value in zip(arg_msg.primitive_type,
+                                                        arg_msg.primitive_name,
+                                                        arg_msg.primitive_value,
+                                                        args):
+                logging.debug("arg match type=%s", p_type)
+                if p_type == "uint32_t":
                     value.uint32_t = given_value
-                elif type == "int32_t":
+                elif p_type == "int32_t":
                     value.int32_t = given_value
-                elif type == "function_pointer":
+                elif p_type == "function_pointer":
                     value.bytes = self.GetFunctionPointerID(given_value)
                 else:
-                    logging.fatal("support %s", type)
+                    raise MirrorObjectError("support %s" % p_type)
                 continue
-            logging.info("generated %s", arg_msg)
+            logging.debug("generated %s", arg_msg)
             return arg_msg
 
         def MessageFuzzer(arg_msg):
             """Fuzz a custom message instance."""
             if not self.GetCustomAggregateType(api_name):
-                logging.fatal("fuzz arg %s unknown", arg_msg)
+                raise MirrorObjectError("fuzz arg %s unknown" % arg_msg)
 
             index = random.randint(0, len(arg_msg.primitive_type))
             count = 0
-            for type, name, value in zip(arg_msg.primitive_type,
-                                         arg_msg.primitive_name,
-                                         arg_msg.primitive_value):
+            for p_type, name, value in zip(arg_msg.primitive_type,
+                                           arg_msg.primitive_name,
+                                           arg_msg.primitive_value):
                 if count == index:
-                    if type == "uint32_t":
+                    if p_type == "uint32_t":
                         value.uint32_t ^= FuzzerUtils.mask_uint32_t()
-                    elif type == "int32_t":
+                    elif p_type == "int32_t":
                         mask = FuzzerUtils.mask_int32_t()
                         if mask == (1 << 31):
                             value.int32_t *= -1
@@ -269,37 +285,29 @@ class MirrorObject(object):
                         else:
                             value.int32_t ^= mask
                     else:
-                        logging.fatal("support %s", type)
+                        raise MirrorObjectError("support %s" % p_type)
                     break
                 count += 1
-            logging.info("fuzzed %s", arg_msg)
+            logging.debug("fuzzed %s", arg_msg)
             return arg_msg
 
         def ConstGenerator():
             """Dynamically generates a const variable's value."""
             arg_msg = self.GetConstType(api_name)
             if not arg_msg:
-                logging.fatal("const %s unknown", arg_msg)
+                raise MirrorObjectError("const %s unknown" % arg_msg)
             logging.debug("check %s", api_name)
-            for type, name, value in zip(arg_msg.primitive_type,
-                                         arg_msg.primitive_name,
-                                         arg_msg.primitive_value):
-                logging.debug("for %s %s %s", type, name, value)
+            for p_type, name, value in zip(arg_msg.primitive_type,
+                                           arg_msg.primitive_name,
+                                           arg_msg.primitive_value):
+                logging.debug("for %s %s %s", p_type, name, value)
                 if api_name == name:
-                    logging.debug("match")
-                    if type == "uint32_t":
-                        logging.info("return %s", value)
-                        return value.uint32_t
-                    elif type == "int32_t":
-                        logging.info("return %s", value)
-                        return value.int32_t
-                    elif type == "bytes":
-                        logging.info("return %s", value)
-                        return value.bytes
-                    else:
-                        logging.fatal("support %s", type)
-                    continue
-            logging.fatal("const %s not found", arg_msg)
+                    logging.debug("Found match for API name %s.", name)
+                    ret_v = getattr(value, p_type, None)
+                    if ret_v is None:
+                        raise MirrorObjectError("No value found for type %s in %s." % (p_type, value))
+                    return ret_v
+            raise MirrorObjectError("const %s not found" % api_name)
 
         # handle APIs.
         func_msg = self.GetApi(api_name)
@@ -314,14 +322,13 @@ class MirrorObject(object):
                 parent_name = "%s.%s" % (self._parent_path, api_name)
             else:
                 parent_name = api_name
-            return MirrorObjectForSubStruct(self._client, struct_msg,
-                                            parent_name)
+            return MirrorObject(self._client, struct_msg, parent_name)
 
         # handle attributes.
         fuzz = False
         if api_name.endswith("_fuzz"):
-          fuzz = True
-          api_name = api_name[:-5]
+            fuzz = True
+            api_name = api_name[:-5]
         arg_msg = self.GetCustomAggregateType(api_name)
         if arg_msg:
             logging.debug("arg %s", arg_msg)
@@ -332,16 +339,6 @@ class MirrorObject(object):
 
         arg_msg = self.GetConstType(api_name)
         if arg_msg:
-            logging.info("const %s *\n%s", api_name, arg_msg)
+            logging.debug("const %s *\n%s", api_name, arg_msg)
             return ConstGenerator()
-        logging.fatal("unknown api name %s", api_name)
-
-
-class MirrorObjectForSubStruct(MirrorObject):
-    """Actual mirror object for sub struct.
-
-    Args:
-        _client: see MirrorObject
-        _if_spec_msg: see MirrorObject
-        _name: see MirrorObject
-    """
+        raise MirrorObjectError("unknown api name %s" % api_name)

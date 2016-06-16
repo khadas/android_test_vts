@@ -150,34 +150,6 @@ class AdbProxy():
         """
         self.forward("tcp:{} tcp:{}".format(host_port, device_port))
 
-    def start_sl4a(self, port=8080):
-        """Starts sl4a server on the android device.
-
-        Args:
-            port: Port number to use on the android device.
-        """
-        MAX_SL4A_WAIT_TIME = 10
-        print(self.shell(SL4A_LAUNCH_CMD.format(port)))
-
-        for _ in range(MAX_SL4A_WAIT_TIME):
-            time.sleep(1)
-            if self.is_sl4a_running():
-                return
-        raise AdbError(
-            "com.googlecode.android_scripting process never started.")
-
-    def is_sl4a_running(self):
-        """Checks if the sl4a app is running on an android device.
-
-        Returns:
-            True if the sl4a app is running, False otherwise.
-        """
-        #Grep for process with a preceding S which means it is truly started.
-        out = self.shell('ps | grep "S com.googlecode.android_scripting"')
-        if len(out) == 0:
-            return False
-        return True
-
     def __getattr__(self, name):
         def adb_call(*args):
             clean_name = name.replace('_', '-')
