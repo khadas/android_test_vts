@@ -41,7 +41,7 @@ namespace vts {
 string ComponentClassToString(int component_class) {
   switch(component_class) {
     case UNKNOWN_CLASS: return "unknown_class";
-    case HAL: return "hal";
+    case HAL_CONVENTIONAL: return "hal_conventional";
     case SHAREDLIB: return "sharedlib";
     case HAL_HIDL: return "hal_hidl";
     case HAL_SUBMODULE: return "hal_submodule";
