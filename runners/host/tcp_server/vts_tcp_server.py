@@ -58,7 +58,7 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
         self.request.sendall(response)  # send the response back to client
 
 
-class ThreadedTCPServer(object):
+class VtsTcpServer(object):
     """This class creates TCPServer in separate thread.
 
     Attributes:
@@ -90,7 +90,6 @@ class ThreadedTCPServer(object):
             None or callback_func is None; else returns True after inserting
             the key-func_id and value-callback_func.
         """
-
         if func_id is None or func_id in _functions or callback_func is None:
             return False
         else:
@@ -108,7 +107,6 @@ class ThreadedTCPServer(object):
             Returns false if func_id is not present in the dictionary -
                 _functions, else return True after removing it from dict.
         """
-
         if func_id is None or func_id not in _functions:
             return False
         else:
@@ -123,6 +121,9 @@ class ThreadedTCPServer(object):
                   is zero, in which case a free port will be chosen
                   automatically.
 
+        Returns:
+            IP Address, port number
+
         Raises:
             TcpServerCreationError: Error occurred while starting server.
         """
@@ -134,21 +135,21 @@ class ThreadedTCPServer(object):
 
             # Start a thread with the server -- that thread will then start one
             # more thread for each request
-            server_thread = threading.Thread(target = self._server.serve_forever)
+            server_thread = threading.Thread(target=self._server.serve_forever)
 
             # Exit the server thread when the main thread terminates
             server_thread.daemon = True
             server_thread.start()
-            logging.info('Server loop running in thread: %s', server_thread.name)
+            logging.info('TcpServer %s started (%s:%s)',
+                         server_thread.name, self._IP_address, self._port_used)
 
+            return self._IP_address, self._port_used
         except (RuntimeError, IOError, socket_error) as e:
             logging.exception(e)
             raise TcpServerCreationError('TcpServerCreationError occurred.')
 
     def Stop(self):
         """This function calls stop server to stop the server instance."""
-
-        # stop the server instance
         self._server.shutdown
         self._server.server_close()
 

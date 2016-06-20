@@ -22,6 +22,8 @@ enum CommandType {
   UNKNOWN_COMMAND_TYPE = 0;
   // To get a list of available HAL modules.
   LIST_HALS = 1;
+  // To set the host information (e.g., callback server port).
+  SET_HOST_INFO = 2;
 
   // To check whether fuzzer's binder service is available.
   CHECK_STUB_SERVICE = 101;
@@ -52,6 +54,9 @@ message AndroidSystemControlCommandMessage {
 
   // for LIST_HALS
   repeated bytes paths = 1001;
+
+  // for SET_HOST_INFO
+  optional int32 callback_port = 1101;
 
   // for CHECK_STUB_SERVICE
   // the binder service name
@@ -90,13 +95,13 @@ message AndroidSystemControlResponseMessage {
   // The reason.
   optional bytes reason = 1001;
 
-  // for the found componet files.
+  // for the found component files.
   repeated bytes file_names = 1002;
 
-  // for the found api spec.
+  // for the found API specification.
   optional bytes spec = 1003;
 
-  // for the api call result including result value, profiling data, and
+  // for the API call result including result value, profiling data, and
   // coverage measurement data.
   optional bytes result = 1004;
 }

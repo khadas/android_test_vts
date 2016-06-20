@@ -26,8 +26,11 @@ from google.protobuf import text_format
 # a dict containing the IDs of the registered function pointers.
 _function_pointer_id_dict = {}
 
+
 class MirrorObjectError(Exception):
+    """Raised when there is a general error in manipulating a mirror object."""
     pass
+
 
 class MirrorObject(object):
     """The class that mirrors objects on the native side.
@@ -39,12 +42,14 @@ class MirrorObject(object):
         _client: the TCP client instance.
         _if_spec_msg: the interface specification message of a host object to
                       mirror.
+        _callback_server: the instance of a callback server.
         _parent_path: the name of a sub struct this object mirrors.
     """
 
-    def __init__(self, client, msg, parent_path=None):
+    def __init__(self, client, msg, callback_server, parent_path=None):
         self._client = client
         self._if_spec_msg = msg
+        self._callback_server = callback_server
         self._parent_path = parent_path
 
     def GetFunctionPointerID(self, function_pointer):
@@ -56,7 +61,9 @@ class MirrorObject(object):
             if not max_num or key > max_num:
                 max_num = key
         _function_pointer_id_dict[max_num + 1] = function_pointer
-        return str(max_num + 1)
+        id = str(max_num + 1)
+        self._callback_server.RegisterCallback(id, function_pointer)
+        return id
 
     def OpenConventionalHal(self, module_name=None):
         """Opens the target conventional HAL component.
@@ -322,7 +329,9 @@ class MirrorObject(object):
                 parent_name = "%s.%s" % (self._parent_path, api_name)
             else:
                 parent_name = api_name
-            return MirrorObject(self._client, struct_msg, parent_name)
+            return MirrorObject(self._client, struct_msg,
+                                self._callback_server,
+                                parent_path=parent_name)
 
         # handle attributes.
         fuzz = False

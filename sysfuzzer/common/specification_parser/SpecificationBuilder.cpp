@@ -232,9 +232,10 @@ const string& SpecificationBuilder::CallFunction(
 
   void* result;
   func_fuzzer->FunctionCallBegin();
-  cout << __func__ << " Call Function " << func_msg->name() << endl;
+  cout << __func__ << " Call Function " << func_msg->name() << " parent_path("
+      << func_msg->parent_path() << ")" << endl;
   if (!func_fuzzer->Fuzz(func_msg, &result, agent_port_)) {
-    cout << __func__ << " function not found - todo handle more explicitly" << endl;
+    cerr << __func__ << " function not found - todo handle more explicitly" << endl;
     return *(new string("error"));
   }
   cout << __func__ << ": called" << endl;

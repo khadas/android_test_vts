@@ -29,6 +29,7 @@ TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
 _SOCKET_CONN_TIMEOUT_SECS = 60
 COMMAND_TYPE_NAME = {1: "LIST_HALS",
+                     2: "SET_HOST_INFO",
                      101: "CHECK_STUB_SERVICE",
                      102: "LAUNCH_STUB_SERVICE",
                      201: "LIST_APIS",
@@ -53,15 +54,22 @@ class VtsTcpClient(object):
         self.channel = None
         self._mode = mode
 
-    def Connect(self, ip=TARGET_IP, port=TARGET_PORT):
+    def Connect(self, ip=TARGET_IP, port=TARGET_PORT,
+                callback_port=None):
         """Connects to a target device.
 
         Args:
-            ip: string, the IP adress of a target device.
-            port: integer, the TCP port.
+            ip: string, the IP address of a target device.
+            port: int, the TCP port which can be used to connect to
+                  a target device.
+            callback_port: int, the TCP port number of a host-side callback
+                           server.
+
+        Returns:
+            True if success, False otherwise
 
         Raises:
-            Exception when the connection fails.
+            socket.error when the connection fails.
         """
         try:
             # TODO: This assumption is incorrect. Need to fix.
@@ -80,6 +88,14 @@ class VtsTcpClient(object):
             # TODO: use a custom exception
             raise
         self.channel = self.connection.makefile(mode="brw")
+
+        if callback_port is not None:
+            self.SendCommand(SysMsg_pb2.SET_HOST_INFO,
+                             callback_port=callback_port)
+            resp = self.RecvResponse()
+            if (resp.response_code != SysMsg_pb2.SUCCESS):
+                return False
+        return True
 
     def Disconnect(self):
         """Disconnects from the target device.
@@ -159,13 +175,14 @@ class VtsTcpClient(object):
                     target_version=None,
                     module_name=None,
                     service_name=None,
+                    callback_port=None,
                     arg=None):
         """Sends a command.
 
         Args:
             command_type: integer, the command type.
-            target_name: string, the target name.
-            paths: a list of strings.
+            each of the other args are to fill in a field in
+            AndroidSystemControlCommandMessage.
         """
         if not self.channel:
             raise VtsTcpError("channel is None, unable to send command.")
@@ -174,6 +191,8 @@ class VtsTcpClient(object):
         command_msg.command_type = command_type
         logging.info("sending a command (type %s)",
                      COMMAND_TYPE_NAME[command_type])
+        if command_type == 202:
+            logging.info("target API: %s", arg)
 
         if target_class is not None:
             command_msg.target_class = target_class
@@ -199,6 +218,9 @@ class VtsTcpClient(object):
         if bits is not None:
             command_msg.bits = bits
 
+        if callback_port is not None:
+            command_msg.callback_port = callback_port
+
         if arg is not None:
             command_msg.arg = arg
 
@@ -214,7 +236,7 @@ class VtsTcpClient(object):
         try:
             header = self.channel.readline()
             len = int(header.strip("\n"))
-            logging.debug("resp %d bytes", len)
+            logging.info("resp %d bytes", len)
             data = self.channel.read(len)
             response_msg = SysMsg_pb2.AndroidSystemControlResponseMessage()
             response_msg.ParseFromString(data)

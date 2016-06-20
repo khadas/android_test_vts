@@ -32,11 +32,11 @@ class SampleCameraTest(base_test.BaseTestClass):
                                          target_basepaths=["/data/local/tmp/32/hal"],
                                          bits=32)
 
-    def testCameraOpenFirst(self):
+    def TestCameraOpenFirst(self):
         """A simple testcase which just calls an open function."""
         self.dut.hal.camera.common.methods.open()  # note args are skipped
 
-    def testCameraInit(self):
+    def TestCameraInit(self):
         """A simple testcase which just calls an init function."""
         self.dut.hal.camera.init()  # expect an exception? (can be undefined)
 
@@ -56,6 +56,9 @@ class SampleCameraTest(base_test.BaseTestClass):
         def torch_mode_status_change():
             logging.info("torch_mode_status_change")
 
+        my_callback = self.dut.hal.camera.camera_module_callbacks_t(
+            camera_device_status_change, torch_mode_status_change)
+        self.dut.hal.camera.set_callbacks(my_callback)
         self.dut.hal.camera.common.methods.open()  # note args are skipped
 
 
