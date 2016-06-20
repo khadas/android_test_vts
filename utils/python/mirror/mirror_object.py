@@ -312,7 +312,8 @@ class MirrorObject(object):
                     logging.debug("Found match for API name %s.", name)
                     ret_v = getattr(value, p_type, None)
                     if ret_v is None:
-                        raise MirrorObjectError("No value found for type %s in %s." % (p_type, value))
+                        raise MirrorObjectError(
+                            "No value found for type %s in %s." % (p_type, value))
                     return ret_v
             raise MirrorObjectError("const %s not found" % api_name)
 

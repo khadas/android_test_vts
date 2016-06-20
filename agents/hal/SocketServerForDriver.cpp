@@ -15,6 +15,7 @@
  */
 
 #include <errno.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -24,11 +25,86 @@
 #include <netinet/in.h>
 
 #include <iostream>
+#include <sstream>
+
+#include "test/vts/runners/host/proto/AndroidSystemControlMessage.pb.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
+
+const static int kCallbackServerPort = 5010;
+
+
+void RpcCallToRunner(char* id, int runner_port) {
+  cout << __func__ << ":" << __LINE__ << " " << id << endl;
+  struct sockaddr_in serv_addr;
+  struct hostent* server;
+
+  for (int index = 0; index < strlen(id); index++) {
+    if (id[index] == '\n' || id[index] == '\r') {
+      id[index] = '\0';
+      break;
+    }
+  }
+
+  int sockfd;
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    cerr << __func__ << " ERROR opening socket" << endl;
+    exit(-1);
+    return;
+  }
+  server = gethostbyname("127.0.0.1");
+  if (server == NULL) {
+    cerr << __func__ << " ERROR can't resolve the host name, localhost" << endl;
+    exit(-1);
+    return;
+  }
+  bzero((char*) &serv_addr, sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;
+  bcopy((char*) server->h_addr, (char*) &serv_addr.sin_addr.s_addr,
+        server->h_length);
+  serv_addr.sin_port = htons(runner_port);
+
+  if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
+    cerr << __func__ << " ERROR connecting" << endl;
+    exit(-1);
+    return;
+  }
+
+  cout << "sending " << id << endl;
+  AndroidSystemCallbackRequestMessage* callback_msg =
+      new AndroidSystemCallbackRequestMessage();
+  callback_msg->set_id(id);
+
+  string callback_msg_str;
+  if (!callback_msg->SerializeToString(&callback_msg_str)) {
+    cerr << "can't serialize the callback request message to a string." << endl;
+    return;
+  }
+
+  std::stringstream callback_header;
+  callback_header << callback_msg_str.length() << "\n";
+  int n = write(sockfd, callback_header.str().c_str(),
+                callback_header.str().length());
+  if (n < 0) {
+    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
+    exit(-1);
+    return;
+  }
+
+  n = write(sockfd, callback_msg_str.c_str(), callback_msg_str.length());
+  if (n < 0) {
+    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
+    exit(-1);
+    return;
+  }
+  delete callback_msg;
+  close(sockfd);
+  return;
+}
 
 
 void handler(int sock, int runner_port) {
@@ -42,7 +118,7 @@ void handler(int sock, int runner_port) {
     return;
   }
   cout << "Here is the message: " << buffer << endl;
-  // TODO: forward the call to the runner's server TCP port.
+  RpcCallToRunner(buffer, kCallbackServerPort);
 }
 
 

@@ -142,7 +142,7 @@ class AdbProxy():
         return self._exec_cmd(' '.join((self.adb_str, name, arg_str)))
 
     def tcp_forward(self, host_port, device_port):
-        """Starts tcp forwarding.
+        """Starts TCP forwarding.
 
         Args:
             host_port: Port number to use on the computer.
@@ -150,7 +150,17 @@ class AdbProxy():
         """
         self.forward("tcp:{} tcp:{}".format(host_port, device_port))
 
+    def reverse_tcp_forward(self, device_port, host_port):
+        """Starts reverse TCP forwarding.
+
+        Args:
+            device_port: Port number to use on the android device.
+            host_port: Port number to use on the computer.
+        """
+        self.reverse("tcp:{} tcp:{}".format(device_port, host_port))
+
     def __getattr__(self, name):
+
         def adb_call(*args):
             clean_name = name.replace('_', '-')
             arg_str = ' '.join(str(elem) for elem in args)

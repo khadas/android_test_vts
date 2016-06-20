@@ -19,6 +19,7 @@ function vts_multidevice_create_image {
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/bin/fuzzer32 test/vts/images/${DEVICE}/32/fuzzer32 -f
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/bin/fuzzer64 test/vts/images/${DEVICE}/64/fuzzer64 -f
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/bin/vts_hal_agent test/vts/images/${DEVICE}/64/vts_hal_agent -f
+
   # .so
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libvts_common.so test/vts/images/${DEVICE}/32/libvts_common.so -f
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libvts_common.so test/vts/images/${DEVICE}/64/libvts_common.so -f

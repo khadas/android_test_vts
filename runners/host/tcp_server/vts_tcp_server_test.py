@@ -15,17 +15,19 @@
 # limitations under the License.
 
 import socket
-import vts_tcp_server
 import unittest
 import logging
 import errno
 from socket import error as socket_error
+
 from vts.runners.host.errors import TcpServerConnectionError
 from vts.runners.host.errors import ConnectionRefusedError
 from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
+from vts.runners.host.tcp_server import vts_tcp_server
 
 HOST, PORT = "localhost", 0
-ERROR_PORT = 380 # port at which we test the error case.
+ERROR_PORT = 380  # port at which we test the error case.
+
 
 class TestMethods(unittest.TestCase):
     """This class defines unit test methods.
@@ -36,18 +38,17 @@ class TestMethods(unittest.TestCase):
 
     Attributes:
         _vts_tcp_server: an instance of VtsTcpServer that is used to
-                            start and stop the TCP server.
-        counter: This is used to keep track of number of calls made to the
-            callback function.
+                         start and stop the TCP server.
+        _counter: This is used to keep track of number of calls made to the
+                  callback function.
     """
     _vts_tcp_server = None
-    counter = 0
+    _counter = 0
 
     def setUp(self):
         """This function initiates starting the server in VtsTcpServer."""
-
         self._vts_tcp_server = vts_tcp_server.VtsTcpServer()
-        self._vts_tcp_server.Start()  # To start the server
+        self._vts_tcp_server.Start()
 
     def tearDown(self):
         """To initiate shutdown of the server.
@@ -75,17 +76,14 @@ class TestMethods(unittest.TestCase):
         try:
             # Connect to server; this should result in Connection refused error
             sock.connect((host, ERROR_PORT))
-
-        # We are comparing the error number of the error we expect and
-        # the error that we get.
-        # Test fails if ConnectionRefusedError is not raised at this step.
         except socket_error as e:
+            # We are comparing the error number of the error we expect and
+            # the error that we get.
+            # Test fails if ConnectionRefusedError is not raised at this step.
             if e.errno == errno.ECONNREFUSED:
-                logging.error(e)
                 raise ConnectionRefusedError  # Test is a success here
             else:
                 raise e  # Test fails, since ConnectionRefusedError was expected
-
         finally:
             sock.close()
 
@@ -104,7 +102,6 @@ class TestMethods(unittest.TestCase):
         Raises:
             TcpServerConnectionError: Exception occurred while stopping server.
         """
-
         # This object is sent to the TCP host
         request_message = SysMsg_pb2.AndroidSystemCallbackRequestMessage()
         request_message.id = func_id
@@ -120,38 +117,40 @@ class TestMethods(unittest.TestCase):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         host = self._vts_tcp_server.GetIPAddress()
         port = self._vts_tcp_server.GetPortUsed()
-        logging.info('Sending Request to host: %s ,using port: %s ', host, port)
+        logging.info('Sending Request to host %s using port %s', host, port)
 
         try:
             # Connect to server and send request_message
             sock.connect((host, port))
-            message = request_message.SerializeToString()
 
+            message = request_message.SerializeToString()
             logging.info("sending a AndroidSystemCallbackRequestMessage()")
-            sock.sendall(message)  # Send the message
+            sock.sendall(str(len(message)) + "\n" + message)
             logging.info('Sent : %s', request_message)
 
             # Receive request_message from the server and shut down
             received_message = sock.recv(1024)
             response_message.ParseFromString(received_message)
             logging.info('Received : %s', received_message)
-
         except socket_error as e:
             logging.error(e)
             raise TcpServerConnectionError('Exception occurred.')
-
         finally:
             sock.close()
 
         return response_message
 
     def testDoErrorCase(self):
-        """ Unit test for error cases."""
+        """Unit test for error cases."""
         with self.assertRaises(ConnectionRefusedError):
             self.DoErrorCase()
 
+    def testCallback(self):
+        """Tests two callback use cases."""
+        self.TestNormalCase()
+        self.TestDoRegisterCallback()
 
-    def testNormalCase(self):
+    def TestNormalCase(self):
         """Tests the normal request to TCPServer.
 
         This function sends the request to the Tcp server where the request
@@ -161,47 +160,42 @@ class TestMethods(unittest.TestCase):
         callback_func() is called and the value of the global counter is
         increased by one.
         """
-        self.counter
         func_id = "1"  # to maintain the key for function pointer
 
         def callback_func():
-            self.counter
-            self.counter += 1
+            self._counter += 1
 
         # Function should be registered with RegisterCallback
         self.assertEqual(self._vts_tcp_server.
                          RegisterCallback(func_id, callback_func), True)
 
         # Capture the previous value of global counter
-        prev_value = self.counter
+        prev_value = self._counter
 
         # Connect to server
         response_message = self.ConnectToServer(func_id)
 
         # Confirm whether the callback_func() was called thereby increasing
         # value of global counter by 1
-        self.assertEqual(self.counter, prev_value + 1)
+        self.assertEqual(self._counter, prev_value + 1)
 
         # Also confirm if query resulted in a success
         self.assertEqual(response_message.response_code, SysMsg_pb2.SUCCESS)
 
-    def testDoRegisterCallback(self):
+    def TestDoRegisterCallback(self):
         """Checks the register callback functionality of the Server.
 
         This function checks whether the value of global counter remains same
         if function is not registered. It also checks whether it's incremented
         by 1 when the function is registered.
         """
-
-        self.counter
         func_id = "11"  # to maintain the key for function pointer
 
         def callback_func():
-            self.counter
-            self.counter += 1
+            self._counter += 1
 
         # Capture the previous value of global counter
-        prev_value = self.counter
+        prev_value = self._counter
 
         # Function should be registered with RegisterCallback
         self.assertEqual(self._vts_tcp_server.
@@ -211,7 +205,7 @@ class TestMethods(unittest.TestCase):
         response_message = self.ConnectToServer(func_id)
 
         # Confirm whether the callback_func() was not called.
-        self.assertEqual(self.counter, prev_value + 1)
+        self.assertEqual(self._counter, prev_value + 1)
 
         # also confirm the error message
         self.assertEqual(response_message.response_code, SysMsg_pb2.SUCCESS)
@@ -222,17 +216,16 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(self._vts_tcp_server.UnregisterCallback(func_id))
 
         # Capture the previous value of global counter
-        prev_value = self.counter
+        prev_value = self._counter
 
         # Connect to server
         response_message = self.ConnectToServer(func_id)
 
         # Confirm whether the callback_func() was not called.
-        self.assertEqual(self.counter, prev_value)
+        self.assertEqual(self._counter, prev_value)
 
         # also confirm the error message
         self.assertEqual(response_message.response_code, SysMsg_pb2.FAIL)
 
 if __name__ == '__main__':
     unittest.main()
-

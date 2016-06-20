@@ -99,8 +99,7 @@ def _parse_device_list(device_list_str, key):
 
 
 def list_adb_devices():
-    """List all android devices connected to the computer that are detected by
-    adb.
+    """List all target devices connected to the host and detected by adb.
 
     Returns:
         A list of android device serials. Empty if there's none.
@@ -266,8 +265,10 @@ class AndroidDevice(object):
 
     Attributes:
         serial: A string that's the serial number of the Androi device.
-        d_port: An integer  that's the port number used on the Android device
-                for adb port forwarding.
+        device_command_port: int, the port number used on the Android device
+                for adb port forwarding (for command-response sessions).
+        device_callback_port: int, the port number used on the Android device
+                for adb port reverse forwarding (for callback sessions).
         log_path: A string that is the path where all logs collected on this
                   android device should be stored.
         adb_logcat_process: A process that collects the adb logcat.
@@ -276,11 +277,16 @@ class AndroidDevice(object):
         adb: An AdbProxy object used for interacting with the device via adb.
         fastboot: A FastbootProxy object used for interacting with the device
                   via fastboot.
+        host_command_port: the host-side port for runner to agent sessions
+                           (to send commands and receive responses).
+        host_callback_port: the host-side port for agent to runner sessions
+                            (to get callbacks from agent).
     """
 
-    def __init__(self, serial="", device_port=5001):
+    def __init__(self, serial="", device_port=5001, device_callback_port=5010):
         self.serial = serial
-        self.device_port = device_port
+        self.device_command_port = device_port
+        self.device_callback_port = device_callback_port
         self.log = logging.getLogger()
         base_log_path = getattr(self.log, "log_path", "/tmp/logs/")
         self.log_path = os.path.join(base_log_path, "AndroidDevice%s" % serial)
@@ -290,13 +296,17 @@ class AndroidDevice(object):
         self.fastboot = fastboot.FastbootProxy(serial)
         if not self.isBootloaderMode:
             self.rootAdb()
-        self.host_port = adb.get_available_host_port()
-        self.adb.tcp_forward(self.host_port, self.device_port)
-        self.hal = hal_mirror.HalMirror(self.host_port)
+        self.host_command_port = adb.get_available_host_port()
+        self.host_callback_port = adb.get_available_host_port()
+        self.adb.tcp_forward(self.host_command_port, self.device_command_port)
+        self.adb.reverse_tcp_forward(
+            self.device_callback_port, self.host_callback_port)
+        self.hal = hal_mirror.HalMirror(
+            self.host_command_port, self.host_callback_port)
 
     def __del__(self):
-        if self.host_port:
-            self.adb.forward("--remove tcp:%s" % self.host_port)
+        if self.host_command_port:
+            self.adb.forward("--remove tcp:%s" % self.host_command_port)
         if self.adb_logcat_process:
             self.stopAdbLogcat()
 
@@ -459,4 +469,3 @@ class AndroidDevice(object):
         self.rootAdb()
         if has_adb_log:
             self.startAdbLogcat()
-
