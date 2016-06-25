@@ -56,14 +56,15 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL_CONVENTIONAL
-      || message.component_class() == HAL_SUBMODULE
+      || message.component_class() == HAL_CONVENTIONAL_SUBMODULE
       || message.component_class() == HAL_LEGACY) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
   GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
   cpp_ss << endl << endl;
-  if (message.component_class() == HAL_CONVENTIONAL) {
+  if (message.component_class() == HAL_CONVENTIONAL
+      || message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
     GenerateCppBodyCallbackFunction(cpp_ss, message, fuzzer_extended_class_name);
   }
 
@@ -132,7 +133,9 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
 
   if (message.component_class() == HAL_CONVENTIONAL) h_ss << "HAL_CONVENTIONAL";
-  if (message.component_class() == HAL_SUBMODULE) h_ss << "HAL_SUBMODULE";
+  if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+    h_ss << "HAL_CONVENTIONAL_SUBMODULE";
+  }
   if (message.component_class() == HAL_LEGACY) h_ss << "HAL_LEGACY";
 
   h_ss << ") { }" << endl;
@@ -145,7 +148,7 @@ void CodeGenBase::GenerateClassHeader(
     GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
   }
 
-  if (message.component_class() == HAL_SUBMODULE) {
+  if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
     string component_name = GetComponentName(message);
     h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
     h_ss << "    submodule_ = submodule;" << endl;

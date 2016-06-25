@@ -65,7 +65,7 @@ SpecificationBuilder::FindInterfaceSpecification(
         if (message->component_type() == target_type
             && message->component_type_version() == target_version) {
           if (submodule_name.length() > 0) {
-            if (message->component_class() != HAL_SUBMODULE
+            if (message->component_class() != HAL_CONVENTIONAL_SUBMODULE
                 || message->original_data_structure_name() != submodule_name) {
               continue;
             }
@@ -201,21 +201,23 @@ const string& SpecificationBuilder::CallFunction(
   if (func_msg->name() == "#Open") {
     cout << __func__ << ":" << __LINE__ << endl;
     if (func_msg->arg().size() > 0) {
-      cout << __func__ << " " << func_msg->arg(0).primitive_value(0).bytes().c_str() << endl;
+      cout << __func__ << " "
+          << func_msg->arg(0).string_value().message()
+          << endl;
       func_fuzzer->OpenConventionalHal(
-          func_msg->arg(0).primitive_value(0).bytes().c_str());
+          func_msg->arg(0).string_value().message().c_str());
     } else {
       cout << __func__ << " no arg" << endl;
       func_fuzzer->OpenConventionalHal();
     }
     cout << __func__ << " opened" << endl;
     // return the return value from open;
-    if (func_msg->return_type().primitive_type().size() > 0) {
+    if (func_msg->return_type().has_type()) {
       cout << __func__ << " return_type exists" << endl;
       // TODO handle when the size > 1.
-      if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
+      if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int32_t")) {
         cout << __func__ << " return_type is int32_t" << endl;
-        func_msg->mutable_return_type()->mutable_primitive_value()->Add()->set_int32_t(0);
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_int32_t(0);
         cout << "result " << endl;
         // todo handle more types;
         string* output = new string();
@@ -248,12 +250,12 @@ const string& SpecificationBuilder::CallFunction(
     }
   }
 
-  if (func_msg->return_type().aggregate_type().size() > 0) {
+  if (func_msg->return_type().type() == TYPE_PREDEFINED) {
     // TODO: actually handle this case.
     if (result != NULL) {
       // loads that interface spec and enqueues all functions.
       cout << __func__ << " return type: "
-          << func_msg->return_type().aggregate_type(0) << endl;
+          << func_msg->return_type().type() << endl;
     } else {
       cout << __func__ << " return value = NULL" << endl;
     }
@@ -261,10 +263,10 @@ const string& SpecificationBuilder::CallFunction(
     string* output = new string();
     google::protobuf::TextFormat::PrintToString(*func_msg, output);
     return *output;
-  } else if (func_msg->return_type().primitive_type().size() > 0) {
+  } else if (func_msg->return_type().type() == TYPE_SCALAR) {
     // TODO handle when the size > 1.
-    if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
-      func_msg->mutable_return_type()->mutable_primitive_value()->Add()->set_int32_t(
+    if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int32_t")) {
+      func_msg->mutable_return_type()->mutable_scalar_value()->set_int32_t(
           *((int*)(&result)));
       cout << "result " << endl;
       // todo handle more types;
@@ -320,13 +322,13 @@ bool SpecificationBuilder::Process(
     void* result;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
     func_fuzzer->Fuzz(func_msg, &result, agent_port_);
-    if (func_msg->return_type().aggregate_type().size() > 0) {
+    if (func_msg->return_type().type() == TYPE_PREDEFINED) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.
         cout << __FUNCTION__ << " return type: "
-            << func_msg->return_type().aggregate_type(0) << endl;
+            << func_msg->return_type().predefined_type() << endl;
         // TODO: handle the case when size > 1
-        string submodule_name = func_msg->return_type().aggregate_type(0);
+        string submodule_name = func_msg->return_type().predefined_type();
         while (!submodule_name.empty()
                && (std::isspace(submodule_name.back())
                    || submodule_name.back() == '*')) {
@@ -336,13 +338,15 @@ bool SpecificationBuilder::Process(
             FindInterfaceSpecification(
                 target_class, target_type, target_version, submodule_name);
         if (iface_spec_msg) {
-          cout << __FUNCTION__ << " submodule found - " << submodule_name << endl;
+          cout << __FUNCTION__ << " submodule found - " << submodule_name
+              << endl;
           if (!GetFuzzerBaseAndAddAllFunctionsToQueue(
                   *iface_spec_msg, dll_file_name)) {
             return false;
           }
         } else {
-          cout << __FUNCTION__ << " submodule not found - " << submodule_name << endl;
+          cout << __FUNCTION__ << " submodule not found - "
+              << submodule_name << endl;
         }
       } else {
         cout << __FUNCTION__ << " return value = NULL" << endl;

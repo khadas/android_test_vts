@@ -51,28 +51,22 @@ FuzzerCallbackBase::FuzzerCallbackBase() {}
 FuzzerCallbackBase::~FuzzerCallbackBase() {}
 
 
-bool FuzzerCallbackBase::Register(const ArgumentSpecificationMessage& message) {
-  cout << __func__ << " size = " << message.primitive_value_size() << endl;
+bool FuzzerCallbackBase::Register(const VariableSpecificationMessage& message) {
+  cout << __func__ << " type = " << message.type() << endl;
   if (!message.is_callback()) {
     cerr << __func__ << " ERROR: argument is not a callback." << endl;
     return false;
   }
 
-  if (message.primitive_type_size() == 0
-      || message.primitive_type_size() != message.primitive_value_size()
-      || message.primitive_type_size() != message.primitive_name_size()) {
-    cerr << __func__ << " ERROR: primitive fields inconsistent." << endl;
+  if (!message.has_type() || message.type() != TYPE_FUNCTION_POINTER) {
+    cerr << __func__ << " ERROR: inconsistent message." << endl;
     return false;
   }
 
-  for (int i = 0; i < message.primitive_type_size(); i++) {
-    if (message.primitive_type(i) != "function_pointer") {
-      cerr << __func__ << " ERROR: non function pointer at " << i << endl;
-      return false;
-    }
-    cout << __func__ << " map[" << message.primitive_name(i) << "] = "
-        << message.primitive_value(i).bytes() << endl;
-    id_map_[message.primitive_name(i)] = message.primitive_value(i).bytes();
+  for (const auto& func_pt : message.function_pointer()) {
+    cout << __func__ << " map[" << func_pt.function_name() << "] = "
+        << func_pt.id() << endl;
+    id_map_[func_pt.function_name()] = func_pt.id();
   }
   return true;
 }
@@ -81,14 +75,14 @@ bool FuzzerCallbackBase::Register(const ArgumentSpecificationMessage& message) {
 const char* FuzzerCallbackBase::GetCallbackID(const string& name) {
   // TODO: handle when not found.
   cout << __func__ << ":" << __LINE__ << " " << name << endl;
-  cout << __func__ << ":" << __LINE__ << " returns " << id_map_[name].c_str()
-      << endl;
+  cout << __func__ << ":" << __LINE__ << " returns '" << id_map_[name].c_str()
+      << "'" << endl;
   return id_map_[name].c_str();
 }
 
 
 void FuzzerCallbackBase::RpcCallToAgent(const char* id, int agent_port) {
-  cout << __func__ << ":" << __LINE__ << " " << id << endl;
+  cout << __func__ << ":" << __LINE__ << " id = '" << id << "'" << endl;
 
   struct sockaddr_in serv_addr;
   struct hostent* server;

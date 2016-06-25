@@ -18,17 +18,21 @@ sub_struct: {
     api: {
       name: "open"
       return_type: {
-        primitive_type: "int32_t"
+        type: TYPE_SCALAR
+        scalar_type: "int32_t"
       }
       arg: {
-        aggregate_type: "hw_module_t*"
+        type: TYPE_PREDEFINED
+        predefined_type: "hw_module_t*"
         is_const: true
       }
       arg: {
-        primitive_type: "char_pointer"
+        type: TYPE_SCALAR
+        scalar_type: "char_pointer"
       }
       arg: {
-        aggregate_type: "hw_device_t**"
+        type: TYPE_PREDEFINED
+        predefined_type: "hw_device_t**"
         is_output: true
       }
       callflow: {
@@ -41,121 +45,152 @@ sub_struct: {
 api: {
   name: "get_number_of_cameras"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "get_camera_info"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    aggregate_type: "camera_info_t*"
+    type: TYPE_PREDEFINED
+    predefined_type: "camera_info_t*"
     is_output: true
     is_input: false
   }
 }
 
+attribute: {
+  type: TYPE_ENUM
+  enum_value: {
+    enumerator: "CAMERA_FACING_BACK"
+    value: 0
 
-aggregate_type_name: "const"
-aggregate_type_definition: {
-  primitive_type: "int32_t"
-  primitive_name: "CAMERA_FACING_BACK"
-  primitive_value: {
-    int32_t: 0
-  }
-
-  primitive_type: "int32_t"
-  primitive_name: "CAMERA_FACING_FRONT"
-  primitive_value: {
-    int32_t: 1
+    enumerator: "CAMERA_FACING_FRONT"
+    value: 1
   }
 }
 
 
-aggregate_type_name: "camera_info_t"
-aggregate_type_definition: {
-  primitive_type: "int32_t"
-  primitive_name: "facing"
-  primitive_value: {
-    int32_t: 0
-  }
+attribute: {
+  type: TYPE_STRUCT
+  name: "camera_info_t"
 
-  primitive_type: "int32_t"
-  primitive_name: "orientation"
-  primitive_value: {
-    int32_t: 0
-  }
-
-  primitive_type: "uint32_t"
-  primitive_name: "device_version"
-  primitive_value: {
-    uint32_t: 772
-  }
-
-  aggregate_type: "camera_metadata_t"
-  aggregate_name: "static_camera_characteristics"
-  aggregate_value: {
-    primitive_type: "int32_t"
-    primitive_name: "xyz"
-    primitive_value: {
+  struct_value: {
+    name: "facing"
+    type: TYPE_SCALAR
+    scalar_value: {
       int32_t: 0
+    }
+    scalar_type: "int32_t"
+  }
+
+  struct_value: {
+    name: "orientation"
+    type: TYPE_SCALAR
+    scalar_value: {
+      int32_t: 0
+    }
+    scalar_type: "int32_t"
+  }
+
+  struct_value: {
+    name: "device_version"
+    type: TYPE_SCALAR
+    scalar_value: {
+      uint32_t: 772
+    }
+    scalar_type: "uint32_t"
+  }
+
+  struct_value: {
+    name: "static_camera_characteristics"
+    struct_type: "camera_metadata_t"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "xyz"
+      scalar_type: "int32_t"
+      scalar_value: {
+        int32_t: 0
+      }
     }
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "resource_cost"
-  primitive_value: {
-    int32_t: 50
+  struct_value: {
+    name: "resource_cost"
+    type: TYPE_SCALAR
+    scalar_value: {
+      int32_t: 50
+    }
+    scalar_type: "int32_t"
   }
 
-  primitive_type: "pointer_pointer"
-  primitive_name: "conflicting_devices"
-  primitive_value: {
+  struct_value: {
+    name: "conflicting_devices"
+    type: TYPE_SCALAR
+    scalar_type: "pointer_pointer"
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "conflicting_devices_length"
-  primitive_value: {
-    int32_t: 0
+  struct_value: {
+    name: "conflicting_devices_length"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+    scalar_value: {
+      int32_t: 0
+    }
   }
 }
 
 
-aggregate_type_name: "camera_module_callbacks_t"
-aggregate_type_definition: {
-  primitive_type: "function_pointer"
-  primitive_name: "camera_device_status_change"
-  primitive_value: {
+attribute: {
+  name: "camera_module_callbacks_t"
+
+  type: TYPE_FUNCTION_POINTER
+
+  function_pointer: {
+    function_name: "camera_device_status_change"
+    arg: {
+      type: TYPE_PREDEFINED
+      predefined_type: "const struct camera_module_callbacks*"
+      scalar_type: "pointer"
+      is_const: true
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: "int32_t"
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: "int32_t"
+    }
   }
-  primitive_format: "%p %d %d"
-  aggregate_value: {
-    primitive_type: "pointer"
-    primitive_name: "const struct camera_module_callbacks*"
 
-    primitive_type: "int32"
-
-    primitive_type: "int32"
+  function_pointer: {
+    function_name: "torch_mode_status_change"
+    arg: {
+      type: TYPE_PREDEFINED
+      predefined_type: "struct camera_module_callbacks*"
+      scalar_type: "pointer"
+      is_const: true
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: "char_pointer"
+      is_const: true
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: "int32_t"
+    }
   }
-
-  primitive_type: "function_pointer"
-  primitive_name: "torch_mode_status_change"
-  primitive_value: {
-  }
-  aggregate_value: {
-    primitive_type: "pointer"
-    primitive_name: "const struct camera_module_callbacks*"
-
-    primitive_type: "pointer"
-    primitive_name: "const char*"
-
-    primitive_type: "int32"
-  }
-  primitive_format: "%p %s %d"
 
   is_callback: true
 }
@@ -164,10 +199,12 @@ aggregate_type_definition: {
 api: {
   name: "set_callbacks"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    aggregate_type: "camera_module_callbacks_t*"
+    type: TYPE_PREDEFINED
+    predefined_type: "camera_module_callbacks_t*"
     is_const: true
     is_callback: true
   }
@@ -176,6 +213,7 @@ api: {
 api: {
   name: "init"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }

@@ -46,11 +46,11 @@ extern camera_info_t* GenerateCameraInfo();
 
 // Generates a camera_info data structure using a given protobuf msg's values.
 extern camera_info_t* GenerateCameraInfoUsingMessage(
-    const ArgumentSpecificationMessage& msg);
+    const VariableSpecificationMessage& msg);
 
 // Converts camera_info to a protobuf message.
 extern bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
-                                        ArgumentSpecificationMessage* msg);
+                                        VariableSpecificationMessage* msg);
 
 }  // namespace vts
 }  // namespace android

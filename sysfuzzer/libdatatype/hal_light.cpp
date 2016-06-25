@@ -57,21 +57,22 @@ light_state_t* GenerateLightState() {
 }
 
 
-light_state_t* GenerateLightStateUsingMessage(const ArgumentSpecificationMessage& msg) {
+light_state_t* GenerateLightStateUsingMessage(
+    const VariableSpecificationMessage& msg) {
   cout << __func__ << " entry" << endl;
   light_state_t* state = (light_state_t*) malloc(sizeof(light_state_t));
 
   // TODO: use a dict in the proto and handle when the key is missing (i.e.,
   // randomly generate that).
-  state->color = msg.primitive_value(0).uint32_t();
+  state->color = msg.struct_value(0).scalar_value().uint32_t();
   cout << __func__ << " color " << state->color << endl;
-  state->flashMode = msg.primitive_value(1).int32_t();
+  state->flashMode = msg.struct_value(1).scalar_value().int32_t();
   cout << __func__ << " flashMode " << state->flashMode << endl;
-  state->flashOnMS = msg.primitive_value(2).int32_t();
+  state->flashOnMS = msg.struct_value(2).scalar_value().int32_t();
   cout << __func__ << " flashOnMS " << state->flashOnMS << endl;
-  state->flashOffMS = msg.primitive_value(3).int32_t();
+  state->flashOffMS = msg.struct_value(3).scalar_value().int32_t();
   cout << __func__ << " flashOffMS " << state->flashOffMS << endl;
-  state->brightnessMode = msg.primitive_value(4).int32_t();
+  state->brightnessMode = msg.struct_value(4).scalar_value().int32_t();
   cout << __func__ << " brightnessMode " << state->brightnessMode << endl;
 
   return state;

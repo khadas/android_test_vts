@@ -10,10 +10,12 @@ header: "<hardware/gps.h>"
 api: {
   name: "get_gps_interface"
   return_type: {
-    aggregate_type: "GpsInterface*"
+    type: TYPE_PREDEFINED
+    predefined_type: "GpsInterface*"
   }
   arg: {
-    aggregate_type: "struct gps_device_t*"
+    type: TYPE_PREDEFINED
+    predefined_type: "struct gps_device_t*"
   }
   callflow: {
     entry: true

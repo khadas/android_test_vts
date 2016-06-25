@@ -70,7 +70,7 @@ void Translate(
     case HAL_CONVENTIONAL:
       code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
       break;
-    case HAL_SUBMODULE:
+    case HAL_CONVENTIONAL_SUBMODULE:
       code_generator.reset(
           new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
       break;

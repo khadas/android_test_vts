@@ -43,7 +43,7 @@ class SampleCameraTest(base_test.BaseTestClass):
     def testCameraNormal(self):
         """A simple testcase which just emulates a normal usage pattern."""
         result = self.dut.hal.camera.get_number_of_cameras()
-        count = result.return_type.primitive_value[0].int32_t
+        count = result.return_type.scalar_value.int32_t
         logging.info(count)
         for index in range(0, count):
             arg = self.dut.hal.camera.camera_info_t(facing=0)

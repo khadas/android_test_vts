@@ -15,7 +15,6 @@
 #   limitations under the License.
 
 from future import standard_library
-from __main__ import time
 standard_library.install_aliases()
 
 import copy
