@@ -48,12 +48,4 @@ function vts_multidevice_target_setup {
   adb shell chmod 755 /data/local/tmp/32/fuzzer32
   adb shell chmod 755 /data/local/tmp/64/fuzzer64
   adb shell chmod 755 /data/local/tmp/64/vts_hal_agent
-  adb shell killall vts_hal_agent > /dev/null 2&>1
-  adb shell killall fuzzer32 > /dev/null 2&>1
-  adb shell killall fuzzer64 > /dev/null 2&>1
-  adb shell LD_LIBRARY_PATH=/data/local/tmp/64 /data/local/tmp/64/vts_hal_agent /data/local/tmp/32/fuzzer32 /data/local/tmp/64/fuzzer64 /data/local/tmp/spec
-  # to run using nohup
-  # adb shell LD_LIBRARY_PATH=/data/local/tmp nohup /data/local/tmp/vts_hal_agent
-  # /data/local/tmp/fuzzer32 /data/local/tmp/fuzzer64 /data/local/tmp/spec
-  # ASAN_OPTIONS=coverage=1 for ASAN
 }

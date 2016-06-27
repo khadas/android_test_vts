@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 from future import standard_library
+from __main__ import time
 standard_library.install_aliases()
 
 import copy
@@ -279,6 +280,11 @@ class TestRunner(object):
                       module_config_name)
         destroy_func = module.destroy
         self.controller_destructors[module_ref_name] = destroy_func
+
+        # call the startAgent in android_device.py
+        # TODO: extend below to support agents on multiple target devices.
+        dut = objects[0]
+        dut.startAgent()
         return objects
 
     def unregisterControllers(self):
@@ -289,6 +295,8 @@ class TestRunner(object):
         for name, destroy in self.controller_destructors.items():
             try:
                 logging.debug("Destroying %s.", name)
+                dut = self.controller_destructors[name][0]
+                dut.stopAgent()
                 destroy(self.controller_registry[name])
             except:
                 logging.exception("Exception occurred destroying %s.", name)
