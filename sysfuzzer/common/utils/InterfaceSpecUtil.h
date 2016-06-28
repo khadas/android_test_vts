@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 #define VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX "vts_func_"
 

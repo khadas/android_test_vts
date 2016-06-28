@@ -22,7 +22,7 @@ from socket import error as socket_error
 
 from vts.runners.host.errors import TcpServerConnectionError
 from vts.runners.host.errors import ConnectionRefusedError
-from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
+from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.runners.host.tcp_server import vts_tcp_server
 
 HOST, PORT = "localhost", 0

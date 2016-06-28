@@ -21,8 +21,8 @@ import os
 import socket
 
 from vts.runners.host import errors
-from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
-from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
+from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
+from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
 
 from google.protobuf import text_format
 

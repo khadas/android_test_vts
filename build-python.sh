@@ -12,5 +12,5 @@
 
 python -m compileall .
 
-protoc -I=runners/host/proto --python_out=runners/host/proto runners/host/proto/AndroidSystemControlMessage.proto
-protoc -I=runners/host/proto --python_out=runners/host/proto runners/host/proto/InterfaceSpecificationMessage.proto
+protoc -I=proto --python_out=proto proto/AndroidSystemControlMessage.proto
+protoc -I=proto --python_out=proto proto/InterfaceSpecificationMessage.proto
