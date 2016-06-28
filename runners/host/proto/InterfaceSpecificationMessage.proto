@@ -27,7 +27,7 @@ enum ComponentClass {
   // For a HAL which uses HIDL (HAL Interface Definition Language).
   HAL_HIDL = 3;
   // For a submodule of a shared library HAL .
-  HAL_SUBMODULE = 4;
+  HAL_CONVENTIONAL_SUBMODULE = 4;
   // For the legacy HAL.
   HAL_LEGACY = 5;
 }
@@ -46,6 +46,29 @@ enum ComponentType {
   LIGHT = 4;
   // For a WiFi submodule.
   WIFI = 5;
+  // For a mobile networking submodule.
+  MOBILE = 6;
+  // For a WiFi submodule.
+  BLUETOOTH = 7;
+  // For a NFC submodule
+  NFC = 8;
+}
+
+
+// Type of a variable.
+enum VariableType {
+  UNKNOWN_VARIABLE_TYPE = 0;
+  TYPE_PREDEFINED = 1;
+  TYPE_SCALAR = 2;
+  TYPE_STRING = 3;
+  TYPE_ENUM = 4;
+  TYPE_VECTOR_FIXED = 5;
+  TYPE_VECTOR_VARIABLE = 6;
+  TYPE_STRUCT = 7;
+  // for conventional HALs, to keep a data structure with one or multiple
+  // callback functions.
+  TYPE_FUNCTION_POINTER = 8;
+  TYPE_VOID = 9;
 }
 
 
@@ -68,13 +91,13 @@ message FunctionSpecificationMessage {
   optional bytes name = 1;
 
   // data type of the return value (for legacy HALs and shared libraries).
-  optional ArgumentSpecificationMessage return_type = 11;
+  optional VariableSpecificationMessage return_type = 11;
 
   // data type of the return value (for HIDL HALs).
-  repeated ArgumentSpecificationMessage return_type_hidl = 12;
+  repeated VariableSpecificationMessage return_type_hidl = 12;
 
   // a list of arguments.
-  repeated ArgumentSpecificationMessage arg = 21;
+  repeated VariableSpecificationMessage arg = 21;
 
   // a specification of the call flows of the function.
   repeated CallFlowSpecificationMessage callflow = 31;
@@ -91,58 +114,139 @@ message FunctionSpecificationMessage {
 }
 
 
-message PrimitiveDataValueMessage {
-  optional int32 int32_t = 1;
-  optional uint32 uint32_t = 2;
-  optional float float_t = 3;
-  optional double double_t = 4;
-  optional bytes bytes = 5;
-  optional uint32 pointer = 6;
+// To keep the value of a scalar variable.
+message ScalarDataValueMessage {
+  optional int32 bool = 1;
 
-  optional int32 int8_t = 7;
-  optional uint32 uint8_t = 8;
-  optional int32 char = 9;
-  optional int32 int16_t = 10;
-  optional uint32 uint16_t = 11;
-  optional int64 int64_t = 12;
-  optional uint64 uint64_t = 13;
-  optional bytes string = 14;
+  optional int32 int8_t = 11;
+  optional uint32 uint8_t = 12;
+
+  optional int32 char = 13;
+  optional uint32 uchar = 14;
+
+  optional int32 int16_t = 21;
+  optional uint32 uint16_t = 22;
+
+  optional int32 int32_t = 31;
+  optional uint32 uint32_t = 32;
+
+  optional int64 int64_t = 41;
+  optional uint64 uint64_t = 42;
+
+  optional float float_t = 101;
+  optional double double_t = 102;
+
+  optional uint32 pointer = 201;
+  optional uint32 opaque = 202;
+  optional uint32 void_pointer = 211;
+  optional uint32 char_pointer = 212;
+  optional uint32 pointer_pointer = 251;
+
+  // for scalar attributes in a union data structure,
+  // to specify the number of used bits.
+  optional uint32 bits = 1001;
 }
 
 
-// To specify a function argument.
-message ArgumentSpecificationMessage {
-  // Data type of the argument to describe the corresponding C/C++ data type.
-  // only one is set if the argument is a primitive data.
-  repeated bytes primitive_type = 1;
-  // Instance type of the argument to describe the semantic information.
-  repeated bytes aggregate_type = 2;
+// To keep the value of a vector variable.
+message VectorDataValueMessage {
+  // set in advance if the type is a fixed-length vector.
+  optional uint32 size = 1;
+
+  // when it's for a scalar vector.
+  optional bytes scalar_type = 11;
+  repeated ScalarDataValueMessage value = 12;
+}
+
+
+// To keep the specification and value of a function pointer.
+message FunctionPointerSpecificationMessage {
+  // used for a function pointer to keep its function name.
+  optional bytes function_name = 1;
+
+  // actual pointer value.
+  optional uint32 address = 11;
+  // ID used for VTS RMI (remote method invocation).
+  optional bytes id = 21;
+
+  // argument(s)
+  repeated VariableSpecificationMessage arg = 101;
+
+  // data type of the return value (for legacy HALs and shared libraries).
+  optional VariableSpecificationMessage return_type = 111;
+}
+
+
+// To keep the value of a string variable.
+message StringDataValueMessage {
+  // for actual contents.
+  optional bytes message = 1;
+
+  // for length in bytes, and usually not required.
+  optional uint32 length = 11;
+}
+
+
+// To keep the value of an enum type variable.
+message EnumDataValueMessage {
+  // for the enumerator names.
+  repeated bytes enumerator = 1;
+
+  // for the corresponding values.
+  repeated uint32 value = 2;
+}
+
+
+// To specify a function argument or an attribute in general.
+message VariableSpecificationMessage {
+  // the variable name. empty if for a type definition.
+  optional bytes name = 1;
+
+  // the variable type which is one of:
+  //     TYPE_SCALAR, TYPE_STRING, TYPE_ENUM, TYPE_VECTOR_FIXED,
+  //     TYPE_VECTOR_VARIABLE, TYPE_STRUCT, TYPE_UNION
+  //
+  // not yet supported:
+  //     "template", "typedef", "handle", "binder", "parcelable".
+  optional VariableType type = 2;
+
+  // the actual value(s) for an scalar data type.
+  // repeated values for a vector.
+  optional ScalarDataValueMessage scalar_value = 101;
+  optional bytes scalar_type = 102;
+
+  optional StringDataValueMessage string_value = 111;
+
+  optional EnumDataValueMessage enum_value = 121;
+
+  repeated VectorDataValueMessage vector_value = 131;
+
+  // for sub variables when this's a struct type.
+  repeated VariableSpecificationMessage struct_value = 141;
+  // the type name of this struct.
+  optional bytes struct_type = 142;
+
+  // for sub variables when this's a union type.
+  repeated VariableSpecificationMessage union_value = 151;
+
+  // for non HIDL HALs, to use a custom type defined in C/C++.
+  optional bytes predefined_type = 201;
+
+  // for non HIDL HALs, to set function pointer(s).
+  repeated FunctionPointerSpecificationMessage function_pointer = 221;
 
   // true if the argument is an input (valid only for the top-level message).
-  optional bool is_input = 11 [default = true];
+  optional bool is_input = 301 [default = true];
   // true if the argument is an output.
-  optional bool is_output = 12 [default = false];
+  optional bool is_output = 302 [default = false];
   // true if the argument is a constant variable.
-  optional bool is_const = 13 [default = false];
+  optional bool is_const = 303 [default = false];
   // true if the argument is a struct with one or multiple function pointers.
-  optional bool is_callback = 14 [default = false];
-
-  // the actual values.
-  repeated PrimitiveDataValueMessage primitive_value = 21;
-  // the actual value(s) for an aggregated data type.
-  repeated ArgumentSpecificationMessage aggregate_value = 22;
-
-  // the variable names of defined primitive type attributes.
-  repeated bytes primitive_name = 31;
-  // the variable names of defined aggregate type attributes.
-  repeated bytes aggregate_name = 32;
-
-  // the format string for the args if primitive_type is "function_pointer".
-  repeated bytes primitive_format = 33;
+  optional bool is_callback = 304 [default = false];
 }
 
 
-// TO specify a sub-structure.
+// To specify a sub-structure.
 message StructSpecificationMessage {
   // the sub-structure's variable name in its parent data structure.
   optional bytes name = 1;
@@ -155,6 +259,9 @@ message StructSpecificationMessage {
 
   // a list of structures contained in the component.
   repeated StructSpecificationMessage sub_struct = 2001;
+
+  // The definitions of custom-defined aggregate types.
+  repeated VariableSpecificationMessage attribute = 3001;
 }
 
 
@@ -164,8 +271,18 @@ message InterfaceSpecificationMessage {
   optional ComponentClass component_class = 1;
   optional ComponentType component_type = 2;
   optional float component_type_version = 3 [default = 1.0];
+  // The name of a target component (used for HIDL HALs).
+  optional bytes component_name = 4;
 
-  // The name of original C/C++ data structure.
+  // The package path of a target component (e.g., android.hardware.name).
+  // name implies the component_type field.
+  optional bytes package = 11;
+
+  // The modules to import (e.g., package_path.component_name).
+  repeated bytes import = 12;
+
+  // The name of original C/C++ data structure
+  // (used for conventional and legacy HALs).
   optional bytes original_data_structure_name = 1001;
 
   // a list of headers that need to be imported in order to use the component.
@@ -174,10 +291,8 @@ message InterfaceSpecificationMessage {
   // a list of functions exposed by the component.
   repeated FunctionSpecificationMessage api = 2001;
 
-  // the names of custom-defined aggregate types.
-  repeated bytes aggregate_type_name = 3001;
-  // The actual definitions of custom-defined aggregate types.
-  repeated ArgumentSpecificationMessage aggregate_type_definition = 3002;
+  // The definitions of custom-defined aggregate types.
+  repeated VariableSpecificationMessage attribute = 3001;
 
   // a list of structures contained in the component.
   repeated StructSpecificationMessage sub_struct = 4001;

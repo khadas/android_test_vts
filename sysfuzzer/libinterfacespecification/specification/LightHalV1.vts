@@ -10,129 +10,168 @@ header: "<hardware/lights.h>"
 api: {
   name: "set_light"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "pointer"
-    aggregate_type: "struct light_device_t*"
+    type: TYPE_PREDEFINED
+    scalar_type: "pointer"
+    predefined_type: "struct light_device_t*"
   }
   arg: {
-    primitive_type: "pointer"
-    aggregate_type: "struct light_state_t*"
+    type: TYPE_PREDEFINED
+    scalar_type: "pointer"
+    predefined_type: "struct light_state_t*"
   }
 }
 
-aggregate_type_name: "light_state_t"
-aggregate_type_definition: {
-  primitive_type: "uint32_t"
-  primitive_name: "color"
-  primitive_value: {
-    uint32_t: 0xffffff00
+attribute: {
+  name: "light_state_t"
+  type: TYPE_STRUCT
+
+  struct_value: {
+    name: "color"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    scalar_value: {
+      uint32_t: 0xffffff00
+    }
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "flashMode"
-  primitive_value: {
-    int32_t: 0
+  struct_value: {
+    name: "flashMode"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+    scalar_value: {
+      int32_t: 0
+    }
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "flashOnMs"
-  primitive_value: {
-    int32_t: 0
+  struct_value: {
+    name: "flashOnMs"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+    scalar_value: {
+      int32_t: 0
+    }
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "flashOffMs"
-  primitive_value: {
-    int32_t: 0
+  struct_value: {
+    name: "flashOffMs"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+    scalar_value: {
+      int32_t: 0
+    }
   }
 
-  primitive_type: "int32_t"
-  primitive_name: "brightnessMode"
-  primitive_value: {
-    int32_t: 0
+  struct_value: {
+    name: "brightnessMode"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+    scalar_value: {
+      int32_t: 0
+    }
+  }
+}
+
+
+attribute: {
+  type: TYPE_ENUM
+
+  enum_value: {
+    enumerator: "LIGHT_FLASH_NONE"
+    value: 0
+
+    enumerator: "LIGHT_FLASH_TIMED"
+    value: 1
+
+    enumerator: "LIGHT_FLASH_HARDWARE"
+    value: 2
   }
 }
 
+attribute: {
+  type: TYPE_ENUM
 
-aggregate_type_name: "const"
-aggregate_type_definition: {
-  primitive_type: "int32_t"
-  primitive_name: "LIGHT_FLASH_NONE"
-  primitive_value: {
-    int32_t: 0
-  }
+  enum_value: {
+    enumerator: "BRIGHTNESS_MODE_USER"
+    value: 0
 
-  primitive_type: "int32_t"
-  primitive_name: "LIGHT_FLASH_TIMED"
-  primitive_value: {
-    int32_t: 1
-  }
-
-  primitive_type: "int32_t"
-  primitive_name: "LIGHT_FLASH_HARDWARE"
-  primitive_value: {
-    int32_t: 2
-  }
-
-  primitive_type: "int32_t"
-  primitive_name: "BRIGHTNESS_MODE_USER"
-  primitive_value: {
-    int32_t: 0
-  }
-
-  primitive_type: "int32_t"
-  primitive_name: "BRIGHTNESS_MODE_SENSOR"
-  primitive_value: {
-    int32_t: 1
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_BACKLIGHT"
-  primitive_value: {
-    bytes: "backlight"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_KEYBOARD"
-  primitive_value: {
-    bytes: "keyboard"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_BUTTONS"
-  primitive_value: {
-    bytes: "buttons"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_BATTERY"
-  primitive_value: {
-    bytes: "battery"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_NOTIFICATIONS"
-  primitive_value: {
-    bytes: "notifications"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_ATTENTION"
-  primitive_value: {
-    bytes: "attention"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_BLUETOOTH"
-  primitive_value: {
-    bytes: "bluetooth"
-  }
-
-  primitive_type: "bytes"
-  primitive_name: "LIGHT_ID_WIFI"
-  primitive_value: {
-    bytes: "wifi"
+    enumerator: "BRIGHTNESS_MODE_SENSOR"
+    value: 1
   }
 }
+
+attribute: {
+  name: "LIGHT_ID_BACKLIGHT"
+  type: TYPE_STRING
+  string_value: {
+    message: "backlight"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_KEYBOARD"
+  type: TYPE_STRING
+  string_value: {
+    message: "keyboard"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_BUTTONS"
+  type: TYPE_STRING
+  string_value: {
+    message: "buttons"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_BATTERY"
+  type: TYPE_STRING
+  string_value: {
+    message: "battery"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_NOTIFICATIONS"
+  type: TYPE_STRING
+  string_value: {
+    message: "notifications"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_ATTENTION"
+  type: TYPE_STRING
+  string_value: {
+    message: "attention"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_BLUETOOTH"
+  type: TYPE_STRING
+  string_value: {
+    message: "bluetooth"
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "LIGHT_ID_WIFI"
+  type: TYPE_STRING
+  string_value: {
+    message: "wifi"
+  }
+  is_const: true
+}
+

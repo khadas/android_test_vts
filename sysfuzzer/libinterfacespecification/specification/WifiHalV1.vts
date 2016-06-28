@@ -8,10 +8,12 @@ header: "<hardware_legacy/wifi_hal.h>"
 api: {
   name: "wifi_initialize"
   return_type: {
-    aggregate_type: "wifi_error"
+    type: TYPE_PREDEFINED
+    predefined_type: "wifi_error"
   }
   arg: {
-    primitive_type: "pointer"
-    aggregate_type: "wifi_handle*"
+    type: TYPE_PREDEFINED
+    scalar_type: "pointer"
+    predefined_type: "wifi_handle*"
   }
 }

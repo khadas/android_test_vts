@@ -35,7 +35,7 @@ class FuzzerCallbackBase {
   FuzzerCallbackBase();
   virtual ~FuzzerCallbackBase();
 
-  static bool Register(const ArgumentSpecificationMessage& message);
+  static bool Register(const VariableSpecificationMessage& message);
 
  protected:
   static const char* GetCallbackID(const string& name);
