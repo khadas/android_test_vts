@@ -70,11 +70,11 @@ message VtsDriverControlCommandMessage {
   optional int32 target_type = 1203;
   // target version (should be divided by 100) - float has a compatibility issue
   // between C/C++ and python protoc.
-  optional int32 target_version = 1204;
+  optional float target_version = 1204;
   // the name of a HAL module to open.
   optional bytes module_name = 1205;
 
-  // for GET_FUNCTIONS
+  // for LIST_FUNCTIONS
   // none
 
   // for CALL_FUNCTION
@@ -92,6 +92,8 @@ message VtsDriverControlResponseMessage {
 
   // Return value.
   optional int32 return_value = 11;
+  // Return message.
+  optional bytes return_message = 12;
 
   // The stdout message.
   repeated bytes stdout = 1001;

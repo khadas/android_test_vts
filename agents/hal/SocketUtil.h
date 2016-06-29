@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-#ifdef VTS_AGENT_DRIVER_COMM_BINDER  // binder
+#ifndef __VTS_AGENT_SOCKET_UTIL_H_
+#define __VTS_AGENT_SOCKET_UTIL_H_
 
-#ifndef __VTS_DRIVER_HAL_BINDER_SERVER_
-#define __VTS_DRIVER_HAL_BINDER_SERVER_
+#include <string>
 
-#include "specification_parser/SpecificationBuilder.h"
+using namespace std;
 
 namespace android {
 namespace vts {
 
-extern void StartBinderServer(const string& service_name,
-                              android::vts::SpecificationBuilder& spec_builder,
-                              const char* lib_path);
+// Sends a message using the VTS's protocol for socket communication.
+bool VtsSocketSend(int sockfd, const string& message);
+
+// Receives a message using the VTS's protocol for socket communication.
+string VtsSocketRecv(int sockfd);
 
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_DRIVER_HAL_BINDER_SERVER_
-
-#endif  // VTS_AGENT_DRIVER_COMM_BINDER
+#endif  // __VTS_AGENT_SOCKET_UTIL_H_

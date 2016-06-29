@@ -26,6 +26,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   VtsFuzzerMain.cpp \
   BinderServer.cpp \
+  SocketServer.cpp \
 
 LOCAL_C_INCLUDES := \
   test/vts/sysfuzzer/framework \

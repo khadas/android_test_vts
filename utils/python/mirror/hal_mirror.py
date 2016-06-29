@@ -80,7 +80,7 @@ class HalMirror(object):
                             bits=64):
         """Initiates a handler for a particular conventional HAL.
 
-        This will initiate a stub service for a HAL on the target side, create
+        This will initiate a driver service for a HAL on the target side, create
         the top level mirror object for a HAL, and register it in the manager.
 
         Args:
@@ -107,7 +107,7 @@ class HalMirror(object):
                       bits=64):
         """Initiates a handler for a particular legacy HAL.
 
-        This will initiate a stub service for a HAL on the target side, create
+        This will initiate a driver service for a HAL on the target side, create
         the top level mirror object for a HAL, and register it in the manager.
 
         Args:
@@ -137,7 +137,7 @@ class HalMirror(object):
                             target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                             handler_name=None,
                             bits=64):
-        """Initiates the stub for a HAL on the target device and creates a top
+        """Initiates the driver for a HAL on the target device and creates a top
         level MirroObject for it.
 
         Args:
@@ -187,15 +187,15 @@ class HalMirror(object):
                 "No file found for HAL target type %s." % target_type)
 
         # Check whether the requested binder service is already running.
-        # if client.CheckStubService(service_name=service_name):
-        #     raise errors.ComponentLoadingError("A stub for %s already exists" %
+        # if client.CheckDriverService(service_name=service_name):
+        #     raise errors.ComponentLoadingError("A driver for %s already exists" %
         #                                        service_name)
 
-        # Launch the corresponding stub of the requested HAL on the target.
-        logging.info("Init the stub service for %s", target_type)
+        # Launch the corresponding driver of the requested HAL on the target.
+        logging.info("Init the driver service for %s", target_type)
         target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
-        launched = client.LaunchStubService(service_name=service_name,
+        launched = client.LaunchDriverService(service_name=service_name,
                                             file_path=target_filename,
                                             bits=bits,
                                             target_class=target_class_id,
@@ -203,7 +203,7 @@ class HalMirror(object):
                                             target_version=target_version)
         if not launched:
             raise errors.ComponentLoadingError(
-                "Failed to launch stub service %s from file path %s" %
+                "Failed to launch driver service %s from file path %s" %
                 (target_type, target_filename))
 
         # Create API spec message.
