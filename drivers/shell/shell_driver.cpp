@@ -16,7 +16,6 @@
 
 
 #include "shell_driver.h"
-#include "shell_msg_protocol.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,70 +23,56 @@
 #include <sys/un.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-#include <time.h>
 
+#include <sstream>
+#include <iostream>
 
-/**
- * struct to save status of reading shell command output
- */
-typedef struct output_struct {
-  bool  is_fully_read;
-  FILE* output_fp;
-  char  buffer[4096];
-} output_struct;
+#include "shell_msg_protocol.h"
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
+using namespace std;
 
-/**
- * read output once for the given length and save status to the struct
- */
-static bool read_output(output_struct* output) {
-  if (output == NULL) {
-    fprintf(stderr, "error: NULL reference of output\n");
-    return false;
-  }
-
-  fread(output->buffer, sizeof(output->buffer), 1, output->output_fp);
-  output->is_fully_read = feof(output->output_fp);
-
-  return !ferror(output->output_fp);
-}
-
-/**
- * close file path for output and free memory
- */
-static int close_output(output_struct* output) {
-  // TODO(yuexima): call close on output;
-  int close_success;
-  close_success = pclose(output -> output_fp);
-  free(output);
-
-  return close_success;
-}
+namespace android {
+namespace vts {
 
 
 /*
  * execute a given shell command and return the output file descriptor
  * Please remember to call close_output after usage.
  */
-static output_struct* exec_shell_cmd(char* cmd) {
+static int exec_shell_cmd(string cmd,
+                          VtsDriverControlResponseMessage* out_msg) {
   // TODO(yuexima): handle no output case.
   FILE* output_fp;
 
   // execute the command.
-  output_fp = popen(cmd, "r");
+  output_fp = popen(cmd.c_str(), "r");
   if (output_fp == NULL) {
     fprintf(stderr, "Failed to run command\n");
-    exit(errno);
+    int no = errno;
+    return no;
   }
 
-  output_struct* output = (output_struct*)malloc(sizeof(output_struct));
-  memset((void*)output, 0, sizeof(output));
+  char buf[4096];
 
-  output->output_fp = output_fp;
+  stringstream ss;
 
-  return read_output(output) ? output : NULL;
+  while (!feof(output_fp)) {
+    fread(buf, sizeof(buf), 1, output_fp);
+
+    // TODO(yuexima) catch stderr
+    if (ferror(output_fp)) {
+      fprintf(stderr, "error: output read error\n");
+      return -1;
+    }
+
+    string buf_str(buf);
+    ss << buf_str;
+  }
+
+  out_msg->add_stdout(ss.str());
+
+  return 0;
 }
 
 
@@ -97,46 +82,48 @@ static output_struct* exec_shell_cmd(char* cmd) {
  */
 static int connection_handler_shell_cmd(int connection_fd) {
   // TODO(yuexima): handle multiple commands in a while loop
+  VtsDriverControlCommandMessage cmd_msg;
 
-  char* cmd;
-  cmd = read_with_length(connection_fd);
+  int success;
+  int nfailure = 0;
 
-  printf("Driver: received command [\"%s\"]. Processing... \n", cmd);
+  success = read_pb_msg(connection_fd, (google::protobuf::Message*) &cmd_msg);
+  if (success != 0) {
+    fprintf(stderr, "Driver: read command error.\n");
+    return -1;
+  }
+
+  cout << "[Shell driver] received " << cmd_msg.shell_command_size()
+      << " command(s). Processing... " << endl;
 
   // execute command and write back output
-  output_struct* output = exec_shell_cmd(cmd);
+  VtsDriverControlResponseMessage out_msg;
 
-  bool read_success;
-
-  // TODO(yuexima): check success
-  do {
-    write_with_length(connection_fd, output->buffer);
-    printf("Driver: wrote output: [%s]\n", output->buffer);
-    read_success = read_output(output);
-    if (!read_success) {
-      fprintf(stderr, "Driver: read error %d\n", read_success);
-      break;
+  for (const auto& command : cmd_msg.shell_command()) {
+    success = exec_shell_cmd(command, &out_msg);
+    if (success != 0) {
+      cerr << "[Shell driver] error during executing command ["
+          << command << "]" << endl;
+      nfailure--;
     }
-  } while (!output->is_fully_read);
+  }
 
-  printf("Driver: finished processing command [\"%s\"].\n", cmd);
+  success = write_pb_msg(connection_fd,
+                         (google::protobuf::Message*) &out_msg);
+  if (success != 0) {
+    fprintf(stderr, "Driver: write output to socket error.\n");
+    nfailure--;
+  }
 
-  int close_conn_success;
-  int close_output_success;
+  cout << "[Shell driver] finished processing commands." << endl;
 
-  free(cmd);
-  close_conn_success = close(connection_fd);
-  if (close_conn_success != 0) {
+  success = close(connection_fd);
+  if (success != 0) {
     fprintf(stderr, "Driver: failed to close connection (errno: %d).\n", errno);
-  }
-  close_output_success = close_output(output);
-  if (close_output_success != 0) {
-    fprintf(stderr,
-            "Driver: failed to close output buffer. (pclose: %d).\n",
-            close_output_success);
+    nfailure--;
   }
 
-  return read_success && close_conn_success == 0 && close_output_success == 0 ? 0 : 1;
+  return nfailure;
 }
 
 
@@ -157,9 +144,9 @@ int vts_shell_driver_start(char* addr_socket) {
   address.sun_family = AF_UNIX;
   strcpy(address.sun_path, addr_socket);
 
-  if (bind(socket_fd,
-           (struct sockaddr *) &address,
-           sizeof(struct sockaddr_un)) != 0) {
+  if (::bind(socket_fd,
+             (struct sockaddr *) &address,
+             sizeof(struct sockaddr_un)) != 0) {
     fprintf(stderr, "bind() failed: errno = %d\n", errno);
     return 1;
   }
@@ -174,18 +161,16 @@ int vts_shell_driver_start(char* addr_socket) {
     address_length = sizeof(address);
 
     connection_fd = accept(socket_fd,
-                           (struct sockaddr *)&address, &address_length);
+                           (struct sockaddr *) &address, &address_length);
     if (connection_fd == -1) {
       fprintf(stderr, "accept error: %s\n", strerror(errno));
       break;
     }
 
     child = fork();
-
     if (child == 0) {
       // now inside newly created connection handling process
       int res = connection_handler_shell_cmd(connection_fd);
-
       if (res == 0) {  // success
         return 0;
       } else {
@@ -211,4 +196,6 @@ int vts_shell_driver_start(char* addr_socket) {
   return 0;
 }
 
+}  // namespace vts
+}  // namespace android
 

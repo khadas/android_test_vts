@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-#include "shell_driver_test_client.h"
+
+#include "shell_driver_test.h"
 
 #include <gtest/gtest.h>
 #include <errno.h>
 #include <limits.h>
 #include <unistd.h>
 
+#include "shell_driver_test_client.h"
 // include code to be tested
 #include "shell_driver.h"
+
+using namespace std;
+
+namespace android {
+namespace vts {
 
 
 /*
@@ -36,7 +43,7 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
 
   p_driver = fork();
   if (p_driver == 0) {  // child
-    int res_driver = ::vts_shell_driver_start(addr_socket);
+    int res_driver = vts_shell_driver_start(addr_socket);
 
     if (res_driver != 0) {
       fprintf(stderr,
@@ -46,15 +53,15 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
 
     exit(0);
   } else if (p_driver > 0) {  // parent
+    res_client = vts_shell_driver_test_client_start(command, addr_socket);
+
     int res_client_len;
-
-    res_client = ::vts_shell_driver_test_client_start(command, addr_socket);
     res_client_len = strlen(res_client);
-
     if (res_client == NULL) {
       fprintf(stderr, "Client reported error.\n");
       exit(1);
     }
+    cout << "Client receiving: " << res_client << endl;
   } else {
     fprintf(stderr,
             "shell_driver_test.cpp: create child process failed for driver.");
@@ -63,8 +70,6 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
 
   // send kill signal to insure the process would not block
   kill(p_driver, SIGKILL);
-
-  printf("Client result: [%s]\n", res_client);
 
   return res_client;
 }
@@ -100,3 +105,5 @@ TEST(vts_shell_driver_start, vts_shell_driver_unit_test_which_ls) {
   free(output);
 }
 
+}  // namespace vts
+}  // namespace android
