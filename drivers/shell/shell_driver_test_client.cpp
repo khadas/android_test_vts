@@ -15,6 +15,7 @@
  */
 
 #include "shell_driver_test_client.h"
+
 #include "shell_driver.h"
 #include "shell_msg_protocol.h"
 

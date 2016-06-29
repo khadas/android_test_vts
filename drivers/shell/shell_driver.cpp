@@ -82,7 +82,7 @@ static output_struct* exec_shell_cmd(char* cmd) {
     exit(errno);
   }
 
-  output_struct* output = malloc(sizeof(output_struct));
+  output_struct* output = (output_struct*)malloc(sizeof(output_struct));
   memset((void*)output, 0, sizeof(output));
 
   output->output_fp = output_fp;

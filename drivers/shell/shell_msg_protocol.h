@@ -19,7 +19,7 @@
 
 
 extern int kLengthTextBufferSize;
-extern char* kAddressUnixSocketPrefix;
+extern char kAddressUnixSocketPrefix[];
 
 /*
  * write a message to a socket connection using our protocol:
