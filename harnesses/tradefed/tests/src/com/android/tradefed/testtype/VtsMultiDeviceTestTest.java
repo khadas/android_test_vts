@@ -15,7 +15,6 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.IShellOutputReceiver;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.result.ITestInvocationListener;
@@ -25,7 +24,6 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
 
 import junit.framework.TestCase;
-
 import org.easymock.EasyMock;
 
 /**
@@ -34,19 +32,15 @@ import org.easymock.EasyMock;
 public class VtsMultiDeviceTestTest extends TestCase {
 
     private ITestInvocationListener mMockInvocationListener = null;
-    private IShellOutputReceiver mMockReceiver = null;
     private ITestDevice mMockITestDevice = null;
     private IRunUtil mRunUtil = null;
     private VtsMultiDeviceTest mTest = null;
-    private static final String TEST_CASE_PATH = "test/vts/testcases/host/sample/SampleLightTest";
-    private static final String TEST_CONFIG_PATH = "test/vts/testcases/host/sample/SampleLightTest.config";
-
-    // This variable is set in order to include the directory that contains the python test cases.
-    private String mPythonPath = null;
-
-    private CommandResult mCommandResult = null;
+    private static final String TEST_CASE_PATH =
+        "test/vts/testcases/host/sample/SampleLightTest";
+    private static final String TEST_CONFIG_PATH =
+        "test/vts/testcases/host/sample/SampleLightTest.config";
+    private static long TEST_TIMEOUT = 1000 * 60 * 5;
     private String[] mCommand = null;
-
 
     /**
      * Helper to initialize the various EasyMocks we'll need.
@@ -54,100 +48,78 @@ public class VtsMultiDeviceTestTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        mTest = new VtsMultiDeviceTest();
         mRunUtil = EasyMock.createMock(IRunUtil.class);
         mMockInvocationListener = EasyMock.createMock(ITestInvocationListener.class);
-        mMockReceiver = EasyMock.createMock(IShellOutputReceiver.class);
         mMockITestDevice = EasyMock.createMock(ITestDevice.class);
-        mPythonPath = ":" + System.getenv("ANDROID_BUILD_TOP") + "/test";
-        mTest = new VtsMultiDeviceTest();
-
+        mTest.setRunUtil(mRunUtil);
         //build the command
-        String[] baseOpts = {"python", "-m"};
+        String[] baseOpts = {"/usr/bin/python", "-m"};
         String[] testModule = {TEST_CASE_PATH, TEST_CONFIG_PATH};
         mCommand = ArrayUtil.buildArray(baseOpts, testModule);
     }
 
     /**
-     * Helper that replays all mocks.
-     */
-    private void replayMocks() {
-      EasyMock.replay(mMockInvocationListener, mMockITestDevice, mMockReceiver);
-    }
-
-    /**
-     * Helper that verifies all mocks.
-     */
-    private void verifyMocks() {
-      EasyMock.verify(mMockInvocationListener, mMockITestDevice, mMockReceiver);
-    }
-
-    /**
      * Test the run method with a normal input.
-     * @throws DeviceNotAvailableException
      */
-    public void testRunNormalInput() throws DeviceNotAvailableException {
+    public void testRunNormalInput(){
         mTest.setDevice(mMockITestDevice);
-        replayMocks();
         mTest.setTestCasePath(TEST_CASE_PATH);
         mTest.setTestConfigPath(TEST_CONFIG_PATH);
-        mRunUtil.setEnvVariable(VtsMultiDeviceTest.PYTHONPATH, mPythonPath);
-        mTest.setRunUtil(mRunUtil);
-        mCommandResult = new CommandResult();
-        mCommandResult.setStatus(CommandStatus.SUCCESS);
-        EasyMock.expect(mRunUtil.runTimedCmd(VtsMultiDeviceTest.TEST_TIMEOUT, mCommand)).
-            andStubReturn(mCommandResult);
-        mTest.run(mMockInvocationListener);
-        verifyMocks();
+
+        CommandResult commandResult = new CommandResult();
+        commandResult.setStatus(CommandStatus.SUCCESS);
+        EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
+            andReturn(commandResult);
+        EasyMock.replay(mRunUtil);
+        try {
+            mTest.run(mMockInvocationListener);
+        } catch (IllegalArgumentException e) {
+            // not expected
+            fail();
+            e.printStackTrace();
+        } catch (DeviceNotAvailableException e) {
+            // not expected
+            fail();
+            e.printStackTrace();
+        }
     }
 
     /**
-     * Test the run method with a normal input command failed.
-     * @throws DeviceNotAvailableException
+     * Test the run method when the device is set null.
      */
-    public void testRunNormalInputCommandFailed() throws DeviceNotAvailableException {
-        mTest.setDevice(mMockITestDevice);
-        replayMocks();
-        mTest.setTestCasePath(TEST_CASE_PATH);
-        mTest.setTestConfigPath(TEST_CONFIG_PATH);
-        mRunUtil.setEnvVariable(VtsMultiDeviceTest.PYTHONPATH, mPythonPath);
-        mTest.setRunUtil(mRunUtil);
-        mCommandResult = new CommandResult();
-        mCommandResult.setStatus(CommandStatus.FAILED);
-        EasyMock.expect(mRunUtil.runTimedCmd(VtsMultiDeviceTest.TEST_TIMEOUT, mCommand)).
-            andStubReturn(mCommandResult);
-        mTest.run(mMockInvocationListener);
-        verifyMocks();
+    public void testRunDevice(){
+        mTest.setDevice(null);
+        try {
+            mTest.run(mMockInvocationListener);
+            fail();
+       } catch (IllegalArgumentException e) {
+            // not expected
+            fail();
+       } catch (DeviceNotAvailableException e) {
+            // expected
+       }
     }
 
     /**
      * Test the run method with abnormal input data.
      */
-    public void testRunAbnormalInput() throws DeviceNotAvailableException {
+    public void testRunNormalInputCommandFailed() {
         mTest.setDevice(mMockITestDevice);
-        replayMocks();
-
+        CommandResult commandResult = new CommandResult();
+        commandResult.setStatus(CommandStatus.FAILED);
+        EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
+            andReturn(commandResult);
+        EasyMock.replay(mRunUtil);
         try {
             mTest.run(mMockInvocationListener);
-            fail("Exception didn't occur");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        verifyMocks();
-    }
-
-    /**
-     * Test the run method without any device.
-     */
-    public void testRunDevice() throws DeviceNotAvailableException {
-        mTest.setDevice(null);
-        replayMocks();
-
-        try {
-            mTest.run(mMockInvocationListener);
-            fail("Exception didn't occur");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-        verifyMocks();
+            fail();
+       } catch (RuntimeException e) {
+             // expected
+       } catch (DeviceNotAvailableException e) {
+             // not expected
+             fail();
+             e.printStackTrace();
+       }
     }
 }
