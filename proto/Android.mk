@@ -24,6 +24,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   AndroidSystemControlMessage.proto \
   InterfaceSpecificationMessage.proto \
+  VtsDriverControlMessage.proto \
   # $(call all-proto-files-under, ./)
 
 LOCAL_C_INCLUDES := \
