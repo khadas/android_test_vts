@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import socket
+import time
 
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
@@ -29,6 +30,7 @@ from google.protobuf import text_format
 TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
 _SOCKET_CONN_TIMEOUT_SECS = 60
+_SOCKET_CONN_RETRY_NUMBER = 5
 COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      2: "SET_HOST_INFO",
                      101: "CHECK_STUB_SERVICE",
@@ -52,7 +54,7 @@ class VtsTcpClient(object):
         self._mode = mode
 
     def Connect(self, ip=TARGET_IP, command_port=TARGET_PORT,
-                callback_port=None):
+                callback_port=None, retry=_SOCKET_CONN_RETRY_NUMBER):
         """Connects to a target device.
 
         Args:
@@ -61,6 +63,8 @@ class VtsTcpClient(object):
                           a target device.
             callback_port: int, the TCP port number of a host-side callback
                            server.
+            retry: int, the number of times to retry connecting before giving
+                   up.
 
         Returns:
             True if success, False otherwise
@@ -68,13 +72,16 @@ class VtsTcpClient(object):
         Raises:
             socket.error when the connection fails.
         """
-        try:
-            self.connection = socket.create_connection(
-                (ip, command_port), _SOCKET_CONN_TIMEOUT_SECS)
-        except socket.error as e:
-            logging.exception(e)
-            raise errors.VtsTcpClientCreationError(
-                "Couldn't connect to %s:%s" % (ip, command_port))
+        for i in xrange(retry):
+            try:
+                self.connection = socket.create_connection(
+                    (ip, command_port), _SOCKET_CONN_TIMEOUT_SECS)
+            except socket.error as e:
+                # Wait a bit and retry.
+                time.sleep(1)
+                if i + 1 == retry:
+                    raise errors.VtsTcpClientCreationError(
+                        "Couldn't connect to %s:%s" % (ip, command_port))
         self.channel = self.connection.makefile(mode="brw")
 
         if callback_port is not None:
