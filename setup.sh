@@ -35,12 +35,12 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/32/hal/libqomx_core.vts.so /data/local/tmp/32/libqomx_core.vts.so
 
   adb shell mkdir /data/local/tmp/spec
-  adb push sysfuzzer/libinterfacespecification/specification/CameraHalV2.vts /data/local/tmp/spec/CameraHalV2.vts
-  adb push sysfuzzer/libinterfacespecification/specification/CameraHalV2hw_device_t.vts /data/local/tmp/spec/CameraHalV2hw_device_t.vts
-  adb push sysfuzzer/libinterfacespecification/specification/GpsHalV1.vts /data/local/tmp/spec/GpsHalV1.vts
-  adb push sysfuzzer/libinterfacespecification/specification/GpsHalV1GpsInterface.vts /data/local/tmp/spec/GpsHalV1GpsInterface.vts
-  adb push sysfuzzer/libinterfacespecification/specification/LightHalV1.vts /data/local/tmp/spec/LightHalV1.vts
-  adb push sysfuzzer/libinterfacespecification/specification/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
+  adb push specification/hal_conventional/CameraHalV2.vts /data/local/tmp/spec/CameraHalV2.vts
+  adb push specification/hal_conventional/CameraHalV2hw_device_t.vts /data/local/tmp/spec/CameraHalV2hw_device_t.vts
+  adb push specification/hal_conventional/GpsHalV1.vts /data/local/tmp/spec/GpsHalV1.vts
+  adb push specification/hal_conventional/GpsHalV1GpsInterface.vts /data/local/tmp/spec/GpsHalV1GpsInterface.vts
+  adb push specification/hal_conventional/LightHalV1.vts /data/local/tmp/spec/LightHalV1.vts
+  adb push specification/hal_conventional/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
 
   # asan
   adb push ../../prebuilts/clang/host/linux-x86/clang-2812033/lib64/clang/3.8/lib/linux/libclang_rt.asan-aarch64-android.so /data/local/tmp/libclang_rt.asan-aarch64-android.so
