@@ -17,22 +17,56 @@
 #ifndef __VTS_DRIVERS_SHELL_MSG_PROTOCOL_H_
 #define __VTS_DRIVERS_SHELL_MSG_PROTOCOL_H_
 
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
+namespace android {
+namespace vts {
+
+/*
+ * Length of buffer to store the length header text
+ */
 extern int kLengthTextBufferSize;
+
+/*
+ * Unix domain socket address prefix
+ */
 extern char kAddressUnixSocketPrefix[];
+
+
+/*
+ * read the length information stored in header.
+ * The length will be the return value; -1 indicates failure.
+ */
+extern int read_len_header(int fd);
+
 
 /*
  * write a message to a socket connection using our protocol:
  * The length of the message will be encoded in text and sent at first.
  * A new line character will be used to separate the length text and message.
  */
-int write_with_length(int connection_fd, char* msg);
+extern int write_with_length(int connection_fd, char* msg);
+
 
 /*
  * read a message from a socket connection encoded according to our protocol.
  * Please remember to free the message after use.
  */
-char* read_with_length(int connection_fd);
+extern char* read_with_length(int connection_fd);
 
+
+/**
+ * Write a protocol buffer message to socket.
+ */
+extern int write_pb_msg(int fd, google::protobuf::Message* msg);
+
+
+/**
+ * Read a protocol buffer message from socket.
+ */
+extern int read_pb_msg(int fd, google::protobuf::Message* msg);
+
+}  // namespace vts
+}  // namespace android
 
 #endif  // __VTS_DRIVERS_SHELL_MSG_PROTOCOL_H_

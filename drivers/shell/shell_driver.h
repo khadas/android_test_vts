@@ -17,11 +17,15 @@
 #ifndef __VTS_DRIVERS_SHELL_SHELL_DRIVER_H_
 #define __VTS_DRIVERS_SHELL_SHELL_DRIVER_H_
 
+namespace android {
+namespace vts {
 
 /*
  * starts driver process and listen on the specified UNIX domain socket.
  */
 extern int vts_shell_driver_start(char* socket_address);
 
+}  // namespace vts
+}  // namespace android
 
 #endif  // __VTS_DRIVERS_SHELL_SHELL_DRIVER_H_

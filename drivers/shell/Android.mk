@@ -29,6 +29,12 @@ LOCAL_SRC_FILES := \
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
+  libvts_multidevice_proto \
+  libprotobuf-cpp-full \
+
+LOCAL_C_INCLUDES += \
+  test/vts/proto \
+  external/protobuf/src \
 
 LOCAL_CFLAGS := $(common_c_flags)
 include $(BUILD_EXECUTABLE)
@@ -47,6 +53,12 @@ LOCAL_SRC_FILES := \
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
+  libvts_multidevice_proto \
+  libprotobuf-cpp-full \
+
+LOCAL_C_INCLUDES += \
+  test/vts/proto \
+  external/protobuf/src \
 
 LOCAL_CFLAGS := $(common_c_flags)
 include $(BUILD_NATIVE_TEST)
