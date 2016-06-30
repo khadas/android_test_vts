@@ -8,4 +8,4 @@ PRODUCT_PACKAGES += \
     lights.bullhead-vts \
     camera.bullhead-vts
 
--include test/vts/sysfuzzer/libinterfacespecification/vts_specification.mk
+-include test/vts/specification/vts_specification.mk
