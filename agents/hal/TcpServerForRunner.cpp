@@ -53,7 +53,7 @@ const static int kTcpPort = 5001;
 int StartTcpServerForRunner(
     const char* fuzzer_path32, const char* fuzzer_path64,
     const char* spec_dir_path) {
-  int sockfd, newsockfd;
+  int sockfd;
   socklen_t clilen;
   struct sockaddr_in serv_addr;
   struct sockaddr_in cli_addr;
@@ -64,43 +64,45 @@ int StartTcpServerForRunner(
     return -1;
   }
 
-  // Initialize socket structure
   bzero((char*) &serv_addr, sizeof(serv_addr));
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
   serv_addr.sin_port = htons(kTcpPort);
 
-  // Now bind the host address using bind() call.
   if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
-    cerr << __func__ << "Binding failed." << endl;
+    cerr << __func__ << " binding failed." << endl;
     return -1;
   }
 
+  if (listen(sockfd, 5) == -1) {
+    cerr << __func__ << " listen failed." << endl;
+    return -1;
+  }
+  clilen = sizeof(cli_addr);
   while (true) {
-    // Now start listening for the clients, here process will go in sleep mode
-    // and will wait for the incoming connection
-    listen(sockfd, 5);
-    clilen = sizeof(cli_addr);
-
-    // Accept actual connection from the client
-    newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
+    int newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
     if (newsockfd < 0) {
-      cerr << "Accept failed" << endl;
+      cerr << __func__ << " accept failed" << endl;
       return -1;
     }
 
     cout << "[runner->agent] NEW SESSION" << endl;
     cout << "[runner->agent] ===========" << endl;
-
     pid_t pid = fork();
     if (pid == 0) {  // child
+      close(sockfd);
+      cout << "[agent] process for a runner - pid = " << getpid() << endl;
       AgentRequestHandler handler;
-      exit(handler.Start(newsockfd, fuzzer_path32, fuzzer_path64,
-                         spec_dir_path));
+      handler.SetSockfd(newsockfd);
+      while (handler.ProcessOneCommand(fuzzer_path32, fuzzer_path64,
+                                       spec_dir_path));
+      exit(-1);
     } else if (pid < 0) {
       cerr << "can't fork a child process to handle a session." << endl;
       return -1;
+    } else {
+      close(newsockfd);
     }
   }
   return 0;

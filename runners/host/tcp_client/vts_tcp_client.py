@@ -132,13 +132,14 @@ class VtsTcpClient(object):
                          target_type=target_type,
                          target_version=target_version)
         resp = self.RecvResponse()
-        logging.info("resp: %s", resp)
+        logging.info("resp for LAUNCH_DRIVER_SERVICE: %s", resp)
         return (resp.response_code == SysMsg_pb2.SUCCESS)
 
     def ListApis(self):
         """RPC to LIST_APIS."""
         self.SendCommand(SysMsg_pb2.LIST_APIS)
         resp = self.RecvResponse()
+        logging.info("resp for LIST_APIS: %s", resp)
         if (resp.response_code == SysMsg_pb2.SUCCESS):
             return resp.spec
         return None
