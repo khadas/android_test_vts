@@ -20,10 +20,10 @@
 #include <string>
 #include <vector>
 
+#include "SocketClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-#include "TcpClient.h"
 
 using namespace std;
 using namespace google::protobuf;
@@ -39,7 +39,7 @@ class AgentRequestHandler {
         driver_client_(NULL) {}
 
   // handles a new session.
-  int StartSession(
+  int Start(
       int fd, const char* fuzzer_path32, const char* fuzzer_path64,
       const char* spec_dir_path);
 

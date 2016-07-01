@@ -19,26 +19,27 @@
 
 #include <string>
 
+#include <VtsDriverCommUtil.h>
+
 using namespace std;
 
 namespace android {
 namespace vts {
 
 // Socket client instance for an agent to control a driver.
-class VtsDriverSocketClient {
+class VtsDriverSocketClient : public VtsDriverCommUtil {
  public:
-  explicit VtsDriverSocketClient(int port)
-      : server_port_(port),
-        sockfd_(-1) {}
+  explicit VtsDriverSocketClient()
+      : VtsDriverCommUtil() {}
 
   // returns true if connection to the server is successful, false otherwise.
-  bool Connect();
-
-  // returns true if successfully sent the message, false otherwise.
-  bool Send(const string& message);
+  bool Connect(const string& socket_name);
 
   // closes the socket.
   void Close();
+
+  // Sends a EXIT request;
+  bool Exit();
 
   // Sends a LOAD_HAL request.
   int32_t LoadHal(
@@ -53,21 +54,14 @@ class VtsDriverSocketClient {
 
   // Sends a GET_STATUS request.
   int32_t Status(int32_t type);
-
- private:
-  // the server's socket port number
-  int server_port_;
-
-  // socket file descriptor.
-  int sockfd_;
 };
 
 
 // returns the socket port file's path for the given service_name.
 extern string GetSocketPortFilePath(const string& service_name);
 
-// reads the socket port from the given service_name's socket port file.
-extern int GetSocketPortFromFile(const string& service_name, int retry_count);
+// returns true if the specified driver is running.
+bool IsDriverRunning(const string& service_name, int retry_count);
 
 // creates and returns VtsDriverSocketClient of the given service_name.
 extern VtsDriverSocketClient* GetDriverSocketClient(const string& service_name);

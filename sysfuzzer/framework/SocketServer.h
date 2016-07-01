@@ -19,24 +19,25 @@
 #ifndef __VTS_DRIVER_HAL_SOCKET_SERVER_
 #define __VTS_DRIVER_HAL_SOCKET_SERVER_
 
+#include <VtsDriverCommUtil.h>
+
 #include "specification_parser/SpecificationBuilder.h"
 
 namespace android {
 namespace vts {
 
-class VtsDriverHalSocketServer {
+class VtsDriverHalSocketServer : public VtsDriverCommUtil {
  public:
   VtsDriverHalSocketServer(android::vts::SpecificationBuilder& spec_builder,
                            const char* lib_path)
       : spec_builder_(spec_builder),
-        lib_path_(lib_path) {}
-
-  // Starts to run a TCP server (foreground).
-  int Start(const string& socket_port_file);
+        lib_path_(lib_path),
+        VtsDriverCommUtil() {}
 
   // Start a session to handle a new request.
-  bool StartSession(int sockfd);
+  bool ProcessOneCommand();
 
+ protected:
   void Exit();
   int32_t LoadHal(const string& path, int target_class,
                   int target_type, float target_version,
@@ -45,18 +46,15 @@ class VtsDriverHalSocketServer {
   const char* Call(const string& arg);
   const char* GetFunctions();
 
- protected:
-  bool Send(int sockfd, const string& message);
-
  private:
   android::vts::SpecificationBuilder& spec_builder_;
   const char* lib_path_;
 };
 
 
-extern void StartSocketServer(const string& socket_port_file,
-                              android::vts::SpecificationBuilder& spec_builder,
-                              const char* lib_path);
+extern int StartSocketServer(const string& socket_port_file,
+                             android::vts::SpecificationBuilder& spec_builder,
+                             const char* lib_path);
 
 }  // namespace vts
 }  // namespace android

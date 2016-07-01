@@ -22,13 +22,12 @@ LOCAL_MODULE := vts_hal_agent
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  HalAgentMain.cpp \
-  BinderClient.cpp \
-  TcpClient.cpp \
-  TcpServer.cpp \
-  RequestHandler.cpp \
+  VtsAgentMain.cpp \
+  TcpServerForRunner.cpp \
+  AgentRequestHandler.cpp \
+  SocketClientToDriver.cpp \
+  BinderClientToDriver.cpp \
   SocketServerForDriver.cpp \
-  SocketUtil.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
@@ -38,6 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
   libc++ \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
+  libvts_drivercomm \
 
 LOCAL_C_INCLUDES += \
   bionic \
@@ -47,6 +47,7 @@ LOCAL_C_INCLUDES += \
   test/vts/sysfuzzer/common \
   test/vts/agents/hal \
   test/vts/agents/hal/proto \
+  test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
 include $(BUILD_EXECUTABLE)

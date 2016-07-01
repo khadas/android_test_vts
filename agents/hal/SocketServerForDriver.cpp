@@ -22,21 +22,22 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 
 #include <iostream>
 #include <sstream>
 
-#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+#include <VtsDriverCommUtil.h>
 
-#include "SocketUtil.h"
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
-const static int kCallbackServerPort = 5010;
+static const int kCallbackServerPort = 5010;
 
 
 void RpcCallToRunner(char* id, int runner_port) {
@@ -77,43 +78,31 @@ void RpcCallToRunner(char* id, int runner_port) {
   }
 
   cout << "sending " << id << endl;
-  AndroidSystemCallbackRequestMessage* callback_msg =
-      new AndroidSystemCallbackRequestMessage();
-  callback_msg->set_id(id);
+  AndroidSystemCallbackRequestMessage callback_msg;
+  callback_msg.set_id(id);
 
-  string callback_msg_str;
-  if (!callback_msg->SerializeToString(&callback_msg_str)) {
-    cerr << "can't serialize the callback request message to a string." << endl;
-    return;
-  }
-
-  if (!VtsSocketSend(sockfd, callback_msg_str)) return;
-  delete callback_msg;
-  close(sockfd);
-  return;
+  VtsDriverCommUtil util(sockfd);
+  if (!util.VtsSocketSendMessage(callback_msg)) return;
 }
 
 
-void handler(int sock, int runner_port) {
-  int n;
+void CallbackRequestHandler(int sock, int runner_port) {
   char buffer[256];
-
   bzero(buffer, 256);
-  n = read(sock, buffer, 255);
+  int n = read(sock, buffer, 255);
   if (n < 0) {
     cerr << __func__ << " ERROR reading from socket" << endl;
     return;
   }
   cout << "Here is the message: " << buffer << endl;
-  RpcCallToRunner(buffer, kCallbackServerPort);
+  RpcCallToRunner(buffer, runner_port);
 }
 
 
-int StartSocketServerForDriver(int agent_port, int runner_port) {
-  struct sockaddr_in serv_addr;
-
-  int pid;
-  pid = fork();
+int StartSocketServerForDriver(const string& callback_socket_name,
+                               int runner_port) {
+  struct sockaddr_un serv_addr;
+  int pid = fork();
   if (pid < 0) {
     cerr << __func__ << " ERROR on fork" << endl;
     return -1;
@@ -121,20 +110,25 @@ int StartSocketServerForDriver(int agent_port, int runner_port) {
     return 0;
   }
 
+  if (runner_port == -1) {
+    runner_port = kCallbackServerPort;
+  }
   // only child process continues;
   int sockfd;
-  sockfd = socket(PF_INET, SOCK_STREAM, 0);
+  sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (sockfd < 0) {
     cerr << __func__ << " ERROR opening socket" << endl;
     return -1;
   }
+
   bzero((char*) &serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(agent_port);
+  serv_addr.sun_family = AF_UNIX;
+  strcpy(serv_addr.sun_path, callback_socket_name.c_str());
 
   if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
-    cerr << __func__ << " ERROR on binding" << endl;
+    int error_save = errno;
+    cerr << getpid() << " " << __func__ << " ERROR on binding errno = "
+        << error_save << " " << strerror(error_save) << endl;
     return -1;
   }
 
@@ -155,16 +149,15 @@ int StartSocketServerForDriver(int agent_port, int runner_port) {
       break;
     }
     pid = fork();
-    if (pid < 0) {
+    if (pid == 0)  {
+      close(sockfd);
+      CallbackRequestHandler(newsockfd, runner_port);
+      exit(0);
+    } else if (pid > 0) {
+      close(newsockfd);
+    } else {
       cerr << __func__ << " ERROR on fork" << endl;
       break;
-    }
-    if (pid == 0)  {
-      // close(sockfd);
-      handler(newsockfd, runner_port);
-      exit(0);
-    } else {
-      //close(newsockfd);
     }
   }
   close(sockfd);
