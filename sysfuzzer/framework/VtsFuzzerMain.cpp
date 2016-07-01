@@ -86,7 +86,7 @@ int main(int argc, char* const argv[]) {
     {"epoch_count",          required_argument, NULL, 'e'},
     {"spec_dir",             required_argument, NULL, 's'},
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    {"socket_port_file",     optional_argument, NULL, 'f'},
+    {"server_socket_path",   optional_argument, NULL, 'f'},
 #else  // binder
     {"service_name",         required_argument, NULL, 'n'},
 #endif
@@ -100,7 +100,7 @@ int main(int argc, char* const argv[]) {
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
   bool server = false;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-  string socket_port_file;
+  string server_socket_path;
 #else  // binder
   string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
 #endif
@@ -163,7 +163,7 @@ int main(int argc, char* const argv[]) {
         break;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
       case 'f':
-        socket_port_file = string(optarg);
+        server_socket_path = string(optarg);
         break;
 #else  // binder
       case 'n':
@@ -198,11 +198,11 @@ int main(int argc, char* const argv[]) {
     }
   } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    android::vts::StartSocketServer(socket_port_file, spec_builder,
-                                    INTERFACE_SPEC_LIB_FILENAME);
+    android::vts::StartSocketServer(
+        server_socket_path, spec_builder, INTERFACE_SPEC_LIB_FILENAME);
 #else  // binder
-    android::vts::StartBinderServer(service_name, spec_builder,
-                                    INTERFACE_SPEC_LIB_FILENAME);
+    android::vts::StartBinderServer(
+        service_name, spec_builder, INTERFACE_SPEC_LIB_FILENAME);
 #endif
   }
   return 0;

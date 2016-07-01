@@ -43,6 +43,7 @@ class TCPRequestHandler(SocketServer.StreamRequestHandler):
             len = int(header.strip("\n"))
         except ValueError as e:
             logging.exception(e)
+            logging.exception(header)
             return
 
         received_data = self.rfile.read(len)

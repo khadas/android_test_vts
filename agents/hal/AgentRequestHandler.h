@@ -36,21 +36,28 @@ namespace vts {
 // Class which contains actual methods to handle the runner requests.
 class AgentRequestHandler : public VtsDriverCommUtil {
  public:
-  AgentRequestHandler()
+  AgentRequestHandler(const char* spec_dir_path,
+                      const char* hal_path32,
+                      const char* hal_path64,
+                      const char* shell_path32,
+                      const char* shell_path64)
       : service_name_(),
         driver_client_(NULL),
+        driver_hal_spec_dir_path_(spec_dir_path),
+        driver_hal_binary32_(hal_path32),
+        driver_hal_binary64_(hal_path64),
+        driver_shell_binary32_(shell_path32),
+        driver_shell_binary64_(shell_path64),
         VtsDriverCommUtil() {}
 
   // handles a new session.
-  bool ProcessOneCommand(
-      const char* fuzzer_path32, const char* fuzzer_path64,
-      const char* spec_dir_path);
+  bool ProcessOneCommand();
 
  protected:
 
   // for the LIST_HAL command
   bool ListHals(
-      const ::google::protobuf::RepeatedPtrField< ::std::string>& base_paths);
+      const ::google::protobuf::RepeatedPtrField<::std::string>& base_paths);
 
   // for the SET_HOST_INFO command.
   bool SetHostInfo(const int callback_port);
@@ -61,10 +68,9 @@ class AgentRequestHandler : public VtsDriverCommUtil {
 
   // for the LAUNCH_DRIVER_SERVICE command
   bool LaunchDriverService(
-      const char* spec_dir_path, const string& service_name,
-      const string& file_path, const char* fuzzer_path,
-      int target_class, int target_type,
-      float target_version, const string& module_name);
+      int driver_type, const string& service_name, const string& file_path,
+      int target_class, int target_type, float target_version,
+      const string& module_name, int bits);
 
   // for the LIST_APIS command
   bool ListApis();
@@ -82,6 +88,12 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   int callback_port_;
   // the socket client of a launched or connected driver.
   VtsDriverSocketClient* driver_client_;
+
+  const string driver_hal_spec_dir_path_;
+  const string driver_hal_binary32_;
+  const string driver_hal_binary64_;
+  const string driver_shell_binary32_;
+  const string driver_shell_binary64_;
 };
 
 }  // namespace vts

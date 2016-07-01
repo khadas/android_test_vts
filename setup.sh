@@ -52,5 +52,4 @@ function vts_multidevice_target_setup {
   adb shell chmod 755 /data/local/tmp/32/fuzzer32
   adb shell chmod 755 /data/local/tmp/64/fuzzer64
   adb shell chmod 755 /data/local/tmp/64/vts_hal_agent
-  adb shell rm -f /data/local/tmp/vts_binder_* /data/local/tmp/vts_agent_callback*
 }

@@ -120,10 +120,9 @@ static const char kUnixSocketNamePrefixForCallbackServer[] =
 
 
 bool AgentRequestHandler::LaunchDriverService(
-    const char* spec_dir_path, const string& service_name,
-    const string& file_path, const char* fuzzer_path,
-    int target_class, int target_type,
-    float target_version, const string& module_name) {
+    int driver_type, const string& service_name, const string& file_path,
+    int target_class, int target_type, float target_version,
+    const string& module_name, int bits) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   ResponseCode result = FAIL;
 
@@ -151,48 +150,81 @@ bool AgentRequestHandler::LaunchDriverService(
       cout << "callback_socket_name: " << callback_socket_name << endl;
       StartSocketServerForDriver(callback_socket_name, -1);
 
-      string fuzzer_path_string(fuzzer_path);
-      size_t offset = fuzzer_path_string.find_last_of("/");
-      string ld_dir_path = fuzzer_path_string.substr(0, offset);
-
+      string driver_binary_path;
       char* cmd;
-      if (!spec_dir_path) {
-  #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+      if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
+        if (bits == 32) {
+          driver_binary_path = driver_hal_binary32_;
+        } else {
+          driver_binary_path = driver_hal_binary64_;
+        }
+        size_t offset = driver_binary_path.find_last_of("/");
+        string ld_dir_path = driver_binary_path.substr(0, offset);
+
+        if (driver_hal_spec_dir_path_.length() < 1) {
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+          asprintf(
+              &cmd,
+              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --server_socket_path=%s "
+              "--callback_socket_name=%s",
+              ld_dir_path.c_str(), driver_binary_path.c_str(),
+              socket_port_flie_path.c_str(), callback_socket_name.c_str());
+#else  // binder
+          asprintf(
+              &cmd,
+              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+              "--callback_socket_name=%s",
+              ld_dir_path.c_str(), driver_binary_path.c_str(), service_name.c_str(),
+              callback_socket_name.c_str());
+#endif
+        } else {
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+          asprintf(
+              &cmd,
+              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --server_socket_path=%s "
+              "--spec_dir=%s --callback_socket_name=%s",
+              ld_dir_path.c_str(), driver_binary_path.c_str(),
+              socket_port_flie_path.c_str(), driver_hal_spec_dir_path_.c_str(),
+              callback_socket_name.c_str());
+#else  // binder
+          asprintf(
+              &cmd,
+              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+              "--spec_dir=%s --callback_socket_name=%s",
+              ld_dir_path.c_str(), driver_binary_path.c_str(), service_name.c_str(),
+              driver_hal_spec_dir_path_.c_str(), callback_socket_name.c_str());
+#endif
+        }
+      } else if (driver_type == VTS_DRIVER_TYPE_SHELL) {
+        if (bits == 32) {
+          driver_binary_path = driver_shell_binary32_;
+        } else {
+          driver_binary_path = driver_shell_binary64_;
+        }
+        size_t offset = driver_binary_path.find_last_of("/");
+        string ld_dir_path = driver_binary_path.substr(0, offset);
+
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
         asprintf(
             &cmd,
-            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server_socket_path=%s "
             "--callback_socket_name=%s",
-            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(),
-            callback_socket_name.c_str());
-  #else  // binder
-        asprintf(
-            &cmd,
-            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-            "--callback_socket_name=%s",
-            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
-            callback_socket_name.c_str());
-  #endif
+            ld_dir_path.c_str(), driver_binary_path.c_str(),
+            socket_port_flie_path.c_str(), callback_socket_name.c_str());
+#else  // binder
+        cerr << __func__ << " no binder implementation available." << endl;
+        exit(-1);
+#endif
       } else {
-  #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-        asprintf(
-            &cmd,
-            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
-            "--spec_dir=%s --callback_socket_name=%s",
-            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(),
-            spec_dir_path, callback_socket_name.c_str());
-  #else  // binder
-        asprintf(
-            &cmd,
-            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-            "--spec_dir=%s --callback_socket_name=%s",
-            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
-            spec_dir_path, callback_socket_name.c_str());
-  #endif
+        cerr << __func__ << " unsupported driver type." << endl;
       }
-      cout << __func__ << "Exec " << cmd << endl;
-      system(cmd);
-      cout << __func__ << "fuzzer exits" << endl;
-      free(cmd);
+
+      if (cmd) {
+        cout << __func__ << "launch a driver - " << cmd << endl;
+        system(cmd);
+        cout << __func__ << "driver exits" << endl;
+        free(cmd);
+      }
       exit(0);
     } else if (pid > 0){
       for (int attempt = 0; attempt < 10; attempt++) {
@@ -322,9 +354,7 @@ bool AgentRequestHandler::DefaultResponse() {
 }
 
 
-bool AgentRequestHandler::ProcessOneCommand(
-    const char* fuzzer_path32, const char* fuzzer_path64,
-    const char* spec_dir_path) {
+bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
 
@@ -336,21 +366,15 @@ bool AgentRequestHandler::ProcessOneCommand(
     case CHECK_DRIVER_SERVICE:
       return CheckDriverService(command_msg.service_name(), NULL);
     case LAUNCH_DRIVER_SERVICE:
-      const char* fuzzer_path;
-      if (command_msg.bits() == 32) {
-        fuzzer_path = fuzzer_path32;
-      } else {
-        fuzzer_path = fuzzer_path64;
-      }
       return LaunchDriverService(
-          spec_dir_path,
+          command_msg.driver_type(),
           command_msg.service_name(),
           command_msg.file_path(),
-          fuzzer_path,
           command_msg.target_class(),
           command_msg.target_type(),
           command_msg.target_version() / 100.0,
-          command_msg.module_name());
+          command_msg.module_name(),
+          command_msg.bits());
     case LIST_APIS:
       return ListApis();
     case CALL_API:

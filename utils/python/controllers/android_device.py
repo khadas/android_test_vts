@@ -498,9 +498,13 @@ class AndroidDevice(object):
         if self.vts_agent_process:
             raise AndroidDeviceError("HAL agent is already running on %s." %
                                      self.serial)
+
+        cleanup_commands = [
+            "rm -f /data/local/tmp/vts_driver_* /data/local/tmp/vts_agent_callback*"]
         kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
                          "killall fuzzer64"]
-        for cmd in kill_commands:
+        cleanup_commands.extend(kill_commands)
+        for cmd in cleanup_commands:
             try:
                 self.adb.shell(cmd)
             except adb.AdbError:
@@ -509,7 +513,8 @@ class AndroidDevice(object):
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
         cmd = (
             'adb -s {s} shell LD_LIBRARY_PATH={path}/64 {path}/64/vts_hal_agent'
-            ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec >> {log}'
+            ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec'
+            ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log}'
         ).format(s=self.serial,
                  path=DEFAULT_AGENT_BASE_DIR,
                  log=vts_agent_log_path)
