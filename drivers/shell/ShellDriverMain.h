@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_DRIVERS_SHELL_SHELL_DRIVER_TEST_H_
-#define __VTS_DRIVERS_SHELL_SHELL_DRIVER_TEST_H_
+#ifndef __VTS_SHELL_DRIVER_MAIN_H_
+#define __VTS_SHELL_DRIVER_MAIN_H_
 
+#include <string>
 
+using namespace std;
 
-#endif  // __VTS_DRIVERS_SHELL_SHELL_DRIVER_TEST_H_
+const char DEFAULT_SOCKET_PATH[] =
+    "/data/local/tmp/tmp_socket_shell_driver.tmp";
+
+int main(int argc, char* const argv[]);
+
+#endif  // __VTS_SHELL_DRIVER_MAIN_H_

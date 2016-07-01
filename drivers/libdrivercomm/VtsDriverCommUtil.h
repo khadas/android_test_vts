@@ -37,7 +37,7 @@ class VtsDriverCommUtil {
 
   ~VtsDriverCommUtil() {
     cout << __func__ << endl;
-    if (sockfd_ != -1) Close();
+//    if (sockfd_ != -1) Close();
   }
 
   // sets sockfd_
@@ -46,8 +46,8 @@ class VtsDriverCommUtil {
     sockfd_ = sockfd;
   }
 
-  // closes the channel.
-  void Close();
+  // closes the channel. returns 0 if success or socket already closed
+  int Close();
 
   // Sends a message using the VTS's protocol for socket communication.
   bool VtsSocketSendBytes(const string& message);

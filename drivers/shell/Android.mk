@@ -22,18 +22,19 @@ LOCAL_MODULE := vts_shell_driver
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  shell_msg_protocol.cpp \
-  shell_driver.cpp \
-  shell_driver_main.cpp \
+  ShellDriver.cpp \
+  ShellDriverMain.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
   libvts_multidevice_proto \
+  libvts_drivercomm \
   libprotobuf-cpp-full \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \
+  test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
 LOCAL_CFLAGS := $(common_c_flags)
@@ -45,19 +46,19 @@ LOCAL_MODULE := vts_shell_driver_test
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  shell_msg_protocol.cpp \
-  shell_driver.cpp \
-  shell_driver_test_client.cpp \
-  shell_driver_test.cpp \
+  ShellDriver.cpp \
+  ShellDriverTest.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
   libvts_multidevice_proto \
+  libvts_drivercomm \
   libprotobuf-cpp-full \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \
+  test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
 LOCAL_MULTILIB := both
