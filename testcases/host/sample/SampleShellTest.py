@@ -32,9 +32,10 @@ class SampleShellTest(base_test.BaseTestClass):
 
     def testOneCommand(self):
         """A simple testcase which just emulates a normal usage pattern."""
-        result = self.dut.shell.my_shell1.Execute("which ls")
-        logging.info(result)
-        asserts.assertEqual(result, "/system/bin/ls")
+        stdouts = self.dut.shell.my_shell1.Execute("which ls")
+        logging.info(stdouts)
+        for stdout in stdouts:
+            asserts.assertEqual(stdout.strip(), "/system/bin/ls")
 
 
 if __name__ == "__main__":

@@ -19,6 +19,8 @@ include $(call all-subdir-makefiles)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := vts_shell_driver
+LOCAL_MODULE_STEM_64 := vts_shell_driver64
+LOCAL_MODULE_STEM_32 := vts_shell_driver32
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
@@ -38,6 +40,9 @@ LOCAL_C_INCLUDES += \
   external/protobuf/src \
 
 LOCAL_CFLAGS := $(common_c_flags)
+
+LOCAL_MULTILIB := both
+
 include $(BUILD_EXECUTABLE)
 
 
@@ -60,8 +65,6 @@ LOCAL_C_INCLUDES += \
   test/vts/proto \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
-
-LOCAL_MULTILIB := both
 
 LOCAL_CFLAGS := $(common_c_flags)
 

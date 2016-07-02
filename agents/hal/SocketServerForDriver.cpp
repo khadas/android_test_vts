@@ -127,8 +127,8 @@ int StartSocketServerForDriver(const string& callback_socket_name,
 
   if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
     int error_save = errno;
-    cerr << getpid() << " " << __func__ << " ERROR on binding errno = "
-        << error_save << " " << strerror(error_save) << endl;
+    cerr << getpid() << " " << __func__ << " ERROR on binding " << callback_socket_name
+        << " errno = " << error_save << " " << strerror(error_save) << endl;
     return -1;
   }
 

@@ -143,16 +143,16 @@ bool AgentRequestHandler::LaunchDriverService(
     if (pid == 0) {  // child
       Close();
 
-      // TODO: check whether the port is available and handle if fails.
-      static int port = 0;
-      string callback_socket_name(kUnixSocketNamePrefixForCallbackServer);
-      callback_socket_name += std::to_string(port++);
-      cout << "callback_socket_name: " << callback_socket_name << endl;
-      StartSocketServerForDriver(callback_socket_name, -1);
-
       string driver_binary_path;
       char* cmd;
       if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
+        // TODO: check whether the port is available and handle if fails.
+        static int port = 0;
+        string callback_socket_name(kUnixSocketNamePrefixForCallbackServer);
+        callback_socket_name += std::to_string(port++);
+        cout << "callback_socket_name: " << callback_socket_name << endl;
+        StartSocketServerForDriver(callback_socket_name, -1);
+
         if (bits == 32) {
           driver_binary_path = driver_hal_binary32_;
         } else {
@@ -207,10 +207,9 @@ bool AgentRequestHandler::LaunchDriverService(
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
         asprintf(
             &cmd,
-            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server_socket_path=%s "
-            "--callback_socket_name=%s",
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server_socket_path=%s",
             ld_dir_path.c_str(), driver_binary_path.c_str(),
-            socket_port_flie_path.c_str(), callback_socket_name.c_str());
+            socket_port_flie_path.c_str());
 #else  // binder
         cerr << __func__ << " no binder implementation available." << endl;
         exit(-1);
@@ -250,19 +249,28 @@ bool AgentRequestHandler::LaunchDriverService(
           // TODO: kill the driver?
           return VtsSocketSendMessage(response_msg);
         }
-        cout << "[agent->driver]: LoadHal " << module_name << endl;
-        int32_t result = client->LoadHal(
-            file_path, target_class, target_type, target_version, module_name);
-        cout << "[driver->agent]: LoadHal returns " << result << endl;
-        if (result == VTS_DRIVER_RESPONSE_SUCCESS) {
+        int32_t result;
+        if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
+          cout << "[agent->driver]: LoadHal " << module_name << endl;
+          result = client->LoadHal(
+              file_path, target_class, target_type, target_version, module_name);
+          cout << "[driver->agent]: LoadHal returns " << result << endl;
+          if (result == VTS_DRIVER_RESPONSE_SUCCESS) {
+            response_msg.set_response_code(SUCCESS);
+            response_msg.set_reason("Loaded the selected HAL.");
+            cout << "set service_name " << service_name << endl;
+            service_name_ = service_name;
+          } else {
+            response_msg.set_response_code(FAIL);
+            response_msg.set_reason("Failed to load the selected HAL.");
+          }
+        } else if (driver_type == VTS_DRIVER_TYPE_SHELL) {
           response_msg.set_response_code(SUCCESS);
-          response_msg.set_reason("Loaded the selected HAL.");
+          response_msg.set_reason("Loaded the shell driver.");
           cout << "set service_name " << service_name << endl;
           service_name_ = service_name;
-        } else {
-          response_msg.set_response_code(FAIL);
-          response_msg.set_reason("Failed to load the selected HAL.");
         }
+
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
         driver_client_ = client;
 #endif
@@ -368,12 +376,14 @@ bool AgentRequestHandler::ExecuteShellCommand(
   }
 
   // TODO: support stdout and stderr
-  char* result = client->ExecuteShellCommand(command_message);
+  char* result = client->ExecuteShellCommand(
+      command_message.shell_command());
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
     cout << "ExecuteShellCommand: success" << endl;
     response_msg.set_response_code(SUCCESS);
+    response_msg.add_stdout(result);
   } else {
     cout << "ExecuteShellCommand: fail" << endl;
     response_msg.set_response_code(FAIL);
@@ -388,6 +398,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
 
+  cout << getpid() << " " << __func__ << " command_type = "
+      << command_msg.command_type() << endl;
   switch (command_msg.command_type()) {
     case LIST_HALS:
       return ListHals(command_msg.paths());
@@ -411,7 +423,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
       return CallApi(command_msg.arg());
     // for shell driver
     case VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND:
-      return ExecuteShellCommand(command_msg);
+      ExecuteShellCommand(command_msg);
+      return true;
     default:
       cerr << __func__ << " ERROR unknown command "
           << command_msg.command_type() << endl;
