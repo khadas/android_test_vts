@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-
-#include "shell_driver.h"
+#include "ShellDriver.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,69 +26,86 @@
 #include <sstream>
 #include <iostream>
 
-#include "shell_msg_protocol.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
+#include <VtsDriverCommUtil.h>
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
+int VtsShellDriver::Close() {
+  cout << __func__ << endl;
+  int result = 0;
 
-/*
- * execute a given shell command and return the output file descriptor
- * Please remember to call close_output after usage.
- */
-static int exec_shell_cmd(string cmd,
-                          VtsDriverControlResponseMessage* out_msg) {
+  if (this->socket_address_ != NULL) {
+    result = unlink(this->socket_address_);
+    if (result != 0) {
+      cerr <<  __func__ << ":" << __LINE__
+          << " ERROR closing socket (errno = "
+          << errno << ")"<< endl;
+    }
+
+    this->socket_address_ = NULL;
+  }
+
+  return result;
+}
+
+
+int VtsShellDriver::ExecShellCommand(const string& command,
+                     VtsDriverControlResponseMessage* responseMessage) {
   // TODO(yuexima): handle no output case.
   FILE* output_fp;
 
   // execute the command.
-  output_fp = popen(cmd.c_str(), "r");
+  output_fp = popen(command.c_str(), "r");
   if (output_fp == NULL) {
-    fprintf(stderr, "Failed to run command\n");
+    cerr << "Failed to run command: " << command << endl;
     int no = errno;
     return no;
   }
 
-  char buf[4096];
+  cout << "[Handler] Running command: " << command << endl << endl;
 
+  char buff[4096];
   stringstream ss;
 
+  int bytes_read;
   while (!feof(output_fp)) {
-    fread(buf, sizeof(buf), 1, output_fp);
-
+    bytes_read = fread(buff, 1, sizeof(buff) - 1, output_fp);
     // TODO(yuexima) catch stderr
     if (ferror(output_fp)) {
-      fprintf(stderr, "error: output read error\n");
+      cerr <<  __func__ << ":" << __LINE__
+          << "ERROR reading shell output" << endl;
       return -1;
     }
 
-    string buf_str(buf);
-    ss << buf_str;
+    cout << "[Handler] bytes read from output: " << bytes_read << endl;
+    buff[bytes_read] = '\0';
+    ss << buff;
   }
 
-  out_msg->add_stdout(ss.str());
+  cout << "[Handler] Returning output: " << ss.str() << endl << endl;
+  responseMessage->add_stdout(ss.str());
+
+  for (auto const& out : responseMessage->stdout()) {
+    cout << "[Handler] Loop output: " << out << endl << endl;
+  }
 
   return 0;
 }
 
 
-/*
- * Handles a socket connection. Will execute a received shell command
- * and send back the output text.
- */
-static int connection_handler_shell_cmd(int connection_fd) {
+int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
+  VtsDriverCommUtil driverUtil(connection_fd);
   // TODO(yuexima): handle multiple commands in a while loop
   VtsDriverControlCommandMessage cmd_msg;
+  bool success;
+  int numberOfFailure = 0;
 
-  int success;
-  int nfailure = 0;
-
-  success = read_pb_msg(connection_fd, (google::protobuf::Message*) &cmd_msg);
-  if (success != 0) {
-    fprintf(stderr, "Driver: read command error.\n");
+  if (!driverUtil.VtsSocketRecvMessage(
+       static_cast<google::protobuf::Message*>(&cmd_msg))) {
     return -1;
   }
 
@@ -97,37 +113,40 @@ static int connection_handler_shell_cmd(int connection_fd) {
       << " command(s). Processing... " << endl;
 
   // execute command and write back output
-  VtsDriverControlResponseMessage out_msg;
+  VtsDriverControlResponseMessage responseMessage;
 
   for (const auto& command : cmd_msg.shell_command()) {
-    success = exec_shell_cmd(command, &out_msg);
-    if (success != 0) {
+    if (this->ExecShellCommand(command, &responseMessage) != 0) {
       cerr << "[Shell driver] error during executing command ["
           << command << "]" << endl;
-      nfailure--;
+      --numberOfFailure;
     }
   }
 
-  success = write_pb_msg(connection_fd,
-                         (google::protobuf::Message*) &out_msg);
-  if (success != 0) {
+  if (!driverUtil.VtsSocketSendMessage(responseMessage)) {
     fprintf(stderr, "Driver: write output to socket error.\n");
-    nfailure--;
+    --numberOfFailure;
   }
 
   cout << "[Shell driver] finished processing commands." << endl;
 
-  success = close(connection_fd);
-  if (success != 0) {
-    fprintf(stderr, "Driver: failed to close connection (errno: %d).\n", errno);
-    nfailure--;
+  if (driverUtil.Close() != 0) {
+    cerr << "[Driver] failed to close connection. errno: " << errno << endl;
+    --numberOfFailure;
   }
 
-  return nfailure;
+  return numberOfFailure;
 }
 
 
-int vts_shell_driver_start(char* addr_socket) {
+int VtsShellDriver::StartListen() {
+  if (this->socket_address_ == NULL) {
+    cerr << "[Driver] NULL socket address." << endl;
+    return -1;
+  }
+
+  cout << "[Driver] start listening on " << this->socket_address_ << endl;
+
   struct sockaddr_un address;
   int socket_fd, connection_fd;
   socklen_t address_length;
@@ -139,10 +158,10 @@ int vts_shell_driver_start(char* addr_socket) {
     return socket_fd;
   }
 
-  unlink(addr_socket);
+  unlink(this->socket_address_);
   memset(&address, 0, sizeof(struct sockaddr_un));
   address.sun_family = AF_UNIX;
-  strcpy(address.sun_path, addr_socket);
+  strcpy(address.sun_path, this->socket_address_);
 
   if (::bind(socket_fd,
              (struct sockaddr *) &address,
@@ -160,6 +179,7 @@ int vts_shell_driver_start(char* addr_socket) {
   while (1) {
     address_length = sizeof(address);
 
+    // TODO(yuexima) exit message to break loop
     connection_fd = accept(socket_fd,
                            (struct sockaddr *) &address, &address_length);
     if (connection_fd == -1) {
@@ -169,33 +189,27 @@ int vts_shell_driver_start(char* addr_socket) {
 
     child = fork();
     if (child == 0) {
+      close(socket_fd);
       // now inside newly created connection handling process
-      int res = connection_handler_shell_cmd(connection_fd);
-      if (res == 0) {  // success
-        return 0;
-      } else {
-        fprintf(stderr, "Driver: connection handler returned failure");
-        return 1;
+      if (this->HandleShellCommandConnection(connection_fd) != 0) {
+        cerr << "[Driver] failed to handle connection." << endl;
+        close(connection_fd);
+        exit(1);
       }
+      close(connection_fd);
+      exit(0);
     } else if (child > 0) {
-      // parent - no op.
+      close(connection_fd);
     } else {
-      fprintf(stderr,
-              "shell_driver.c: create child process failed. Exiting...");
+      cerr << "[Driver] create child process failed. Exiting..." << endl;
       return(errno);
     }
-
-    close(connection_fd);
   }
 
-  // clean up
   close(socket_fd);
-  unlink(addr_socket);
-  free(addr_socket);
 
   return 0;
 }
 
 }  // namespace vts
 }  // namespace android
-
