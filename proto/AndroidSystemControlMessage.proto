@@ -34,6 +34,9 @@ enum CommandType {
   LIST_APIS = 201;
   // To call a function.
   CALL_API = 202;
+
+  // To execute a shell command;
+  VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND = 301;
 }
 
 
@@ -104,6 +107,9 @@ message AndroidSystemControlCommandMessage {
 
   // for CALL_API
   optional bytes arg = 4001;
+
+  // for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND
+  repeated bytes shell_command = 5001;
 }
 
 
@@ -124,6 +130,9 @@ message AndroidSystemControlResponseMessage {
   // for the API call result including result value, profiling data, and
   // coverage measurement data.
   optional bytes result = 1004;
+
+  repeated bytes stdout = 2001;
+  repeated bytes stderr = 2002;
 }
 
 

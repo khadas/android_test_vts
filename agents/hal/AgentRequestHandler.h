@@ -78,6 +78,10 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   // for the CALL_API command
   bool CallApi(const string& call_payload);
 
+  // for the EXECUTE_SHELL command
+  bool ExecuteShellCommand(
+      const AndroidSystemControlCommandMessage& command_message);
+
   // Returns a default response message.
   bool DefaultResponse();
 

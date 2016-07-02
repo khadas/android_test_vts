@@ -118,8 +118,9 @@ class VtsTcpClient(object):
         resp = self.RecvResponse()
         return (resp.response_code == SysMsg_pb2.SUCCESS)
 
-    def LaunchDriverService(self, driver_type, service_name, file_path, bits,
-                            target_class, target_type, target_version):
+    def LaunchDriverService(self, driver_type, service_name, bits,
+                            file_path=None, target_class=None, target_type=None,
+                            target_version=None):
         """RPC to LAUNCH_DRIVER_SERVICE."""
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
@@ -127,8 +128,8 @@ class VtsTcpClient(object):
         self.SendCommand(SysMsg_pb2.LAUNCH_DRIVER_SERVICE,
                          driver_type=driver_type,
                          service_name=service_name,
-                         file_path=file_path,
                          bits=bits,
+                         file_path=file_path,
                          target_class=target_class,
                          target_type=target_type,
                          target_version=target_version)
@@ -165,6 +166,17 @@ class VtsTcpClient(object):
         raise errors.VtsTcpCommunicationError(
             "RPC Error, response code for %s is %s" % (arg, resp_code))
 
+    def ExecuteShellCommand(self, command):
+        """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND."""
+        self.SendCommand(
+            shell_command=SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND)
+        resp = self.RecvResponse()
+        logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
+                     resp)
+        if (resp.response_code == SysMsg_pb2.SUCCESS):
+            return resp.stdout
+        return None
+
     def SendCommand(self,
                     command_type,
                     paths=None,
@@ -177,6 +189,7 @@ class VtsTcpClient(object):
                     service_name=None,
                     callback_port=None,
                     driver_type=None,
+                    shell_command=None,
                     arg=None):
         """Sends a command.
 
@@ -228,6 +241,9 @@ class VtsTcpClient(object):
 
         if arg is not None:
             command_msg.arg = arg
+
+        if shell_command is not None:
+            command_msg.shell_command = shell_command
 
         message = command_msg.SerializeToString()
         message_len = len(message)
