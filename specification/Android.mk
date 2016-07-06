@@ -67,3 +67,40 @@ LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/../tools/build/Android.packaging_sharedlib.mk
+
+include $(CLEAR_VARS)
+
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+vts_spec_file1 := $(VTS_TESTCASES_OUT)/CameraHalV2.vts
+vts_spec_file2 := $(VTS_TESTCASES_OUT)/CameraHalV2hw_device_t.vts
+vts_spec_file3 := $(VTS_TESTCASES_OUT)/GpsHalV1.vts
+vts_spec_file4 := $(VTS_TESTCASES_OUT)/GpsHalV1GpsInterface.vts
+vts_spec_file5 := $(VTS_TESTCASES_OUT)/LightHalV1.vts
+vts_spec_file6 := $(VTS_TESTCASES_OUT)/WifiHalV1.vts
+
+$(vts_spec_file1): $(LOCAL_PATH)/hal_conventional/CameraHalV2.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file2): $(LOCAL_PATH)/hal_conventional/CameraHalV2hw_device_t.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file3): $(LOCAL_PATH)/hal_conventional/GpsHalV1.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file4): $(LOCAL_PATH)/hal_conventional/GpsHalV1GpsInterface.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file5): $(LOCAL_PATH)/hal_conventional/LightHalV1.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file6): $(LOCAL_PATH)/hal_conventional/WifiHalV1.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6)
