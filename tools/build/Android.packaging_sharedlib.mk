@@ -14,23 +14,12 @@
 # limitations under the License.
 #
 
-LOCAL_PATH:= $(call my-dir)
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+vts_framework_file64 := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE).so
 
-include $(CLEAR_VARS)
+$(vts_framework_file64): $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE))/LINKED/$(LOCAL_MODULE).so | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
 
-LOCAL_MODULE := libvts_codecoverage
-LOCAL_MODULE_TAGS := optional
+vts: $(vts_framework_file64)
 
-LOCAL_SRC_FILES := \
-  gcda_parser.cpp \
-  gcov_basic_io.cpp \
-
-LOCAL_C_INCLUDES := \
-  bionic \
-  libcore \
-
-LOCAL_SHARED_LIBRARIES := \
-  libcutils \
-
-include $(BUILD_SHARED_LIBRARY)
-include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk
