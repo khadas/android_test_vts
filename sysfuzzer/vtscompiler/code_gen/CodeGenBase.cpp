@@ -53,11 +53,15 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   GenerateOpenNameSpaces(cpp_ss);
 
   string component_name = GetComponentName(message);
-
+  if (component_name.empty()) {
+    cerr << __func__ << ":" << __LINE__ << " error component_name is empty" << endl;
+    exit(-1);
+  }
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL_CONVENTIONAL
       || message.component_class() == HAL_CONVENTIONAL_SUBMODULE
-      || message.component_class() == HAL_LEGACY) {
+      || message.component_class() == HAL_LEGACY
+      || message.component_class() == LIB_SHARED) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
@@ -133,10 +137,11 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
 
   if (message.component_class() == HAL_CONVENTIONAL) h_ss << "HAL_CONVENTIONAL";
-  if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+  else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
     h_ss << "HAL_CONVENTIONAL_SUBMODULE";
   }
-  if (message.component_class() == HAL_LEGACY) h_ss << "HAL_LEGACY";
+  else if (message.component_class() == HAL_LEGACY) h_ss << "HAL_LEGACY";
+  else if (message.component_class() == LIB_SHARED) h_ss << "LIB_SHARED";
 
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
@@ -204,6 +209,10 @@ void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
 
 string CodeGenBase::GetComponentName(
     const InterfaceSpecificationMessage& message) {
+  if (!message.component_name().empty()) {
+    return message.component_name();
+  }
+
   string component_name = message.original_data_structure_name();
   while (!component_name.empty()
          && (std::isspace(component_name.back())
