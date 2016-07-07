@@ -194,6 +194,10 @@ class MirrorObject(object):
                             arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
                             arg_msg.scalar_value.int32_t = value_msg
                             arg_msg.scalar_type = "int32_t"
+                        elif isinstance(value_msg, float):
+                            arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
+                            arg_msg.scalar_value.float_t = value_msg
+                            arg_msg.scalar_type = "float_t"
                         else:
                             # TODO: check in advance (whether it's a message)
                             if isinstance(

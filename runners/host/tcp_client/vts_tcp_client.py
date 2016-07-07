@@ -161,7 +161,8 @@ class VtsTcpClient(object):
             try:
                 text_format.Merge(resp.result, result)
             except text_format.ParseError as e:
-                logging.error("Paring error\n%s\n%s", resp.result, e)
+                logging.exception(e)
+                logging.error("Paring error\n%s", resp.result)
             return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
