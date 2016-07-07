@@ -75,6 +75,6 @@ int main(int argc, char* const argv[]) {
     }
   }
 
-  android::vts::VtsShellDriver shellDriver(&socket_path[0]);
+  android::vts::VtsShellDriver shellDriver(socket_path.c_str());
   return shellDriver.StartListen();
 }

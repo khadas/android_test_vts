@@ -38,15 +38,14 @@ int VtsShellDriver::Close() {
   cout << __func__ << endl;
   int result = 0;
 
-  if (this->socket_address_ != NULL) {
-    result = unlink(this->socket_address_);
+  if (!this->socket_address_.empty()) {
+    result = unlink(this->socket_address_.c_str());
     if (result != 0) {
       cerr <<  __func__ << ":" << __LINE__
           << " ERROR closing socket (errno = "
           << errno << ")"<< endl;
     }
-
-    this->socket_address_ = NULL;
+    this->socket_address_.clear();
   }
 
   return result;
@@ -140,7 +139,7 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
 
 
 int VtsShellDriver::StartListen() {
-  if (this->socket_address_ == NULL) {
+  if (this->socket_address_.empty()) {
     cerr << "[Driver] NULL socket address." << endl;
     return -1;
   }
@@ -154,24 +153,26 @@ int VtsShellDriver::StartListen() {
 
   socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (socket_fd < 0) {
-    fprintf(stderr, "socket() failed\n");
+    cerr << "Driver: socket() failed: " << strerror(errno) << endl;
     return socket_fd;
   }
 
-  unlink(this->socket_address_);
+  unlink(this->socket_address_.c_str());
   memset(&address, 0, sizeof(struct sockaddr_un));
   address.sun_family = AF_UNIX;
-  strcpy(address.sun_path, this->socket_address_);
+  strncpy(address.sun_path,
+          this->socket_address_.c_str(),
+          sizeof(address.sun_path) - 1);
 
   if (::bind(socket_fd,
              (struct sockaddr *) &address,
              sizeof(struct sockaddr_un)) != 0) {
-    fprintf(stderr, "bind() failed: errno = %d\n", errno);
+    cerr << "Driver: bind() failed: " << strerror(errno) << endl;
     return 1;
   }
 
   if (listen(socket_fd, 5) != 0) {
-    fprintf(stderr, "Driver: listen() failed: errno = %d\n", errno);
+    cerr << "Driver: listen() failed: " << strerror(errno) << endl;
 
     return errno;
   }
@@ -183,7 +184,7 @@ int VtsShellDriver::StartListen() {
     connection_fd = accept(socket_fd,
                            (struct sockaddr *) &address, &address_length);
     if (connection_fd == -1) {
-      fprintf(stderr, "accept error: %s\n", strerror(errno));
+      cerr << "Driver: accept error: " << strerror(errno) << endl;
       break;
     }
 
