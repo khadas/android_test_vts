@@ -7,4 +7,6 @@ PRODUCT_COPY_FILES += \
     test/vts/specification/hal_conventional/GpsHalV1GpsInterface.vts:system/etc/GpsHalV1GpsInterface.vts \
     test/vts/specification/hal_conventional/LightHalV1.vts:system/etc/LightHalV1.vts \
     test/vts/specification/hal_conventional/WifiHalV1.vts:system/etc/WifiHalV1.vts \
+    test/vts/specification/hal_hidl/Nfc.vts:system/etc/Nfc.vts
+    test/vts/specification/hal_hidl/NfcClientCallback.vts:system/etc/NfcClientCallback.vts
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
