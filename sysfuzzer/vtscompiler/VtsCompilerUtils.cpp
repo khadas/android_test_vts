@@ -16,16 +16,16 @@
 
 #include "VtsCompilerUtils.h"
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 
 #include <google/protobuf/text_format.h>
 
@@ -35,59 +35,66 @@
 
 using namespace std;
 
-
 namespace android {
 namespace vts {
 
 string ComponentClassToString(int component_class) {
-  switch(component_class) {
-    case UNKNOWN_CLASS: return "unknown_class";
-    case HAL_CONVENTIONAL: return "hal_conventional";
-    case HAL_CONVENTIONAL_SUBMODULE: return "hal_conventional_submodule";
-    case HAL_HIDL: return "hal_hidl";
-    case HAL_HIDL_WRAPPED_CONVENTIONAL: return "hal_hidl_wrapped_conventional";
-    case LIB_SHARED: return "lib_shared";
+  switch (component_class) {
+    case UNKNOWN_CLASS:
+      return "unknown_class";
+    case HAL_CONVENTIONAL:
+      return "hal_conventional";
+    case HAL_CONVENTIONAL_SUBMODULE:
+      return "hal_conventional_submodule";
+    case HAL_HIDL:
+      return "hal_hidl";
+    case HAL_HIDL_WRAPPED_CONVENTIONAL:
+      return "hal_hidl_wrapped_conventional";
+    case LIB_SHARED:
+      return "lib_shared";
   }
   cerr << "error: invalid component_class " << component_class << endl;
   exit(-1);
 }
 
-
 string ComponentTypeToString(int component_type) {
-  switch(component_type) {
-    case UNKNOWN_TYPE: return "unknown_type";
-    case AUDIO: return "audio";
-    case CAMERA: return "camera";
-    case GPS: return "gps";
-    case LIGHT: return "light";
-    case WIFI: return "wifi";
-    case MOBILE: return "mobile";
-    case BLUETOOTH: return "bluetooth";
-    case NFC: return "nfc";
-    case BIONIC_LIBM: return "bionic_libm";
+  switch (component_type) {
+    case UNKNOWN_TYPE:
+      return "unknown_type";
+    case AUDIO:
+      return "audio";
+    case CAMERA:
+      return "camera";
+    case GPS:
+      return "gps";
+    case LIGHT:
+      return "light";
+    case WIFI:
+      return "wifi";
+    case MOBILE:
+      return "mobile";
+    case BLUETOOTH:
+      return "bluetooth";
+    case NFC:
+      return "nfc";
+    case BIONIC_LIBM:
+      return "bionic_libm";
   }
   cerr << "error: invalid component_type " << component_type << endl;
   exit(-1);
 }
 
-
 string GetCppVariableType(const std::string scalar_type_string) {
-  if (scalar_type_string == "void"
-      || scalar_type_string == "bool"
-      || scalar_type_string == "int32_t"
-      || scalar_type_string == "uint32_t"
-      || scalar_type_string == "int8_t"
-      || scalar_type_string == "uint8_t"
-      || scalar_type_string == "int64_t"
-      || scalar_type_string == "uint64_t"
-      || scalar_type_string == "int16_t"
-      || scalar_type_string == "uint16_t"
-      || scalar_type_string == "float_t"
-      || scalar_type_string == "double_t") {
+  if (scalar_type_string == "void" || scalar_type_string == "bool" ||
+      scalar_type_string == "int32_t" || scalar_type_string == "uint32_t" ||
+      scalar_type_string == "int8_t" || scalar_type_string == "uint8_t" ||
+      scalar_type_string == "int64_t" || scalar_type_string == "uint64_t" ||
+      scalar_type_string == "int16_t" || scalar_type_string == "uint16_t" ||
+      scalar_type_string == "float_t" || scalar_type_string == "double_t") {
     return scalar_type_string;
-  } else if(scalar_type_string == "ufloat") {
+  } else if (scalar_type_string == "ufloat") {
     return "unsigned float";
-  } else if(scalar_type_string == "udouble") {
+  } else if (scalar_type_string == "udouble") {
     return "unsigned double";
   } else if (scalar_type_string == "string") {
     return "std::string";
@@ -104,21 +111,21 @@ string GetCppVariableType(const std::string scalar_type_string) {
   }
 
   cerr << __func__ << ":" << __LINE__ << " "
-      << "error: unknown scalar_type " << scalar_type_string << endl;
+       << "error: unknown scalar_type " << scalar_type_string << endl;
   exit(-1);
 }
-
 
 string GetCppVariableType(VariableSpecificationMessage arg) {
   if (arg.type() == TYPE_VOID) {
     return "void";
-  } if (arg.type() == TYPE_PREDEFINED) {
+  }
+  if (arg.type() == TYPE_PREDEFINED) {
     return arg.predefined_type();
   } else if (arg.type() == TYPE_SCALAR) {
     return GetCppVariableType(arg.scalar_type());
   }
   cerr << __func__ << ":" << __LINE__ << " "
-      << ": type " << arg.type() << " not supported" << endl;
+       << ": type " << arg.type() << " not supported" << endl;
   string* output = new string();
   google::protobuf::TextFormat::PrintToString(arg, output);
   cerr << *output;
@@ -126,23 +133,20 @@ string GetCppVariableType(VariableSpecificationMessage arg) {
   exit(-1);
 }
 
-
 string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg) {
   if (arg.type() == TYPE_PREDEFINED) {
     if (arg.predefined_type() == "camera_info_t*") {
       return "ConvertCameraInfoToProtobuf";
     } else if (arg.predefined_type() == "hw_device_t**") {
-        return "";
+      return "";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
-          << "error: unknown instance type " << arg.predefined_type() << endl;
+           << "error: unknown instance type " << arg.predefined_type() << endl;
     }
   }
-  cerr << __FUNCTION__
-      << ": non-supported type " << arg.type() << endl;
+  cerr << __FUNCTION__ << ": non-supported type " << arg.type() << endl;
   exit(-1);
 }
-
 
 string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
   if (arg.type() == TYPE_PREDEFINED) {
@@ -198,7 +202,7 @@ string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
       return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
-          << "error: unknown instance type " << arg.predefined_type() << endl;
+           << "error: unknown instance type " << arg.predefined_type() << endl;
     }
   } else if (arg.type() == TYPE_SCALAR) {
     if (arg.scalar_type() == "uint32_t") {
@@ -223,18 +227,17 @@ string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
       return "RandomDouble()";
     } else if (arg.scalar_type() == "char_pointer") {
       return "RandomCharPointer()";
-    } else if (arg.scalar_type() == "pointer"
-               || arg.scalar_type() == "void_pointer") {
+    } else if (arg.scalar_type() == "pointer" ||
+               arg.scalar_type() == "void_pointer") {
       return "RandomVoidPointer()";
     }
     cerr << __FILE__ << ":" << __LINE__ << " "
-        << "error: unsupported scalar data type " << arg.scalar_type() << endl;
+         << "error: unsupported scalar data type " << arg.scalar_type() << endl;
     exit(-1);
   }
   cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
   exit(-1);
 }
-
 
 int vts_fs_mkdirs(char* file_path, mode_t mode) {
   char* p;
@@ -247,7 +250,7 @@ int vts_fs_mkdirs(char* file_path, mode_t mode) {
         return -1;
       }
     }
-    *p='/';
+    *p = '/';
   }
   return 0;
 }

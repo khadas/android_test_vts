@@ -24,7 +24,6 @@
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
 
 namespace android {

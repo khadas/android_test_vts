@@ -24,18 +24,18 @@
 
 #include <errno.h>
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <dirent.h>
 
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/un.h>
 
 #include <utils/RefBase.h>
@@ -55,19 +55,14 @@
 
 using namespace std;
 
-
 namespace android {
 namespace vts {
 
+void VtsDriverHalSocketServer::Exit() { printf("VtsFuzzerServer::Exit\n"); }
 
-void VtsDriverHalSocketServer::Exit() {
-  printf("VtsFuzzerServer::Exit\n");
-}
-
-
-int32_t VtsDriverHalSocketServer::LoadHal(
-    const string& path, int target_class, int target_type,
-    float target_version, const string& module_name) {
+int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
+                                          int target_type, float target_version,
+                                          const string& module_name) {
   printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
   bool success = spec_builder_.LoadTargetComponent(
       path.c_str(), lib_path_, target_class, target_type, target_version,
@@ -80,12 +75,10 @@ int32_t VtsDriverHalSocketServer::LoadHal(
   }
 }
 
-
 int32_t VtsDriverHalSocketServer::Status(int32_t type) {
   printf("VtsFuzzerServer::Status(%i)\n", type);
   return 0;
 }
-
 
 const char* VtsDriverHalSocketServer::Call(const string& arg) {
   printf("VtsFuzzerServer::Call(%s)\n", arg.c_str());
@@ -96,7 +89,6 @@ const char* VtsDriverHalSocketServer::Call(const string& arg) {
   printf("call done!!!\n");
   return result.c_str();
 }
-
 
 const char* VtsDriverHalSocketServer::GetFunctions() {
   printf("Get functions*");
@@ -116,11 +108,10 @@ const char* VtsDriverHalSocketServer::GetFunctions() {
   }
 }
 
-
 bool VtsDriverHalSocketServer::ProcessOneCommand() {
   VtsDriverControlCommandMessage command_message;
   if (!VtsSocketRecvMessage(&command_message)) return false;
-  switch(command_message.command_type()) {
+  switch (command_message.command_type()) {
     case EXIT: {
       Exit();
       VtsDriverControlResponseMessage response_message;
@@ -132,11 +123,10 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case LOAD_HAL: {
-      int32_t result = LoadHal(command_message.file_path(),
-                               command_message.target_class(),
-                               command_message.target_type(),
-                               command_message.target_version(),
-                               command_message.module_name());
+      int32_t result = LoadHal(
+          command_message.file_path(), command_message.target_class(),
+          command_message.target_type(), command_message.target_version(),
+          command_message.module_name());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_value(result);
@@ -172,7 +162,6 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
   return false;
 }
 
-
 // Starts to run a TCP server (foreground).
 int StartSocketServer(const string& socket_port_file,
                       android::vts::SpecificationBuilder& spec_builder,
@@ -189,16 +178,17 @@ int StartSocketServer(const string& socket_port_file,
   }
 
   unlink(socket_port_file.c_str());
-  bzero((char*) &serv_addr, sizeof(serv_addr));
+  bzero((char*)&serv_addr, sizeof(serv_addr));
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_port_file.c_str());
 
   cout << "[driver:hal] tryimg to bind" << endl;
 
-  if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+  if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
     int error_save = errno;
-    cerr << getpid() << " " << __func__ << " ERROR binding failed. errno = "
-        << error_save << " " << strerror(error_save) << endl;
+    cerr << getpid() << " " << __func__
+         << " ERROR binding failed. errno = " << error_save << " "
+         << strerror(error_save) << endl;
     return -1;
   }
 
@@ -207,7 +197,7 @@ int StartSocketServer(const string& socket_port_file,
 
   while (true) {
     cout << "[driver:hal] waiting for a new connection from the agent" << endl;
-    int newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
+    int newsockfd = ::accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
     if (newsockfd < 0) {
       cerr << __func__ << " ERROR accept failed." << endl;
       return -1;
@@ -221,7 +211,8 @@ int StartSocketServer(const string& socket_port_file,
       VtsDriverHalSocketServer* server =
           new VtsDriverHalSocketServer(spec_builder, lib_path);
       server->SetSockfd(newsockfd);
-      while(server->ProcessOneCommand());
+      while (server->ProcessOneCommand())
+        ;
       delete server;
       exit(0);
     } else if (pid < 0) {

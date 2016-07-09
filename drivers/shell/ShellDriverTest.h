@@ -17,6 +17,4 @@
 #ifndef __VTS_SHELL_DRIVER_TEST_H_
 #define __VTS_SHELL_DRIVER_TEST_H_
 
-
-
 #endif  // __VTS_SHELL_DRIVER_TEST_H_

@@ -30,7 +30,6 @@ namespace {
 
 // VTS structural testcase for HAL Lights basic functionalities.
 class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
-
  protected:
   VtsStructuralTestHalLightsBasicTest() {
     int rc = hw_get_module_by_class(LIGHTS_HARDWARE_MODULE_ID, NULL, &module_);
@@ -50,8 +49,7 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
     }
   }
 
-  virtual ~VtsStructuralTestHalLightsBasicTest() {
-  }
+  virtual ~VtsStructuralTestHalLightsBasicTest() {}
 
   virtual void SetUp() {
     // define operations to execute before running each testcase.
@@ -71,7 +69,7 @@ class VtsStructuralTestHalLightsBasicTest : public ::testing::Test {
 TEST_F(VtsStructuralTestHalLightsBasicTest, example) {
   ASSERT_TRUE(device_);
   struct light_state_t* arg =
-      (struct light_state_t*) malloc(sizeof(struct light_state_t));
+      (struct light_state_t*)malloc(sizeof(struct light_state_t));
   arg->color = 0x80ff8000;
   arg->flashMode = LIGHT_FLASH_NONE;
   arg->flashOnMS = 0;

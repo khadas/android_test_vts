@@ -38,14 +38,12 @@ class LegacyHalCodeGen : public HalCodeGen {
       : HalCodeGen(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss,
-      const InterfaceSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+                                   const InterfaceSpecificationMessage& message,
+                                   const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss,
-      const string& function_prototype);
+      std::stringstream& h_ss, const string& function_prototype);
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;

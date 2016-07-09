@@ -21,20 +21,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderServer"
 #include <utils/Log.h>
 #include <utils/String8.h>
 
-#include <binder/TextOutput.h>
-#include <binder/IInterface.h>
 #include <binder/IBinder.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
+#include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/ProcessState.h>
+#include <binder/TextOutput.h>
 
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/SpecificationBuilder.h"
@@ -42,21 +42,18 @@
 #include <google/protobuf/text_format.h>
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
 
 namespace android {
 namespace vts {
 
-
 class BnVtsFuzzer : public BnInterface<IVtsFuzzer> {
-  virtual status_t onTransact(
-      uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags = 0);
+  virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply,
+                              uint32_t flags = 0);
 };
 
-
-status_t BnVtsFuzzer::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) {
+status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
+                                 Parcel* reply, uint32_t flags) {
   ALOGD("BnVtsFuzzer::%s(%i) %i", __FUNCTION__, code, flags);
 
   data.checkInterface(this);
@@ -65,7 +62,7 @@ status_t BnVtsFuzzer::onTransact(
   endl(PLOG);
 #endif
 
-  switch(code) {
+  switch (code) {
     case EXIT:
       Exit();
       break;
@@ -77,8 +74,7 @@ status_t BnVtsFuzzer::onTransact(
       const char* module_name = data.readCString();
       int32_t result = LoadHal(string(path), target_class, target_type,
                                target_version, string(module_name));
-      ALOGD("BnVtsFuzzer::%s LoadHal(%s) -> %i",
-            __FUNCTION__, path, result);
+      ALOGD("BnVtsFuzzer::%s LoadHal(%s) -> %i", __FUNCTION__, path, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -94,8 +90,7 @@ status_t BnVtsFuzzer::onTransact(
       int32_t type = data.readInt32();
       int32_t result = Status(type);
 
-      ALOGD("BnVtsFuzzer::%s status(%i) -> %i",
-            __FUNCTION__, type, result);
+      ALOGD("BnVtsFuzzer::%s status(%i) -> %i", __FUNCTION__, type, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -111,8 +106,7 @@ status_t BnVtsFuzzer::onTransact(
       const char* arg = data.readCString();
       const char* result = Call(arg);
 
-      ALOGD("BnVtsFuzzer::%s call(%s) = %i",
-            __FUNCTION__, arg, result);
+      ALOGD("BnVtsFuzzer::%s call(%s) = %i", __FUNCTION__, arg, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -144,22 +138,16 @@ status_t BnVtsFuzzer::onTransact(
   return NO_ERROR;
 }
 
-
 class VtsFuzzerServer : public BnVtsFuzzer {
-
  public:
   VtsFuzzerServer(android::vts::SpecificationBuilder& spec_builder,
                   const char* lib_path)
-      : spec_builder_(spec_builder),
-        lib_path_(lib_path) {}
+      : spec_builder_(spec_builder), lib_path_(lib_path) {}
 
-  void Exit() {
-    printf("VtsFuzzerServer::Exit\n");
-  }
+  void Exit() { printf("VtsFuzzerServer::Exit\n"); }
 
-  int32_t LoadHal(const string& path, int target_class,
-                  int target_type, float target_version,
-                  const string& module_name) {
+  int32_t LoadHal(const string& path, int target_class, int target_type,
+                  float target_version, const string& module_name) {
     printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
     bool success = spec_builder_.LoadTargetComponent(
         path.c_str(), lib_path_, target_class, target_type, target_version,
@@ -209,7 +197,6 @@ class VtsFuzzerServer : public BnVtsFuzzer {
   android::vts::SpecificationBuilder& spec_builder_;
   const char* lib_path_;
 };
-
 
 void StartBinderServer(const string& service_name,
                        android::vts::SpecificationBuilder& spec_builder,

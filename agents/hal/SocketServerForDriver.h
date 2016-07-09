@@ -20,8 +20,8 @@
 namespace android {
 namespace vts {
 
-extern int StartSocketServerForDriver(
-    const string& callback_socket_name, int runner_port);
+extern int StartSocketServerForDriver(const string& callback_socket_name,
+                                      int runner_port);
 
 }  // namespace vts
 }  // namespace android
