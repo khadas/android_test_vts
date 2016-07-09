@@ -18,13 +18,13 @@
 
 #include <errno.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
@@ -38,15 +38,14 @@ using namespace std;
 namespace android {
 namespace vts {
 
-
 int VtsDriverCommUtil::Close() {
   cout << getpid() << " " << __func__ << endl;
   int result = 0;
   if (sockfd_ != -1) {
     result = close(sockfd_);
-    if(result != 0) {
-      cerr <<  getpid() << " " << __func__ << ":" << __LINE__
-          << " ERROR closing socket (errno = " << errno << ")"<< endl;
+    if (result != 0) {
+      cerr << getpid() << " " << __func__ << ":" << __LINE__
+           << " ERROR closing socket (errno = " << errno << ")" << endl;
     }
 
     sockfd_ = -1;
@@ -54,7 +53,6 @@ int VtsDriverCommUtil::Close() {
 
   return result;
 }
-
 
 bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   cout << getpid() << " " << __func__ << endl;
@@ -68,7 +66,7 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   int n = write(sockfd_, header.str().c_str(), header.str().length());
   if (n < 0) {
     cerr << getpid() << " " << __func__ << ":" << __LINE__
-        << " ERROR writing to socket" << endl;
+         << " ERROR writing to socket" << endl;
     return false;
   }
 
@@ -78,14 +76,13 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
     n = write(sockfd_, &message.c_str()[bytes_sent], msg_len - bytes_sent);
     if (n <= 0) {
       cerr << getpid() << " " << __func__ << ":" << __LINE__
-          << " ERROR writing to socket" << endl;
+           << " ERROR writing to socket" << endl;
       return false;
     }
     bytes_sent += n;
   }
   return true;
 }
-
 
 string VtsDriverCommUtil::VtsSocketRecvBytes() {
   cout << getpid() << " " << __func__ << endl;
@@ -97,26 +94,26 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   int header_index = 0;
   char header_buffer[MAX_HEADER_BUFFER_SIZE];
 
-  for (header_index = 0; header_index < MAX_HEADER_BUFFER_SIZE; header_index++) {
+  for (header_index = 0; header_index < MAX_HEADER_BUFFER_SIZE;
+       header_index++) {
     int ret = read(sockfd_, &header_buffer[header_index], 1);
     if (ret != 1) {
       int errno_save = errno;
       cerr << getpid() << " " << __func__
-          << " ERROR reading the length ret = " << ret
-          << " sockfd = " << sockfd_ << " "
-          << " errno = " << errno_save << " "
-          << strerror(errno_save) << endl;
+           << " ERROR reading the length ret = " << ret
+           << " sockfd = " << sockfd_ << " "
+           << " errno = " << errno_save << " " << strerror(errno_save) << endl;
       return string();
     }
-    if (header_buffer[header_index] == '\n'
-        || header_buffer[header_index] == '\r') {
+    if (header_buffer[header_index] == '\n' ||
+        header_buffer[header_index] == '\r') {
       header_buffer[header_index] = '\0';
       break;
     }
   }
 
   int msg_len = atoi(header_buffer);
-  char* msg = (char*) malloc(msg_len + 1);
+  char* msg = (char*)malloc(msg_len + 1);
   if (!msg) {
     cerr << getpid() << " " << __func__ << " ERROR malloc failed" << endl;
     return string();
@@ -136,7 +133,6 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   return string(msg, msg_len);
 }
 
-
 bool VtsDriverCommUtil::VtsSocketSendMessage(
     const google::protobuf::Message& message) {
   cout << getpid() << " " << __func__ << endl;
@@ -148,13 +144,11 @@ bool VtsDriverCommUtil::VtsSocketSendMessage(
   string message_string;
   if (!message.SerializeToString(&message_string)) {
     cerr << getpid() << " " << __func__
-        << " ERROR can't serialize the message to a string."
-        << endl;
+         << " ERROR can't serialize the message to a string." << endl;
     return false;
   }
   return VtsSocketSendBytes(message_string);
 }
-
 
 bool VtsDriverCommUtil::VtsSocketRecvMessage(
     google::protobuf::Message* message) {

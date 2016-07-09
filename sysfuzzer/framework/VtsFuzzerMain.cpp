@@ -16,8 +16,10 @@
 
 /*
  * Example usage (for angler 64-bit devices):
- *  $ fuzzer --class=hal_conventional --type=light --version=1.0 /system/lib64/hw/lights.angler.so
- *  $ fuzzer --class=hal_conventional --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
+ *  $ fuzzer --class=hal_conventional --type=light --version=1.0
+ * /system/lib64/hw/lights.angler.so
+ *  $ fuzzer --class=hal_conventional --type=gps --version=1.0
+ * /system/lib64/hw/gps.msm8994.so
  *
  *  $ LD_LIBRARY_PATH=/data/local/tmp/64 ./fuzzer64 --class=hal --type=light \
  *    --version=1.0 --spec_dir=/data/local/tmp/spec \
@@ -27,9 +29,12 @@
  *    /data/local/tmp/32/hal/camera.bullhead-vts.so
  *
  * Example usage (for GCE virtual devices):
- *  $ fuzzer --class=hal_conventional --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
- *  $ fuzzer --class=hal_conventional --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so
- *  $ fuzzer --class=hal_conventional --type=camera --version=2.1 /system/lib/hw/camera.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=light --version=1.0
+ * /system/lib/hw/lights.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=gps --version=1.0
+ * /system/lib/hw/gps.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=camera --version=2.1
+ * /system/lib/hw/camera.gce_x86.so
  */
 
 #include <getopt.h>
@@ -39,8 +44,8 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
@@ -75,24 +80,23 @@ static void usage() {
       "\n");
 }
 
-
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",                 no_argument,       NULL, 'h'},
-    {"class",                required_argument, NULL, 'c'},
-    {"type",                 required_argument, NULL, 't'},
-    {"version",              required_argument, NULL, 'v'},
-    {"epoch_count",          required_argument, NULL, 'e'},
-    {"spec_dir",             required_argument, NULL, 's'},
+      {"help", no_argument, NULL, 'h'},
+      {"class", required_argument, NULL, 'c'},
+      {"type", required_argument, NULL, 't'},
+      {"version", required_argument, NULL, 'v'},
+      {"epoch_count", required_argument, NULL, 'e'},
+      {"spec_dir", required_argument, NULL, 's'},
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    {"server_socket_path",   optional_argument, NULL, 'f'},
+      {"server_socket_path", optional_argument, NULL, 'f'},
 #else  // binder
-    {"service_name",         required_argument, NULL, 'n'},
+      {"service_name", required_argument, NULL, 'n'},
 #endif
-    {"server",               optional_argument, NULL, 'd'},
-    {"callback_socket_name", optional_argument, NULL, 'p'},
-    {NULL,                   0,                 NULL, 0}};
+      {"server", optional_argument, NULL, 'd'},
+      {"callback_socket_name", optional_argument, NULL, 'p'},
+      {NULL, 0, NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
@@ -181,28 +185,28 @@ int main(int argc, char* const argv[]) {
     }
   }
 
-  android::vts::SpecificationBuilder spec_builder(
-      spec_dir_path, epoch_count, callback_socket_name);
+  android::vts::SpecificationBuilder spec_builder(spec_dir_path, epoch_count,
+                                                  callback_socket_name);
   if (!server) {
     if (optind != argc - 1) {
       fprintf(stderr, "Must specify output file (see --help).\n");
       return 2;
     }
 
-    bool success = spec_builder.Process(
-        argv[optind], INTERFACE_SPEC_LIB_FILENAME, target_class,
-        target_type, target_version);
+    bool success =
+        spec_builder.Process(argv[optind], INTERFACE_SPEC_LIB_FILENAME,
+                             target_class, target_type, target_version);
     cout << "Result: " << success << endl;
     if (success) {
       cout << endl << PASSED_MARKER << endl;
     }
   } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    android::vts::StartSocketServer(
-        server_socket_path, spec_builder, INTERFACE_SPEC_LIB_FILENAME);
+    android::vts::StartSocketServer(server_socket_path, spec_builder,
+                                    INTERFACE_SPEC_LIB_FILENAME);
 #else  // binder
-    android::vts::StartBinderServer(
-        service_name, spec_builder, INTERFACE_SPEC_LIB_FILENAME);
+    android::vts::StartBinderServer(service_name, spec_builder,
+                                    INTERFACE_SPEC_LIB_FILENAME);
 #endif
   }
   return 0;

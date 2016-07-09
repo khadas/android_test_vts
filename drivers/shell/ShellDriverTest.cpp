@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-
 #include "ShellDriverTest.h"
 
-#include <gtest/gtest.h>
 #include <errno.h>
+#include <gtest/gtest.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <string.h>
-#include <math.h>
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
-#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include <VtsDriverCommUtil.h>
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 #include "ShellDriver.h"
 
@@ -40,7 +39,6 @@ using namespace std;
 
 namespace android {
 namespace vts {
-
 
 static int kMaxRetry = 3;
 
@@ -64,24 +62,23 @@ static string vts_shell_driver_test_client_start(const string& command,
   memset(&address, 0, sizeof(struct sockaddr_un));
 
   address.sun_family = AF_UNIX;
-  strncpy(address.sun_path,
-          socket_address.c_str(),
+  strncpy(address.sun_path, socket_address.c_str(),
           sizeof(address.sun_path) - 1);
 
   int conn_success;
   int retry_count = 0;
 
-  conn_success = connect(socket_fd, (struct sockaddr*) &address,
+  conn_success = connect(socket_fd, (struct sockaddr*)&address,
                          sizeof(struct sockaddr_un));
   for (retry_count = 0; retry_count < kMaxRetry && conn_success != 0;
-      retry_count++) {  // retry if server not ready
+       retry_count++) {  // retry if server not ready
     printf("Client: connection failed, retrying...\n");
     retry_count++;
     if (usleep(50 * pow(retry_count, 3)) != 0) {
       fprintf(stderr, "shell driver unit test: sleep intrupted.");
     }
 
-    conn_success = connect(socket_fd, (struct sockaddr*) &address,
+    conn_success = connect(socket_fd, (struct sockaddr*)&address,
                            sizeof(struct sockaddr_un));
   }
 
@@ -110,8 +107,8 @@ static string vts_shell_driver_test_client_start(const string& command,
   stringstream ss;
   for (int i = 0; i < out_msg.stdout_size(); i++) {
     string out_str = out_msg.stdout(i);
-    cout << "[Shell driver] output for command " << i
-        << ": " << out_str << endl;
+    cout << "[Shell driver] output for command " << i << ": " << out_str
+         << endl;
     ss << out_str;
   }
   close(socket_fd);
@@ -119,7 +116,6 @@ static string vts_shell_driver_test_client_start(const string& command,
   cout << "[Client] receiving output: " << ss.str() << endl;
   return ss.str();
 }
-
 
 /*
  * Prototype unit test helper. It first forks a vts_shell_driver process
@@ -138,15 +134,14 @@ static string test_shell_command_output(const string& command,
     int res_driver = shellDriver.StartListen();
 
     if (res_driver != 0) {
-      fprintf(stderr,
-              "Driver reported error. The error code is: %d.\n", res_driver);
+      fprintf(stderr, "Driver reported error. The error code is: %d.\n",
+              res_driver);
       exit(res_driver);
     }
 
     exit(0);
   } else if (p_driver > 0) {  // parent
-    res_client = vts_shell_driver_test_client_start(command,
-                                                    socket_address);
+    res_client = vts_shell_driver_test_client_start(command, socket_address);
     if (res_client.empty()) {
       fprintf(stderr, "Client reported error.\n");
       exit(1);
@@ -163,7 +158,6 @@ static string test_shell_command_output(const string& command,
 
   return res_client;
 }
-
 
 /*
  * This test tests whether the output of "uname" is "Linux\n"

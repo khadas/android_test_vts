@@ -37,35 +37,29 @@ class HalCodeGen : public CodeGenBase {
       : CodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss,
-      const InterfaceSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+                                   const InterfaceSpecificationMessage& message,
+                                   const string& fuzzer_extended_class_name);
 
-  void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss,
-      const StructSpecificationMessage& message,
-      const string& fuzzer_extended_class_name,
-      const string& original_data_structure_name,
-      const string& parent_path);
+  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+                                   const StructSpecificationMessage& message,
+                                   const string& fuzzer_extended_class_name,
+                                   const string& original_data_structure_name,
+                                   const string& parent_path);
 
   void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss,
-      const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss,
-      const string& function_prototype);
+      std::stringstream& h_ss, const string& function_prototype);
 
-  void GenerateCppBodyGlobalFunctions(
-      std::stringstream& cpp_ss,
-      const string& function_prototype,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyGlobalFunctions(std::stringstream& cpp_ss,
+                                      const string& function_prototype,
+                                      const string& fuzzer_extended_class_name);
 
   void GenerateSubStructFuzzFunctionCall(
-      std::stringstream& cpp_ss,
-      const StructSpecificationMessage& message,
+      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
       const string& parent_path);
 
   // instance variable name (e.g., device_);

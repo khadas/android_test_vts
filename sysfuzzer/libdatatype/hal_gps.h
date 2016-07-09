@@ -31,7 +31,6 @@ typedef uint32_t min_interval;
 typedef uint32_t preferred_accuracy;
 typedef uint32_t preferred_time;
 
-
 // Generates a GpsCallback instance used for GPS HAL v1 init().
 extern GpsCallbacks* GenerateGpsCallbacks();
 

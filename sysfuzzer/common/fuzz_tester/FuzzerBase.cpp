@@ -46,47 +46,46 @@ typedef unsigned long uptr;
 
 #define SANITIZER_INTERFACE_ATTRIBUTE __attribute__((visibility("default")))
 SANITIZER_INTERFACE_ATTRIBUTE
-void __sanitizer_cov(uint32_t *guard) {
+void __sanitizer_cov(uint32_t* guard) {
   printf("sancov\n");
   coverage_data.Add(StackTrace::GetPreviousInstructionPc(GET_CALLER_PC()),
                     guard);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void *__asan_memset(void *block, int c, uptr size) {
+void* __asan_memset(void* block, int c, uptr size) {
   ASAN_MEMSET_IMPL(nullptr, block, c, size);
   return block;
 }
 
-
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_register_globals() { }
+void __asan_register_globals() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_unregister_globals() { }
+void __asan_unregister_globals() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_handle_no_return() { }
+void __asan_handle_no_return() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load1() { }
+void __asan_report_load1() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load2() { }
+void __asan_report_load2() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load4() { }
+void __asan_report_load4() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load8() { }
+void __asan_report_load8() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load16() { }
+void __asan_report_load16() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store1() { }
+void __asan_report_store1() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store2() { }
+void __asan_report_store2() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store4() { }
+void __asan_report_store4() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store8() { }
+void __asan_report_store8() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store16() { }
+void __asan_report_store16() {}
 SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_set_error_report_callback() { }
+void __asan_set_error_report_callback() {}
 
 SANITIZER_INTERFACE_ATTRIBUTE
 uptr __asan_stack_malloc_1(uptr size, uptr real_stack) {
@@ -125,7 +124,7 @@ uptr __asan_stack_malloc_7(uptr size, uptr real_stack) {
 
 SANITIZER_INTERFACE_ATTRIBUTE
 uptr __asan_stack_malloc_8(uptr size, uptr real_stack) {
-  return(uptr) malloc(size);
+  return (uptr)malloc(size);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -139,52 +138,52 @@ uptr __asan_stack_malloc_10(uptr size, uptr real_stack) {
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_1(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_1(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_2(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_2(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_3(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_3(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_4(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_4(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_5(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_5(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_6(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_6(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_7(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_7(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_8(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_8(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_9(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_9(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
-void  __asan_stack_free_10(uptr ptr, uptr size, uptr real_stack) {
+void __asan_stack_free_10(uptr ptr, uptr size, uptr real_stack) {
   free((void*)ptr);
 }
 
@@ -193,9 +192,8 @@ void __asan_version_mismatch_check_v6() {
   // Do nothing.
 }
 
-SANITIZER_INTERFACE_ATTRIBUTE void
-__sanitizer_cov_module_init(int32_t *guards, uptr npcs, uint8_t *counters,
-                            const char *comp_unit_name) {
+SANITIZER_INTERFACE_ATTRIBUTE void __sanitizer_cov_module_init(
+    int32_t* guards, uptr npcs, uint8_t* counters, const char* comp_unit_name) {
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -205,32 +203,30 @@ void __asan_init() {
   inited = 1;
 #if __WORDSIZE == 64
   unsigned long start = 0x100000000000;
-  unsigned long size  = 0x100000000000;
+  unsigned long size = 0x100000000000;
 #else
   unsigned long start = 0x20000000;
   unsigned long size = 0x20000000;
 #endif
-  void *res = mmap((void*)start, size,
-                   PROT_READ | PROT_WRITE,
-                   MAP_PRIVATE | MAP_ANON | MAP_FIXED | MAP_NORESERVE,
-                   0, 0);
+  void* res = mmap((void*)start, size, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANON | MAP_FIXED | MAP_NORESERVE, 0, 0);
   if (res == (void*)start) {
     fprintf(stderr, "Fake AddressSanitizer run-time initialized ok at %p\n",
             res);
   } else {
-    fprintf(stderr, "Fake AddressSanitizer run-time failed to initialize.\n"
+    fprintf(stderr,
+            "Fake AddressSanitizer run-time failed to initialize.\n"
             "You have been warned. Aborting.");
     abort();
   }
 }
-
 }
 #endif
 
 namespace android {
 namespace vts {
 
-static void RemoveDir(char *path) {
+static void RemoveDir(char* path) {
   struct dirent* entry = NULL;
   DIR* dir = opendir(path);
 
@@ -244,7 +240,7 @@ static void RemoveDir(char *path) {
       if ((sub_dir = opendir(abs_path)) != NULL) {
         closedir(sub_dir);
         RemoveDir(abs_path);
-      } else if((file = fopen(abs_path, "r")) != NULL) {
+      } else if ((file = fopen(abs_path, "r")) != NULL) {
         fclose(file);
         remove(abs_path);
       }
@@ -252,7 +248,6 @@ static void RemoveDir(char *path) {
   }
   remove(path);
 }
-
 
 FuzzerBase::FuzzerBase(int target_class)
     : device_(NULL),
@@ -262,36 +257,27 @@ FuzzerBase::FuzzerBase(int target_class)
       component_filename_(NULL),
       gcov_output_basepath_(NULL) {}
 
+FuzzerBase::~FuzzerBase() { free(component_filename_); }
 
-FuzzerBase::~FuzzerBase() {
-  free(component_filename_);
-}
+void wfn() { cout << "wfn" << endl; }
 
-
-void wfn() {
-  cout << "wfn" << endl;
-}
-
-
-void ffn() {
-  cout << "ffn" << endl;
-}
-
+void ffn() { cout << "ffn" << endl; }
 
 bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   cout << __func__ << ":" << __LINE__ << " entry" << endl;
-  if (target_dll_path && target_dll_path_
-      && !strcmp(target_dll_path, target_dll_path_)) {
+  if (target_dll_path && target_dll_path_ &&
+      !strcmp(target_dll_path, target_dll_path_)) {
     cout << __func__ << " skip loading" << endl;
     return true;
   }
 
   if (!target_loader_.Load(target_dll_path)) return false;
-  target_dll_path_ = (char*) malloc(strlen(target_dll_path) + 1);
+  target_dll_path_ = (char*)malloc(strlen(target_dll_path) + 1);
   strcpy(target_dll_path_, target_dll_path);
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == HAL_LEGACY) return true;
-  cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file." << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file."
+       << endl;
   if (target_class_ == HAL_CONVENTIONAL) {
     hmi_ = target_loader_.InitConventionalHal();
     if (!hmi_) {
@@ -301,7 +287,9 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
     }
   }
 #if SANCOV
-  cout << __FUNCTION__ << "sancov reset " << target_loader_.SancovResetCoverage() << endl;;
+  cout << __FUNCTION__ << "sancov reset "
+       << target_loader_.SancovResetCoverage() << endl;
+  ;
 #endif
 
   if (target_dll_path_) {
@@ -309,24 +297,24 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
 
     size_t offset = target_path.rfind("/", target_path.length());
     if (offset != string::npos) {
-      string filename = target_path.substr(offset + 1,
-                                           target_path.length() - offset);
+      string filename =
+          target_path.substr(offset + 1, target_path.length() - offset);
       filename = filename.substr(0, filename.length() - 3 /* for .so */);
-      component_filename_ = (char*) malloc(filename.length() + 1);
+      component_filename_ = (char*)malloc(filename.length() + 1);
       strcpy(component_filename_, filename.c_str());
       cout << __FUNCTION__ << ":" << __LINE__
-          << " module file name: " << component_filename_ << endl;
+           << " module file name: " << component_filename_ << endl;
     }
     cout << __FUNCTION__ << ":" << __LINE__ << " target_dll_path "
-        << target_dll_path_ << endl;
+         << target_dll_path_ << endl;
   }
 
 #if USE_GCOV
-  cout << __FUNCTION__ << ": gcov init " << target_loader_.GcovInit(wfn, ffn) << endl;
+  cout << __FUNCTION__ << ": gcov init " << target_loader_.GcovInit(wfn, ffn)
+       << endl;
 #endif
   return true;
 }
-
 
 int FuzzerBase::OpenConventionalHal(const char* module_name) {
   cout << __func__ << endl;
@@ -337,13 +325,12 @@ int FuzzerBase::OpenConventionalHal(const char* module_name) {
   return 0;
 }
 
-
 bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
                       void** result) {
   cout << __func__ << " Fuzzing target component: "
-      << "class " << message->component_class()
-      << " type " << message->component_type()
-      << " version " << message->component_type_version() << endl;
+       << "class " << message->component_class() << " type "
+       << message->component_type() << " version "
+       << message->component_type_version() << endl;
 
   string function_name_prefix = GetFunctionNamePrefix(*message);
   function_name_prefix_ = function_name_prefix.c_str();
@@ -352,7 +339,6 @@ bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
   }
   return true;
 }
-
 
 void FuzzerBase::FunctionCallBegin() {
   char product_path[4096];
@@ -434,7 +420,8 @@ void FuzzerBase::FunctionCallBegin() {
       if (gcov_output_basepath_) {
         free(gcov_output_basepath_);
       }
-      gcov_output_basepath_ = (char*) malloc(strlen(module_basepath) + target.length() + 2);
+      gcov_output_basepath_ =
+          (char*)malloc(strlen(module_basepath) + target.length() + 2);
       if (!gcov_output_basepath_) {
         cerr << __FUNCTION__ << ": couldn't alloc memory" << endl;
         return;
@@ -448,7 +435,6 @@ void FuzzerBase::FunctionCallBegin() {
     cerr << __FUNCTION__ << ": couldn't get the pwd." << endl;
   }
 }
-
 
 vector<unsigned>* FuzzerBase::FunctionCallEnd() {
   cout << __FUNCTION__ << ": gcov flush " << endl;
@@ -482,7 +468,8 @@ vector<unsigned>* FuzzerBase::FunctionCallEnd() {
       cout << dent->d_name << endl;
       if (string(dent->d_name).rfind(".gcda") != string::npos) {
         char* buffer;
-        buffer = (char*) malloc(strlen(gcov_output_basepath_) + strlen(dent->d_name) + 2);
+        buffer = (char*)malloc(strlen(gcov_output_basepath_) +
+                               strlen(dent->d_name) + 2);
         if (!buffer) {
           cerr << __FUNCTION__ << ": OOM" << endl;
           closedir(srcdir);

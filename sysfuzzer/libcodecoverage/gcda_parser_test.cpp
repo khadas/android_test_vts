@@ -17,8 +17,8 @@
 #include "gcda_parser.h"
 #include "gcda_basic_io.h"
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 /*
  * To test locally:
@@ -28,7 +28,8 @@
 using namespace std;
 
 int main() {
-  std::vector<unsigned>* result = android::vts::parse_gcda_file("testdata/lights.gcda");
+  std::vector<unsigned>* result =
+      android::vts::parse_gcda_file("testdata/lights.gcda");
   if (result) {
     for (unsigned int index = 0; index < result->size(); index++) {
       cout << result->at(index) << endl;

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-
 #include "ShellDriverMain.h"
 
-#include <stdio.h>
 #include <getopt.h>
+#include <stdio.h>
 #include <string>
 
 #include "ShellDriver.h"
@@ -43,13 +42,12 @@ static void usage() {
       "\n");
 }
 
-
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",               no_argument,       NULL, 'h'},
-    {"server_socket_path", required_argument, NULL, 's'},
-    {NULL,                 0,                 NULL, 0  }};
+      {"help", no_argument, NULL, 'h'},
+      {"server_socket_path", required_argument, NULL, 's'},
+      {NULL, 0, NULL, 0}};
 
   string socket_path = DEFAULT_SOCKET_PATH;
 

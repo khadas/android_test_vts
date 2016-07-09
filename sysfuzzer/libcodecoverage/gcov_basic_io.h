@@ -1,12 +1,12 @@
 #ifndef __VTS_SYSFUZZER_LIBMEASUREMENT_GCOV_BASIC_IO_H__
 #define __VTS_SYSFUZZER_LIBMEASUREMENT_GCOV_BASIC_IO_H__
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <inttypes.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 namespace android {
 namespace vts {
@@ -16,17 +16,17 @@ struct source_info;
 
 #define GCOV_DATA_MAGIC ((unsigned)0x67636461) /* "gcda" */
 
-#define GCOV_TAG_FUNCTION ((unsigned int) 0x01000000)
-#define GCOV_TAG_FUNCTION_LENGTH (3)   /* or 2 */
-#define GCOV_COUNTER_ARCS   0
-#define GCOV_TAG_ARCS    ((unsigned)0x01430000)
-#define GCOV_TAG_ARCS_LENGTH(NUM)  (1 + (NUM) * 2)
-#define GCOV_TAG_ARCS_NUM(LENGTH)  (((LENGTH) - 1) / 2)
+#define GCOV_TAG_FUNCTION ((unsigned int)0x01000000)
+#define GCOV_TAG_FUNCTION_LENGTH (3) /* or 2 */
+#define GCOV_COUNTER_ARCS 0
+#define GCOV_TAG_ARCS ((unsigned)0x01430000)
+#define GCOV_TAG_ARCS_LENGTH(NUM) (1 + (NUM)*2)
+#define GCOV_TAG_ARCS_NUM(LENGTH) (((LENGTH)-1) / 2)
 #define GCOV_TAG_LINES ((unsigned)0x01450000)
 #define GCOV_TAG_BLOCKS ((unsigned)0x01410000)
 #define GCOV_TAG_BLOCKS_LENGTH(NUM) (NUM)
 #define GCOV_TAG_BLOCKS_NUM(LENGTH) (LENGTH)
-#define GCOV_TAG_OBJECT_SUMMARY  ((unsigned)0xa1000000)
+#define GCOV_TAG_OBJECT_SUMMARY ((unsigned)0xa1000000)
 #define GCOV_TAG_COUNTER_NUM(LENGTH) ((LENGTH) / 2)
 
 #define GCOV_HISTOGRAM_SIZE 252
@@ -34,38 +34,36 @@ struct source_info;
 #define GCOV_COUNTERS_SUMMABLE (GCOV_COUNTER_ARCS + 1)
 
 #define GCOV_TAG_IS_COUNTER(TAG) \
-  (!((TAG) & 0xFFFF) && GCOV_COUNTER_FOR_TAG (TAG) < GCOV_COUNTERS)
+  (!((TAG)&0xFFFF) && GCOV_COUNTER_FOR_TAG(TAG) < GCOV_COUNTERS)
 
-#define GCOV_TAG_MASK(TAG) (((TAG) - 1) ^ (TAG))
+#define GCOV_TAG_MASK(TAG) (((TAG)-1) ^ (TAG))
 
 /* Return nonzero if SUB is an immediate subtag of TAG.  */
-#define GCOV_TAG_IS_SUBTAG(TAG,SUB) \
-  (GCOV_TAG_MASK (TAG) >> 8 == GCOV_TAG_MASK (SUB) \
-   && !(((SUB) ^ (TAG)) & ~GCOV_TAG_MASK (TAG)))
+#define GCOV_TAG_IS_SUBTAG(TAG, SUB)                \
+  (GCOV_TAG_MASK(TAG) >> 8 == GCOV_TAG_MASK(SUB) && \
+   !(((SUB) ^ (TAG)) & ~GCOV_TAG_MASK(TAG)))
 
 /* Return nonzero if SUB is at a sublevel to TAG. */
-#define GCOV_TAG_IS_SUBLEVEL(TAG,SUB) \
-    (GCOV_TAG_MASK (TAG) > GCOV_TAG_MASK (SUB))
-
+#define GCOV_TAG_IS_SUBLEVEL(TAG, SUB) (GCOV_TAG_MASK(TAG) > GCOV_TAG_MASK(SUB))
 
 typedef long long gcov_type;
 
-enum {
-GCOV_COUNTERS
-};
+enum { GCOV_COUNTERS };
 
+#define assert(EXPR)       \
+  {                        \
+    if (!(EXPR)) exit(-1); \
+  }
 
-#define assert(EXPR) { if (!(EXPR)) exit(-1); }
-
-#define GCOV_VERSION ((unsigned)0x34303670)  /* 406p */
+#define GCOV_VERSION ((unsigned)0x34303670) /* 406p */
 
 #define GCOV_TAG_BUILD_INFO ((unsigned)0xa7000000)
 #define GCOV_TAG_PROGRAM_SUMMARY ((unsigned)0xa3000000)
 
-#define XCNEWVEC(T, N) ((T*) calloc((N), sizeof(T)))
+#define XCNEWVEC(T, N) ((T *)calloc((N), sizeof(T)))
 
-#define GCOV_TAG_COUNTER_BASE ((unsigned) 0x01a10000)
-#define GCOV_TAG_COUNTER_LENGTH(NUM) ((NUM) * 2)
+#define GCOV_TAG_COUNTER_BASE ((unsigned)0x01a10000)
+#define GCOV_TAG_COUNTER_LENGTH(NUM) ((NUM)*2)
 
 /* Convert a counter index to a tag. */
 #define GCOV_TAG_FOR_COUNTER(COUNT) \
@@ -73,20 +71,17 @@ GCOV_COUNTERS
 
 /* Convert a tag to a counter. */
 #define GCOV_COUNTER_FOR_TAG(TAG) \
-  ((unsigned)(((TAG) - GCOV_TAG_COUNTER_BASE) >> 17))
+  ((unsigned)(((TAG)-GCOV_TAG_COUNTER_BASE) >> 17))
 
 /* Check whether a tag is a counter tag.  */
 #define GCOV_TAG_IS_COUNTER(TAG) \
-  (!((TAG) & 0xFFFF) && GCOV_COUNTER_FOR_TAG (TAG) < GCOV_COUNTERS)
+  (!((TAG)&0xFFFF) && GCOV_COUNTER_FOR_TAG(TAG) < GCOV_COUNTERS)
 
-#define GCOV_UNSIGNED2STRING(ARRAY,VALUE) \
-  ((ARRAY)[0] = (char)((VALUE) >> 24), \
-   (ARRAY)[1] = (char)((VALUE) >> 16), \
-   (ARRAY)[2] = (char)((VALUE) >> 8), \
-   (ARRAY)[3] = (char)((VALUE) >> 0))
+#define GCOV_UNSIGNED2STRING(ARRAY, VALUE)                                 \
+  ((ARRAY)[0] = (char)((VALUE) >> 24), (ARRAY)[1] = (char)((VALUE) >> 16), \
+   (ARRAY)[2] = (char)((VALUE) >> 8), (ARRAY)[3] = (char)((VALUE) >> 0))
 
 #define GCOV_BLOCK_SIZE (1 << 10)
-
 
 typedef struct arc_info {
   /* source and destination blocks.  */
@@ -126,34 +121,31 @@ typedef struct arc_info {
   struct arc_info *pred_next;
 } arc_t;
 
-
-struct gcov_var_t
-{
+struct gcov_var_t {
   FILE *file;
-  unsigned start;  /* Position of first byte of block */
-  unsigned offset;    /* Read/write position within the block.  */
-  unsigned length;    /* Read limit in the block.  */
-  unsigned overread;    /* Number of words overread.  */
-  int error;      /* < 0 overflow, > 0 disk error.  */
-  int mode;                 /* < 0 writing, > 0 reading */
-  int endian;     /* Swap endianness.  */
+  unsigned start;    /* Position of first byte of block */
+  unsigned offset;   /* Read/write position within the block.  */
+  unsigned length;   /* Read limit in the block.  */
+  unsigned overread; /* Number of words overread.  */
+  int error;         /* < 0 overflow, > 0 disk error.  */
+  int mode;          /* < 0 writing, > 0 reading */
+  int endian;        /* Swap endianness.  */
   /* Holds a variable length block, as the compiler can write
      strings and needs to backtrack.  */
   size_t alloc;
   unsigned *buffer;
 };
 
-
-unsigned gcov_position (void);
+unsigned gcov_position(void);
 int gcov_is_error();
 unsigned gcov_read_string_array(char **string_array, unsigned num_strings);
 unsigned gcov_read_unsigned();
 void gcov_allocate(unsigned length);
-const unsigned* gcov_read_words(unsigned words);
+const unsigned *gcov_read_words(unsigned words);
 int gcov_magic(unsigned magic, unsigned expected);
 gcov_type gcov_read_counter();
 void gcov_write_block(unsigned size);
-const char* gcov_read_string();
+const char *gcov_read_string();
 bool gcov_open(const char *name, int mode);
 void gcov_sync(unsigned base, unsigned length);
 int gcov_close();

@@ -20,13 +20,13 @@
 #define LOG_TAG "VtsFuzzerBinderClient"
 #include <utils/Log.h>
 
-#include <binder/IInterface.h>
 #include <binder/IBinder.h>
-#include <binder/ProcessState.h>
+#include <binder/IInterface.h>
 #include <binder/IServiceManager.h>
+#include <binder/ProcessState.h>
 
-#include "binder/VtsFuzzerBinderService.h"
 #include "BinderClientToDriver.h"
+#include "binder/VtsFuzzerBinderService.h"
 
 using namespace std;
 
@@ -44,14 +44,14 @@ sp<IVtsFuzzer> GetBinderClient(const string& service_name) {
   sp<IBinder> binder = manager->getService(String16(service_name.c_str()));
   if (!binder.get()) {
     cerr << "can't find the " << service_name << " binder service."
-        << std::endl;
+         << std::endl;
     return NULL;
   }
 
   sp<IVtsFuzzer> fuzzer = interface_cast<IVtsFuzzer>(binder);
   if (!fuzzer.get()) {
     cerr << "can't cast the obtained " << service_name << " binder instance"
-        << std::endl;
+         << std::endl;
     return NULL;
   }
 
