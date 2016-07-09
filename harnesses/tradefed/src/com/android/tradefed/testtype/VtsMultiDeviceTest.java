@@ -17,6 +17,7 @@
 package com.android.tradefed.testtype;
 
 import com.android.ddmlib.MultiLineReceiver;
+import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -60,14 +61,14 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     private String mTestConfigPath = null;
 
     @Option(name = "include-filter",
-        description="The positive filter of the test names to run.")
+        description = "The positive filter of the test names to run.")
     private Set<String> mIncludeFilters = new HashSet<>();
 
     @Option(name = "exclude-filter",
-        description="The negative filter of the test names to run.")
+        description = "The negative filter of the test names to run.")
     private Set<String> mExcludeFilters = new HashSet<>();
 
-    @Option(name = "runtime-hint", description="The hint about the test's runtime.",
+    @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
         isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
 
@@ -221,14 +222,14 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
-     * 
+     *
      * @param listener
      * @param runUtil
      * @param mTestCasePath
      * @param mTestConfigPath
      */
 
-    private void doRunTest(ITestInvocationListener listener, IRunUtil runUtil, String mTestCasePath,
+    private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
         String mTestConfigPath) throws RuntimeException {
 
         if (mPythonBin == null){
@@ -254,7 +255,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             CLog.i("Parsing test result: %s", commandResult.getStderr());
         }
 
-        MultiLineReceiver parser = new VtsMultiDeviceTestResultParser(ArrayUtil.list(listener),
+        MultiLineReceiver parser = new VtsMultiDeviceTestResultParser(listener,
             mRunName);
 
         if (commandResult.getStdout() != null) {
