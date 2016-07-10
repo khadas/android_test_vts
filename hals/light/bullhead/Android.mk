@@ -47,4 +47,5 @@ LOCAL_LDFLAGS += --coverage
 #LOCAL_LDFLAGS += -fsanitize=address -fsanitize-coverage=bb
 #LOCAL_ADDRESS_SANITIZER := true
 
+include $(LOCAL_PATH)/../../../tools/build/Android.packaging_sharedlib.mk
 include $(BUILD_SHARED_LIBRARY)
