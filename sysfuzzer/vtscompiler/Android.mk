@@ -28,6 +28,7 @@ LOCAL_SRC_FILES := \
   code_gen/CodeGenBase.cpp \
   code_gen/HalCodeGen.cpp \
   code_gen/HalSubmoduleCodeGen.cpp \
+  code_gen/HalHidlCodeGen.cpp \
   code_gen/LegacyHalCodeGen.cpp \
   code_gen/LibSharedCodeGen.cpp \
 

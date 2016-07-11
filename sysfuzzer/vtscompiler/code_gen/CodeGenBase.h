@@ -59,7 +59,8 @@ class CodeGenBase {
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates code that opens the default namespaces.
-  void GenerateOpenNameSpaces(std::stringstream& ss);
+  void GenerateOpenNameSpaces(
+      std::stringstream& ss, const InterfaceSpecificationMessage& message);
 
   // Generates code that closes the default namespaces.
   void GenerateCloseNameSpaces(std::stringstream& ss);

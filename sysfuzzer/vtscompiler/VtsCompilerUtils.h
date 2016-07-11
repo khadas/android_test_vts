@@ -33,11 +33,14 @@ extern string ComponentTypeToString(int component_type);
 extern string GetCppVariableType(const string primitive_type_string);
 
 // Returns the C/C++ basic variable type name of a given argument.
-extern string GetCppVariableType(VariableSpecificationMessage arg);
+string GetCppVariableType(const VariableSpecificationMessage& arg,
+                          const InterfaceSpecificationMessage* message = NULL);
 
 // Get the C/C++ instance type name of an argument.
-extern string GetCppInstanceType(VariableSpecificationMessage arg,
-                                 string msg = string());
+extern string GetCppInstanceType(
+    const VariableSpecificationMessage& arg,
+    const string& msg = string(),
+    const InterfaceSpecificationMessage* message = NULL);
 
 // Returns the name of a function which can convert the given arg to a protobuf.
 extern string GetConversionToProtobufFunctionName(
@@ -45,6 +48,9 @@ extern string GetConversionToProtobufFunctionName(
 
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);
+
+// custom util function to replace all occurrences of a substring.
+void ReplaceSubString(string& original, const string& from, const string& to);
 
 }  // namespace vts
 }  // namespace android
