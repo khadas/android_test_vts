@@ -75,6 +75,7 @@ enum VariableType {
   // callback functions.
   TYPE_FUNCTION_POINTER = 8;
   TYPE_VOID = 9;
+  TYPE_HIDL_CALLBACK = 10;
 }
 
 
