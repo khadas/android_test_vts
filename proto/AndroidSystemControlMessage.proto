@@ -105,7 +105,7 @@ message AndroidSystemControlCommandMessage {
   // for LIST_APIS
   // none
 
-  // for CALL_API
+  // for CALL_API and VTS_AGENT_COMMAND_INVOKE_SYSCALL
   optional bytes arg = 4001;
 
   // for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND
