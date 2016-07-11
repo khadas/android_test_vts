@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
+#ifndef __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
+#define __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
 
 #include <fstream>
 #include <iostream>
@@ -31,10 +31,9 @@ using namespace std;
 namespace android {
 namespace vts {
 
-
-class HalCodeGen : public CodeGenBase {
+class HalHidlCodeGen : public CodeGenBase {
  public:
-  HalCodeGen(const char* input_vts_file_path, const char* vts_name)
+  HalHidlCodeGen(const char* input_vts_file_path, const char* vts_name)
       : CodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
@@ -70,4 +69,4 @@ class HalCodeGen : public CodeGenBase {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
+#endif  // __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
