@@ -15,13 +15,8 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.tradefed.device.DeviceNotAvailableException;
-import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.result.ITestInvocationListener;
-import com.android.tradefed.util.ArrayUtil;
-import com.android.tradefed.util.CommandResult;
-import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.IRunUtil;
+import com.android.ddmlib.testrunner.ITestRunListener;
+import com.android.ddmlib.testrunner.TestIdentifier;
 
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -30,45 +25,39 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
 
 /**
- * Unit tests for {@link VtsMultiDeviceTest}.
+ * Unit tests for {@link VtsMultiDeviceTestResultParser}.
  */
 public class VtsMultiDeviceTestResultParserTest extends TestCase {
 
-    private ITestInvocationListener mMockInvocationListener = null;
-    private ITestDevice mMockITestDevice = null;
-    private IRunUtil mRunUtil = null;
-    private VtsMultiDeviceTest mTest = null;
-    private static final String TEST_CASE_PATH =
-        "test/vts/testcases/host/sample/SampleLightTest";
-    private static final String TEST_CONFIG_PATH =
-        "test/vts/testcases/host/sample/SampleLightTest.config";
-    static final long TEST_TIMEOUT = 1000 * 60 * 5;
-    private String[] mCommand = null;
     // for file path
     private static final String TEST_DIR = "tests";
     private static final String OUTPUT_FILE_1 = "vts_multi_device_test_parser_output.txt";
     private static final String OUTPUT_FILE_2 = "vts_multi_device_test_parser_output_timeout.txt";
+    private static final String OUTPUT_FILE_3 = "vts_multi_device_test_parser_output_error.txt";
     private static final String USER_DIR = "user.dir";
     private static final String RES = "res";
     private static final String TEST_TYPE = "testtype";
 
-    /**
-     * Helper to initialize the various EasyMocks we'll need.
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mTest = new VtsMultiDeviceTest();
-        mRunUtil = EasyMock.createMock(IRunUtil.class);
-        mMockInvocationListener = EasyMock.createMock(ITestInvocationListener.class);
-        mMockITestDevice = EasyMock.createMock(ITestDevice.class);
-        mTest.setRunUtil(mRunUtil);
-        //build the command
-        String[] baseOpts = {"/usr/bin/python", "-m"};
-        String[] testModule = {TEST_CASE_PATH, TEST_CONFIG_PATH};
-        mCommand = ArrayUtil.buildArray(baseOpts, testModule);
+    //test results
+    static final String PASS = "PASS";
+    static final String FAIL = "FAIL";
+    static final String TIME_OUT = "TIMEOUT";
+
+    // test name
+    private static final String RUN_NAME = "SampleLightFuzzTest";
+    private static final String TEST_NAME_1 = "testTurnOnLightBlackBoxFuzzing";
+    private static final String TEST_NAME_2 = "testTurnOnLightWhiteBoxFuzzing";
+
+    // enumeration to indicate the input file used for each run.
+    private TestCase mTestCase = TestCase.NORMAL;
+    private enum TestCase {
+        NORMAL, ERROR, TIMEOUT;
     }
 
     /**
@@ -76,95 +65,96 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
      * @throws IOException
      */
     public void testRunTimeoutInput() throws IOException{
-        mTest.setDevice(mMockITestDevice);
-        mTest.setTestCasePath(TEST_CASE_PATH);
-        mTest.setTestConfigPath(TEST_CONFIG_PATH);
+        mTestCase = TestCase.TIMEOUT;
+        String[] contents =  getOutput();
+        long totalTime = getTotalTime(contents);
 
-        CommandResult commandResult = new CommandResult();
-        commandResult.setStatus(CommandStatus.SUCCESS);
-        commandResult.setStdout(getOutputTimeout());
-        EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
-                andReturn(commandResult);
-        EasyMock.replay(mRunUtil);
-        try {
-            mTest.run(mMockInvocationListener);
-        } catch (IllegalArgumentException e) {
-            // not expected
-            fail();
-            e.printStackTrace();
-        } catch (DeviceNotAvailableException e) {
-            // not expected
-            fail();
-            e.printStackTrace();
-        }
-    }
-    /**
-     * Returns the sample shell output for a test command.
-     * @return {String} shell output
-     * @throws IOException
-     */
-    private String getOutputTimeout() throws IOException{
-        BufferedReader br = null;
-        String output = null;
-        try {
-            br = new BufferedReader(new FileReader(getFileNameTimeout()));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
+        // prepare the mock object
+        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        mockRunListener.testRunStarted(TEST_NAME_1, 2);
+        mockRunListener.testRunStarted(TEST_NAME_2, 2);
+        mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
+        mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_2));
+        mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_1),
+                Collections.<String, String>emptyMap());
+        mockRunListener.testFailed(new TestIdentifier(RUN_NAME, TEST_NAME_2), TIME_OUT);
+        mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-            }
-            output = sb.toString();
-        } finally {
-            br.close();
-        }
-        return output;
+        EasyMock.replay(mockRunListener);
+        VtsMultiDeviceTestResultParser resultParser = new VtsMultiDeviceTestResultParser(
+            mockRunListener, RUN_NAME);
+        resultParser.processNewLines(contents);
+        resultParser.done();
     }
 
-    /** Return the file path that contains sample shell output logs.
-     * @return {String} file path
-     */private String getFileNameTimeout(){
-           StringBuilder path = new StringBuilder();
-           path.append(System.getProperty(USER_DIR)).append(File.separator).append(TEST_DIR).
-                   append(File.separator).append(RES).append(File.separator).
-                   append(TEST_TYPE).append(File.separator).append(OUTPUT_FILE_2);
-           return path.toString();
-     }
      /**
       * Test the run method with a normal input.
       * @throws IOException
       */
      public void testRunNormalInput() throws IOException{
-         mTest.setDevice(mMockITestDevice);
-         mTest.setTestCasePath(TEST_CASE_PATH);
-         mTest.setTestConfigPath(TEST_CONFIG_PATH);
+         mTestCase = TestCase.NORMAL;
+         String[] contents =  getOutput();
+         long totalTime = getTotalTime(contents);
 
-         CommandResult commandResult = new CommandResult();
-         commandResult.setStatus(CommandStatus.SUCCESS);
-         commandResult.setStdout(getOutput());
-         EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
-                 andReturn(commandResult);
-         EasyMock.replay(mRunUtil);
-         try {
-             mTest.run(mMockInvocationListener);
-         } catch (IllegalArgumentException e) {
-             // not expected
-             fail();
-             e.printStackTrace();
-         } catch (DeviceNotAvailableException e) {
-             // not expected
-             fail();
-             e.printStackTrace();
-         }
+         // prepare the mock object
+         ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+         mockRunListener.testRunStarted(TEST_NAME_1, 2);
+         mockRunListener.testRunStarted(TEST_NAME_2, 2);
+         mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
+         mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_2));
+         mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_1),
+                 Collections.<String, String>emptyMap());
+         mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_2),
+                 Collections.<String, String>emptyMap());
+         mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
+
+         EasyMock.replay(mockRunListener);
+         VtsMultiDeviceTestResultParser resultParser = new VtsMultiDeviceTestResultParser(
+                 mockRunListener, RUN_NAME);
+         resultParser.processNewLines(contents);
+         resultParser.done();
+     }
+
+     /**
+      * Test the run method with a erroneous input.
+      * @throws IOException
+      */
+     public void testRunErrorInput() throws IOException{
+       mTestCase = TestCase.ERROR;
+       String[] contents =  getOutput();
+       long totalTime = getTotalTime(contents);
+
+       // prepare the mock object
+       ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+       mockRunListener.testRunStarted(null, 0);
+       mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
+
+       EasyMock.replay(mockRunListener);
+       VtsMultiDeviceTestResultParser resultParser = new VtsMultiDeviceTestResultParser(
+               mockRunListener, RUN_NAME);
+       resultParser.processNewLines(contents);
+       resultParser.done();
      }
      /**
+     * @param contents The logs that are used for a test case.
+     * @return {long} total running time of the test.
+     */
+     private long getTotalTime(String[] contents) {
+         Date startDate = getDate(contents, true);
+         Date endDate = getDate(contents, false);
+
+         if (startDate == null || endDate == null) {
+             return 0;
+         }
+         return endDate.getTime() - startDate.getTime();
+     }
+
+    /**
       * Returns the sample shell output for a test command.
       * @return {String} shell output
       * @throws IOException
       */
-     private String getOutput() throws IOException{
+     private String[] getOutput() throws IOException{
          BufferedReader br = null;
          String output = null;
          try {
@@ -181,16 +171,65 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
          } finally {
              br.close();
          }
-         return output;
+         return output.split("\n");
      }
 
      /** Return the file path that contains sample shell output logs.
-      * @return {String} file path
-      */private String getFileName(){
-            StringBuilder path = new StringBuilder();
-            path.append(System.getProperty(USER_DIR)).append(File.separator).append(TEST_DIR).
-                    append(File.separator).append(RES).append(File.separator).
-                    append(TEST_TYPE).append(File.separator).append(OUTPUT_FILE_1);
-            return path.toString();
+      *
+      * @return {String} The file path.
+      */
+     private String getFileName(){
+         String fileName = null;
+         switch (mTestCase) {
+             case NORMAL:
+                 fileName = OUTPUT_FILE_1;
+                 break;
+             case TIMEOUT:
+                 fileName = OUTPUT_FILE_2;
+                 break;
+             case ERROR:
+                 fileName = OUTPUT_FILE_3;
+                 break;
+             default:
+                 break;
+         }
+         StringBuilder path = new StringBuilder();
+         path.append(System.getProperty(USER_DIR)).append(File.separator).append(TEST_DIR).
+                 append(File.separator).append(RES).append(File.separator).
+                 append(TEST_TYPE).append(File.separator).append(fileName);
+         return path.toString();
       }
+
+     /**
+      * Return the time in milliseconds to calculate the time elapsed in a particular test.
+      * 
+      * @param lines The logs that need to be parsed.
+      * @param calculateStartDate flag which is true if we need to calculate start date.
+      * @return {Date} the start and end time corresponding to a test.
+      */
+     private Date getDate(String[] lines, boolean calculateStartDate) {
+         Date date = null;
+         int begin = calculateStartDate ? 0 : lines.length - 1;
+         int diff = calculateStartDate ? 1 : -1;
+
+         for (int index = begin; index >= 0 && index < lines.length; index += diff) {
+             lines[index].trim();
+             String[] toks = lines[index].split(" ");
+
+             // set the start time from the first line
+             // the loop should continue if exception occurs, else it can break
+             if (toks.length < 3) {
+                 continue;
+             }
+             String time = toks[2];
+             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+             try {
+                 date = sdf.parse(time);
+             } catch (ParseException e) {
+                 continue;
+             }
+             break;
+         }
+         return date;
+     }
 }
