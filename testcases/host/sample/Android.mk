@@ -12,3 +12,7 @@ include $(BUILD_SYSTEM)/base_rules.mk
 $(LOCAL_BUILT_MODULE):
 	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
 	$(hide) touch $@
+
+VTS_CONFIG_SRC_DIR := testcases/host/sample
+include $(LOCAL_PATH)/../../../tools/build/Android.host_config.mk
+
