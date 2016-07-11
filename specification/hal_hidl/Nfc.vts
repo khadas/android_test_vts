@@ -1,6 +1,3 @@
-// Golden file (Manually Produced)
-// Deprecate once this golden and hidl-gen produce file is the same or equivalent.
-
 component_class: HAL_HIDL
 component_type: NFC
 component_type_version: 1.0
@@ -54,7 +51,7 @@ attribute: {
     name: "data"
     type: TYPE_VECTOR_VARIABLE
     vector_value: {
-      scalar_type_name: "uint8_t"
+      scalar_type: "uint8_t"
     }
   }
 }
@@ -62,55 +59,64 @@ attribute: {
 api: {
   name: "open"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    aggregate_type: "INfcClientCallback"
+    type: TYPE_HIDL_CALLBACK
+    predefined_type: "INfcClientCallback"
   }
 }
 
 api: {
   name: "write"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    aggregate_type: "nfc_data_t"
+    type: TYPE_STRUCT
+    predefined_type: "nfc_data_t"
   }
 }
 
 api: {
   name: "core_initialized"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "pre_discover"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "close"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "control_granted"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "power_cycle"
   return_type_hidl: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
