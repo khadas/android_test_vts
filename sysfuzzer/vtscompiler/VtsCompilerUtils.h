@@ -23,6 +23,9 @@ using namespace std;
 namespace android {
 namespace vts {
 
+// returns true if s ends with suffix.
+bool endsWith(const string& s, const string& suffix);
+
 // Returns the component class name as a string
 extern string ComponentClassToString(int component_class);
 

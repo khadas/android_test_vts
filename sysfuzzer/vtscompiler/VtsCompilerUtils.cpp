@@ -38,6 +38,11 @@ using namespace std;
 namespace android {
 namespace vts {
 
+bool endsWith(const string& s, const string& suffix) {
+  return s.size() >= suffix.size() && s.rfind(suffix) == (s.size() - suffix.size());
+}
+
+
 string ComponentClassToString(int component_class) {
   switch (component_class) {
     case UNKNOWN_CLASS:
@@ -131,8 +136,13 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       if (!message || message->component_class() != HAL_HIDL) {
         return arg.predefined_type();
       } else {
-        return "Bp" + message->component_name().substr(1) + "::"
-            + arg.predefined_type();
+        if (!endsWith(message->component_name(), "Callback")) {
+          return "Bp" + message->component_name().substr(1) + "::"
+              + arg.predefined_type();
+        } else {
+          return "Bn" + message->component_name().substr(1) + "::"
+              + arg.predefined_type();
+        }
       }
     }
   } else if (arg.type() == TYPE_STRUCT) {
@@ -142,10 +152,12 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       if (!message || message->component_class() != HAL_HIDL) {
         return arg.predefined_type();
       } else {
-        return "Bp" + message->component_name().substr(1) + "::"
+        return message->component_name() + "::"
             + arg.predefined_type();
       }
     }
+  } else if (arg.type() == TYPE_VECTOR_VARIABLE) {
+    return "const hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
     return arg.predefined_type();
   }
@@ -284,8 +296,15 @@ string GetCppInstanceType(
     if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
       return message->component_name() + "::" + arg.predefined_type() +  "()";
     }
+  } else if (arg.type() == TYPE_VECTOR_VARIABLE) {  // only for HAL_HIDL
+    // TODO: generate code that initializes a local hidl_vec.
+    return "";
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
-    return "Bp" + arg.predefined_type().substr(1) + "()";
+    if (!endsWith(arg.predefined_type(), "Callback")) {
+      return "Bp" + arg.predefined_type().substr(1) + "()";
+    } else {
+      return "Bn" + arg.predefined_type().substr(1) + "()";
+    }
   }
   cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
   cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;

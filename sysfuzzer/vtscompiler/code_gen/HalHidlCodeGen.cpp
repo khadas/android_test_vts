@@ -177,9 +177,33 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
   }
 }
 
+
+void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
+    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+
+  for (auto const& api : message.api()) {
+    if (api.return_type_hidl_size() > 0) {
+      cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func("
+             << api.return_type_hidl(0).scalar_type() << " arg) {" << endl;
+      // TODO: support other non-scalar type and multiple args.
+      cpp_ss << "}" << endl;
+      cpp_ss << "std::function<"
+              << "void(" << api.return_type_hidl(0).scalar_type() << ")> "
+              << fuzzer_extended_class_name << api.name() << "_cb = "
+              << fuzzer_extended_class_name << api.name() << "_cb_func;" << endl;
+      cpp_ss << endl << endl;
+    }
+  }
+}
+
+
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
+  GenerateCppBodySyncCallbackFunction(
+      cpp_ss, message, fuzzer_extended_class_name);
+
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
                                 message.original_data_structure_name(),
@@ -257,9 +281,25 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           exit(-1);
         }
       } else {
-        cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
-        cpp_ss << "arg" << arg_count << " = ";
-        {
+        if (arg.type() == TYPE_VECTOR_VARIABLE) {
+          cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
+                 << "arg" << arg_count << "buffer = (" << arg.vector_value(0).scalar_type()
+                 << "*) malloc(8 * sizeof(" << arg.vector_value(0).scalar_type() << "));"
+                 << endl;
+        }
+        if (arg.type() == TYPE_HIDL_CALLBACK) {
+          cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count << "= nullptr" << endl;
+        } else if (arg.type() == TYPE_STRUCT) {
+          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+          cpp_ss << "arg" << arg_count;
+        } else {
+          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+          cpp_ss << "arg" << arg_count << " = ";
+        }
+
+        if (arg.type() != TYPE_VECTOR_VARIABLE &&
+            arg.type() != TYPE_HIDL_CALLBACK &&
+            arg.type() != TYPE_STRUCT) {
           std::stringstream msg_ss;
           msg_ss << "func_msg->arg(" << arg_count << ")";
           string msg = msg_ss.str();
@@ -296,8 +336,14 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               exit(-1);
             }
             cpp_ss << ") : ";
+          } else if (arg.type() == TYPE_ENUM) {
+            // TODO: impl
+          } else if (arg.type() == TYPE_STRUCT) {
+            // TODO: impl
           } else {
-            cerr << __func__ << " unknown type " << msg << endl;
+            cerr << __func__ << ":" << __LINE__ << " unknown type "
+                 << arg.type() << endl;
+            exit(-1);
           }
 
           cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
@@ -307,6 +353,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << " : " << GetCppInstanceType(arg, string(), &message) << " )";
           // TODO: use the given message and call a lib function which converts
           // a message to a C/C++ struct.
+        } else if (arg.type() == TYPE_VECTOR_VARIABLE) {
+          // TODO: dynamically generate the initial value for hidl_vec
+          cpp_ss << "{arg" << arg_count << "buffer, 8}";
         }
         cpp_ss << ";" << endl;
       }
@@ -320,7 +369,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
     cpp_ss << "*result = NULL;" << endl;
-    cpp_ss << kInstanceVariableName << "." << api.name() << "(";
+    cpp_ss << kInstanceVariableName << "->" << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
     for (int index = 0; index < arg_count; index++) {
@@ -332,7 +381,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 
     if (api.return_type_hidl_size() > 0) {
       // TODO: support callback as the last arg
-      cpp_ss << ", nullptr)";
+      if (arg_count != 0) cpp_ss << ", ";
+      cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
       // TODO: callback shall update *result (barrier here?)
       //       cpp_ss << "*result = ...";
     }
@@ -459,7 +509,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
     cpp_ss << "*result = NULL;" << endl;
-    cpp_ss << kInstanceVariableName << "." << parent_path << message.name() << "->"
+    cpp_ss << kInstanceVariableName << "->" << parent_path << message.name() << "->"
            << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
@@ -470,7 +520,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       }
     }
     if (api.return_type_hidl_size() > 0) {
-      cpp_ss << ", nullptr)";
+      if (arg_count != 0) cpp_ss << ", ";
+      cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
       // TODO: support callback as the last arg and setup barrier here to
       // do *result = ...;
     }
