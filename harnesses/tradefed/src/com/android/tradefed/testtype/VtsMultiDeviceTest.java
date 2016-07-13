@@ -18,6 +18,8 @@ package com.android.tradefed.testtype;
 
 import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -30,6 +32,8 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,9 +44,10 @@ import java.util.Set;
 
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-    IRuntimeHintProvider, ITestCollector {
+    IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
     static final String PYTHONPATH = "PYTHONPATH";
+    static final String VTS = "vts";
     static final float DEFAULT_TARGET_VERSION = -1;
 
     private ITestDevice mDevice = null;
@@ -87,6 +92,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         + "(optional)")
     private String mPythonBin = null;
     private IRunUtil mRunUtil = null;
+    private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
 
     /**
@@ -219,6 +225,11 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         doRunTest(listener, mRunUtil, mTestCasePath, mTestConfigPath);
     }
 
+    @Override
+    public void setBuild(IBuildInfo buildInfo) {
+        mBuildInfo = buildInfo;
+    }
+
     /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
@@ -269,9 +280,39 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
-        sb.append("$" + PYTHONPATH + ":./:" +
-                  System.getenv("ANDROID_BUILD_TOP") + "/test");
+        sb.append(System.getenv(PYTHONPATH));
+
+        // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
+        if (mBuildInfo != null) {
+            CompatibilityBuildHelper mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
+            mBuildHelper.init(VTS, null);
+
+            File testDir = null;
+            try {
+                testDir = mBuildHelper.getTestsDir();
+            } catch(FileNotFoundException e) {
+                /* pass */
+            }
+            if (testDir != null) {
+                sb.append(":");
+                sb.append(testDir.getAbsolutePath());
+            } else if (mBuildInfo.getFile(VTS) != null) {
+                sb.append(":");
+                sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
+            }
+        }
+
+        // for when one uses PythonVirtualenvPreparer.
+        if (mBuildInfo.getFile(PYTHONPATH) != null) {
+            sb.append(":");
+            sb.append(mBuildInfo.getFile(PYTHONPATH).getAbsolutePath());
+        }
+        if (System.getenv("ANDROID_BUILD_TOP") != null) {
+            sb.append(":");
+            sb.append(System.getenv("ANDROID_BUILD_TOP")).append("/test");
+        }
         mPythonPath = sb.toString();
+        CLog.i("mPythonPath: %s", mPythonPath);
     }
 
     /**
