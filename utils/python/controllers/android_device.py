@@ -500,7 +500,7 @@ class AndroidDevice(object):
         This function starts the target side native agent and is persisted
         throughout the test run.
         """
-        self.log.info("start a VTS agent on %s", self.serial)
+        self.log.info("start a VTS agent")
         if self.vts_agent_process:
             raise AndroidDeviceError("HAL agent is already running on %s." %
                                      self.serial)
@@ -518,9 +518,9 @@ class AndroidDevice(object):
         for cmd in cleanup_commands:
             try:
                 self.adb.shell(cmd)
-            except adb.AdbError:
-                self.log.warning("setup command failed %s", cmd)
-                pass
+            except adb.AdbError as e:
+                self.log.warning(
+                        "A command to setup the env to start the VTS Agent failed %s", e)
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
         cmd = (
             'adb -s {s} shell LD_LIBRARY_PATH={path}/64 {path}/64/vts_hal_agent'
