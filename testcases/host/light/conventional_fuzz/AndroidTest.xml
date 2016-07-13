@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for VTS HAL lights test cases">
+<configuration description="Config for VTS HAL light fuzz test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="push" value="libvts_common.so->/data/local/tmp/64/libvts_common.so" />
@@ -65,7 +65,7 @@
         <option name="append-bitness" value="false" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/host/sample/SampleLightTest" />
-        <option name="test-config-path" value="vts-config/testcases/host/sample/SampleLightTest.config" />
+        <option name="test-case-path" value="vts/testcases/host/light/conventional_fuzz/SampleLightFuzzTest" />
+        <option name="test-config-path" value="vts-config/testcases/host/light/conventional_fuzz/SampleLightFuzzTest.config" />
     </test>
 </configuration>
