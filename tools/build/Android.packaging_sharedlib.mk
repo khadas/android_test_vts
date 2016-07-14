@@ -15,7 +15,7 @@
 #
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
-vts_framework_file64 := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE).so
+vts_framework_file64 := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)64.so
 
 $(vts_framework_file64): $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE))/LINKED/$(LOCAL_MODULE).so | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
