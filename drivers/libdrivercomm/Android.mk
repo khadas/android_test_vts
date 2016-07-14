@@ -36,5 +36,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MULTILIB := both
 
+LOCAL_COMPATIBILITY_SUITE := vts
+
 include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk

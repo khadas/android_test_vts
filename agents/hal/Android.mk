@@ -50,6 +50,8 @@ LOCAL_C_INCLUDES += \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
+LOCAL_COMPATIBILITY_SUITE := vts
+
 include $(BUILD_EXECUTABLE)
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
