@@ -25,7 +25,7 @@ class TestMethods(unittest.TestCase):
 
     Attributes:
         _bigtable_client: An instance of bigtable_client used for performing
-            read/write opearations.
+            read/write operations.
     """
 
     _bigtable_client = None
