@@ -22,7 +22,7 @@ else
 vts_framework_lib_file := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)64.so
 endif
 
-$(vts_framework_lib_file): $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE))/LINKED/$(LOCAL_MODULE).so | $(ACP)
+$(vts_framework_lib_file): out/target/product/$(TARGET_PRODUCT)/obj_arm/SHARED_LIBRARIES/$(LOCAL_MODULE)_intermediates/LINKED/$(LOCAL_MODULE).so | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
