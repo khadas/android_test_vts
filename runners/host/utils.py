@@ -198,6 +198,12 @@ def load_config(file_full_path):
     Returns:
         A JSON object.
     """
+    if not os.path.isfile(file_full_path):
+        file_full_path = "testcases/" + file_full_path
+        if not os.path.isfile(file_full_path):
+            file_full_path = "android-vts/" + file_full_path
+            if not os.path.isfile(file_full_path):
+                logging.error("config not found - cwd: %s", os.getcwd())
     with open(file_full_path, 'r') as f:
         conf = json.load(f)
         return conf
