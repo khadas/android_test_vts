@@ -333,20 +333,19 @@ class AndroidDevice(object):
 
     @property
     def isBootloaderMode(self):
-        """True if the device is in bootloader mode.
-        """
+        """True if the device is in bootloader mode."""
         return self.serial in list_fastboot_devices()
 
     @property
     def isAdbRoot(self):
-        """True if adb is running as root for this device.
-        """
-        return "root" in self.adb.shell("id -u").decode("utf-8")
+        """True if adb is running as root for this device."""
+        id_str = self.adb.shell("id -u").decode("utf-8")
+        self.log.info(id_str)
+        return "root" in id_str
 
     @property
     def model(self):
-        """The Android code name for the device.
-        """
+        """The Android code name for the device."""
         # If device is in bootloader mode, get mode name from fastboot.
         if self.isBootloaderMode:
             out = self.fastboot.getvar("product").strip()
@@ -393,10 +392,13 @@ class AndroidDevice(object):
             setattr(self, k, v)
 
     def rootAdb(self):
-        """Change adb to root mode for this device.
-        """
+        """Changes adb to root mode for this device."""
         if not self.isAdbRoot:
-            self.adb.root()
+            try:
+                self.adb.root()
+            except adb.AdbError as e:
+                # adb root is not always possible in the lab
+                logging.exception(e)
             self.adb.wait_for_device()
             self.adb.remount()
             self.adb.wait_for_device()

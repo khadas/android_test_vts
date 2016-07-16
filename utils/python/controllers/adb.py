@@ -16,6 +16,7 @@
 
 from builtins import str
 
+import logging
 import random
 import socket
 import subprocess
@@ -118,13 +119,13 @@ class AdbProxy():
         indicator of cmd execution status.
 
         Args:
-            cmds: A string that is the adb command to execute.
+            cmd: string, the adb command to execute.
 
         Returns:
-            The output of the adb command run if exit code is 0.
+            The output of the adb command run if the exit code is 0.
 
         Raises:
-            AdbError is raised if the adb command exit code is not 0.
+            AdbError if the adb command exit code is not 0.
         """
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         (out, err) = proc.communicate()
@@ -133,10 +134,11 @@ class AdbProxy():
         # TODO(angli): Fix this when global logger is done.
         if self.log:
             self.log.debug("{}\n{}".format(cmd, total_output))
-        if ret == 0:
-            return out
-        else:
+        if ret != 0:
+            logging.error("adb '%s' failed error code %s", cmd, ret)
+            logging.error("total_output: %s", total_output)
             raise AdbError(total_output)
+        return out
 
     def _exec_adb_cmd(self, name, arg_str):
         return self._exec_cmd(' '.join((self.adb_str, name, arg_str)))
