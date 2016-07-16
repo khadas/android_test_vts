@@ -248,10 +248,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             mPythonBin = getPythonBinary();
         }
         String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath, mTestConfigPath};
+        String[] testModule = {mTestCasePath, mTestConfigPath,
+                               mDevice.getSerialNumber()};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
-        cmd.append(mDevice.getSerialNumber());
 
         CommandResult commandResult = runUtil.runTimedCmd(TEST_TIMEOUT, cmd);
 
