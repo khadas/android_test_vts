@@ -35,6 +35,8 @@
         <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
         <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
+        <option name="push" value="Nfc.vts->/data/local/tmp/spec/Nfc.vts" />
+        <option name="push" value="NfcClientCallback.vts->/data/local/tmp/spec/NfcClientCallback.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
