@@ -17,11 +17,35 @@
 #ifndef __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H_
 #define __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H_
 
+#include <VtsDriverCommUtil.h>
+
 namespace android {
 namespace vts {
 
+// Launches a server which accepts connection requests from drivers.
 extern int StartSocketServerForDriver(const string& callback_socket_name,
                                       int runner_port);
+
+// Class which contains actual methods to handle the callback requests.
+class SocketServerForDriver : public VtsDriverCommUtil {
+ public:
+  SocketServerForDriver(int sock, int runner_port)
+      : runner_port_(runner_port),
+        VtsDriverCommUtil(sock_) {}
+
+  // Starts to process requests.
+  void Start();
+
+  // Sends a RPC call to the runner.
+  void RpcCallToRunner(const char* id);
+
+ private:
+  // ID of a socket to communicate with a connected driver.
+  int sock_;
+
+  // TCP port number of a runner's callback server.
+  int runner_port_;
+};
 
 }  // namespace vts
 }  // namespace android

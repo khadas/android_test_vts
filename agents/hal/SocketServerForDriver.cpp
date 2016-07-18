@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "SocketServerForDriver.h"
+
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -39,17 +41,10 @@ namespace vts {
 
 static const int kCallbackServerPort = 5010;
 
-void RpcCallToRunner(char* id, int runner_port) {
+void SocketServerForDriver::RpcCallToRunner(const char* id) {
   cout << __func__ << ":" << __LINE__ << " " << id << endl;
   struct sockaddr_in serv_addr;
   struct hostent* server;
-
-  for (int index = 0; index < strlen(id); index++) {
-    if (id[index] == '\n' || id[index] == '\r') {
-      id[index] = '\0';
-      break;
-    }
-  }
 
   int sockfd;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -68,7 +63,7 @@ void RpcCallToRunner(char* id, int runner_port) {
   serv_addr.sin_family = AF_INET;
   bcopy((char*)server->h_addr, (char*)&serv_addr.sin_addr.s_addr,
         server->h_length);
-  serv_addr.sin_port = htons(runner_port);
+  serv_addr.sin_port = htons(runner_port_);
 
   if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
     cerr << __func__ << " ERROR connecting" << endl;
@@ -84,16 +79,12 @@ void RpcCallToRunner(char* id, int runner_port) {
   if (!util.VtsSocketSendMessage(callback_msg)) return;
 }
 
-void CallbackRequestHandler(int sock, int runner_port) {
-  char buffer[256];
-  bzero(buffer, 256);
-  int n = read(sock, buffer, 255);
-  if (n < 0) {
-    cerr << __func__ << " ERROR reading from socket" << endl;
-    return;
-  }
-  cout << "Here is the message: " << buffer << endl;
-  RpcCallToRunner(buffer, runner_port);
+void SocketServerForDriver::Start() {
+  AndroidSystemCallbackRequestMessage message;
+  if (!VtsSocketRecvMessage(&message)) return;
+  cout << __func__ << " Callback ID: " << message.id() << endl;
+  RpcCallToRunner(message.id().c_str());
+  Close();
 }
 
 int StartSocketServerForDriver(const string& callback_socket_name,
@@ -118,11 +109,12 @@ int StartSocketServerForDriver(const string& callback_socket_name,
     return -1;
   }
 
-  bzero((char*)&serv_addr, sizeof(serv_addr));
+  bzero((char*) &serv_addr, sizeof(serv_addr));
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, callback_socket_name.c_str());
+  cout << "[agent] callback server at " << callback_socket_name << endl;
 
-  if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+  if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
     int error_save = errno;
     cerr << getpid() << " " << __func__ << " ERROR on binding "
          << callback_socket_name << " errno = " << error_save << " "
@@ -141,15 +133,17 @@ int StartSocketServerForDriver(const string& callback_socket_name,
     socklen_t clilen;
 
     clilen = sizeof(cli_addr);
-    newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
+    newsockfd = accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
     if (newsockfd < 0) {
       cerr << __func__ << " ERROR on accept " << strerror(errno) << endl;
       break;
     }
+    cout << "[agent] new callback connection." << endl;
     pid = fork();
     if (pid == 0) {
       close(sockfd);
-      CallbackRequestHandler(newsockfd, runner_port);
+      SocketServerForDriver server(newsockfd, runner_port);
+      server.Start();
       exit(0);
     } else if (pid > 0) {
       close(newsockfd);

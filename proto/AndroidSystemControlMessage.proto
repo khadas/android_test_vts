@@ -16,6 +16,8 @@ syntax = "proto2";
 
 package android.vts;
 
+import "test/vts/proto/InterfaceSpecificationMessage.proto";
+
 
 // Type of a command.
 enum CommandType {
@@ -140,6 +142,9 @@ message AndroidSystemControlResponseMessage {
 message AndroidSystemCallbackRequestMessage {
   // callback id for the message sent to the TCP Server.
   optional bytes id = 1;
+
+  // args
+  repeated VariableSpecificationMessage arg = 11;
 }
 
 
