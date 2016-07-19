@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Config for VTS kernel LTP test cases">
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <option name="cleanup" value="true" />
+        <option name="push" value="libvts_common.so->/data/local/tmp/32/libvts_common.so" />
+        <option name="push" value="libvts_common64.so->/data/local/tmp/64/libvts_common.so" />
+        <option name="push" value="libvts_interfacespecification.so->/data/local/tmp/32/libvts_interfacespecification.so" />
+        <option name="push" value="libvts_interfacespecification64.so->/data/local/tmp/64/libvts_interfacespecification.so" />
+        <option name="push" value="libvts_drivercomm.so->/data/local/tmp/32/libvts_drivercomm.so" />
+        <option name="push" value="libvts_drivercomm64.so->/data/local/tmp/64/libvts_drivercomm.so" />
+        <option name="push" value="libvts_datatype.so->/data/local/tmp/32/libvts_datatype.so" />
+        <option name="push" value="libvts_datatype64.so->/data/local/tmp/64/libvts_datatype.so" />
+        <option name="push" value="libvts_measurement.so->/data/local/tmp/32/libvts_measurement.so" />
+        <option name="push" value="libvts_measurement64.so->/data/local/tmp/64/libvts_measurement.so" />
+        <option name="push" value="libvts_codecoverage.so->/data/local/tmp/32/libvts_codecoverage.so" />
+        <option name="push" value="libvts_codecoverage64.so->/data/local/tmp/64/libvts_codecoverage.so" />
+        <option name="push" value="libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
+        <option name="push" value="libvts_multidevice_proto64.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
+        <option name="push" value="fuzzer32->/data/local/tmp/32/fuzzer32" />
+        <option name="push" value="fuzzer64->/data/local/tmp/64/fuzzer64" />
+        <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
+        <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
+        <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
+
+        <option name="push" value="crash01_32->/data/local/tmp/32/crash01_32" />
+        <option name="push" value="crash01_64->/data/local/tmp/64/crash01_64" />
+        <option name="push" value="crash02_32->/data/local/tmp/32/crash02_32" />
+        <option name="push" value="crash02_64->/data/local/tmp/64/crash02_64" />
+        <option name="append-bitness" value="false" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
+        <option name="dep-module" value="future" />
+        <option name="dep-module" value="futures" />
+        <option name="dep-module" value="enum" />
+        <option name="dep-module" value="protobuf" />
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-case-path" value="vts/testcases/kernel/ltp/KernelLtpTest" />
+        <option name="test-config-path" value="vts-config/testcases/kernel/ltp/KernelLtpTest.config" />
+    </test>
+</configuration>
