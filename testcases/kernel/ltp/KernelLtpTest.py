@@ -35,8 +35,9 @@ class KernelLtpTest(base_test.BaseTestClass):
         # TODO: enable 64-bit test cases.
         for test_binary in ["/data/local/tmp/32/crash01_32",
                             "/data/local/tmp/32/crash02_32"]:
-            stdouts = self.dut.shell.my_shell1.Execute(test_binary)
             logging.info("***** %s *****", test_binary)
+            self.dut.shell.my_shell1.Execute("chmod 755 %s" % test_binary)
+            stdouts = self.dut.shell.my_shell1.Execute(test_binary)
             logging.info(stdouts)
             asserts.assertTrue("TPASS" in "".join(stdouts),
                                "%s failed" % test_binary)
