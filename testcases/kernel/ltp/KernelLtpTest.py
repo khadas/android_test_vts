@@ -32,14 +32,14 @@ class KernelLtpTest(base_test.BaseTestClass):
 
     def testCrashTestcases(self):
         """A simple testcase which just emulates a normal usage pattern."""
+        # TODO: enable 64-bit test cases.
         for test_binary in ["/data/local/tmp/32/crash01_32",
-                            "/data/local/tmp/64/crash01_64",
-                            "/data/local/tmp/32/crash02_32",
-                            "/data/local/tmp/64/crash02_64"]:
+                            "/data/local/tmp/32/crash02_32"]:
             stdouts = self.dut.shell.my_shell1.Execute(test_binary)
             logging.info("***** %s *****", test_binary)
             logging.info(stdouts)
-            asserts.assertTrue("passed" in "".join(stdouts))
+            asserts.assertTrue("TPASS" in "".join(stdouts),
+                               "%s failed" % test_binary)
 
 
 if __name__ == "__main__":
