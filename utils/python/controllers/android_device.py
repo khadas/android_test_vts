@@ -513,14 +513,18 @@ class AndroidDevice(object):
                                      self.serial)
 
         cleanup_commands = [
-            "rm -f /data/local/tmp/vts_driver_* /data/local/tmp/vts_agent_callback*"]
+            "rm -f /data/local/tmp/vts_driver_*",
+            "rm -f /data/local/tmp/vts_agent_callback*"]
         kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
-                         "killall fuzzer64"]
+                         "killall fuzzer64", "vts_shell_driver32",
+                         "vts_shell_driver64"]
         cleanup_commands.extend(kill_commands)
         chmod_commands = [
             "chmod 755 %s/64/vts_hal_agent" % DEFAULT_AGENT_BASE_DIR,
             "chmod 755 %s/32/fuzzer32" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/64/fuzzer64" % DEFAULT_AGENT_BASE_DIR]
+            "chmod 755 %s/64/fuzzer64" % DEFAULT_AGENT_BASE_DIR,
+            "chmod 755 %s/32/vts_shell_driver32" % DEFAULT_AGENT_BASE_DIR,
+            "chmod 755 %s/64/vts_shell_driver64" % DEFAULT_AGENT_BASE_DIR]
         cleanup_commands.extend(chmod_commands)
         for cmd in cleanup_commands:
             try:
