@@ -163,6 +163,55 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
              << endl;
       cpp_ss << "    callback_message.set_id(GetCallbackID(\"" << callback_name
              << "\"));" << endl;
+
+      primitive_type_index = 0;
+      for (const auto& arg : func_pt_spec.arg()) {
+        cpp_ss << "VariableSpecificationMessage* var_msg" << primitive_type_index
+               << " = callback_message.add_arg();" << endl;
+        if (arg.type() == TYPE_SCALAR) {
+          cpp_ss << "var_msg" << primitive_type_index << "->set_type("
+                 << "TYPE_SCALAR);" << endl;
+          cpp_ss << "var_msg" << primitive_type_index << "->set_scalar_type(\""
+                 << arg.scalar_type() << "\");" << endl;
+          cpp_ss << "var_msg" << primitive_type_index << "->mutable_scalar_value()";
+          if (arg.scalar_type() == "int32_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int32_t() << ");" << endl;
+          } else if (arg.scalar_type() == "uint32_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint32_t() << ");" << endl;
+          } else if (arg.scalar_type() == "size_t") {
+            cpp_ss << "->set_uint32_t("
+                   << arg.scalar_value().uint32_t() << ");" << endl;
+          } else if (arg.scalar_type() == "int64_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int64_t() << ");" << endl;
+          } else if (arg.scalar_type() == "uint64_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint64_t() << ");" << endl;
+          } else if (arg.scalar_type() == "char_pointer") {
+            // pointer value is not meaning when it is passed to another machine.
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().char_pointer() << ");" << endl;
+          } else if (arg.scalar_type() == "void_pointer") {
+            // pointer value is not meaning when it is passed to another machine.
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().void_pointer() << ");" << endl;
+          } else {
+            cerr << __func__ << " unsupported scalar type " << arg.scalar_type()
+                 << endl;
+            exit(-1);
+          }
+        } else if (arg.type() == TYPE_PREDEFINED) {
+          cpp_ss << "var_msg" << primitive_type_index << "->set_type("
+                 << "TYPE_PREDEFINED);" << endl;
+          // TODO: actually handle such case.
+        } else {
+          cerr << __func__ << " unsupported type" << endl;
+          exit(-1);
+        }
+        primitive_type_index++;
+      }
       cpp_ss << "    RpcCallToAgent(callback_message, callback_socket_name_);"
              << endl;
       if (has_return_value) {

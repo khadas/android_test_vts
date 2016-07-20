@@ -100,7 +100,7 @@ const char* VtsDriverHalSocketServer::GetFunctions() {
   string* output = new string();
   printf("getfunctions serial1\n");
   if (google::protobuf::TextFormat::PrintToString(*spec, output)) {
-    printf("getfunctions length %d\n", output->length());
+    printf("getfunctions length %lu\n", output->length());
     return output->c_str();
   } else {
     printf("can't serialize the interface spec message to a string.\n");
