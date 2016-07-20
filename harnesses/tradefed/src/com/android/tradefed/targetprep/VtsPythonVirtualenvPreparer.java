@@ -55,6 +55,9 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     @Option(name = "requirements-file", description = "pip-formatted requirements file")
     private File mRequirementsFile = null;
 
+    @Option(name = "script-file", description = "scripts which need to be executed in advance")
+    private List<String> mScriptFiles = new ArrayList<>();
+
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
     private List<String> mDepModules = new ArrayList<>();
 
@@ -70,6 +73,16 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
 
     protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
         boolean hasDependencies = false;
+        if (!mScriptFiles.isEmpty()) {
+            for (String scriptFile : mScriptFiles) {
+                CLog.i("Attempting to execute a script, %s", scriptFile);
+                CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, scriptFile);
+                if (c.getStatus() != CommandStatus.SUCCESS) {
+                    CLog.e("Executing script %s failed", scriptFile);
+                    throw new TargetSetupError("Failed to source a script");
+                }
+            }
+        }
         if (mRequirementsFile != null) {
             CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip,
                     "install", "-r", mRequirementsFile.getAbsolutePath());
