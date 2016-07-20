@@ -222,8 +222,8 @@ class MirrorObject(object):
                                         setattr(arg.scalar_value, value.scalar_type,
                                                 getattr(value.scalar_value, value.scalar_type))
                                     elif value.type == IfaceSpecMsg.TYPE_STRING:
-                                        arg.string_value.message = value.string_value.length
-                                        arg.string_value.length = value.string_value.message
+                                        arg.string_value.message = value.string_value.message
+                                        arg.string_value.length = value.string_value.length
                                     elif value.type == IfaceSpecMsg.TYPE_STRUCT:
                                         # TODO: assign recursively
                                         logging.error("TYPE_STRUCT unsupported")

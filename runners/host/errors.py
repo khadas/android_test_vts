@@ -35,18 +35,6 @@ class ComponentLoadingError(VtsError):
     """Raised if it is unable to load a target component on a target device."""
 
 
-class TcpServerCreationError(VtsError):
-    """Raised when it's unable to start a TCP server."""
-
-
-class TcpServerShutdownError(VtsError):
-    """Raised when it's unable to shutdown a TCP server."""
-
-
-class TcpServerConnectionError(VtsError):
-    """Raised when it's unable to connect to a TCP Server."""
-
-
 class ConnectionRefusedError(VtsError):
     """Failure due to wrong port number.
 
