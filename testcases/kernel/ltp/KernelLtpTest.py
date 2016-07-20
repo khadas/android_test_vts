@@ -33,23 +33,21 @@ class KernelLtpTest(base_test.BaseTestClass):
     def testCrashTestcases(self):
         """A simple testcase which just emulates a normal usage pattern."""
         # TODO: enable 64-bit test cases.
-        stdouts = self.dut.shell.my_shell1.Execute("which ls")
-        logging.info(stdouts)
-        for stdout in stdouts:
-            asserts.assertEqual(stdout.strip(), "/system/bin/ls")
+        test_binaries = ["/data/local/tmp/32/crash01_32",
+                         "/data/local/tmp/32/crash02_32"]
+        test_commands = ["chmod 755 " + b for b in test_binaries]
+        test_commands.extend(test_binaries)
 
-        logging.info("ls /data/local/tmp/32 -> %s" %
-                     self.dut.shell.my_shell1.Execute("/system/bin/ls /data/local/tmp/32"))
-        logging.info("ls /data/local/tmp/64 -> %s" %
-                     self.dut.shell.my_shell1.Execute("ls /data/local/tmp/64"))
-        for test_binary in ["/data/local/tmp/32/crash01_32",
-                            "/data/local/tmp/32/crash02_32"]:
-            logging.info("***** %s *****", test_binary)
-            self.dut.shell.my_shell1.Execute("chmod 755 %s" % test_binary)
-            stdouts = self.dut.shell.my_shell1.Execute(test_binary)
-            logging.info(stdouts)
-            asserts.assertTrue("TPASS" in "".join(stdouts),
-                               "%s failed" % test_binary)
+        logging.info("executing the following %i commands:" % len(test_commands))
+        for cmd in test_commands:
+            logging.info(cmd)
+
+        stdouts = self.dut.shell.my_shell1.Execute(test_commands)
+        for cmd, stdout in zip(test_commands, tuple(stdouts)):
+            logging.info("stdout for [%s]: %s" % (cmd, stdout))
+            if not cmd.startswith("chmod"):
+                asserts.assertTrue("TPASS" in stdout and "TFAIL" not in stdout,
+                                   "command [%s] failed" % cmd)
 
 
 if __name__ == "__main__":
