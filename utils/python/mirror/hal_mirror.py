@@ -57,26 +57,33 @@ class HalMirror(object):
     One can use this class to create and destroy a HAL mirror object.
 
     Attributes:
+        _hal_level_mirrors: dict, key is HAL handler name, value is HAL
+                            mirror object.
+        _callback_server: VtsTcpServer, the server that receives and handles
+                          callback messages from target side.
         _host_command_port: int, the host-side port for command-response
                             sessions.
         _host_callback_port: int, the host-side port for callback sessions.
-        _hal_level_mirrors: dict, key is HAL handler name, value is HAL
-                            mirror object.
-        _host_port: int, the port number on the host side to use.
-        _callback_server: the instance of a callback server.
-        _callback_port: int, the port number of a host-side callback server.
     """
+
     def __init__(self, host_command_port, host_callback_port):
         self._hal_level_mirrors = {}
         self._host_command_port = host_command_port
         self._host_callback_port = host_callback_port
         self._callback_server = None
-        self._callback_port = 0
 
     def __del__(self):
-        for hal_mirror_name in self._hal_level_mirrors:
-            self.RemoveHal(hal_mirror_name)
+        self.CleanUp()
+
+    def CleanUp(self):
+        """Shutdown services and release resources held by the HalMirror.
+        """
+        for hal_mirror_name in self._hal_level_mirrors.values():
+            hal_mirror_name.CleanUp()
         self._hal_level_mirrors = {}
+        if self._callback_server:
+            self._callback_server.Stop()
+            self._callback_server = None
 
     def InitConventionalHal(self,
                             target_type,
@@ -160,8 +167,22 @@ class HalMirror(object):
                                  bits=bits)
 
     def RemoveHal(self, handler_name):
-        hal_level_mirror = self._hal_level_mirrors[handler_name]
-        hal_level_mirror.CleanUp()
+        self._hal_level_mirrors[handler_name].CleanUp()
+        self._hal_level_mirrors.pop(handler_name)
+
+    def _StartCallbackServer(self):
+        """Starts the callback server.
+
+        Raises:
+            errors.ComponentLoadingError is raised if the callback server fails
+            to start.
+        """
+        self._callback_server = vts_tcp_server.VtsTcpServer()
+        _, port = self._callback_server.Start(self.host_callback_port)
+        if port != self.host_callback_port:
+            raise errors.ComponentLoadingError(
+                "Failed to start a callback TcpServer at port %s" %
+                self._host_callback_port)
 
     def _CreateMirrorObject(self,
                             target_class,
@@ -172,6 +193,8 @@ class HalMirror(object):
                             bits=64):
         """Initiates the driver for a HAL on the target device and creates a top
         level MirroObject for it.
+
+        Also starts the callback server to listen for callback invocations.
 
         Args:
             target_class: string, the target class name (e.g., hal).
@@ -188,14 +211,10 @@ class HalMirror(object):
             create a MirrorObject.
         """
         if bits not in [32, 64]:
-            raise error.ComponentLoadingError("Invalid value for bits: %s" % bits)
+            raise error.ComponentLoadingError("Invalid value for bits: %s" %
+                                              bits)
+        self._StartCallbackServer()
         client = vts_tcp_client.VtsTcpClient()
-        callback_server = vts_tcp_server.VtsTcpServer()
-        _, port = callback_server.Start(self._host_callback_port)
-        if port != self._host_callback_port:
-            raise errors.ComponentLoadingError(
-                "Couldn't start a callback TcpServer at port %s" %
-                    self._host_callback_port)
         client.Connect(command_port=self._host_command_port,
                        callback_port=self._host_callback_port)
         if not handler_name:
@@ -236,16 +255,16 @@ class HalMirror(object):
         driver_type = {
             "hal_conventional": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
             "hal_legacy": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_LEGACY,
-            "hal_hidl": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_HIDL}.get(target_class)
+            "hal_hidl": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_HIDL
+        }.get(target_class)
 
-        launched = client.LaunchDriverService(
-            driver_type=driver_type,
-            service_name=service_name,
-            bits=bits,
-            file_path=target_filename,
-            target_class=target_class_id,
-            target_type=target_type_id,
-            target_version=target_version)
+        launched = client.LaunchDriverService(driver_type=driver_type,
+                                              service_name=service_name,
+                                              bits=bits,
+                                              file_path=target_filename,
+                                              target_class=target_class_id,
+                                              target_type=target_type_id,
+                                              target_version=target_version)
 
         if not launched:
             raise errors.ComponentLoadingError(
