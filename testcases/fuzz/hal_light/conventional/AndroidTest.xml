@@ -48,7 +48,6 @@
         <option name="dep-module" value="enum" />
         <option name="dep-module" value="protobuf" />
         <option name="dep-module" value="six" />
-        <option name="dep-module" value="grpcio" />
         <option name="dep-module" value="gcloud" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
