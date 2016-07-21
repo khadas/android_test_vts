@@ -100,31 +100,33 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
   bool success;
   int numberOfFailure = 0;
 
-  if (!driverUtil.VtsSocketRecvMessage(
-          static_cast<google::protobuf::Message*>(&cmd_msg))) {
-    return -1;
-  }
+  while (1) {
+    if (!driverUtil.VtsSocketRecvMessage(
+            static_cast<google::protobuf::Message*>(&cmd_msg))) {
+      return -1;
+    }
 
-  cout << "[Shell driver] received " << cmd_msg.shell_command_size()
-       << " command(s). Processing... " << endl;
+    cout << "[Shell driver] received " << cmd_msg.shell_command_size()
+         << " command(s). Processing... " << endl;
 
-  // execute command and write back output
-  VtsDriverControlResponseMessage responseMessage;
+    // execute command and write back output
+    VtsDriverControlResponseMessage responseMessage;
 
-  for (const auto& command : cmd_msg.shell_command()) {
-    if (this->ExecShellCommand(command, &responseMessage) != 0) {
-      cerr << "[Shell driver] error during executing command [" << command
-           << "]" << endl;
+    for (const auto& command : cmd_msg.shell_command()) {
+      if (this->ExecShellCommand(command, &responseMessage) != 0) {
+        cerr << "[Shell driver] error during executing command [" << command
+             << "]" << endl;
+        --numberOfFailure;
+      }
+    }
+
+    if (!driverUtil.VtsSocketSendMessage(responseMessage)) {
+      fprintf(stderr, "Driver: write output to socket error.\n");
       --numberOfFailure;
     }
+    cout << "[Shell driver] finished processing commands." << endl;
+    // TODO: exit when EXIT request is received.
   }
-
-  if (!driverUtil.VtsSocketSendMessage(responseMessage)) {
-    fprintf(stderr, "Driver: write output to socket error.\n");
-    --numberOfFailure;
-  }
-
-  cout << "[Shell driver] finished processing commands." << endl;
 
   if (driverUtil.Close() != 0) {
     cerr << "[Driver] failed to close connection. errno: " << errno << endl;
