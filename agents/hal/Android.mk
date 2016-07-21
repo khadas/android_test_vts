@@ -53,16 +53,3 @@ LOCAL_C_INCLUDES += \
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_EXECUTABLE)
-
-VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
-vts_framework_file := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)
-
-$(vts_framework_file): $(call intermediates-dir-for,EXECUTABLES,$(LOCAL_MODULE))/$(LOCAL_MODULE) | $(ACP)
-	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
-	$(hide) $(ACP) -fp $< $@
-
-vts: $(vts_framework_file)
-
-#ifneq ($(filter vts, $(MAKECMDGOALS)),)
-#  $(call dist-for-goals,vts,$(vts_framework_file))
-#endif
