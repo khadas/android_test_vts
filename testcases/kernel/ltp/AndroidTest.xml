@@ -37,10 +37,10 @@
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
 
         <option name="push" value="libcap.so->/data/local/tmp/64/libcap.so" />
-        <option name="push" value="crash01_32->/data/local/tmp/32/crash01_32" />
-        <option name="push" value="crash01_64->/data/local/tmp/64/crash01_64" />
-        <option name="push" value="crash02_32->/data/local/tmp/32/crash02_32" />
-        <option name="push" value="crash02_64->/data/local/tmp/64/crash02_64" />
+        <option name="push" value="32/ltp/testcases/bin/crash01->/data/local/tmp/32/crash01_32" />
+        <option name="push" value="64/ltp/testcases/bin/crash01->/data/local/tmp/64/crash01_64" />
+        <option name="push" value="32/ltp/testcases/bin/crash02->/data/local/tmp/32/crash02_32" />
+        <option name="push" value="64/ltp/testcases/bin/crash02->/data/local/tmp/64/crash02_64" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
