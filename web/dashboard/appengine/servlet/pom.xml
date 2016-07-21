@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2015-2016 Google Inc. All Rights Reserved.
+  ~ Copyright (c) 2016-2016 Google Inc. All Rights Reserved.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you
   ~ may not use this file except in compliance with the License. You may
@@ -43,6 +43,8 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+
+    <slf4jVersion>1.6.1</slf4jVersion>
   </properties>
 
   <repositories>
@@ -125,17 +127,23 @@
 
     <dependency>
       <groupId>org.json</groupId>
-	    <artifactId>json</artifactId>
-	    <version>20140107</version>
+      <artifactId>json</artifactId>
+      <version>20140107</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4jVersion}</version>
     </dependency>
   </dependencies>
 
   <build>
-    <outputDirectory>target/${project.artifactId}-${project.version}/WEB-INF/classes</outputDirectory> 
+    <outputDirectory>target/${project.artifactId}-${project.version}/WEB-INF/classes</outputDirectory>
     <resources>
         <resource>
             <directory>src/main/resources</directory>
-            <filtering>true</filtering> 
+            <filtering>true</filtering>
         </resource>
     </resources>
     <plugins>
@@ -173,6 +181,9 @@
         <groupId>com.google.appengine</groupId>
         <artifactId>gcloud-maven-plugin</artifactId>
         <version>${gcloud.plugin.version}</version>
+        <configuration>
+          <gcloud_directory>${gcloud.directory}</gcloud_directory>
+        </configuration>
       </plugin>
 
     </plugins>
