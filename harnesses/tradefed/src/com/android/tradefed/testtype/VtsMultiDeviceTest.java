@@ -94,6 +94,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
+    // the path of a dir which contains the test data files.
+    private String mTestCaseDataDir = "./";
 
     /**
      * @return the mRunUtil
@@ -249,7 +251,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         }
         String[] baseOpts = {mPythonBin, "-m"};
         String[] testModule = {mTestCasePath, mTestConfigPath,
-                               mDevice.getSerialNumber()};
+                               mDevice.getSerialNumber(), mTestCaseDataDir};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
@@ -297,7 +299,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             }
             if (testDir != null) {
                 sb.append(":");
-                sb.append(testDir.getAbsolutePath());
+                mTestCaseDataDir = testDir.getAbsolutePath();
+                sb.append(mTestCaseDataDir);
             } else if (mBuildInfo.getFile(VTS) != null) {
                 sb.append(":");
                 sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
