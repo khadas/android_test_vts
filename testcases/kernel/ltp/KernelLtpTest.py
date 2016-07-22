@@ -16,6 +16,7 @@
 #
 
 import logging
+import os
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
@@ -27,36 +28,62 @@ class KernelLtpTest(base_test.BaseTestClass):
     """Runs the LTP (Linux Test Project) testcases against Android OS kernel."""
 
     def setUpClass(self):
-        """Creates a remote shell instance."""
+        """Creates a remote shell instance, and copies data files."""
         self.dut = self.registerController(android_device)[0]
         self.dut.shell.InvokeTerminal("one")
         self.shell = self.dut.shell.one
 
+        self.ltp_dir = "/data/local/tmp/ltp"
+        # Copy LTP test case files.
+        self.shell.Execute("mkdir %s -p" % self.ltp_dir)
+        self.shell.Execute("mkdir %s/32 -p" % self.ltp_dir)
+        self.dut.adb.push("%s/32/ltp/testcases/bin/* %s/32" %
+                          (self.data_file_path, self.ltp_dir))
+        self.shell.Execute("mkdir %s/64 -p" % self.ltp_dir)
+        self.dut.adb.push("%s/64/ltp/testcases/bin/* %s/64" %
+                          (self.data_file_path, self.ltp_dir))
+
+    def tearDownClass(self):
+        """Deletes all copied data files."""
+        self.shell.Execute("rm -rf /data/local/tmp/ltp")
+
     def Verify(self, binary, all_stdout):
         """Verifies the test result of each test case."""
         logging.info("stdout: %s" % all_stdout)
-        asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
-                           "command [%s] failed" % binary)
+        if "TPASS" in all_stdout and "TFAIL" not in all_stdout:
+            logging.info("[Test Case] %s PASS" % binary)
+        else:
+            logging.info("[Test Case] %s FAIL" % binary)
 
-    def testCrashTestcases32Bits(self):
-        """Crash01 and Crash02 test cases (32-bit mode)."""
-        for binary in ["/data/local/tmp/32/crash01_32",
-                       "/data/local/tmp/32/crash02_32"]:
-            self.shell.Execute("chmod 755 " + binary)
-            logging.info("executing a command '%s'" % binary)
-            stdouts = self.shell.Execute("env TMPDIR=/data/local/tmp " + binary)
-            self.Verify(binary, "\n".join(stdouts))
+    def test32Bits(self):
+        """Runs all 32-bit LTP test cases."""
+        logging.info("[Test Case] test32Bits PASS")
+        stdouts = self.shell.Execute("ls %s/32" % self.ltp_dir)
+        for binary in stdouts[0].split():
+            testcase_name = "%s_32bit" % binary
+            logging.info("[Test Case] %s" % testcase_name)
+            path = os.path.join(self.ltp_dir, "32", binary)
+            logging.info("executing a command '%s'" % path)
+            self.dut.shell.InvokeTerminal(testcase_name)
+            shell = getattr(self.dut.shell, testcase_name)
+            shell.Execute("chmod 755 " + path)
+            stdouts = shell.Execute("env TMPDIR=/data/local/tmp " + path)
+            self.Verify(testcase_name, "\n".join(stdouts))
 
-
-    def testCrashTestcases64Bits(self):
-        """Crash01 and Crash02 test cases (64-bit mode)."""
-        for binary in ["/data/local/tmp/64/crash01_64",
-                       "/data/local/tmp/64/crash02_64"]:
-            self.shell.Execute("chmod 755 " + binary)
-            logging.info("executing a command '%s'" % binary)
-            stdouts = self.shell.Execute(
-                "env TMPDIR=/data/local/tmp LD_LIBRARY_PATH=/data/local/tmp/64/ " + binary)
-            self.Verify(binary, "\n".join(stdouts))
+    def test64Bits(self):
+        """Runs all 64-bit LTP test cases."""
+        logging.info("[Test Case] Test64Bits PASS")
+        stdouts = self.shell.Execute("ls %s/64" % self.ltp_dir)
+        for binary in stdouts[0].split():
+            testcase_name = "%s_64bit" % binary
+            logging.info("[Test Case] %s" % testcase_name)
+            path = os.path.join(self.ltp_dir, "64", binary)
+            logging.info("executing a command '%s'" % path)
+            self.dut.shell.InvokeTerminal(testcase_name)
+            shell = getattr(self.dut.shell, testcase_name)
+            shell.Execute("chmod 755 " + path)
+            stdouts = shell.Execute("env TMPDIR=/data/local/tmp " + path)
+            self.Verify(testcase_name, "\n".join(stdouts))
 
 
 if __name__ == "__main__":
