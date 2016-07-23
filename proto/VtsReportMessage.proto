@@ -20,9 +20,11 @@ package android.vts;
 // To specify test case execution result.
 enum TestCaseResult {
   UNKNOWN_RESULT = 0;
-  PASS = 1;
-  FAIL = 2;
-  TIMEOUT = 3;
+  TEST_CASE_RESULT_PASS = 1;
+  TEST_CASE_RESULT_FAIL = 2;
+  TEST_CASE_RESULT_SKIP = 3;
+  TEST_CASE_RESULT_EXCEPTION = 4;
+  TEST_CASE_RESULT_TIMEOUT = 5;
 }
 
 

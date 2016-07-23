@@ -1,0 +1,141 @@
+#!/usr/bin/env python3.4
+#
+# Copyright 2016 - The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import getpass
+import logging
+import os
+import traceback
+import time
+
+from vts.proto import VtsReportMessage_pb2 as ReportMsg
+
+from vts.runners.host import asserts
+from vts.runners.host import base_test
+from vts.runners.host import errors
+from vts.runners.host import keys
+from vts.runners.host import logger
+from vts.runners.host import records
+from vts.runners.host import signals
+from vts.runners.host import utils
+
+from vts.utils.app_engine import bigtable_rest_client
+
+
+class BaseTestWithWebDbClass(base_test.BaseTestClass):
+    """Base class with Web DB interface for test classes to inherit from.
+
+    Attributes:
+        tests: A list of strings, each representing a test case name.
+        TAG: A string used to refer to a test class. Default is the test class
+             name.
+        results: A records.TestResult object for aggregating test results from
+                 the execution of test cases.
+        currentTestName: A string that's the name of the test case currently
+                           being executed. If no test is executing, this should
+                           be None.
+        _report_msg: TestReportMessage, to store to a GAE-side bigtable.
+        _current_test_report_msg: a proto message keeping the information of a
+                                  current test case.
+    """
+
+    def _setUpClass(self):
+        """Proxy function to guarantee the base implementation of setUpClass
+        is called.
+        """
+        self._report_msg = ReportMsg.TestReportMessage()
+        self._report_msg.test = self.__class__.__name__
+        self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
+        self._report_msg.start_timestamp = int(time.time() * 1000000)
+        return super(BaseTestWithWebDbClass, self)._setUpClass()
+
+    def _tearDownClass(self):
+        self._report_msg.end_timestamp = int(time.time() * 1000000)
+
+        logging.info("_tearDownClass hook: start (username: %s)", getpass.getuser())
+        bt_client = bigtable_rest_client.HbaseRestClient(
+            "result_%s" % self._report_msg.test)
+        bt_client.CreateTable("test")
+        bt_client.PutRow(str(self._report_msg.start_timestamp),
+                         "data", self._report_msg.SerializeToString())
+        logging.info("_tearDownClass hook: proto %s", self._report_msg)
+        logging.info("_tearDownClass hook: done")
+        return super(BaseTestWithWebDbClass, self)._tearDownClass()
+
+    def GetFunctionName(self):
+        """Returns the caller's function name."""
+        return traceback.extract_stack(None, 2)[0][2]
+
+    def _setUpTest(self, test_name):
+        """Proxy function to guarantee the base implementation of setUpTest is
+        called.
+        """
+        self._current_test_report_msg = self._report_msg.test_case.add()
+        self._current_test_report_msg.name = test_name
+        self._current_test_report_msg.start_timestamp = int(time.time() * 1000000)
+        return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
+
+    def _tearDownTest(self, test_name):
+        """Proxy function to guarantee the base implementation of tearDownTest
+        is called.
+        """
+        self._current_test_report_msg.end_timestamp = int(time.time() * 1000000)
+        self._current_test_report_msg = None
+        return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
+
+    def _onFail(self, record):
+        """Proxy function to guarantee the base implementation of onFail is
+        called.
+
+        Args:
+            record: The records.TestResultRecord object for the failed test
+                    case.
+        """
+        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
+        return super(BaseTestWithWebDbClass, self)._onFail(record)
+
+    def _onPass(self, record):
+        """Proxy function to guarantee the base implementation of onPass is
+        called.
+
+        Args:
+            record: The records.TestResultRecord object for the passed test
+                    case.
+        """
+        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_PASS
+        return super(BaseTestWithWebDbClass, self)._onPass(record)
+
+    def _onSkip(self, record):
+        """Proxy function to guarantee the base implementation of onSkip is
+        called.
+
+        Args:
+            record: The records.TestResultRecord object for the skipped test
+                    case.
+        """
+        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_SKIP
+        return super(BaseTestWithWebDbClass, self)._onSkip(record)
+
+    def _onException(self, record):
+        """Proxy function to guarantee the base implementation of onException
+        is called.
+
+        Args:
+            record: The records.TestResultRecord object for the failed test
+                    case.
+        """
+        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_EXCEPTION
+        return super(BaseTestWithWebDbClass, self)._onException(record)
+

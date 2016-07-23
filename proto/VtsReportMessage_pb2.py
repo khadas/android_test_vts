@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsReportMessage.proto',
   package='android.vts',
-  serialized_pb='\n\x16VtsReportMessage.proto\x12\x0b\x61ndroid.vts\"_\n\x18\x41ndroidDeviceInfoMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x12\n\nbuild_type\x18\x02 \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\x03 \x01(\x0c\x12\x11\n\tapi_level\x18\x04 \x01(\r\"P\n\x10\x41ndroidBuildInfo\x12\n\n\x02id\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x0b \x01(\x0c\x12\x12\n\nbuild_type\x18\x0c \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\r \x01(\x0c\"\x87\x01\n\x15TestCaseReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x30\n\x0btest_result\x18\x0b \x01(\x0e\x32\x1b.android.vts.TestCaseResult\x12\x17\n\x0fstart_timestamp\x18\x15 \x01(\x03\x12\x15\n\rend_timestamp\x18\x16 \x01(\x03\"V\n\x16ProfilingReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x17\n\x0fstart_timestamp\x18\x0b \x01(\x03\x12\x15\n\rend_timestamp\x18\x0c \x01(\x03\"\xf0\x02\n\x11TestReportMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12+\n\ttest_type\x18\x03 \x01(\x0e\x32\x18.android.vts.VtsTestType\x12:\n\x0b\x64\x65vice_info\x18\x04 \x03(\x0b\x32%.android.vts.AndroidDeviceInfoMessage\x12\x31\n\nbuild_info\x18\x05 \x01(\x0b\x32\x1d.android.vts.AndroidBuildInfo\x12\x35\n\ttest_case\x18\x0b \x03(\x0b\x32\".android.vts.TestCaseReportMessage\x12\x36\n\tprofiling\x18\x15 \x03(\x0b\x32#.android.vts.ProfilingReportMessage\x12\x17\n\x0fstart_timestamp\x18\x65 \x01(\x03\x12\x15\n\rend_timestamp\x18\x66 \x01(\x03*E\n\x0eTestCaseResult\x12\x12\n\x0eUNKNOWN_RESULT\x10\x00\x12\x08\n\x04PASS\x10\x01\x12\x08\n\x04\x46\x41IL\x10\x02\x12\x0b\n\x07TIMEOUT\x10\x03*\x9c\x01\n\x0bVtsTestType\x12\x18\n\x14UNKNOWN_VTS_TESTTYPE\x10\x00\x12\x1e\n\x1aVTS_HOST_DRIVEN_STRUCTURAL\x10\x01\x12\x1b\n\x17VTS_HOST_DRIVEN_FUZZING\x10\x02\x12\x19\n\x15VTS_TARGET_SIDE_GTEST\x10\x03\x12\x1b\n\x17VTS_TARGET_SIDE_FUZZING\x10\x04')
+  serialized_pb='\n\x16VtsReportMessage.proto\x12\x0b\x61ndroid.vts\"_\n\x18\x41ndroidDeviceInfoMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x12\n\nbuild_type\x18\x02 \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\x03 \x01(\x0c\x12\x11\n\tapi_level\x18\x04 \x01(\r\"P\n\x10\x41ndroidBuildInfo\x12\n\n\x02id\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x0b \x01(\x0c\x12\x12\n\nbuild_type\x18\x0c \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\r \x01(\x0c\"\x87\x01\n\x15TestCaseReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x30\n\x0btest_result\x18\x0b \x01(\x0e\x32\x1b.android.vts.TestCaseResult\x12\x17\n\x0fstart_timestamp\x18\x15 \x01(\x03\x12\x15\n\rend_timestamp\x18\x16 \x01(\x03\"V\n\x16ProfilingReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x17\n\x0fstart_timestamp\x18\x0b \x01(\x03\x12\x15\n\rend_timestamp\x18\x0c \x01(\x03\"\xf0\x02\n\x11TestReportMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12+\n\ttest_type\x18\x03 \x01(\x0e\x32\x18.android.vts.VtsTestType\x12:\n\x0b\x64\x65vice_info\x18\x04 \x03(\x0b\x32%.android.vts.AndroidDeviceInfoMessage\x12\x31\n\nbuild_info\x18\x05 \x01(\x0b\x32\x1d.android.vts.AndroidBuildInfo\x12\x35\n\ttest_case\x18\x0b \x03(\x0b\x32\".android.vts.TestCaseReportMessage\x12\x36\n\tprofiling\x18\x15 \x03(\x0b\x32#.android.vts.ProfilingReportMessage\x12\x17\n\x0fstart_timestamp\x18\x65 \x01(\x03\x12\x15\n\rend_timestamp\x18\x66 \x01(\x03*\xb3\x01\n\x0eTestCaseResult\x12\x12\n\x0eUNKNOWN_RESULT\x10\x00\x12\x19\n\x15TEST_CASE_RESULT_PASS\x10\x01\x12\x19\n\x15TEST_CASE_RESULT_FAIL\x10\x02\x12\x19\n\x15TEST_CASE_RESULT_SKIP\x10\x03\x12\x1e\n\x1aTEST_CASE_RESULT_EXCEPTION\x10\x04\x12\x1c\n\x18TEST_CASE_RESULT_TIMEOUT\x10\x05*\x9c\x01\n\x0bVtsTestType\x12\x18\n\x14UNKNOWN_VTS_TESTTYPE\x10\x00\x12\x1e\n\x1aVTS_HOST_DRIVEN_STRUCTURAL\x10\x01\x12\x1b\n\x17VTS_HOST_DRIVEN_FUZZING\x10\x02\x12\x19\n\x15VTS_TARGET_SIDE_GTEST\x10\x03\x12\x1b\n\x17VTS_TARGET_SIDE_FUZZING\x10\x04')
 
 _TESTCASERESULT = _descriptor.EnumDescriptor(
   name='TestCaseResult',
@@ -27,22 +27,30 @@ _TESTCASERESULT = _descriptor.EnumDescriptor(
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PASS', index=1, number=1,
+      name='TEST_CASE_RESULT_PASS', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FAIL', index=2, number=2,
+      name='TEST_CASE_RESULT_FAIL', index=2, number=2,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='TIMEOUT', index=3, number=3,
+      name='TEST_CASE_RESULT_SKIP', index=3, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_CASE_RESULT_EXCEPTION', index=4, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_CASE_RESULT_TIMEOUT', index=5, number=5,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=815,
-  serialized_end=884,
+  serialized_start=816,
+  serialized_end=995,
 )
 
 TestCaseResult = enum_type_wrapper.EnumTypeWrapper(_TESTCASERESULT)
@@ -75,15 +83,17 @@ _VTSTESTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=887,
-  serialized_end=1043,
+  serialized_start=998,
+  serialized_end=1154,
 )
 
 VtsTestType = enum_type_wrapper.EnumTypeWrapper(_VTSTESTTYPE)
 UNKNOWN_RESULT = 0
-PASS = 1
-FAIL = 2
-TIMEOUT = 3
+TEST_CASE_RESULT_PASS = 1
+TEST_CASE_RESULT_FAIL = 2
+TEST_CASE_RESULT_SKIP = 3
+TEST_CASE_RESULT_EXCEPTION = 4
+TEST_CASE_RESULT_TIMEOUT = 5
 UNKNOWN_VTS_TESTTYPE = 0
 VTS_HOST_DRIVEN_STRUCTURAL = 1
 VTS_HOST_DRIVEN_FUZZING = 2
