@@ -52,6 +52,22 @@ message AndroidDeviceInfoMessage {
 }
 
 
+// To specify build info.
+message AndroidBuildInfo {
+  // build ID.
+  optional bytes id = 1;
+
+  // device name (e.g., bullhead).
+  optional bytes name = 11;
+
+  // build type (e.g., userdebug)
+  optional bytes build_type = 12;
+
+  // branch name (e.g., master or nyc-dev)
+  optional bytes branch = 13;
+}
+
+
 // To specify a test case execution report.
 message TestCaseReportMessage {
   // the test case name.
@@ -87,6 +103,12 @@ message TestReportMessage {
 
   // the test type
   optional VtsTestType test_type = 3;
+
+  // target device info
+  repeated AndroidDeviceInfoMessage device_info = 4;
+
+  // build info
+  optional AndroidBuildInfo build_info = 5;
 
   // test case reports
   repeated TestCaseReportMessage test_case = 11;
