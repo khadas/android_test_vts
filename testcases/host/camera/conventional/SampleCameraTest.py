@@ -18,12 +18,12 @@
 import logging
 import time
 
-from vts.runners.host import base_test
+from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class SampleCameraTest(base_test.BaseTestClass):
+class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
 
     def setUpClass(self):
@@ -66,6 +66,7 @@ class SampleCameraTest(base_test.BaseTestClass):
             logging.info("camera_device_status_change: callbacks = %s", callbacks)
 
         def torch_mode_status_change(callbacks, camera_id, new_status):
+            self.StopProfiling("callback_latency_torch_mode_status_change")
             self.call_count_torch_mode_status_change += 1
             logging.info("torch_mode_status_change")
             logging.info("torch_mode_status_change: camera_id = %s", camera_id)
@@ -75,6 +76,7 @@ class SampleCameraTest(base_test.BaseTestClass):
         my_callback = self.dut.hal.camera.camera_module_callbacks_t(
             camera_device_status_change, torch_mode_status_change)
         self.dut.hal.camera.set_callbacks(my_callback)
+        self.StartProfiling("callback_latency_torch_mode_status_change")
         self.dut.hal.camera.common.methods.open()  # note args are skipped
         while self.call_count_torch_mode_status_change < 1:
             logging.info("waiting %s %s",
