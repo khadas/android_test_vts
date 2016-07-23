@@ -25,7 +25,7 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.fuzzer import GenePool
 
-from vts.utils.app_engine import bigtable_client
+from vts.utils.app_engine import bigtable_rest_client
 
 
 class SampleLightFuzzTest(base_test.BaseTestClass):
@@ -55,15 +55,9 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
     def testGaeBt(self):
         """Accesses a GAE bigtable."""
         logging.info("testGaeBt: start (username: %s)", getpass.getuser())
-        messages = ['Test Message']
-        column_id = 'Test Column'
-        table = 'Test_table'
-        bt_client = bigtable_client.BigTableClient(table)
-        bt_client.CreateTable()
-        bt_client.Enqueue(messages, column_id)
-        bt_client.Dequeue()
-        bt_client.DeleteTable()
-        # success if no exception
+        bt_client = bigtable_rest_client.HbaseRestClient(
+            "http://android-vts-internal.googleplex.com", table)
+        # TODO: actually do BT operations
         logging.info("testGaeBt: done")
 
     def testTurnOnLightBlackBoxFuzzing(self):
