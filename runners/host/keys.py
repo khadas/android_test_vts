@@ -25,7 +25,7 @@ class ConfigKeys(object):
     # Keys used to look up values from test config files.
     # These keys define the wording of test configs and their internal
     # references.
-    KEP_LOG_PATH = "log_path"
+    KEY_LOG_PATH = "log_path"
     KEY_TESTBED = "test_bed"
     KEY_TESTBED_NAME = "name"
     KEY_TEST_PATHS = "test_paths"
@@ -33,8 +33,11 @@ class ConfigKeys(object):
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"
     IKEY_TESTBED_NAME = "testbed_name"
-    IKEY_LOG_PATH = "log_path"
+    IKEY_LOG_PATH = "data_file_path"
+
+    IKEY_BUILD = "build"
+    IKEY_DATA_FILE_PATH = "data_file_path"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
-    RESERVED_KEYS = (KEY_TESTBED, KEP_LOG_PATH, KEY_TEST_PATHS)
+    RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
