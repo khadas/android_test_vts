@@ -64,6 +64,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                             self.COVERAGE_GCOV_FILE])
 
         if getattr(self, self.USE_GAE_DB, False):
+            logging.info("GAE-DB: turned on")
             self._report_msg = ReportMsg.TestReportMessage()
             self._report_msg.test = self.__class__.__name__
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
@@ -82,6 +83,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             bt_client = bigtable_rest_client.HbaseRestClient(
                 "result_%s" % self._report_msg.test)
             bt_client.CreateTable("test")
+
+            self.getUserParams(opt_param_names=[keys.ConfigKeys.IKEY_BUILD])
+            if getattr(self, keys.ConfigKeys.IKEY_BUILD, False):
+                build = self.build
+                if "build_id" in build:
+                    self._report_msg.build_info.id = str(build["build_id"])
+
             bt_client.PutRow(str(self._report_msg.start_timestamp),
                              "data", self._report_msg.SerializeToString())
             logging.info("_tearDownClass hook: result proto %s",
@@ -117,7 +125,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._current_test_report_msg.end_timestamp = self.GetTimestamp()
             if hasattr(self, self.COVERAGE_GCOV_FILE):
                 logging.info("data_file_path not set. PATH=%s", os.environ["PATH"])
-                if not hasattr(self, "data_file_path"):
+                if not hasattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH):
                     logging.warning("data_file_path not set.")
                 else:
                     for gcno_file in getattr(self, self.COVERAGE_GCOV_FILE):
