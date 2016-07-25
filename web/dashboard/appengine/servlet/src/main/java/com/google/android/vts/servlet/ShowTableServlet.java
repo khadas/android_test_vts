@@ -16,22 +16,28 @@
 
 package com.google.android.vts.servlet;
 
+import com.google.android.vts.proto.VtsReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -49,6 +55,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(ShowTableServlet.class);
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
+    private static final String PROFILING_DATA_ERROR = "Error : No profiling data was found.";
 
     /**
      * Returns the table corresponding to the table name.
@@ -90,13 +97,52 @@ public class ShowTableServlet extends HttpServlet {
             response.setContentType("text/plain");
             table = getTable(tableName);
             ResultScanner scanner = table.getScanner(new Scan());
-            List<String> values = new ArrayList<String>();
+
+            // map to hold the the list of time taken for each test.
+            Map<String, List<Double>> map = new HashMap();
             for (Result result = scanner.next(); (result != null); result = scanner.next()) {
                 for (KeyValue keyValue : result.list()) {
-                    values.add(Bytes.toString(keyValue.getValue()));
+                    TestReportMessage message = VtsReportMessage.TestReportMessage.
+                        parseFrom(keyValue.getValue());
+                    for (ProfilingReportMessage profilingReportMessage : message.getProfilingList()) {
+                        String profilingPointName =  new String(profilingReportMessage.getName().toByteArray(), "UTF-8");
+                        double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() - profilingReportMessage.
+                            getStartTimestamp())) / 1000;
+                        if (timeTaken < 0) {
+                            logger.info("Inappropriate value for time taken");
+                            continue;
+                        }
+                        if (!map.containsKey(profilingPointName)) {
+                            map.put(profilingPointName, new ArrayList<Double>());
+                        }
+                        map.get(profilingPointName).add(timeTaken);
+                    }
                 }
             }
-            request.setAttribute("values", values.toArray(new String[values.size()]));
+
+            // Result map for jsp
+            Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
+            for (String key : map.keySet()) {
+                double[] values = new double[map.get(key).size()];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = map.get(key).get(i);
+                }
+
+                List<String> resultList = new ArrayList<String>();
+                int[] percentiles = {99, 95, 90, 80, 75, 50, 25, 10};
+                for (int percentile : percentiles) {
+                    resultList.add(String.valueOf(percentile) +" percentile : " + String.valueOf((double)
+                        Math.round(new Percentile().evaluate(values, percentile))));
+                }
+                resultMap.put(key, resultList);
+            }
+
+
+            request.setAttribute("map", map);
+            if (resultMap.isEmpty()) {
+                request.setAttribute("error", PROFILING_DATA_ERROR);
+            }
+            request.setAttribute("resultMap", resultMap);
             request.setAttribute("table_name", table.getName());
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {
