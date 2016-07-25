@@ -285,7 +285,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           exit(-1);
         }
       } else {
-        if (arg.type() == TYPE_VECTOR_VARIABLE) {
+        if (arg.type() == TYPE_VECTOR) {
           cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
                  << "arg" << arg_count << "buffer = (" << arg.vector_value(0).scalar_type()
                  << "*) malloc(8 * sizeof(" << arg.vector_value(0).scalar_type() << "));"
@@ -301,7 +301,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << "arg" << arg_count << " = ";
         }
 
-        if (arg.type() != TYPE_VECTOR_VARIABLE &&
+        if (arg.type() != TYPE_VECTOR &&
             arg.type() != TYPE_HIDL_CALLBACK &&
             arg.type() != TYPE_STRUCT) {
           std::stringstream msg_ss;
@@ -357,7 +357,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << " : " << GetCppInstanceType(arg, string(), &message) << " )";
           // TODO: use the given message and call a lib function which converts
           // a message to a C/C++ struct.
-        } else if (arg.type() == TYPE_VECTOR_VARIABLE) {
+        } else if (arg.type() == TYPE_VECTOR) {
           // TODO: dynamically generate the initial value for hidl_vec
           cpp_ss << "{arg" << arg_count << "buffer, 8}";
         }

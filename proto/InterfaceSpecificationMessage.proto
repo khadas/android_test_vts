@@ -68,8 +68,8 @@ enum VariableType {
   TYPE_SCALAR = 2;
   TYPE_STRING = 3;
   TYPE_ENUM = 4;
-  TYPE_VECTOR_FIXED = 5;
-  TYPE_VECTOR_VARIABLE = 6;
+  TYPE_ARRAY = 5;
+  TYPE_VECTOR = 6;
   TYPE_STRUCT = 7;
   // for conventional HALs, to keep a data structure with one or multiple
   // callback functions.
@@ -157,12 +157,18 @@ message ScalarDataValueMessage {
 
 // To keep the value of a vector variable.
 message VectorDataValueMessage {
-  // set in advance if the type is a fixed-length vector.
-  optional uint32 size = 1;
+  optional VariableType type = 1;
+
+  // mainly for an array, and also can be used at runtime if this's for a vector.
+  optional uint32 size = 2;
 
   // when it's for a scalar vector.
   optional bytes scalar_type = 11;
   repeated ScalarDataValueMessage value = 12;
+
+  // when it's for a struct vector.
+  optional bytes struct_type = 21;
+  repeated VariableSpecificationMessage struct_value = 22;
 }
 
 
@@ -210,8 +216,8 @@ message VariableSpecificationMessage {
   optional bytes name = 1;
 
   // the variable type which is one of:
-  //     TYPE_SCALAR, TYPE_STRING, TYPE_ENUM, TYPE_VECTOR_FIXED,
-  //     TYPE_VECTOR_VARIABLE, TYPE_STRUCT, TYPE_UNION
+  //     TYPE_SCALAR, TYPE_STRING, TYPE_ENUM, TYPE_ARRAY,
+  //     TYPE_VECTOR, TYPE_STRUCT, TYPE_UNION
   //
   // not yet supported:
   //     "template", "typedef", "handle", "binder", "parcelable".
@@ -226,6 +232,7 @@ message VariableSpecificationMessage {
 
   optional EnumDataValueMessage enum_value = 121;
 
+  // for both TYPE_ARRAY (using size field) and TYPE_VECTOR.
   repeated VectorDataValueMessage vector_value = 131;
 
   // for sub variables when this's a struct type.
