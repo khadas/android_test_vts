@@ -40,6 +40,7 @@
 #include "SocketClientToDriver.h"
 #include "SocketServerForDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
@@ -369,24 +370,54 @@ bool AgentRequestHandler::ExecuteShellCommand(
     return false;
   }
 
-  // TODO: support stdout and stderr
-  vector<string>* result = client->ExecuteShellCommand(
+  VtsDriverControlResponseMessage* result_message = client->ExecuteShellCommand(
       command_message.shell_command());
 
   AndroidSystemControlResponseMessage response_msg;
-  if (result != NULL && result->size() > 0) {
-    cout << "ExecuteShellCommand: success" << endl;
-    response_msg.set_response_code(SUCCESS);
-    for (string element : *result) {
-      response_msg.add_stdout(element);
-    }
-  } else {
-    cout << "ExecuteShellCommand: fail" << endl;
+
+  if (result_message == NULL) {
+    cout << "ExecuteShellCommand: failed to call the api" << endl;
     response_msg.set_response_code(FAIL);
     response_msg.set_reason("Failed to call the api.");
+  } else {
+    CreateSystemControlResponseFromDriverControlResponse(
+        *result_message, &response_msg);
+    delete(result_message);
   }
+
   bool succ = VtsSocketSendMessage(response_msg);
   return succ;
+}
+
+void AgentRequestHandler::CreateSystemControlResponseFromDriverControlResponse(
+    const VtsDriverControlResponseMessage& driver_control_response_message,
+    AndroidSystemControlResponseMessage* system_control_response_message) {
+
+  if (driver_control_response_message.response_code() ==
+      VTS_DRIVER_RESPONSE_SUCCESS) {
+    cout << "ExecuteShellCommand: shell driver reported success" << endl;
+    system_control_response_message->set_response_code(SUCCESS);
+  } else if (driver_control_response_message.response_code() ==
+      VTS_DRIVER_RESPONSE_FAIL) {
+    cout << "ExecuteShellCommand: shell driver reported fail" << endl;
+    system_control_response_message->set_response_code(FAIL);
+  } else if (driver_control_response_message.response_code() ==
+      UNKNOWN_VTS_DRIVER_RESPONSE_CODE) {
+    cout << "ExecuteShellCommand: shell driver reported unknown" << endl;
+    system_control_response_message->set_response_code(UNKNOWN_RESPONSE_CODE);
+  }
+
+  for (const auto& log_stdout : driver_control_response_message.stdout()) {
+    system_control_response_message->add_stdout(log_stdout);
+  }
+
+  for (const auto& log_stderr : driver_control_response_message.stderr()) {
+    system_control_response_message->add_stderr(log_stderr);
+  }
+
+  for (const auto& exit_code : driver_control_response_message.exit_code()) {
+    system_control_response_message->add_exit_code(exit_code);
+  }
 }
 
 bool AgentRequestHandler::ProcessOneCommand() {

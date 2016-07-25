@@ -24,6 +24,7 @@
 
 #include "SocketClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
@@ -87,6 +88,10 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   int callback_port_;
   // the socket client of a launched or connected driver.
   VtsDriverSocketClient* driver_client_;
+
+  void CreateSystemControlResponseFromDriverControlResponse(
+      const VtsDriverControlResponseMessage& driver_control_response_message,
+      AndroidSystemControlResponseMessage* system_control_response_message);
 
   const string driver_hal_spec_dir_path_;
   const string driver_hal_binary32_;

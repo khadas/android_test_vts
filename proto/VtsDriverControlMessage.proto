@@ -98,8 +98,10 @@ message VtsDriverControlResponseMessage {
   // Return message.
   optional bytes return_message = 12;
 
-  // The stdout message.
+  // The stdout message for each command
   repeated bytes stdout = 1001;
-  // The stderr message.
+  // The stderr message for each command
   repeated bytes stderr = 1002;
+  // The exit code for each command
+  repeated int32 exit_code = 1003;
 }
