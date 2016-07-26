@@ -25,6 +25,7 @@ import types
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
+from vts.runners.host import const
 
 from google.protobuf import text_format
 
@@ -182,8 +183,11 @@ class VtsTcpClient(object):
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                      resp)
         if resp is not None and resp.response_code == SysMsg_pb2.SUCCESS:
-            return resp.stdout
-        return None
+            return {const.STDOUT: resp.stdout,
+                    const.STDERR: resp.stderr,
+                    const.EXIT_CODE: resp.exit_code,
+                    }
+        return {}
 
     def SendCommand(self,
                     command_type,

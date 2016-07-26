@@ -51,7 +51,6 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
 
     // General state
     private Map<TestIdentifier, String> mTestResultCache;
-    private int mFailedTestCount = 0;
     private final Collection<ITestRunListener> mListeners;
     private String mRunName = null;
     private String mCurrentTestName = null;
@@ -69,6 +68,7 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     static final String PASS = "PASS";
     static final String FAIL = "FAIL";
     static final String TIMEOUT = "TIMEOUT";
+    static final String SKIP = "SKIP";
     static final String END_PATTERN = "<==========";
     static final String BEGIN_PATTERN = "==========>";
 
@@ -192,9 +192,9 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
                   }
                   break;
               case COMPLETE:
-                  mCurrentParseState = ParserState.TEST_CASE_ENTRY;
-                  parse();
-                  break;
+                mCurrentParseState = ParserState.TEST_CASE_ENTRY;
+                parse();
+                break;
               default:
                   break;
           }
@@ -218,18 +218,13 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         } else if (lastToken.equals(FAIL)){
             markTestFailure();
             return true;
+        } else if (lastToken.equals(SKIP)){
+            markTestSkip();
+            return true;
         } else {
             markTestTimeout();
             return false;
         }
-    }
-
-    /**
-     * This method is called whenever the current test doesn't finish as expected and runs out
-     * of time.
-     */
-    private void markTestTimeout() {
-        mTestResultCache.put(mCurrentTestId, TIMEOUT);
     }
 
     /**
@@ -308,7 +303,9 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
                 if (test.getValue() == PASS) {
                     listener.testEnded(test.getKey(), Collections.<String, String>emptyMap());
                 } else if (test.getValue() == TIMEOUT) {
-                    listener.testFailed(test.getKey(), test.getValue());
+                  listener.testFailed(test.getKey(), test.getValue());
+                } else if (test.getValue() == SKIP) {
+                  listener.testAssumptionFailure(test.getKey(), test.getValue());
                 } else {
                     listener.testFailed(test.getKey(), test.getValue());
                 }
@@ -337,7 +334,21 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
 
     private void markTestFailure() {
         mTestResultCache.put(mCurrentTestId, FAIL);
-        mFailedTestCount++;
+    }
+
+    /**
+     * This method is called whenever the current test doesn't finish as expected and runs out
+     * of time.
+     */
+    private void markTestTimeout() {
+        mTestResultCache.put(mCurrentTestId, TIMEOUT);
+    }
+
+    /**
+     * This method is called whenever the current test decides to skip the test
+     */
+    private void markTestSkip() {
+        mTestResultCache.put(mCurrentTestId, SKIP);
     }
 
     @Override

@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <VtsDriverCommUtil.h>
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 using namespace std;
 
@@ -52,7 +53,7 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   int32_t Status(int32_t type);
 
   // Sends a EXECUTE request.
-  vector<string>* ExecuteShellCommand(
+  VtsDriverControlResponseMessage* ExecuteShellCommand(
       const ::google::protobuf::RepeatedPtrField<::std::string> shell_command);
 };
 

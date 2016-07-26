@@ -21,6 +21,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
+from vts.runners.host import const
 
 
 class SampleShellTest(base_test.BaseTestClass):
@@ -32,10 +33,12 @@ class SampleShellTest(base_test.BaseTestClass):
 
     def testOneCommand(self):
         """A simple testcase which just emulates a normal usage pattern."""
-        stdouts = self.dut.shell.my_shell1.Execute("which ls")
-        logging.info(stdouts)
-        for stdout in stdouts:
-            asserts.assertEqual(stdout.strip(), "/system/bin/ls")
+        results = self.dut.shell.my_shell1.Execute("which ls")
+        logging.info(str(results[const.STDOUT]))
+        asserts.assertEqual(len(results[const.STDOUT]), 1)
+        asserts.assertEqual(results[const.STDOUT][0].strip(),
+                            "/system/bin/ls")
+        asserts.assertEqual(results[const.EXIT_CODE][0], 0)
 
 
 if __name__ == "__main__":
