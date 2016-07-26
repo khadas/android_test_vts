@@ -125,10 +125,10 @@ class TempDir(object):
     def Prepare(self):
         """Prepare a temporary directory."""
         # TODO: check error
-        self._executor.Execute("mkdir %s -p" % self._path)
-        self._executor.Execute("chmod 775 %s" % self._path)
-        self._executor.Execute("mkdir %s/tmp" % self._path)
-        self._executor.Execute("chmod 775 %s/tmp" % self._path)
+        self._executor.Execute(["mkdir %s -p" % self._path,
+                                "chmod 775 %s" % self._path,
+                                "mkdir %s/tmp" % self._path,
+                                "chmod 775 %s/tmp" % self._path])
 
     def Clean(self):
         """Clean a temporary directory."""
@@ -175,6 +175,7 @@ class KernelLtpTest(base_test.BaseTestClass):
         self._shell = self._dut.shell.one
         self._ltp_dir = "/data/local/tmp/ltp"
 
+        self.data_file_path = '/usr/local/google/home/yuexima/android/master/out/host/linux-x86/vts/android-vts/testcases'
         self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._shell)
 
         self._testcases = TestcaseParser(self.data_file_path)
@@ -193,8 +194,8 @@ class KernelLtpTest(base_test.BaseTestClass):
                    _64BIT, or 64, for 64bit test;
         """
 
-        self._shell.Execute("rm -rf  %s" % self._ltp_dir)
-        self._shell.Execute("mkdir %s -p" % self._ltp_dir)
+        self._shell.Execute(["rm -rf  %s" % self._ltp_dir,
+                             "mkdir %s -p" % self._ltp_dir])
         self._dut.adb.push("%s/%i/ltp/. %s" %
                            (self.data_file_path, n_bit, self._ltp_dir))
         # TODO: libcap
@@ -224,7 +225,7 @@ class KernelLtpTest(base_test.BaseTestClass):
         # For LTP test cases, we run one shell command for each test case
         # So the result should also contains only one execution output
         if results[const.EXIT_CODE][0] not in (self._TPASS, self._TCONF) or \
-            results[const.STDOUT][0].find("TFAIL") >= 0:
+            "TFAIL" in results[const.STDOUT][0]:
             # If return code is other than 0 or 32,
             # or the output contains 'TFAIL', then test FAIL
             logging.info("[Test Case] %s FAIL" % testcase_name)
@@ -232,7 +233,7 @@ class KernelLtpTest(base_test.BaseTestClass):
             # If output exit_code is _TPASS, then test PASS
             logging.info("[Test Case] %s PASS" % testcase_name)
         elif results[const.EXIT_CODE][0] == self._TCONF and \
-            any(s.find("TPASS") >= 0 for s in results[const.STDOUT]):
+            "TPASS" in results[const.STDOUT][0]:
             # If output exit_code is _TCONF or but the stdout
             # contains TPASS, this means part of the test passed
             # but others were skipped. We consider it a PASS
