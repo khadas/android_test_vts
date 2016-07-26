@@ -33,7 +33,7 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
         self.getUserParams(required_params)
         self.dut = self.registerController(android_device)[0]
         self.dut.hal.InitConventionalHal(target_type="light",
-                                         target_basepaths=["/system/lib64/hw"],
+                                         target_basepaths=["/data/local/tmp/64/hal"],
                                          target_version=1.0,
                                          bits=64)
         self.dut.hal.light.OpenConventionalHal("backlight")
@@ -94,6 +94,7 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
                 result = self.dut.hal.light.set_light(None, gene)
                 if len(result.coverage_data) > 0:
                     gene_coverage = []
+                    logging.info("coverage: %s", result.coverage_data)
                     for coverage_data in result.coverage_data:
                         gene_coverage.append(coverage_data)
                     coverages.append(gene_coverage)

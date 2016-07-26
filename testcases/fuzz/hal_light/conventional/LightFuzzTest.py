@@ -92,6 +92,7 @@ class LightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 logging.debug("Gene %d", index)
                 result = self.dut.hal.light.set_light(None, gene)
                 if len(result.coverage_data) > 0:
+                    logging.info("coverage: %s", result.coverage_data)
                     gene_coverage = []
                     for coverage_data in result.coverage_data:
                         gene_coverage.append(coverage_data)
