@@ -17,7 +17,6 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleLightTest" />
-    <option name="compatibility:include-filter" value="SampleLightFuzzTest" />
     <option name="compatibility:include-filter" value="SampleCameraTest" />
     <!-- staging <option name="compatibility:include-filter" value="NfcHidlBasicTest" /> -->
     <option name="compatibility:include-filter" value="SampleShellTest" />
