@@ -53,35 +53,45 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                      a GAE-side bigtable.
         _profiling: a dict containing the current profiling information.
     """
+    USE_GAE_DB = "use_gae_db"
+    COVERAGE_GCOV_FILE = "coverage_gcno_file"
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
-        self._report_msg = ReportMsg.TestReportMessage()
-        self._report_msg.test = self.__class__.__name__
-        self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
-        self._report_msg.start_timestamp = self.GetTimestamp()
-        self._profile_msg = None
-        self._profiling = {}
+        self.getUserParams(opt_param_names=[self.USE_GAE_DB,
+                                            self.COVERAGE_GCOV_FILE])
+
+        if getattr(self, self.USE_GAE_DB, False):
+            self._report_msg = ReportMsg.TestReportMessage()
+            self._report_msg.test = self.__class__.__name__
+            self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
+            self._report_msg.start_timestamp = self.GetTimestamp()
+            self._profile_msg = None
+            self._profiling = {}
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
-        self._report_msg.end_timestamp = self.GetTimestamp()
+        if getattr(self, self.USE_GAE_DB, False):
+            self._report_msg.end_timestamp = self.GetTimestamp()
 
-        logging.info("_tearDownClass hook: start (username: %s)", getpass.getuser())
-        bt_client = bigtable_rest_client.HbaseRestClient(
-            "result_%s" % self._report_msg.test)
-        bt_client.CreateTable("test")
-        bt_client.PutRow(str(self._report_msg.start_timestamp),
-                         "data", self._report_msg.SerializeToString())
-        logging.info("_tearDownClass hook: result proto %s", self._report_msg)
-        if self._profile_msg:
-            bt_client.CreateTable("profile")
+            logging.info("_tearDownClass hook: start (username: %s)",
+                         getpass.getuser())
+            bt_client = bigtable_rest_client.HbaseRestClient(
+                "result_%s" % self._report_msg.test)
+            bt_client.CreateTable("test")
             bt_client.PutRow(str(self._report_msg.start_timestamp),
-                             "data", self._profile_msg.SerializeToString())
-            logging.info("_tearDownClass hook: profile proto %s", self._profile_msg)
-        logging.info("_tearDownClass hook: done")
+                             "data", self._report_msg.SerializeToString())
+            logging.info("_tearDownClass hook: result proto %s",
+                         self._report_msg)
+            if self._profile_msg:
+                bt_client.CreateTable("profile")
+                bt_client.PutRow(str(self._report_msg.start_timestamp),
+                                 "data", self._profile_msg.SerializeToString())
+                logging.info("_tearDownClass hook: profile proto %s",
+                             self._profile_msg)
+            logging.info("_tearDownClass hook: done")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
 
     def GetFunctionName(self):
@@ -92,16 +102,37 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """Proxy function to guarantee the base implementation of setUpTest is
         called.
         """
-        self._current_test_report_msg = self._report_msg.test_case.add()
-        self._current_test_report_msg.name = test_name
-        self._current_test_report_msg.start_timestamp = self.GetTimestamp()
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg = self._report_msg.test_case.add()
+            self._current_test_report_msg.name = test_name
+            self._current_test_report_msg.start_timestamp = self.GetTimestamp()
         return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
 
     def _tearDownTest(self, test_name):
         """Proxy function to guarantee the base implementation of tearDownTest
         is called.
         """
-        self._current_test_report_msg.end_timestamp = self.GetTimestamp()
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg.end_timestamp = self.GetTimestamp()
+            if hasattr(self, self.COVERAGE_GCOV_FILE):
+                logging.info("data_file_path not set. PATH=%s", os.environ["PATH"])
+                if not hasattr(self, "data_file_path"):
+                    logging.warning("data_file_path not set.")
+                else:
+                    for gcno_file in getattr(self, self.COVERAGE_GCOV_FILE):
+                        gcno_file = str(gcno_file)
+                        logging.info("coverage - gcno file: %s", gcno_file)
+                        coverage = self._current_test_report_msg.coverage.add()
+                        coverage.file_name = gcno_file
+                        abs_path = os.path.join(self.data_file_path, gcno_file)
+                        if not os.path.exists(abs_path):
+                            logging.warning("couldn't find gcno file %s",
+                                            abs_path)
+                            continue
+                        with open(abs_path, "rb") as f:
+                            coverage.gcno = f.read()
+            else:
+                logging.info("coverage - no gcno file specified")
         return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
 
     def _onFail(self, record):
@@ -112,7 +143,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             record: The records.TestResultRecord object for the failed test
                     case.
         """
-        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
         return super(BaseTestWithWebDbClass, self)._onFail(record)
 
     def _onPass(self, record):
@@ -123,7 +155,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             record: The records.TestResultRecord object for the passed test
                     case.
         """
-        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_PASS
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_PASS
         return super(BaseTestWithWebDbClass, self)._onPass(record)
 
     def _onSkip(self, record):
@@ -134,7 +167,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             record: The records.TestResultRecord object for the skipped test
                     case.
         """
-        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_SKIP
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_SKIP
         return super(BaseTestWithWebDbClass, self)._onSkip(record)
 
     def _onException(self, record):
@@ -145,7 +179,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             record: The records.TestResultRecord object for the failed test
                     case.
         """
-        self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_EXCEPTION
+        if getattr(self, self.USE_GAE_DB, False):
+            self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_EXCEPTION
         return super(BaseTestWithWebDbClass, self)._onException(record)
 
     def GetTimestamp(self):
@@ -161,6 +196,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if successful, False otherwise
         """
+        if not getattr(self, self.USE_GAE_DB, False):
+            logging.error("'use_gae_db' config is not True.")
+            False
+
         if not self._profile_msg:
             self._profile_msg = ReportMsg.TestReportMessage()
             self._profile_msg.test = self.__class__.__name__
@@ -178,6 +217,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Args:
             name: string, the name of a profiling point
         """
+        if not getattr(self, self.USE_GAE_DB, False):
+            logging.error("'use_gae_db' config is not True.")
+            False
+
         if not self._profile_msg or name not in self._profiling:
             logging.error("profiling point %s is not active.", name)
             return False
@@ -186,4 +229,3 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             return False
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
-
