@@ -3,11 +3,11 @@
 
 <html>
 <head>
-
+      <title>VTS Dashboard</title>
 </head>
 <body>
       <h1>Table : ${table_name}</h1>
-      <h2>Raw Data </h2>
+      <h2>Raw Data (Unit : milliseconds) </h2>
       <!-- Error in case of profiling data is missing -->
       <h3>${error}</h3>
 
