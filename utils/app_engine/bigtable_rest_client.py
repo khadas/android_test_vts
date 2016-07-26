@@ -22,10 +22,10 @@ import json
 
 import requests
 
-_DEFAULT_BASE_URL="http://146.148.105.120:8080"
-_PROJECT_ID='google.com:android-vts-internal'
-_INSTANCE_ID='vts-dev'
-_DEFAULT_COLUMN_FAMILY_ID='cf_data'
+_DEFAULT_BASE_URL = "http://146.148.105.120:8080"
+_PROJECT_ID = 'google.com:android-vts-internal'
+_INSTANCE_ID = 'vts-dev'
+_DEFAULT_COLUMN_FAMILY_ID = 'cf_data'
 
 
 class HbaseRestClient(object):
@@ -48,7 +48,7 @@ class HbaseRestClient(object):
 
         This puts a value in the fully qualified column name. This assumes
         that the table has already been created with the column family in its
-        schema. If it doesn't exist, you can use create_table() to doso.
+        schema. If it doesn't exist, you can use create_table() to do so.
 
         Args:
             row_key: The row we want to put a value into.
