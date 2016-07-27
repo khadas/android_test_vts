@@ -23,7 +23,6 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/GpsHalV1GpsInterface.vts \
   hal_conventional/LightHalV1.vts \
   hal_conventional/WifiHalV1.vts \
-  hal_hidl/Nfc.vts \
   lib_bionic/libmV1.vts \
 
 vtslib_interfacespec_includes := \
@@ -61,23 +60,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libvts_interfacespecification
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := \
-  ${vtslib_interfacespec_srcfiles} \
-  ../hals/nfc/hidl/NfcAll.cpp \
-  ../hals/nfc/hidl/NfcClientCallbackAll.cpp \
-
-LOCAL_C_INCLUDES := \
-  ${vtslib_interfacespec_includes} \
-  test/vts/hals/nfc/hidl/include \
-  test/vts/hals/nfc/hidl/include/android/hardware/nfc \
-  system/libhwbinder/include \
-
-LOCAL_SHARED_LIBRARIES := \
-  ${vtslib_interfacespec_shared_libraries} \
-  libhwbinder \
-  libbase \
-  libutils \
-
+LOCAL_SRC_FILES := ${vtslib_interfacespec_srcfiles}
+LOCAL_C_INCLUDES := ${vtslib_interfacespec_includes}
+LOCAL_SHARED_LIBRARIES := ${vtslib_interfacespec_shared_libraries}
 LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
