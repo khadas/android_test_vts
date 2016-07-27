@@ -20,9 +20,10 @@ import os
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
+from vts.runners.host import const
+from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
-from vts.runners.host import const
 
 
 class TestCase(object):
@@ -170,6 +171,10 @@ class KernelLtpTest(base_test.BaseTestClass):
 
     def setUpTest(self):
         """Creates a remote shell instance, and copies data files."""
+        required_params = [keys.IKEY_DATA_FILE_PATH]
+        self.getUserParams(required_params)
+
+        logging.info("data_file_path: %s", self.data_file_path)
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
