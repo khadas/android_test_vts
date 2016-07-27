@@ -14,4 +14,4 @@ $(LOCAL_BUILT_MODULE):
 	$(hide) touch $@
 
 VTS_CONFIG_SRC_DIR := testcases/host/light/conventional
-include $(LOCAL_PATH)/../../../../tools/build/Android.host_config.mk
+include test/vts/tools/build/Android.host_config.mk
