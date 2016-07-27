@@ -9,11 +9,19 @@
     <title>VTS Dashboard</title>
   </head>
   <body>
-  <h3>List of Tables : android-vts-internal</h3>
-      <c:forEach items="${tableNames}" var="table">
-            <a href="${pageContext.request.contextPath}/show_table?tableName=${table}">${table}</a>
-          <br>
-      </c:forEach>
+    <div style="margin-left:200px">
+    <h3>Project : android-vts-internal</h3>
+     <table border="1" cellpadding="10" cellspacing="10">
+             <tr>
+               <th>List of Tables</th>
+            </tr>
+        <c:forEach items="${tableNames}" var="table">
+                <tr>
+                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=${table}">${table}</a></td>
+                </tr>
+        </c:forEach>
+     </table>
+    </div>
   </body>
 </html>
 <%-- //[END all]--%>
