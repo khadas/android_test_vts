@@ -27,6 +27,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
   <servlet-class>com.google.android.vts.servlet.ShowTableServlet</servlet-class>
 </servlet>
 
+<servlet>
+  <servlet-name>show_graph</servlet-name>
+  <servlet-class>com.google.android.vts.servlet.ShowGraphServlet</servlet-class>
+</servlet>
+
 <servlet-mapping>
   <servlet-name>dashboard_main</servlet-name>
   <url-pattern>/</url-pattern>
@@ -35,6 +40,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <servlet-mapping>
   <servlet-name>show_table</servlet-name>
   <url-pattern>/show_table/*</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>show_graph</servlet-name>
+  <url-pattern>/show_graph/*</url-pattern>
 </servlet-mapping>
 
 </web-app>
