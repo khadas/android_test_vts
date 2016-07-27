@@ -27,18 +27,55 @@ from vts.runners.host import const
 class SampleShellTest(base_test.BaseTestClass):
     """A sample testcase for the shell driver."""
 
+    REPEAT_COUNT = 10
+
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
-        self.dut.shell.InvokeTerminal("my_shell1")
 
     def testOneCommand(self):
         """A simple testcase which just emulates a normal usage pattern."""
+        self.dut.shell.InvokeTerminal("my_shell1")
         results = self.dut.shell.my_shell1.Execute("which ls")
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 1)
         asserts.assertEqual(results[const.STDOUT][0].strip(),
                             "/system/bin/ls")
         asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+
+    def testOneBigCommand(self):
+        """A simple testcase which just emulates a normal usage pattern."""
+        self.dut.shell.InvokeTerminal("my_shell2")
+        results = self.dut.shell.my_shell2.Execute(["which ls"] * self.REPEAT_COUNT)
+        logging.info(str(results[const.STDOUT]))
+        asserts.assertEqual(len(results[const.STDOUT]), self.REPEAT_COUNT)
+        for index in range(self.REPEAT_COUNT):
+            asserts.assertEqual(results[const.STDOUT][index].strip(),
+                                "/system/bin/ls")
+            asserts.assertEqual(results[const.EXIT_CODE][index], 0)
+
+    def testMultipleCommands(self):
+        """A simple testcase which just emulates a normal usage pattern."""
+        self.dut.shell.InvokeTerminal("my_shell3")
+        for _ in range(self.REPEAT_COUNT):
+            results = self.dut.shell.my_shell3.Execute("which ls")
+            logging.info(str(results[const.STDOUT]))
+            asserts.assertEqual(len(results[const.STDOUT]), 1)
+            asserts.assertEqual(results[const.STDOUT][0].strip(),
+                                "/system/bin/ls")
+            asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+
+    def testMultipleShells(self):
+        """A simple testcase which just emulates a normal usage pattern."""
+        for index in range(self.REPEAT_COUNT):
+            current_shell_name = "shell%s" % index
+            self.dut.shell.InvokeTerminal(current_shell_name)
+            current_shell = getattr(self.dut.shell, current_shell_name)
+            results = current_shell.Execute("which ls")
+            logging.info(str(results[const.STDOUT]))
+            asserts.assertEqual(len(results[const.STDOUT]), 1)
+            asserts.assertEqual(results[const.STDOUT][0].strip(),
+                                "/system/bin/ls")
+            asserts.assertEqual(results[const.EXIT_CODE][0], 0)
 
 
 if __name__ == "__main__":
