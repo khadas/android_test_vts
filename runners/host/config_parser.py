@@ -46,7 +46,7 @@ def gen_term_signal_handler(test_runners):
 
 
 def load_test_config_file(test_config_path, tb_filters=None):
-    """Processes the test configuration file provied by user.
+    """Processes the test configuration file provided by user.
 
     Loads the configuration file into a json object, unpacks each testbed
     config into its own json object, and validate the configuration in the
@@ -76,7 +76,7 @@ def load_test_config_file(test_config_path, tb_filters=None):
             configs[keys.ConfigKeys.KEY_TESTBED] = tbs
         _validate_test_config(configs)
         _validate_testbed_configs(configs[keys.ConfigKeys.KEY_TESTBED])
-        k_log_path = keys.ConfigKeys.KEP_LOG_PATH
+        k_log_path = keys.ConfigKeys.KEY_LOG_PATH
         configs[k_log_path] = utils.abs_path(configs[k_log_path])
         tps = configs[keys.ConfigKeys.KEY_TEST_PATHS]
     except errors.USERError as e:
