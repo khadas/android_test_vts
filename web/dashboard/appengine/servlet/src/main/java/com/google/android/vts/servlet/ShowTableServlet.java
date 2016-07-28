@@ -24,6 +24,7 @@ import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.gson.Gson;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
@@ -166,10 +167,20 @@ public class ShowTableServlet extends HttpServlet {
                 request.setAttribute("error", PROFILING_DATA_ALERT);
             }
             session.setAttribute("mapProfilingNameValues", mapProfilingNameValues);
-            request.setAttribute("profilingPointNameArray", profilingPointNameArray);
             request.setAttribute("tableName", table.getName());
-            request.setAttribute("testCaseReportMessagesArray", testCaseReportMessagesArray);
-            request.setAttribute("buildNameArray", buildNameArray);
+
+            // pass values by converting to JSON
+            String profilingPointNameJson = new Gson().toJson(profilingPointNameArray);
+            request.setAttribute("profilingPointNameJson", profilingPointNameJson);
+
+            // pass values by converting to JSON
+            String testCaseReportMessagesJson = new Gson().toJson(testCaseReportMessagesArray);
+            request.setAttribute("testCaseReportMessagesJson", testCaseReportMessagesJson);
+
+            // pass values by converting to JSON
+            String buildNameArrayJson = new Gson().toJson(buildNameArray);
+            request.setAttribute("buildNameArrayJson", buildNameArrayJson);
+
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {
                 dispatcher.forward(request, response);

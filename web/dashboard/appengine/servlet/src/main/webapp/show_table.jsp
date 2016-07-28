@@ -3,122 +3,107 @@
 <html>
   <head>
       <title>VTS Table</title>
-      <style type="text/css">
-          table.table_grid {
-            color: #333;
-            font-family: Helvetica, Arial, sans-serif;
-            width: 640px;
-            /* Table reset stuff */
-            border: 3px dotted;
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script type="text/javascript">
+        google.charts.load('current', {'packages':['table']});
+        google.charts.setOnLoadCallback(drawGridTable);
+        google.charts.setOnLoadCallback(drawProfilingTable);
+
+        // table for grid data
+        function drawGridTable() {
+
+          var data = new google.visualization.DataTable();
+
+          // add columns
+          data.addColumn('string', 'Test Cases/Build ID'); // blank column for first
+          var buildNameArray = ${buildNameArrayJson};
+          buildNameArray.sort();
+          for (var i = 0; i < buildNameArray.length; i++) {
+              data.addColumn('string', buildNameArray[i]);
           }
 
-          table.table_grid td, th {  border: 0 none; height: 30px;}
+          // add rows
+          var testCaseReportMessagesArray = ${testCaseReportMessagesJson};
+          var rowArray = new Array(testCaseReportMessagesArray.length);
 
-          table.table_grid th {
-            /* Gradient Background */
-            background: linear-gradient(#333 0%,#444 100%);
-            color: #FFF; font-weight: bold;
-            height: 40px;
+          for (var i = 0; i < rowArray.length; i++) {
+              var row = new Array(buildNameArray.length + 1);
+              for (var j = 0; j < row.length; j++) {
+                  if (j == 0) {
+                      row[j] = testCaseReportMessagesArray[i];
+                  } else {
+                      row[j] = '';
+                  }
+              }
+              rowArray[i] = row;
           }
+          data.addRows(rowArray);
+          // custom color to table
+          var cssClassNames = {
+              'headerRow': 'italic-darkblue-font large-font bold-font',
+              'tableRow': 'beige-background',
+              'oddTableRow': 'beige-background',
+              'selectedTableRow': 'orange-background large-font',
+              'hoverTableRow': '',
+              'headerCell': 'gold-border',
+              'tableCell': '',
+              'rowNumberCell': 'underline-blue-font'};
 
-          table.table_grid td { background: #FAFAFA; text-align: center; }
+          var table = new google.visualization.Table(document.getElementById('grid_table_div'));
+          table.draw(data, {showRowNumber: false, alternatingRowStyle : true, frozenColumns: 1, page: 'enable', 'cssClassNames': cssClassNames});
+        }
 
-          /* Zebra Stripe Rows */
+        // table for profiling data
+        function drawProfilingTable() {
 
-          table.table_grid tr:nth-child(even) table.table_grid td { background: #EEE; }
-          table.table_grid tr:nth-child(odd) table.table_grid td { background: #FDFDFD; }
+          var data = new google.visualization.DataTable();
 
-          /* First-child blank cells! */
-          table.table_grid tr td:first-child, table.table_grid tr th:first-child {
-            background: none;
-            font-style: italic;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: right;
-            padding-right: 10px;
-            width: 80px;
+          // add columns
+          data.addColumn('string', 'Profiling Point Names');
+
+          // add rows
+          var profilingPointNameArray = ${profilingPointNameJson};
+          var rowArray = new Array(profilingPointNameArray.length);
+
+          for (var i = 0; i < rowArray.length; i++) {
+              var row = new Array(1);
+              row[0] = profilingPointNameArray[i];
+              rowArray[i] = row;
           }
+          data.addRows(rowArray);
 
-          /* Add border-radius to specific cells! */
-          table.table_grid tr:first-child table.table_grid th:nth-child(2) {
-            border-radius: 5px 0 0 0;
+          // custom color to table
+          var cssClassNames = {
+              'headerRow': 'italic-darkblue-font large-font bold-font',
+              'tableRow': 'beige-background',
+              'oddTableRow': 'beige-background',
+              'selectedTableRow': 'orange-background large-font',
+              'hoverTableRow': '',
+              'headerCell': 'gold-border',
+              'tableCell': '',
+              'rowNumberCell': 'underline-blue-font'};
+
+          var table = new google.visualization.Table(document.getElementById('profiling_table_div'));
+          table.draw(data,
+                    {showRowNumber: true, alternatingRowStyle : true, 'cssClassNames': cssClassNames});
+
+          google.visualization.events.addListener(table, 'select', selectHandler);
+
+          function selectHandler(e) {
+              var ctx = "${pageContext.request.contextPath}";
+              var link = ctx + "/show_graph?profilingPoint=" + data.getValue(table.getSelection()[0].row, 0);
+              window.open(link,"_self");
           }
+        }
 
-          table.table_grid tr:first-child table.table_grid th:last-child {
-            border-radius: 0 5px 0 0;
-          }
 
-          /*Table to list profiling point names.*/
-          table.table_list {
-            color: #333;
-            font-family: Helvetica, Arial, sans-serif;
-            width: 640px;
-            border-collapse:
-            collapse; border-spacing: 0;
-            }
-
-            td, th {
-            border: 1px solid transparent; /* No more visible border */
-            height: 30px;
-            transition: all 0.3s;  /* Simple transition for hover effect */
-            }
-
-            th {
-            background: #551A8B;  /* Darken header a bit */
-            font-weight: bold;
-            color: white;
-            }
-
-            td {
-            background: #912CEE;
-            text-align: center;
-            }
-
-            /* Cells in even rows (2,4,6...) are one color */
-            tr:nth-child(even) td { background: #EED2EE; }
-            /* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
-            tr:nth-child(odd) td { background: #EAADEA; }
-            tr td:hover { background: #DA70D6; color: #FFF; } /* Hover cell effect! */
-      </style>
+      </script>
   </head>
 
   <body>
-    <div style="margin-left:200px">
-        <h2>Table : ${tableName}</h2>
-        <!-- Error in case of profiling data is missing -->
-        <h3>${error}</h3>
-        <table class="table_list">
-            <tr>
-              <th>Profiling Point Names</th>
-            </tr>
-
-            <c:forEach items="${profilingPointNameArray}" var="profilingPoint">
-                <tr>
-                    <td><a href="${pageContext.request.contextPath}/show_graph?profilingPoint=${profilingPoint}">${profilingPoint}</a></td>
-                </tr>
-            </c:forEach>
-      </table>
-    </div>
-
-    <div style="margin-left:200px">
-    <br/><br/>
-      <h3>Test cases and build</h3>
-      <table class="table_grid">
-          <tr>
-              <th>Test Case / Build ID</th>
-              <!-- y dimemsion for matrix: Build IDs come here -->
-              <c:forEach items="${buildNameArray}" var="buildName">
-                  <th>${buildName}</th>
-              </c:forEach>
-          </tr>
-           <!-- y dimension for matrix -->
-          <c:forEach items="${testCaseReportMessagesArray}" var="testCaseReportMessage">
-              <tr>
-                  <td>${testCaseReportMessage}</td>
-              </tr>
-          </c:forEach>
-      </table>
-    </div>
-
+    <!-- Error in case of profiling data is missing -->
+    <h3>${error}</h3>
+    <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
+    <div id="grid_table_div" style="margin-left:100px; margin-top:50px"></div>
   </body>
 </html>
