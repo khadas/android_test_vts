@@ -18,6 +18,7 @@ package com.google.android.vts.servlet;
 
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 
 import com.google.appengine.api.users.User;
@@ -103,18 +104,42 @@ public class ShowTableServlet extends HttpServlet {
             table = getTable(tableName);
             ResultScanner scanner = table.getScanner(new Scan());
 
+            // set to hold all the test case names
+            Set<String> testCaseReportMessagesSet = new HashSet<String>();
+
+            // set to hold all the build names
+            Set<String> buildNameSet = new HashSet<String>();
+
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<String>();
+
             // map to hold the the list of time taken for each test. This map is saved to session
             // so that it could be used later.
             Map<String, List<Double>> mapProfilingNameValues = new HashMap();
             for (Result result = scanner.next(); (result != null); result = scanner.next()) {
                 for (KeyValue keyValue : result.list()) {
-                    TestReportMessage testCase = VtsReportMessage.TestReportMessage.
+                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
                         parseFrom(keyValue.getValue());
-                    for (ProfilingReportMessage profilingReportMessage : testCase.getProfilingList()) {
-                        String profilingPointName =  new String(profilingReportMessage.getName().
-                            toByteArray(), "UTF-8");
+
+                    // update TestCaseReportMessage list
+                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
+                        getTestCaseList()) {
+                        testCaseReportMessagesSet.add(new String(testCaseReportMessage.getName().
+                            toStringUtf8()));
+                    }
+
+                    String buildId =
+                        new String(testReportMessage.getBuildInfo().getId().toStringUtf8());
+                    // filter empty build IDs
+                    if (buildId.length() > 0) {
+                        buildNameSet.add(buildId);
+                    }
+
+                    // update map of profiling point names
+                    for (ProfilingReportMessage profilingReportMessage :
+                        testReportMessage.getProfilingList()) {
+
+                        String profilingPointName = profilingReportMessage.getName().toStringUtf8();
                         profilingPointNameSet.add(profilingPointName);
                         double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
                             profilingReportMessage.getStartTimestamp())) / 1000;
@@ -130,13 +155,21 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-            String[] profilingPointNameArray = profilingPointNameSet.toArray(new String[profilingPointNameSet.size()]);
+            String[] profilingPointNameArray = profilingPointNameSet.
+                toArray(new String[profilingPointNameSet.size()]);
+
+            String[] testCaseReportMessagesArray = testCaseReportMessagesSet.
+                toArray(new String[testCaseReportMessagesSet.size()]);
+
+            String[] buildNameArray = buildNameSet.toArray(new String[buildNameSet.size()]);
             if (profilingPointNameArray.length == 0) {
                 request.setAttribute("error", PROFILING_DATA_ALERT);
             }
             session.setAttribute("mapProfilingNameValues", mapProfilingNameValues);
             request.setAttribute("profilingPointNameArray", profilingPointNameArray);
             request.setAttribute("tableName", table.getName());
+            request.setAttribute("testCaseReportMessagesArray", testCaseReportMessagesArray);
+            request.setAttribute("buildNameArray", buildNameArray);
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {
                 dispatcher.forward(request, response);

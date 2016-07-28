@@ -51,17 +51,23 @@
         chart.draw(data, options);
       }
 
+      function saveTextAsFile() {
+          var textToSave = ${valuesJson};
+          var filename = ${profilingPointName};
+          var blob = new Blob([textToSave], {type: "text/plain;charset=utf-8"});
+          saveAs(blob, filename+".txt");
+      }
     </script>
 </head>
-<body>
-    <h1>Profiling Point Name : ${profilingPointName}</h1>
-    <h2>Raw Data - Time Taken (Unit : milliseconds) </h2>
-    <!-- Error in case of profiling data is missing -->
-    <h3>${error}</h3>
 
-    <c:forEach items="${values}" var="value">
-        ${value},
-    </c:forEach>
+<body>
+    <div style="margin-left:200px">
+      <h2>Profiling Point Name : ${profilingPointName}</h2>
+      <button id="b">Click to Download Raw Data </button>
+      <!-- Error in case of profiling data is missing -->
+      <h3>${error}</h3>
+    </div>
+
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
 
     <div style="margin-left:200px">
@@ -83,6 +89,16 @@
           </tr>
       </table>
     </div>
+    <script type="text/javascript">
+      function exportToCsv() {
+          var valuesArray = ${valuesJson};
+          var myCsv = valuesArray.join();
+          window.open('data:text/csv;charset=utf-8,' + escape(myCsv));
+      }
+      var button = document.getElementById('b');
+      button.addEventListener('click', exportToCsv);
+
+    </script>
 
 </body>
 </html>
