@@ -57,4 +57,6 @@ include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
 
 VTS_GCNO_FILE := lights
+VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
+VTS_GCOV_SRC_CPP_FILE := lights.c
 include test/vts/tools/build/Android.packaging_gcno.mk
