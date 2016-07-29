@@ -334,11 +334,11 @@ bool AgentRequestHandler::CallApi(const string& call_payload) {
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
-    cout << "Call: success" << endl;
+    cout << "[agent] Call: success" << endl;
     response_msg.set_response_code(SUCCESS);
     response_msg.set_result(result);
   } else {
-    cout << "Call: fail" << endl;
+    cout << "[agent] Call: fail" << endl;
     response_msg.set_response_code(FAIL);
     response_msg.set_reason("Failed to call the api.");
   }

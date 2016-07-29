@@ -96,7 +96,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   }
 
   if (message.component_class() != HAL_HIDL ||
-      endsWith(message.component_name(), "Callback")) {
+      !endsWith(message.component_name(), "Callback")) {
     cpp_ss << endl;
     GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
 
