@@ -38,6 +38,16 @@ class ConfigKeys(object):
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
 
+    # sub fields of test_bed
+    IKEY_PRODUCT_TYPE = "product_type"
+    IKEY_PRODUCT_VARIANT = "product_variant"
+    IKEY_BUILD_FLAVOR = "build_flavor"
+    IKEY_BUILD_ID = "build_id"
+    IKEY_BRANCH = "branch"
+    IKEY_BUILD_ALIAS = "build_alias"
+    IKEY_API_LEVEL = "api_level"
+    IKEY_SERIAL = "serial"
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)

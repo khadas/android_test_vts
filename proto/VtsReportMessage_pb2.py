@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsReportMessage.proto',
   package='android.vts',
-  serialized_pb='\n\x16VtsReportMessage.proto\x12\x0b\x61ndroid.vts\"_\n\x18\x41ndroidDeviceInfoMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x12\n\nbuild_type\x18\x02 \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\x03 \x01(\x0c\x12\x11\n\tapi_level\x18\x04 \x01(\r\"P\n\x10\x41ndroidBuildInfo\x12\n\n\x02id\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x0b \x01(\x0c\x12\x12\n\nbuild_type\x18\x0c \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\r \x01(\x0c\"\xbd\x01\n\x15TestCaseReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x30\n\x0btest_result\x18\x0b \x01(\x0e\x32\x1b.android.vts.TestCaseResult\x12\x17\n\x0fstart_timestamp\x18\x15 \x01(\x03\x12\x15\n\rend_timestamp\x18\x16 \x01(\x03\x12\x34\n\x08\x63overage\x18\x1f \x03(\x0b\x32\".android.vts.CoverageReportMessage\"V\n\x16ProfilingReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x17\n\x0fstart_timestamp\x18\x0b \x01(\x03\x12\x15\n\rend_timestamp\x18\x0c \x01(\x03\"T\n\x15\x43overageReportMessage\x12\x11\n\tfile_name\x18\x01 \x01(\x0c\x12\x0c\n\x04gcno\x18\x0b \x01(\x0c\x12\x0c\n\x04gcda\x18\x0c \x01(\x0c\x12\x0c\n\x04\x64\x61ta\x18\x65 \x03(\x0c\"\xf0\x02\n\x11TestReportMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12+\n\ttest_type\x18\x03 \x01(\x0e\x32\x18.android.vts.VtsTestType\x12:\n\x0b\x64\x65vice_info\x18\x04 \x03(\x0b\x32%.android.vts.AndroidDeviceInfoMessage\x12\x31\n\nbuild_info\x18\x05 \x01(\x0b\x32\x1d.android.vts.AndroidBuildInfo\x12\x35\n\ttest_case\x18\x0b \x03(\x0b\x32\".android.vts.TestCaseReportMessage\x12\x36\n\tprofiling\x18\x15 \x03(\x0b\x32#.android.vts.ProfilingReportMessage\x12\x17\n\x0fstart_timestamp\x18\x65 \x01(\x03\x12\x15\n\rend_timestamp\x18\x66 \x01(\x03*\xb3\x01\n\x0eTestCaseResult\x12\x12\n\x0eUNKNOWN_RESULT\x10\x00\x12\x19\n\x15TEST_CASE_RESULT_PASS\x10\x01\x12\x19\n\x15TEST_CASE_RESULT_FAIL\x10\x02\x12\x19\n\x15TEST_CASE_RESULT_SKIP\x10\x03\x12\x1e\n\x1aTEST_CASE_RESULT_EXCEPTION\x10\x04\x12\x1c\n\x18TEST_CASE_RESULT_TIMEOUT\x10\x05*\x9c\x01\n\x0bVtsTestType\x12\x18\n\x14UNKNOWN_VTS_TESTTYPE\x10\x00\x12\x1e\n\x1aVTS_HOST_DRIVEN_STRUCTURAL\x10\x01\x12\x1b\n\x17VTS_HOST_DRIVEN_FUZZING\x10\x02\x12\x19\n\x15VTS_TARGET_SIDE_GTEST\x10\x03\x12\x1b\n\x17VTS_TARGET_SIDE_FUZZING\x10\x04\x42\x30\n\x1c\x63om.google.android.vts.protoB\x10VtsReportMessage')
+  serialized_pb='\n\x16VtsReportMessage.proto\x12\x0b\x61ndroid.vts\"\xb9\x01\n\x18\x41ndroidDeviceInfoMessage\x12\x14\n\x0cproduct_type\x18\x01 \x01(\x0c\x12\x17\n\x0fproduct_variant\x18\x02 \x01(\x0c\x12\x14\n\x0c\x62uild_flavor\x18\x0b \x01(\x0c\x12\x10\n\x08\x62uild_id\x18\x0c \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\x15 \x01(\x0c\x12\x13\n\x0b\x62uild_alias\x18\x16 \x01(\x0c\x12\x11\n\tapi_level\x18\x1f \x01(\x0c\x12\x0e\n\x06serial\x18\x65 \x01(\x0c\"P\n\x10\x41ndroidBuildInfo\x12\n\n\x02id\x18\x01 \x01(\x0c\x12\x0c\n\x04name\x18\x0b \x01(\x0c\x12\x12\n\nbuild_type\x18\x0c \x01(\x0c\x12\x0e\n\x06\x62ranch\x18\r \x01(\x0c\"\xbd\x01\n\x15TestCaseReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x30\n\x0btest_result\x18\x0b \x01(\x0e\x32\x1b.android.vts.TestCaseResult\x12\x17\n\x0fstart_timestamp\x18\x15 \x01(\x03\x12\x15\n\rend_timestamp\x18\x16 \x01(\x03\x12\x34\n\x08\x63overage\x18\x1f \x03(\x0b\x32\".android.vts.CoverageReportMessage\"V\n\x16ProfilingReportMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x17\n\x0fstart_timestamp\x18\x0b \x01(\x03\x12\x15\n\rend_timestamp\x18\x0c \x01(\x03\"T\n\x15\x43overageReportMessage\x12\x11\n\tfile_name\x18\x01 \x01(\x0c\x12\x0c\n\x04gcno\x18\x0b \x01(\x0c\x12\x0c\n\x04gcda\x18\x0c \x01(\x0c\x12\x0c\n\x04\x64\x61ta\x18\x65 \x03(\x0c\"\xf0\x02\n\x11TestReportMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12+\n\ttest_type\x18\x03 \x01(\x0e\x32\x18.android.vts.VtsTestType\x12:\n\x0b\x64\x65vice_info\x18\x04 \x03(\x0b\x32%.android.vts.AndroidDeviceInfoMessage\x12\x31\n\nbuild_info\x18\x05 \x01(\x0b\x32\x1d.android.vts.AndroidBuildInfo\x12\x35\n\ttest_case\x18\x0b \x03(\x0b\x32\".android.vts.TestCaseReportMessage\x12\x36\n\tprofiling\x18\x15 \x03(\x0b\x32#.android.vts.ProfilingReportMessage\x12\x17\n\x0fstart_timestamp\x18\x65 \x01(\x03\x12\x15\n\rend_timestamp\x18\x66 \x01(\x03*\xb3\x01\n\x0eTestCaseResult\x12\x12\n\x0eUNKNOWN_RESULT\x10\x00\x12\x19\n\x15TEST_CASE_RESULT_PASS\x10\x01\x12\x19\n\x15TEST_CASE_RESULT_FAIL\x10\x02\x12\x19\n\x15TEST_CASE_RESULT_SKIP\x10\x03\x12\x1e\n\x1aTEST_CASE_RESULT_EXCEPTION\x10\x04\x12\x1c\n\x18TEST_CASE_RESULT_TIMEOUT\x10\x05*\x9c\x01\n\x0bVtsTestType\x12\x18\n\x14UNKNOWN_VTS_TESTTYPE\x10\x00\x12\x1e\n\x1aVTS_HOST_DRIVEN_STRUCTURAL\x10\x01\x12\x1b\n\x17VTS_HOST_DRIVEN_FUZZING\x10\x02\x12\x19\n\x15VTS_TARGET_SIDE_GTEST\x10\x03\x12\x1b\n\x17VTS_TARGET_SIDE_FUZZING\x10\x04\x42\x30\n\x1c\x63om.google.android.vts.protoB\x10VtsReportMessage')
 
 _TESTCASERESULT = _descriptor.EnumDescriptor(
   name='TestCaseResult',
@@ -49,8 +49,8 @@ _TESTCASERESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=956,
-  serialized_end=1135,
+  serialized_start=1047,
+  serialized_end=1226,
 )
 
 TestCaseResult = enum_type_wrapper.EnumTypeWrapper(_TESTCASERESULT)
@@ -83,8 +83,8 @@ _VTSTESTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1138,
-  serialized_end=1294,
+  serialized_start=1229,
+  serialized_end=1385,
 )
 
 VtsTestType = enum_type_wrapper.EnumTypeWrapper(_VTSTESTTYPE)
@@ -110,30 +110,58 @@ _ANDROIDDEVICEINFOMESSAGE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='android.vts.AndroidDeviceInfoMessage.name', index=0,
+      name='product_type', full_name='android.vts.AndroidDeviceInfoMessage.product_type', index=0,
       number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value="",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='build_type', full_name='android.vts.AndroidDeviceInfoMessage.build_type', index=1,
+      name='product_variant', full_name='android.vts.AndroidDeviceInfoMessage.product_variant', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value="",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='branch', full_name='android.vts.AndroidDeviceInfoMessage.branch', index=2,
-      number=3, type=12, cpp_type=9, label=1,
+      name='build_flavor', full_name='android.vts.AndroidDeviceInfoMessage.build_flavor', index=2,
+      number=11, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value="",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='api_level', full_name='android.vts.AndroidDeviceInfoMessage.api_level', index=3,
-      number=4, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
+      name='build_id', full_name='android.vts.AndroidDeviceInfoMessage.build_id', index=3,
+      number=12, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='branch', full_name='android.vts.AndroidDeviceInfoMessage.branch', index=4,
+      number=21, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='build_alias', full_name='android.vts.AndroidDeviceInfoMessage.build_alias', index=5,
+      number=22, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='api_level', full_name='android.vts.AndroidDeviceInfoMessage.api_level', index=6,
+      number=31, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='serial', full_name='android.vts.AndroidDeviceInfoMessage.serial', index=7,
+      number=101, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -146,8 +174,8 @@ _ANDROIDDEVICEINFOMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=39,
-  serialized_end=134,
+  serialized_start=40,
+  serialized_end=225,
 )
 
 
@@ -195,8 +223,8 @@ _ANDROIDBUILDINFO = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=136,
-  serialized_end=216,
+  serialized_start=227,
+  serialized_end=307,
 )
 
 
@@ -251,8 +279,8 @@ _TESTCASEREPORTMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=219,
-  serialized_end=408,
+  serialized_start=310,
+  serialized_end=499,
 )
 
 
@@ -293,8 +321,8 @@ _PROFILINGREPORTMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=410,
-  serialized_end=496,
+  serialized_start=501,
+  serialized_end=587,
 )
 
 
@@ -342,8 +370,8 @@ _COVERAGEREPORTMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=498,
-  serialized_end=582,
+  serialized_start=589,
+  serialized_end=673,
 )
 
 
@@ -426,8 +454,8 @@ _TESTREPORTMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=585,
-  serialized_end=953,
+  serialized_start=676,
+  serialized_end=1044,
 )
 
 _TESTCASEREPORTMESSAGE.fields_by_name['test_result'].enum_type = _TESTCASERESULT

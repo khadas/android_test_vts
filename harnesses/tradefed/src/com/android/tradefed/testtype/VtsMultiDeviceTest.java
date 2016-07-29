@@ -254,7 +254,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      *
      * @return the updated JSONObject as the new test config.
      */
-    private JSONObject getUpdatedVtsRunnerTestConfig() throws IOException, JSONException {
+    private JSONObject getUpdatedVtsRunnerTestConfig()
+        throws IOException, JSONException, RuntimeException {
         JSONObject jsonObject = null;
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
         String content = FileUtil.readStringFromFile(new File(
@@ -266,6 +267,16 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         JSONArray deviceArray = new JSONArray();
         JSONObject deviceItemObject = new JSONObject();
         deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
+        try {
+            deviceItemObject.put("product_type", mDevice.getProductType());
+            deviceItemObject.put("product_variant", mDevice.getProductVariant());
+            deviceItemObject.put("build_alias", mDevice.getBuildAlias());
+            deviceItemObject.put("build_id", mDevice.getBuildId());
+            deviceItemObject.put("build_flavor", mDevice.getBuildFlavor());
+        } catch (DeviceNotAvailableException e) {
+            CLog.e("A device not available - continuing");
+            throw new RuntimeException("Failed to get device information");
+        }
         deviceArray.put(deviceItemObject);
 
         JSONArray testBedArray = (JSONArray) jsonObject.get("test_bed");
