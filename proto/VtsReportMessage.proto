@@ -42,17 +42,29 @@ enum VtsTestType {
 
 // To specify a call flow event.
 message AndroidDeviceInfoMessage {
-  // device name (e.g., bullhead).
-  optional bytes name = 1;
+  // product type (e.g., bullhead).
+  optional bytes product_type = 1;
 
-  // build type (e.g., userdebug)
-  optional bytes build_type = 2;
+  // product type variant (e.g., still bullhead or another name).
+  optional bytes product_variant = 2;
 
-  // branch name (e.g., master or nyc-dev)
-  optional bytes branch = 3;
+  // build type (e.g., userdebug).
+  optional bytes build_flavor = 11;
+
+  // Android Build ID.
+  optional bytes build_id = 12;
+
+  // branch name (e.g., master or nyc-dev).
+  optional bytes branch = 21;
+
+  // build alias implies the branch name.
+  optional bytes build_alias = 22;
 
   // API level
-  optional uint32 api_level = 4;
+  optional bytes api_level = 31;
+
+  // Device USB serial number
+  optional bytes serial = 101;
 }
 
 
