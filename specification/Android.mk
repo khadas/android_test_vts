@@ -75,12 +75,11 @@ LOCAL_CFLAGS += -DENABLE_TREBLE
 
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
+  libhwbinder \
   libbase \
   libutils \
 
-LOCAL_STATIC_LIBRARIES := \
-  ${vtslib_interfacespec_static_libraries} \
-  libhwbinder \
+LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
