@@ -17,12 +17,12 @@
 
 import logging
 
-from vts.runners.host import base_test
+from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class SampleLightTest(base_test.BaseTestClass):
+class SampleLightTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A sample testcase for the legacy lights HAL."""
 
     def setUpClass(self):
