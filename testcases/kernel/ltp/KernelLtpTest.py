@@ -169,7 +169,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     _KEY_ENV_LTPROOT = 'LTPROOT'
     _KEY_ENV_PATH = 'PATH'
 
-    def setUpTest(self):
+    def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
         required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
         self.getUserParams(required_params)
@@ -181,6 +181,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._ltp_dir = "/data/local/tmp/ltp"
 
         self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._shell)
+        self._temp_dir.Prepare()
 
         self._testcases = TestcaseParser(self.data_file_path)
         self._env = {self._KEY_ENV_TMPDIR: self._temp_dir._path,
@@ -198,8 +199,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
 
-        self._shell.Execute(["rm -rf  %s" % self._ltp_dir,
-                             "mkdir %s -p" % self._ltp_dir])
+        self._shell.Execute("mkdir %s -p" % self._ltp_dir)
         self._dut.adb.push("%s/%i/ltp/. %s" %
                            (self.data_file_path, n_bit, self._ltp_dir))
         # TODO: libcap
@@ -209,17 +209,17 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         return ' '.join("%s=%s" % (key, value)
                         for key, value in self._env.items())
 
-    def tearDownTest(self):
+    def tearDownClass(self):
         """Deletes all copied data files."""
         self._shell.Execute("rm -rf %s" % self._ltp_dir)
+        self._temp_dir.Clean()
 
-    def Verify(self, testcase_name, results):
+    def Verify(self, results):
         """Verifies the test result of each test case."""
 
         if len(results) == 0:
             # TIMEOUT
-            logging.info("[Test Case] %s FAIL" % testcase_name)
-            return
+            asserts.fail("No response received. Socket timeout")
 
         logging.info("stdout: %s" % str(results[const.STDOUT]))
         logging.info("stderr: %s" % str(results[const.STDERR]))
@@ -232,22 +232,23 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    "TFAIL" in results[const.STDOUT][0]:
             # If return code is other than 0 or 32,
             # or the output contains 'TFAIL', then test FAIL
-            logging.info("[Test Case] %s FAIL" % testcase_name)
+            asserts.fail("Test received TFAIL/TBOK or return code is neither "
+                          "TPASS nor TCONF.")
         elif results[const.EXIT_CODE][0] == self._TPASS:
             # If output exit_code is _TPASS, then test PASS
-            logging.info("[Test Case] %s PASS" % testcase_name)
+            pass
         elif results[const.EXIT_CODE][0] == self._TCONF and \
             "TPASS" in results[const.STDOUT][0]:
             # If output exit_code is _TCONF or but the stdout
             # contains TPASS, this means part of the test passed
             # but others were skipped. We consider it a PASS
-            logging.info("[Test Case] %s PASS" % testcase_name)
+            pass
         elif results[const.EXIT_CODE][0] == self._TCONF:
             # Test case is not for the current configuration, SKIP
-            logging.info("[Test Case] %s SKIP" % testcase_name)
+            raise asserts.skip("Incompatible test skipped: TCONF")
         else:
             # All other cases are treated as FAIL, but this is not expected
-            logging.info("[Test Case] %s FAIL" % testcase_name)
+            asserts.fail("Unexpected unknown failure.")
 
     def TestNBits(self, n_bit):
         """Runs all 32-bit or 64-bit LTP test cases.
@@ -257,33 +258,43 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
         self.PushFiles(n_bit)
-        logging.info("[Test Case] test%iBits PASS" % n_bit)
+        logging.info("[Test Case] test%iBits SKIP" % n_bit)
 
-        for test_case in self._testcases.Load():
-            self._temp_dir.Prepare()
-            testcase_name = "%s-%s_%ibit" % (test_case._testsuite,
-                                             test_case._testname, n_bit)
-            logging.info("[Test Case] %s" % testcase_name)
-            path = os.path.join(self._ltp_dir, "testcases/bin",
-                                test_case._testbinary)
+        self.runGeneratedTests(test_func=self.RunLtpOnce,
+                               settings=self._testcases.Load(),
+                               args=(n_bit,),
+                               name_func=self.GetTestName)
 
-            logging.info("executing a test binary: [%s]" % path)
-            logging.info("execution envp: [%s]" % self.GetEnvp())
-            logging.info("execution params: [%s]" % \
-                         test_case.GetArgs("$LTPROOT", self._ltp_dir))
+        logging.info("[Test Case] test%iBits" % n_bit)
+        raise asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
-            self._dut.shell.InvokeTerminal(testcase_name)
-            shell = getattr(self._dut.shell, testcase_name)
+    def GetTestName(self, test_case, n_bit):
+        "Generate the vts test name of a ltp test"
+        return "%s-%s_%ibit" % (test_case._testsuite,
+                                test_case._testname, n_bit)
 
-            shell.Execute("chmod 775 " + path)
+    def RunLtpOnce(self, test_case, n_bit):
+        "Run one LTP test case"
+        testcase_name = self.GetTestName(test_case, n_bit)
 
-            results = shell.Execute("env %s %s %s" % (
-                self.GetEnvp(), path, test_case.GetArgs("$LTPROOT",
-                                                        self._ltp_dir)))
+        path = os.path.join(self._ltp_dir, "testcases/bin",
+                            test_case._testbinary)
 
-            self.Verify(testcase_name, results)
+        logging.info("executing a test binary: [%s]" % path)
+        logging.info("execution envp: [%s]" % self.GetEnvp())
+        logging.info("execution params: [%s]" % \
+                     test_case.GetArgs("$LTPROOT", self._ltp_dir))
 
-            self._temp_dir.Clean()
+        self._dut.shell.InvokeTerminal(testcase_name)
+        shell = getattr(self._dut.shell, testcase_name)
+
+        shell.Execute("chmod 775 " + path)
+
+        results = shell.Execute("env %s %s %s" % (
+            self.GetEnvp(), path, test_case.GetArgs("$LTPROOT",
+                                                    self._ltp_dir)))
+
+        self.Verify(results)
 
     def test32Bits(self):
         """Runs all 32-bit LTP test cases."""
