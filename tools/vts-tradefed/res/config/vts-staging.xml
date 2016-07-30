@@ -17,7 +17,6 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="LightFuzzTest" />
-    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
     <option name="compatibility:include-filter" value="KernelLtpTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
