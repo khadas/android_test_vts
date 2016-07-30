@@ -30,6 +30,8 @@
         <option name="push" value="libvts_codecoverage64.so->/data/local/tmp/64/libvts_codecoverage.so" />
         <option name="push" value="libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
         <option name="push" value="libvts_multidevice_proto64.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
+        <option name="push" value="libhwbinder.so->/data/local/tmp/32/libhwbinder.so" />
+        <option name="push" value="libhwbinder64.so->/data/local/tmp/64/libhwbinder.so" />
         <option name="push" value="lights.bullhead-vts.so->/data/local/tmp/32/lights.bullhead-vts.so" />
         <option name="push" value="lights.bullhead-vts64.so->/data/local/tmp/64/lights.bullhead-vts.so" />
         <option name="push" value="fuzzer32->/data/local/tmp/32/fuzzer32" />
