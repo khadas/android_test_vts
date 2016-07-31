@@ -53,7 +53,7 @@ class ShellMirror(object):
         shell_mirror = self._shell_mirrors[instance_name]
         shell_mirror.CleanUp()
 
-    def InvokeTerminal(self, instance_name, bits=64):
+    def InvokeTerminal(self, instance_name, bits=32):
         """Initiates a handler for a particular conventional HAL.
 
         This will initiate a driver service for a shell on the target side,
