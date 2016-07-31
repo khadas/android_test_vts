@@ -38,10 +38,8 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_common \
   libc++ \
   libvts_multidevice_proto \
+  libprotobuf-cpp-full \
   libvts_drivercomm \
-
-LOCAL_STATIC_LIBRARIES := \
-  libprotobuf-cpp-full-ndk \
 
 LOCAL_C_INCLUDES += \
   bionic \
