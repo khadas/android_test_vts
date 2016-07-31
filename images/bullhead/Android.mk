@@ -12,5 +12,5 @@ $(vts_protobuf_lib64_file): test/vts/images/bullhead/64/libprotobuf-cpp-full.so 
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) -fp $< $@
 
-vts: $(vts_protobuf_lib32_file) $(vts_protobuf_lib32_file)
+vts: $(vts_protobuf_lib32_file) $(vts_protobuf_lib64_file)
 
