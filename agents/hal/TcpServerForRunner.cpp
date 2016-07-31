@@ -46,8 +46,6 @@ using namespace std;
 namespace android {
 namespace vts {
 
-const static int kTcpPort = 5001;
-
 // Starts to run a TCP server (foreground).
 int StartTcpServerForRunner(const char* spec_dir_path,
                             const char* fuzzer_path32,
@@ -68,12 +66,26 @@ int StartTcpServerForRunner(const char* spec_dir_path,
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(kTcpPort);
+  serv_addr.sin_port = htons(0);
 
   if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
-    cerr << __func__ << " binding failed." << endl;
+    cerr << __func__ << " binding failed. errno = " << errno << endl;
+    cerr << __func__ << " " << strerror(errno) << endl;
     return -1;
   }
+
+  socklen_t sa_len = sizeof(serv_addr);
+  if (getsockname(sockfd, (struct sockaddr*) &serv_addr, &sa_len) == -1) {
+    cerr << __func__ << " getsockname failed. errno = " << errno << endl;
+    cerr << __func__ << " " << strerror(errno) << endl;
+    return -1;
+  }
+
+  cout << "[agent] TCP server port is " << (int) ntohs(serv_addr.sin_port)
+       << endl;
+  FILE* fp = fopen("/data/local/tmp/vts_tcp_server_port", "wt");
+  fprintf(fp, "%d", (int) ntohs(serv_addr.sin_port));
+  fclose(fp);
 
   if (listen(sockfd, 5) == -1) {
     cerr << __func__ << " listen failed." << endl;
