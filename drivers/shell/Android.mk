@@ -31,9 +31,7 @@ LOCAL_SHARED_LIBRARIES := \
   libcutils \
   libvts_multidevice_proto \
   libvts_drivercomm \
-
-LOCAL_STATIC_LIBRARIES := \
-  libprotobuf-cpp-full-ndk \
+  libprotobuf-cpp-full \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \

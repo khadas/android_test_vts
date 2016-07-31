@@ -50,10 +50,10 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_common \
   libvts_drivercomm \
   libvts_multidevice_proto \
+  libprotobuf-cpp-full \
 
 LOCAL_STATIC_LIBRARIES := \
   libelf \
-  libprotobuf-cpp-full-ndk \
 
 LOCAL_MULTILIB := both
 
