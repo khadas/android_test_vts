@@ -44,9 +44,6 @@ vtslib_interfacespec_includes := \
   $(TARGET_OUT_HEADERS) \
 
 vtslib_interfacespec_shared_libraries := \
-  libcutils \
-  liblog \
-  libdl \
   libandroid_runtime \
   libvts_datatype \
   libvts_common \
@@ -55,6 +52,9 @@ vtslib_interfacespec_shared_libraries := \
   libprotobuf-cpp-full \
 
 vtslib_interfacespec_static_libraries := \
+  libcutils \
+  liblog \
+  libdl \
   libelf \
 
 include $(CLEAR_VARS)
@@ -76,10 +76,11 @@ LOCAL_CFLAGS += -DENABLE_TREBLE
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
   libhwbinder \
+
+LOCAL_STATIC_LIBRARIES := \
+  ${vtslib_interfacespec_static_libraries} \
   libbase \
   libutils \
-
-LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 

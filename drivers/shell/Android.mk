@@ -27,11 +27,13 @@ LOCAL_SRC_FILES := \
   ShellDriverMain.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
-  libutils \
-  libcutils \
   libvts_multidevice_proto \
   libvts_drivercomm \
   libprotobuf-cpp-full \
+
+LOCAL_STATIC_LIBRARIES := \
+  libutils \
+  libcutils \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \
