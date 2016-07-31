@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +62,7 @@ public class ShowTableServlet extends HttpServlet {
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
+    private static final int MAX_BUILD_IDS_PER_PAGE = 10;
 
     /**
      * Returns the table corresponding to the table name.
@@ -87,6 +89,7 @@ public class ShowTableServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
+        int buildIdPageNo;
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
@@ -97,19 +100,28 @@ public class ShowTableServlet extends HttpServlet {
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             return;
         }
-
         tableName = TableName.valueOf(request.getParameter("tableName"));
+
+        buildIdPageNo = 0;
+        if (request.getParameter("buildIdPageNo") != null) {
+            try {
+                buildIdPageNo = Integer.parseInt(request.getParameter("buildIdPageNo"));
+            } catch (Exception e) {
+            }
+        }
 
         if (currentUser != null) {
             response.setContentType("text/plain");
             table = getTable(tableName);
-            ResultScanner scanner = table.getScanner(new Scan());
+
+            // set to hold all the build IDs
+            Set<Integer> buildIdSet = new HashSet<Integer>();
 
             // set to hold all the test case names
-            Set<String> testCaseReportMessagesSet = new HashSet<String>();
+            List<String> testCaseNameList = new ArrayList<String>();
 
-            // set to hold all the build names
-            Set<String> buildNameSet = new HashSet<String>();
+            // set to hold all the test case execution results
+            Map<String, String> testCaseResultMap = new HashMap();
 
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<String>();
@@ -117,23 +129,22 @@ public class ShowTableServlet extends HttpServlet {
             // map to hold the the list of time taken for each test. This map is saved to session
             // so that it could be used later.
             Map<String, List<Double>> mapProfilingNameValues = new HashMap();
+
+            ResultScanner scanner = table.getScanner(new Scan());
             for (Result result = scanner.next(); (result != null); result = scanner.next()) {
                 for (KeyValue keyValue : result.list()) {
                     TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
                         parseFrom(keyValue.getValue());
 
-                    // update TestCaseReportMessage list
-                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
-                        getTestCaseList()) {
-                        testCaseReportMessagesSet.add(new String(testCaseReportMessage.getName().
-                            toStringUtf8()));
-                    }
-
                     String buildId =
                         new String(testReportMessage.getBuildInfo().getId().toStringUtf8());
                     // filter empty build IDs
                     if (buildId.length() > 0) {
-                        buildNameSet.add(buildId);
+                        try {
+                            buildIdSet.add(new Integer(buildId));
+                        } catch (NumberFormatException e) {
+                            /* skip a non-post-submit build */
+                        }
                     }
 
                     // update map of profiling point names
@@ -155,14 +166,69 @@ public class ShowTableServlet extends HttpServlet {
                     }
                 }
             }
+            List<Integer> sortedBuildIdList = new ArrayList(buildIdSet);
+            Collections.sort(sortedBuildIdList, Collections.reverseOrder());
+            int listStart = buildIdPageNo * MAX_BUILD_IDS_PER_PAGE;  // inclusive
+            int listEnd = (buildIdPageNo + 1) * MAX_BUILD_IDS_PER_PAGE;  // exclusive
+            if (listStart >= sortedBuildIdList.size()) {
+                listStart = sortedBuildIdList.size() - 1;
+            }
+            if (listEnd >= sortedBuildIdList.size()) {
+                listEnd = sortedBuildIdList.size() - 1;
+            }
+            sortedBuildIdList = sortedBuildIdList.subList(listStart, listEnd);
+            List<String> selectedBuildIdList = new ArrayList<String>(sortedBuildIdList.size());
+            for (Object intElem : sortedBuildIdList) {
+                selectedBuildIdList.add(intElem.toString());
+            }
+
+            scanner = table.getScanner(new Scan());
+            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
+                for (KeyValue keyValue : result.list()) {
+                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                        parseFrom(keyValue.getValue());
+
+                    String buildId =
+                        new String(testReportMessage.getBuildInfo().getId().toStringUtf8());
+                    if (buildId.length() <= 0) continue;
+                    if (!selectedBuildIdList.contains(buildId)) continue;
+
+                    // update TestCaseReportMessage list
+                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
+                        getTestCaseList()) {
+                        String testCaseName = new String(
+                            testCaseReportMessage.getName().toStringUtf8());
+                        if (!testCaseNameList.contains(testCaseName)) {
+                            testCaseNameList.add(testCaseName);
+                        }
+                    }
+                }
+            }
+
+            scanner = table.getScanner(new Scan());
+            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
+                for (KeyValue keyValue : result.list()) {
+                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                        parseFrom(keyValue.getValue());
+
+                    String buildId =
+                        new String(testReportMessage.getBuildInfo().getId().toStringUtf8());
+                    if (buildId.length() <= 0) continue;
+                    if (!selectedBuildIdList.contains(buildId)) continue;
+
+                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
+                        getTestCaseList()) {
+                        testCaseResultMap.put(
+                            buildId + "." + testCaseReportMessage.getName().toStringUtf8(),
+                            "" + testCaseReportMessage.getTestResult().getNumber());
+                    }
+                }
+            }
 
             String[] profilingPointNameArray = profilingPointNameSet.
                 toArray(new String[profilingPointNameSet.size()]);
 
-            String[] testCaseReportMessagesArray = testCaseReportMessagesSet.
-                toArray(new String[testCaseReportMessagesSet.size()]);
-
-            String[] buildNameArray = buildNameSet.toArray(new String[buildNameSet.size()]);
+            String[] buildNameArray = selectedBuildIdList.toArray(new String[selectedBuildIdList.size()]);
             if (profilingPointNameArray.length == 0) {
                 request.setAttribute("error", PROFILING_DATA_ALERT);
             }
@@ -170,16 +236,14 @@ public class ShowTableServlet extends HttpServlet {
             request.setAttribute("tableName", table.getName());
 
             // pass values by converting to JSON
-            String profilingPointNameJson = new Gson().toJson(profilingPointNameArray);
-            request.setAttribute("profilingPointNameJson", profilingPointNameJson);
-
-            // pass values by converting to JSON
-            String testCaseReportMessagesJson = new Gson().toJson(testCaseReportMessagesArray);
-            request.setAttribute("testCaseReportMessagesJson", testCaseReportMessagesJson);
-
-            // pass values by converting to JSON
-            String buildNameArrayJson = new Gson().toJson(buildNameArray);
-            request.setAttribute("buildNameArrayJson", buildNameArrayJson);
+            request.setAttribute("buildNameArrayJson",
+                                 new Gson().toJson(buildNameArray));
+            request.setAttribute("testCaseNameListJson",
+                                 new Gson().toJson(testCaseNameList));
+            request.setAttribute("testCaseResultMapJson",
+                                 new Gson().toJson(testCaseResultMap));
+            request.setAttribute("profilingPointNameJson",
+                                 new Gson().toJson(profilingPointNameArray));
 
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {

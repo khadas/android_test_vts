@@ -43,14 +43,14 @@
 
   <body>
     <div style="margin-left:200px">
-    <h3>Project : android-vts-internal</h3>
+    <h3>VTS Dashboard (Internal)</h3>
      <table>
              <tr>
-               <th>List of Tables</th>
+               <th>Test Name</th>
             </tr>
         <c:forEach items="${tableNames}" var="table">
                 <tr>
-                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=${table}">${table}</a></td>
+                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}">${table}</a></td>
                 </tr>
         </c:forEach>
      </table>
