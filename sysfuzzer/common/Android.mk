@@ -44,18 +44,16 @@ LOCAL_C_INCLUDES := \
   system/core/include \
 
 LOCAL_SHARED_LIBRARIES := \
+  libutils \
+  libcutils \
   libbinder \
+  liblog \
+  libdl \
   libandroid_runtime \
   libvts_drivercomm \
   libvts_codecoverage \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
-
-LOCAL_STATIC_LIBRARIES := \
-  libutils \
-  libcutils \
-  liblog \
-  libdl \
 
 LOCAL_MULTILIB := both
 
