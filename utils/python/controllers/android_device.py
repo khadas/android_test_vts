@@ -60,12 +60,13 @@ class AndroidDeviceError(signals.ControllerError):
     pass
 
 
-def create(configs):
+def create(configs, use_vts_agent=true):
     """Creates AndroidDevice controller objects.
 
     Args:
         configs: A list of dicts, each representing a configuration for an
                  Android device.
+        use_vts_agent: bool, whether to use VTS agent.
 
     Returns:
         A list of AndroidDevice objects.
@@ -88,7 +89,7 @@ def create(configs):
         if ad.serial not in connected_ads:
             raise DoesNotExistError(("Android device %s is specified in config"
                                      " but is not attached.") % ad.serial)
-    _startServicesOnAds(ads)
+    _startServicesOnAds(ads, use_vts_agent)
     return ads
 
 
@@ -105,7 +106,7 @@ def destroy(ads):
             ad.log.exception("Failed to clean up properly.")
 
 
-def _startServicesOnAds(ads):
+def _startServicesOnAds(ads, use_vts_agent):
     """Starts long running services on multiple AndroidDevice objects.
 
     If any one AndroidDevice object fails to start services, cleans up all
@@ -113,12 +114,13 @@ def _startServicesOnAds(ads):
 
     Args:
         ads: A list of AndroidDevice objects whose services to start.
+        use_vts_agent: bool, whether to use the VTS agent.
     """
     running_ads = []
     for ad in ads:
         running_ads.append(ad)
         try:
-            ad.startServices()
+            ad.startServices(use_vts_agent)
         except:
             ad.log.exception("Failed to start some services, abort!")
             destroy(running_ads)
@@ -539,27 +541,33 @@ class AndroidDevice(object):
         if has_vts_agent:
             self.startVtsAgent()
 
-    def startServices(self):
+    def startServices(self, use_vts_agent):
         """Starts long running services on the android device.
 
         1. Start adb logcat capture.
         2. Start VtsAgent.
         3. Create HalMirror
+
+        Args:
+            use_vts_agent: bool, whether to use the VTS agent.
         """
         try:
             self.startAdbLogcat()
         except:
             self.log.exception("Failed to start adb logcat!")
             raise
-        self.startVtsAgent()
-        self.device_command_port = int(
-            self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
-        logging.info("device_command_port: %s", self.device_command_port)
-        self.adb.tcp_forward(self.host_command_port, self.device_command_port)
-        self.hal = hal_mirror.HalMirror(self.host_command_port,
-                                        self.host_callback_port)
-        self.lib = lib_mirror.LibMirror(self.host_command_port)
-        self.shell = shell_mirror.ShellMirror(self.host_command_port)
+        if use_vts_agent:
+            self.startVtsAgent()
+            self.device_command_port = int(
+                self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
+            logging.info("device_command_port: %s", self.device_command_port)
+            self.adb.tcp_forward(self.host_command_port, self.device_command_port)
+            self.hal = hal_mirror.HalMirror(self.host_command_port,
+                                            self.host_callback_port)
+            self.lib = lib_mirror.LibMirror(self.host_command_port)
+            self.shell = shell_mirror.ShellMirror(self.host_command_port)
+        else:
+            logging.info("not using VTS agent.")
 
     def stopServices(self):
         """Stops long running services on the android device.

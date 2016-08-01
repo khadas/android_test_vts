@@ -16,6 +16,6 @@
 <configuration description="Run VTS Kernel and Kernel Module Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="KernelLtpTest" />
+    <option name="compatibility:include-filter" value="KernelLtpAdbTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
