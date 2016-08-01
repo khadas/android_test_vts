@@ -276,7 +276,11 @@ class TestRunner(object):
             original_config = self.testbed_configs[module_config_name]
             controller_config = copy.deepcopy(original_config)
             logging.info("controller_config: %s", controller_config)
-            objects = create(controller_config)
+            if "use_vts_agent" not in self.testbed_configs:
+                objects = create(controller_config)
+            else:
+                objects = create(controller_config,
+                                 self.testbed_configs["use_vts_agent"])
         except:
             logging.exception(("Failed to initialize objects for controller "
                                "%s, abort!"), module_config_name)
