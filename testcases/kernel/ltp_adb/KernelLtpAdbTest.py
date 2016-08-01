@@ -115,25 +115,27 @@ class TempDir(object):
 
     Attributes:
         _path: string, path to the temp dir
-        _shell: AdbProxy.shell function pointer
+        _adb: AdbProxy instance, to send adb commands
     """
 
-    def __init__(self, path, shell):
+    def __init__(self, path, adb):
         self._path = path
-        self._shell = shell
+        self._adb = adb
 
     def Prepare(self):
         """Prepare a temporary directory."""
         # TODO: check error
-        self._shell("mkdir %s -p" % self._path)
-        self._shell("chmod 775 %s" % self._path)
-        self._shell("mkdir %s/tmp" % self._path)
-        self._shell("chmod 775 %s/tmp" % self._path)
+        logging.info("TempDir: Prepare %s", self._path)
+        self._adb.shell("mkdir %s -p" % self._path)
+        self._adb.shell("chmod 775 %s" % self._path)
+        self._adb.shell("mkdir %s/tmp" % self._path)
+        self._adb.shell("chmod 775 %s/tmp" % self._path)
 
     def Clean(self):
         """Clean a temporary directory."""
         # TODO: check error
-        self._shell("rm -rf %s" % self._path)
+        logging.info("TempDir: Clean %s", self._path)
+        self._adb.shell("rm -rf %s" % self._path)
 
     @property
     def path(self):
@@ -150,7 +152,7 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
         _32BIT: int, for 32 bit tests
         _64BIT: int, for 64 bit tests
         _dut: AndroidDevice, the device under test
-        _shell: ShellMirrorObject, shell mirror object used to execute commands
+        _adb: AdbProxy instance, to send adb commands
         _ltp_dir: string, ltp build root directory on target
         _temp_dir: TempDir, temporary directory manager
         _testcases: TestcaseParser, test case input parser
@@ -169,17 +171,16 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
     _KEY_ENV_PATH = 'PATH'
 
     def setUpClass(self):
-        """Creates a remote shell instance, and copies data files."""
+        """Prepares an AdbProxy instance, and copies data files."""
         required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
         self.getUserParams(required_params)
 
         logging.info("data_file_path: %s", self.data_file_path)
         self._dut = self.registerController(android_device)[0]
-        self._dut.adb.shell()
-        self._shell = self._dut.adb.shell
+        self._adb = self._dut.adb
         self._ltp_dir = "/data/local/tmp/ltp"
 
-        self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._shell)
+        self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._adb)
         self._temp_dir.Prepare()
 
         self._testcases = TestcaseParser(self.data_file_path)
@@ -197,8 +198,8 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
             n_bit: int, _32BIT, or 32, for 32bit test;
                    _64BIT, or 64, for 64bit test;
         """
-
-        self._shell("mkdir %s -p" % self._ltp_dir)
+        logging.info("PushFiles")
+        self._adb.shell("mkdir %s -p" % self._ltp_dir)
         self._dut.adb.push("%s/%i/ltp/. %s" %
                            (self.data_file_path, n_bit, self._ltp_dir))
         # TODO: libcap
@@ -210,7 +211,8 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def tearDownClass(self):
         """Deletes all copied data files."""
-        self._shell("rm -rf %s" % self._ltp_dir)
+        logging.info("tearDownClass")
+        self._adb.shell("rm -rf %s" % self._ltp_dir)
         self._temp_dir.Clean()
 
     def Verify(self, results):
@@ -258,9 +260,9 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("execution params: [%s]" % \
                      test_case.GetArgs("$LTPROOT", self._ltp_dir))
 
-        self._shell("chmod 775 " + path)
+        self._adb.shell("chmod 775 " + path)
 
-        results = self._shell("env %s %s %s" % (
+        results = self._adb.shell("env %s %s %s" % (
             self.GetEnvp(), path, test_case.GetArgs("$LTPROOT",
                                                     self._ltp_dir)))
 
