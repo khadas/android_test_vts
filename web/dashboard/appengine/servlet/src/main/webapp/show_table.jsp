@@ -11,33 +11,65 @@
 
         // table for grid data
         function drawGridTable() {
-
           var data = new google.visualization.DataTable();
+          var summaryTableData = new google.visualization.DataTable();
 
           // add columns
-          data.addColumn('string', 'Test Cases/Build ID'); // blank column for first
+          data.addColumn('string', 'Test Cases \\ Build ID'); // blank column for first
+          summaryTableData.addColumn('string', 'Stats Type \\ Build ID');
           var buildNameArray = ${buildNameArrayJson};
           buildNameArray.sort();
           for (var i = 0; i < buildNameArray.length; i++) {
               data.addColumn('string', buildNameArray[i]);
+              summaryTableData.addColumn('string', buildNameArray[i]);
           }
 
           // add rows
-          var testCaseReportMessagesArray = ${testCaseReportMessagesJson};
-          var rowArray = new Array(testCaseReportMessagesArray.length);
+          var testCaseNameListArray = ${testCaseNameListJson};
+          var rowArray = new Array(testCaseNameListArray.length);
+          var summaryTableRowArray = new Array(3);
 
-          for (var i = 0; i < rowArray.length; i++) {
+          var testCaseResultMap = ${testCaseResultMapJson};
+
+          var totalRow = new Array(buildNameArray.length + 1);
+          var passRow = new Array(buildNameArray.length + 1);
+          var ratioRow = new Array(buildNameArray.length + 1);
+          for (var i = 0; i < rowArray.length; i++) {  // test case name
               var row = new Array(buildNameArray.length + 1);
-              for (var j = 0; j < row.length; j++) {
+              for (var j = 0; j < row.length; j++) {  // build ID
                   if (j == 0) {
-                      row[j] = testCaseReportMessagesArray[i];
+                      row[j] = testCaseNameListArray[i];
+                      totalRow[j] = "total";
+                      passRow[j] = "#passed";
+                      ratioRow[j] = "%passed";
                   } else {
-                      row[j] = '';
+                      if (i == 0) {
+                          passRow[j] = 0;
+                          totalRow[j] = 0;
+                      }
+                      var result = testCaseResultMap[buildNameArray[j] + "." + testCaseNameListArray[i]];
+                      if (result == 1) {
+                          row[j] = 'O';
+                          passRow[j] += 1;
+                      } else if (result == 2) row[j] = 'X';
+                      else if (result == 0) row[j] = '?';
+                      else row[j] = '-';
+                      totalRow[j] += 1;
+                      if (i == rowArray.length - 1) {
+                          ratioRow[j] = "" + Math.round(passRow[j] * 1000 / totalRow[j]) / 10 + "%";
+                          passRow[j] = "" + passRow[j];
+                          totalRow[j] = "" + totalRow[j];
+                      }
                   }
               }
               rowArray[i] = row;
           }
           data.addRows(rowArray);
+          summaryTableRowArray[0] = totalRow;
+          summaryTableRowArray[1] = passRow;
+          summaryTableRowArray[2] = ratioRow;
+          summaryTableData.addRows(summaryTableRowArray);
+
           // custom color to table
           var cssClassNames = {
               'headerRow': 'italic-darkblue-font large-font bold-font',
@@ -49,8 +81,14 @@
               'tableCell': '',
               'rowNumberCell': 'underline-blue-font'};
 
+          var summaryTable = new google.visualization.Table(document.getElementById('grid_summary_table_div'));
+          summaryTable.draw(summaryTableData,
+                            {showRowNumber: false, alternatingRowStyle : true,
+                             frozenColumns: 1, page: 'enable', 'cssClassNames': cssClassNames});
+
           var table = new google.visualization.Table(document.getElementById('grid_table_div'));
-          table.draw(data, {showRowNumber: false, alternatingRowStyle : true, frozenColumns: 1, page: 'enable', 'cssClassNames': cssClassNames});
+          table.draw(data, {showRowNumber: false, alternatingRowStyle : true,
+                            frozenColumns: 1, page: 'enable', 'cssClassNames': cssClassNames});
         }
 
         // table for profiling data
@@ -104,6 +142,7 @@
     <!-- Error in case of profiling data is missing -->
     <h3>${error}</h3>
     <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
+    <div id="grid_summary_table_div" style="margin-left:100px; margin-top:50px"></div>
     <div id="grid_table_div" style="margin-left:100px; margin-top:50px"></div>
   </body>
 </html>
