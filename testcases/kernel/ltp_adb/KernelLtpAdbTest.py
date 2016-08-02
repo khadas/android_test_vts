@@ -242,7 +242,7 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                name_func=self.GetTestName)
 
         logging.info("[Test Case] test%iBits" % n_bit)
-        raise asserts.skip("Finished generating {} bit tests.".format(n_bit))
+        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
     def GetTestName(self, test_case, n_bit):
         "Generate the vts test name of a ltp test"
