@@ -62,7 +62,7 @@ public class ShowTableServlet extends HttpServlet {
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
-    private static final int MAX_BUILD_IDS_PER_PAGE = 10;
+    private static final int MAX_BUILD_IDS_PER_PAGE = 15;
 
     /**
      * Returns the table corresponding to the table name.
@@ -168,14 +168,26 @@ public class ShowTableServlet extends HttpServlet {
             }
             List<Integer> sortedBuildIdList = new ArrayList(buildIdSet);
             Collections.sort(sortedBuildIdList, Collections.reverseOrder());
+            int maxBuildIdPageNo = sortedBuildIdList.size() / MAX_BUILD_IDS_PER_PAGE;
+
             int listStart = buildIdPageNo * MAX_BUILD_IDS_PER_PAGE;  // inclusive
             int listEnd = (buildIdPageNo + 1) * MAX_BUILD_IDS_PER_PAGE;  // exclusive
-            if (listStart >= sortedBuildIdList.size()) {
-                listStart = sortedBuildIdList.size() - 1;
+
+            if (sortedBuildIdList.size() != 0) {
+                if (listStart >= sortedBuildIdList.size()) {
+                    listStart = sortedBuildIdList.size() - 1;
+                }
+                if (listEnd >= sortedBuildIdList.size()) {
+                    listEnd = sortedBuildIdList.size() - 1;
+                }
+                if (sortedBuildIdList.size() % MAX_BUILD_IDS_PER_PAGE == 0) {
+                    maxBuildIdPageNo--;
+                }
+            } else {
+                listStart = 0;
+                listEnd = 0;
             }
-            if (listEnd >= sortedBuildIdList.size()) {
-                listEnd = sortedBuildIdList.size() - 1;
-            }
+
             sortedBuildIdList = sortedBuildIdList.subList(listStart, listEnd);
             List<String> selectedBuildIdList = new ArrayList<String>(sortedBuildIdList.size());
             for (Object intElem : sortedBuildIdList) {
@@ -244,6 +256,17 @@ public class ShowTableServlet extends HttpServlet {
                                  new Gson().toJson(testCaseResultMap));
             request.setAttribute("profilingPointNameJson",
                                  new Gson().toJson(profilingPointNameArray));
+            // pass table name back
+            request.setAttribute("tableName",
+                                 new Gson().toJson(request.getParameter("tableName")));
+
+            // pass the buildIdPageNo -- pass the updated buildIdPageNo, since buildIdPageNo
+            // can be modified.
+            request.setAttribute("buildIdPageNo",
+                                  new Gson().toJson(buildIdPageNo));
+
+            request.setAttribute("maxBuildIdPageNo",
+                                  new Gson().toJson(maxBuildIdPageNo));
 
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {

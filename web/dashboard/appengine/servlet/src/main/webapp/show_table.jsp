@@ -139,7 +139,6 @@
             table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
                               frozenColumns: 1});
         }
-
       </script>
   </head>
 
@@ -148,6 +147,31 @@
     <h3>${error}</h3>
     <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
     <div id="grid_summary_table_div" style="margin-left:100px; margin-top:50px"></div>
-    <div id="grid_table_div" style="margin-left:100px; margin-top:50px"></div>
+
+    <div style="margin-left:100px;margin-top:50px">
+        <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
+        <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
+    </div>
+    <div id="grid_table_div" style="margin-left:100px"></div>
+
+    <script type="text/javascript">
+        // disable buttons on load
+        var pageNumber = ${buildIdPageNo};
+        var maxPageNumber = ${maxBuildIdPageNo};
+        document.getElementById("previous_button").disabled = (pageNumber == 0) ? true : false;
+        document.getElementById("next_button").disabled = (pageNumber == maxPageNumber) ? true : false;
+
+        // for navigating grid table thorugh previous and next buttons
+        function navigate(inc) {
+            var pageNumber = ${buildIdPageNo};
+            var maxPageNumber = ${maxBuildIdPageNo};
+            var nextPage = parseInt(pageNumber) + parseInt(inc);
+            nextPage = Math.max(nextPage, 0);
+            nextPage = Math.min(nextPage, maxPageNumber);
+            var link = "${pageContext.request.contextPath}" + "/show_table?tableName=" + ${tableName} +
+                       "&" + "buildIdPageNo=" + nextPage;
+            window.open(link,"_self");
+        }
+    </script>
   </body>
 </html>
