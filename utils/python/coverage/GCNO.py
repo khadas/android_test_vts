@@ -93,6 +93,17 @@ class Parser(object):
         self.format = '<'
         self.summary = GCNOSummary.GCNOSummary()
 
+        magic = self.ReadInt()
+        self.ReadInt()  #   version information
+        self.ReadInt()  #   stamp
+
+        if magic != self.NOTE_MAGIC:
+            magic = struct.unpack('>I', struct.pack('<I', magic))[0]
+            if magic == self.NOTE_MAGIC:  #  switch endianness
+                self.format = '>'
+            else:
+                raise FileFormatError('Invalid file format.')
+
     def parse(self):
         """Runs the parser on the file opened in the stream attribute.
 
@@ -106,17 +117,6 @@ class Parser(object):
         Raises:
             FileFormatError: invalid file format.
         """
-
-        magic = self.ReadInt()
-        self.ReadInt()  #   version information
-        self.ReadInt()  #   stamp
-
-        if magic != self.NOTE_MAGIC:
-            magic = struct.unpack('>I', struct.pack('<I', magic))
-            if magic == self.NOTE_MAGIC:  #  switch endianness
-                self.format = '>'
-            else:
-                raise FileFormatError('Invalid file format.')
 
         func = None
 
@@ -146,7 +146,7 @@ class Parser(object):
                 self.ReadArcs(length, func)
 
             elif tag == self.TAG_LINES:
-                self.ReadLines(func)
+                self.ReadLines(length, func)
 
     def ReadInt(self):
         """Reads and returns an integer from the stream.
@@ -259,13 +259,14 @@ class Parser(object):
             dst_block = func.blocks[arc.dst_block_index]
             dst_block.entry_arcs.append(arc)
 
-    def ReadLines(self, func):
+    def ReadLines(self, length, func):
         """Reads the line information from the stream.
 
         Parses the lines from the gcno file and updates the input
         function summary with line information.
 
         Args:
+            length: represents the number of bytes to read
             func: FunctionSummary object for the lines' parent fuction
 
         Raises:
@@ -273,15 +274,13 @@ class Parser(object):
         """
 
         block_number = self.ReadInt()
+        self.ReadInt()  #  dummy value
         lines = []
-        while True:
-            line_number = self.ReadInt()
-            if line_number > 0:
-                lines.append(line_number)
-            else:
-                file_name = self.ReadString()
-                if not file_name:
-                    break
+        src = self.ReadString()  #  source file name
+        for i in range(length - len(src)):
+            line = self.ReadInt()
+            if line:
+                lines.append(line)
         func.blocks[block_number].lines = lines
 
 
