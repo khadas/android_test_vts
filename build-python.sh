@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # if "from future import standard_library" fails, please install future:
+#   $ sudo apt-get install python-dev
 #   $ sudo apt-get install python-pip
+#   $ sudo apt-get install python-virtualbox
 #   $ sudo pip install future
 #   $ sudo pip install futures
 #   $ sudo pip install enum
