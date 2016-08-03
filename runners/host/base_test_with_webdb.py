@@ -32,6 +32,7 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 
 from vts.utils.app_engine import bigtable_rest_client
+from vts.utils.python.coverage import GCNO
 
 _ANDROID_DEVICE = "AndroidDevice"
 
@@ -56,14 +57,15 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         _profiling: a dict containing the current profiling information.
     """
     USE_GAE_DB = "use_gae_db"
-    COVERAGE_GCOV_FILE = "coverage_gcno_file"
+    COVERAGE_SRC_FILES = "coverage_src_files"
+    COVERAGE_ATTRIBUTE = "_gcov_coverage_basicblock_id_list"
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
         self.getUserParams(opt_param_names=[self.USE_GAE_DB,
-                                            self.COVERAGE_GCOV_FILE])
+                                            self.COVERAGE_SRC_FILES])
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
@@ -74,6 +76,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         self._profile_msg = None
         self._profiling = {}
+        setattr(self, self.COVERAGE_ATTRIBUTE, [])
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
@@ -149,25 +152,60 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if getattr(self, self.USE_GAE_DB, False):
             self._current_test_report_msg.end_timestamp = self.GetTimestamp()
-            if hasattr(self, self.COVERAGE_GCOV_FILE):
-                logging.info("data_file_path not set. PATH=%s", os.environ["PATH"])
+            if hasattr(self, self.COVERAGE_SRC_FILES):
                 if not hasattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH):
-                    logging.warning("data_file_path not set.")
+                    logging.warning("data_file_path not set. PATH=%s",
+                                    os.environ["PATH"])
                 else:
-                    for gcno_file in getattr(self, self.COVERAGE_GCOV_FILE):
-                        gcno_file = str(gcno_file)
-                        logging.info("coverage - gcno file: %s", gcno_file)
+                    for src_file in getattr(self, self.COVERAGE_SRC_FILES):
+                        src_file_name = str(src_file)
+                        logging.info("coverage - src file: %s", src_file_name)
                         coverage = self._current_test_report_msg.coverage.add()
-                        coverage.file_name = gcno_file
-                        abs_path = os.path.join(self.data_file_path, gcno_file)
+
+                        coverage.file_name = src_file_name
+                        abs_path = os.path.join(self.data_file_path,
+                                                src_file_name)
+                        src_file_content = None
                         if not os.path.exists(abs_path):
-                            logging.warning("couldn't find gcno file %s",
-                                            abs_path)
+                            logging.error("couldn't find src file %s",
+                                          abs_path)
                             continue
                         with open(abs_path, "rb") as f:
-                            coverage.gcno = f.read()
+                            src_file_content = f.read()
+
+                        if src_file_name.endswith(".c"):
+                            gcov_file_name = src_file_name.replace(".c",
+                                                                   ".gcno")
+                        elif src_file_name.endswith(".cpp"):
+                            gcov_file_name = src_file_name.replace(".cpp",
+                                                                   ".gcno")
+                        elif src_file_name.endswith(".cc"):
+                            gcov_file_name = src_file_name.replace(".cc",
+                                                                   ".gcno")
+                        else:
+                            logging.error("unsupported source file type %s",
+                                          src_file_name)
+                            continue
+
+                        abs_path = os.path.join(self.data_file_path,
+                                                gcov_file_name)
+                        gcov_file_content = None
+                        if not os.path.exists(abs_path):
+                            logging.error("couldn't find gcno file %s",
+                                          abs_path)
+                            continue
+                        with open(abs_path, "rb") as f:
+                            gcov_file_content = f.read()
+
+                        basic_block_id_list = getattr(
+                            self, self.COVERAGE_ATTRIBUTE, [])
+                        if not basic_block_id_list:
+                            logging.error("no basic block info found")
+                        coverage.html = GCNO.GenerateCoverageReport(
+                            src_file_content, gcov_file_content,
+                            basic_block_id_list)
             else:
-                logging.info("coverage - no gcno file specified")
+                logging.info("coverage - no coverage src file specified")
         return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
 
     def _onFail(self, record):
@@ -264,3 +302,17 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             return False
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
+
+    def AddCoverageData(self, coverage_data):
+      """Adds the given coverage to the class-level list attribute.
+
+      Currently, only basic block ID is supported.
+
+      Args:
+          coverage_data: a list of strings, each string is for coverage data
+                         (e.g., basic block ID or control flow event ID).
+      """
+      logging.info("AddCoverageData %s", coverage_data)
+      coverage_data_list = getattr(self, self.COVERAGE_ATTRIBUTE)
+      if coverage_data not in coverage_data_list:
+          coverage_data_list.append(coverage_data)
