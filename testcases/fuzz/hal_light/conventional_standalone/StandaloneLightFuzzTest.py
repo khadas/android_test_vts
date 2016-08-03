@@ -41,7 +41,6 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             [self.dut.hal.light.LIGHT_ID_BACKLIGHT,
              self.dut.hal.light.LIGHT_ID_NOTIFICATIONS,
              self.dut.hal.light.LIGHT_ID_ATTENTION])
-
         # TODO: broken on bullhead
         #   self.dut.hal.light.LIGHT_ID_KEYBOARD
         #   self.dut.hal.light.LIGHT_ID_BUTTONS
@@ -97,6 +96,7 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
                     logging.info("coverage: %s", result.coverage_data)
                     for coverage_data in result.coverage_data:
                         gene_coverage.append(coverage_data)
+                        self.AddCoverageData(coverage_data)
                     coverages.append(gene_coverage)
                 index += 1
             evolution = GenePool.Evolution()
