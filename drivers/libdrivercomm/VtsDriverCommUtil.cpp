@@ -55,13 +55,13 @@ bool VtsDriverCommUtil::Connect(const string& socket_name) {
     return false;
   }
 
-  bzero((char*) &serv_addr, sizeof(serv_addr));
+  bzero((char*)&serv_addr, sizeof(serv_addr));
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_name.c_str());
 
-  if (connect(sockfd_, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
-    cerr << __func__ << " ERROR connecting to " << socket_name << " errno = "
-        << errno << " " << strerror(errno) << endl;
+  if (connect(sockfd_, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+    cerr << __func__ << " ERROR connecting to " << socket_name
+         << " errno = " << errno << " " << strerror(errno) << endl;
     sockfd_ = -1;
     return false;
   }
@@ -189,7 +189,12 @@ bool VtsDriverCommUtil::VtsSocketRecvMessage(
   }
 
   string message_string = VtsSocketRecvBytes();
-  if (message_string.length() == 0) return false;
+  if (message_string.length() == 0) {
+    cerr << getpid() << " " << __func__ << " ERROR message string zero length"
+         << endl;
+    return false;
+  }
+
   return message->ParseFromString(message_string);
 }
 
