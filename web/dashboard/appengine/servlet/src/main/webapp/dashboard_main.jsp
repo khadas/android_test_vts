@@ -50,7 +50,7 @@
             </tr>
         <c:forEach items="${tableNames}" var="table">
                 <tr>
-                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}">${table}</a></td>
+                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}&buildIdPageNo=0">${table}</a></td>
                 </tr>
         </c:forEach>
      </table>
