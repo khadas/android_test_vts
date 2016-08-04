@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.4
 #
 # Copyright (C) 2016 The Android Open Source Project
 #
@@ -17,7 +18,6 @@
 import os
 import logging
 import copy
-from enum import Enum
 
 from vts.runners.host import const
 from vts.testcases.kernel.ltp import KernelLtpTestCaseRequirements
@@ -27,7 +27,7 @@ from vts.testcases.kernel.ltp.shell_environment import CheckDefinition
 LTPTMP = "/data/local/tmp/ltp/temp"
 
 
-class RequirementState(Enum):
+class RequirementState(object):
     """Enum for test case requirement check state
 
     Attributes:
