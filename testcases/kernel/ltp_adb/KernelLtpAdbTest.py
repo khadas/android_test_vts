@@ -222,7 +222,8 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
             asserts.fail("No response received. Socket timeout")
 
         logging.info("stdout: %s" % results)
-        if "TFAIL" in results or "TPASS" not in results:
+        if ("TFAIL" in results or "TBOK" in results) or \
+            ("TCONF" not in results and "TPASS" not in results):
             asserts.fail("Test failed")
 
     def TestNBits(self, n_bit):
