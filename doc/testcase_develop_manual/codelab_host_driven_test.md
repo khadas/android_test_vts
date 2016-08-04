@@ -1,8 +1,8 @@
 # Codelab - VTS Host-Driven, Structural Test
 
-##1. Project setup
+## 1. Project setup
 
-###1.1. Setup a local Android repository
+### 1.1. Setup a local Android repository
 
 `$ export branch=master`  # currently, internal master is mainly supported.
 
@@ -18,7 +18,7 @@ Then to check the vts project directory,
 
 `$ ls test/vts`
 
-###1.2. Create a test project
+### 1.2. Create a test project
 
 Create your test project directory under,
 
@@ -30,7 +30,7 @@ In practice, use
 
 - `test/vts/testcases/**kernel**/<your project name>` if your project is for kernel or kernel modules
 
-###1.3. Create Android.mk file
+### 1.3. Create Android.mk file
 
 `$ vi test/vts/testcases/host/codelab/hello_world/Android.mk`
 
@@ -64,7 +64,7 @@ That file tells the Android build system the `CodeLabHelloWorld` VTS test case
 so that the Android build system can store the compiled executable to
 a designated output directory (under `out/` directory) for packaging.
 
-###1.4. Create AndroidTest.xml file
+### 1.4. Create AndroidTest.xml file
 
 `$ vi test/vts/testcases/host/codelab/hello_world/AndroidTest.xml`
 
@@ -111,13 +111,13 @@ Then edit its contents to:
 ```
 ---
 
-##2. Design your test case
+## 2. Design your test case
 
-###2.1. Declare a python module
+### 2.1. Declare a python module
 
 `$ touch test/vts/testcases/host/codelab/hello_world/__init__.py`
 
-###2.2. Actual test case code
+### 2.2. Actual test case code
 
 `$ vi test/vts/testcases/host/codelab/hello_world/CodeLabHelloWorldTest.py`
 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 ```
 ---
 
-###2.3. Test case config
+### 2.3. Test case config
 
 `$ vi test/vts/testcases/host/codelab/hello_world/CodeLabHelloWorldTest.config`
 
@@ -188,7 +188,7 @@ Then edit its contents to:
 ```
 ---
 
-###2.4. Create a test suite
+### 2.4. Create a test suite
 
 `$ vi test/vts/tools/vts-tradefed/res/config/vts-codelab.xml`
 
@@ -206,9 +206,9 @@ Then edit its contents to:
 ---
 
 
-##3. Build and Run
+## 3. Build and Run
 
-###3.1. Build
+### 3.1. Build
 
 `$ . build/envsetup.sh`
 
@@ -220,7 +220,7 @@ To run the tests against physical devices,
 
 `$ make vts -j 10`
 
-###3.2. Run
+### 3.2. Run
 
 `$ vts-tradefed`
 
@@ -234,7 +234,7 @@ If your test case can violate some SELinux rules, please run:
 
 `target$ setenforce 0`
 
-##4. Serving
+## 4. Serving
 
 [Dashboard](https://android-vts-internal.googleplex.com)
 
