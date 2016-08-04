@@ -245,12 +245,7 @@ const string& SpecificationBuilder::CallFunction(
   cout << __func__ << ": called" << endl;
 
   // set coverage data.
-  vector<unsigned>* coverage = func_fuzzer->FunctionCallEnd();
-  if (coverage && coverage->size() > 0) {
-    for (unsigned int index = 0; index < coverage->size(); index++) {
-      func_msg->mutable_coverage_data()->Add(coverage->at(index));
-    }
-  }
+  func_fuzzer->FunctionCallEnd(func_msg);
 
   if (func_msg->return_type().type() == TYPE_PREDEFINED) {
     // TODO: actually handle this case.

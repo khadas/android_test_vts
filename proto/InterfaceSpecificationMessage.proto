@@ -92,6 +92,16 @@ message CallFlowSpecificationMessage {
 }
 
 
+// To specify the measured native code coverage raw data.
+message NativeCodeCoverageRawDataMessage {
+  // gcno file path.
+  optional bytes file_path = 1;
+
+  // content of a gcda file.
+  optional bytes gcda = 11;
+}
+
+
 // To specify a function.
 message FunctionSpecificationMessage {
   // the function name.
@@ -112,8 +122,11 @@ message FunctionSpecificationMessage {
   // profiling data.
   repeated float profiling_data = 101;
 
-  // coverage measurement data.
-  repeated uint32 coverage_data = 201;
+  // measured processed coverage data.
+  repeated uint32 processed_coverage_data = 201;
+
+  // measured raw coverage data.
+  repeated NativeCodeCoverageRawDataMessage raw_coverage_data = 202;
 
   // not a user-provided variable. used by the frameworks to tell the sub
   // struct hierarchy.

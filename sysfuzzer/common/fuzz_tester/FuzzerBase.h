@@ -53,9 +53,8 @@ class FuzzerBase {
   // Called before calling a target function.
   void FunctionCallBegin();
 
-  // Called after calling a target function. Returns a vector which contains
-  // the code coverage info.
-  vector<unsigned>* FunctionCallEnd();
+  // Called after calling a target function. Fills in the code coverage info.
+  bool FunctionCallEnd(FunctionSpecificationMessage* msg);
 
  protected:
   // a pointer to a HAL data structure of the loaded component.
