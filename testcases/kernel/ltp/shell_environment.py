@@ -46,8 +46,8 @@ class CheckDefinition(object):
         return self._function(self)
 
     def __str__(self):
-        return "Shell Environment Check Definition: function={}, to_setup={} args={}".format(
-                self._function, self.to_setup, self.args)
+        return ("Shell Environment Check Definition: function=%s, to_setup=%s"
+                " args=%s") % (self._function, self.to_setup, self.args)
 
 class ShellEnvironment(object):
     """Wrapper class for all the environment setup classes.
@@ -230,7 +230,8 @@ class DirExistsClass(CheckSetupCleanup):
 
 
 class DirsAllExistAndPermissionClass(CheckSetupCleanup):
-    """Class for check, setup, and cleanup a existence of a list of directories and set permissions."""
+    """Class for check, setup, and cleanup a existence of a list of directories
+    and set permissions."""
     NOTE = "Directories do not all exist or have the specified permission"
 
     def ValidateInput(self):
@@ -243,6 +244,8 @@ class DirsAllExistAndPermissionClass(CheckSetupCleanup):
         permissions = self.definition.args[1]
 
         commands = []
+        # TODO(yuexi): "dir" is a reserved word in Python, we should not use
+        # it as a var name.
         commands.extend(["ls %s" % dir for dir in dirs])
         commands.extend(["stat -c {}a {}".format('%', *pair)
                          for pair in zip(permissions, dirs)])
