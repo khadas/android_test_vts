@@ -58,7 +58,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     """
     USE_GAE_DB = "use_gae_db"
     COVERAGE_SRC_FILES = "coverage_src_files"
-    COVERAGE_ATTRIBUTE = "_gcov_coverage_basicblock_id_list"
+    COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
@@ -266,7 +266,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
       Args:
           raw_coverage_data: a list of NativeCodeCoverageRawDataMessage.
       """
-      logging.info("AddCoverageData %s", raw_coverage_data)
+      logging.info("SetCoverageData %s", raw_coverage_data)
       setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
 
     def ProcessCoverageData(self):
@@ -275,9 +275,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if successful, False otherwise.
         """
-        coverage_data_list = getattr(
+        gcda_dict = getattr(
             self, self.COVERAGE_ATTRIBUTE, [])
-        if not coverage_data_list:
+        if not gcda_dict:
             logging.error("no coverage data found")
             return False
         for src_file in getattr(self, self.COVERAGE_SRC_FILES):
@@ -286,8 +286,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             coverage = self._current_test_report_msg.coverage.add()
 
             coverage.file_name = src_file_name
-            abs_path = os.path.join(self.data_file_path,
-                                    src_file_name)
+            abs_path = os.path.join(self.data_file_path, src_file_name)
             src_file_content = None
             if not os.path.exists(abs_path):
                 logging.error("couldn't find src file %s", abs_path)
@@ -317,11 +316,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             with open(abs_path, "rb") as f:
                 gcno_file_content = f.read()
 
-            if coverage_data_list:
-                for coverage_data in coverage_data_list:
+            if gcda_dict:
+                for file_path in gcda_dict:
                     # TODO: consider path and do exact matching
-                    if coverage_data.file_path.contains(gcda_file_name):
+                    logging.info("check if %s in %s", gcda_file_name, file_path)
+                    if file_path in gcda_file_name:
                         coverage.html = GCNO.GenerateCoverageReport(
                             src_file_name, src_file_content,
-                            gcno_file_content, coverage_data.gcda)
+                            gcno_file_content, gcda_dict[file_path])
+                        logging.info("HTML Report: %s", coverage.html)
                         return True
