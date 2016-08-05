@@ -63,7 +63,6 @@ int StartTcpServerForRunner(const char* spec_dir_path,
   }
 
   bzero((char*)&serv_addr, sizeof(serv_addr));
-
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
   serv_addr.sin_port = htons(0);
@@ -84,15 +83,22 @@ int StartTcpServerForRunner(const char* spec_dir_path,
   cout << "[agent] TCP server port is " << (int) ntohs(serv_addr.sin_port)
        << endl;
   FILE* fp = fopen("/data/local/tmp/vts_tcp_server_port", "wt");
+  if (!fp) {
+    cerr << __func__ << " can't write to "
+         << "/data/local/tmp/vts_tcp_server_port" << endl;
+    return -1;
+  }
   fprintf(fp, "%d", (int) ntohs(serv_addr.sin_port));
   fclose(fp);
 
+  cout << "[agent] listening" << endl;
   if (listen(sockfd, 5) == -1) {
     cerr << __func__ << " listen failed." << endl;
     return -1;
   }
   clilen = sizeof(cli_addr);
   while (true) {
+    cout << "[agent] accepting" << endl;
     int newsockfd = ::accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
     if (newsockfd < 0) {
       cerr << __func__ << " accept failed" << endl;
