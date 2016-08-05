@@ -298,7 +298,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             throw new RuntimeException("Failed to produce VTS runner test config");
         }
         jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
-        CLog.i("Added %s to the Json object", DATA_FILE_PATH);
+        CLog.i("Added %s = %s to the Json object", DATA_FILE_PATH, mTestCaseDataDir);
 
         JSONObject build = new JSONObject();
         build.put(BUILD_ID, mBuildInfo.getBuildId());
