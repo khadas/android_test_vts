@@ -96,16 +96,16 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
   cout << __func__ << ":" << __LINE__ << " "
        << "got fuzzer" << endl;
   if (iface_spec_msg.component_class() == HAL_HIDL) {
-      // TODO: generate vts driver + hidl proxy as a shared lib
-      // which is not part of the libvts_specification.so
-      cout << __func__ << ":" << __LINE__ << " "
-           << "there's no component file to load for HIDL HAL." << endl;
-      return fuzzer;
-  }
-  if (!fuzzer->LoadTargetComponent(dll_file_name)) {
-    cerr << __FUNCTION__ << ": couldn't load target component file, "
-         << dll_file_name << endl;
-    return NULL;
+    if (!fuzzer->GetService()) {
+      cerr << __FUNCTION__ << ": couldn't get service" << endl;
+      return NULL;
+    }
+  } else {
+    if (!fuzzer->LoadTargetComponent(dll_file_name)) {
+      cerr << __FUNCTION__ << ": couldn't load target component file, "
+           << dll_file_name << endl;
+      return NULL;
+    }
   }
   cout << __func__ << ":" << __LINE__ << " "
        << "loaded target comp" << endl;
@@ -247,29 +247,41 @@ const string& SpecificationBuilder::CallFunction(
   // set coverage data.
   func_fuzzer->FunctionCallEnd(func_msg);
 
-  if (func_msg->return_type().type() == TYPE_PREDEFINED) {
-    // TODO: actually handle this case.
-    if (result != NULL) {
-      // loads that interface spec and enqueues all functions.
-      cout << __func__ << " return type: " << func_msg->return_type().type()
-           << endl;
-    } else {
-      cout << __func__ << " return value = NULL" << endl;
-    }
-    cerr << __func__ << " todo: support aggregate" << endl;
+  if (if_spec_msg_ && if_spec_msg_->component_class() == HAL_HIDL) {
+    func_msg->mutable_return_type()->set_type(TYPE_STRING);
+    func_msg->mutable_return_type()->mutable_string_value()->set_message(
+        *(string*)result);
+    func_msg->mutable_return_type()->mutable_string_value()->set_length(
+        ((string*)result)->size());
+    free(result);
     string* output = new string();
     google::protobuf::TextFormat::PrintToString(*func_msg, output);
     return *output;
-  } else if (func_msg->return_type().type() == TYPE_SCALAR) {
-    // TODO handle when the size > 1.
-    if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int32_t")) {
-      func_msg->mutable_return_type()->mutable_scalar_value()->set_int32_t(
-          *((int*)(&result)));
-      cout << "result " << endl;
-      // todo handle more types;
+  } else {
+    if (func_msg->return_type().type() == TYPE_PREDEFINED) {
+      // TODO: actually handle this case.
+      if (result != NULL) {
+        // loads that interface spec and enqueues all functions.
+        cout << __func__ << " return type: " << func_msg->return_type().type()
+             << endl;
+      } else {
+        cout << __func__ << " return value = NULL" << endl;
+      }
+      cerr << __func__ << " todo: support aggregate" << endl;
       string* output = new string();
       google::protobuf::TextFormat::PrintToString(*func_msg, output);
       return *output;
+    } else if (func_msg->return_type().type() == TYPE_SCALAR) {
+      // TODO handle when the size > 1.
+      if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int32_t")) {
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_int32_t(
+            *((int*)(&result)));
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      }
     }
   }
   return *(new string("void"));

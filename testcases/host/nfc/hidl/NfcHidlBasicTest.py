@@ -28,17 +28,19 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
         self.dut.hal.InitHidlHal(target_type="nfc",
-                                 target_basepaths=["/data/local/tmp"],
+                                 target_basepaths=["/system/lib64"],
                                  target_version=1.0,
                                  bits=64)
 
     def testBase(self):
         """A simple testcase which just calls functions."""
         # TODO: extend to make realistic testcases
-        self.dut.hal.nfc.open()
-        self.dut.hal.nfc.core_initialized(0)
+        result = self.dut.hal.nfc.open()
+        logging.info("result: %s", result.return_type.string_value.message)
+        result = self.dut.hal.nfc.core_initialized(0)
+        logging.info("result: %s", result.return_type.string_value.message)
         result = self.dut.hal.nfc.close()
-        logging.info("result: %d", result)
+        logging.info("result: %s", result.return_type.string_value.message)
 
 
 if __name__ == "__main__":

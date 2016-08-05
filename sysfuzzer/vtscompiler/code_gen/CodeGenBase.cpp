@@ -137,6 +137,8 @@ void CodeGenBase::GenerateAllHeader(
     } else {
       h_ss << "#include <Bn" << message.component_name().substr(1) << ".h>" << endl;
     }
+    h_ss << "#include <hwbinder/Hidl.h>" << endl;
+    h_ss << "#include <hwbinder/IServiceManager.h>" << endl;
   }
   h_ss << "\n\n" << endl;
   GenerateOpenNameSpaces(h_ss, message);
@@ -202,8 +204,11 @@ void CodeGenBase::GenerateClassHeader(
          << endl;
   }
   if (message.component_class() == HAL_HIDL) {
-    h_ss << " private:" << endl;
-    h_ss << "  sp<" << message.component_name() << "> hw_binder_proxy_;" << endl;
+    h_ss << "  bool GetService();" << endl
+         << endl
+         << " private:" << endl
+         << "  sp<" << message.component_name() << "> hw_binder_proxy_;"
+         << endl;
   }
   h_ss << "};" << endl;
 }
@@ -225,6 +230,7 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
 void CodeGenBase::GenerateOpenNameSpaces(
     std::stringstream& ss, const InterfaceSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
+    ss << "using namespace android::hardware;" << endl;
     ss << "using namespace ";
     string name = message.package();
     ReplaceSubString(name, ".", "::");
