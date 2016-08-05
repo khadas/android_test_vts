@@ -9,8 +9,10 @@
         google.charts.setOnLoadCallback(drawGridTable);
         google.charts.setOnLoadCallback(drawProfilingTable);
 
+
         // table for profiling data
         function drawProfilingTable() {
+
             var data = new google.visualization.DataTable();
 
             // add columns
@@ -44,68 +46,31 @@
         // table for grid data
         function drawGridTable() {
             var data = new google.visualization.DataTable();
-            var summaryTableData = new google.visualization.DataTable();
 
             // add columns
-            data.addColumn('string', 'Test Cases \\ Build ID'); // blank column for first
-            summaryTableData.addColumn('string', 'Stats Type \\ Build ID');
-            var buildNameArray = ${buildNameArrayJson};
-            for (var i = 0; i < buildNameArray.length; i++) {
-                data.addColumn('string', buildNameArray[i]);
-                summaryTableData.addColumn('string', buildNameArray[i]);
+            data.addColumn('string', 'Stats Type  \\ Build ID'); // blank column for first
+            var buildIDtimeStampArray = ${buildIDtimeStampArrayJson};
+            for (var i = 0; i < buildIDtimeStampArray.length; i++) {
+                // trim the time stamp
+                var colName = buildIDtimeStampArray[i].substring(0, buildIDtimeStampArray[i].lastIndexOf("."));
+                data.addColumn('string', colName);
             }
 
             // add rows
-            var testCaseNameListArray = ${testCaseNameListJson};
-            var rowArray = new Array(testCaseNameListArray.length);
-            var summaryTableRowArray = new Array(3);
+            var finalGrid = ${finalGridJson};
 
-            var testCaseResultMap = ${testCaseResultMapJson};
-
-            var totalRow = new Array(buildNameArray.length + 1);
-            var passRow = new Array(buildNameArray.length + 1);
-            var ratioRow = new Array(buildNameArray.length + 1);
-            for (var i = 0; i < rowArray.length; i++) {  // test case name
-                var row = new Array(buildNameArray.length + 1);
-                for (var j = 0; j < row.length; j++) {  // build ID
-                    if (j == 0) {
-                        row[j] = testCaseNameListArray[i];
-                        totalRow[j] = "total";
-                        passRow[j] = "#passed";
-                        ratioRow[j] = "%passed";
-                    } else {
-                        if (i == 0) {
-                            passRow[j] = 0;
-                            totalRow[j] = 0;
-                        }
-                        var result = testCaseResultMap[buildNameArray[j] + "." +
-                            testCaseNameListArray[i]];
-                        if (result == 1) {
-                            passRow[j] += 1;
-                        }
-                        row[j] = result;
-                        totalRow[j] += 1;
-
-                        if (i == rowArray.length - 1) {
-                            ratioRow[j] = "" + Math.round(passRow[j] * 1000 / totalRow[j]) / 10 + "%";
-                            passRow[j] = "" + passRow[j];
-                            totalRow[j] = "" + totalRow[j];
-                        }
-                    }
-                }
-                rowArray[i] = row;
+            // bold the first seven rows - first column
+            for (var i = 0; i < 7; i++) {
+                finalGrid[i][0] = finalGrid[i][0].bold();
             }
-            data.addRows(rowArray);
-            summaryTableRowArray[0] = totalRow;
-            summaryTableRowArray[1] = passRow;
-            summaryTableRowArray[2] = ratioRow;
-            summaryTableData.addRows(summaryTableRowArray);
+            data.addRows(finalGrid);
 
             // add colors to the grid data table - iterate rowArray to view saved results.
-            for (var testCaseIndex = 0; testCaseIndex < rowArray.length; testCaseIndex++) {  // test case name
-                for (var buildIdIndex = 1; buildIdIndex < rowArray[0].length; buildIdIndex++) {  // build ID
-                    var result = rowArray[testCaseIndex][buildIdIndex];
-                    console.log(result);
+            // first seven rows are for the summary grid and the device info grid
+            for (var testCaseIndex = 7; testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
+                for (var buildIdIndex = 1; buildIdIndex < finalGrid[0].length; buildIdIndex++) {  // build ID
+
+                    var result = finalGrid[testCaseIndex][buildIdIndex];
                     switch(result) {
                         case '0':
                             data.setProperty(testCaseIndex, buildIdIndex, 'style',
@@ -130,11 +95,6 @@
                 }
             }
 
-            var summaryTable = new google.visualization.Table(document.getElementById('grid_summary_table_div'));
-            summaryTable.draw(summaryTableData,
-                              {showRowNumber: false, alternatingRowStyle : true,
-                               frozenColumns: 1});
-
             var table = new google.visualization.Table(document.getElementById('grid_table_div'));
             table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
                               frozenColumns: 1});
@@ -143,15 +103,22 @@
   </head>
 
   <body>
+    <!-- Home page logo -->
+    <div id="home_page_logo_div" style="margin-left:100px; margin-top:50px">
+      <a href="${pageContext.request.contextPath}/"><h2>VTS</h2>
+      </a>
+    </div>
     <!-- Error in case of profiling data is missing -->
-    <h3>${error}</h3>
+    <div id="error_div" style="margin-left:100px; margin-top:50px"><h3>${error}</h3></div>
+    <!-- Profiling Table -->
     <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
-    <div id="grid_summary_table_div" style="margin-left:100px; margin-top:50px"></div>
 
+    <!-- Grid tables-->
     <div style="margin-left:100px;margin-top:50px">
         <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
         <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
     </div>
+
     <div id="grid_table_div" style="margin-left:100px"></div>
 
     <script type="text/javascript">
@@ -160,6 +127,12 @@
         var maxPageNumber = ${maxBuildIdPageNo};
         document.getElementById("previous_button").disabled = (pageNumber == 0) ? true : false;
         document.getElementById("next_button").disabled = (pageNumber == maxPageNumber) ? true : false;
+
+        // hide the table if if error message is empty.
+        var errorMessage = ${errorJson};
+        if (errorMessage.length > 0) {
+            document.getElementById('profiling_table_div').style.display = "none";
+        }
 
         // for navigating grid table thorugh previous and next buttons
         function navigate(inc) {
