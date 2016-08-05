@@ -2,7 +2,7 @@
 ## 1. Compile LTP source code
 'make vts -j12'
 
-__Note: the following instructions will be simplified after vts supports tradefeded run command filter)__
+__Note: The following instructions will be simplified after VTS supports TradeFed run command filtering__
 ## 2. Copy all test binaries
 'adb push out/host/linux-x86/vts/android-vts/testcases/32/ltp/. /data/local/tmp/ltp'
 
