@@ -14,7 +14,7 @@ __Note: the following instructions will be simplified after vts supports tradefe
 ## 4. Run individual LTP test case with arguments
 'adb shell env TMP=/data/local/tmp/ltp/tmp PATH=/system/bin:/data/local/tmp/ltp/testcases/bin LTP_DEV_FS_TYPE=ext4 TMPDIR=/data/local/tmp/ltp/tmp LTPROOT=/data/local/tmp/ltp /data/local/tmp/ltp/testcases/bin/<binary> <args1 args2 ...>'
 
-Test binaries and ars for test cases can be found at 'out/host/linux-x86/vts/android-vts/testcases/32/ltp/ltp_vts_testcases.txt'.
+Test binaries and args for test cases can be found at 'out/host/linux-x86/vts/android-vts/testcases/32/ltp/ltp_vts_testcases.txt'.
 
 Example:test case chdir01A in testsuite syscalls' arguments are "-T chdir01":
 
