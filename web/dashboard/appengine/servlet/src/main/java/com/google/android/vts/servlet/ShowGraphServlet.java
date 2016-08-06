@@ -67,9 +67,9 @@ public class ShowGraphServlet extends HttpServlet {
         request.setAttribute("valuesJson", valuesJson);
 
         int[] percentiles = {10, 25, 50 , 75, 80, 90, 95, 99};
-        double[] percentileResultArray = new double[percentiles.length];
+        double[] percentileValuesArray = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
-            percentileResultArray[i] =
+            percentileValuesArray[i] =
                 Math.round(new Percentile().evaluate(values, percentiles[i]) * 1000d) / 1000d;
         }
 
@@ -78,7 +78,7 @@ public class ShowGraphServlet extends HttpServlet {
         }
         request.setAttribute("profilingPointName", profilingPointName);
         request.setAttribute("values", values);
-        request.setAttribute("percentileResultArray", percentileResultArray);
+        request.setAttribute("percentileValuesJson", new Gson().toJson(percentileValuesArray));
         response.setContentType("text/plain");
         dispatcher = request.getRequestDispatcher("/show_graph.jsp");
         try {
