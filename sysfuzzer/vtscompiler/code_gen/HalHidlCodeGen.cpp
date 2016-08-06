@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -210,6 +211,18 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   GenerateCppBodySyncCallbackFunction(
       cpp_ss, message, fuzzer_extended_class_name);
 
+  set<string> callbacks;
+  for (auto const& api : message.api()) {
+    for (auto const& arg : api.arg()) {
+      if (!arg.is_callback() && arg.type() == TYPE_HIDL_CALLBACK &&
+          callbacks.find(arg.predefined_type()) == callbacks.end()) {
+        cpp_ss << "extern " << arg.predefined_type() << "* "
+               << "VtsFuzzerCreate" << arg.predefined_type() << "();" << endl << endl;
+        callbacks.insert(arg.predefined_type());
+      }
+    }
+  }
+
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
                                 message.original_data_structure_name(),
@@ -312,7 +325,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                  << endl;
         }
         if (arg.type() == TYPE_HIDL_CALLBACK) {
-          cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count << "= nullptr" << endl;
+          cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count
+                 << "(" << "VtsFuzzerCreate"
+                 << arg.predefined_type() << "());" << endl;
         } else if (arg.type() == TYPE_STRUCT) {
           cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
           cpp_ss << "arg" << arg_count;
