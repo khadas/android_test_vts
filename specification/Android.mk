@@ -23,9 +23,14 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/GpsHalV1GpsInterface.vts \
   hal_conventional/LightHalV1.vts \
   hal_conventional/WifiHalV1.vts \
+  lib_bionic/libmV1.vts \
+
+ifeq ($(ENABLE_TREBLE),true)
+vtslib_interfacespec_srcfiles += \
   hal_hidl/Nfc.vts \
   hal_hidl/NfcClientCallback.vts \
-  lib_bionic/libmV1.vts \
+
+endif
 
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
@@ -64,20 +69,32 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
   ${vtslib_interfacespec_srcfiles} \
+
+ifeq ($(ENABLE_TREBLE),true)
+LOCAL_SRC_FILES += \
   ../../../external/libnfc-nci/hidl/INfc.hal \
   ../../../external/libnfc-nci/hidl/INfcClientCallback.hal \
+
+endif
 
 LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
   system/libhwbinder/include \
 
+ifeq ($(ENABLE_TREBLE),true)
 LOCAL_CFLAGS += -DENABLE_TREBLE
+endif
 
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
+
+ifeq ($(ENABLE_TREBLE),true)
+LOCAL_SHARED_LIBRARIES += \
   libhwbinder \
   libbase \
   libutils \
+
+endif
 
 LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
@@ -88,6 +105,7 @@ LOCAL_MULTILIB := both
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
+
 include test/vts/tools/build/Android.packaging_sharedlib.mk
 
 include $(CLEAR_VARS)
