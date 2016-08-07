@@ -182,7 +182,7 @@ int StartSocketServer(const string& socket_port_file,
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_port_file.c_str());
 
-  cout << "[driver:hal] tryimg to bind" << endl;
+  cout << "[driver:hal] trying to bind" << endl;
 
   if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
     int error_save = errno;

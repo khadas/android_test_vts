@@ -96,7 +96,15 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
           } */
           if (arg.scalar_type() == "char_pointer") {
             cpp_ss << "char* ";
-          } else if (arg.scalar_type() == "int32_t" ||
+          } else if (arg.scalar_type() == "uchar_pointer") {
+            cpp_ss << "unsigned char* ";
+          } else if (arg.scalar_type() == "bool_t") {
+            cpp_ss << "bool ";
+          } else if (arg.scalar_type() == "int8_t" ||
+                     arg.scalar_type() == "uint8_t" ||
+                     arg.scalar_type() == "int16_t" ||
+                     arg.scalar_type() == "uint16_t" ||
+                     arg.scalar_type() == "int32_t" ||
                      arg.scalar_type() == "uint32_t" ||
                      arg.scalar_type() == "size_t" ||
                      arg.scalar_type() == "int64_t" ||
@@ -174,7 +182,22 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
           cpp_ss << "var_msg" << primitive_type_index << "->set_scalar_type(\""
                  << arg.scalar_type() << "\");" << endl;
           cpp_ss << "var_msg" << primitive_type_index << "->mutable_scalar_value()";
-          if (arg.scalar_type() == "int32_t") {
+          if (arg.scalar_type() == "bool_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().bool_t() << ");" << endl;
+          } else if (arg.scalar_type() == "int8_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int8_t() << ");" << endl;
+          } else if (arg.scalar_type() == "uint8_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint8_t() << ");" << endl;
+          } else if (arg.scalar_type() == "int16_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int16_t() << ");" << endl;
+          } else if (arg.scalar_type() == "uint16_t") {
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint16_t() << ");" << endl;
+          } else if (arg.scalar_type() == "int32_t") {
             cpp_ss << "->set_" << arg.scalar_type() << "("
                    << arg.scalar_value().int32_t() << ");" << endl;
           } else if (arg.scalar_type() == "uint32_t") {
@@ -193,6 +216,10 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
             // pointer value is not meaning when it is passed to another machine.
             cpp_ss << "->set_" << arg.scalar_type() << "("
                    << arg.scalar_value().char_pointer() << ");" << endl;
+          } else if (arg.scalar_type() == "uchar_pointer") {
+            // pointer value is not meaning when it is passed to another machine.
+            cpp_ss << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uchar_pointer() << ");" << endl;
           } else if (arg.scalar_type() == "void_pointer") {
             // pointer value is not meaning when it is passed to another machine.
             cpp_ss << "->set_" << arg.scalar_type() << "("
@@ -244,7 +271,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
       << endl;
 
   // to call another function if it's for a sub_struct
@@ -262,7 +289,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
          << "*>(" << kInstanceVariableName << ");" << endl;
 
   cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
+  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
   cpp_ss << "      local_device = reinterpret_cast<"
          << message.original_data_structure_name() << "*>(hmi_);" << endl;
   cpp_ss << "    }" << endl;
@@ -274,7 +301,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
   for (auto const& api : message.api()) {
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
-
+    cpp_ss << "    cout << \"match\" << endl;" << endl;
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
@@ -344,13 +371,15 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
             if (arg.scalar_type() == "pointer" ||
                 arg.scalar_type() == "pointer_pointer" ||
                 arg.scalar_type() == "char_pointer" ||
+                arg.scalar_type() == "uchar_pointer" ||
                 arg.scalar_type() == "void_pointer" ||
                 arg.scalar_type() == "function_pointer") {
               cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
             }
             cpp_ss << "(" << msg << ".scalar_value()";
 
-            if (arg.scalar_type() == "int32_t" ||
+            if (arg.scalar_type() == "bool_t" ||
+                arg.scalar_type() == "int32_t" ||
                 arg.scalar_type() == "uint32_t" ||
                 arg.scalar_type() == "int64_t" ||
                 arg.scalar_type() == "uint64_t" ||
@@ -363,6 +392,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
               cpp_ss << "." << arg.scalar_type() << "() ";
             } else if (arg.scalar_type() == "pointer" ||
                        arg.scalar_type() == "char_pointer" ||
+                       arg.scalar_type() == "uchar_pointer" ||
                        arg.scalar_type() == "void_pointer") {
               cpp_ss << ".pointer() ";
             } else {
@@ -445,6 +475,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  }" << endl;
   }
   // TODO: if there were pointers, free them.
+  cpp_ss << "  cerr << \"func not found\" << endl;" << endl;
   cpp_ss << "  return false;" << endl;
   cpp_ss << "}" << endl;
 }
@@ -519,6 +550,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
                  << ".scalar_value()";
           if (arg.scalar_type() == "pointer" ||
               arg.scalar_type() == "char_pointer" ||
+              arg.scalar_type() == "uchar_pointer" ||
               arg.scalar_type() == "void_pointer" ||
               arg.scalar_type() == "function_pointer") {
             cpp_ss << ".has_pointer())? ";
@@ -540,6 +572,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
             cpp_ss << "." << arg.scalar_type() << "() ";
           } else if (arg.scalar_type() == "pointer" ||
                      arg.scalar_type() == "char_pointer" ||
+                     arg.scalar_type() == "uchar_pointer" ||
                      arg.scalar_type() == "function_pointer" ||
                      arg.scalar_type() == "void_pointer") {
             cpp_ss << ".pointer() ";

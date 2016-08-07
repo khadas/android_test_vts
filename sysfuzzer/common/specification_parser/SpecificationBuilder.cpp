@@ -129,6 +129,39 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
   */
 }
 
+FuzzerBase* SpecificationBuilder::GetFuzzerBaseSubModule(
+    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    void* object_pointer) {
+  cout << __func__ << ":" << __LINE__ << " "
+       << "entry object_pointer " << ((uint64_t)object_pointer) << endl;
+  FuzzerWrapper wrapper;
+  if (!wrapper.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
+    cerr << __func__ << " can't load spec" << endl;
+    return NULL;
+  }
+  FuzzerBase* fuzzer = wrapper.GetFuzzer(iface_spec_msg);
+  if (!fuzzer) {
+    cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
+    return NULL;
+  }
+
+  // TODO: don't load multiple times. reuse FuzzerBase*.
+  cout << __func__ << ":" << __LINE__ << " "
+       << "got fuzzer" << endl;
+  if (iface_spec_msg.component_class() == HAL_HIDL) {
+    cerr << __func__ << " HIDL not supported" << endl;
+    return NULL;
+  } else {
+    if (!fuzzer->SetTargetObject(object_pointer)) {
+      cerr << __FUNCTION__ << ": couldn't set target object" << endl;
+      return NULL;
+    }
+  }
+  cout << __func__ << ":" << __LINE__ << " "
+       << "loaded target comp" << endl;
+  return fuzzer;
+}
+
 FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
     const vts::InterfaceSpecificationMessage& iface_spec_msg,
     const char* dll_file_name) {
@@ -191,8 +224,23 @@ const string& SpecificationBuilder::CallFunction(
        << "loaded if_spec lib" << endl;
   cout << __func__ << " " << dll_file_name_ << " " << func_msg->name() << endl;
 
-  FuzzerBase* func_fuzzer =
-      GetFuzzerBase(*if_spec_msg_, dll_file_name_, func_msg->name().c_str());
+  FuzzerBase* func_fuzzer;
+  if (func_msg->submodule_name().size() > 0) {
+    string submodule_name = func_msg->submodule_name();
+    cout << __func__ << " submodule name " << submodule_name << endl;
+    vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+    if (submodule_fuzzerbase_map_.find(submodule_name)
+        != submodule_fuzzerbase_map_.end()) {
+      cout << __func__ << " call is for a submodule" << endl;
+      func_fuzzer = submodule_fuzzerbase_map_[submodule_name];
+    } else {
+      cerr << __func__ << " called an API of a non-loaded submodule." << endl;
+      return empty_string;
+    }
+  } else {
+    func_fuzzer = GetFuzzerBase(*if_spec_msg_, dll_file_name_,
+                                func_msg->name().c_str());
+  }
   cout << __func__ << ":" << __LINE__ << endl;
   if (!func_fuzzer) {
     cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
@@ -282,6 +330,46 @@ const string& SpecificationBuilder::CallFunction(
         google::protobuf::TextFormat::PrintToString(*func_msg, output);
         return *output;
       }
+    } else if (func_msg->return_type().type() == TYPE_SUBMODULE) {
+      cerr << __func__ << "[driver:hal] return type TYPE_SUBMODULE" << endl;
+      if (result != NULL) {
+        // loads that interface spec and enqueues all functions.
+        cout << __func__ << " return type: " << func_msg->return_type().type()
+             << endl;
+      } else {
+        cout << __func__ << " return value = NULL" << endl;
+      }
+      // find a VTS spec for that module
+      string submodule_name = func_msg->return_type().predefined_type().substr(
+          0, func_msg->return_type().predefined_type().size() - 1);
+      vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+      if (submodule_if_spec_map_.find(submodule_name)
+          != submodule_if_spec_map_.end()) {
+        cout << __func__ << " submodule InterfaceSpecification already loaded"
+             << endl;
+        submodule_iface_spec_msg = submodule_if_spec_map_[submodule_name];
+        func_msg->set_allocated_return_type_submodule_spec(
+            submodule_iface_spec_msg);
+      } else {
+        submodule_iface_spec_msg =
+            FindInterfaceSpecification(
+                if_spec_msg_->component_class(), if_spec_msg_->component_type(),
+                if_spec_msg_->component_type_version(), submodule_name);
+        if (!submodule_iface_spec_msg) {
+          cerr << __func__ << " submodule InterfaceSpecification not found" << endl;
+        } else {
+          cout << __func__ << " submodule InterfaceSpecification found" << endl;
+          func_msg->set_allocated_return_type_submodule_spec(
+              submodule_iface_spec_msg);
+          FuzzerBase* func_fuzzer = GetFuzzerBaseSubModule(
+              *submodule_iface_spec_msg, result);
+          submodule_if_spec_map_[submodule_name] = submodule_iface_spec_msg;
+          submodule_fuzzerbase_map_[submodule_name] = func_fuzzer;
+        }
+      }
+      string* output = new string();
+      google::protobuf::TextFormat::PrintToString(*func_msg, output);
+      return *output;
     }
   }
   return *(new string("void"));

@@ -299,7 +299,9 @@ bool AgentRequestHandler::ListApis() {
     return false;
   }
   const char* result = client->GetFunctions();
-  cout << "GetFunctions: len " << strlen(result) << endl;
+  if (result != NULL) {
+    cout << "GetFunctions: len " << strlen(result) << endl;
+  }
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
@@ -309,6 +311,7 @@ bool AgentRequestHandler::ListApis() {
     response_msg.set_response_code(FAIL);
     response_msg.set_reason("Failed to get the functions.");
   }
+
   bool succ = VtsSocketSendMessage(response_msg);
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   free((void*)result);
