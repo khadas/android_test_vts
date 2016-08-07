@@ -104,4 +104,7 @@ message VtsDriverControlResponseMessage {
   repeated bytes stderr = 1002;
   // The exit code for each command
   repeated int32 exit_code = 1003;
+
+  // The retrieved specifications.
+  repeated bytes spec = 2001;
 }

@@ -76,6 +76,7 @@ enum VariableType {
   TYPE_FUNCTION_POINTER = 8;
   TYPE_VOID = 9;
   TYPE_HIDL_CALLBACK = 10;
+  TYPE_SUBMODULE = 11;
 }
 
 
@@ -107,11 +108,17 @@ message FunctionSpecificationMessage {
   // the function name.
   optional bytes name = 1;
 
+  // the submodule name.
+  optional bytes submodule_name = 2;
+
   // data type of the return value (for legacy HALs and shared libraries).
   optional VariableSpecificationMessage return_type = 11;
 
   // data type of the return value (for HIDL HALs).
   repeated VariableSpecificationMessage return_type_hidl = 12;
+
+  // used to pass the spec of a found HAL_CONVENTIONAL_SUBMODULE to the host.
+  optional InterfaceSpecificationMessage return_type_submodule_spec = 13;
 
   // a list of arguments.
   repeated VariableSpecificationMessage arg = 21;
@@ -136,7 +143,7 @@ message FunctionSpecificationMessage {
 
 // To keep the value of a scalar variable.
 message ScalarDataValueMessage {
-  optional int32 bool = 1;
+  optional int32 bool_t = 1;
 
   optional int32 int8_t = 11;
   optional uint32 uint8_t = 12;
@@ -160,6 +167,7 @@ message ScalarDataValueMessage {
   optional uint32 opaque = 202;
   optional uint32 void_pointer = 211;
   optional uint32 char_pointer = 212;
+  optional uint32 uchar_pointer = 213;
   optional uint32 pointer_pointer = 251;
 
   // for scalar attributes in a union data structure,

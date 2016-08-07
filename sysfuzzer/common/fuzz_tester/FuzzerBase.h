@@ -35,6 +35,9 @@ class FuzzerBase {
   // Returns true iff successful.
   bool LoadTargetComponent(const char* target_dll_path);
 
+  // sets the target object (used for HAL_CONVENTIONAL_SUBMODULE).
+  bool SetTargetObject(void* object_pointer);
+
   // Gets the HIDL service.
   // Returns true iff successful.
   virtual bool GetService();

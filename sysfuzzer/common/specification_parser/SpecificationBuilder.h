@@ -17,6 +17,7 @@
 #ifndef __VTS_SYSFUZZER_COMMON_SPECPARSER_SPECBUILDER_H__
 #define __VTS_SYSFUZZER_COMMON_SPECPARSER_SPECBUILDER_H__
 
+#include <map>
 #include <queue>
 #include <string>
 
@@ -70,11 +71,15 @@ class SpecificationBuilder {
                            const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
-      const vts::InterfaceSpecificationMessage& iface_spec_msg,
+      const InterfaceSpecificationMessage& iface_spec_msg,
       const char* dll_file_name, const char* target_func_name);
 
+  FuzzerBase* GetFuzzerBaseSubModule(
+      const vts::InterfaceSpecificationMessage& iface_spec_msg,
+      void* object_pointer);
+
   // Returns the loaded interface specification message.
-  vts::InterfaceSpecificationMessage* GetInterfaceSpecification() const;
+  InterfaceSpecificationMessage* GetInterfaceSpecification() const;
 
  private:
   // A FuzzerWrapper instance.
@@ -84,15 +89,18 @@ class SpecificationBuilder {
   // the total number of epochs
   const int epoch_count_;
   // fuzzing job queue.
-  queue<pair<vts::FunctionSpecificationMessage*, FuzzerBase*>> job_queue_;
+  queue<pair<FunctionSpecificationMessage*, FuzzerBase*>> job_queue_;
   // Loaded interface specification message.
-  vts::InterfaceSpecificationMessage* if_spec_msg_;
+  InterfaceSpecificationMessage* if_spec_msg_;
   // TODO: use unique_ptr
   char* spec_lib_file_path_;
   char* dll_file_name_;
   char* module_name_;
   // the server socket port # of the agent.
   const string& callback_socket_name_;
+  // map for submodule interface specification messages.
+  map<string, InterfaceSpecificationMessage*> submodule_if_spec_map_;
+  map<string, FuzzerBase*> submodule_fuzzerbase_map_;
 };
 
 }  // namespace vts
