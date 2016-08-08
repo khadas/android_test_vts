@@ -16,8 +16,6 @@
 <configuration description="Config for VTS kernel LTP ADB test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
-        <option name="push" value="libcap.so->/data/local/tmp/32/libcap.so" />
-        <option name="push" value="libcap64.so->/data/local/tmp/64/libcap.so" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
