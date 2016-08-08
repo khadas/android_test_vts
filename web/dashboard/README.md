@@ -1,12 +1,20 @@
-# Steps to run locally
+# VTS Dashboard
+
+## Introduction
+
+The VTS Dashboard displays the summarized results of the Multi Device Tests along with graphs.
+
+## Installation
+
+### Steps to run locally:
 
 1. Google App Engine uses Java 8. Install Java 8 before running running locally:
-   sudo apt install openjdk-8-jdk
+   'sudo apt install openjdk-8-jdk'
 
    To use java 8:
-   Copy the following lines in ~/.bashrc
+   Copy the following lines in ~/.bashrc :
 
-    ####################
+```
     function setup_jdk() {
       # Remove the current JDK from PATH
       if [ -n "$JAVA_HOME" ] ; then
@@ -23,6 +31,7 @@
 
     Then from cmd:
     $ use_java8
+```
 
 2. Maven is used for build. Install Maven 3.3.9:
    Download maven from:
@@ -61,20 +70,21 @@
    Otherwise, to have a custom location, specify the location of
    google-cloud-sdk in /vts/web/dashboard/appengine/servlet/pom.xml by putting the configuration:
 
+```
    <configuration>
      <gcloud_directory>PATH/TO/GCLOUD_DIRECTORY</gcloud_directory>
    </configuration>
-
+```
    within the 'com.google.appengine' plugin tag :
 
-###########################################################
-
-# To run GAE on local machine:
+## To run GAE on local machine:
 
 $ cd web/dashboard/appengine/servlet
 $ mvn clean gcloud:run
 
-# To deploy to GAE
+## To deploy to Google App Engine
+
+$ cd web/dashboard/appengine/servlet
 $ mvn clean gcloud:deploy
 
-visit https://android-vts-internal.googleplex.com
+visit https://<YOUR-PROJECT-NAME>.appspot.com
