@@ -90,6 +90,15 @@ const char* VtsDriverHalSocketServer::Call(const string& arg) {
   return result.c_str();
 }
 
+const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
+  printf("%s(%s)\n", __func__, arg.c_str());
+  FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
+  google::protobuf::TextFormat::MergeFromString(arg, func_msg);
+  const string& result = spec_builder_.GetAttribute(func_msg);
+  printf("%s: done\n", __func__);
+  return result.c_str();
+}
+
 const char* VtsDriverHalSocketServer::GetFunctions() {
   printf("Get functions*");
   vts::InterfaceSpecificationMessage* spec =
@@ -143,6 +152,14 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
     }
     case CALL_FUNCTION: {
       const char* result = Call(command_message.arg());
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      response_message.set_return_message(result);
+      if (VtsSocketSendMessage(response_message)) return true;
+      break;
+    }
+    case GET_ATTRIBUTE: {
+      const char* result = GetAttribute(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_message(result);

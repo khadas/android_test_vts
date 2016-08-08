@@ -671,6 +671,145 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
+void HalCodeGen::GenerateCppBodyGetAttributeFunction(
+    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  for (auto const& sub_struct : message.sub_struct()) {
+    GenerateCppBodyGetAttributeFunction(
+        cpp_ss, sub_struct, fuzzer_extended_class_name,
+        message.original_data_structure_name(),
+        sub_struct.is_pointer() ? "->" : ".");
+  }
+
+  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
+  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
+  cpp_ss << "    void** result) {" << endl;
+  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
+  cpp_ss
+      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
+      << endl;
+
+  // to call another function if it's for a sub_struct
+  if (message.sub_struct().size() > 0) {
+    cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
+    for (auto const& sub_struct : message.sub_struct()) {
+      GenerateSubStructGetAttributeFunctionCall(cpp_ss, sub_struct, "");
+    }
+    cpp_ss << "  }" << endl;
+  }
+
+  cpp_ss << "    " << message.original_data_structure_name()
+         << "* local_device = ";
+  cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
+         << "*>(" << kInstanceVariableName << ");" << endl;
+
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
+  cpp_ss << "      local_device = reinterpret_cast<"
+         << message.original_data_structure_name() << "*>(hmi_);" << endl;
+  cpp_ss << "    }" << endl;
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+         << endl;
+  cpp_ss << "      return false;" << endl;
+  cpp_ss << "    }" << endl;
+
+  for (auto const& attribute : message.attribute()) {
+    if (attribute.type() == TYPE_SUBMODULE ||
+        attribute.type() == TYPE_SCALAR) {
+      cpp_ss << "  if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << endl;
+      cpp_ss << "    cout << \"match\" << endl;" << endl;
+
+      // actual function call
+      cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+
+      cpp_ss << "    cout << \"ok. let's read attribute.\" << endl;" << endl;
+      cpp_ss << "    ";
+      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      cpp_ss << "local_device->" << attribute.name();
+      cpp_ss << "));" << endl;
+
+      cpp_ss << "    cout << \"got\" << endl;" << endl;
+
+      cpp_ss << "    return true;" << endl;
+      cpp_ss << "  }" << endl;
+    }
+  }
+  // TODO: if there were pointers, free them.
+  cpp_ss << "  cerr << \"attribute not found\" << endl;" << endl;
+  cpp_ss << "  return false;" << endl;
+  cpp_ss << "}" << endl;
+}
+
+void HalCodeGen::GenerateCppBodyGetAttributeFunction(
+    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    const string& fuzzer_extended_class_name,
+    const string& original_data_structure_name, const string& parent_path) {
+  for (auto const& sub_struct : message.sub_struct()) {
+    GenerateCppBodyGetAttributeFunction(
+        cpp_ss, sub_struct, fuzzer_extended_class_name,
+        original_data_structure_name,
+        parent_path + message.name() + (sub_struct.is_pointer() ? "->" : "."));
+  }
+
+  string parent_path_printable(parent_path);
+  ReplaceSubString(parent_path_printable, "->", "_");
+  replace(parent_path_printable.begin(), parent_path_printable.end(), '.', '_');
+
+  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute_"
+         << parent_path_printable + message.name() << "(" << endl;
+  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
+  cpp_ss << "    void** result) {" << endl;
+  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
+  cpp_ss
+      << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+      << endl;
+
+  cpp_ss << "    " << original_data_structure_name
+         << "* local_device = ";
+  cpp_ss << "reinterpret_cast<" << original_data_structure_name
+         << "*>(" << kInstanceVariableName << ");" << endl;
+
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
+  cpp_ss << "      local_device = reinterpret_cast<"
+         << original_data_structure_name << "*>(hmi_);" << endl;
+  cpp_ss << "    }" << endl;
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+         << endl;
+  cpp_ss << "      return false;" << endl;
+  cpp_ss << "    }" << endl;
+
+  for (auto const& attribute : message.attribute()) {
+    if (attribute.type() == TYPE_SUBMODULE ||
+        attribute.type() == TYPE_SCALAR) {
+      cpp_ss << "  if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << endl;
+      cpp_ss << "    cout << \"match\" << endl;" << endl;
+
+      // actual function call
+      cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+
+      cpp_ss << "    cout << \"ok. let's read attribute.\" << endl;" << endl;
+      cpp_ss << "    ";
+      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      cpp_ss << "local_device" << parent_path << message.name() << ".";
+      // TODO: use parent's is_pointer()
+      cpp_ss << attribute.name();
+      cpp_ss << "));" << endl;
+
+      cpp_ss << "    cout << \"got\" << endl;" << endl;
+
+      cpp_ss << "    return true;" << endl;
+      cpp_ss << "  }" << endl;
+    }
+  }
+  // TODO: if there were pointers, free them.
+  cpp_ss << "  cerr << \"attribute not found\" << endl;" << endl;
+  cpp_ss << "  return false;" << endl;
+  cpp_ss << "}" << endl;
+}
+
 void HalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
     std::stringstream& h_ss, const string& function_prototype) {
   h_ss << "extern \"C\" {" << endl;
@@ -710,6 +849,30 @@ void HalCodeGen::GenerateSubStructFuzzFunctionCall(
 
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, current_path);
+  }
+}
+
+void HalCodeGen::GenerateSubStructGetAttributeFunctionCall(
+    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    const string& parent_path) {
+  string current_path(parent_path);
+  if (current_path.length() > 0) {
+    current_path += ".";
+  }
+  current_path += message.name();
+
+  string current_path_printable(current_path);
+  replace(current_path_printable.begin(), current_path_printable.end(), '.',
+          '_');
+
+  cpp_ss << "    if (func_msg->parent_path() == \"" << current_path << "\") {"
+         << endl;
+  cpp_ss << "      return GetAttribute__" << current_path_printable
+         << "(func_msg, result);" << endl;
+  cpp_ss << "    }" << endl;
+
+  for (auto const& sub_struct : message.sub_struct()) {
+    GenerateSubStructGetAttributeFunctionCall(cpp_ss, sub_struct, current_path);
   }
 }
 

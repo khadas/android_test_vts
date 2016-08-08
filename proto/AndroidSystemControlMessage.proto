@@ -38,6 +38,8 @@ enum CommandType {
   LIST_APIS = 201;
   // To call a function.
   CALL_API = 202;
+  // To get the value of an attribute.
+  VTS_AGENT_COMMAND_GET_ATTRIBUTE = 203;
 
   // To execute a shell command;
   VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND = 301;

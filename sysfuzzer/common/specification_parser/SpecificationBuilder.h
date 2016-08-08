@@ -58,6 +58,8 @@ class SpecificationBuilder {
 
   const string& CallFunction(FunctionSpecificationMessage* func_msg);
 
+  const string& GetAttribute(FunctionSpecificationMessage* func_msg);
+
   // Main function for the VTS system fuzzer where dll_file_name is the path of
   // a target component, spec_lib_file_path is the path of a specification
   // library file, and the rest three arguments are the basic information of

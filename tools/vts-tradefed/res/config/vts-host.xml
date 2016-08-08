@@ -17,7 +17,8 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleLightTest" />
-    <option name="compatibility:include-filter" value="SampleCameraTest" />
+    <option name="compatibility:include-filter" value="SampleCameraV2Test" />
+    <option name="compatibility:include-filter" value="SampleCameraV3Test" />
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
     <template-include name="reporters" default="basic-reporters" />

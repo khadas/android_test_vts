@@ -57,6 +57,11 @@ class FuzzerBase {
     return false;
   };
 
+  virtual bool GetAttribute(vts::FunctionSpecificationMessage* func_msg,
+                            void** result) {
+    return false;
+  }
+
   // Called before calling a target function.
   void FunctionCallBegin();
 

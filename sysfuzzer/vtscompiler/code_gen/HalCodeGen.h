@@ -38,15 +38,24 @@ class HalCodeGen : public CodeGenBase {
       : CodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
-                                   const InterfaceSpecificationMessage& message,
-                                   const string& fuzzer_extended_class_name);
+  void GenerateCppBodyFuzzFunction(
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
 
-  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
-                                   const StructSpecificationMessage& message,
-                                   const string& fuzzer_extended_class_name,
-                                   const string& original_data_structure_name,
-                                   const string& parent_path);
+  void GenerateCppBodyFuzzFunction(
+      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name,
+      const string& parent_path);
+
+  void GenerateCppBodyGetAttributeFunction(
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  void GenerateCppBodyGetAttributeFunction(
+      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name, const string& parent_path);
 
   void GenerateCppBodyCallbackFunction(
       std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
@@ -60,6 +69,10 @@ class HalCodeGen : public CodeGenBase {
                                       const string& fuzzer_extended_class_name);
 
   void GenerateSubStructFuzzFunctionCall(
+      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      const string& parent_path);
+
+  void GenerateSubStructGetAttributeFunctionCall(
       std::stringstream& cpp_ss, const StructSpecificationMessage& message,
       const string& parent_path);
 
