@@ -28,7 +28,6 @@ each block.
     summary = parse(file_name)
 """
 
-import logging
 import math
 import struct
 import sys
