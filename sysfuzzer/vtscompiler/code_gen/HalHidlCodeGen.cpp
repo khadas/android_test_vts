@@ -94,7 +94,8 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
             cpp_ss << definition.aggregate_value(
                 primitive_format_index).primitive_name(primitive_type_index)
                     << " ";
-          } */
+          }
+          */
           if (arg.scalar_type() == "char_pointer") {
             cpp_ss << "char* ";
           } else if (arg.scalar_type() == "int32_t" ||
@@ -223,229 +224,264 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     }
   }
 
-  for (auto const& sub_struct : message.sub_struct()) {
-    GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
-                                message.original_data_structure_name(),
-                                sub_struct.is_pointer() ? "->" : ".");
-  }
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetService() {" << endl;
-  cpp_ss << "  hidl_version version = make_hidl_version("
-         << (int)message.component_type_version() << ","
-         << (int)((message.component_type_version() -
-            (int)message.component_type_version()) * 10) << ");" << endl;
-  cpp_ss << "  static bool initialized = false;" << endl;
-  cpp_ss << "  if (!initialized) {" << endl;
-  cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
-  cpp_ss << "    status_t status = getService(String16(\""
-         << message.package().substr(message.package().find_last_of(".") + 1)
-         << "\"), version," << endl;
-  cpp_ss << "        &hw_binder_proxy_);" << endl;
-  cpp_ss << "    cout << \"[agent:hal] HIDL getService status \""
-         << " << status << endl;" << endl;
-  cpp_ss << "    initialized = true;" << endl;
-  cpp_ss << "  }" << endl;
-  cpp_ss << "  return true;" << endl;
-  cpp_ss << "}" << endl << endl;
-
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
-      << endl;
-
-  // to call another function if it's for a sub_struct
-  if (message.sub_struct().size() > 0) {
-    cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
+  if (message.component_name() != "types") {
     for (auto const& sub_struct : message.sub_struct()) {
-      GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, "");
+      GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
+                                  message.original_data_structure_name(),
+                                  sub_struct.is_pointer() ? "->" : ".");
     }
+
+    cpp_ss << "bool " << fuzzer_extended_class_name << "::GetService() {" << endl;
+    cpp_ss << "  hidl_version version = make_hidl_version("
+           << (int)message.component_type_version() << ","
+           << (int)((message.component_type_version() -
+              (int)message.component_type_version()) * 10) << ");" << endl;
+
+    cpp_ss << "  static bool initialized = false;" << endl;
+    cpp_ss << "  if (!initialized) {" << endl;
+    cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
+    cpp_ss << "    status_t status = getService(String16(\""
+           << message.package().substr(message.package().find_last_of(".") + 1)
+           << "\"), version," << endl;
+    cpp_ss << "        &hw_binder_proxy_);" << endl;
+    cpp_ss << "    cout << \"[agent:hal] HIDL getService status \""
+           << " << status << endl;" << endl;
+    cpp_ss << "    initialized = true;" << endl;
     cpp_ss << "  }" << endl;
-  }
+    cpp_ss << "  return true;" << endl;
+    cpp_ss << "}" << endl << endl;
 
-  for (auto const& api : message.api()) {
-    cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+    cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
+    cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
+    cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
 
-    // args - definition;
-    int arg_count = 0;
-    for (auto const& arg : api.arg()) {
-      if (arg.is_callback()) {  // arg.type() isn't always TYPE_FUNCTION_POINTER
-        string name = "vts_callback_" + fuzzer_extended_class_name + "_" +
-                      arg.predefined_type();  // TODO - check to make sure name
-                                              // is always correct
-        if (name.back() == '*') name.pop_back();
-        cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
-        cpp_ss << name << "(callback_socket_name);" << endl;
-        cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
-               << arg_count << "));" << endl;
+    cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
+    cpp_ss
+        << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+        << endl;
 
-        cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
-        cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg, &message)
-               << ") malloc(sizeof(" << GetCppVariableType(arg, &message) << "));"
-               << endl;
-        // TODO: think about how to free the malloced callback data structure.
-        // find the spec.
-        bool found = false;
-        cout << name << endl;
-        for (auto const& attribute : message.attribute()) {
-          if (attribute.type() == TYPE_FUNCTION_POINTER &&
-              attribute.is_callback()) {
-            string target_name = "vts_callback_" + fuzzer_extended_class_name +
-                                 "_" + attribute.name();
-            cout << "compare" << endl;
-            cout << target_name << endl;
-            if (name == target_name) {
-              if (attribute.function_pointer_size() > 1) {
-                for (auto const& func_pt : attribute.function_pointer()) {
-                  cpp_ss << "    arg" << arg_count << "->"
-                         << func_pt.function_name() << " = arg" << arg_count
-                         << "callback->" << func_pt.function_name() << ";"
-                         << endl;
+    // to call another function if it's for a sub_struct
+    if (message.sub_struct().size() > 0) {
+      cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
+      for (auto const& sub_struct : message.sub_struct()) {
+        GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, "");
+      }
+      cpp_ss << "  }" << endl;
+    }
+
+    for (auto const& api : message.api()) {
+      cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+
+      // args - definition;
+      int arg_count = 0;
+      for (auto const& arg : api.arg()) {
+        if (arg.is_callback()) {  // arg.type() isn't always TYPE_FUNCTION_POINTER
+          string name = "vts_callback_" + fuzzer_extended_class_name + "_" +
+                        arg.predefined_type();  // TODO - check to make sure name
+                                                // is always correct
+          if (name.back() == '*') name.pop_back();
+          cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
+          cpp_ss << name << "(callback_socket_name);" << endl;
+          cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
+                 << arg_count << "));" << endl;
+
+          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+          cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg, &message)
+                 << ") malloc(sizeof(" << GetCppVariableType(arg, &message) << "));"
+                 << endl;
+          // TODO: think about how to free the malloced callback data structure.
+          // find the spec.
+          bool found = false;
+          cout << name << endl;
+          for (auto const& attribute : message.attribute()) {
+            if (attribute.type() == TYPE_FUNCTION_POINTER &&
+                attribute.is_callback()) {
+              string target_name = "vts_callback_" + fuzzer_extended_class_name +
+                                   "_" + attribute.name();
+              cout << "compare" << endl;
+              cout << target_name << endl;
+              if (name == target_name) {
+                if (attribute.function_pointer_size() > 1) {
+                  for (auto const& func_pt : attribute.function_pointer()) {
+                    cpp_ss << "    arg" << arg_count << "->"
+                           << func_pt.function_name() << " = arg" << arg_count
+                           << "callback->" << func_pt.function_name() << ";"
+                           << endl;
+                  }
+                } else {
+                  cpp_ss << "    arg" << arg_count << " = arg" << arg_count
+                         << "callback->" << attribute.name() << ";" << endl;
                 }
-              } else {
-                cpp_ss << "    arg" << arg_count << " = arg" << arg_count
-                       << "callback->" << attribute.name() << ";" << endl;
+                found = true;
+                break;
               }
-              found = true;
-              break;
             }
           }
-        }
-        if (!found) {
-          cerr << __func__ << " ERROR callback definition missing for " << name
-               << " of " << api.name() << endl;
-          exit(-1);
-        }
-      } else {
-        if (arg.type() == TYPE_VECTOR) {
-          cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
-                 << "arg" << arg_count << "buffer = (" << arg.vector_value(0).scalar_type()
-                 << "*) malloc(8 * sizeof(" << arg.vector_value(0).scalar_type() << "));"
-                 << endl;
-        }
-        if (arg.type() == TYPE_HIDL_CALLBACK) {
-          cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count
-                 << "(" << "VtsFuzzerCreate"
-                 << arg.predefined_type() << "());" << endl;
-        } else if (arg.type() == TYPE_STRUCT) {
-          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
-          cpp_ss << "arg" << arg_count;
-        } else {
-          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
-          cpp_ss << "arg" << arg_count << " = ";
-        }
-
-        if (arg.type() != TYPE_VECTOR &&
-            arg.type() != TYPE_HIDL_CALLBACK &&
-            arg.type() != TYPE_STRUCT) {
-          std::stringstream msg_ss;
-          msg_ss << "func_msg->arg(" << arg_count << ")";
-          string msg = msg_ss.str();
-
-          if (arg.type() == TYPE_SCALAR) {
-            cpp_ss << "(" << msg << ".type() == TYPE_SCALAR)? ";
-            if (arg.scalar_type() == "pointer" ||
-                arg.scalar_type() == "pointer_pointer" ||
-                arg.scalar_type() == "char_pointer" ||
-                arg.scalar_type() == "void_pointer" ||
-                arg.scalar_type() == "function_pointer") {
-              cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg, &message) << ">";
-            }
-            cpp_ss << "(" << msg << ".scalar_value()";
-
-            if (arg.scalar_type() == "int32_t" ||
-                arg.scalar_type() == "uint32_t" ||
-                arg.scalar_type() == "int64_t" ||
-                arg.scalar_type() == "uint64_t" ||
-                arg.scalar_type() == "int16_t" ||
-                arg.scalar_type() == "uint16_t" ||
-                arg.scalar_type() == "int8_t" ||
-                arg.scalar_type() == "uint8_t" ||
-                arg.scalar_type() == "float_t" ||
-                arg.scalar_type() == "double_t") {
-              cpp_ss << "." << arg.scalar_type() << "() ";
-            } else if (arg.scalar_type() == "pointer" ||
-                       arg.scalar_type() == "char_pointer" ||
-                       arg.scalar_type() == "void_pointer") {
-              cpp_ss << ".pointer() ";
-            } else {
-              cerr << __func__ << " ERROR unsupported scalar type "
-                   << arg.scalar_type() << endl;
-              exit(-1);
-            }
-            cpp_ss << ") : ";
-          } else if (arg.type() == TYPE_ENUM) {
-            // TODO: impl
-          } else if (arg.type() == TYPE_STRUCT) {
-            // TODO: impl
-          } else {
-            cerr << __func__ << ":" << __LINE__ << " unknown type "
-                 << arg.type() << endl;
+          if (!found) {
+            cerr << __func__ << " ERROR callback definition missing for " << name
+                 << " of " << api.name() << endl;
             exit(-1);
           }
+        } else {
+          if (arg.type() == TYPE_VECTOR) {
+            cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
+                   << "arg" << arg_count << "buffer = ("
+                   << arg.vector_value(0).scalar_type()
+                   << "*) malloc(8 * sizeof("
+                   << arg.vector_value(0).scalar_type() << "));"
+                   << endl;
+          }
+          if (arg.type() == TYPE_HIDL_CALLBACK) {
+            cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count
+                   << "(" << "VtsFuzzerCreate"
+                   << arg.predefined_type() << "());" << endl;
+          } else if (arg.type() == TYPE_STRUCT) {
+            cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+            cpp_ss << "arg" << arg_count;
+          } else if (arg.type() == TYPE_VECTOR) {
+            cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+            cpp_ss << "arg" << arg_count << ";" << endl;
+          } else {
+            cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+            cpp_ss << "arg" << arg_count << " = ";
+          }
 
-          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
-                 << ".type() == TYPE_STRUCT || " << msg
-                 << ".type() == TYPE_SCALAR)? ";
-          cpp_ss << GetCppInstanceType(arg, msg, &message);
-          cpp_ss << " : " << GetCppInstanceType(arg, string(), &message) << " )";
-          // TODO: use the given message and call a lib function which converts
-          // a message to a C/C++ struct.
-        } else if (arg.type() == TYPE_VECTOR) {
-          // TODO: dynamically generate the initial value for hidl_vec
-          cpp_ss << "{arg" << arg_count << "buffer, 8}";
+          if (arg.type() != TYPE_VECTOR &&
+              arg.type() != TYPE_HIDL_CALLBACK &&
+              arg.type() != TYPE_STRUCT) {
+            std::stringstream msg_ss;
+            msg_ss << "func_msg->arg(" << arg_count << ")";
+            string msg = msg_ss.str();
+
+            if (arg.type() == TYPE_SCALAR) {
+              cpp_ss << "(" << msg << ".type() == TYPE_SCALAR)? ";
+              if (arg.scalar_type() == "pointer" ||
+                  arg.scalar_type() == "pointer_pointer" ||
+                  arg.scalar_type() == "char_pointer" ||
+                  arg.scalar_type() == "void_pointer" ||
+                  arg.scalar_type() == "function_pointer") {
+                cpp_ss << "reinterpret_cast<"
+                       << GetCppVariableType(arg, &message)
+                       << ">";
+              }
+              cpp_ss << "(" << msg << ".scalar_value()";
+
+              if (arg.scalar_type() == "int32_t" ||
+                  arg.scalar_type() == "uint32_t" ||
+                  arg.scalar_type() == "int64_t" ||
+                  arg.scalar_type() == "uint64_t" ||
+                  arg.scalar_type() == "int16_t" ||
+                  arg.scalar_type() == "uint16_t" ||
+                  arg.scalar_type() == "int8_t" ||
+                  arg.scalar_type() == "uint8_t" ||
+                  arg.scalar_type() == "float_t" ||
+                  arg.scalar_type() == "double_t") {
+                cpp_ss << "." << arg.scalar_type() << "() ";
+              } else if (arg.scalar_type() == "pointer" ||
+                         arg.scalar_type() == "char_pointer" ||
+                         arg.scalar_type() == "void_pointer") {
+                cpp_ss << ".pointer() ";
+              } else {
+                cerr << __func__ << " ERROR unsupported scalar type "
+                     << arg.scalar_type() << endl;
+                exit(-1);
+              }
+              cpp_ss << ") : ";
+            } else if (arg.type() == TYPE_ENUM) {
+              // TODO: impl
+            } else if (arg.type() == TYPE_STRUCT) {
+              // TODO: impl
+            } else {
+              cerr << __func__ << ":" << __LINE__ << " unknown type "
+                   << arg.type() << endl;
+              exit(-1);
+            }
+
+            cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
+                   << ".type() == TYPE_STRUCT || " << msg
+                   << ".type() == TYPE_SCALAR)? ";
+            cpp_ss << GetCppInstanceType(arg, msg, &message);
+            cpp_ss << " : " << GetCppInstanceType(arg, string(), &message) << " )";
+            // TODO: use the given message and call a lib function which converts
+            // a message to a C/C++ struct.
+          } else if (arg.type() == TYPE_VECTOR) {
+            // TODO: dynamically generate the initial value for hidl_vec
+            cpp_ss << "arg" << arg_count << ".setTo("
+                   << "arg" << arg_count << "buffer, 8)";
+          }
+          cpp_ss << ";" << endl;
         }
-        cpp_ss << ";" << endl;
+        arg_count++;
       }
-      arg_count++;
+
+      // actual function call
+      GenerateCodeToStartMeasurement(cpp_ss);
+
+      // may need to check whether the function is actually defined.
+      cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
+      cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
+             << kInstanceVariableName << "->" << api.name() << "(";
+      if (arg_count > 0) cpp_ss << endl;
+
+      for (int index = 0; index < arg_count; index++) {
+        cpp_ss << "      arg" << index;
+        if (index != (arg_count - 1)) {
+          cpp_ss << "," << endl;
+        }
+      }
+
+      if (api.return_type_hidl_size() > 0) {
+        // TODO: support callback as the last arg
+        if (arg_count != 0) cpp_ss << ", ";
+        cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
+        // TODO: callback shall update *result (barrier here?)
+        //       cpp_ss << "*result = ...";
+      }
+      cpp_ss << ").toString8().string())));" << endl;
+      GenerateCodeToStopMeasurement(cpp_ss);
+      cpp_ss << "    cout << \"called\" << endl;" << endl;
+
+      // Copy the output (call by pointer or reference cases).
+      arg_count = 0;
+      for (auto const& arg : api.arg()) {
+        if (arg.is_output()) {
+          // TODO check the return value
+          cpp_ss << "    " << GetConversionToProtobufFunctionName(arg)
+                 << "(arg" << arg_count << ", "
+                 << "func_msg->mutable_arg(" << arg_count << "));" << endl;
+        }
+        arg_count++;
+      }
+
+      cpp_ss << "    return true;" << endl;
+      cpp_ss << "  }" << endl;
     }
 
-    // actual function call
-    GenerateCodeToStartMeasurement(cpp_ss);
-
-    // may need to check whether the function is actually defined.
-    cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
-    cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
-           << kInstanceVariableName << "->" << api.name() << "(";
-    if (arg_count > 0) cpp_ss << endl;
-
-    for (int index = 0; index < arg_count; index++) {
-      cpp_ss << "      arg" << index;
-      if (index != (arg_count - 1)) {
-        cpp_ss << "," << endl;
+    // TODO: if there were pointers, free them.
+    cpp_ss << "  return false;" << endl;
+    cpp_ss << "}" << endl;
+  } else {
+    for (const auto& attribute : message.attribute()) {
+      if (attribute.type() == TYPE_ENUM) {
+        cpp_ss << attribute.name() << " " << "Random" << attribute.name() << "() {"
+               << endl;
+        cpp_ss << "int choice = rand() / " << attribute.enum_value().enumerator().size() << ";" << endl;
+        cpp_ss << "if (choice < 0) choice *= -1;" << endl;
+        for (int index = 0; index < attribute.enum_value().enumerator().size(); index++) {
+          cpp_ss << "    if (choice == " << attribute.enum_value().value(index)
+                 << ") return " << attribute.name() << "::"
+                 << attribute.enum_value().enumerator(index)
+                 << ";" << endl;
+        }
+        cpp_ss << "    return " << attribute.name() << "::"
+               << attribute.enum_value().enumerator(0)
+               << ";" << endl;
+        cpp_ss << "}" << endl;
+      } else {
+        cerr << __func__ << " unsupported attribute type" << endl;
       }
     }
-
-    if (api.return_type_hidl_size() > 0) {
-      // TODO: support callback as the last arg
-      if (arg_count != 0) cpp_ss << ", ";
-      cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
-      // TODO: callback shall update *result (barrier here?)
-      //       cpp_ss << "*result = ...";
-    }
-    cpp_ss << ").toString8().string())));" << endl;
-    GenerateCodeToStopMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"called\" << endl;" << endl;
-
-    // Copy the output (call by pointer or reference cases).
-    arg_count = 0;
-    for (auto const& arg : api.arg()) {
-      if (arg.is_output()) {
-        // TODO check the return value
-        cpp_ss << "    " << GetConversionToProtobufFunctionName(arg) << "(arg"
-               << arg_count << ", "
-               << "func_msg->mutable_arg(" << arg_count << "));" << endl;
-      }
-      arg_count++;
-    }
-
-    cpp_ss << "    return true;" << endl;
-    cpp_ss << "  }" << endl;
   }
-  // TODO: if there were pointers, free them.
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
 }
 
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
@@ -512,7 +548,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               arg.scalar_type() == "uint64_t" ||
               arg.scalar_type() == "int16_t" ||
               arg.scalar_type() == "uint16_t" ||
-              arg.scalar_type() == "int8_t" || arg.scalar_type() == "uint8_t" ||
+              arg.scalar_type() == "int8_t" ||
+              arg.scalar_type() == "uint8_t" ||
               arg.scalar_type() == "float_t" ||
               arg.scalar_type() == "double_t") {
             cpp_ss << "." << arg.scalar_type() << "() ";
@@ -587,10 +624,20 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 }
 
 void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& /*cpp_ss*/, const InterfaceSpecificationMessage& /*message*/,
-    const string& /*fuzzer_extended_class_name*/) {
-  // TOOD: impl
-  cerr << __func__ << " not supported for HIDL HAL yet" << endl;
+    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  if (message.component_name() != "types") {
+    cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
+    cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
+    cpp_ss << "    void** result) {" << endl;
+
+    // TOOD: impl
+    cerr << __func__ << " not supported for HIDL HAL yet" << endl;
+
+    cpp_ss << "  cerr << \"attribute not found\" << endl;" << endl;
+    cpp_ss << "  return false;" << endl;
+    cpp_ss << "}" << endl;
+  }
 }
 
 void HalHidlCodeGen::GenerateHeaderGlobalFunctionDeclarations(
