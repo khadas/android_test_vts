@@ -22,7 +22,8 @@ LOCAL_MODULE := libvts_drivercomm
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  VtsDriverCommUtil.cpp
+  VtsDriverCommUtil.cpp \
+  VtsDriverFileUtil.cpp
 
 LOCAL_C_INCLUDES := \
   bionic \

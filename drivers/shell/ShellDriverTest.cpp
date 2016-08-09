@@ -90,6 +90,7 @@ static string vts_shell_driver_test_client_start(const string& command,
   VtsDriverControlCommandMessage cmd_msg;
 
   cmd_msg.add_shell_command(command);
+  cmd_msg.set_command_type(EXECUTE_COMMAND);
 
   if (!driverUtil.VtsSocketSendMessage(cmd_msg)) {
     return NULL;
@@ -164,16 +165,18 @@ static string test_shell_command_output(const string& command,
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_uname) {
   string expected = "Linux\n";
-  string output = test_shell_command_output("uname", "test1_1.tmp");
+  string output =
+      test_shell_command_output("uname", "/data/local/tmp/test1_1.tmp");
   ASSERT_EQ(output.compare(expected), 0);
 }
 
 /*
- * This test tests whether the output of "uname" is "Linux\n"
+ * This test tests whether the output of "which ls" is "/system/bin/ls\n"
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_which_ls) {
   string expected = "/system/bin/ls\n";
-  string output = test_shell_command_output("which ls", "test1_2.tmp");
+  string output =
+      test_shell_command_output("which ls", "/data/local/tmp/test1_2.tmp");
   ASSERT_EQ(output.compare(expected), 0);
 }
 

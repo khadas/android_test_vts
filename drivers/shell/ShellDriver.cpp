@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include <VtsDriverCommUtil.h>
+#include <VtsDriverFileUtil.h>
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 using namespace std;
@@ -50,20 +51,21 @@ int VtsShellDriver::Close() {
   return result;
 }
 
-int VtsShellDriver::ExecShellCommand(
-    const string& command, VtsDriverControlResponseMessage* responseMessage) {
-  // TODO(yuexima): handle no output case.
+CommandResult* VtsShellDriver::ExecShellCommandPopen(const string& command) {
+  CommandResult* result = new CommandResult();
+
+  // TODO: handle no output case.
   FILE* output_fp;
+
+  cout << "[Driver] Running command: " << command << endl << endl;
 
   // execute the command.
   output_fp = popen(command.c_str(), "r");
   if (output_fp == NULL) {
     cerr << "Failed to run command: " << command << endl;
-    int no = errno;
-    return no;
+    result->exit_code = errno;
+    return result;
   }
-
-  cout << "[Handler] Running command: " << command << endl << endl;
 
   char buff[4096];
   stringstream ss;
@@ -71,27 +73,61 @@ int VtsShellDriver::ExecShellCommand(
   int bytes_read;
   while (!feof(output_fp)) {
     bytes_read = fread(buff, 1, sizeof(buff) - 1, output_fp);
-    // TODO(yuexima) catch stderr
+    // TODO: catch stderr
     if (ferror(output_fp)) {
       cerr << __func__ << ":" << __LINE__ << "ERROR reading shell output"
            << endl;
-      return -1;
+      result->exit_code = -1;
+      return result;
     }
 
-    cout << "[Handler] bytes read from output: " << bytes_read << endl;
+    cout << "[Driver] bytes read from output: " << bytes_read << endl;
     buff[bytes_read] = '\0';
     ss << buff;
   }
 
-  cout << "[Handler] Returning output: " << ss.str() << endl << endl;
-  responseMessage->add_stdout(ss.str());
+  cout << "[Driver] Returning output: " << ss.str() << endl << endl;
+  result->stdout = ss.str();
 
-  for (auto const& out : responseMessage->stdout()) {
-    cout << "[Handler] Loop output: " << out << endl << endl;
-  }
+  result->exit_code = pclose(output_fp) / 256;
+  return result;
+}
 
-  int exit_code = pclose(output_fp) / 256;
-  responseMessage->add_exit_code(exit_code);
+CommandResult* VtsShellDriver::ExecShellCommandNohup(const string& command) {
+  CommandResult* result = new CommandResult();
+
+  const char* temp_dir = GetDirFromFilePath(this->socket_address_).c_str();
+  char* stdout_file_name = tempnam(temp_dir, "nohup");
+  char* stderr_file_name = tempnam(temp_dir, "nohup");
+
+  stringstream ss;
+  ss << "nohup " << command << " >" << stdout_file_name << " 2>"
+     << stderr_file_name;
+
+  // execute the command.
+  int exit_code = system(ss.str().c_str());
+
+  result->exit_code = exit_code;
+  result->stdout = ReadFile(stdout_file_name);
+  result->stderr = ReadFile(stderr_file_name);
+
+  remove(stdout_file_name);
+  remove(stderr_file_name);
+
+  return result;
+}
+
+int VtsShellDriver::ExecShellCommand(
+    const string& command, VtsDriverControlResponseMessage* responseMessage) {
+  CommandResult* result = this->ExecShellCommandNohup(command);
+
+  responseMessage->add_stdout(result->stdout);
+  responseMessage->add_stderr(result->stderr);
+
+  int exit_code = result->exit_code;
+  responseMessage->add_exit_code(result->exit_code);
+
+  delete result;
   return exit_code;
 }
 
@@ -103,9 +139,12 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
   while (1) {
     if (!driverUtil.VtsSocketRecvMessage(
             static_cast<google::protobuf::Message*>(&cmd_msg))) {
+      cerr << "[Shell driver] receiving message failure." << endl;
       return -1;
     }
+
     if (cmd_msg.command_type() == EXIT) {
+      cout << "[Shell driver] received exit command." << endl;
       break;
     } else if (cmd_msg.command_type() != EXECUTE_COMMAND) {
       cerr << "[Shell driver] unknown command type " << cmd_msg.command_type()

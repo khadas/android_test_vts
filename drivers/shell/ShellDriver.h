@@ -28,6 +28,12 @@ using namespace std;
 namespace android {
 namespace vts {
 
+struct CommandResult {
+  string stdout;
+  string stderr;
+  int exit_code;
+};
+
 class VtsShellDriver {
  public:
   VtsShellDriver() { socket_address_.clear(); }
@@ -64,6 +70,16 @@ class VtsShellDriver {
    * and send back the output text.
    */
   int HandleShellCommandConnection(int connection_fd);
+
+  /*
+   * Execute a shell command using popen and return a CommandResult object.
+   */
+  CommandResult* ExecShellCommandPopen(const string& command);
+
+  /*
+   * Execute a shell command using nohup and return a CommandResult object.
+   */
+  CommandResult* ExecShellCommandNohup(const string& command);
 };
 
 }  // namespace vts
