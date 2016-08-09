@@ -68,7 +68,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[self.USE_GAE_DB,
-                                            self.COVERAGE_SRC_FILES])
+                                            self.COVERAGE_SRC_FILES,
+                                            keys.ConfigKeys.IKEY_DATA_FILE_PATH])
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
