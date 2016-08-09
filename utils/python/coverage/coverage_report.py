@@ -59,12 +59,18 @@ def GenerateCoverageReport(src_file_name, src_file_content, gcno_file_content,
     gcda_parser.GCDAParser(gcda_stream, file_summary).Parse()
     src_lines = src_file_content.split('\n')
     src_lines_counts = [None] * len(src_lines)
+    logging.info("GenerateCoverageReport: src file lines %d", len(src_lines))
     for ident in file_summary.functions:
         for block in file_summary.functions[ident].blocks:
             for line in block.lines:
-                if src_lines_counts[line - 1] == None:
-                    src_lines_counts[line - 1] = 0
-                src_lines_counts[line - 1] += block.count
+                logging.info("GenerateCoverageReport: covered line %s", line)
+                if line >= 0 and line < len(src_lines_counts):
+                    if src_lines_counts[line - 1] == None:
+                        src_lines_counts[line - 1] = 0
+                    src_lines_counts[line - 1] += block.count
+                else:
+                    logging.error("GenerateCoverageReport: line mismatch %s",
+                                  line)
 
     html = (
         "<div><table border=0 style=\"width: 100%; word-spacing: 5px;"
