@@ -32,6 +32,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
   <servlet-class>com.google.android.vts.servlet.ShowGraphServlet</servlet-class>
 </servlet>
 
+<servlet>
+  <servlet-name>show_coverage</servlet-name>
+  <servlet-class>com.google.android.vts.servlet.ShowCoverageServlet</servlet-class>
+</servlet>
+
 <servlet-mapping>
   <servlet-name>dashboard_main</servlet-name>
   <url-pattern>/</url-pattern>
@@ -45,6 +50,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <servlet-mapping>
   <servlet-name>show_graph</servlet-name>
   <url-pattern>/show_graph/*</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>show_coverage</servlet-name>
+  <url-pattern>/show_coverage/*</url-pattern>
 </servlet-mapping>
 
 </web-app>
