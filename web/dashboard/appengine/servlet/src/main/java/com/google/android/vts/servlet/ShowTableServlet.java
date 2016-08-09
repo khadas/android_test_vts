@@ -65,7 +65,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 15;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
-    private static final int SUMMARY_ROW_COUNT = 3;
+    private static final int SUMMARY_ROW_COUNT = 4;
 
     /**
      * Returns the table corresponding to the table name.
@@ -225,7 +225,7 @@ public class ShowTableServlet extends HttpServlet {
             }
 
             // first column for summary grid
-            String[] rowNamesSummaryGrid = {"Total", "# Passed", "% Passed"};
+            String[] rowNamesSummaryGrid = {"Total", "# Passed", "% Passed", "Coverage"};
             for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
                 summaryGrid[i][0] = rowNamesSummaryGrid[i];
             }
@@ -345,6 +345,11 @@ public class ShowTableServlet extends HttpServlet {
                         summaryGrid[i][j] += " %";
                     }
                 }
+            }
+
+            // last row of summary grid - it should point a link 'C' to coverage page.
+            for (int index = 1; index < summaryGrid[0].length; index++) {
+                summaryGrid[3][index] = "C";
             }
 
             // copy the summary grid
