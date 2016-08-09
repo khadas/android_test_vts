@@ -26,11 +26,10 @@
 
                 var table = new google.visualization.Table(document.getElementById('coverage_grid_div'));
                 table.draw(data,
-                          {showRowNumber: true, alternatingRowStyle : true});
+                          {showRowNumber: true, alternatingRowStyle : true, 'allowHtml': true});
             }
         </script>
     </head>
-
     <body>
         <div id="coverage_grid_div" style="margin-left:200px;margin-top:50px"></div>
     </body>
