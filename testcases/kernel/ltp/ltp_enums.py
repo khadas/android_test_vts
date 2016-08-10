@@ -1,0 +1,70 @@
+#!/usr/bin/env python3.4
+#
+# Copyright (C) 2016 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+
+class RequirementState(object):
+    """Enum for test case requirement check state.
+
+    Attributes:
+        UNCHECKED: test case requirement has not been checked
+        PATHEXISTS: the path of the test case has been verified exist, but
+                    all the other requirements have not been checked
+        SATISFIED: all the requirements are satisfied
+        UNSATISFIED: some of the requirements are not satisfied. Test case will
+                     not be executed
+    """
+    UNCHECKED = 0
+    PATHEXISTS = 1
+    SATISFIED = 2
+    UNSATISFIED = 3
+
+
+class ConfigKeys(object):
+    """Enum for LTP test config related lookups.
+
+    Attributes:
+    """
+    DISABLED_TESTS = "disabled_tests"
+
+
+class ShellEnvKeys(object):
+    """Shell env keys to run LTP (Linux Test Project) testcases.
+
+    Contains constant strings starting with prefix "_KEY_ENV_" are used as dict
+        key in environment variable dictionary
+    """
+    TMPDIR = 'TMPDIR'
+    TMP = 'TMP'
+    LTP_DEV_FS_TYPE = 'LTP_DEV_FS_TYPE'
+    LTPROOT = 'LTPROOT'
+    PATH = 'PATH'
+
+
+class TestExitCode(object):
+    """Exit return codes of LTP test case binary
+
+    Attributes:
+        TPASS: int, exit_code for Test pass
+        TCONF: int, the test case is not for current configuration of kernel
+        TBROK: int, test assumption failed, such as missing system binary and
+               and permission issue not explicitly checked by the test case.
+        SEGFAULT: int, test case results in segmentation fault
+    """
+    TPASS = 0
+    TCONF = 32
+    TBROK = 2
+    SEGFAULT = 139
