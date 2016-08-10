@@ -219,7 +219,7 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
             markTestFailure();
             return true;
         } else if (lastToken.equals(SKIP)){
-            markTestSkip();
+            // SKIP is not a recognized test type in TradeFed.
             return true;
         } else {
             markTestTimeout();
@@ -342,13 +342,6 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
      */
     private void markTestTimeout() {
         mTestResultCache.put(mCurrentTestId, TIMEOUT);
-    }
-
-    /**
-     * This method is called whenever the current test decides to skip the test
-     */
-    private void markTestSkip() {
-        mTestResultCache.put(mCurrentTestId, SKIP);
     }
 
     @Override
