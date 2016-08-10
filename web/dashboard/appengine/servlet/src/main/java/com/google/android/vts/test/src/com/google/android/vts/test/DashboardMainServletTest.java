@@ -31,13 +31,14 @@ public class DashboardMainServletTest extends TestCase {
     private static final String ASSERT_MESSAGE = "Title should start differently.";
     private static final String HOMEPAGE_TITLE = "VTS Dashboard";
     private static final String LOGIN_BUTTON_ID = "submit-login";
-    public static WebDriver driver = null;
+    private static WebDriver driver = null;
 
     /**
      * Runs once before running tests.
      */
     @Override
     public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "chromedriver");
         driver = new ChromeDriver();
     }
 
