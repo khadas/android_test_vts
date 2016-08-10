@@ -8,7 +8,7 @@
         google.charts.load('current', {'packages':['table']});
         google.charts.setOnLoadCallback(drawGridTable);
         google.charts.setOnLoadCallback(drawProfilingTable);
-
+        google.charts.setOnLoadCallback(drawLegendTable);
 
         // table for profiling data
         function drawProfilingTable() {
@@ -41,6 +41,57 @@
                     data.getValue(table.getSelection()[0].row, 0);
                 window.open(link,"_self");
             }
+        }
+
+        // table for legend
+        function drawLegendTable() {
+            var data = new google.visualization.DataTable();
+
+            var columns = new Array('Unknown', 'Pass', 'Fail', 'Skipped', 'Exception', 'Timeout');
+            // add columns
+            data.addColumn('string', 'Result');
+            for (var i = 0; i < columns.length; i++) {
+                data.addColumn('string', columns[i]);
+            }
+
+            var row = new Array('Color Code', '-', ' ', ' ', '~', ' ', ' ');
+            var rows = new  Array(1);
+            rows[0] = row;
+            data.addRows(rows);
+
+            // add colors
+            for (var row = 0; row < rows.length; row++) {
+                for (var column = 1; column < rows[0].length; column++) {
+                    var result = column - 1;
+                    switch(result) {
+                        case 0 : // case : unknown
+                            data.setValue(row, column, '-');
+                            break;
+                        case 1 : // Case: pass - green
+                            data.setProperty(row, column, 'style',
+                                'background-color: #7FFF00;');
+                            break;
+                        case 2 : // Case : fail - red
+                            data.setProperty(row, column, 'style',
+                                'background-color: #ff4d4d;');
+                            break;
+                        case 3 : // case : skip : grey
+                            data.setProperty(row, column, 'style',
+                                'background-color: #A8A8A8;');
+                            data.setValue(row, column, '~');
+                            break;
+                        case 4:
+                        case 5: // Case: exception, timeout - black
+                            data.setProperty(row, column, 'style',
+                                'background-color: #000000;');
+                            break;
+                    }
+                }
+            }
+
+            var table = new google.visualization.Table(document.getElementById('legend_table_div'));
+            table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
+                              frozenColumns: 1});
         }
 
         // table for grid data
@@ -79,26 +130,34 @@
 
                     var result = finalGrid[testCaseIndex][buildIdIndex];
                     switch(result) {
-                        case '0':
-                            data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                                'background-color: #A8A8A8;'); // Case: unknown - grey
+                        case '0': // case : unknown
+                            data.setValue(testCaseIndex, buildIdIndex, '-');
                             break;
-                        case '1':
+
+                        case '1': // Case: pass - green
                             data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                                'background-color: #7FFF00;'); // Case: pass - green
+                                'background-color: #7FFF00;');
+                            data.setValue(testCaseIndex, buildIdIndex, '');
                             break;
-                        case '2':
+
+                        case '2': // Case : fail - red
                             data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                                'background-color: #ff4d4d;'); // Case : fail - red
+                                'background-color: #ff4d4d;');
+                            data.setValue(testCaseIndex, buildIdIndex, '');
                             break;
-                        case '3':
+
+                        case '3': // Case: skip
+                            data.setProperty(testCaseIndex, buildIdIndex, 'style',
+                                'background-color: #A8A8A8;');
+                            data.setValue(testCaseIndex, buildIdIndex, '~');
+                            break;
+
                         case '4':
-                        case '5':
+                        case '5': // Case: timeout - black
                             data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                                'background-color: #ff944d;'); // Case: skip, exception, timeout - orange
+                                'background-color: #000000;');
                             break;
                     }
-                    data.setValue(testCaseIndex, buildIdIndex, '');
                 }
             }
 
@@ -140,12 +199,12 @@
     <!-- Profiling Table -->
     <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
 
+    <div id = "legend_table_div" style="margin-left:100px; margin-top:10px"></div>
     <!-- Grid tables-->
-    <div style="margin-left:100px;margin-top:50px">
+    <div style="margin-left:100px;margin-top:10px">
         <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
         <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
     </div>
-
     <div id="grid_table_div" style="margin-left:100px"></div>
 
     <script type="text/javascript">
