@@ -1,0 +1,30 @@
+component_class: LIB_SHARED
+component_type: BIONIC_LIBCUTIL
+component_type_version: 1.0
+component_name: "libcutil"
+
+header: "<unistd.h>"
+header: "<stdint.h>"
+header: "<sys/types.h>"
+
+api: {
+  name: "qtaguid_tagSocket"
+  return_type: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+  }
+
+}
+
