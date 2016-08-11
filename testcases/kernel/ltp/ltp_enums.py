@@ -33,6 +33,10 @@ class RequirementState(object):
     UNSATISFIED = 3
 
 
+class ConfigKeys(object):
+    RUN_STAGING = "run_staging"
+
+
 class ShellEnvKeys(object):
     """Shell env keys to run LTP (Linux Test Project) testcases.
 
@@ -62,6 +66,7 @@ class TestExitCode(object):
     TCONF = 32
     TBROK = 2
     SEGFAULT = 139
+
 
 class Requirements(object):
     """Enum for all ltp requirements"""

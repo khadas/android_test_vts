@@ -35,15 +35,15 @@ class EnvironmentRequirementChecker(object):
     are cached in a dictionary for multiple use.
 
     Attributes:
-        _REQUIREMENT_DEFINITIONS: dictionary {string, obj}, a map between requirement
-                                  name and the actual definition class object
-        _result_cache: dictionary {requirement_check_method_name: (bool, string)}
-                       a map between check method name and cached result
-                       tuples (boolean, note)
-        _shell_env: ShellEnvironment object, which checks and sets shell environments
-                    given a shell mirror
-        shell: shell mirror object, can be used to execute shell commands on target
-               side through runner
+        _REQUIREMENT_DEFINITIONS: dictionary {string, obj}, a map between
+            requirement name and the actual definition class object
+        _result_cache: dictionary {requirement_check_method_name:
+            (bool, string)}, a map between check method name and cached result
+            tuples (boolean, note)
+        _shell_env: ShellEnvironment object, which checks and sets
+            shell environments given a shell mirror
+        shell: shell mirror object, can be used to execute shell
+            commands on target side through runner
     """
 
     def __init__(self, shell):
@@ -79,7 +79,8 @@ class EnvironmentRequirementChecker(object):
                 result.append(rule)
 
         for rule in ltp_configs.REQUIREMENT_TO_TESTSUITE:
-            if test_case.testsuite in ltp_configs.REQUIREMENT_TO_TESTSUITE[rule]:
+            if test_case.testsuite in ltp_configs.REQUIREMENT_TO_TESTSUITE[
+                    rule]:
                 result.append(rule)
 
         return list(set(result))
@@ -91,24 +92,22 @@ class EnvironmentRequirementChecker(object):
         Args:
             test_case: TestCase object, a given test case to check
         """
-        asserts.skipIf(
-            test_case.requirement_state == ltp_enums.RequirementState.UNSATISFIED,
-            test_case.note)
-        asserts.skipIf(not self.IsTestBinaryExist(test_case),
-                       test_case.note)
+        asserts.skipIf(test_case.requirement_state ==
+                       ltp_enums.RequirementState.UNSATISFIED, test_case.note)
+        asserts.skipIf(not self.IsTestBinaryExist(test_case), test_case.note)
 
         for requirement in self.GetRequirements(test_case):
             if requirement not in self._result_cache:
                 definitions = self._REQUIREMENT_DEFINITIONS[requirement]
-                self._result_cache[requirement] = \
-                    self._shell_env.ExecuteDefinitions(definitions)
+                self._result_cache[
+                    requirement] = self._shell_env.ExecuteDefinitions(
+                        definitions)
 
             result, note = self._result_cache[requirement]
             logging.info("Result for %s's requirement %s is %s", test_case,
                          requirement, result)
             if result is False:
-                test_case.requirement_state = \
-                    ltp_enums.RequirementState.UNSATISFIED
+                test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
                 test_case.note = note
                 asserts.skip(note)
         test_case.requirement_state = ltp_enums.RequirementState.SATISFIED
@@ -160,8 +159,7 @@ class EnvironmentRequirementChecker(object):
             True if exists, False otherwise
         """
         if test_case.requirement_state != ltp_enums.RequirementState.UNCHECKED:
-            return test_case.requirement_state != \
-                        ltp_enums.RequirementState.UNSATISFIED
+            return test_case.requirement_state != ltp_enums.RequirementState.UNSATISFIED
 
         command_results = self._shell.Execute("ls %s" % test_case.path)
         exists = command_results[const.STDOUT][0].find(

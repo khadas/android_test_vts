@@ -25,7 +25,7 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 from vts.testcases.kernel.ltp import test_cases_parser
-from vts.testcases.kernel.ltp import environment_requirement_checker
+from vts.testcases.kernel.ltp import environment_requirement_checker as env_checker
 from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import ltp_configs
 
@@ -44,25 +44,28 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
-        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
+        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+                           ltp_enums.ConfigKeys.RUN_STAGING]
         self.getUserParams(required_params)
 
         logging.info("data_file_path: %s", self.data_file_path)
+        logging.info("run_staging: %s", self.run_staging)
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
 
-        self._requirement = \
-            environment_requirement_checker.EnvironmentRequirementChecker(
-                self._shell)
+        self._requirement = env_checker.EnvironmentRequirementChecker(
+            self._shell)
 
-        self._testcases = test_cases_parser.TestCasesParser(self.data_file_path)
+        self._testcases = test_cases_parser.TestCasesParser(
+            self.data_file_path)
         self._env = {ltp_enums.ShellEnvKeys.TMP: ltp_configs.TMP,
                      ltp_enums.ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
                      ltp_enums.ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
                      ltp_enums.ShellEnvKeys.TMPDIR: ltp_configs.TMPDIR,
-                     ltp_enums.ShellEnvKeys.LTP_DEV_FS_TYPE: ltp_configs.LTP_DEV_FS_TYPE,
+                     ltp_enums.ShellEnvKeys.LTP_DEV_FS_TYPE:
+                     ltp_configs.LTP_DEV_FS_TYPE,
                      ltp_enums.ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
                      ltp_enums.ShellEnvKeys.PATH: ltp_configs.PATH}
 
@@ -90,8 +93,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def Verify(self, results):
         """Verifies the test result of each test case."""
-        asserts.assertFalse(len(results) == 0,
-                            "No response received. Socket timeout")
+        asserts.assertFalse(
+            len(results) == 0, "No response received. Socket timeout")
 
         logging.info("stdout: %s", results[const.STDOUT])
         logging.info("stderr: %s", results[const.STDERR])
@@ -120,16 +123,19 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.PushFiles(n_bit)
         logging.info("[Test Case] test%sBits SKIP", n_bit)
 
-        test_cases = list(self._testcases.Load(ltp_configs.LTPDIR))
+        test_cases = list(
+            self._testcases.Load(
+                ltp_configs.LTPDIR, n_bit=n_bit, run_staging=self.run_staging))
         logging.info("Checking binary exists for all test cases.")
         self._requirement.RunCheckTestcasePathExistsAll(test_cases)
         self._requirement.RunChmodTestcasesAll(test_cases)
-        logging.info("Start running individual tests.")
+        logging.info("Start running %i individual tests." % len(test_cases))
 
-        self.runGeneratedTests(test_func=self.RunLtpOnce,
-                               settings=test_cases,
-                               args=(n_bit, ),
-                               name_func=self.GetTestName)
+        self.runGeneratedTests(
+            test_func=self.RunLtpOnce,
+            settings=test_cases,
+            args=(n_bit, ),
+            name_func=self.GetTestName)
         logging.info("[Test Case] test%sBits", n_bit)
         asserts.skip("Finished generating {} bit tests.".format(n_bit))
 

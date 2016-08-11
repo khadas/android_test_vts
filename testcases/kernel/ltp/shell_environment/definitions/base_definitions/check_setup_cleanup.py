@@ -90,10 +90,9 @@ class CheckSetupCleanup(object):
         return self.InternalCall(self.Setup)
 
     def __str__(self):
-        return "Shell Environment Check Definition Class:{cls}" \
-               "  Variables:{props}".format(msg=message,
-                                            cls=self.__class__.__name__,
-                                            props=vars(self))
+        return ("Shell Environment Check Definition Class:{cls} "
+                "Variables:{props}").format(
+                    msg=message, cls=self.__class__.__name__, props=vars(self))
 
     def GetNote(self):
         """Get a string note as error message. Can be override by sub-class"""
@@ -108,8 +107,8 @@ class CheckSetupCleanup(object):
         self.note = None
         success = method()
         if not success and not self.note:
-            self.note = "Shell environment definition unsatisfied: " \
-                        "step [%s] failed." % method.__name__
+            self.note = ("Shell environment definition unsatisfied: step [%s] "
+                         "failed.") % method.__name__
         return success
 
     def ValidateInput(self):
