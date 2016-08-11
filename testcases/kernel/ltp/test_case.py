@@ -17,7 +17,7 @@
 
 import logging
 
-from vts.testcases.kernel.ltp.ltp_enums import RequirementState
+from vts.testcases.kernel.ltp import ltp_enums
 
 
 class TestCase(object):
@@ -39,7 +39,7 @@ class TestCase(object):
         self.testname = testname
         self.path = path
         self._args = args
-        self.requirement_state = RequirementState.UNCHECKED
+        self.requirement_state = ltp_enums.RequirementState.UNCHECKED
         self.note = None
 
     @property
