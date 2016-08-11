@@ -54,7 +54,8 @@ class TestCasesParser(object):
                                     os.path.join(ltp_dir, 'testcases/bin',
                                                  testbinary), args)
 
-                if testcase in ltp_configs.DISABLED_TESTS:
+                if testcase in ltp_configs.DISABLED_TESTS or \
+                    testcase.testname in ltp_configs.DISABLED_TESTS:
                     continue
 
                 yield testcase
