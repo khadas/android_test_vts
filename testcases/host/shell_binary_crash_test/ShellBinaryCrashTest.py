@@ -27,6 +27,9 @@ from vts.runners.host import const
 class ShellBinaryCrashTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A binary crash test case for the shell driver."""
 
+    EXIT_CODE_CRASH = 133
+    EXIT_CODE_SEGFAULT = 139
+
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
 
@@ -35,13 +38,12 @@ class ShellBinaryCrashTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.dut.shell.InvokeTerminal("my_shell1")
         target = "/data/local/tmp/64/vts_test_binary_crash_app"
         results = self.dut.shell.my_shell1.Execute(
-            ["chmod 755 %s" % target,
-             "%s" % target])
+            ["chmod 755 %s" % target, target])
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 2)
         asserts.assertEqual(results[const.STDOUT][1].strip(), "")
         # "crash_app: start" is also valid output.
-        asserts.assertEqual(results[const.EXIT_CODE][1], 127)
+        asserts.assertEqual(results[const.EXIT_CODE][1], self.EXIT_CODE_CRASH)
 
         self.CheckShellDriver("my_shell1")
         self.CheckShellDriver("my_shell2")
@@ -51,14 +53,14 @@ class ShellBinaryCrashTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.dut.shell.InvokeTerminal("my_shell1")
         target = "/data/local/tmp/32/connect01"
         results = self.dut.shell.my_shell1.Execute(
-            ["chmod 755 %s" % target,
-             "%s" % target])
+            ["chmod 755 %s" % target, target])
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 2)
         asserts.assertEqual(results[const.STDOUT][1].strip(), "")
         # TODO: currently the agent doesn't return the stdout log emitted
         # before a failure.
-        asserts.assertEqual(results[const.EXIT_CODE][1], 127)
+        asserts.assertEqual(results[const.EXIT_CODE][1],
+                            self.EXIT_CODE_SEGFAULT)
 
         self.CheckShellDriver("my_shell1")
         self.CheckShellDriver("my_shell2")
