@@ -58,12 +58,13 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._requirement = EnvironmentRequirementChecker(self._shell)
 
         self._testcases = TestCasesParser(self.data_file_path)
-        self._env = {ShellEnvKeys.TMPDIR: ltp_configs.LTPTMPDIR,
-                     ShellEnvKeys.TMP: ltp_configs.LTPTMP,
-                     ShellEnvKeys.LTP_DEV_FS_TYPE: "ext4",
+        self._env = {ShellEnvKeys.TMP: ltp_configs.TMP,
+                     ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
+                     ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
+                     ShellEnvKeys.TMPDIR: ltp_configs.TMPDIR,
+                     ShellEnvKeys.LTP_DEV_FS_TYPE: ltp_configs.LTP_DEV_FS_TYPE,
                      ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
-                     ShellEnvKeys.PATH:
-                     "/system/bin:%s/testcases/bin" % ltp_configs.LTPDIR, }
+                     ShellEnvKeys.PATH: ltp_configs.PATH}
 
     def PushFiles(self, n_bit):
         """Push the related files to target.
