@@ -1,0 +1,52 @@
+// Copyright 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package android.vts;
+
+import "test/vts/proto/InterfaceSpecificationMessage.proto";
+
+
+// To specify a module (which is logically equivalent to a .hal file in case
+// of a HIDL HAL).
+message ComponentSpecificationMessage {
+  // Class, type, and version of a target component.
+  optional ComponentClass component_class = 1;
+  optional ComponentType component_type = 2;
+  optional float component_type_version = 3 [default = 1.0];
+
+  // The name of a target component (used for HIDL HALs).
+  optional bytes component_name = 4;
+
+  // The package path of a target component (e.g., android.hardware.name).
+  // name implies the component_type field.
+  optional bytes package = 11;
+
+  // The modules to import (e.g., package_path.component_name).
+  repeated bytes import = 12;
+
+  // The name of original C/C++ data structure
+  // (used for conventional and legacy HALs).
+  optional bytes original_data_structure_name = 1001;
+
+  // a list of headers that need to be imported in order to use the component.
+  repeated bytes header = 1002;
+
+  // For a .hal file which actually defines an interface.
+  optional InterfaceSpecificationMessage interface = 2001;
+
+  // For a .hal file which does not defines an interface (e.g., types.hal).
+  repeated VariableSpecificationMessage attributes = 2101;
+}
