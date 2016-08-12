@@ -34,7 +34,6 @@ LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SHARED_LIBRARIES := \
     liblog \
 
-# enable below for gcov
 LOCAL_SANITIZE := never
 LOCAL_CLANG := true
 LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
@@ -56,7 +55,6 @@ VTS_GCNO_MODULE := $(LOCAL_MODULE)
 include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
 
-VTS_GCNO_FILE := lights
 VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
-VTS_GCOV_SRC_CPP_FILE := lights.c
+VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
 include test/vts/tools/build/Android.packaging_gcno.mk

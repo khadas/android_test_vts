@@ -13,23 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+ifeq ($(strip $(my_module_multilib)), 32)
+shared_lib := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE),,,true)
+else
+shared_lib := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))
+endif
 
-gcno_obj_file := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))/${VTS_GCNO_FILE}.o
-gcno_src_file := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))/${VTS_GCNO_FILE}.gcno
+base_src_paths := ${basename ${VTS_GCOV_SRC_CPP_FILES}}
 
-VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+obj_target_files := $(addsuffix .o, $(addprefix $(shared_lib)/,${base_src_paths}))
+gcno_target_files := $(addsuffix .gcno, $(addprefix $(shared_lib)/,${base_src_paths}))
+src_files := $(addprefix $(VTS_GCOV_SRC_DIR)/, $(VTS_GCOV_SRC_CPP_FILES))
 
-vts_framework_lib_gcno_file := $(VTS_TESTCASES_OUT)/${LOCAL_MODULE}_${VTS_GCNO_FILE}.gcno
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases/coverage
+vts_framework_lib_gcno_files := $(addsuffix .gcno, $(addprefix \
+	$(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)/, ${base_src_paths}))
+vts_framework_lib_src_files := $(addprefix \
+	$(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)/, $(VTS_GCOV_SRC_CPP_FILES))
+src_dest_gcno_tuples := $(join $(gcno_target_files), $(addprefix :,\
+	$(vts_framework_lib_gcno_files)))
+src_dest_src_tuples := $(join $(src_files), $(addprefix :, \
+	$(vts_framework_lib_src_files)))
 
-$(vts_framework_lib_gcno_file): $(gcno_obj_file) | $(ACP)
-	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
-	$(hide) touch $(gcno_src_file)
-	$(hide) $(ACP) -fp $(gcno_src_file) $@
-
-vts_framework_lib_src_file := $(VTS_TESTCASES_OUT)/${LOCAL_MODULE}_${VTS_GCOV_SRC_CPP_FILE}
-
-$(vts_framework_lib_src_file): ${VTS_GCOV_SRC_DIR}/${VTS_GCOV_SRC_CPP_FILE} | $(ACP)
-	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
-	$(hide) $(ACP) -fp $< $@
-
-vts: $(vts_framework_lib_gcno_file) $(vts_framework_lib_src_file)
+ifneq (,$(filter $(LOCAL_NATIVE_COVERAGE),true always))
+$(gcno_target_files): $(obj_target_files)
+vts: $(call copy-many-files, $(src_dest_src_tuples)) \
+	$(call copy-many-files, $(src_dest_gcno_tuples))
+endif

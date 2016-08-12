@@ -79,10 +79,7 @@ LOCAL_SHARED_LIBRARIES := libcamera_client liblog libhardware libutils libcutils
 LOCAL_SHARED_LIBRARIES += libmmcamera_interface.vts libmmjpeg_interface.vts libui libcamera_metadata
 LOCAL_SHARED_LIBRARIES += libqdMetaData.vts
 
-# enable below for gcov
-LOCAL_CLANG := true
-LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
-LOCAL_LDFLAGS += --coverage
+LOCAL_NATIVE_COVERAGE := true
 
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_MODULE := camera.bullhead-vts
@@ -93,7 +90,13 @@ LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib_arm.mk
+include test/vts/tools/build/Android.packaging_sharedlib.mk
+
+VTS_GCNO_MODULE := $(LOCAL_MODULE)
+VTS_GCOV_SRC_DIR := test/vts/hals/camera/bullhead/QCamera2
+VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
+
+include test/vts/tools/build/Android.packaging_gcno.mk
 
 include $(call first-makefiles-under,$(LOCAL_PATH))
 
