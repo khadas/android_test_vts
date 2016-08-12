@@ -16,8 +16,7 @@
 #
 
 from vts.runners.host import const
-from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions \
-    import check_setup_cleanup
+from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions import check_setup_cleanup
 
 
 class DirectoryExists(check_setup_cleanup.CheckSetupCleanup):
@@ -36,8 +35,11 @@ class DirectoryExists(check_setup_cleanup.CheckSetupCleanup):
         _permissions: list of int, desired permissions for each path
     """
 
-    def __init__(self, paths=None,
-                 to_check=True, to_setup=False, to_cleanup=False):
+    def __init__(self,
+                 paths=None,
+                 to_check=True,
+                 to_setup=False,
+                 to_cleanup=False):
         self._paths = paths
         self.to_check = to_check
         self.to_setup = to_setup
@@ -59,8 +61,9 @@ class DirectoryExists(check_setup_cleanup.CheckSetupCleanup):
         commands = ["ls %s" % path for path in self._paths]
         results = self.ExecuteShellCommand(commands)[const.EXIT_CODE]
 
-        self._failed_paths = [path for path, fail in
-                              zip(self._paths, map(bool, results)) if fail]
+        self._failed_paths = [
+            path for path, fail in zip(self._paths, map(bool, results)) if fail
+        ]
 
         if not self._failed_paths:
             return True

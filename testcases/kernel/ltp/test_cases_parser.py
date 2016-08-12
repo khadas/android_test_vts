@@ -31,14 +31,19 @@ class TestCasesParser(object):
     def __init__(self, data_path):
         self._data_path = data_path
 
-    def _GetTestcaseFilePath(self):
-        """return the test case definition fiile's path."""
-        return os.path.join(self._data_path, '32', 'ltp',
-                            'ltp_vts_testcases.txt')
+    def IsTestcaseInList(self, testcase, name_list, n_bit):
+        """Check whether a given testcase object is in a disabled test list"""
+        name_set = (testcase, testcase.testname,
+                    "{test_name}_%{n_bit}bit".format(
+                        test_name=testcase.testname, n_bit=n_bit))
+        return len(set(name_set).intersection(name_list)) > 0
 
-    def Load(self, ltp_dir):
-        """read the definition file and return a TestCase generator."""
-        with open(self._GetTestcaseFilePath(), 'r') as f:
+    def Load(self, ltp_dir, n_bit, run_staging=False):
+        """Read the definition file and return a TestCase generator."""
+        case_definition_path = os.path.join(self._data_path, n_bit, 'ltp',
+                                            'ltp_vts_testcases.txt')
+
+        with open(case_definition_path, 'r') as f:
             for line in f:
                 items = line.split('\t')
                 if not len(items) == 4:
@@ -50,12 +55,16 @@ class TestCasesParser(object):
                 if testname.startswith("DISABLED_"):
                     continue
 
-                testcase = test_case.TestCase(testsuite, testname,
-                                    os.path.join(ltp_dir, 'testcases/bin',
-                                                 testbinary), args)
+                testcase = test_case.TestCase(
+                    testsuite, testname, os.path.join(ltp_dir, 'testcases/bin',
+                                                      testbinary), args)
 
-                if testcase in ltp_configs.DISABLED_TESTS or \
-                    testcase.testname in ltp_configs.DISABLED_TESTS:
+                if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
+                                         n_bit):
+                    continue
+
+                if (not run_staging and self.IsTestcaseInList(
+                        testcase, ltp_configs.STAGING_TESTS, n_bit)):
                     continue
 
                 yield testcase

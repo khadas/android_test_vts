@@ -36,7 +36,6 @@ PATH = "/system/bin:%s" % os.path.join(LTPDIR, "testcases/bin")
 # File system type for loop device
 LTP_DEV_FS_TYPE = "ext4"
 
-
 # Requirement to testcase dictionary.
 REQUIREMENTS_TO_TESTCASE = {
     ltp_enums.Requirements.LOOP_DEVICE_SUPPORT: [
@@ -69,8 +68,8 @@ REQUIREMENTS_TO_TESTCASE = {
         "syscalls-utime06",
         "syscalls-utimes01",
         "syscalls-mkfs01",
-        ],
-    }
+    ],
+}
 
 # Requirement for all test cases
 REQUIREMENT_FOR_ALL = [ltp_enums.Requirements.LTP_TMP_DIR]
@@ -78,8 +77,25 @@ REQUIREMENT_FOR_ALL = [ltp_enums.Requirements.LTP_TMP_DIR]
 # Requirement to test suite dictionary
 REQUIREMENT_TO_TESTSUITE = {}
 
-# Tests under investigation
-
+# Staging tests are temporally disabled in stable version and are being addressed.
+STAGING_TESTS = [
+    # Bug#30675453
+    "syscalls-perf_event_open02_32bit",
+    # Bug#30688551
+    "syscalls-lstat03_64_32bit",
+    "syscalls-lstat03_32bit"
+    # Bug#30688061
+    "input-input03_32bit",
+    # Bug#30688056
+    "cpuhotplug-cpuhotplug04_32bit",
+    # Bug#30699880
+    "mm-mtest01w_32bit",
+    "mm-mtest01_32bit",
+    # Bug#30688574
+    "syscalls-accept4_01_32bit",
+    # Bug#30689411
+    "mm-mmapstress03_32bit"
+]
 
 # Tests disabled
 # Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
@@ -423,4 +439,36 @@ DISABLED_TESTS = [
     "ext4_persist_prealloc",
     "connect01",
     "prot_hsymlinks",
-    ]
+    "fs-ftest01_32bit",
+    "fs-ftest03_32bit",
+    "fs-ftest04_32bit",
+    "fs-ftest05_32bit",
+    "fs-ftest07_32bit",
+    "fs-ftest08_32bit",
+    "fs-inode02_32bit",
+    "ipc-signal_test_01_32bit",
+    "mm-data_space_32bit",
+    "mm-mmapstress01_32bit",
+    "mm-mmapstress03_32bit",
+    "mm-mmapstress09_32bit",
+    "mm-mmapstress10_32bit",
+    "syscalls-clock_nanosleep01_32bit",
+    "syscalls-clone04_32bit",
+    "syscalls-creat08_32bit",
+    "syscalls-fcntl14_32bit",
+    "syscalls-fcntl14_32bit",
+    "syscalls-fcntl14_64_32bit",
+    "syscalls-fcntl17_32bit",
+    "syscalls-fcntl17_64_32bit",
+    "syscalls-getdomainname01_32bit",
+    "syscalls-kill12_32bit",
+    "syscalls-setdomainname01_32bit",
+    "syscalls-setdomainname02_32bit",
+    "syscalls-setdomainname03_32bit",
+    "syscalls-sighold02_32bit",
+    "syscalls-sigpending02_32bit",
+    "syscalls-sigrelse01_32bit",
+    "syscalls-vfork02_32bit",
+    "syscalls-getrusage03_32bit",
+    "syscalls-getrusage04_32bit",
+]
