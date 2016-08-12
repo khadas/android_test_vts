@@ -41,7 +41,8 @@ COMPONENT_TYPE_DICT = {"audio": 1,
                        "mobile": 6,
                        "bluetooth": 7,
                        "nfc": 8,
-                       "bionic_libm": 1001}
+                       "bionic_libm": 1001,
+                       "vndk_libcutils": 1101}
 
 VTS_CALLBACK_SERVER_TARGET_SIDE_PORT = 5010
 

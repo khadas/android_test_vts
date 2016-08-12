@@ -57,6 +57,7 @@ function vts_multidevice_target_setup {
   adb push specification/hal_hidl/Nfc.vts /data/local/tmp/spec/Nfc.vts
   adb push specification/hal_hidl/NfcClientCallback.vts /data/local/tmp/spec/NfcClientCallback.vts
   adb push specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
+  adb push specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
 
   echo "install asan packages"
   # asan
