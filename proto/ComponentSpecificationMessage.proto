@@ -48,5 +48,5 @@ message ComponentSpecificationMessage {
   optional InterfaceSpecificationMessage interface = 2001;
 
   // For a .hal file which does not defines an interface (e.g., types.hal).
-  repeated VariableSpecificationMessage attributes = 2101;
+  repeated VariableSpecificationMessage attribute = 2101;
 }
