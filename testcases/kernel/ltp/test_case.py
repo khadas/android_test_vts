@@ -111,5 +111,10 @@ class TestCase(object):
             return ' '.join([p.replace(replace_string_from, replace_string_to)
                              for p in self._args])
 
-    def __str__(self):
+    @property
+    def fullname(self):
+        """Return full test name in <testsuite-testname> format"""
         return "%s-%s" % (self.testsuite, self.testname)
+
+    def __str__(self):
+        return self.fullname
