@@ -91,6 +91,9 @@ The following diagram discusses the flow of the dashboard wrt to the directory :
 ```
    within the 'com.google.appengine' plugin tag :
 
+   Install the Google App Engine Python SDK:
+   https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python
+
 ## To run GAE on local machine:
 
 $ cd web/dashboard/appengine/servlet
