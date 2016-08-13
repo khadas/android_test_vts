@@ -24,4 +24,4 @@ class LoopDeviceSupport(check_setup_cleanup.CheckSetupCleanup):
     note = "Kernel does not have loop device support"
 
     def Check(self):
-        return not self.ExecuteCommand("losetup -f")[const.EXIT_CODE][0]
+        return not self.ExecuteShellCommand("losetup -f")[const.EXIT_CODE][0]
