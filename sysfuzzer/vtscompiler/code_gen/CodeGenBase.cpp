@@ -179,7 +179,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
            << endl;
     cpp_ss << "}" << endl << endl;
   } else {
-    if (message.component_class() == HAL_HIDL &&
+    if (message.component_class() != HAL_HIDL ||
         message.component_name() != "types") {
       std::stringstream ss;
       // return type
