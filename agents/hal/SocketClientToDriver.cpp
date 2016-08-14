@@ -104,6 +104,29 @@ const char* VtsDriverSocketClient::GetFunctions() {
   return result;
 }
 
+const char* VtsDriverSocketClient::ReadSpecification(
+    const string& component_name) {
+  cout << "[agent->driver] LIST_FUNCTIONS" << endl;
+
+  VtsDriverControlCommandMessage command_message;
+  command_message.set_command_type(
+      VTS_DRIVER_COMMAND_READ_SPECIFICATION);
+  command_message.set_module_name(component_name);
+  if (!VtsSocketSendMessage(command_message)) return NULL;
+
+  VtsDriverControlResponseMessage response_message;
+  if (!VtsSocketRecvMessage(&response_message)) return NULL;
+
+  char* result =
+      (char*)malloc(strlen(response_message.return_message().c_str()) + 1);
+  if (!result) {
+    cerr << __func__ << " ERROR result is NULL" << endl;
+    return NULL;
+  }
+  strcpy(result, response_message.return_message().c_str());
+  return result;
+}
+
 const char* VtsDriverSocketClient::Call(const string& arg) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);

@@ -16,6 +16,7 @@ api: {
   arg: {
     type: TYPE_HIDL_CALLBACK
     predefined_type: "INfcClientCallback"
+    is_callback: true
   }
 }
 

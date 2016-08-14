@@ -218,7 +218,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       if (!arg.is_callback() && arg.type() == TYPE_HIDL_CALLBACK &&
           callbacks.find(arg.predefined_type()) == callbacks.end()) {
         cpp_ss << "extern " << arg.predefined_type() << "* "
-               << "VtsFuzzerCreate" << arg.predefined_type() << "();" << endl << endl;
+               << "VtsFuzzerCreate" << arg.predefined_type()
+               << "(const string& callback_socket_name);" << endl << endl;
         callbacks.insert(arg.predefined_type());
       }
     }
@@ -276,65 +277,75 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       int arg_count = 0;
       for (auto const& arg : api.arg()) {
         if (arg.is_callback()) {  // arg.type() isn't always TYPE_FUNCTION_POINTER
-          string name = "vts_callback_" + fuzzer_extended_class_name + "_" +
-                        arg.predefined_type();  // TODO - check to make sure name
-                                                // is always correct
-          if (name.back() == '*') name.pop_back();
-          cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
-          cpp_ss << name << "(callback_socket_name);" << endl;
-          cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
-                 << arg_count << "));" << endl;
+          if (arg.type() == TYPE_PREDEFINED) {
+            string name = "vts_callback_" + fuzzer_extended_class_name + "_" +
+                arg.predefined_type();  // TODO - check to make sure name
+                                        // is always correct
+            if (name.back() == '*') name.pop_back();
+            cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
+            cpp_ss << name << "(callback_socket_name);" << endl;
+            cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
+                   << arg_count << "));" << endl;
 
-          cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
-          cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg, &message)
-                 << ") malloc(sizeof(" << GetCppVariableType(arg, &message) << "));"
-                 << endl;
-          // TODO: think about how to free the malloced callback data structure.
-          // find the spec.
-          bool found = false;
-          cout << name << endl;
-          for (auto const& attribute : message.attribute()) {
-            if (attribute.type() == TYPE_FUNCTION_POINTER &&
-                attribute.is_callback()) {
-              string target_name = "vts_callback_" + fuzzer_extended_class_name +
-                                   "_" + attribute.name();
-              cout << "compare" << endl;
-              cout << target_name << endl;
-              if (name == target_name) {
-                if (attribute.function_pointer_size() > 1) {
-                  for (auto const& func_pt : attribute.function_pointer()) {
-                    cpp_ss << "    arg" << arg_count << "->"
-                           << func_pt.function_name() << " = arg" << arg_count
-                           << "callback->" << func_pt.function_name() << ";"
-                           << endl;
+            cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+            cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg, &message)
+                   << ") malloc(sizeof(" << GetCppVariableType(arg, &message) << "));"
+                   << endl;
+            // TODO: think about how to free the malloced callback data structure.
+            // find the spec.
+            bool found = false;
+            cout << name << endl;
+            for (auto const& attribute : message.attribute()) {
+              if (attribute.type() == TYPE_FUNCTION_POINTER &&
+                  attribute.is_callback()) {
+                string target_name = "vts_callback_" + fuzzer_extended_class_name +
+                                     "_" + attribute.name();
+                cout << "compare" << endl;
+                cout << target_name << endl;
+                if (name == target_name) {
+                  if (attribute.function_pointer_size() > 1) {
+                    for (auto const& func_pt : attribute.function_pointer()) {
+                      cpp_ss << "    arg" << arg_count << "->"
+                             << func_pt.function_name() << " = arg" << arg_count
+                             << "callback->" << func_pt.function_name() << ";"
+                             << endl;
+                    }
+                  } else {
+                    cpp_ss << "    arg" << arg_count << " = arg" << arg_count
+                           << "callback->" << attribute.name() << ";" << endl;
                   }
-                } else {
-                  cpp_ss << "    arg" << arg_count << " = arg" << arg_count
-                         << "callback->" << attribute.name() << ";" << endl;
+                  found = true;
+                  break;
                 }
-                found = true;
-                break;
               }
             }
-          }
-          if (!found) {
-            cerr << __func__ << " ERROR callback definition missing for " << name
-                 << " of " << api.name() << endl;
-            exit(-1);
+            if (!found) {
+              cerr << __func__ << " ERROR callback definition missing for " << name
+                   << " of " << api.name() << endl;
+              exit(-1);
+            }
+          } else if (arg.type() == TYPE_HIDL_CALLBACK) {
+            cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count
+                   << "(" << "VtsFuzzerCreate"
+                   << arg.predefined_type() << "(callback_socket_name));" << endl;
           }
         } else {
           if (arg.type() == TYPE_VECTOR) {
             cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
                    << "arg" << arg_count << "buffer = ("
                    << arg.vector_value(0).scalar_type()
-                   << "*) malloc(8 * sizeof("
+                   << "*) malloc("
+                   << "func_msg->arg(" << arg_count
+                   << ").vector_value(0).value().size()"
+                   << " * sizeof("
                    << arg.vector_value(0).scalar_type() << "));"
                    << endl;
           }
+
           if (arg.type() == TYPE_HIDL_CALLBACK) {
             cpp_ss << "    sp<" << arg.predefined_type()  << "> arg" << arg_count
                    << "(" << "VtsFuzzerCreate"
-                   << arg.predefined_type() << "());" << endl;
+                   << arg.predefined_type() << "(callback_socket_name));" << endl;
           } else if (arg.type() == TYPE_STRUCT) {
             cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
             cpp_ss << "arg" << arg_count;
@@ -389,8 +400,6 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               cpp_ss << ") : ";
             } else if (arg.type() == TYPE_ENUM) {
               // TODO: impl
-            } else if (arg.type() == TYPE_STRUCT) {
-              // TODO: impl
             } else {
               cerr << __func__ << ":" << __LINE__ << " unknown type "
                    << arg.type() << endl;
@@ -406,10 +415,26 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             // a message to a C/C++ struct.
           } else if (arg.type() == TYPE_VECTOR) {
             // TODO: dynamically generate the initial value for hidl_vec
+            cpp_ss << "    for (int vector_index = 0; vector_index < "
+                   << "func_msg->arg(" << arg_count << ").vector_value(0).value().size(); "
+                   << "vector_index++) {" << endl;
+            cpp_ss << "      arg" << arg_count << "buffer[vector_index] = "
+                   << "func_msg->arg(" << arg_count << ").vector_value(0).value(vector_index)."
+                   << arg.vector_value(0).scalar_type() << "();"
+                   << endl;
+            cpp_ss << "    }" << endl;
             cpp_ss << "arg" << arg_count << ".setTo("
-                   << "arg" << arg_count << "buffer, 8)";
+                   << "arg" << arg_count << "buffer, "
+                   << "func_msg->arg(" << arg_count << ").vector_value(0).value().size()"
+                   << ")";
           }
           cpp_ss << ";" << endl;
+          if (arg.type() == TYPE_STRUCT) {
+            if (message.component_class() == HAL_HIDL) {
+              cpp_ss << "    MessageTo" << GetCppVariableType(arg, &message)
+                     << "(func_msg->arg(" << arg_count << "), &arg" << arg_count << ");" << endl;
+            }
+          }
         }
         arg_count++;
       }
@@ -477,8 +502,39 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                << attribute.enum_value().enumerator(0)
                << ";" << endl;
         cpp_ss << "}" << endl;
+      } else if (attribute.type() == TYPE_STRUCT) {
+        cpp_ss << "void " << "MessageTo" << attribute.name()
+               << "(const VariableSpecificationMessage& var_msg, "
+               << attribute.name() << "* arg) {"
+               << endl;
+        int struct_index = 0;
+        for (const auto& struct_value : attribute.struct_value()) {
+          if (struct_value.type() == TYPE_VECTOR) {
+            cpp_ss << "  arg->" << struct_value.name() << ".resize("
+                   << "var_msg.struct_value(" << struct_index
+                   << ").vector_value(0).value().size()"
+                   << ");" << endl;
+            cpp_ss << "  for (int value_index = 0; value_index < "
+                   << "var_msg.struct_value(" << struct_index
+                   << ").vector_value(0).value().size(); "
+                   << "value_index++) {" << endl;
+            cpp_ss << "    arg->" << struct_value.name() << "[value_index] = "
+                   << "var_msg.struct_value(" << struct_index
+                   << ").vector_value(0).value(value_index)."
+                   << struct_value.vector_value(0).scalar_type() << "();"
+                   << endl;
+            cpp_ss << "  }" << endl;
+          } else {
+            cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+                 << struct_value.type() << endl;
+            exit(-1);
+          }
+          struct_index++;
+        }
+        cpp_ss << "}" << endl;
       } else {
-        cerr << __func__ << " unsupported attribute type" << endl;
+        cerr << __func__ << " unsupported attribute type "
+             << attribute.type() << endl;
       }
     }
   }

@@ -33,6 +33,8 @@ enum CommandType {
   CHECK_DRIVER_SERVICE = 101;
   // To start a fuzzer binary service and select a HAL module.
   LAUNCH_DRIVER_SERVICE = 102;
+  // To read the VTS spec of a target component.
+  VTS_AGENT_COMMAND_READ_SPECIFICATION = 103;
 
   // To get a list of available functions.
   LIST_APIS = 201;

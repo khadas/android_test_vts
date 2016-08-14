@@ -16,6 +16,7 @@
 #
 
 import logging
+import time
 
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
@@ -33,19 +34,57 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                  bits=64)
 
     def testBase(self):
-        """A simple testcase which just calls a function."""
-        # TODO: extend to make realistic testcases
-        result = self.dut.hal.nfc.open()
-        logging.info("result: %s", result.return_type.string_value.message)
+        """A simple testcase which just calls each registered function."""
 
-    def TestNormla(self):
-        """A simple testcase which just calls functions."""
-        result = self.dut.hal.nfc.open()
-        logging.info("result: %s", result.return_type.string_value.message)
-        result = self.dut.hal.nfc.core_initialized(0)
-        logging.info("result: %s", result.return_type.string_value.message)
+        # TODO: extend to make realistic testcases
+        def send_event(nfc_event_t, nfc_status_t):
+            logging.info("callback send_event")
+            logging.info("arg0 %s", nfc_event_t)
+            logging.info("arg1 %s", nfc_status_t)
+
+        def send_data(nfc_data_t):
+            logging.info("callback send_data")
+            logging.info("arg0 %s", nfc_data_t)
+
+        client_callback = self.dut.hal.nfc.GetHidlCallbackInterface(
+            "INfcClientCallback",
+            sendEvent=send_event,
+            sendData=send_data)
+
+        result = self.dut.hal.nfc.open(client_callback)
+        logging.info("open result: %s",
+                     result.return_type.string_value.message)
+
+        result = self.dut.hal.nfc.pre_discover()
+        logging.info("pre_discover result: %s",
+                     result.return_type.string_value.message)
+
+        result = self.dut.hal.nfc.control_granted()
+        logging.info("control_granted result: %s",
+                     result.return_type.string_value.message)
+
+        result = self.dut.hal.nfc.power_cycle()
+        logging.info("power_cycle result: %s",
+                     result.return_type.string_value.message)
+
+        result = self.dut.hal.nfc.core_initialized([0, 9, 8])
+        logging.info("core_initialized result: %s",
+                     result.return_type.string_value.message)
+
+        nfc_types = self.dut.hal.nfc.GetHidlTypeInterface("types")
+        logging.info("nfc_types: %s", nfc_types)
+        data_vec = nfc_types.nfc_data_t(data=[0, 1, 2, 3, 4, 5])
+        logging.info("data_vec: %s", data_vec)
+
+        result = self.dut.hal.nfc.write(data_vec)
+        logging.info("write result: %s",
+                     result.return_type.string_value.message)
+
         result = self.dut.hal.nfc.close()
-        logging.info("result: %s", result.return_type.string_value.message)
+        logging.info("close result: %s",
+                     result.return_type.string_value.message)
+
+        time.sleep(5)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ import logging
 import random
 
 from vts.utils.python.fuzzer import FuzzerUtils
+from vts.utils.python.mirror import mirror_object_for_types
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from google.protobuf import text_format
 
@@ -131,6 +132,28 @@ class MirrorObject(object):
             logging.debug("attribute: %s", var_msg)
             return RemoteCallToGetAttribute()
         raise MirrorObjectError("unknown attribute name %s" % attribute_name)
+
+    def GetHidlCallbackInterface(self, interface_name, **kwargs):
+        result = self._client.ReadSpecification(interface_name)
+        logging.info("result %s", result)
+
+        var_msg = IfaceSpecMsg.VariableSpecificationMessage()
+        var_msg.name = interface_name
+        var_msg.type = IfaceSpecMsg.TYPE_FUNCTION_POINTER
+        for given_name, given_value in kwargs.iteritems():
+            for api in result.api:
+                logging.debug("check %s %s", api.name, given_name)
+                if given_name == api.name:
+                    func_pt_msg = var_msg.function_pointer.add()
+                    func_pt_msg.function_name = given_name
+                    func_pt_msg.id = self.GetFunctionPointerID(given_value)
+                    break
+        return var_msg
+
+    def GetHidlTypeInterface(self, interface_name):
+        result = self._client.ReadSpecification(interface_name)
+        logging.info("result %s", result)
+        return mirror_object_for_types.MirrorObjectForTypes(result)
 
     def CleanUp(self):
         self._client.Disconnect()
@@ -260,6 +283,18 @@ class MirrorObject(object):
                             arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
                             arg_msg.scalar_value.float_t = value_msg
                             arg_msg.scalar_type = "float_t"
+                        elif isinstance(value_msg, list):
+                            if arg_msg.type == IfaceSpecMsg.TYPE_VECTOR:
+                                arg_msg.vector_value[0].scalar_type
+                                for value in value_msg:
+                                    scalar_value = arg_msg.vector_value[0].value.add()
+                                    setattr(
+                                        scalar_value,
+                                        arg_msg.vector_value[0].scalar_type,
+                                        value)
+                            else:
+                                raise MirrorObjectError(
+                                    "unsupported type %s" % arg_msg.type)
                         else:
                             # TODO: check in advance (whether it's a message)
                             if isinstance(
@@ -291,6 +326,10 @@ class MirrorObject(object):
                                         logging.error("TYPE_STRUCT unsupported")
                                     elif value.type == IfaceSpecMsg.TYPE_FUNCTION_POINTER:
                                         logging.error("TYPE_FUNCTION_POINTER unsupported")
+                                    elif value.type == IfaceSpecMsg.TYPE_VECTOR:
+                                        logging.info("copy before arg %s", arg)
+                                        logging.info("copy before value %s", value)
+                                        # skip
                                     else:
                                         raise MirrorObjectError(
                                             "unsupport type %s" % value.type)
