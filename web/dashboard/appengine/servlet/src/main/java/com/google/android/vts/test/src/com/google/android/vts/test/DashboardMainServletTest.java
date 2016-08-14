@@ -19,8 +19,13 @@ package com.google.android.vts.test;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class tests the behavior of elements on the home screen of VTS Dashboard.
@@ -28,17 +33,20 @@ import org.openqa.selenium.chrome.ChromeDriver;
 public class DashboardMainServletTest extends TestCase {
 
     private static final String LOCALHOST = "localhost:8080";
-    private static final String ASSERT_MESSAGE = "Title should start differently.";
+    private static final String ASSERT_MESSAGE_TITLE = "Title should start differently.";
     private static final String HOMEPAGE_TITLE = "VTS Dashboard";
+    private static final String HOMEPAGE_TABLE_ID = "dashboard_main_table";
     private static final String LOGIN_BUTTON_ID = "submit-login";
     private static WebDriver driver = null;
+
+    // constants for page two - VTS Table
+    private static final String VTS_TABLE_TITLE = "VTS Table";
 
     /**
      * Runs once before running tests.
      */
     @Override
     public void setUp() {
-        System.setProperty("webdriver.chrome.driver", "chromedriver");
         driver = new ChromeDriver();
     }
 
@@ -57,6 +65,36 @@ public class DashboardMainServletTest extends TestCase {
         driver.navigate().to(LOCALHOST);
         driver.navigate().refresh();
         driver.findElement(By.id(LOGIN_BUTTON_ID)).click();
-        Assert.assertTrue(ASSERT_MESSAGE, driver.getTitle().equals(HOMEPAGE_TITLE));
+        Assert.assertTrue(ASSERT_MESSAGE_TITLE, driver.getTitle().equals(HOMEPAGE_TITLE));
+    }
+
+    /**
+     * This test clicks each of the links in the table on the home page and confirms that it
+     * navigates to the second page.
+     */
+    public void testDashboardMainTable() {
+        driver.navigate().to(LOCALHOST);
+        driver.navigate().refresh();
+        driver.findElement(By.id(LOGIN_BUTTON_ID)).click();
+
+        WebElement tableElement = driver.findElement(By.id(HOMEPAGE_TABLE_ID));
+        List<WebElement> trCollection = tableElement.findElements(By.tagName("tr"));
+
+        List<String> linkCollection = new ArrayList<String>();
+
+        for(WebElement trElement : trCollection) {
+            try {
+                linkCollection.add(trElement.findElement(By.tagName("td")).
+                    findElement(By.tagName("a")).getAttribute("href"));
+            } catch (NoSuchElementException e) {
+                /* Ignore header elements. */
+            }
+        }
+
+        for(String link : linkCollection) {
+            driver.navigate().to(link);
+            Assert.assertTrue(ASSERT_MESSAGE_TITLE, driver.getTitle().equals(VTS_TABLE_TITLE));
+            driver.navigate().back();
+        }
     }
 }

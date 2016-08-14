@@ -44,10 +44,10 @@
   <body>
     <div style="margin-left:200px">
     <h3>VTS Dashboard (Internal)</h3>
-     <table>
-             <tr>
-               <th>Test Name</th>
-            </tr>
+    <table id='dashboard_main_table'>
+        <tr>
+           <th>Test Name</th>
+        </tr>
         <c:forEach items="${tableNames}" var="table">
                 <tr>
                     <td><a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}&buildIdPageNo=0">${table}</a></td>
