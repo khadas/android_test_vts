@@ -74,14 +74,15 @@ class EnvironmentRequirementChecker(object):
         """
         result = copy.copy(ltp_configs.REQUIREMENT_FOR_ALL)
 
-        for rule in ltp_configs.REQUIREMENTS_TO_TESTCASE:
-            if test_case.fullname in ltp_configs.REQUIREMENTS_TO_TESTCASE[rule]:
-                result.append(rule)
+        result.extend(
+            rule
+            for rule, tests in ltp_configs.REQUIREMENTS_TO_TESTCASE.iteritems()
+            if test_case.fullname in tests)
 
-        for rule in ltp_configs.REQUIREMENT_TO_TESTSUITE:
-            if test_case.testsuite in ltp_configs.REQUIREMENT_TO_TESTSUITE[
-                    rule]:
-                result.append(rule)
+        result.extend(
+            rule
+            for rule, tests in ltp_configs.REQUIREMENT_TO_TESTSUITE.iteritems()
+            if test_case.testsuite in tests)
 
         return list(set(result))
 
