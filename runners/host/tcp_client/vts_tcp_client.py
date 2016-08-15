@@ -232,6 +232,19 @@ class VtsTcpClient(object):
                     }
         return {}
 
+    def Ping(self):
+        """RPC to send a PING request.
+
+        Returns:
+            True if the agent is alive, False otherwise.
+        """
+        self.SendCommand(SysMsg_pb2.PING)
+        resp = self.RecvResponse()
+        logging.info("resp for PING: %s", resp)
+        if resp is not None and resp.response_code == SysMsg_pb2.SUCCESS:
+            return True
+        return False
+
     def SendCommand(self,
                     command_type,
                     paths=None,

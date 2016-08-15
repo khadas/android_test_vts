@@ -65,6 +65,8 @@ class HalMirror(object):
         _host_command_port: int, the host-side port for command-response
                             sessions.
         _host_callback_port: int, the host-side port for callback sessions.
+        _client: VtsTcpClient, the client instance that can be used to send
+                 commands to the target-side's agent.
     """
 
     def __init__(self, host_command_port, host_callback_port):
@@ -215,9 +217,9 @@ class HalMirror(object):
             raise error.ComponentLoadingError("Invalid value for bits: %s" %
                                               bits)
         self._StartCallbackServer()
-        client = vts_tcp_client.VtsTcpClient()
-        client.Connect(command_port=self._host_command_port,
-                       callback_port=self._host_callback_port)
+        self._client = vts_tcp_client.VtsTcpClient()
+        self._client.Connect(command_port=self._host_command_port,
+                             callback_port=self._host_callback_port)
         if not handler_name:
             handler_name = target_type
         service_name = "vts_driver_%s" % handler_name
@@ -225,7 +227,7 @@ class HalMirror(object):
         target_filename = None
         if target_class == "hal_conventional" or target_class == "hal_legacy":
             # Get all the HALs available on the target.
-            hal_list = client.ListHals(target_basepaths)
+            hal_list = self._client.ListHals(target_basepaths)
             if not hal_list:
                 raise errors.ComponentLoadingError(
                     "Could not find any HAL under path %s" % target_basepaths)
@@ -259,13 +261,14 @@ class HalMirror(object):
             "hal_hidl": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_HIDL
         }.get(target_class)
 
-        launched = client.LaunchDriverService(driver_type=driver_type,
-                                              service_name=service_name,
-                                              bits=bits,
-                                              file_path=target_filename,
-                                              target_class=target_class_id,
-                                              target_type=target_type_id,
-                                              target_version=target_version)
+        launched = self._client.LaunchDriverService(
+            driver_type=driver_type,
+            service_name=service_name,
+            bits=bits,
+            file_path=target_filename,
+            target_class=target_class_id,
+            target_type=target_type_id,
+            target_version=target_version)
 
         if not launched:
             raise errors.ComponentLoadingError(
@@ -273,7 +276,7 @@ class HalMirror(object):
                 (target_type, target_filename))
 
         # Create API spec message.
-        found_api_spec = client.ListApis()
+        found_api_spec = self._client.ListApis()
         if not found_api_spec:
             raise errors.ComponentLoadingError("No API found for %s" %
                                                service_name)
@@ -283,9 +286,13 @@ class HalMirror(object):
         text_format.Merge(found_api_spec, if_spec_msg)
 
         # Instantiate a MirrorObject and return it.
-        hal_mirror = mirror_object.MirrorObject(client, if_spec_msg,
+        hal_mirror = mirror_object.MirrorObject(self._client, if_spec_msg,
                                                 self._callback_server)
         self._hal_level_mirrors[handler_name] = hal_mirror
 
     def __getattr__(self, name):
         return self._hal_level_mirrors[name]
+
+    def Ping(self):
+      """Returns true iff pinging the agent is successful, False otherwise."""
+      return self._client.Ping()
