@@ -4,7 +4,12 @@
 
 ### 1.1. Compile with code coverage instrumentation
 
-To enable code coverage instrumentation, let's add
+To enable code global coverage instrumentation, first let's set
+the let's set the environment. Copy the command to the terminal:
+
+`export NATIVE_COVERAGE=true`
+
+Next, copy and paste the following:
 
 `LOCAL_NATIVE_COVERAGE := true`
 
@@ -31,18 +36,20 @@ file.
 include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
 
-VTS_GCNO_FILE := <source file name without extension>
-VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
-VTS_GCOV_SRC_CPP_FILE := <source file name with extension>
+VTS_GCOV_SRC_DIR := test/vts/hals/<module>/<product>
+VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
 include test/vts/tools/build/Android.packaging_gcno.mk
 ```
 
 An example for lights HAL is:
 
 ```
-VTS_GCNO_FILE := lights
+include $(BUILD_SHARED_LIBRARY)
+include test/vts/tools/build/Android.packaging_sharedlib.mk
+
 VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
-VTS_GCOV_SRC_CPP_FILE := lights.c
+VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
+VTS_GCNO_OBJ_DIR_NAME := out/target/product/$(TARGET_PRODUCT)/obj
 include test/vts/tools/build/Android.packaging_gcno.mk
 ```
 
@@ -68,7 +75,7 @@ to `<target test case name>.config` file.
 Then let's also specify the source files which you have enabled code coverage
 instrumentation and would like to see the measured line coverage data by adding
 
-`"coverage_src_files": ["<module_name>_<source file name with extension>"]`
+`"coverage_src_files": ["<module_name>/<source file name with extension>"]`
 
 to the same config file.
 
@@ -81,7 +88,7 @@ Then the target config file would look like:
     "log_path": "/tmp/logs",
     "test_paths": ["./"],
     "use_gae_db": true,
-    "coverage_src_files": ["lights.bullhead-vts_lights.c"]
+    "coverage_src_files": ["lights.bullhead-vts/lights.c"]]
 }
 ```
 
