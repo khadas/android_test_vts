@@ -38,14 +38,14 @@ class SampleShellTest(base_test_with_webdb.BaseTestWithWebDbClass):
         results = self.dut.shell.my_shell1.Execute("which ls")
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 1)
-        asserts.assertEqual(results[const.STDOUT][0].strip(),
-                            "/system/bin/ls")
+        asserts.assertEqual(results[const.STDOUT][0].strip(), "/system/bin/ls")
         asserts.assertEqual(results[const.EXIT_CODE][0], 0)
 
-    def testOneBigCommand(self):
+    def testCommandList(self):
         """A simple testcase which just emulates a normal usage pattern."""
         self.dut.shell.InvokeTerminal("my_shell2")
-        results = self.dut.shell.my_shell2.Execute(["which ls"] * self.REPEAT_COUNT)
+        results = self.dut.shell.my_shell2.Execute(["which ls"] *
+                                                   self.REPEAT_COUNT)
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), self.REPEAT_COUNT)
         for index in range(self.REPEAT_COUNT):
@@ -63,6 +63,41 @@ class SampleShellTest(base_test_with_webdb.BaseTestWithWebDbClass):
             asserts.assertEqual(results[const.STDOUT][0].strip(),
                                 "/system/bin/ls")
             asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+
+    def testCommandSequenceCd(self):
+        """A simple test case that emulates using cd bash command sequence
+           connected by '&&' under normal usage pattern.
+        """
+        self.dut.shell.InvokeTerminal("command_sequence_cd")
+        directory = "/data/local"
+        commands = ["cd %s && pwd" % directory, "'cd' '%s' && 'pwd'" %
+                    directory, "\"cd\" \"%s\" && \"pwd\"" % directory]
+        for cmd in commands:
+            results = self.dut.shell.command_sequence_cd.Execute(cmd)
+            asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+            asserts.assertEqual(results[const.STDOUT][0].strip(), directory)
+
+    def testCommandSequenceExport(self):
+        """A simple test case that emulates using export bash command sequence
+           connected by '&&' under normal usage pattern.
+        """
+        self.dut.shell.InvokeTerminal("command_sequence_export")
+        var_value = "helloworld"
+        results = self.dut.shell.command_sequence_export.Execute(
+            "export {var_name}={var_value} && echo ${var_name}".format(
+                var_name="TESTTMPVAR", var_value=var_value))
+        asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+        asserts.assertEqual(results[const.STDOUT][0].strip(), var_value)
+
+    def testCommandSequenceMktemp(self):
+        """A simple test case that emulates using mktemp bash command sequence
+           connected by '&&' under normal usage pattern.
+        """
+        self.dut.shell.InvokeTerminal("command_sequence_mktemp")
+        results = self.dut.shell.command_sequence_mktemp.Execute(
+            "TMPFILE=`mktemp /data/local/tmp/test.XXXXXXXXXXXX` "
+            "&& ls $TMPFILE")
+        asserts.assertEqual(results[const.EXIT_CODE][0], 0)
 
     def testMultipleShells(self):
         """A simple testcase which just emulates a normal usage pattern."""
