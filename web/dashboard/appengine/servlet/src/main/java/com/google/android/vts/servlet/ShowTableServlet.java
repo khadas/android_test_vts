@@ -67,6 +67,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final int MAX_BUILD_IDS_PER_PAGE = 15;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int SUMMARY_ROW_COUNT = 4;
+    private static final int UNKNOWN_RESULT = 0;
 
     /**
      * Returns the table corresponding to the table name.
@@ -332,6 +333,8 @@ public class ShowTableServlet extends HttpServlet {
                             summaryGridfloat[1][j]++;
                         }
                         finalGrid[i][j] = String.valueOf(value);
+                    } else {
+                        finalGrid[i][j] = String.valueOf(UNKNOWN_RESULT);
                     }
 
                     if (i == finalGrid.length - 1) {
