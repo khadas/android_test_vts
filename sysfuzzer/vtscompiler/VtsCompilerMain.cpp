@@ -123,10 +123,12 @@ void Translate(const char* input_vts_file_path,
 }  // namespace android
 
 int main(int argc, char* argv[]) {
+#ifdef VTS_DEBUG
   cout << "Android VTS Compiler (AVTSC)" << endl;
   for (int i = 0; i < argc; i++) {
     cout << "- args[" << i << "] " << argv[i] << endl;
   }
+#endif
   if (argc < 5) {
     cerr << "argc " << argc << " < 5" << endl;
     return -1;
