@@ -16,6 +16,7 @@
 #
 
 import os
+import logging
 
 from vts.testcases.kernel.ltp import ltp_configs
 from vts.testcases.kernel.ltp import test_case
@@ -38,33 +39,62 @@ class TestCasesParser(object):
                         test_name=testcase.fullname, n_bit=n_bit))
         return len(set(name_set).intersection(name_list)) > 0
 
+    def ValidateDefinition(self, line):
+        """Validate a tab delimited test case definition.
+
+        Will check whether the given line of definition has three parts
+        separated by tabs.
+        It will also trim leading and ending white spaces for each part
+        in returned tuple (if valid).
+
+        Returns:
+            A tuple in format (test suite, test name, test command) if
+            definition is valid. None otherwise.
+        """
+        items = [item.strip() for item in line.split('\t')]
+        if not len(items) == 3 or not items:
+            return None
+        else:
+            return items
+
     def Load(self, ltp_dir, n_bit, run_staging=False):
-        """Read the definition file and return a TestCase generator."""
+        """Read the definition file and yields a TestCase generator."""
         case_definition_path = os.path.join(self._data_path, n_bit, 'ltp',
                                             'ltp_vts_testcases.txt')
 
         with open(case_definition_path, 'r') as f:
             for line in f:
-                items = line.split('\t')
-                if not len(items) == 4:
+                items = self.ValidateDefinition(line)
+                if not items:
                     continue
 
-                testsuite, testname, testbinary, arg = items
-                args = arg.strip().split(',')
+                testsuite, testname, command = items
 
+                # Tests failed to build will have prefix "DISABLED_"
                 if testname.startswith("DISABLED_"):
+                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
+                                 "not built".format(testsuite, testname))
                     continue
+
+                # Some test cases contain semicolons in their commands,
+                # and we replace them with &&
+                command = command.replace(';', '&&')
 
                 testcase = test_case.TestCase(
-                    testsuite, testname, os.path.join(ltp_dir, 'testcases/bin',
-                                                      testbinary), args)
+                    testsuite=testsuite, testname=testname, command=command)
 
+                # For skipping tests that are not designed for Android
                 if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
                                          n_bit):
+                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
+                                 "disabled".format(testsuite, testname))
                     continue
 
+                # For failing tests that are being inspected
                 if (not run_staging and self.IsTestcaseInList(
                         testcase, ltp_configs.STAGING_TESTS, n_bit)):
+                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
+                                 "staging".format(testsuite, testname))
                     continue
 
                 yield testcase

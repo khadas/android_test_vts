@@ -127,8 +127,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self._testcases.Load(
                 ltp_configs.LTPDIR, n_bit=n_bit, run_staging=self.run_staging))
         logging.info("Checking binary exists for all test cases.")
-        self._requirement.RunCheckTestcasePathExistsAll(test_cases)
-        self._requirement.RunChmodTestcasesAll(test_cases)
+        self._requirement.CheckAllTestCaseExecutables(test_cases)
         logging.info("Start running %i individual tests." % len(test_cases))
 
         self.runGeneratedTests(
@@ -147,10 +146,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         "Run one LTP test case"
         self._requirement.Check(test_case)
 
-        cmd = "env {envp} {binary} {args}".format(
-            envp=self.GetEnvp(),
-            binary=test_case.path,
-            args=test_case.GetArgs("$LTPROOT", ltp_configs.LTPDIR))
+        cmd = "export {envp} && {commands}".format(
+            envp=self.GetEnvp(), commands=test_case.GetCommand())
         logging.info("Executing %s", cmd)
         self.Verify(self._shell.Execute(cmd))
 

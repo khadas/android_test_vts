@@ -23,22 +23,26 @@ from vts.testcases.kernel.ltp.shell_environment.definitions import path_permissi
 
 
 def GetRequrementDefinitions():
-    """Get a dictionary in which keys are requirement names and
-       values are corresponding definition class object or a list
-       of such objects.
+    """Get requirement definition objects.
+
+    Get a dictionary in which keys are requirement names and
+    values are corresponding definition class object or a list
+    of such objects.
     """
     return {
         ltp_enums.Requirements.LOOP_DEVICE_SUPPORT:
-        loop_device_support.LoopDeviceSupport(),
+            loop_device_support.LoopDeviceSupport(),
         ltp_enums.Requirements.LTP_TMP_DIR: [
             directory_exists.DirectoryExists(
                 paths=[ltp_configs.TMP, ltp_configs.TMPBASE,
                        ltp_configs.LTPTMP, ltp_configs.TMPDIR],
+                to_check=False,
                 to_setup=True,
                 to_cleanup=True), path_permission.PathPermission(
                     paths=[ltp_configs.TMP, ltp_configs.TMPBASE,
                            ltp_configs.LTPTMP, ltp_configs.TMPDIR],
                     permissions=775,
+                    to_check=False,
                     to_setup=True,
                     to_cleanup=False)
         ]
