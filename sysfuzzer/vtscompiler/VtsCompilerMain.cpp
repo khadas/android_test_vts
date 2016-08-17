@@ -51,10 +51,8 @@ void Translate(const char* input_vts_file_path,
 
   size_t found;
   found = output_cpp_file_path_str.find_last_of("/");
-  const char* vts_name =
-      output_cpp_file_path_str
-          .substr(found + 1, output_cpp_file_path_str.length() - found - 5)
-          .c_str();
+  string vts_name = output_cpp_file_path_str
+      .substr(found + 1, output_cpp_file_path_str.length() - found - 5);
 
   cout << "vts_name: " << vts_name << endl;
 
