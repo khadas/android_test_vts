@@ -24,7 +24,7 @@ not executable instructions.
 
 ### 1.3. Example
 
-![Screenshot of Native Code Coverage](https://screenshot.googleplex.com/fwmPDBPRO8m)
+![Screenshot of Native Code Coverage](https://screenshot.googleplex.com/fwmPDBPRO8m.png)
 
 ## 2. Frequently Asked Questions
 
@@ -33,7 +33,7 @@ not executable instructions.
 The line of code is not an executable instruction. In the example below, six
 lines of code are unaccounted for as they are not executable instructions:
 
-![Example of Unexecuted Lines of Code](https://screenshot.googleplex.com/LnLjOkahqUi)
+![Example of Unexecuted Lines of Code](https://screenshot.googleplex.com/LnLjOkahqUi.png)
 
 ### 2.2. Why are some lines called more than expected?
 
@@ -42,4 +42,4 @@ appear to have been executed more than expected. In the example below, inline
 conditional notation causes line 70 to be accounted for by two basic blocks:
 one repesenting the control flow, and the other representing the return.
 
-![Example of Overlapping Accounting](https://screenshot.googleplex.com/CNuZDniHOuW)
+![Example of Overlapping Accounting](https://screenshot.googleplex.com/CNuZDniHOuW.png)
