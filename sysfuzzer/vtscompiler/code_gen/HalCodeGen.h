@@ -34,7 +34,7 @@ namespace vts {
 
 class HalCodeGen : public CodeGenBase {
  public:
-  HalCodeGen(const char* input_vts_file_path, const char* vts_name)
+  HalCodeGen(const char* input_vts_file_path, const string& vts_name)
       : CodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:

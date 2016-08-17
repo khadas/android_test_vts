@@ -33,7 +33,7 @@ namespace vts {
 
 class HalHidlCodeGen : public CodeGenBase {
  public:
-  HalHidlCodeGen(const char* input_vts_file_path, const char* vts_name)
+  HalHidlCodeGen(const char* input_vts_file_path, const string& vts_name)
       : CodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:

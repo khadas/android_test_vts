@@ -31,7 +31,7 @@ namespace vts {
 
 class CodeGenBase {
  public:
-  explicit CodeGenBase(const char* input_vts_file_path, const char* vts_name);
+  explicit CodeGenBase(const char* input_vts_file_path, const string& vts_name);
   virtual ~CodeGenBase();
 
   // Generate both a C/C++ file and its header file.
@@ -94,7 +94,7 @@ class CodeGenBase {
 
  private:
   const char* input_vts_file_path_;
-  const char* vts_name_;
+  const string& vts_name_;
 };
 
 }  // namespace vts

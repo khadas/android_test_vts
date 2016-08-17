@@ -34,7 +34,7 @@ namespace vts {
 
 class LegacyHalCodeGen : public HalCodeGen {
  public:
-  LegacyHalCodeGen(const char* input_vts_file_path, const char* vts_name)
+  LegacyHalCodeGen(const char* input_vts_file_path, const string& vts_name)
       : HalCodeGen(input_vts_file_path, vts_name) {}
 
  protected:
