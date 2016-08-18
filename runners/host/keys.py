@@ -29,6 +29,11 @@ class ConfigKeys(object):
     KEY_TESTBED = "test_bed"
     KEY_TESTBED_NAME = "name"
     KEY_TEST_PATHS = "test_paths"
+    KEY_TEST_SUITE = "test_suite"
+
+    # Keys in test suite
+    KEY_INCLUDE_FILTER = "include_filter"
+    KEY_EXCLUDE_FILTER = "exclude_filter"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"
