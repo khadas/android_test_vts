@@ -40,7 +40,8 @@
             function selectHandler(e) {
                 var ctx = "${pageContext.request.contextPath}";
                 var link = ctx + "/show_graph?profilingPoint=" +
-                    data.getValue(table.getSelection()[0].row, 0);
+                    data.getValue(table.getSelection()[0].row, 0) + "&" +
+                    "tableName=" + ${tableName};
                 window.open(link,"_self");
             }
         }
