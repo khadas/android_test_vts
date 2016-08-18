@@ -348,6 +348,7 @@ class TestRunner(object):
             A tuple, with the number of cases passed at index 0, and the total
             number of test cases at index 1.
         """
+        self.running = True
         with test_cls(self.test_run_info) as test_cls_instance:
             try:
                 cls_result = test_cls_instance.run(test_cases)
@@ -414,7 +415,7 @@ class TestRunner(object):
                                                        self.results.summary())
             self._writeResultsJsonString()
             logging.info(msg.strip())
-            logger.killTestLogger(logging.getLogger)
+            logger.killTestLogger(logging.getLogger())
             self.running = False
 
     def _writeResultsJsonString(self):
