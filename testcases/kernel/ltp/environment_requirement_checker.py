@@ -17,8 +17,9 @@
 
 import copy
 import logging
+import itertools
+import operator
 
-from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.testcases.kernel.ltp.shell_environment import shell_environment
 from vts.testcases.kernel.ltp import ltp_enums
@@ -40,6 +41,8 @@ class EnvironmentRequirementChecker(object):
         _result_cache: dictionary {requirement_check_method_name:
             (bool, string)}, a map between check method name and cached result
             tuples (boolean, note)
+        _executable_exist_dict: dict {string, bool}, a map between executable
+                                path and its existance on target
         _shell_env: ShellEnvironment object, which checks and sets
             shell environments given a shell mirror
         shell: shell mirror object, can be used to execute shell
@@ -49,6 +52,7 @@ class EnvironmentRequirementChecker(object):
     def __init__(self, shell):
         self.shell = shell
         self._result_cache = {}
+        self._executable_exist_dict = {}
         self._shell_env = shell_environment.ShellEnvironment(self.shell)
         self._REQUIREMENT_DEFINITIONS = requirements.GetRequrementDefinitions()
 
@@ -90,12 +94,19 @@ class EnvironmentRequirementChecker(object):
         """Check whether a given test case's requirement has been satisfied.
         Skip the test if not.
 
+        If check failed, this method returns False and the reason is set
+        to test_case.note.
+
         Args:
             test_case: TestCase object, a given test case to check
+
+        Returns:
+            True if check pass; False otherwise
         """
-        asserts.skipIf(test_case.requirement_state ==
-                       ltp_enums.RequirementState.UNSATISFIED, test_case.note)
-        asserts.skipIf(not self.IsTestBinaryExist(test_case), test_case.note)
+        if (test_case.requirement_state ==
+                ltp_enums.RequirementState.UNSATISFIED or
+                not self.TestBinaryExists(test_case)):
+            return False
 
         for requirement in self.GetRequirements(test_case):
             if requirement not in self._result_cache:
@@ -110,47 +121,41 @@ class EnvironmentRequirementChecker(object):
             if result is False:
                 test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
                 test_case.note = note
-                asserts.skip(note)
+                return False
+
         test_case.requirement_state = ltp_enums.RequirementState.SATISFIED
+        return True
 
-    def RunCheckTestcasePathExistsAll(self, test_cases):
-        """Run a batch job to check the path existance of all given test cases
-
-        Args:
-            test_case: list of TestCase objects.
-        """
-        commands = ["ls %s" % test_case.path for test_case in test_cases]
-        command_results = self._shell.Execute(commands)
-        exists_results = [exit_code is 0
-                          for exit_code in command_results[const.EXIT_CODE]]
-        for testcase_result in zip(test_cases, exists_results):
-            self.SetCheckResultPathExists(*testcase_result)
-
-    def RunChmodTestcasesAll(self, test_cases):
-        """Batch commands to make all test case binaries executable
-        Test cases whose binary path does not exist will be excluded.
+    def CheckAllTestCaseExecutables(self, test_cases):
+        """Run a batch job to check the all test executable exists and set
+           permissions
 
         Args:
             test_case: list of TestCase objects.
         """
-        self._shell.Execute(["chmod 775 %s" % test_case.path
-                             for test_case in test_cases
-                             if self.IsTestBinaryExist(test_case)])
+        executables_generators = (test_case.GetRequiredExecutablePaths()
+                                  for test_case in test_cases)
+        executables = list(
+            set(itertools.chain.from_iterable(executables_generators)))
 
-    def SetCheckResultPathExists(self, test_case, is_exists):
-        """Set a path exists result to a test case object
+        commands = ["ls %s" % executable
+                    if executable not in ltp_configs.EXTERNAL_BINS else
+                    "which %s" % executable for executable in executables]
 
-        Args:
-            test_case: TestCase object, the target test case
-            is_exists: bool, the result. True for exists, False otherwise.
-        """
-        if is_exists:
-            test_case.requirement_state = ltp_enums.RequirementState.PATHEXISTS
-        else:
-            test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
-            test_case.note = "Test binary is not compiled."
+        results = map(operator.not_,
+                      self._shell.Execute(commands)[const.EXIT_CODE])
 
-    def IsTestBinaryExist(self, test_case):
+        self._executable_exist_dict = dict(zip(executables, results))
+
+        permission_commands = ["chmod 755 %s" % executable
+                               for executable in executables
+                               if (executable not in ltp_configs.EXTERNAL_BINS
+                                   and self._executable_exist_dict[executable])
+                               ]
+
+        self._shell.Execute(permission_commands)
+
+    def TestBinaryExists(self, test_case):
         """Check whether the given test case's binary exists.
 
         Args:
@@ -159,11 +164,22 @@ class EnvironmentRequirementChecker(object):
         Return:
             True if exists, False otherwise
         """
-        if test_case.requirement_state != ltp_enums.RequirementState.UNCHECKED:
-            return test_case.requirement_state != ltp_enums.RequirementState.UNSATISFIED
+        if test_case.requirement_state == ltp_enums.RequirementState.UNSATISFIED:
+            logging.warn("[Checker] Attempting to run test case that has "
+                         "already been checked and requirement not satisfied."
+                         "%s" % test_case)
+            return False
 
-        command_results = self._shell.Execute("ls %s" % test_case.path)
-        exists = command_results[const.STDOUT][0].find(
-            ": No such file or directory") > 0
-        self.SetCheckResultPathExists(test_case, exists)
-        return exists
+        executables = test_case.GetRequiredExecutablePaths()
+        results = (self._executable_exist_dict[executable]
+                   for executable in executables)
+
+        if not all(results):
+            test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
+            test_case.note = "Some executables not exist: {}".format(
+                zip(executables, results))
+            logging.error("[Checker] Binary existance check failed for {}. "
+                          "Reason: {}".format(test_case, test_case.note))
+            return False
+        else:
+            return True
