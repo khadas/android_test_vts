@@ -41,6 +41,10 @@
         <option name="push" value="types.vts->/data/local/tmp/spec/types.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="test-file-name" value="sl4a.apk" />
+        <option name="cleanup-apks" value="true" />
+    </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
         <option name="dep-module" value="future" />
         <option name="dep-module" value="futures" />
