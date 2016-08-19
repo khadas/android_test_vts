@@ -80,6 +80,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         self._profile_msg = None
         self._profiling = {}
+        self._profiling_labeled_vector = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
@@ -239,6 +240,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             return False
         self._profiling[name] = self._profile_msg.profiling.add()
         self._profiling[name].name = name
+        self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_TIMESTAMP
         self._profiling[name].start_timestamp = self.GetTimestamp()
         return True
 
@@ -261,17 +263,36 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
+    def AddProfilingDataLabeledVector(self, name, labeled_vector):
+        """Adds the profiling data in order to upload to the web DB.
+
+        Args:
+            name: string, profiling point name.
+            labeled_vector: a dict where key is label and value is measured
+                            number.
+        """
+        if not self._profile_msg:
+            self._profile_msg = ReportMsg.TestReportMessage()
+            self._profile_msg.test = self.__class__.__name__
+
+        profiling = self._profile_msg.profiling.add()
+        profiling.name = name
+        profiling.type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
+        for label in labeled_vector:
+            profiling.label.append(label)
+            profiling.value.append(labeled_vector[label])
+
     def SetCoverageData(self, raw_coverage_data):
-      """Sets the given coverage data to the class-level list attribute.
+        """Sets the given coverage data to the class-level list attribute.
 
-      In case of gcda, the file is always appended so the last one alone is
-      sufficient for coverage visualization.
+        In case of gcda, the file is always appended so the last one alone is
+        sufficient for coverage visualization.
 
-      Args:
-          raw_coverage_data: a list of NativeCodeCoverageRawDataMessage.
-      """
-      logging.info("SetCoverageData %s", raw_coverage_data)
-      setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
+        Args:
+            raw_coverage_data: a list of NativeCodeCoverageRawDataMessage.
+        """
+        logging.info("SetCoverageData %s", raw_coverage_data)
+        setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
 
     def ProcessCoverageData(self):
         """Process reported coverage data and store the produced html(s).
@@ -335,4 +356,3 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                         coverage.total_line_count, coverage.covered_line_count = (
                             coverage_report.GetCoverageStats(coverage_vec))
                         return True
-
