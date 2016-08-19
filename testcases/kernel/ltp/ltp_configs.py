@@ -47,6 +47,7 @@ EXTERNAL_BINS = [
     'chmod',
     'chown',
     'ls',
+    'mkfifo',
 ]
 
 # Requirement to testcase dictionary.
