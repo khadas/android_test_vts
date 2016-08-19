@@ -25,6 +25,7 @@ import threading
 import socket
 import Queue
 
+from vts.runners.host import keys
 from vts.runners.host import logger as vts_logger
 from vts.runners.host import signals
 from vts.runners.host import utils
@@ -47,6 +48,8 @@ ANDROID_DEVICE_ADB_LOGCAT_PARAM_KEY = "adb_logcat_param"
 ANDROID_DEVICE_EMPTY_CONFIG_MSG = "Configuration is empty, abort!"
 ANDROID_DEVICE_NOT_LIST_CONFIG_MSG = "Configuration should be a list, abort!"
 
+ANDROID_PRODUCT_TYPE_UNKNOWN = "unknown"
+
 # Target-side directory where the VTS binaries are uploaded
 DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
 # Time for which the current is put on sleep when the client is unable to
@@ -54,7 +57,6 @@ DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
 THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
-
 
 class AndroidDeviceError(signals.ControllerError):
     pass
@@ -198,11 +200,22 @@ def get_instances_with_configs(configs):
     results = []
     for c in configs:
         try:
-            serial = c.pop("serial")
+            serial = c.pop(keys.ConfigKeys.IKEY_SERIAL)
         except KeyError:
-            raise AndroidDeviceError(('Required value "serial" is missing in '
-                                      'AndroidDevice config %s.') % c)
-        ad = AndroidDevice(serial)
+            raise AndroidDeviceError(
+                ('Required value %s is missing in '
+                 'AndroidDevice config %s.') % (keys.ConfigKeys.IKEY_SERIAL,
+                                                c))
+        try:
+            product_type = c.pop(keys.ConfigKeys.IKEY_PRODUCT_TYPE)
+        except KeyError:
+            logging.error(
+                'Required value %s is missing in '
+                'AndroidDevice config %s.',
+                keys.ConfigKeys.IKEY_PRODUCT_TYPE, c)
+            product_type = ANDROID_PRODUCT_TYPE_UNKNOWN
+
+        ad = AndroidDevice(serial, product_type)
         ad.loadConfig(c)
         results.append(ad)
     return results
@@ -311,7 +324,7 @@ class AndroidDevice(object):
     handles to adb, fastboot, and various RPC clients.
 
     Attributes:
-        serial: A string that's the serial number of the Androi device.
+        serial: A string that's the serial number of the Android device.
         device_command_port: int, the port number used on the Android device
                 for adb port forwarding (for command-response sessions).
         device_callback_port: int, the port number used on the Android device
@@ -335,10 +348,14 @@ class AndroidDevice(object):
         lib: LibMirror, in charge of all communications with static and shared
              native libs.
         shell: ShellMirror, in charge of all communications with shell.
+        _product_type: A string, the device product type (e.g., bullhead) if
+                       known, ANDROID_PRODUCT_TYPE_UNKNOWN otherwise.
     """
 
-    def __init__(self, serial="", device_callback_port=5010):
+    def __init__(self, serial="", product_type=ANDROID_PRODUCT_TYPE_UNKNOWN,
+                 device_callback_port=5010):
         self.serial = serial
+        self._product_type = product_type
         self.device_command_port = None
         self.device_callback_port = device_callback_port
         self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
@@ -646,6 +663,11 @@ class AndroidDevice(object):
         if self.vts_agent_process:
             utils.stop_standing_subprocess(self.vts_agent_process)
             self.vts_agent_process = None
+
+    @property
+    def product_type(self):
+        """Gets the product type name."""
+        return self._product_type
 
 
 class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
