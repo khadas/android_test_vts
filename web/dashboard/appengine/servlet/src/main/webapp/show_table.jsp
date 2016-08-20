@@ -254,11 +254,11 @@
         <div id = "legend_table_div" style="margin-top:10px"></div>
 
         <!-- Grid tables-->
-        <div style="margin-top:10px;float:left;">
+        <div style="margin-top:10px">
             <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
             <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
         </div>
-        <div id="grid_table_div" style:"float:left;"></div>
+        <div id="grid_table_div"></div>
     </div>
 
     <script type="text/javascript">
