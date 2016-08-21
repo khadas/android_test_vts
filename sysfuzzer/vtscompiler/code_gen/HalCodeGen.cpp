@@ -427,8 +427,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     // checks whether the function is actually defined.
     cpp_ss << "    if (reinterpret_cast<"
            << message.original_data_structure_name() << "*>(local_device)->"
-           << api.name() << " == NULL";
-    cpp_ss << ") {" << endl;
+           << api.name() << " == NULL" << ") {" << endl;
     cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
     // todo: consider throwing an exception at least a way to tell more
     // specifically to the caller.
