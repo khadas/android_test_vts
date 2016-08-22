@@ -17,5 +17,6 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="sample_qtaguid_test" />
+    <option name="compatibility:include-filter" value="LibcTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
