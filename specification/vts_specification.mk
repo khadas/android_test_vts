@@ -14,3 +14,4 @@ PRODUCT_COPY_FILES += \
     test/vts/specification/hal_hidl/Nfc.vts:system/etc/Nfc.vts \
     test/vts/specification/hal_hidl/NfcClientCallback.vts:system/etc/NfcClientCallback.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
+    test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \
