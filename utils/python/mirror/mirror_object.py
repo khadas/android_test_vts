@@ -283,6 +283,16 @@ class MirrorObject(object):
                             arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
                             arg_msg.scalar_value.float_t = value_msg
                             arg_msg.scalar_type = "float_t"
+                        elif isinstance(value_msg, str):
+                            if ((arg_msg.type == IfaceSpecMsg.TYPE_SCALAR and
+                                 (arg_msg.scalar_type == "char_pointer" or
+                                  arg_msg.scalar_type == "uchar_pointer")) or
+                                arg_msg.type == IfaceSpecMsg.TYPE_STRING):
+                                arg_msg.string_value.message = value_msg
+                                arg_msg.string_value.length = len(value_msg)
+                            else:
+                                raise MirrorObjectError(
+                                    "unsupported type %s for str" % arg_msg)
                         elif isinstance(value_msg, list):
                             if arg_msg.type == IfaceSpecMsg.TYPE_VECTOR:
                                 arg_msg.vector_value[0].scalar_type
@@ -433,7 +443,8 @@ class MirrorObject(object):
                             else:
                                 struct_value.scalar_value.int32_t ^= mask
                         else:
-                            raise MirrorObjectError("support %s" % struct_value.scalar_type)
+                            raise MirrorObjectError(
+                                "support %s" % struct_value.scalar_type)
                         break
                     count += 1
                 logging.debug("fuzzed %s", arg_msg)
