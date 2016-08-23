@@ -50,29 +50,57 @@ void LibSharedCodeGen::GenerateCppBodyFuzzFunction(
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
-      cpp_ss << "    " << GetCppVariableType(arg) << " ";
-      cpp_ss << "arg" << arg_count << " = ";
       if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
           !strncmp(arg.predefined_type().c_str(),
                    message.original_data_structure_name().c_str(),
                    message.original_data_structure_name().length()) &&
           message.original_data_structure_name().length() > 0) {
+        cpp_ss << "    " << GetCppVariableType(arg) << " "
+               << "arg" << arg_count << " = ";
         cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
                << kInstanceVariableName << ")";
       } else if (arg.type() == TYPE_SCALAR) {
-        cpp_ss << "(func_msg->arg(" << arg_count << ").type() == TYPE_SCALAR && "
-               << "func_msg->arg(" << arg_count << ").scalar_value().has_" << arg.scalar_type() << "()) ? ";
         if (arg.scalar_type() == "char_pointer" ||
-            arg.scalar_type() == "void_pointer") {
-          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">(";
+            arg.scalar_type() == "uchar_pointer") {
+          if (arg.scalar_type() == "char_pointer") {
+            cpp_ss << "    char ";
+          } else {
+            cpp_ss << "    unsigned char ";
+          }
+          cpp_ss << "arg" << arg_count
+                 << "[func_msg->arg(" << arg_count
+                 << ").string_value().length() + 1];" << endl;
+          cpp_ss << "    if (func_msg->arg(" << arg_count
+                 << ").type() == TYPE_SCALAR && "
+                 << "func_msg->arg(" << arg_count
+                 << ").string_value().has_message()) {" << endl;
+          cpp_ss << "      strcpy(arg" << arg_count << ", "
+                 << "func_msg->arg(" << arg_count << ").string_value()"
+                 << ".message().c_str());" << endl;
+          cpp_ss << "    } else {" << endl;
+          cpp_ss << "   strcpy(arg" << arg_count << ", "
+                 << GetCppInstanceType(arg) << ");" << endl;
+          cpp_ss << "    }" << endl;
+        } else {
+          cpp_ss << "    " << GetCppVariableType(arg) << " "
+                 << "arg" << arg_count << " = ";
+          cpp_ss << "(func_msg->arg(" << arg_count
+                 << ").type() == TYPE_SCALAR && "
+                 << "func_msg->arg(" << arg_count
+                 << ").scalar_value().has_" << arg.scalar_type() << "()) ? ";
+          if (arg.scalar_type() == "void_pointer") {
+            cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">(";
+          }
+          cpp_ss << "func_msg->arg(" << arg_count << ").scalar_value()."
+                 << arg.scalar_type() << "()";
+          if (arg.scalar_type() == "void_pointer") {
+            cpp_ss << ")";
+          }
+          cpp_ss << " : " << GetCppInstanceType(arg);
         }
-        cpp_ss << "func_msg->arg(" << arg_count << ").scalar_value()." << arg.scalar_type() << "()";
-        if (arg.scalar_type() == "char_pointer" ||
-            arg.scalar_type() == "void_pointer") {
-          cpp_ss << ")";
-        }
-        cpp_ss << " : " << GetCppInstanceType(arg);
       } else {
+        cpp_ss << "    " << GetCppVariableType(arg) << " "
+               << "arg" << arg_count << " = ";
         cpp_ss << GetCppInstanceType(arg);
       }
       cpp_ss << ";" << endl;
