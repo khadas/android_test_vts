@@ -36,11 +36,95 @@ class LibcTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                    bits=64,
                                    handler_name="libc")
 
-    def testFileIO(self):
-        """Tests open, read, and close file IO operations."""
-        logging.info("Test result: %s",
-            self.dut.lib.libc.fopen("/system/lib64/libc.so", "r"))
+    def testOpenCloseLocalSocketStream(self):
+        """Tests open and close socket operations for local communication.
 
+        Uses local addresses and a streaming socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_UNIX,
+                                          self.dut.lib.libc.SOCK_STREAM, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
+
+    def testOpenCloseLocalSocketDatagram(self):
+        """Tests open and close socket operations for local communication.
+
+        Uses local addresses and a datagram socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_UNIX,
+                                          self.dut.lib.libc.SOCK_DGRAM, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
+
+    def testOpenCloseLocalSocketRaw(self):
+        """Tests open and close socket operations for local communication.
+
+        Uses local addresses and a raw socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_UNIX,
+                                          self.dut.lib.libc.SOCK_RAW, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
+
+    def testOpenCloseLocalSocketSequential(self):
+        """Tests open and close socket operations for local communication.
+
+        Uses local addresses and a sequential socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_UNIX,
+                                          self.dut.lib.libc.SOCK_SEQPACKET, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
+
+    def testOpenCloseINETSocketStream(self):
+        """Tests open and close socket operations for INET communication.
+
+        Uses IP addresses and a streaming socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_INET,
+                                          self.dut.lib.libc.SOCK_STREAM, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
+
+    def testOpenCloseINETSocketDatagram(self):
+        """Tests open and close socket operations for INET communication.
+
+        Uses IP addresses and a datagram socket.
+        """
+        result = self.dut.lib.libc.socket(self.dut.lib.libc.PF_INET,
+                                          self.dut.lib.libc.SOCK_DGRAM, 0)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.socket: could not create socket.")
+
+        result = self.dut.lib.libc.close(
+            result.return_type.scalar_value.int32_t)
+        asserts.assertNotEqual(result.return_type.scalar_value.int32_t, -1,
+                               "libc.close: unable to close socket.")
 
 if __name__ == "__main__":
     test_runner.main()
