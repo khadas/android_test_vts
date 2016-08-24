@@ -58,8 +58,7 @@ class PathPermission(check_setup_cleanup.CheckSetupCleanup):
         if not normalized:
             return False
         self._paths, self._permissions = normalized
-        self._failed_paths = zip(self._paths,
-                                 self._permissions,
+        self._failed_paths = zip(self._paths, self._permissions,
                                  self._permissions)
 
         return True
