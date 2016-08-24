@@ -334,9 +334,11 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      * @param runUtil
      * @param mTestCasePath
      * @param mTestConfigPath
+     * @throws RuntimeException
+     * @throws IllegalArgumentException
      */
     private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
-        String mTestConfigPath) throws RuntimeException {
+        String mTestConfigPath) throws RuntimeException, IllegalArgumentException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         JSONObject jsonObject = null;
@@ -428,8 +430,9 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      *
      * @param logDir : The file that needs to be converted
      * @return the file named test_run_details.txt
+     * @throws IllegalArgumentException
      */
-    private File getFileTestRunSummary(File logDir) {
+    private File getFileTestRunSummary (File logDir) throws IllegalArgumentException {
         File[] children;
         if (logDir == null) {
             throw new IllegalArgumentException("Argument logDir is null.");
