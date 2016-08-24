@@ -15,10 +15,13 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.log.LogUtil.CLog;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +38,7 @@ import java.util.Map.Entry;
  * calls on a series of {@link ITestRunListener}s. Output from these tests follows this
  * EBNF grammar:
  */
-public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
+public class VtsMultiDeviceTestResultParser {
 
     // Parser state
     String[] mAllLines;
@@ -72,6 +75,14 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     static final String END_PATTERN = "<==========";
     static final String BEGIN_PATTERN = "==========>";
 
+    // constants for parsing json file
+    static final String RESULTS = "Results";
+    static final String BEGIN_TIME = "Begin Time";
+    static final String END_TIME = "End Time";
+    static final String TEST_CLASS = "Test Class";
+    static final String TEST_NAME = "Test Name";
+    static final String RESULT = "Result";
+
     // Enumeration for parser state.
     static enum ParserState {
         TEST_CASE_ENTRY,
@@ -93,7 +104,6 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         mTestResultCache = new HashMap<>();
     }
 
-    @Override
     public void processNewLines(String[] lines) {
         init(lines);
 
@@ -135,9 +145,7 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     /**
      * Called by parent when adb session is complete.
      */
-    @Override
     public void done() {
-        super.done();
         if (mNumTestsRun < mNumTestsExpected) {
             handleTestRunFailed(String.format("Test run failed. Expected %d tests, received %d",
                     mNumTestsExpected, mNumTestsRun));
@@ -316,6 +324,62 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     }
 
     /**
+     * This method parses the json object and summarizes the test result through listener.
+     * @param object
+     */
+    public void processJsonFile(JSONObject object) {
+        long beginTime = -1, endTime = -1;
+        JSONArray results = null;
+
+        try {
+            results = object.getJSONArray(RESULTS);
+            for (ITestRunListener listener: mListeners) {
+                if (results == null || results.length() < 1) {
+                    CLog.e("JSONArray is null.");
+                    throw new RuntimeException("JSONArray is null.");
+                }
+                // calculate test run time
+                beginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
+                endTime = (long) results.getJSONObject(results.length() - 1).get(END_TIME);
+
+                // do testRunStarted
+                listener.testRunStarted((String) results.getJSONObject(0).get(TEST_CLASS),
+                    results.length());
+
+                for (int index = 0; index < results.length(); index++) {
+                    JSONObject  resultObject = results.getJSONObject(index);
+                    String result = (String) resultObject.get(RESULT);
+                    String testClass = (String) resultObject.get(TEST_CLASS);
+                    String testName = (String) resultObject.get(TEST_NAME);
+
+                    // mark test started
+                    TestIdentifier testIdentifier = new TestIdentifier(testClass, testName);
+                    listener.testStarted(testIdentifier);
+
+                    switch (result) {
+                        case PASS :
+                            listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
+                            break;
+                        case TIMEOUT :
+                            /* Timeout is not recognized in TF*/
+                            break;
+                        case SKIP :
+                            /* Skip is not recognized in TF*/
+                            break;
+                        case FAIL:
+                            listener.testFailed(testIdentifier, FAIL);
+                        default:
+                            break;
+                    }
+                }
+                listener.testRunEnded(endTime - beginTime, Collections.<String, String>emptyMap());
+             }
+         } catch (JSONException e) {
+             CLog.e("Exception occurred %s :", e);
+         }
+    }
+
+    /**
      * This is called whenever the program encounters unexpected tokens in parsing.
      *
      * @param expected The string that was expected.
@@ -344,7 +408,6 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         mTestResultCache.put(mCurrentTestId, TIMEOUT);
     }
 
-    @Override
     public boolean isCancelled() {
         return false;
     }
