@@ -16,6 +16,7 @@
 <configuration description="Run VTS Host-Driven, HIDL HAL Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
+    <option name="compatibility:include-filter" value="hwbinder_performance_test" />
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
   <template-include name="reporters" default="basic-reporters" />
 </configuration>

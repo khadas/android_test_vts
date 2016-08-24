@@ -40,6 +40,14 @@ enum VtsTestType {
 }
 
 
+enum VtsProfilingType {
+  UNKNOWN_VTS_PROFILING_TYPE = 0;
+  // for one sample which measures the time between two profiling points.
+  VTS_PROFILING_TYPE_TIMESTAMP = 1;
+  // for multiple single-type samples with labels.
+  VTS_PROFILING_TYPE_LABELED_VECTOR = 2;
+}
+
 // To specify a call flow event.
 message AndroidDeviceInfoMessage {
   // product type (e.g., bullhead).
@@ -105,10 +113,14 @@ message TestCaseReportMessage {
 message ProfilingReportMessage {
   // the instrumentation point name.
   optional bytes name = 1;
+  optional VtsProfilingType type = 2;
 
   // profiling start and end time stamp (for performance).
   optional int64 start_timestamp = 11;
   optional int64 end_timestamp = 12;
+
+  repeated bytes label = 21;
+  repeated int64 value = 22;
 }
 
 

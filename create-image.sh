@@ -51,6 +51,11 @@ function vts_multidevice_create_image {
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libqdMetaData.vts.so test/vts/images/${DEVICE}/64/hal
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libqomx_core.vts.so test/vts/images/${DEVICE}/32/hal
 
+  cp ${BASE_DIR}/out/host/linux-x86/vts/android-vts/testcases/android.hardware.tests.libhwbinder@1.064.so test/vts/images/${DEVICE}/64/hal/android.hardware.tests.libhwbinder@1.0.so
+  cp ${BASE_DIR}/out/host/linux-x86/vts/android-vts/testcases/android.hardware.tests.libhwbinder@1.0.so test/vts/images/${DEVICE}/32/hal
+
+  cp ${BASE_DIR}/out/host/linux-x86/vts/android-vts/testcases/libhwbinder_benchmark test/vts/images/${DEVICE}/64
+
   # uncomment for hidl
   # cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libhwbinder.so test/vts/images/${DEVICE}/32/libhwbinder.so
   # cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libhwbinder.so test/vts/images/${DEVICE}/64/libhwbinder.so

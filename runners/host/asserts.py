@@ -127,6 +127,28 @@ def assertFalse(expr, msg, extras=None):
         fail(msg, extras)
 
 
+def assertLess(first, second, msg=None, extras=None):
+    """Assert first < second, otherwise fail the test.
+
+    Error message is "first >= second" by default. Additional explanation can
+    be supplied in the message.
+
+    Args:
+        first: The actual value which is supposed to be smaller than `second`.
+        second: The threshold.
+        msg: A string that adds additional info about the failure.
+        extras: An optional field for extra information to be included in
+                test result.
+    """
+    try:
+        _pyunit_proxy.assertLess(first, second)
+    except AssertionError as e:
+        my_msg = str(e)
+        if msg:
+            my_msg = "%s %s" % (my_msg, msg)
+        fail(my_msg, extras=extras)
+
+
 def skip(reason, extras=None):
     """Skip a test case.
 
