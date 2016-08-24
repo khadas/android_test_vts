@@ -143,7 +143,7 @@ class EnvironmentRequirementChecker(object):
                     "which %s" % executable for executable in executables]
 
         results = map(operator.not_,
-                      self._shell.Execute(commands)[const.EXIT_CODE])
+                      self.shell.Execute(commands)[const.EXIT_CODE])
 
         self._executable_exist_dict = dict(zip(executables, results))
 
@@ -153,7 +153,7 @@ class EnvironmentRequirementChecker(object):
                                    and self._executable_exist_dict[executable])
                                ]
 
-        self._shell.Execute(permission_commands)
+        self.shell.Execute(permission_commands)
 
     def TestBinaryExists(self, test_case):
         """Check whether the given test case's binary exists.
