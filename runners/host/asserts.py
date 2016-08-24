@@ -39,13 +39,34 @@ def assertEqual(first, second, msg=None, extras=None):
     be supplied in the message.
 
     Args:
-        expr: The expression that is evaluated.
+        first, second: The arguments that will be tested for equality.
         msg: A string that adds additional info about the failure.
         extras: An optional field for extra information to be included in
                 test result.
     """
     try:
         _pyunit_proxy.assertEqual(first, second)
+    except AssertionError as e:
+        my_msg = str(e)
+        if msg:
+            my_msg = "%s %s" % (my_msg, msg)
+        fail(my_msg, extras=extras)
+
+def assertNotEqual(first, second, msg=None, extras=None):
+    """Assert that the first and second args are not equal, otherwise fail
+    the test.
+
+    Error message is "first == second" by default. Additional explanation can
+    be supplied in the message.
+
+    Args:
+        first, second: The arguments that will be tested for inequality.
+        msg: A string that adds additional info about the failure.
+        extras: An optional field for extra information to be included in
+                test result.
+    """
+    try:
+        _pyunit_proxy.assertNotEqual(first, second)
     except AssertionError as e:
         my_msg = str(e)
         if msg:

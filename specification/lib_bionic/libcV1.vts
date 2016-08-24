@@ -26,6 +26,86 @@ attribute: {
 }
 
 api: {
+  name: "socket"
+  return_type: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+  arg: {
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
+  }
+}
+
+attribute: {
+  name: "PF_UNIX"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 1
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "PF_INET"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 2
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "SOCK_STREAM"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 1
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "SOCK_DGRAM"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 2
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "SOCK_RAW"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 3
+  }
+  is_const: true
+}
+
+attribute: {
+  name: "SOCK_SEQPACKET"
+  type: TYPE_SCALAR
+  scalar_type: "int32_t"
+  scalar_value: {
+    int32_t: 5
+  }
+  is_const: true
+}
+
+api: {
   name: "accept"
   return_type: {
     type: TYPE_SCALAR
