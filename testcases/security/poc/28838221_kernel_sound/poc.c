@@ -27,8 +27,7 @@ void test_write(int fd)
 int main(int argc, char* argv[])
 {
   int ret;
-  char* path =
-      "/sys/kernel/debug/asoc/msm8994-tomtom-snd-card/snd-soc-dummy/codec_reg";
+  char* path = argv[1];
   int fd;
 
   fd = open(path, O_RDWR);
