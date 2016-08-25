@@ -32,19 +32,25 @@ class SecurityPoCKernelTest(base_test.BaseTestClass):
         self.dut.shell.InvokeTerminal("one")
         self.shell = self.dut.shell.one
 
-    def test_28838221_kernel_sound(self):
+    def test_28838221_kernel_sound_64bit(self):
         """A test case for b/28838221 which is from kernel sound driver."""
         binary = "/data/local/tmp/64/28838221_poc64"
+        logging.info("device type: %s", self.dut.model)
+        # TODO: customize arg based on self.dut.model.
+        if self.dut.model == "unknown":
+            asserts.skip("skip test_28838221_kernel_sound_64bit for a unknown device.")
+            return
+        arg = "/sys/kernel/debug/asoc/msm8994-tomtom-snd-card/snd-soc-dummy/codec_reg"
         results = self.shell.Execute(
             ["chmod 755 %s" % binary,
-             binary])
+             "%s %s" % (binary, arg)])
         logging.info(str(results[const.STDOUT]))
         # TODO: enable with a correct verification logic
         # asserts.assertEqual(
         #     results[const.STDOUT][0].strip(), "expected stdout")
         asserts.assertEqual(results[const.EXIT_CODE][0], 0)  # checks the exit code
 
-    def test_30149612_kernel_bluetooth(self):
+    def test_30149612_kernel_bluetooth_64bit(self):
         """A test case for b/28838221 which is from kernel bluetooth driver."""
         binary = "/data/local/tmp/64/30149512_poc64"
         results = self.shell.Execute(
