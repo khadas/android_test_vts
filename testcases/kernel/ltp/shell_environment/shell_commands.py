@@ -16,3 +16,7 @@
 #
 
 FILE_CPU_PRESENT = '/sys/devices/system/cpu/present'
+
+CMD_GETPROC = 'getprop'
+
+PROC_CPUABI = 'ro.product.cpu.abi'
