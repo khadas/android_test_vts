@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+class ConfigKeys(object):
+    RUN_STAGING = "run_staging"
+
 class ExitCode(object):
     """Exit codes for test binaries and test scripts."""
     KSFT_PASS = 0
@@ -26,7 +29,10 @@ class ExitCode(object):
 # Directory on the target where the tests are copied.
 KSFT_DIR = "/data/local/tmp/linux-kselftest"
 
-KSFT_CASES = [
+KSFT_CASES_STABLE = [
+]
+
+KSFT_CASES_STAGING = [
     "cpu-hotplug/cpu-on-off-test.sh",
     "futex/functional/futex_wait_timeout",
     "futex/functional/futex_wait_wouldblock",
@@ -42,5 +48,5 @@ KSFT_CASES = [
     "timers/raw_skew",
     "timers/threadtest",
     "timers/alarmtimer-suspend",
-    "timers/set-tai"
+    "timers/set-tai",
 ]
