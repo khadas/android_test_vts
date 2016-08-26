@@ -92,8 +92,8 @@ class CheckSetupCleanup(object):
 
     def __str__(self):
         return ("Shell Environment Check Definition Class:{cls} "
-                "Variables:{props}").format(
-                    msg=message, cls=self.__class__.__name__, props=vars(self))
+                "Variables: {props}").format(
+                    cls=self.__class__.__name__, props=vars(self))
 
     def GetNote(self):
         """Get a string note as error message. Can be override by sub-class"""
