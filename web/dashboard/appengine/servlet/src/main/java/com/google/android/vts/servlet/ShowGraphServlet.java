@@ -19,7 +19,7 @@ package com.google.android.vts.servlet;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
-
+import com.google.android.vts.proto.VtsReportMessage.VtsProfilingType;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -36,8 +36,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -55,6 +59,9 @@ public class ShowGraphServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
+
+    // for number of independent lines on the graph
+    private static final int GRAPH_SIZE = 2;
 
     /**
      * Returns the table corresponding to the table name.
@@ -92,6 +99,15 @@ public class ShowGraphServlet extends HttpServlet {
         // This list holds the values for all profiling points.
         List<Double> profilingPointValuesList = new ArrayList<Double>();
 
+        // Map for labels and values
+        Map<String, Integer> labelIndexMap = new HashMap<String, Integer>();
+
+        // Set of all labels
+        Set<String> labels = new HashSet<String>();
+
+        // List of all profiling vectors
+        List<ProfilingReportMessage> profilingVectors = new ArrayList<ProfilingReportMessage>();
+
         ResultScanner scanner = table.getScanner(new Scan());
         for (Result result = scanner.next(); (result != null); result = scanner.next()) {
             for (KeyValue keyValue : result.list()) {
@@ -101,42 +117,84 @@ public class ShowGraphServlet extends HttpServlet {
                 // update map of profiling point names
                 for (ProfilingReportMessage profilingReportMessage :
                     testReportMessage.getProfilingList()) {
-                    if (! profilingPointName.equals(profilingReportMessage.getName().toStringUtf8())) {
+                    if (!profilingPointName.equals(profilingReportMessage.getName().toStringUtf8())) {
                         continue;
                     }
+                    switch(profilingReportMessage.getType()) {
+                        case UNKNOWN_VTS_PROFILING_TYPE:
+                        case VTS_PROFILING_TYPE_TIMESTAMP :
+                            double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
+                                profilingReportMessage.getStartTimestamp())) / 1000;
+                            if (timeTaken < 0) {
+                                logger.info("Inappropriate value for time taken");
+                                continue;
+                            }
+                            profilingPointValuesList.add(timeTaken);
+                            break;
 
-                    double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
-                        profilingReportMessage.getStartTimestamp())) / 1000;
-                    if (timeTaken < 0) {
-                        logger.info("Inappropriate value for time taken");
-                        continue;
+                        case VTS_PROFILING_TYPE_LABELED_VECTOR :
+                            profilingVectors.add(profilingReportMessage);
+                            for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
+                                labels.add(profilingReportMessage.getLabelList()
+                                    .get(i).toStringUtf8());
+                            }
+                            break;
+
+                        default :
+                            break;
                     }
-                    profilingPointValuesList.add(timeTaken);
                 }
             }
         }
 
-        double[] values = new double[profilingPointValuesList.size()];
+        List<String> sortedLabels = new ArrayList<String>(labels);
+        Collections.sort(sortedLabels);
+        for (int i = 0; i < sortedLabels.size(); i++) {
+            labelIndexMap.put(sortedLabels.get(i), i);
+        }
+        long[][] lineGraphValues = new long[labels.size()][profilingVectors.size()];
+        for (int reportIndex = 0; reportIndex < profilingVectors.size(); reportIndex++) {
+            ProfilingReportMessage report = profilingVectors.get(reportIndex);
+            if (report.getLabelList().size() != report.getValueList().size()) continue;
+            for (int i = 0; i < report.getLabelList().size(); i++) {
+                String label = report.getLabelList().get(i).toStringUtf8();
+                if (!labelIndexMap.containsKey(label)) continue;
+                lineGraphValues[labelIndexMap.get(label)][reportIndex] =
+                    report.getValueList().get(i);
+            }
+        }
+
+        // fill performance profiling array
+        double[] performanceProfilingValues = new double[profilingPointValuesList.size()];
         for (int i = 0; i < profilingPointValuesList.size(); i++) {
-            values[i] = profilingPointValuesList.get(i).doubleValue();
+            performanceProfilingValues[i] = profilingPointValuesList.get(i).doubleValue();
         }
 
         // pass map to show_graph.jsp through request by converting to JSON
-        String valuesJson = new Gson().toJson(values);
-        request.setAttribute("valuesJson", valuesJson);
+        String valuesJson = new Gson().toJson(performanceProfilingValues);
+        request.setAttribute("performanceValuesJson", valuesJson);
 
         int[] percentiles = {10, 25, 50 , 75, 80, 90, 95, 99};
         double[] percentileValuesArray = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             percentileValuesArray[i] =
-                Math.round(new Percentile().evaluate(values, percentiles[i]) * 1000d) / 1000d;
+                Math.round(new Percentile().evaluate(performanceProfilingValues, percentiles[i]) * 1000d) / 1000d;
         }
 
-        if (values.length == 0) {
+        if (performanceProfilingValues.length == 0) {
             request.setAttribute("error", PROFILING_DATA_ALERT);
+            request.setAttribute("showPercentileTable", false);
+            request.setAttribute("showProfilingGraph", false);
+        } else {
+            request.setAttribute("showPercentileTable", true);
+            request.setAttribute("showProfilingGraph", true);
         }
+
+        // performance data for scatter plot
+        request.setAttribute("lineGraphValuesJson", new Gson().toJson(lineGraphValues));
+        request.setAttribute("labelsListJson", new Gson().toJson(sortedLabels));
+
         request.setAttribute("profilingPointName", profilingPointName);
-        request.setAttribute("values", values);
         request.setAttribute("percentileValuesJson", new Gson().toJson(percentileValuesArray));
         response.setContentType("text/plain");
         dispatcher = request.getRequestDispatcher("/show_graph.jsp");
