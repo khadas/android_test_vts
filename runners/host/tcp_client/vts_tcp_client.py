@@ -23,7 +23,7 @@ import time
 import types
 
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
-from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg_pb2
 from vts.runners.host import const
 from vts.runners.host import errors
 from vts.utils.python.mirror import mirror_object
@@ -167,7 +167,7 @@ class VtsTcpClient(object):
         resp = self.RecvResponse()
         resp_code = resp.response_code
         if (resp_code == SysMsg_pb2.SUCCESS):
-            result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
+            result = CompSpecMsg_pb2.FunctionSpecificationMessage()
             if resp.result == "error":
                 raise errors.VtsTcpCommunicationError(
                     "API call error by the VTS driver.")
@@ -176,14 +176,14 @@ class VtsTcpClient(object):
             except text_format.ParseError as e:
                 logging.exception(e)
                 logging.error("Paring error\n%s", resp.result)
-            if result.return_type.type == IfaceSpecMsg_pb2.TYPE_SUBMODULE:
+            if result.return_type.type == CompSpecMsg_pb2.TYPE_SUBMODULE:
                 logging.info("returned a submodule spec")
                 logging.info("spec: %s", result.return_type_submodule_spec)
                 return mirror_object.MirrorObject(
                      self, result.return_type_submodule_spec, None)
             if (len(result.return_type_hidl) == 1 and
                 result.return_type_hidl[0].type ==
-                    IfaceSpecMsg_pb2.TYPE_SCALAR):
+                    CompSpecMsg_pb2.TYPE_SCALAR):
                 return getattr(result.return_type_hidl[0].scalar_value,
                                result.return_type_hidl[0].scalar_type)
             else:
@@ -199,7 +199,7 @@ class VtsTcpClient(object):
         resp = self.RecvResponse()
         resp_code = resp.response_code
         if (resp_code == SysMsg_pb2.SUCCESS):
-            result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
+            result = CompSpecMsg_pb2.FunctionSpecificationMessage()
             if resp.result == "error":
                 raise errors.VtsTcpCommunicationError(
                     "Get attribute request failed on target.")
@@ -208,13 +208,13 @@ class VtsTcpClient(object):
             except text_format.ParseError as e:
                 logging.exception(e)
                 logging.error("Paring error\n%s", resp.result)
-            if result.return_type.type == IfaceSpecMsg_pb2.TYPE_SUBMODULE:
+            if result.return_type.type == CompSpecMsg_pb2.TYPE_SUBMODULE:
                 logging.info("returned a submodule spec")
                 logging.info("spec: %s", result.return_type_submodule_spec)
                 return mirror_object.MirrorObject(self,
                                            result.return_type_submodule_spec,
                                            None)
-            elif result.return_type.type == IfaceSpecMsg_pb2.TYPE_SCALAR:
+            elif result.return_type.type == CompSpecMsg_pb2.TYPE_SCALAR:
                 return getattr(result.return_type.scalar_value,
                                result.return_type.scalar_type)
             return result
@@ -261,7 +261,7 @@ class VtsTcpClient(object):
                      resp)
         logging.info("proto: %s",
                      resp.result)
-        result = IfaceSpecMsg_pb2.InterfaceSpecificationMessage()
+        result = CompSpecMsg_pb2.ComponentSpecificationMessage()
         if resp.result == "error":
             raise errors.VtsTcpCommunicationError(
                 "API call error by the VTS driver.")

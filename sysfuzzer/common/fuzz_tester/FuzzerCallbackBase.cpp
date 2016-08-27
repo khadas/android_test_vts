@@ -34,7 +34,7 @@
 #include <vector>
 
 #include <VtsDriverCommUtil.h>
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
 #include "component_loader/DllLoader.h"

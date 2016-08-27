@@ -20,7 +20,7 @@ import logging
 import random
 
 from vts.utils.python.fuzzer import FuzzerUtils
-from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from google.protobuf import text_format
 
 
@@ -51,8 +51,8 @@ class MirrorObjectForTypes(object):
         Returns:
             StructSpecificationMessage if found, None otherwise
         """
-        if self._if_spec_msg.sub_struct:
-            for sub_struct in self._if_spec_msg.sub_struct:
+        if self._if_spec_msg.interface and self._if_spec_msg.interface.sub_struct:
+            for sub_struct in self._if_spec_msg.interface.sub_struct:
                 if sub_struct.name == sub_struct_name:
                     return copy.copy(sub_struct)
         return None
@@ -67,9 +67,15 @@ class MirrorObjectForTypes(object):
             VariableSpecificationMessage if found, None otherwise
         """
         try:
-            for attribute in self._if_spec_msg.attribute:
-                if not attribute.is_const and attribute.name == type_name:
-                    return copy.copy(attribute)
+            if (self._if_spec_msg.interface and
+                self._if_spec_msg.interface.attribute):
+                for attribute in self._if_spec_msg.interface.attribute:
+                    if not attribute.is_const and attribute.name == type_name:
+                        return copy.copy(attribute)
+            if self._if_spec_msg.attribute:
+                for attribute in self._if_spec_msg.attribute:
+                    if not attribute.is_const and attribute.name == type_name:
+                        return copy.copy(attribute)
             return None
         except AttributeError as e:
             # TODO: check in advance whether self._if_spec_msg Interface
@@ -86,14 +92,26 @@ class MirrorObjectForTypes(object):
             VariableSpecificationMessage if found, None otherwise
         """
         try:
-            for attribute in self._if_spec_msg.attribute:
-                if attribute.is_const and attribute.name == type_name:
-                    return copy.copy(attribute)
-                elif attribute.type == IfaceSpecMsg.TYPE_ENUM:
-                    for enumerator, value in zip(attribute.enum_value.enumerator,
-                                                 attribute.enum_value.value):
-                        if enumerator == type_name:
-                          return copy.copy(attribute)
+            if (self._if_spec_msg.interface and
+                self._if_spec_msg.interface.attribute):
+                for attribute in self._if_spec_msg.interface.attribute:
+                    if attribute.is_const and attribute.name == type_name:
+                        return copy.copy(attribute)
+                    elif attribute.type == CompSpecMsg.TYPE_ENUM:
+                        for enumerator, value in zip(attribute.enum_value.enumerator,
+                                                     attribute.enum_value.value):
+                            if enumerator == type_name:
+                                return copy.copy(attribute)
+            if self._if_spec_msg.attribute:
+                for attribute in self._if_spec_msg.attribute:
+                    if attribute.is_const and attribute.name == type_name:
+                        return copy.copy(attribute)
+                    elif attribute.type == CompSpecMsg.TYPE_ENUM:
+                        for enumerator, value in zip(attribute.enum_value.enumerator,
+                                                     attribute.enum_value.value):
+                            if enumerator == type_name:
+                                return copy.copy(attribute)
+            return None
             return None
         except AttributeError as e:
             # TODO: check in advance whether self._if_spec_msg Interface
@@ -116,7 +134,7 @@ class MirrorObjectForTypes(object):
                 raise MirrorObjectError("arg %s unknown" % arg_msg)
             logging.info("MessageGenerator %s %s", api_name, arg_msg)
             logging.debug("MESSAGE %s", api_name)
-            if arg_msg.type == IfaceSpecMsg.TYPE_STRUCT:
+            if arg_msg.type == CompSpecMsg.TYPE_STRUCT:
                 for struct_value in arg_msg.struct_value:
                     logging.debug("for %s %s",
                                   struct_value.name, struct_value.scalar_type)
@@ -125,7 +143,7 @@ class MirrorObjectForTypes(object):
                         logging.debug("check %s %s", struct_value.name, given_name)
                         if given_name == struct_value.name:
                             logging.debug("match type=%s", struct_value.scalar_type)
-                            if struct_value.type == IfaceSpecMsg.TYPE_SCALAR:
+                            if struct_value.type == CompSpecMsg.TYPE_SCALAR:
                                 if struct_value.scalar_type == "uint32_t":
                                     struct_value.scalar_value.uint32_t = given_value
                                 elif struct_value.scalar_type == "int32_t":
@@ -133,13 +151,13 @@ class MirrorObjectForTypes(object):
                                 else:
                                     raise MirrorObjectError(
                                         "support %s" % struct_value.scalar_type)
-                            elif struct_value.type == IfaceSpecMsg.TYPE_VECTOR:
+                            elif struct_value.type == CompSpecMsg.TYPE_VECTOR:
                                 sclar_type = struct_value.vector_value[0].scalar_type
                                 for value in given_value:
                                     vector_value = struct_value.vector_value[0].value.add()
                                     setattr(vector_value, sclar_type, value)
                             continue
-            elif arg_msg.type == IfaceSpecMsg.TYPE_FUNCTION_POINTER:
+            elif arg_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
                 for fp_value in arg_msg.function_pointer:
                     logging.debug("for %s", fp_value.function_name)
                     for given_name, given_value in kwargs.iteritems():
@@ -148,17 +166,17 @@ class MirrorObjectForTypes(object):
                               fp_value.id = self.GetFunctionPointerID(given_value)
                               break
 
-            if arg_msg.type == IfaceSpecMsg.TYPE_STRUCT:
+            if arg_msg.type == CompSpecMsg.TYPE_STRUCT:
                 for struct_value, given_value in zip(arg_msg.struct_value, args):
                     logging.debug("arg match type=%s", struct_value.scalar_type)
-                    if struct_value.type == IfaceSpecMsg.TYPE_SCALAR:
+                    if struct_value.type == CompSpecMsg.TYPE_SCALAR:
                         if struct_value.scalar_type == "uint32_t":
                             struct_value.scalar_value.uint32_t = given_value
                         elif struct_value.scalar_type == "int32_t":
                             struct_value.scalar_value.int32_t = given_value
                         else:
                             raise MirrorObjectError("support %s" % p_type)
-            elif arg_msg.type == IfaceSpecMsg.TYPE_FUNCTION_POINTER:
+            elif arg_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
                 for fp_value, given_value in zip(arg_msg.function_pointer, args):
                     logging.debug("for %s", fp_value.function_name)
                     fp_value.id = self.GetFunctionPointerID(given_value)
@@ -172,15 +190,15 @@ class MirrorObjectForTypes(object):
             if not arg_msg:
                 raise MirrorObjectError("const %s unknown" % arg_msg)
             logging.debug("check %s", api_name)
-            if arg_msg.type == IfaceSpecMsg.TYPE_SCALAR:
+            if arg_msg.type == CompSpecMsg.TYPE_SCALAR:
                 ret_v = getattr(arg_msg.scalar_value, arg_msg.scalar_type, None)
                 if ret_v is None:
                     raise MirrorObjectError(
                         "No value found for type %s in %s." % (p_type, value))
                 return ret_v
-            elif arg_msg.type == IfaceSpecMsg.TYPE_STRING:
+            elif arg_msg.type == CompSpecMsg.TYPE_STRING:
                 return arg_msg.string_value.message
-            elif arg_msg.type == IfaceSpecMsg.TYPE_ENUM:
+            elif arg_msg.type == CompSpecMsg.TYPE_ENUM:
                 for enumerator, value in zip(arg_msg.enum_value.enumerator,
                                              arg_msg.enum_value.value):
                     if enumerator == api_name:

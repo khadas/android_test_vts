@@ -8,53 +8,55 @@ header: "<hardware/hardware.h>"
 header: "<hardware/camera_common.h>"
 header: "<hardware/camera3.h>"
 
-sub_struct: {
-  name: "common"
-  is_pointer: true
-
-  attribute: {
-    name: "version"
-    type: TYPE_SCALAR
-    scalar_type: "uint32_t"
-  }
-
+interface: {
   sub_struct: {
-    name: "module"
+    name: "common"
+    is_pointer: true
+
+    attribute: {
+      name: "version"
+      type: TYPE_SCALAR
+      scalar_type: "uint32_t"
+    }
 
     sub_struct: {
-      name: "methods"
-      is_pointer: true
+      name: "module"
 
-      api: {
-        name: "open"
-        return_type: {
-          type: TYPE_SCALAR
-          scalar_type: "int32_t"
-        }
-        arg: {
-          type: TYPE_PREDEFINED
-          predefined_type: "hw_module_t*"
-          is_const: true
-        }
-        arg: {
-          type: TYPE_SCALAR
-          scalar_type: "char_pointer"
-        }
-        arg: {
-          type: TYPE_PREDEFINED
-          predefined_type: "hw_device_t**"
-          is_output: true
-        }
-        callflow: {
-          entry: true
+      sub_struct: {
+        name: "methods"
+        is_pointer: true
+
+        api: {
+          name: "open"
+          return_type: {
+            type: TYPE_SCALAR
+            scalar_type: "int32_t"
+          }
+          arg: {
+            type: TYPE_PREDEFINED
+            predefined_type: "hw_module_t*"
+            is_const: true
+          }
+          arg: {
+            type: TYPE_SCALAR
+            scalar_type: "char_pointer"
+          }
+          arg: {
+            type: TYPE_PREDEFINED
+            predefined_type: "hw_device_t**"
+            is_output: true
+          }
+          callflow: {
+            entry: true
+          }
         }
       }
     }
   }
-}
 
-attribute: {
-  name: "ops"
-  type: TYPE_SUBMODULE
-  predefined_type: "camera3_device_ops_t*"
+  attribute: {
+    name: "ops"
+    type: TYPE_SUBMODULE
+    predefined_type: "camera3_device_ops_t*"
+  }
 }

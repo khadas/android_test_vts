@@ -27,7 +27,7 @@
 #include "specification_parser/InterfaceSpecificationParser.h"
 
 #include <google/protobuf/text_format.h>
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 namespace android {
 namespace vts {
@@ -41,8 +41,8 @@ SpecificationBuilder::SpecificationBuilder(const string dir_path,
       module_name_(NULL),
       callback_socket_name_(callback_socket_name) {}
 
-vts::InterfaceSpecificationMessage*
-SpecificationBuilder::FindInterfaceSpecification(const int target_class,
+vts::ComponentSpecificationMessage*
+SpecificationBuilder::FindComponentSpecification(const int target_class,
                                                  const int target_type,
                                                  const float target_version,
                                                  const string submodule_name) {
@@ -58,8 +58,8 @@ SpecificationBuilder::FindInterfaceSpecification(const int target_class,
     if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
       cout << __FUNCTION__ << ": Checking a file " << ent->d_name << endl;
       const string file_path = string(dir_path_) + "/" + string(ent->d_name);
-      vts::InterfaceSpecificationMessage* message =
-          new vts::InterfaceSpecificationMessage();
+      vts::ComponentSpecificationMessage* message =
+          new vts::ComponentSpecificationMessage();
       if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
         if (message->component_type() == target_type &&
             message->component_type_version() == target_version) {
@@ -81,8 +81,8 @@ SpecificationBuilder::FindInterfaceSpecification(const int target_class,
   return NULL;
 }
 
-vts::InterfaceSpecificationMessage*
-SpecificationBuilder::FindInterfaceSpecification(const string& component_name) {
+vts::ComponentSpecificationMessage*
+SpecificationBuilder::FindComponentSpecification(const string& component_name) {
   DIR* dir;
   struct dirent* ent;
 
@@ -95,8 +95,8 @@ SpecificationBuilder::FindInterfaceSpecification(const string& component_name) {
     if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
       cout << __FUNCTION__ << ": Checking a file " << ent->d_name << endl;
       const string file_path = string(dir_path_) + "/" + string(ent->d_name);
-      vts::InterfaceSpecificationMessage* message =
-          new vts::InterfaceSpecificationMessage();
+      vts::ComponentSpecificationMessage* message =
+          new vts::ComponentSpecificationMessage();
       if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
         if (message->component_name() == component_name) {
           closedir(dir);
@@ -111,7 +111,7 @@ SpecificationBuilder::FindInterfaceSpecification(const string& component_name) {
 }
 
 FuzzerBase* SpecificationBuilder::GetFuzzerBase(
-    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    const vts::ComponentSpecificationMessage& iface_spec_msg,
     const char* dll_file_name, const char* target_func_name) {
   cout << __func__ << ":" << __LINE__ << " "
        << "entry" << endl;
@@ -159,7 +159,7 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
 }
 
 FuzzerBase* SpecificationBuilder::GetFuzzerBaseSubModule(
-    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    const vts::ComponentSpecificationMessage& iface_spec_msg,
     void* object_pointer) {
   cout << __func__ << ":" << __LINE__ << " "
        << "entry object_pointer " << ((uint64_t)object_pointer) << endl;
@@ -192,7 +192,7 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseSubModule(
 }
 
 FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
-    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    const vts::ComponentSpecificationMessage& iface_spec_msg,
     const char* dll_file_name) {
   FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
   if (!fuzzer) {
@@ -202,7 +202,7 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
   if (!fuzzer->LoadTargetComponent(dll_file_name)) return NULL;
 
   for (const vts::FunctionSpecificationMessage& func_msg :
-       iface_spec_msg.api()) {
+       iface_spec_msg.interface().api()) {
     cout << "Add a job " << func_msg.name() << endl;
     FunctionSpecificationMessage* func_msg_copy = func_msg.New();
     func_msg_copy->CopyFrom(func_msg);
@@ -215,7 +215,7 @@ bool SpecificationBuilder::LoadTargetComponent(
     const char* dll_file_name, const char* spec_lib_file_path, int target_class,
     int target_type, float target_version, const char* module_name) {
   if_spec_msg_ =
-      FindInterfaceSpecification(target_class, target_type, target_version);
+      FindComponentSpecification(target_class, target_type, target_version);
   if (!if_spec_msg_) {
     cerr << __FUNCTION__ << ": no interface specification file found for "
          << "class " << target_class << " type " << target_type << " version "
@@ -257,7 +257,7 @@ const string& SpecificationBuilder::CallFunction(
   if (func_msg->submodule_name().size() > 0) {
     string submodule_name = func_msg->submodule_name();
     cout << __func__ << " submodule name " << submodule_name << endl;
-    vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+    vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
     if (submodule_fuzzerbase_map_.find(submodule_name)
         != submodule_fuzzerbase_map_.end()) {
       cout << __func__ << " call is for a submodule" << endl;
@@ -412,7 +412,7 @@ const string& SpecificationBuilder::CallFunction(
       // find a VTS spec for that module
       string submodule_name = func_msg->return_type().predefined_type().substr(
           0, func_msg->return_type().predefined_type().size() - 1);
-      vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+      vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
       if (submodule_if_spec_map_.find(submodule_name)
           != submodule_if_spec_map_.end()) {
         cout << __func__ << " submodule InterfaceSpecification already loaded"
@@ -422,7 +422,7 @@ const string& SpecificationBuilder::CallFunction(
             submodule_iface_spec_msg);
       } else {
         submodule_iface_spec_msg =
-            FindInterfaceSpecification(
+            FindComponentSpecification(
                 if_spec_msg_->component_class(), if_spec_msg_->component_type(),
                 if_spec_msg_->component_type_version(), submodule_name);
         if (!submodule_iface_spec_msg) {
@@ -458,7 +458,7 @@ const string& SpecificationBuilder::GetAttribute(
   if (func_msg->submodule_name().size() > 0) {
     string submodule_name = func_msg->submodule_name();
     cout << __func__ << " submodule name " << submodule_name << endl;
-    vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+    vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
     if (submodule_fuzzerbase_map_.find(submodule_name)
         != submodule_fuzzerbase_map_.end()) {
       cout << __func__ << " call is for a submodule" << endl;
@@ -561,7 +561,7 @@ const string& SpecificationBuilder::GetAttribute(
       // find a VTS spec for that module
       string submodule_name = func_msg->return_type().predefined_type().substr(
           0, func_msg->return_type().predefined_type().size() - 1);
-      vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+      vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
       if (submodule_if_spec_map_.find(submodule_name)
           != submodule_if_spec_map_.end()) {
         cout << __func__ << " submodule InterfaceSpecification already loaded"
@@ -571,7 +571,7 @@ const string& SpecificationBuilder::GetAttribute(
             submodule_iface_spec_msg);
       } else {
         submodule_iface_spec_msg =
-            FindInterfaceSpecification(
+            FindComponentSpecification(
                 if_spec_msg_->component_class(), if_spec_msg_->component_type(),
                 if_spec_msg_->component_type_version(), submodule_name);
         if (!submodule_iface_spec_msg) {
@@ -598,8 +598,8 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
                                    const char* spec_lib_file_path,
                                    int target_class, int target_type,
                                    float target_version) {
-  vts::InterfaceSpecificationMessage* interface_specification_message =
-      FindInterfaceSpecification(target_class, target_type, target_version);
+  vts::ComponentSpecificationMessage* interface_specification_message =
+      FindComponentSpecification(target_class, target_type, target_version);
   cout << "ifspec addr " << interface_specification_message << endl;
 
   if (!interface_specification_message) {
@@ -647,8 +647,8 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
                 submodule_name.back() == '*')) {
           submodule_name.pop_back();
         }
-        vts::InterfaceSpecificationMessage* iface_spec_msg =
-            FindInterfaceSpecification(target_class, target_type,
+        vts::ComponentSpecificationMessage* iface_spec_msg =
+            FindComponentSpecification(target_class, target_type,
                                        target_version, submodule_name);
         if (iface_spec_msg) {
           cout << __FUNCTION__ << " submodule found - " << submodule_name
@@ -670,8 +670,8 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
   return true;
 }
 
-vts::InterfaceSpecificationMessage*
-SpecificationBuilder::GetInterfaceSpecification() const {
+vts::ComponentSpecificationMessage*
+SpecificationBuilder::GetComponentSpecification() const {
   cout << "ifspec addr get " << if_spec_msg_ << endl;
   return if_spec_msg_;
 }

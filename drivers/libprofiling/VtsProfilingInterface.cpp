@@ -28,7 +28,7 @@ const int VtsProfilingInterface::kProfilingPointCallback = 2;
 const int VtsProfilingInterface::kProfilingPointExit = 3;
 
 bool VtsProfilingInterface::AddTraceEvent(
-    const InterfaceSpecificationMessage& message) {
+    const FunctionSpecificationMessage& message) {
   return true;
 }
 

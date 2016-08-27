@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -37,13 +37,13 @@ extern string GetCppVariableType(const string primitive_type_string);
 
 // Returns the C/C++ basic variable type name of a given argument.
 string GetCppVariableType(const VariableSpecificationMessage& arg,
-                          const InterfaceSpecificationMessage* message = NULL);
+                          const ComponentSpecificationMessage* message = NULL);
 
 // Get the C/C++ instance type name of an argument.
 extern string GetCppInstanceType(
     const VariableSpecificationMessage& arg,
     const string& msg = string(),
-    const InterfaceSpecificationMessage* message = NULL);
+    const ComponentSpecificationMessage* message = NULL);
 
 // Returns the name of a function which can convert the given arg to a protobuf.
 extern string GetConversionToProtobufFunctionName(

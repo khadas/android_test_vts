@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 #include "code_gen/HalCodeGen.h"
@@ -36,15 +36,20 @@ namespace vts {
 const char* const HalHidlCodeGen::kInstanceVariableName = "hw_binder_proxy_";
 
 void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   bool first_callback = true;
 
-  for (int i = 0; i < message.attribute_size(); i++) {
-    const VariableSpecificationMessage& attribute = message.attribute(i);
+  for (int i = 0;
+       i < message.attribute_size() + message.interface().attribute_size();
+       i++) {
+    const VariableSpecificationMessage& attribute = (i < message.attribute_size()) ?
+        message.attribute(i) :
+        message.interface().attribute(i - message.attribute_size());
     if (attribute.type() != TYPE_FUNCTION_POINTER || !attribute.is_callback()) {
       continue;
     }
+
     string name =
         "vts_callback_" + fuzzer_extended_class_name + "_" + attribute.name();
     if (first_callback) {
@@ -185,10 +190,10 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
 
 
 void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
 
-  for (auto const& api : message.api()) {
+  for (auto const& api : message.interface().api()) {
     if (api.return_type_hidl_size() > 0) {
       cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func("
              << api.return_type_hidl(0).scalar_type() << " arg) {" << endl;
@@ -207,13 +212,13 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
 
 
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   GenerateCppBodySyncCallbackFunction(
       cpp_ss, message, fuzzer_extended_class_name);
 
   set<string> callbacks;
-  for (auto const& api : message.api()) {
+  for (auto const& api : message.interface().api()) {
     for (auto const& arg : api.arg()) {
       if (!arg.is_callback() && arg.type() == TYPE_HIDL_CALLBACK &&
           callbacks.find(arg.predefined_type()) == callbacks.end()) {
@@ -226,7 +231,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   }
 
   if (message.component_name() != "types") {
-    for (auto const& sub_struct : message.sub_struct()) {
+    for (auto const& sub_struct : message.interface().sub_struct()) {
       GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
                                   message.original_data_structure_name(),
                                   sub_struct.is_pointer() ? "->" : ".");
@@ -262,15 +267,15 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         << endl;
 
     // to call another function if it's for a sub_struct
-    if (message.sub_struct().size() > 0) {
+    if (message.interface().sub_struct().size() > 0) {
       cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
-      for (auto const& sub_struct : message.sub_struct()) {
+      for (auto const& sub_struct : message.interface().sub_struct()) {
         GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, "");
       }
       cpp_ss << "  }" << endl;
     }
 
-    for (auto const& api : message.api()) {
+    for (auto const& api : message.interface().api()) {
       cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
 
       // args - definition;
@@ -295,7 +300,13 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             // find the spec.
             bool found = false;
             cout << name << endl;
-            for (auto const& attribute : message.attribute()) {
+            for (int attr_idx = 0;
+                 attr_idx < message.attribute_size() + message.interface().attribute_size();
+                 attr_idx++) {
+              const VariableSpecificationMessage& attribute = (attr_idx < message.attribute_size()) ?
+                  message.attribute(attr_idx) :
+                  message.interface().attribute(attr_idx - message.attribute_size());
+
               if (attribute.type() == TYPE_FUNCTION_POINTER &&
                   attribute.is_callback()) {
                 string target_name = "vts_callback_" + fuzzer_extended_class_name +
@@ -503,7 +514,13 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  return false;" << endl;
     cpp_ss << "}" << endl;
   } else {
-    for (const auto& attribute : message.attribute()) {
+    for (int attr_idx = 0;
+         attr_idx < message.attribute_size() + message.interface().attribute_size();
+         attr_idx++) {
+      const VariableSpecificationMessage& attribute = (attr_idx < message.attribute_size()) ?
+          message.attribute(attr_idx) :
+          message.interface().attribute(attr_idx - message.attribute_size());
+
       if (attribute.type() == TYPE_ENUM) {
         cpp_ss << attribute.name() << " " << "Random" << attribute.name() << "() {"
                << endl;
@@ -697,7 +714,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 }
 
 void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   if (message.component_name() != "types") {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;

@@ -53,6 +53,8 @@
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/SpecificationBuilder.h"
 
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
+
 using namespace std;
 
 namespace android {
@@ -82,7 +84,8 @@ int32_t VtsDriverHalSocketServer::Status(int32_t type) {
 
 const char* VtsDriverHalSocketServer::ReadSpecification(const string& name) {
   printf("VtsFuzzerServer::ReadSpecification(%s)\n", name.c_str());
-  InterfaceSpecificationMessage* msg = spec_builder_.FindInterfaceSpecification(name);
+  ComponentSpecificationMessage* msg =
+      spec_builder_.FindComponentSpecification(name);
   string* result = new string();
   google::protobuf::TextFormat::PrintToString(*msg, result);
   return result->c_str();
@@ -107,8 +110,8 @@ const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
 
 const char* VtsDriverHalSocketServer::GetFunctions() {
   printf("Get functions*");
-  vts::InterfaceSpecificationMessage* spec =
-      spec_builder_.GetInterfaceSpecification();
+  vts::ComponentSpecificationMessage* spec =
+      spec_builder_.GetComponentSpecification();
   if (!spec) {
     return NULL;
   }

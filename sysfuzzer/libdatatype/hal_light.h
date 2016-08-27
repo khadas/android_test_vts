@@ -19,7 +19,7 @@
 
 #include <hardware/lights.h>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 namespace android {
 namespace vts {

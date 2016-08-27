@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 
@@ -34,7 +34,7 @@ namespace vts {
 const char* const LegacyHalCodeGen::kInstanceVariableName = "legacyhal_";
 
 void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
@@ -42,7 +42,7 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
-  for (auto const& api : message.api()) {
+  for (auto const& api : message.interface().api()) {
     std::stringstream ss;
 
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
@@ -107,7 +107,7 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
 
 void LegacyHalCodeGen::GenerateCppBodyGetAttributeFunction(
     std::stringstream& cpp_ss,
-    const InterfaceSpecificationMessage& /*message*/,
+    const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
