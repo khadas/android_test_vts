@@ -423,7 +423,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                    << arg.vector_value(0).scalar_type() << "();"
                    << endl;
             cpp_ss << "    }" << endl;
-            cpp_ss << "arg" << arg_count << ".setTo("
+            cpp_ss << "arg" << arg_count << ".setToExternal("
                    << "arg" << arg_count << "buffer, "
                    << "func_msg->arg(" << arg_count << ").vector_value(0).value().size()"
                    << ")";
@@ -442,10 +442,24 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       // actual function call
       GenerateCodeToStartMeasurement(cpp_ss);
 
+      bool simple_return_type = false;
+      if (api.return_type_hidl_size() > 0) {
+        if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+            api.return_type_hidl(0).type() == TYPE_ENUM) {
+          simple_return_type = true;
+        }
+      }
+
       // may need to check whether the function is actually defined.
       cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
-      cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
-             << kInstanceVariableName << "->" << api.name() << "(";
+      if (!simple_return_type) {
+        cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<"
+               << "const void*>(new string("
+               << kInstanceVariableName << "->" << api.name() << "(";
+      } else {
+        cpp_ss << "    *result = reinterpret_cast<void*>("
+               << kInstanceVariableName << "->" << api.name() << "(";
+      }
       if (arg_count > 0) cpp_ss << endl;
 
       for (int index = 0; index < arg_count; index++) {
@@ -455,14 +469,17 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         }
       }
 
-      if (api.return_type_hidl_size() > 0) {
-        // TODO: support callback as the last arg
-        if (arg_count != 0) cpp_ss << ", ";
-        cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
-        // TODO: callback shall update *result (barrier here?)
-        //       cpp_ss << "*result = ...";
+      if (!simple_return_type) {
+        if (api.return_type_hidl_size() > 0) {
+          if (arg_count != 0) cpp_ss << ", ";
+          cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
+        }
       }
-      cpp_ss << ").toString8().string())));" << endl;
+      if (!simple_return_type) {
+          cpp_ss << ").toString8().string())));" << endl;
+      } else {
+          cpp_ss << ").val);" << endl;
+      }
       GenerateCodeToStopMeasurement(cpp_ss);
       cpp_ss << "    cout << \"called\" << endl;" << endl;
 
