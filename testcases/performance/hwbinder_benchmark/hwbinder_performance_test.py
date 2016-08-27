@@ -46,6 +46,36 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
         self.dut.shell.InvokeTerminal("one")
+        self.DisableCpuScaling()
+
+    def tearDownClass(self):
+        self.EnableCpuScaling()
+
+    def ChangeCpuGoverner(self, mode):
+        """Changes the cpu governer mode of all the cpus on the device.
+
+        Args:
+            mode:expected cpu governer mode. e.g performan/interactive.
+        """
+        results = self.dut.shell.one.Execute(
+            "cat /sys/devices/system/cpu/possible")
+        asserts.assertEqual(len(results[const.STDOUT]), 1)
+        stdout_lines = results[const.STDOUT][0].split("\n")
+        (low, high) = stdout_lines[0].split('-')
+        logging.info("possible cpus: %s : %s" % (low, high))
+
+        for cpu_no in range(int(low), int(high)):
+          self.dut.shell.one.Execute(
+             "echo %s > /sys/devices/system/cpu/cpu%s/"
+             "cpufreq/scaling_governor" % (mode, cpu_no))
+
+    def DisableCpuScaling(self):
+        """Disable CPU frequency scaling on the device."""
+        self.ChangeCpuGoverner("performance")
+
+    def EnableCpuScaling(self):
+        """Enable CPU frequency scaling on the device."""
+        self.ChangeCpuGoverner("interactive")
 
     def testRunBenchmark32Bit(self):
         """A testcase which runs the 32-bit benchmark."""
@@ -65,6 +95,7 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         # Runs the benchmark.
         logging.info("Start to run the benchmark (%s bit mode)", bits)
         binary = "/data/local/tmp/%s/libhwbinder_benchmark%s" % (bits, bits)
+
         results = self.dut.shell.one.Execute(
             ["chmod 755 %s" % binary,
              "LD_LIBRARY_PATH=/data/local/tmp/%s/hal:"
