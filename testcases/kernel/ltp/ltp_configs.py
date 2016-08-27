@@ -96,31 +96,12 @@ REQUIREMENT_TO_TESTSUITE = {}
 # or testsuite-testname_**bit, or just testname. Using just testname
 # is not recommended
 STAGING_TESTS = [
-    # Bug#30675453
-    'syscalls-perf_event_open02',
-    # Bug#30688551
-    'syscalls-lstat03_64',
-    'syscalls-lstat03',
-    # Bug#30688061
-    'input-input03',
-    # Bug#30688056
-    'cpuhotplug-cpuhotplug04',
-    # Bug#30699880
-    'mm-mtest01w',
-    'mm-mtest01',
-    # Bug#30688574
-    'syscalls-accept4_01',
-    # Bug#30689411
-    'mm-mmapstress03',
     # Tests currently only failing on sailfish and marlin,
     # these will be inspected soon
-    'syscalls-fcntl34',
-    'syscalls-fcntl34_64',
     'syscalls-open14',
     'syscalls-openat03',
     # Recently fixed
     'connectors-Connectors',
-    'cpuhotplug-cpuhotplug02',
     'kernel_misc-kmsg01',
     'syscalls-access01',
     'syscalls-add_key01',
@@ -132,14 +113,11 @@ STAGING_TESTS = [
     'syscalls-creat03',
     'syscalls-creat04',
     'syscalls-creat05',
-    'syscalls-creat07',
-    'syscalls-creat08',
     'epoll_create1_01',
     'epoll_ctl01',
     'epoll_ctl02',
     'fcntl07',
     'fcntl07_64',
-    'syscalls-getrusage03',
     'syscalls-getrusage04',
     'madvise05',
     'mkdir02',
@@ -162,7 +140,9 @@ STAGING_TESTS = [
     'rename09',
     'syscall01',
     'utime03',
-    # Fail on lab device but pass on local device
+    # Fail on local device but pass on lab devices
+    'fs-proc01',
+    # Fail on lab devices but pass on local device
     'syscalls-execl01',
     'syscalls-execle01',
     'syscalls-execlp01',
@@ -181,11 +161,40 @@ STAGING_TESTS = [
     'syscalls-move_pages09',
     'syscalls-move_pages10',
     'syscalls-setpgid03',
-    'mm-mtest05',
+    'numa-move_pages01_32bit',
+    # Fail on staging but passing on stable
+    'fs-fs_di',
+    # Bug#30675453
+    'syscalls-perf_event_open02',
+    # Bug#30688551
+    'syscalls-lstat03_64',
+    'syscalls-lstat03',
+    # Bug#30688061
+    'input-input03',
+    # Bug#30688056
+    'cpuhotplug-cpuhotplug04',
+    # Bug#30699880
+    'mm-mtest01w',
+    'mm-mtest01',
+    # Bug#30688574
+    'syscalls-accept4_01',
+    # Bug#30689411
+    'mm-mmapstress03',
+]
+
+# Tests disabled
+# Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
+DISABLED_TESTS = [
+    # Recently fixed, will push to staging soon
+    'syscalls-getrusage03',
+    'syscalls-creat07',
+    'syscalls-creat08',
     'sched-sched_cli_serv',
     'admin_tools-at_deny01',
     'admin_tools-at_allow01',
-    'numa-move_pages01',
+    'cpuhotplug-cpuhotplug02',
+    'mm-mtest05',
+    'numa-move_pages01_64bit',
     'numa-move_pages02',
     'numa-move_pages04',
     'numa-move_pages05',
@@ -194,21 +203,11 @@ STAGING_TESTS = [
     'numa-move_pages08',
     'numa-move_pages09',
     'numa-move_pages10',
-    # The following tests are failing on 64bit version
-    'mm-overcommit_memory01_64bit',
-    'mm-overcommit_memory02_64bit',
-    'mm-overcommit_memory03_64bit',
-    'mm-overcommit_memory04_64bit',
-    'mm-overcommit_memory05_64bit',
-    'mm-overcommit_memory06_64bit',
-]
-
-# Tests disabled
-# Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
-DISABLED_TESTS = [
     # The following test case is designed only for i386
     'f00f',
     # The following test cases are uncategorized
+    'syscalls-fcntl34',
+    'syscalls-fcntl34_64',
     'inotify06',
     'abort01',
     'chmod05',
@@ -538,4 +537,18 @@ DISABLED_TESTS = [
     'syscalls-sigpending02',
     'syscalls-sigrelse01',
     'syscalls-vfork02',
+    # The following tests are not stable on 64bit version
+    'input01_64bit',
+    'input02_64bit',
+    'input03_64bit',
+    'input04_64bit',
+    'input05_64bit',
+    'input06_64bit',
+    # The following tests are failing on 64bit version
+    'mm-overcommit_memory01_64bit',
+    'mm-overcommit_memory02_64bit',
+    'mm-overcommit_memory03_64bit',
+    'mm-overcommit_memory04_64bit',
+    'mm-overcommit_memory05_64bit',
+    'mm-overcommit_memory06_64bit',
 ]
