@@ -41,7 +41,7 @@ class EnvironmentRequirementChecker(object):
         _result_cache: dictionary {requirement_check_method_name:
             (bool, string)}, a map between check method name and cached result
             tuples (boolean, note)
-        _executable_exist_dict: dict {string, bool}, a map between executable
+        _executable_available: dict {string, bool}, a map between executable
                                 path and its existance on target
         _shell_env: ShellEnvironment object, which checks and sets
             shell environments given a shell mirror
@@ -52,7 +52,7 @@ class EnvironmentRequirementChecker(object):
     def __init__(self, shell):
         self.shell = shell
         self._result_cache = {}
-        self._executable_exist_dict = {}
+        self._executable_available = {}
         self._shell_env = shell_environment.ShellEnvironment(self.shell)
         self._REQUIREMENT_DEFINITIONS = requirements.GetRequrementDefinitions()
 
@@ -127,8 +127,10 @@ class EnvironmentRequirementChecker(object):
         return True
 
     def CheckAllTestCaseExecutables(self, test_cases):
-        """Run a batch job to check the all test executable exists and set
-           permissions
+        """Run a batch job to check executable exists and set permissions.
+
+        The result will be stored in self._executable_available for use in
+        TestBinaryExists method.
 
         Args:
             test_case: list of TestCase objects.
@@ -138,22 +140,18 @@ class EnvironmentRequirementChecker(object):
         executables = list(
             set(itertools.chain.from_iterable(executables_generators)))
 
-        commands = ["ls %s" % executable
-                    if executable not in ltp_configs.EXTERNAL_BINS else
-                    "which %s" % executable for executable in executables]
-
-        results = map(operator.not_,
-                      self.shell.Execute(commands)[const.EXIT_CODE])
-
-        self._executable_exist_dict = dict(zip(executables, results))
-
+        # Set all executables executable using chmod. If file does not exists
+        # or setting permission failed, chomd will return non-zero exit code
+        # and the executable will be marked as unavailable in
+        # self._executable_available
         permission_commands = ["chmod 775 %s" % executable
                                for executable in executables
-                               if (executable not in ltp_configs.EXTERNAL_BINS
-                                   and self._executable_exist_dict[executable])
-                               ]
+                               if executable not in ltp_configs.EXTERNAL_BINS]
 
-        self.shell.Execute(permission_commands)
+        results = map(operator.not_,
+                      self.shell.Execute(permission_commands)[const.EXIT_CODE])
+
+        self._executable_available = dict(zip(executables, results))
 
     def TestBinaryExists(self, test_case):
         """Check whether the given test case's binary exists.
@@ -171,7 +169,7 @@ class EnvironmentRequirementChecker(object):
             return False
 
         executables = test_case.GetRequiredExecutablePaths()
-        results = (self._executable_exist_dict[executable]
+        results = (self._executable_available[executable]
                    for executable in executables)
 
         if not all(results):
