@@ -23,9 +23,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
   AndroidSystemControlMessage.proto \
-  InterfaceSpecificationMessage.proto \
+  ComponentSpecificationMessage.proto \
   VtsDriverControlMessage.proto \
-  # $(call all-proto-files-under, ./)
 
 LOCAL_C_INCLUDES := \
   external/protobuf/src \
@@ -52,7 +51,7 @@ LOCAL_CFLAGS += -Wno-unused-parameter -Werror
 # Files needed for VTSC.
 LOCAL_SRC_FILES := \
   AndroidSystemControlMessage.proto \
-  InterfaceSpecificationMessage.proto \
+  ComponentSpecificationMessage.proto \
 
 LOCAL_C_INCLUDES := \
   external/protobuf/src \

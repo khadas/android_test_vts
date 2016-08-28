@@ -28,7 +28,7 @@
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "utils/InterfaceSpecUtil.h"
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 #include "code_gen/CodeGenBase.h"
@@ -56,7 +56,7 @@ void Translate(const char* input_vts_file_path,
 
   cout << "vts_name: " << vts_name << endl;
 
-  InterfaceSpecificationMessage message;
+  ComponentSpecificationMessage message;
   if (InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
     cout << message.component_class();
   } else {

@@ -25,7 +25,7 @@
 #include "fuzz_tester/FuzzerBase.h"
 #include "utils/InterfaceSpecUtil.h"
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -51,7 +51,7 @@ bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
 }
 
 FuzzerBase* FuzzerWrapper::GetFuzzer(
-    const vts::InterfaceSpecificationMessage& message) {
+    const vts::ComponentSpecificationMessage& message) {
   cout << __func__ << endl;
   if (!spec_dll_path_) {
     cerr << __func__ << ": spec_dll_path_ not set" << endl;

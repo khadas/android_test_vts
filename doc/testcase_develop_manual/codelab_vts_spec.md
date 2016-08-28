@@ -7,7 +7,7 @@ both target-side native and host-side python code that is needed for Android
 system testing.
 
 A VTS specification flie is an ASCII protobuf file whose format is defined in
-[InterfaceSpecificationMessage.proto](https://googleplex-android.git.corp.google.com/platform/test/vts/+/master/proto/InterfaceSpecificationMessage.proto).
+[ComponentSpecificationMessage.proto](https://googleplex-android.git.corp.google.com/platform/test/vts/+/master/proto/ComponentSpecificationMessage.proto).
 Please check [this web site](https://developers.google.com/protocol-buffers/)
 if you are not yet familiar with Protocol Buffer.
 
@@ -22,7 +22,7 @@ To automatically generate a .vts file from .hal file, please check
 
 First let us set some global flags that are always required. The following
 are the required fields and their possible values. The full list is available
-in the InterfaceSpecificationMessage.proto file.
+in the ComponentSpecificationMessage.proto file.
 
 - component_class
  * `HAL_CONVENTIONAL` (for a conventional HAL)

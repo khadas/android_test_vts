@@ -26,7 +26,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/text_format.h>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ namespace android {
 namespace vts {
 
 bool InterfaceSpecificationParser::parse(
-    const char* file_path, InterfaceSpecificationMessage* is_message) {
+    const char* file_path, ComponentSpecificationMessage* is_message) {
   cout << __FUNCTION__ << " " << file_path << endl;
 
   ifstream in_file(file_path);
