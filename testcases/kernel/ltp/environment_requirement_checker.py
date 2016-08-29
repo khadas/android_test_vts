@@ -153,6 +153,16 @@ class EnvironmentRequirementChecker(object):
 
         self._executable_available = dict(zip(executables, results))
 
+        bin_path_exist_commands = ["which %s" % bin
+                                   for bin in ltp_configs.EXTERNAL_BINS]
+
+        bin_path_results = map(
+            operator.not_,
+            self.shell.Execute(bin_path_exist_commands)[const.EXIT_CODE])
+
+        self._executable_available.update(
+            dict(zip(ltp_configs.EXTERNAL_BINS, bin_path_results)))
+
     def TestBinaryExists(self, test_case):
         """Check whether the given test case's binary exists.
 
@@ -169,8 +179,8 @@ class EnvironmentRequirementChecker(object):
             return False
 
         executables = test_case.GetRequiredExecutablePaths()
-        results = (self._executable_available[executable]
-                   for executable in executables)
+        results = [self._executable_available[executable]
+                   for executable in executables]
 
         if not all(results):
             test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
