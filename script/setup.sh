@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Only tested on linux so far
 echo "Install Python SDK"
 sudo apt-get install python-dev
 
@@ -21,3 +21,9 @@ sudo pip install concurrent
 sudo pip install protobuf
 sudo pip install setuptools
 sudo pip install requests
+
+echo "Install CameraITS packages"
+sudo apt-get install python-numpy
+sudo apt-get install python-scipy
+sudo apt-get install python-matplotlib
+sudo apt-get install python-opencv
