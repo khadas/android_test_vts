@@ -39,15 +39,19 @@ PATH = '/system/bin:%s' % LTPBINPATH
 LTP_DEV_FS_TYPE = 'ext4'
 
 # Binaries required by LTP test cases that should exist in PATH
-EXTERNAL_BINS = [
-    'export',
-    'cd',
+INTERNAL_BINS = [
     'mktemp',
     'cp',
     'chmod',
     'chown',
     'ls',
     'mkfifo',
+]
+
+# Internal shell command required by some LTP test cases
+INTERNAL_SHELL_COMMANDS = [
+    'export',
+    'cd',
 ]
 
 # Requirement to testcase dictionary.

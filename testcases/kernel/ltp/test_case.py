@@ -92,7 +92,9 @@ class TestCase(object):
         tokens = command.strip().split()
 
         # If not ltp executables:
-        if (tokens[0] in ltp_configs.EXTERNAL_BINS or tokens[0].find('=') > 0):
+        if (tokens[0] in ltp_configs.INTERNAL_BINS
+            or tokens[0] in ltp_configs.INTERNAL_SHELL_COMMANDS
+            or tokens[0].find('=') > 0):
             return command
         else:  # Is Ltp executable
             tokens[0] = os.path.join(ltp_configs.LTPBINPATH, tokens[0])
@@ -129,8 +131,9 @@ class TestCase(object):
             returned.
         """
         return [os.path.join(ltp_configs.LTPBINPATH, executable)
-                if executable not in ltp_configs.EXTERNAL_BINS else executable
-                for executable in self.InternalGetExecutableNames()]
+                if executable not in ltp_configs.INTERNAL_BINS else executable
+                for executable in self.InternalGetExecutableNames()
+                if executable not in ltp_configs.INTERNAL_SHELL_COMMANDS]
 
     @property
     def fullname(self):
