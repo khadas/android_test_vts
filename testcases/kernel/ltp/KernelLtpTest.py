@@ -176,7 +176,9 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         stdout = results[const.STDOUT][0]
         ret_code = results[const.EXIT_CODE][0]
         # Test case is not for the current configuration, SKIP
-        if ret_code == ltp_enums.TestExitCode.TCONF and 'TPASS' not in stdout:
+        if ((ret_code == ltp_enums.TestExitCode.TCONF and
+             'TPASS' not in stdout) or
+            (ret_code == ltp_enums.TestExitCode.TPASS and 'CONF' in stdout)):
             return (self._SKIP, "Incompatible test skipped: TCONF")
         elif ret_code not in (ltp_enums.TestExitCode.TCONF,
                               ltp_enums.TestExitCode.TPASS):

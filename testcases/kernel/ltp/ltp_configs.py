@@ -46,6 +46,7 @@ INTERNAL_BINS = [
     'chown',
     'ls',
     'mkfifo',
+    'ldd',
 ]
 
 # Internal shell command required by some LTP test cases
@@ -87,6 +88,7 @@ REQUIREMENTS_TO_TESTCASE = {
         'syscalls-utimes01',
         'syscalls-mkfs01',
     ],
+    ltp_enums.Requirements.BIN_IN_PATH_LDD: ['commands-ldd'],
 }
 
 # Requirement for all test cases
@@ -144,6 +146,7 @@ STAGING_TESTS = [
     'rename09',
     'syscall01',
     'utime03',
+    'commands-ldd',
     # Fail on local device but pass on lab devices
     'fs-proc01',
     # Fail on lab devices but pass on local device
@@ -468,7 +471,6 @@ DISABLED_TESTS = [
     'hugemmap05_3',
     'ar',
     'ld',
-    'ldd',
     'nm',
     'objdump',
     'file',
