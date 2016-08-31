@@ -490,7 +490,6 @@ DISABLED_TESTS = [
     'sssd03',
     'du01',
     'mkfs01',
-    'which01',
     'lsmod01',
     'wc01',
     'smt_smp_enabled',
@@ -557,4 +556,17 @@ DISABLED_TESTS = [
     'mm-overcommit_memory04_64bit',
     'mm-overcommit_memory05_64bit',
     'mm-overcommit_memory06_64bit',
+    # 'which' in Android does not accept the tested options b/31152668
+    'commands-which01',
+    # tests that are currently killing some lab devices
+    'mm-oom01_64bit',
+    'mm-oom02_64bit',
+    'mm-oom03_64bit',
+    'mm-oom04_64bit',
+    'mm-oom05_64bit',
+    'mm-swapping01_64bit',
+    'mm-thp01_64bit',
+    'mm-thp02_64bit',
+    'mm-thp03_64bit',
+    'mm-vma01_64bit',
 ]
