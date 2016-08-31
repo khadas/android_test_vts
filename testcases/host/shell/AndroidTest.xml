@@ -16,28 +16,28 @@
 <configuration description="Config for VTS HAL shell test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
-        <option name="push" value="libvts_common.so->/data/local/tmp/32/libvts_common.so" />
-        <option name="push" value="libvts_common64.so->/data/local/tmp/64/libvts_common.so" />
-        <option name="push" value="libvts_interfacespecification.so->/data/local/tmp/32/libvts_interfacespecification.so" />
-        <option name="push" value="libvts_interfacespecification64.so->/data/local/tmp/64/libvts_interfacespecification.so" />
-        <option name="push" value="libvts_drivercomm.so->/data/local/tmp/32/libvts_drivercomm.so" />
-        <option name="push" value="libvts_drivercomm64.so->/data/local/tmp/64/libvts_drivercomm.so" />
-        <option name="push" value="libvts_datatype.so->/data/local/tmp/32/libvts_datatype.so" />
-        <option name="push" value="libvts_datatype64.so->/data/local/tmp/64/libvts_datatype.so" />
-        <option name="push" value="libvts_measurement.so->/data/local/tmp/32/libvts_measurement.so" />
-        <option name="push" value="libvts_measurement64.so->/data/local/tmp/64/libvts_measurement.so" />
-        <option name="push" value="libvts_codecoverage.so->/data/local/tmp/32/libvts_codecoverage.so" />
-        <option name="push" value="libvts_codecoverage64.so->/data/local/tmp/64/libvts_codecoverage.so" />
-        <option name="push" value="libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
-        <option name="push" value="libvts_multidevice_proto64.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
-        <option name="push" value="libhwbinder.so->/data/local/tmp/32/libhwbinder.so" />
-        <option name="push" value="libhwbinder64.so->/data/local/tmp/64/libhwbinder.so" />
-        <option name="push" value="fuzzer32->/data/local/tmp/32/fuzzer32" />
-        <option name="push" value="fuzzer64->/data/local/tmp/64/fuzzer64" />
-        <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
-        <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
-        <option name="push" value="vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
-        <option name="push" value="vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
+        <option name="push" value="DATA/lib/libvts_common.so->/data/local/tmp/32/libvts_common.so" />
+        <option name="push" value="DATA/lib64/libvts_common.so->/data/local/tmp/64/libvts_common.so" />
+        <option name="push" value="DATA/lib/libvts_interfacespecification.so->/data/local/tmp/32/libvts_interfacespecification.so" />
+        <option name="push" value="DATA/lib64/libvts_interfacespecification.so->/data/local/tmp/64/libvts_interfacespecification.so" />
+        <option name="push" value="DATA/lib/libvts_drivercomm.so->/data/local/tmp/32/libvts_drivercomm.so" />
+        <option name="push" value="DATA/lib64/libvts_drivercomm.so->/data/local/tmp/64/libvts_drivercomm.so" />
+        <option name="push" value="DATA/lib/libvts_datatype.so->/data/local/tmp/32/libvts_datatype.so" />
+        <option name="push" value="DATA/lib64/libvts_datatype.so->/data/local/tmp/64/libvts_datatype.so" />
+        <option name="push" value="DATA/lib/libvts_measurement.so->/data/local/tmp/32/libvts_measurement.so" />
+        <option name="push" value="DATA/lib64/libvts_measurement.so->/data/local/tmp/64/libvts_measurement.so" />
+        <option name="push" value="DATA/lib/libvts_codecoverage.so->/data/local/tmp/32/libvts_codecoverage.so" />
+        <option name="push" value="DATA/lib64/libvts_codecoverage.so->/data/local/tmp/64/libvts_codecoverage.so" />
+        <option name="push" value="DATA/lib/libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
+        <option name="push" value="DATA/lib64/libvts_multidevice_proto.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
+        <option name="push" value="DATA/lib/libhwbinder.so->/data/local/tmp/32/libhwbinder.so" />
+        <option name="push" value="DATA/lib64/libhwbinder.so->/data/local/tmp/64/libhwbinder.so" />
+        <option name="push" value="DATA/bin/fuzzer32->/data/local/tmp/32/fuzzer32" />
+        <option name="push" value="DATA/bin/fuzzer64->/data/local/tmp/64/fuzzer64" />
+        <option name="push" value="DATA/bin/vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
+        <option name="push" value="DATA/bin/vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
+        <option name="push" value="DATA/bin/vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
+        <option name="push" value="DATA/bin/vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">

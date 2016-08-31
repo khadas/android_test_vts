@@ -16,5 +16,6 @@
 vts_test_bin_packages := \
   libhwbinder_benchmark \
   libbinder_benchmark \
+  vts_test_binary_crash_app \
   28838221_poc \
   30149612_poc \
