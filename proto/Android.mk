@@ -35,10 +35,7 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 LOCAL_MULTILIB := both
 
-LOCAL_COMPATIBILITY_SUITE := vts
-
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
 
 include $(CLEAR_VARS)
 

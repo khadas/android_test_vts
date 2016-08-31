@@ -12,18 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := 30149612_poc
-LOCAL_MODULE_STEM_32 := 30149612_poc32
-LOCAL_MODULE_STEM_64 := 30149612_poc64
-
-LOCAL_SRC_FILES := poc.c
-
-LOCAL_MULTILIB := both
-
-include $(BUILD_EXECUTABLE)
+vts_test_bin_packages := \
+  libhwbinder_benchmark \
+  libbinder_benchmark \
+  28838221_poc \
+  30149612_poc \

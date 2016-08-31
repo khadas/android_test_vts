@@ -42,7 +42,4 @@ LOCAL_CLANG := true
 LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
 LOCAL_LDFLAGS += --coverage
 
-LOCAL_COMPATIBILITY_SUITE := vts
-
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk

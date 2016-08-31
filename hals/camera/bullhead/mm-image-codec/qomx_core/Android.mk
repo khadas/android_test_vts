@@ -31,8 +31,5 @@ LOCAL_SHARED_LIBRARIES := libcutils libdl
 
 LOCAL_32_BIT_ONLY := true
 
-LOCAL_COMPATIBILITY_SUITE := vts
-
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
 
