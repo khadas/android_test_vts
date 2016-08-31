@@ -29,8 +29,7 @@ VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 .PHONY: $(VTS_PYTHON_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
-	@mkdir -p $(VTS_TESTCASES_OUT)
-	@mkdir -p $(dir $@)
+	$(hide) mkdir -p $(dir $@)
 	@rm -f $@.list
 	$(hide) find test -name '*.py' -or -name '*.config' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
@@ -96,11 +95,14 @@ vts_test_lib_hal_packages := \
 vts_test_bin_hal_packages := \
   # hidl-power.default \
 
+.PHONY: vts_runner_python
+vts_runner_python: $(VTS_PYTHON_ZIP)
+
 .PHONY: vts
-vts: $(VTS_PYTHON_ZIP) $(vts_apk_packages) $(vts_bin_packages) $(vts_lib_packages) $(vts_test_bin_packages) $(vts_test_lib_hidl_packages) $(vts_test_lib_hal_packages) $(vts_test_bin_hal_packages) | $(ACP)
-	@mkdir -p $(VTS_TESTCASES_OUT)
-	$(call vts-copy-apk,CtsVerifier)  # apks
-	$(call vts-copy-apk,sl4a)
+# TODO restore $(vts_apk_packages) $(vts_bin_packages) $(vts_lib_packages) $(vts_test_bin_packages) $(vts_test_lib_hidl_packages) $(vts_test_lib_hal_packages) $(vts_test_bin_hal_packages) | $(ACP)
+vts: $(VTS_PYTHON_ZIP) | $(ACP)
+	# $(call vts-copy-apk,CtsVerifier)  # apks
+	# $(call vts-copy-apk,sl4a)
 	# $(call vts-copy-bin,vts_hal_agent,vts_hal_agent32,vts_hal_agent64)  # framework bins
 	# $(call vts-copy-bin,vtssysfuzzer,fuzzer32,fuzzer64)
 	# $(call vts-copy-bin,vts_shell_driver,vts_shell_driver32,vts_shell_driver64)
