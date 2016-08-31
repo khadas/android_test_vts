@@ -19,12 +19,8 @@ package com.google.android.vts.servlet;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.VtsProfilingType;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -36,17 +32,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,9 +51,7 @@ public class ShowGraphServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
-
-    // for number of independent lines on the graph
-    private static final int GRAPH_SIZE = 2;
+    private static final long ONE_DAY = 86400000000000L;  // units microseconds
 
     /**
      * Returns the table corresponding to the table name.
@@ -71,7 +61,6 @@ public class ShowGraphServlet extends HttpServlet {
      * @throws IOException
      */
     private Table getTable(TableName tableName) throws IOException {
-        long result;
         Table table = null;
 
         try {
@@ -86,13 +75,21 @@ public class ShowGraphServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        UserService userService = UserServiceFactory.getUserService();
-        User currentUser = userService.getCurrentUser();
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
 
         String profilingPointName = request.getParameter("profilingPoint");
+        long startTime;
+        long endTime;
+        try {
+            startTime = Long.parseLong(request.getParameter("buildIdStartTime"));
+            endTime = Long.parseLong(request.getParameter("buildIdEndTime"));
+        } catch (NumberFormatException e){
+            long now = System.currentTimeMillis() * 1000000L;
+            startTime = now - ONE_DAY;
+            endTime = now;
+        }
         tableName = TableName.valueOf(request.getParameter("tableName"));
         table = getTable(tableName);
 
@@ -103,16 +100,22 @@ public class ShowGraphServlet extends HttpServlet {
         Map<String, Integer> labelIndexMap = new HashMap<String, Integer>();
 
         // Set of all labels
-        Set<String> labels = new HashSet<String>();
+        List<String> labels = new ArrayList<String>();
 
         // List of all profiling vectors
         List<ProfilingReportMessage> profilingVectors = new ArrayList<ProfilingReportMessage>();
 
-        ResultScanner scanner = table.getScanner(new Scan());
-        for (Result result = scanner.next(); (result != null); result = scanner.next()) {
-            for (KeyValue keyValue : result.list()) {
+        // List of build IDs for each profiling vector
+        List<String> profilingBuildIds = new ArrayList<String>();
+
+        Scan scan = new Scan();
+        scan.setStartRow(Long.toString(startTime).getBytes());
+        scan.setStopRow(Long.toString(endTime).getBytes());
+        ResultScanner scanner = table.getScanner(scan);
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            for (Cell cell : result.rawCells()) {
                 TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                    parseFrom(keyValue.getValue());
+                    parseFrom(cell.getValueArray());
 
                 // update map of profiling point names
                 for (ProfilingReportMessage profilingReportMessage :
@@ -133,31 +136,38 @@ public class ShowGraphServlet extends HttpServlet {
                             break;
 
                         case VTS_PROFILING_TYPE_LABELED_VECTOR :
-                            profilingVectors.add(profilingReportMessage);
-                            for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
-                                labels.add(profilingReportMessage.getLabelList()
-                                    .get(i).toStringUtf8());
+                            if (profilingReportMessage.getLabelList().size() != 0 &&
+                                profilingReportMessage.getLabelList().size() ==
+                                profilingReportMessage.getValueList().size()) {
+                                profilingVectors.add(profilingReportMessage);
+                                profilingBuildIds.add(testReportMessage.getBuildInfo()
+                                    .getId().toStringUtf8());
                             }
                             break;
-
                         default :
                             break;
                     }
                 }
             }
         }
-
-        List<String> sortedLabels = new ArrayList<String>(labels);
-        Collections.sort(sortedLabels);
-        for (int i = 0; i < sortedLabels.size(); i++) {
-            labelIndexMap.put(sortedLabels.get(i), i);
+        if (profilingVectors.size() > 0) {
+            // Use the most recent profiling vector to generate the labels
+            ProfilingReportMessage profilingReportMessage = profilingVectors
+                .get(profilingVectors.size() - 1);
+            for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
+                labels.add(profilingReportMessage.getLabelList().get(i).toStringUtf8());
+            }
+        }
+        for (int i = 0; i < labels.size(); i++) {
+            labelIndexMap.put(labels.get(i), i);
         }
         long[][] lineGraphValues = new long[labels.size()][profilingVectors.size()];
         for (int reportIndex = 0; reportIndex < profilingVectors.size(); reportIndex++) {
             ProfilingReportMessage report = profilingVectors.get(reportIndex);
-            if (report.getLabelList().size() != report.getValueList().size()) continue;
             for (int i = 0; i < report.getLabelList().size(); i++) {
                 String label = report.getLabelList().get(i).toStringUtf8();
+
+                // Skip value if its label is not present
                 if (!labelIndexMap.containsKey(label)) continue;
                 lineGraphValues[labelIndexMap.get(label)][reportIndex] =
                     report.getValueList().get(i);
@@ -192,7 +202,12 @@ public class ShowGraphServlet extends HttpServlet {
 
         // performance data for scatter plot
         request.setAttribute("lineGraphValuesJson", new Gson().toJson(lineGraphValues));
-        request.setAttribute("labelsListJson", new Gson().toJson(sortedLabels));
+        request.setAttribute("labelsListJson", new Gson().toJson(labels));
+        request.setAttribute("profilingBuildIdsJson", new Gson().toJson(profilingBuildIds));
+
+        request.setAttribute("tableName", new Gson().toJson(request.getParameter("tableName")));
+        request.setAttribute("startTime", new Gson().toJson(startTime));
+        request.setAttribute("endTime", new Gson().toJson(endTime));
 
         request.setAttribute("profilingPointName", profilingPointName);
         request.setAttribute("percentileValuesJson", new Gson().toJson(percentileValuesArray));
