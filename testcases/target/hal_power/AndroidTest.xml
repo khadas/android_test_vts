@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Config for VTS HAL Power test cases">
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="cleanup" value="true" />
         <option name="push" value="VtsHalPowerTestCases->/data/local/tmp/VtsHalPowerTestCases" />
         <option name="append-bitness" value="true" />

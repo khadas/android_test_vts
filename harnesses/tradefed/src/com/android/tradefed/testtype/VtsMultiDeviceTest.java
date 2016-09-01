@@ -24,24 +24,27 @@ import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
+import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONException;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Set;
 
 /**
@@ -51,7 +54,7 @@ import java.util.Set;
 
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-    IRuntimeHintProvider, ITestCollector, IBuildReceiver {
+IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
@@ -64,46 +67,48 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
     static final String VTS = "vts";
+    static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
+    static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
 
     private ITestDevice mDevice = null;
 
     @Option(name = "test-timeout", description = "maximum amount of time"
-        + "(im milliseconds) tests are allowed to run",
-        isTimeVal = true)
+            + "(im milliseconds) tests are allowed to run",
+            isTimeVal = true)
     private static long TEST_TIMEOUT = 1000 * 60 * 5;
 
     @Option(name = "test-case-path",
-        description = "The path for test case.")
+            description = "The path for test case.")
     private String mTestCasePath = null;
 
     @Option(name = "test-config-path",
-        description = "The path for test case config file.")
+            description = "The path for test case config file.")
     private String mTestConfigPath = null;
 
     @Option(name = "use-stdout-logs",
-        description = "Flag that determines whether to use std:out to parse output.")
+            description = "Flag that determines whether to use std:out to parse output.")
     private boolean mUseStdoutLogs = true;
 
     @Option(name = "include-filter",
-        description = "The positive filter of the test names to run.")
-    private Set<String> mIncludeFilters = new HashSet<>();
+            description = "The positive filter of the test names to run.")
+    private Set<String> mIncludeFilters = new TreeSet<>();
 
     @Option(name = "exclude-filter",
-        description = "The negative filter of the test names to run.")
-    private Set<String> mExcludeFilters = new HashSet<>();
+            description = "The negative filter of the test names to run.")
+    private Set<String> mExcludeFilters = new TreeSet<>();
 
     @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
-        isTimeVal = true)
+            isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
 
     @Option(name = "collect-tests-only",
-        description = "Only invoke the test binary to collect list of applicable test cases. "
-                + "All test run callbacks will be triggered, but test execution will "
-                + "not be actually carried out.")
+            description = "Only invoke the test binary to collect list of applicable test cases. "
+                    + "All test run callbacks will be triggered, but test execution will "
+                    + "not be actually carried out.")
     private boolean mCollectTestsOnly = false;
 
     // This variable is set in order to include the directory that contains the
@@ -112,7 +117,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     public String mPythonPath = null;
 
     @Option(name = "python-binary", description = "python binary to use "
-        + "(optional)")
+            + "(optional)")
     private String mPythonBin = null;
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
@@ -224,17 +229,13 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     @SuppressWarnings("deprecation")
     @Override
     public void run(ITestInvocationListener listener)
-        throws IllegalArgumentException, DeviceNotAvailableException {
+            throws IllegalArgumentException, DeviceNotAvailableException {
         if (mDevice == null) {
             throw new DeviceNotAvailableException("Device has not been set");
         }
 
         if (mTestCasePath == null) {
             throw new IllegalArgumentException("test-case-path is not set.");
-        }
-
-        if (mTestConfigPath == null) {
-            throw new IllegalArgumentException("test-config-path is not set.");
         }
 
         setPythonPath();
@@ -247,7 +248,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             mRunUtil = new RunUtil();
             mRunUtil.setEnvVariable(PYTHONPATH, mPythonPath);
         }
-        doRunTest(listener, mRunUtil, mTestCasePath, mTestConfigPath);
+
+        doRunTest(listener);
     }
 
     @Override
@@ -256,22 +258,53 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     }
 
     /**
+     * Populate a jsonObject with default fields.
+     * This method uses deepMergeJsonObjects method from JsonUtil to merge the default config file with the target
+     * config file. Field already defined in target config file will not be overwritten. Also, JSONArray will not be
+     * deep merged.
+     *
+     * @param jsonObject the target json object to populate
+     * @param testCaseDataDir data file path
+     * @throws IOException
+     * @throws JSONException
+     */
+    private void populateDefaultJsonFields(JSONObject jsonObject, String testCaseDataDir)
+            throws IOException, JSONException {
+        CLog.i("Populating default fields to json object from %s", DEFAULT_TESTCASE_CONFIG_PATH);
+        String content = FileUtil.readStringFromFile(new File(mTestCaseDataDir, DEFAULT_TESTCASE_CONFIG_PATH));
+        JSONObject defaultJsonObject = new JSONObject(content);
+
+        JsonUtil.deepMergeJsonObjects(jsonObject, defaultJsonObject);
+    }
+
+    /**
      * This method reads the provided VTS runner test json config, adds or updates some of its
      * fields (e.g., to add build info and device serial IDs), and returns the updated json object.
+     * This method calls populateDefaultJsonFields to populate the config JSONObject if the config file is missing
+     * or some required fields is missing from the JSONObject. If test name is not specified, this method
+     * will use the config file's file name file without extension as test name. If config file is missing, this method
+     * will use the test case's class name as test name.
      *
      * @param log_path the path of a directory to store the VTS runner logs.
      * @return the updated JSONObject as the new test config.
      */
     private JSONObject getUpdatedVtsRunnerTestConfig(String log_path)
-        throws IOException, JSONException, RuntimeException {
+            throws IOException, JSONException, RuntimeException {
         JSONObject jsonObject = null;
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
-        String content = FileUtil.readStringFromFile(new File(
-            Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
-        CLog.i("Loaded original test config %s", content);
-        if (content != null && !content.isEmpty()) {
-            jsonObject = new JSONObject(content);
+        String content = null;
+
+        if (mTestConfigPath != null) {
+            content = FileUtil.readStringFromFile(new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
         }
+
+        CLog.i("Loaded original test config %s", content);
+        if (content != null) {
+            jsonObject = new JSONObject(content);
+        } else {
+            jsonObject = new JSONObject();
+        }
+        populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
         CLog.i("Built a Json object using the loaded original test config");
 
         JSONArray deviceArray = new JSONArray();
@@ -292,7 +325,15 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         JSONArray testBedArray = (JSONArray) jsonObject.get("test_bed");
         if (testBedArray.length() == 0) {
             JSONObject device = new JSONObject();
-            device.put(NAME, "VTS-Test-Unspecified");
+            String testName;
+            if (mTestConfigPath != null) {
+                testName = new File(mTestConfigPath).getName();
+                testName = testName.replace(CONFIG_FILE_EXTENSION, "");
+            } else {
+                testName = new File(mTestCasePath).getName();
+            }
+            CLog.logAndDisplay(LogLevel.INFO, "Setting test name as %s", testName);
+            device.put(NAME, testName);
             device.put(ANDROIDDEVICE, deviceArray);
             testBedArray.put(device);
         } else if (testBedArray.length() == 1) {
@@ -300,7 +341,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             device.put(ANDROIDDEVICE, deviceArray);
         } else {
             CLog.e("Multi-device not yet supported: %d devices requested",
-                   testBedArray.length());
+                    testBedArray.length());
             throw new RuntimeException("Failed to produce VTS runner test config");
         }
         jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
@@ -337,8 +378,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      * @throws RuntimeException
      * @throws IllegalArgumentException
      */
-    private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
-        String mTestConfigPath) throws RuntimeException, IllegalArgumentException {
+    private void doRunTest(ITestRunListener listener) throws RuntimeException, IllegalArgumentException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         JSONObject jsonObject = null;
@@ -356,7 +396,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         String jsonFilePath = null;
         try {
             File tmpFile = FileUtil.createTempFile(
-                mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json");
+                    mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json");
             jsonFilePath = tmpFile.getAbsolutePath();
             CLog.i("config json file path: %s", jsonFilePath);
             FileWriter fw = new FileWriter(jsonFilePath);
@@ -374,10 +414,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
-        CommandResult commandResult = runUtil.runTimedCmd(TEST_TIMEOUT, cmd);
+        CommandResult commandResult = mRunUtil.runTimedCmd(TEST_TIMEOUT, cmd);
 
         if (commandResult != null && commandResult.getStatus() !=
-              CommandStatus.SUCCESS) {
+                CommandStatus.SUCCESS) {
             CLog.e("Python process failed");
             CLog.e("Python path: %s", mPythonPath);
             CLog.e("Stderr: %s", commandResult.getStderr());
@@ -391,7 +431,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         }
 
         VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener,
-            mRunName);
+                mRunName);
 
         if (mUseStdoutLogs) {
             if (commandResult.getStdout() == null) {
@@ -539,8 +579,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         String pythonBin = c.getStdout().trim();
         if (pythonBin.length() == 0) {
             throw new RuntimeException("Could not find python binary on host "
-                + "machine");
+                    + "machine");
         }
         return pythonBin;
     }
- }
+}

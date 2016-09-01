@@ -119,7 +119,7 @@ public class VtsFuzzTestResultParser extends MultiLineReceiver {
             if (line.contains(Prefixes.PASSED_MARKER)) {
                 doTestEnded(true);
             } else if (line.contains(Prefixes.FAILED_MARKER)
-                || line.contains(Prefixes.TIMEOUT_MARKER)) {
+                    || line.contains(Prefixes.TIMEOUT_MARKER)) {
                 doTestEnded(false);
             } else {
                 mStackTrace.append(line + "\r\n");
