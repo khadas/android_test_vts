@@ -272,6 +272,7 @@ interface: {
       name: "sa_data"
       type: TYPE_ARRAY
       vector_value: {
+        type: TYPE_SCALAR
         scalar_type: "char"
       }
     }

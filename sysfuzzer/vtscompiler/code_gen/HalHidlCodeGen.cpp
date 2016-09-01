@@ -365,7 +365,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                      << arg.vector_value(0).scalar_type()
                      << "*) malloc("
                      << "func_msg->arg(" << arg_count
-                     << ").vector_value(0).value().size()"
+                     << ").vector_size()"
                      << " * sizeof("
                      << arg.vector_value(0).scalar_type() << "));"
                      << endl;
@@ -375,7 +375,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                      << arg.vector_value(0).struct_type()
                      << "*) malloc("
                      << "func_msg->arg(" << arg_count
-                     << ").vector_value(0).value().size()"
+                     << ").vector_size()"
                      << " * sizeof("
                      << arg.vector_value(0).struct_type() << "));"
                      << endl;
@@ -459,10 +459,10 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           } else if (arg.type() == TYPE_VECTOR) {
             // TODO: dynamically generate the initial value for hidl_vec
             cpp_ss << "    for (int vector_index = 0; vector_index < "
-                   << "func_msg->arg(" << arg_count << ").vector_value(0).value().size(); "
+                   << "func_msg->arg(" << arg_count << ").vector_size(); "
                    << "vector_index++) {" << endl;
             cpp_ss << "      arg" << arg_count << "buffer[vector_index] = "
-                   << "func_msg->arg(" << arg_count << ").vector_value(0).value(vector_index)."
+                   << "func_msg->arg(" << arg_count << ").vector_value(vector_index)."
                    << arg.vector_value(0).scalar_type() << "();"
                    << endl;
             cpp_ss << "    }" << endl;
@@ -587,34 +587,37 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           } else if (struct_value.type() == TYPE_VECTOR) {
             cpp_ss << "  arg->" << struct_value.name() << ".resize("
                    << "var_msg.struct_value(" << struct_index
-                   << ").vector_value(0).value().size()"
+                   << ").vector_size()"
                    << ");" << endl;
             if (struct_value.vector_value(0).type() == TYPE_SCALAR) {
               cpp_ss << "  for (int value_index = 0; value_index < "
                      << "var_msg.struct_value(" << struct_index
-                     << ").vector_value(0).value().size(); "
+                     << ").vector_size(); "
                      << "value_index++) {" << endl;
               cpp_ss << "    arg->" << struct_value.name() << "[value_index] = "
                      << "var_msg.struct_value(" << struct_index
-                     << ").vector_value(0).value(value_index)."
+                     << ").vector_value(value_index).scalar_value()."
                      << struct_value.vector_value(0).scalar_type() << "();" << endl;
               cpp_ss << "  }" << endl;
             } else if (struct_value.vector_value(0).type() == TYPE_STRUCT) {
               // Should use a recursion to handle nested data structure.
               cpp_ss << "  for (int value_index = 0; value_index < "
                      << "var_msg.struct_value(" << struct_index
-                     << ").vector_value(0).struct_value().size(); "
+                     << ").vector_size(); "
                      << "value_index++) {" << endl;
+              int sub_value_index = 0;
               for (const auto& sub_struct_value : struct_value.vector_value(0).struct_value()) {
                 if (sub_struct_value.type() == TYPE_SCALAR) {
                   cpp_ss << "    arg->" << struct_value.name() << "[value_index]."
                          << sub_struct_value.name() << " = "
                          << "var_msg.struct_value(" << struct_index
-                         << ").vector_value(0).struct_value(value_index).scalar_type()."
+                         << ").vector_value(value_index).struct_value("
+                         << sub_value_index << ").scalar_type()."
                          << sub_struct_value.scalar_type() << "();" << endl;
+                  sub_value_index++;
                 } else {
                   cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
-                       << struct_value.vector_value(0).type() << endl;
+                       << sub_struct_value.type() << endl;
                   exit(-1);
                 }
               }

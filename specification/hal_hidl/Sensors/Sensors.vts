@@ -93,12 +93,12 @@ interface: {
     struct_value: {
       name: "_version"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "_handle"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "type"
@@ -108,32 +108,32 @@ interface: {
     struct_value: {
       name: "maxRange"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "resolution"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "power"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "minDelay"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "fifoReservedEventCount"
       type: TYPE_SCALAR
-      scalar_type: uint32_t
+      scalar_type: "uint32_t"
     }
     struct_value: {
       name: "fifoMaxEventCount"
       type: TYPE_SCALAR
-      scalar_type: uint32_t
+      scalar_type: "uint32_t"
     }
     struct_value: {
       name: "stringType"
@@ -146,12 +146,12 @@ interface: {
     struct_value: {
       name: "maxDelay"
       type: TYPE_SCALAR
-      scalar_type: int64_t
+      scalar_type: "int64_t"
     }
     struct_value: {
       name: "flags"
       type: TYPE_SCALAR
-      scalar_type: uint64_t
+      scalar_type: "uint64_t"
     }
   }
 
@@ -161,22 +161,22 @@ interface: {
     struct_value: {
       name: "x"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "y"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "z"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "status"
       type: TYPE_SCALAR
-      scalar_type: int8_t
+      scalar_type: "int8_t"
     }
   }
 
@@ -186,22 +186,22 @@ interface: {
     struct_value: {
       name: "x"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "y"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "z"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "w"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
   }
 
@@ -211,22 +211,22 @@ interface: {
     struct_value: {
       name: "x"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "y"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "z"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "x_bias"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "y_bias"
@@ -236,7 +236,7 @@ interface: {
     struct_value: {
       name: "z_bias"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
   }
 
@@ -246,12 +246,12 @@ interface: {
     struct_value: {
       name: "bpm"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     struct_value: {
       name: "status"
       type: TYPE_SCALAR
-      scalar_type: int8_t
+      scalar_type: "int8_t"
     }
   }
 
@@ -261,12 +261,12 @@ interface: {
     struct_value: {
       name: "what"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "sensor"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
   }
 
@@ -276,12 +276,12 @@ interface: {
     struct_value: {
       name: "connected"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "_handle"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "sensor"
@@ -292,10 +292,10 @@ interface: {
       name: "uuid"
       type: TYPE_ARRAY
       vector_value: {
-        size: 16
         type: TYPE_SCALAR
-        scalar_type: uint8_t
+        scalar_type: "uint8_t"
       }
+      vector_size: 16
     }
   }
 
@@ -325,12 +325,12 @@ interface: {
     union_value: {
       name: "scalar"
       type: TYPE_SCALAR
-      scalar_type: float
+      scalar_type: "float_t"
     }
     union_value: {
       name: "stepCount"
       type: TYPE_SCALAR
-      scalar_type: uint64_t
+      scalar_type: "uint64_t"
     }
     union_value: {
       name: "heartRate"
@@ -341,10 +341,10 @@ interface: {
       name: "pose6DOF"
       type: TYPE_ARRAY
       vector_value: {
-        size: 15
         type: TYPE_SCALAR
-        scalar_type: float
+        scalar_type: "float_t"
       }
+      vector_size: 15
     }
   }
 
@@ -354,12 +354,12 @@ interface: {
     struct_value: {
       name: "_version"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "sensor"
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     struct_value: {
       name: "type"
@@ -369,12 +369,12 @@ interface: {
     struct_value: {
       name: "timestamp"
       type: TYPE_SCALAR
-      scalar_type: int64_t
+      scalar_type: "int64_t"
     }
     struct_value: {
       name: "flags"
       type: TYPE_SCALAR
-      scalar_type: uint32_t
+      scalar_type: "uint32_t"
     }
     struct_value: {
       name: "u"
@@ -398,11 +398,11 @@ interface: {
     name: "set_operation_mode"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: uint32_t
+      scalar_type: "uint32_t"
     }
   }
 
@@ -410,15 +410,15 @@ interface: {
     name: "activate"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
   }
 
@@ -426,15 +426,15 @@ interface: {
     name: "setDelay"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int64_t
+      scalar_type: "int64_t"
     }
   }
 
@@ -442,7 +442,7 @@ interface: {
     name: "poll"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     return_type_hidl: {
       type: TYPE_VECTOR
@@ -453,7 +453,7 @@ interface: {
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
   }
 
@@ -461,23 +461,23 @@ interface: {
     name: "batch"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int64_t
+      scalar_type: "int64_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int64_t
+      scalar_type: "int64_t"
     }
   }
 
@@ -485,11 +485,11 @@ interface: {
     name: "flush"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
   }
 
@@ -497,7 +497,7 @@ interface: {
     name: "inject_sensor_data"
     return_type_hidl: {
       type: TYPE_SCALAR
-      scalar_type: int32_t
+      scalar_type: "int32_t"
     }
     arg: {
       type: TYPE_STRUCT
