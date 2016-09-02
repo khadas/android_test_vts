@@ -23,5 +23,6 @@
     <option name="compatibility:include-filter" value="KernelLtpStagingTest" />
     <option name="compatibility:include-filter" value="linux_kselftest_test_staging" />
     <option name="compatibility:include-filter" value="security_poc_kernel_test" />
+    <option name="compatibility:include-filter" value="cpu_profiling_test" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
