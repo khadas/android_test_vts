@@ -89,6 +89,9 @@ message AndroidBuildInfo {
 
   // branch name (e.g., master or nyc-dev)
   optional bytes branch = 13;
+
+  // indicates the latest commit information of each branch (e.g., xml format).
+  optional bytes build_summary = 21;
 }
 
 
