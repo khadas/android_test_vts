@@ -33,7 +33,7 @@ include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 vts: $(compatibility_zip)
 $(call dist-for-goals, vts, $(compatibility_zip))
 
-# Packaging rule for android-vts.zip's testcases dir.
+# Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 
 my_modules := \
     $(vts_bin_packages) \
@@ -41,9 +41,6 @@ my_modules := \
     $(vts_test_bin_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
-
-my_modules += \
-    $(vts_spec_file_list) \
 
 my_copy_pairs :=
   $(foreach m,$(my_modules),\
@@ -61,4 +58,14 @@ my_copy_pairs :=
         $(eval my_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/$(my_copy_dest)))\
     ))
 
-$(compatibility_zip): $(call copy-many-files,$(my_copy_pairs))
+# Packaging rule for android-vts.zip's testcases dir (spec subdir).
+
+my_spec_modules := \
+    $(vts_spec_file_list) \
+
+my_spec_copy_pairs :=
+  $(foreach m,$(my_spec_modules),\
+    $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/spec/$(m)))\
+
+
+$(compatibility_zip): $(call copy-many-files,$(my_copy_pairs)) $(call copy-many-files,$(my_spec_copy_pairs))
