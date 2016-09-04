@@ -17,8 +17,4 @@ vts_test_lib_hal_packages := \
   android.hardware.tests.libbinder \
   android.hardware.tests.libhwbinder@1.0 \
   lights.bullhead-vts \
-  camera.bullhead-vts \
-  libmmcamera_interface.vts \
-  libmmjpeg_interface.vts \
-  libqdMetaData.vts \
-  libqomx_core.vts \
+

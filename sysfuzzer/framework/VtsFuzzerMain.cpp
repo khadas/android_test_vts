@@ -24,17 +24,12 @@
  *  $ LD_LIBRARY_PATH=/data/local/tmp/64 ./fuzzer64 --class=hal --type=light \
  *    --version=1.0 --spec_dir=/data/local/tmp/spec \
  *    /data/local/tmp/64/hal/lights.bullhead-vts.so
- *  $ LD_LIBRARY_PATH=/data/local/tmp/32 ./fuzzer32 --class=hal --type=light \
- *    --version=1.0 --spec_dir=/data/local/tmp/spec \
- *    /data/local/tmp/32/hal/camera.bullhead-vts.so
  *
  * Example usage (for GCE virtual devices):
  *  $ fuzzer --class=hal_conventional --type=light --version=1.0
  * /system/lib/hw/lights.gce_x86.so
  *  $ fuzzer --class=hal_conventional --type=gps --version=1.0
  * /system/lib/hw/gps.gce_x86.so
- *  $ fuzzer --class=hal_conventional --type=camera --version=2.1
- * /system/lib/hw/camera.gce_x86.so
  */
 
 #include <getopt.h>
