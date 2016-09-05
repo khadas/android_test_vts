@@ -23,7 +23,7 @@
  *
  *  $ LD_LIBRARY_PATH=/data/local/tmp/64 ./fuzzer64 --class=hal --type=light \
  *    --version=1.0 --spec_dir=/data/local/tmp/spec \
- *    /data/local/tmp/64/hal/lights.bullhead-vts.so
+ *    /data/local/tmp/64/hal/lights.vts.so
  *
  * Example usage (for GCE virtual devices):
  *  $ fuzzer --class=hal_conventional --type=light --version=1.0

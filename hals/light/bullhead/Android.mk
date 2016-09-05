@@ -27,7 +27,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := lights.bullhead-vts
+LOCAL_MODULE := lights.vts
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := lights.c
 LOCAL_MODULE_RELATIVE_PATH := hw

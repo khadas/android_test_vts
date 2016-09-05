@@ -32,8 +32,8 @@
         <option name="push" value="DATA/lib64/libvts_multidevice_proto.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
         <option name="push" value="DATA/lib/libhwbinder.so->/data/local/tmp/32/libhwbinder.so" />
         <option name="push" value="DATA/lib64/libhwbinder.so->/data/local/tmp/64/libhwbinder.so" />
-        <option name="push" value="DATA/lib/hw/lights.bullhead-vts.so->/data/local/tmp/32/hw/lights.bullhead-vts.so" />
-        <option name="push" value="DATA/lib64/hw/lights.bullhead-vts.so->/data/local/tmp/64/hw/lights.bullhead-vts.so" />
+        <option name="push" value="DATA/lib/hw/lights.vts.so->/data/local/tmp/32/hw/lights.vts.so" />
+        <option name="push" value="DATA/lib64/hw/lights.vts.so->/data/local/tmp/64/hw/lights.vts.so" />
         <option name="push" value="DATA/bin/fuzzer32->/data/local/tmp/32/fuzzer32" />
         <option name="push" value="DATA/bin/fuzzer64->/data/local/tmp/64/fuzzer64" />
         <option name="push" value="DATA/bin/vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
