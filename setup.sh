@@ -14,8 +14,8 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/64/vts_hal_agent64 /data/local/tmp/64/vts_hal_agent64
 
   echo "install vts framework packages"
-  adb shell mkdir /data/local/tmp/32/hal
-  adb shell mkdir /data/local/tmp/64/hal
+  adb shell mkdir /data/local/tmp/32/hw
+  adb shell mkdir /data/local/tmp/64/hw
   adb push images/${DEVICE}/32/libvts_common.so /data/local/tmp/32/libvts_common.so
   adb push images/${DEVICE}/64/libvts_common.so /data/local/tmp/64/libvts_common.so
   adb push images/${DEVICE}/32/libvts_interfacespecification.so /data/local/tmp/32/libvts_interfacespecification.so
@@ -32,8 +32,8 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/64/libvts_multidevice_proto.so /data/local/tmp/64/libvts_multidevice_proto.so
   # hal
   echo "install hal packages"
-  adb push images/${DEVICE}/32/hal/lights.${DEVICE}-vts.so /data/local/tmp/32/hal/lights.${DEVICE}-vts.so
-  adb push images/${DEVICE}/64/hal/lights.${DEVICE}-vts.so /data/local/tmp/64/hal/lights.${DEVICE}-vts.so
+  adb push images/${DEVICE}/32/hal/lights.bullhead-vts.so /data/local/tmp/32/hw/lights.bullhead-vts.so
+  adb push images/${DEVICE}/64/hal/lights.bullhead-vts.so /data/local/tmp/64/hw/lights.bullhead-vts.so
 
   adb push images/${DEVICE}/32/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/32/android.hardware.tests.libhwbinder@1.0.so
   adb push images/${DEVICE}/64/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/64/android.hardware.tests.libhwbinder@1.0.so
@@ -41,8 +41,10 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/64/libhwbinder_benchmark data/local/tmp/libhwbinder_benchmark
 
   # uncomment for hidl in non-treble devices
-  # adb push images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so /data/local/tmp/32/hal/android.hardware.nfc@1.0.so
-  # adb push images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so /data/local/tmp/64/hal/android.hardware.nfc@1.0.so
+  # adb push images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so
+  # /data/local/tmp/32/hw/android.hardware.nfc@1.0.so
+  # adb push images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so
+  # /data/local/tmp/64/hw/android.hardware.nfc@1.0.so
   # adb push images/${DEVICE}/32/libhwbinder.so /data/local/tmp/32/libhwbinder.so
   # adb push images/${DEVICE}/64/libhwbinder.so /data/local/tmp/64/libhwbinder.so
 

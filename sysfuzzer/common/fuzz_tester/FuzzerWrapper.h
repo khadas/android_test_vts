@@ -44,7 +44,7 @@ class FuzzerWrapper {
 
  private:
   // loaded file path.
-  const char* spec_dll_path_;
+  string spec_dll_path_;
 
   // DLL Loader class.
   DllLoader dll_loader_;

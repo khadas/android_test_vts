@@ -92,10 +92,13 @@ const char* VtsDriverHalSocketServer::ReadSpecification(const string& name) {
 }
 
 const char* VtsDriverHalSocketServer::Call(const string& arg) {
-  printf("VtsFuzzerServer::Call(%s)\n", arg.c_str());
+  cout << "VtsFuzzerServer::Call(" << arg << ")" << endl;
   FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
+  cout << __func__ << ":" << __LINE__ << endl;
   google::protobuf::TextFormat::MergeFromString(arg, func_msg);
+  cout << __func__ << ":" << __LINE__ << endl;
   const string& result = spec_builder_.CallFunction(func_msg);
+  cout << __func__ << ":" << __LINE__ << endl;
   return result.c_str();
 }
 
@@ -108,27 +111,31 @@ const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
   return result.c_str();
 }
 
-const char* VtsDriverHalSocketServer::GetFunctions() {
-  printf("Get functions*");
+string VtsDriverHalSocketServer::ListFunctions() const {
+  printf("VtsFuzzerServer::%s\n", __FUNCTION__);
   vts::ComponentSpecificationMessage* spec =
       spec_builder_.GetComponentSpecification();
+  string output;
   if (!spec) {
-    return NULL;
+    return output;
   }
-  string* output = new string();
-  printf("getfunctions serial1\n");
-  if (google::protobuf::TextFormat::PrintToString(*spec, output)) {
-    printf("getfunctions length %lu\n", output->length());
-    return output->c_str();
+  printf("VtsFuzzerServer::%s serialize\n", __FUNCTION__);
+  if (google::protobuf::TextFormat::PrintToString(*spec, &output)) {
+    printf("VtsFuzzerServer::%s result length %lu\n",
+           __FUNCTION__, output.length());
+    return output;
   } else {
     printf("can't serialize the interface spec message to a string.\n");
-    return NULL;
+    return output;
   }
 }
 
 bool VtsDriverHalSocketServer::ProcessOneCommand() {
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
   VtsDriverControlCommandMessage command_message;
   if (!VtsSocketRecvMessage(&command_message)) return false;
+  cout << __func__ << ":" << __LINE__ << " command_type "
+       << command_message.command_type() << endl;
   switch (command_message.command_type()) {
     case EXIT: {
       Exit();
@@ -160,6 +167,8 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case CALL_FUNCTION: {
+      cout << __func__ << ":" << __LINE__ << endl;
+      cout << __func__ << ":" << __LINE__ << " " << command_message.arg() << endl;
       const char* result = Call(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
@@ -184,10 +193,14 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case LIST_FUNCTIONS: {
-      const char* result = GetFunctions();
+      string result = ListFunctions();
       VtsDriverControlResponseMessage response_message;
-      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-      response_message.set_return_message(result);
+      if (result.size() > 0) {
+        response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+        response_message.set_return_message(result.c_str());
+      } else {
+        response_message.set_response_code(VTS_DRIVER_RESPONSE_FAIL);
+      }
       if (VtsSocketSendMessage(response_message)) return true;
       break;
     }

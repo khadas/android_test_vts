@@ -98,7 +98,7 @@ class BinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         results = self.dut.shell.one.Execute(
             ["chmod 755 %s" % binary,
-             "LD_LIBRARY_PATH=/data/local/tmp/%s/hal:"
+             "LD_LIBRARY_PATH=/data/local/tmp/%s/hw:"
              "/data/local/tmp/%s:"
              "$LD_LIBRARY_PATH %s" % (bits, bits, binary)])
 

@@ -246,11 +246,13 @@ const string empty_string = string();
 
 const string& SpecificationBuilder::CallFunction(
     FunctionSpecificationMessage* func_msg) {
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
   if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
+    cerr << __func__ << ":" << __LINE__ << " lib loading failed" << endl;
     return empty_string;
   }
-  cout << __func__ << " "
-       << "loaded if_spec lib" << endl;
+  cout << __func__ << ":" << __LINE__ << " "
+       << "loaded if_spec lib " << func_msg << endl;
   cout << __func__ << " " << dll_file_name_ << " " << func_msg->name() << endl;
 
   FuzzerBase* func_fuzzer;
@@ -278,7 +280,7 @@ const string& SpecificationBuilder::CallFunction(
   }
 
   if (func_msg->name() == "#Open") {
-    cout << __func__ << ":" << __LINE__ << endl;
+    cout << __func__ << ":" << __LINE__ << " #Open" << endl;
     if (func_msg->arg().size() > 0) {
       cout << __func__ << " " << func_msg->arg(0).string_value().message()
            << endl;
