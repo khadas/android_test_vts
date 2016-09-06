@@ -15,6 +15,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
+include $(LOCAL_PATH)/list/vts_apk_package_list.mk
 include $(LOCAL_PATH)/list/vts_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_spec_file_list.mk
@@ -36,6 +37,7 @@ $(call dist-for-goals, vts, $(compatibility_zip))
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 
 my_modules := \
+    $(vts_apk_packages) \
     $(vts_bin_packages) \
     $(vts_lib_packages) \
     $(vts_test_bin_packages) \
