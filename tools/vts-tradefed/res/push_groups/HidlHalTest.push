@@ -1,0 +1,4 @@
+HostDrivenTest.push
+
+DATA/lib/libhwbinder.so->/data/local/tmp/32/libhwbinder.so
+DATA/lib64/libhwbinder.so->/data/local/tmp/64/libhwbinder.so

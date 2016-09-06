@@ -31,7 +31,7 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	$(hide) mkdir -p $(dir $@)
 	@rm -f $@.list
-	$(hide) find test -name '*.py' -or -name '*.config' | sort > $@.list
+	$(hide) find test -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
 	@rm -f $@.list
 	$(hide) rm -rf $(VTS_TESTCASES_OUT)/vts
