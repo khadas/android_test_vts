@@ -213,23 +213,6 @@ message ScalarDataValueMessage {
 }
 
 
-// To keep the value of a vector variable.
-message VectorDataValueMessage {
-  optional VariableType type = 1;
-
-  // mainly for an array, and also can be used at runtime if this's for a vector.
-  optional uint32 size = 2;
-
-  // when it's for a scalar vector.
-  optional bytes scalar_type = 11;
-  repeated ScalarDataValueMessage value = 12;
-
-  // when it's for a struct vector.
-  optional bytes struct_type = 21;
-  repeated VariableSpecificationMessage struct_value = 22;
-}
-
-
 // To keep the specification and value of a function pointer.
 message FunctionPointerSpecificationMessage {
   // used for a function pointer to keep its function name.
@@ -294,7 +277,9 @@ message VariableSpecificationMessage {
   optional EnumDataValueMessage enum_value = 121;
 
   // for both TYPE_ARRAY (using size field) and TYPE_VECTOR.
-  repeated VectorDataValueMessage vector_value = 131;
+  repeated VariableSpecificationMessage vector_value = 131;
+  // Length of an array. Also used for TYPE_VECTOR at runtime.
+  optional int32 vector_size = 132;
 
   // for sub variables when this's a struct type.
   repeated VariableSpecificationMessage struct_value = 141;
