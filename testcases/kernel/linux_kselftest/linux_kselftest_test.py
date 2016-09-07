@@ -71,6 +71,23 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.adb.push("%s/%s/linux-kselftest/. %s" %
             (self.data_file_path, n_bit, config.KSFT_DIR))
 
+    def PreTestSetup(self):
+        """Sets up test before running."""
+        sed_pattern = [
+            '-i "s?/bin/echo?echo?"'
+        ]
+
+        sed_cmd = 'sed %s' % " ".join(sed_pattern)
+
+        # This applies sed_cmd to every shell script.
+        cmd = 'find %s -type f | xargs grep -l "bin/sh" | xargs %s' % (
+            config.KSFT_DIR, sed_cmd)
+        result = self._shell.Execute(cmd)
+
+        asserts.assertFalse(
+            any(result[const.EXIT_CODE]),
+            "Error: pre-test setup failed.")
+
     def RunTestcase(self, testcase):
         """Runs the given testcase and asserts the result.
 
@@ -107,6 +124,7 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """
         logging.info("[Test Case] test%sBits SKIP", n_bit)
         self.PushFiles(n_bit)
+        self.PreTestSetup()
 
         self.runGeneratedTests(
             test_func=self.RunTestcase,
