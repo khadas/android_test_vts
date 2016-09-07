@@ -36,15 +36,15 @@ KSFT_CASES_STABLE = [
     "futex/functional/futex_wait_uninitialized_heap",
     "futex/functional/futex_wait_private_mapped_file",
     "net/socket",
+]
+
+KSFT_CASES_STAGING = [
     "timers/posix_timers",
     "timers/nanosleep",
     "timers/nsleep-lat",
     "timers/set-timer-lat",
     "timers/inconsistency-check",
     "timers/alarmtimer-suspend",
-]
-
-KSFT_CASES_STAGING = [
     "timers/raw_skew",
     "timers/threadtest",
     "timers/change_skew",
@@ -53,4 +53,5 @@ KSFT_CASES_STAGING = [
     "timers/set-tai",
     "timers/valid-adjtimex",
     "net/psock_tpacket",
+    "pstore/pstore_tests",
 ]
