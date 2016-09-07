@@ -20,8 +20,7 @@
 # AndroidTest.xml and a test case python file into a given relative directory
 # under testcases/ using the given test name.
 
-LICENSE_STATEMENT_POUND = '''
-#
+LICENSE_STATEMENT_POUND = '''#
 # Copyright (C) {year} The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
