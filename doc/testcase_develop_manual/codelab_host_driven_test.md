@@ -22,7 +22,7 @@ Then to check the vts project directory,
 
 Create your test project using:
 
-`scripts/init_test_case.py <your project name> <your project directory>`
+`script/create-test-project.py --name <your project name> --dir <your project directory>`
 
 Project name is required to be upper camel case (trailing numbers are allowed), and test directory
 is a relative directory under `test/vts/testcases`.
@@ -30,7 +30,7 @@ is a relative directory under `test/vts/testcases`.
 For example, to create your test project `HelloAndroid` under directory
 `test/vts/testcases/codelab/hello_android`, use the following command:
 
-`scripts/init_test_case.py --name HelloAndroid --dir codelab/hello_android`
+`script/create-test-project.py --name HelloAndroid --dir codelab/hello_android`
 
 This will create `Android.mk file`, `AndroidTest.xml`, `__init__.py`, and populate parent directories
 with necessary packaging files.
