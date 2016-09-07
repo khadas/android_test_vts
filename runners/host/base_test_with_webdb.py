@@ -343,9 +343,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                         coverage_vec = coverage_report.GenerateLineCoverageVector(
                             src_file_name, len(src_file_content.split('\n')),
                             gcno_file_content, gcda_dict[file_path])
-                        coverage.html = coverage_report.GenerateCoverageHTML(
-                            src_file_content, coverage_vec)
-                        logging.info("HTML Report: %s", coverage.html)
                         coverage.total_line_count, coverage.covered_line_count = (
                             coverage_report.GetCoverageStats(coverage_vec))
+                        coverage.line_coverage_vector = coverage_vec
                         return True

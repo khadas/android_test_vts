@@ -64,8 +64,8 @@ def GenerateLineCoverageVector(src_file_name, src_file_length,
         gcda_file_content: string, the raw gcda binary file content.
 
     Returns:
-        A list of integers (or None) representing the number of times the
-        i-th line was executed. None indicates a line that is not executable.
+        A list of non-negative integers or -1 representing the number of times
+        the i-th line was executed. -1 indicates a line that is not executable.
     """
     if gcno_file_content:
         logging.info("GenerateLineCoverageVector: gcno_file_content %d bytes",
@@ -77,7 +77,7 @@ def GenerateLineCoverageVector(src_file_name, src_file_length,
     file_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
     gcda_stream = io.BytesIO(gcda_file_content)
     gcda_parser.GCDAParser(gcda_stream, file_summary).Parse()
-    src_lines_counts = [None] * src_file_length
+    src_lines_counts = [-1] * src_file_length
     logging.info("GenerateLineCoverageVector: src file lines %d",
                  src_file_length)
     for ident in file_summary.functions:
@@ -91,7 +91,7 @@ def GenerateLineCoverageVector(src_file_name, src_file_length,
                 logging.info("GenerateLineCoverageVector: covered line %s",
                              line)
                 if line >= 0 and line < len(src_lines_counts):
-                    if src_lines_counts[line - 1] is None:
+                    if src_lines_counts[line - 1] < 0:
                         src_lines_counts[line - 1] = 0
                     src_lines_counts[line - 1] += block.count
                 else:
@@ -109,8 +109,8 @@ def GenerateCoverageHTML(src_file_content, src_lines_counts):
 
     Args:
         src_file_content: string, the C/C++ source file content.
-        src_lines_counts: A list of integers (or None) representing the
-                          number of times the i-th line was executed. None
+        src_lines_counts: A list of non-negative integers or -1 representing the
+                          number of times the i-th line was executed. -1
                           indicates the line is not executable.
 
     Returns:
@@ -119,7 +119,7 @@ def GenerateCoverageHTML(src_file_content, src_lines_counts):
     html = "<div><table %s>\n" % TABLE_STYLE
     src_lines = src_file_content.split('\n')
     for line_no in range(len(src_lines)):
-        if src_lines_counts[line_no] is None:  #  Not executable
+        if src_lines_counts[line_no] < 0:  #  Not executable
             html += "<tr>\n<td %s>--</td>\n" % COUNT_STYLE
         elif not src_lines_counts[line_no]:  #  Uncovered line
             html += "<tr %s>\n<td %s>%i</td>\n" % (
@@ -160,9 +160,9 @@ def GetCoverageStats(src_lines_counts):
     """Returns the coverage stats.
 
     Args:
-        src_lines_counts: A list of integers (or None) representing the number
-                          of times the i-th line was executed.
-                          None indicates a line that is not executable.
+        src_lines_counts: A list of non-negative integers or -1 representing
+                          the number of times the i-th line was executed.
+                          -1 indicates a line that is not executable.
 
     Returns:
         integer, the number of lines instrumented for coverage measurement
@@ -175,7 +175,7 @@ def GetCoverageStats(src_lines_counts):
         return total, covered
 
     for line in src_lines_counts:
-        if line is None:
+        if line < 0:
             continue
         total += 1
         if line > 0:
