@@ -4866,6 +4866,32 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getGcda();
 
+    // repeated int32 line_coverage_vector = 23;
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    java.util.List<java.lang.Integer> getLineCoverageVectorList();
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    int getLineCoverageVectorCount();
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    int getLineCoverageVector(int index);
+
     // repeated bytes data = 31;
     /**
      * <code>repeated bytes data = 31;</code>
@@ -5033,10 +5059,31 @@ public final class VtsReportMessage {
               gcda_ = input.readBytes();
               break;
             }
-            case 250: {
+            case 184: {
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000040;
+              }
+              lineCoverageVector_.add(input.readInt32());
+              break;
+            }
+            case 186: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
+                lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000040;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                lineCoverageVector_.add(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 250: {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+                data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000080;
               }
               data_.add(input.readBytes());
               break;
@@ -5065,6 +5112,9 @@ public final class VtsReportMessage {
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+          lineCoverageVector_ = java.util.Collections.unmodifiableList(lineCoverageVector_);
+        }
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           data_ = java.util.Collections.unmodifiableList(data_);
         }
         this.unknownFields = unknownFields.build();
@@ -5235,6 +5285,41 @@ public final class VtsReportMessage {
       return gcda_;
     }
 
+    // repeated int32 line_coverage_vector = 23;
+    public static final int LINE_COVERAGE_VECTOR_FIELD_NUMBER = 23;
+    private java.util.List<java.lang.Integer> lineCoverageVector_;
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    public java.util.List<java.lang.Integer>
+        getLineCoverageVectorList() {
+      return lineCoverageVector_;
+    }
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    public int getLineCoverageVectorCount() {
+      return lineCoverageVector_.size();
+    }
+    /**
+     * <code>repeated int32 line_coverage_vector = 23;</code>
+     *
+     * <pre>
+     * i-th element gives the number of times i-th line is executed.
+     * </pre>
+     */
+    public int getLineCoverageVector(int index) {
+      return lineCoverageVector_.get(index);
+    }
+
     // repeated bytes data = 31;
     public static final int DATA_FIELD_NUMBER = 31;
     private java.util.List<com.google.protobuf.ByteString> data_;
@@ -5351,6 +5436,7 @@ public final class VtsReportMessage {
       sourceCode_ = com.google.protobuf.ByteString.EMPTY;
       gcno_ = com.google.protobuf.ByteString.EMPTY;
       gcda_ = com.google.protobuf.ByteString.EMPTY;
+      lineCoverageVector_ = java.util.Collections.emptyList();
       data_ = java.util.Collections.emptyList();
       gcov_ = com.google.protobuf.ByteString.EMPTY;
       totalLineCount_ = 0;
@@ -5385,6 +5471,9 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeBytes(22, gcda_);
+      }
+      for (int i = 0; i < lineCoverageVector_.size(); i++) {
+        output.writeInt32(23, lineCoverageVector_.get(i));
       }
       for (int i = 0; i < data_.size(); i++) {
         output.writeBytes(31, data_.get(i));
@@ -5430,6 +5519,15 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(22, gcda_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < lineCoverageVector_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(lineCoverageVector_.get(i));
+        }
+        size += dataSize;
+        size += 2 * getLineCoverageVectorList().size();
       }
       {
         int dataSize = 0;
@@ -5584,14 +5682,16 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000010);
         gcda_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000020);
-        data_ = java.util.Collections.emptyList();
+        lineCoverageVector_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000040);
-        gcov_ = com.google.protobuf.ByteString.EMPTY;
+        data_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000080);
-        totalLineCount_ = 0;
+        gcov_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000100);
-        coveredLineCount_ = 0;
+        totalLineCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000200);
+        coveredLineCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000400);
         return this;
       }
 
@@ -5645,19 +5745,24 @@ public final class VtsReportMessage {
         }
         result.gcda_ = gcda_;
         if (((bitField0_ & 0x00000040) == 0x00000040)) {
-          data_ = java.util.Collections.unmodifiableList(data_);
+          lineCoverageVector_ = java.util.Collections.unmodifiableList(lineCoverageVector_);
           bitField0_ = (bitField0_ & ~0x00000040);
         }
+        result.lineCoverageVector_ = lineCoverageVector_;
+        if (((bitField0_ & 0x00000080) == 0x00000080)) {
+          data_ = java.util.Collections.unmodifiableList(data_);
+          bitField0_ = (bitField0_ & ~0x00000080);
+        }
         result.data_ = data_;
-        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000040;
         }
         result.gcov_ = gcov_;
-        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000080;
         }
         result.totalLineCount_ = totalLineCount_;
-        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
           to_bitField0_ |= 0x00000100;
         }
         result.coveredLineCount_ = coveredLineCount_;
@@ -5695,10 +5800,20 @@ public final class VtsReportMessage {
         if (other.hasGcda()) {
           setGcda(other.getGcda());
         }
+        if (!other.lineCoverageVector_.isEmpty()) {
+          if (lineCoverageVector_.isEmpty()) {
+            lineCoverageVector_ = other.lineCoverageVector_;
+            bitField0_ = (bitField0_ & ~0x00000040);
+          } else {
+            ensureLineCoverageVectorIsMutable();
+            lineCoverageVector_.addAll(other.lineCoverageVector_);
+          }
+          onChanged();
+        }
         if (!other.data_.isEmpty()) {
           if (data_.isEmpty()) {
             data_ = other.data_;
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000080);
           } else {
             ensureDataIsMutable();
             data_.addAll(other.data_);
@@ -6037,12 +6152,106 @@ public final class VtsReportMessage {
         return this;
       }
 
+      // repeated int32 line_coverage_vector = 23;
+      private java.util.List<java.lang.Integer> lineCoverageVector_ = java.util.Collections.emptyList();
+      private void ensureLineCoverageVectorIsMutable() {
+        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+          lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>(lineCoverageVector_);
+          bitField0_ |= 0x00000040;
+         }
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public java.util.List<java.lang.Integer>
+          getLineCoverageVectorList() {
+        return java.util.Collections.unmodifiableList(lineCoverageVector_);
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public int getLineCoverageVectorCount() {
+        return lineCoverageVector_.size();
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public int getLineCoverageVector(int index) {
+        return lineCoverageVector_.get(index);
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public Builder setLineCoverageVector(
+          int index, int value) {
+        ensureLineCoverageVectorIsMutable();
+        lineCoverageVector_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public Builder addLineCoverageVector(int value) {
+        ensureLineCoverageVectorIsMutable();
+        lineCoverageVector_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public Builder addAllLineCoverageVector(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureLineCoverageVectorIsMutable();
+        super.addAll(values, lineCoverageVector_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 line_coverage_vector = 23;</code>
+       *
+       * <pre>
+       * i-th element gives the number of times i-th line is executed.
+       * </pre>
+       */
+      public Builder clearLineCoverageVector() {
+        lineCoverageVector_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+
       // repeated bytes data = 31;
       private java.util.List<com.google.protobuf.ByteString> data_ = java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
           data_ = new java.util.ArrayList<com.google.protobuf.ByteString>(data_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000080;
          }
       }
       /**
@@ -6132,7 +6341,7 @@ public final class VtsReportMessage {
        */
       public Builder clearData() {
         data_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
@@ -6147,7 +6356,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasGcov() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
        * <code>optional bytes gcov = 32;</code>
@@ -6170,7 +6379,7 @@ public final class VtsReportMessage {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000100;
         gcov_ = value;
         onChanged();
         return this;
@@ -6183,7 +6392,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearGcov() {
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000100);
         gcov_ = getDefaultInstance().getGcov();
         onChanged();
         return this;
@@ -6200,7 +6409,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasTotalLineCount() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
+        return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       /**
        * <code>optional int32 total_line_count = 101;</code>
@@ -6222,7 +6431,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setTotalLineCount(int value) {
-        bitField0_ |= 0x00000100;
+        bitField0_ |= 0x00000200;
         totalLineCount_ = value;
         onChanged();
         return this;
@@ -6236,7 +6445,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearTotalLineCount() {
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
         totalLineCount_ = 0;
         onChanged();
         return this;
@@ -6252,7 +6461,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasCoveredLineCount() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
+        return ((bitField0_ & 0x00000400) == 0x00000400);
       }
       /**
        * <code>optional int32 covered_line_count = 102;</code>
@@ -6272,7 +6481,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setCoveredLineCount(int value) {
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000400;
         coveredLineCount_ = value;
         onChanged();
         return this;
@@ -6285,7 +6494,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearCoveredLineCount() {
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000400);
         coveredLineCount_ = 0;
         onChanged();
         return this;
@@ -8903,34 +9112,35 @@ public final class VtsReportMessage {
       "\001(\014\022+\n\004type\030\002 \001(\0162\035.android.vts.VtsProfi" +
       "lingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend" +
       "_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value" +
-      "\030\026 \003(\003\"\315\001\n\025CoverageReportMessage\022\020\n\010dir_" +
+      "\030\026 \003(\003\"\353\001\n\025CoverageReportMessage\022\020\n\010dir_" +
       "path\030\001 \001(\014\022\021\n\tfile_name\030\002 \001(\014\022\014\n\004html\030\003 " +
       "\001(\014\022\023\n\013source_code\030\013 \001(\014\022\014\n\004gcno\030\025 \001(\014\022\014",
-      "\n\004gcda\030\026 \001(\014\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014" +
-      "\022\030\n\020total_line_count\030e \001(\005\022\032\n\022covered_li" +
-      "ne_count\030f \001(\005\"\360\002\n\021TestReportMessage\022\022\n\n" +
-      "test_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_t" +
-      "ype\030\003 \001(\0162\030.android.vts.VtsTestType\022:\n\013d" +
-      "evice_info\030\004 \003(\0132%.android.vts.AndroidDe" +
-      "viceInfoMessage\0221\n\nbuild_info\030\005 \001(\0132\035.an" +
-      "droid.vts.AndroidBuildInfo\0225\n\ttest_case\030" +
-      "\013 \003(\0132\".android.vts.TestCaseReportMessag" +
-      "e\0226\n\tprofiling\030\025 \003(\0132#.android.vts.Profi",
-      "lingReportMessage\022\027\n\017start_timestamp\030e \001" +
-      "(\003\022\025\n\rend_timestamp\030f \001(\003*\263\001\n\016TestCaseRe" +
-      "sult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_CASE_RE" +
-      "SULT_PASS\020\001\022\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031" +
-      "\n\025TEST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST_CASE_R" +
-      "ESULT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RESULT_TI" +
-      "MEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOWN_VTS_T" +
-      "ESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRUCTURAL\020" +
-      "\001\022\033\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TA" +
-      "RGET_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZ",
-      "ZING\020\004*{\n\020VtsProfilingType\022\036\n\032UNKNOWN_VT" +
-      "S_PROFILING_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE" +
-      "_TIMESTAMP\020\001\022%\n!VTS_PROFILING_TYPE_LABEL" +
-      "ED_VECTOR\020\002B0\n\034com.google.android.vts.pr" +
-      "otoB\020VtsReportMessage"
+      "\n\004gcda\030\026 \001(\014\022\034\n\024line_coverage_vector\030\027 \003" +
+      "(\005\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_" +
+      "line_count\030e \001(\005\022\032\n\022covered_line_count\030f" +
+      " \001(\005\"\360\002\n\021TestReportMessage\022\022\n\ntest_suite" +
+      "\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162" +
+      "\030.android.vts.VtsTestType\022:\n\013device_info" +
+      "\030\004 \003(\0132%.android.vts.AndroidDeviceInfoMe" +
+      "ssage\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts." +
+      "AndroidBuildInfo\0225\n\ttest_case\030\013 \003(\0132\".an" +
+      "droid.vts.TestCaseReportMessage\0226\n\tprofi",
+      "ling\030\025 \003(\0132#.android.vts.ProfilingReport" +
+      "Message\022\027\n\017start_timestamp\030e \001(\003\022\025\n\rend_" +
+      "timestamp\030f \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UN" +
+      "KNOWN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020" +
+      "\001\022\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CAS" +
+      "E_RESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCE" +
+      "PTION\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001" +
+      "\n\013VtsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022" +
+      "\036\n\032VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_H" +
+      "OST_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_",
+      "GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020" +
+      "VtsProfilingType\022\036\n\032UNKNOWN_VTS_PROFILIN" +
+      "G_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP" +
+      "\020\001\022%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020" +
+      "\002B0\n\034com.google.android.vts.protoB\020VtsRe" +
+      "portMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -8966,7 +9176,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_CoverageReportMessage_descriptor,
-              new java.lang.String[] { "DirPath", "FileName", "Html", "SourceCode", "Gcno", "Gcda", "Data", "Gcov", "TotalLineCount", "CoveredLineCount", });
+              new java.lang.String[] { "DirPath", "FileName", "Html", "SourceCode", "Gcno", "Gcda", "LineCoverageVector", "Data", "Gcov", "TotalLineCount", "CoveredLineCount", });
           internal_static_android_vts_TestReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new

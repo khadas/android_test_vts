@@ -144,6 +144,8 @@ message CoverageReportMessage {
   // gcov produced data files.
   optional bytes gcno = 21;
   optional bytes gcda = 22;
+  // i-th element gives the number of times i-th line is executed.
+  repeated int32 line_coverage_vector = 23;
 
   // measured coverage data.
   repeated bytes data = 31;
