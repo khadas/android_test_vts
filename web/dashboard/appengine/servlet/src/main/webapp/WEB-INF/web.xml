@@ -37,6 +37,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
   <servlet-class>com.google.android.vts.servlet.ShowCoverageServlet</servlet-class>
 </servlet>
 
+<servlet>
+  <servlet-name>vts_alert_job</servlet-name>
+  <servlet-class>com.google.android.vts.servlet.VtsAlertJobServlet</servlet-class>
+</servlet>
+
 <servlet-mapping>
   <servlet-name>dashboard_main</servlet-name>
   <url-pattern>/</url-pattern>
@@ -61,4 +66,20 @@ Copyright 2016 Google Inc. All Rights Reserved.
   <servlet-name>default</servlet-name>
   <url-pattern>*.css</url-pattern>
 </servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>vts_alert_job</servlet-name>
+  <url-pattern>/cron/vts_alert_job/*</url-pattern>
+</servlet-mapping>
+
+<security-constraint>
+  <web-resource-collection>
+      <web-resource-name>cron</web-resource-name>
+      <url-pattern>/cron/*</url-pattern>
+  </web-resource-collection>
+  <auth-constraint>
+      <role-name>admin</role-name>
+  </auth-constraint>
+</security-constraint>
+
 </web-app>

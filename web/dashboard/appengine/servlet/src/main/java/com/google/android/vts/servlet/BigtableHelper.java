@@ -19,11 +19,20 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
-
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
+import org.apache.hadoop.hbase.filter.PageFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -37,6 +46,8 @@ public class BigtableHelper implements ServletContextListener {
 
     private static String PROJECT_ID = System.getenv("BIGTABLE_PROJECT");
     private static String INSTANCE_ID = System.getenv("BIGTABLE_INSTANCE");
+
+    private static final Logger logger = LoggerFactory.getLogger(BigtableHelper.class);
 
     // The initial connection to Cloud Bigtable is an expensive operation -- We cache this
     // connection to speed things up.
@@ -88,16 +99,85 @@ public class BigtableHelper implements ServletContextListener {
 
         } catch (MasterNotRunningException e) {
             servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper"
-                + ".getTables() ", e);
+                               + ".getTables() ", e);
         } catch (ZooKeeperConnectionException e) {
             servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
-                + "getTables() ", e);
+                               + "getTables() ", e);
         } catch (IOException e) {
             servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
-                + "getTables() ", e);
+                               + "getTables() ", e);
         }
 
         return tableDescriptor;
+    }
+
+    /**
+     * Returns the table corresponding to the table name.
+     * @param tableName Describes the table name.
+     * @return table An instance of org.apache.hadoop.hbase.client.Table
+     * @throws IOException
+     */
+    public static Table getTable(TableName tableName) throws IOException {
+        Table table = null;
+
+        try {
+            table = getConnection().getTable(tableName);
+        } catch (IOException e) {
+            logger.error("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
+                         + "getTable()" + e.toString());
+            return null;
+        }
+        return table;
+    }
+
+    /**
+     * Returns true if there are data points newer than lowerBound in the table.
+     * This method assumes the row key is a time stamp.
+     * @param table An instance of org.apache.hadoop.hbase.client.Table with a long time stamp as
+     *              its row key.
+     * @param lowerBound The (inclusive) lower time bound, long, microseconds.
+     * @return boolean True if there are newer data points.
+     * @throws IOException
+     */
+    public static boolean hasNewer(Table table, long lowerBound) throws IOException {
+        FilterList filters = new FilterList();
+        filters.addFilter(new PageFilter(1));
+        filters.addFilter(new KeyOnlyFilter());
+        Scan scan = new Scan();
+        scan.setStartRow(Long.toString(lowerBound).getBytes());
+        scan.setFilter(filters);
+        ResultScanner scanner = table.getScanner(scan);
+        int count = 0;
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            count++;
+        }
+        scanner.close();
+        return count > 0;
+    }
+
+    /**
+     * Returns true if there are data points older than upperBound in the table.
+     * This method assumes the row key is a time stamp.
+     * @param table An instance of org.apache.hadoop.hbase.client.Table with a long time stamp as
+     *              its row key.
+     * @param upperBound The (exclusive) upper time bound, long, microseconds.
+     * @return boolean True if there are older data points.
+     * @throws IOException
+     */
+    public static boolean hasOlder(Table table, long upperBound) throws IOException {
+        FilterList filters = new FilterList();
+        filters.addFilter(new PageFilter(1));
+        filters.addFilter(new KeyOnlyFilter());
+        Scan scan = new Scan();
+        scan.setStopRow(Long.toString(upperBound).getBytes());
+        scan.setFilter(filters);
+        ResultScanner scanner = table.getScanner(scan);
+        int count = 0;
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            count++;
+        }
+        scanner.close();
+        return count > 0;
     }
 
     /**

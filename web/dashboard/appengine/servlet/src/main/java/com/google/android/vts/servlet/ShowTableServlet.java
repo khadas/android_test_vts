@@ -33,9 +33,6 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
-import org.apache.hadoop.hbase.filter.PageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,74 +76,6 @@ public class ShowTableServlet extends HttpServlet {
     // pie chart table column headers
     private static final String PIE_CHART_TEST_RESULT_NAME = "Test Result Name";
     private static final String PIE_CHART_TEST_RESULT_VALUE = "Test Result Value";
-
-    /**
-     * Returns the table corresponding to the table name.
-     * @param tableName Describes the table name which is passed as a parameter from
-     *        dashboard_main.jsp, which represents the table to fetch data from.
-     * @return table An instance of org.apache.hadoop.hbase.client.Table
-     * @throws IOException
-     */
-    public Table getTable(TableName tableName) throws IOException {
-        Table table = null;
-
-        try {
-            table = BigtableHelper.getConnection().getTable(tableName);
-        } catch (IOException e) {
-            logger.error("Exception occurred in com.google.android.vts.servlet.DashboardServletTable."
-              + "getTable()" + e.toString());
-            return null;
-        }
-        return table;
-    }
-
-
-    /**
-     * Returns true if there are data points newer than lowerBound in the table.
-     * @param table An instance of org.apache.hadoop.hbase.client.Table
-     * @param lowerBound The (exclusive) lower time bound, long, microseconds.
-     * @return boolean True if there are newer data points.
-     * @throws IOException
-     */
-    public boolean hasNewer(Table table, long lowerBound) throws IOException {
-        FilterList filters = new FilterList();
-        filters.addFilter(new PageFilter(1));
-        filters.addFilter(new KeyOnlyFilter());
-        Scan scan = new Scan();
-        scan.setStartRow(Long.toString(lowerBound).getBytes());
-        scan.setFilter(filters);
-        ResultScanner scanner = table.getScanner(scan);
-        int count = 0;
-        for (Result result = scanner.next(); result != null; result = scanner.next()) {
-            count++;
-        }
-        scanner.close();
-        return count > 0;
-    }
-
-
-    /**
-     * Returns true if there are data points older than upperBound in the table.
-     * @param table An instance of org.apache.hadoop.hbase.client.Table
-     * @param upperBound The (exclusive) upper time bound, long, microseconds.
-     * @return boolean True if there are older data points.
-     * @throws IOException
-     */
-    public boolean hasOlder(Table table, long upperBound) throws IOException {
-        FilterList filters = new FilterList();
-        filters.addFilter(new PageFilter(1));
-        filters.addFilter(new KeyOnlyFilter());
-        Scan scan = new Scan();
-        scan.setStopRow(Long.toString(upperBound - 1).getBytes());
-        scan.setFilter(filters);
-        ResultScanner scanner = table.getScanner(scan);
-        int count = 0;
-        for (Result result = scanner.next(); result != null; result = scanner.next()) {
-            count++;
-        }
-        scanner.close();
-        return count > 0;
-    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -202,7 +131,7 @@ public class ShowTableServlet extends HttpServlet {
 
         if (currentUser != null) {
             response.setContentType("text/plain");
-            table = getTable(tableName);
+            table = BigtableHelper.getTable(tableName);
 
             // this is the tip of the tree and is used for populating pie chart.
             String topBuild = null;
@@ -284,7 +213,7 @@ public class ShowTableServlet extends HttpServlet {
                 }
                 scanner.close();
                 if (sortedBuildIdTimeStampList.size() < MAX_BUILD_IDS_PER_PAGE
-                    && hasOlder(table, buildIdStartTime)) {
+                    && BigtableHelper.hasOlder(table, buildIdStartTime)) {
                     // Look further back in time a day
                     buildIdEndTime = buildIdStartTime;
                     buildIdStartTime -= ONE_DAY;
@@ -489,8 +418,8 @@ public class ShowTableServlet extends HttpServlet {
                 profilingDataAlert = PROFILING_DATA_ALERT;
             }
 
-            boolean hasNewer = hasNewer(table, buildIdEndTime);
-            boolean hasOlder = hasOlder(table, buildIdStartTime);
+            boolean hasNewer = BigtableHelper.hasNewer(table, buildIdEndTime);
+            boolean hasOlder = BigtableHelper.hasOlder(table, buildIdStartTime);
 
             request.setAttribute("tableName", table.getName());
 
