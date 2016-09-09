@@ -15,7 +15,7 @@
 -->
 <configuration description="Run VTS Host-Driven, HIDL HAL Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
     <option name="compatibility:include-filter" value="BinderPerformanceTest" />
     <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />

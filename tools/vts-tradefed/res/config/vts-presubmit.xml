@@ -15,7 +15,7 @@
 -->
 <configuration description="Run VTS Presubmit Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleShellTest" />
-  <template-include name="reporters" default="basic-reporters" />
+    <template-include name="reporters" default="basic-reporters" />
 </configuration>

@@ -15,7 +15,7 @@
 -->
 <configuration description="VTS Presubmit Test Serving Plan">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
 
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />
