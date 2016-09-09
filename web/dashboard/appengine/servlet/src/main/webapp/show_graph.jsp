@@ -181,7 +181,7 @@
       <div class="nav-wrapper">
         <div class="col s12">
           <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="${pageContext.request.contextPath}/show_table?tableName=${tableName}&buildIdStartTime=${buildIdStartTime}&buildIdEndTime=${buildIdEndTime}" class="breadcrumb">${tableName}</a>
+          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&buildIdStartTime=${buildIdStartTime}&buildIdEndTime=${buildIdEndTime}" class="breadcrumb">${testName}</a>
           <a href="#!" class="breadcrumb">Profiling</a>
         </div>
       </div>
@@ -222,7 +222,7 @@
             <c:otherwise>
               <!-- Profiling chart for profiling values. -->
               <div id="profiling_chart_div" style="width: 80%; height: 500px;"></div>
-  
+
               <!-- Percentile table -->
               <div id="percentile_table_div" style="margin-left:10%; margin-top:-40px; margin-bottom:125px"></div>
             </c:otherwise>
@@ -234,14 +234,14 @@
         <div id="performance_chart_div" style="width:80%; margin-left: 10%;height: 500px;"></div>
       </div>
     </div>
-  
+
     <script type="text/javascript">
       function exportToCsv() {
           var valuesArray = ${lineGraphValuesJson};
           var performanceValuesArray = ${performanceValuesJson};
           var labelArray = ${labelsListJson};
           var myCsv;
-  
+
           if (valuesArray.length > 0) {
               myCsv = valuesArray.join();
           } else {
@@ -252,7 +252,7 @@
       }
       var button = document.getElementById("b");
       $("#b").click(exportToCsv);
-  
+
       function load() {
           var fromDate = $("#from").datepicker("getDate").getTime();
           var toDate = $("#to").datepicker("getDate").getTime();
@@ -260,7 +260,7 @@
           var endTime = (toDate - 1) * NANO_PER_MILLI + ONE_DAY;  // end of day
           var ctx = "${pageContext.request.contextPath}";
           var link = ctx + "/show_graph?profilingPoint=${profilingPointName}" +
-              "&tableName=${tableName}" +
+              "&testName=${testName}" +
               "&buildIdStartTime=" + startTime +
               "&buildIdEndTime=" + endTime;
           window.open(link,"_self");

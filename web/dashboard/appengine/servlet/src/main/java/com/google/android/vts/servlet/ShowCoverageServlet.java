@@ -23,12 +23,12 @@ import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -49,6 +49,9 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "show_coverage", urlPatterns = {"/show_coverage"})
 public class ShowCoverageServlet extends HttpServlet {
 
+    private static final byte[] FAMILY = Bytes.toBytes("test");
+    private static final byte[] QUALIFIER = Bytes.toBytes("data");
+    private static final String TABLE_PREFIX = "result_";
     private static final Logger logger = LoggerFactory.getLogger(ShowCoverageServlet.class);
 
     @Override
@@ -58,7 +61,7 @@ public class ShowCoverageServlet extends HttpServlet {
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
-        tableName = TableName.valueOf(request.getParameter("tableName"));
+        tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
 
         // key is a unique combination of build Id and timestamp that helps identify the
         // corresponding build id.
@@ -78,27 +81,25 @@ public class ShowCoverageServlet extends HttpServlet {
         if (currentUser != null) {
             table = BigtableHelper.getTable(tableName);
             ResultScanner scanner = table.getScanner(scan);
-            outerloop:
             for (Result result = scanner.next(); result != null; result = scanner.next()) {
-                for (Cell keyValue : result.rawCells()) {
-                    TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(keyValue.getValueArray());
-                    String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
+                byte[] value = result.getValue(FAMILY, QUALIFIER);
+                TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
+                    parseFrom(value);
+                String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                    // filter empty build IDs and add only numbers
-                    if (buildId.length() > 0) {
-                        try {
-                            Integer.parseInt(buildId);
-                            String currentKey = currentTestReportMessage.getBuildInfo().getId().toStringUtf8() +
-                                    "." + String.valueOf(currentTestReportMessage.getStartTimestamp());
+                // filter empty build IDs and add only numbers
+                if (buildId.length() > 0) {
+                    try {
+                        Integer.parseInt(buildId);
+                        String currentKey = currentTestReportMessage.getBuildInfo().getId().toStringUtf8() +
+                                "." + String.valueOf(currentTestReportMessage.getStartTimestamp());
 
-                            if (key.equals(currentKey)) {
-                              testReportMessage = currentTestReportMessage;
-                              break outerloop;
-                            }
-                        } catch (NumberFormatException e) {
-                            /* skip a non-post-submit build */
+                        if (key.equals(currentKey)) {
+                          testReportMessage = currentTestReportMessage;
+                          break;
                         }
+                    } catch (NumberFormatException e) {
+                        /* skip a non-post-submit build */
                     }
                 }
             }
@@ -118,7 +119,7 @@ public class ShowCoverageServlet extends HttpServlet {
                 }
             }
 
-            request.setAttribute("tableName", table.getName());
+            request.setAttribute("testName", request.getParameter("testName"));
             request.setAttribute("coverageInfo", coverageInfo);
             request.setAttribute("buildIdStartTime", request.getParameter("buildIdStartTime"));
             request.setAttribute("buildIdEndTime", request.getParameter("buildIdEndTime"));

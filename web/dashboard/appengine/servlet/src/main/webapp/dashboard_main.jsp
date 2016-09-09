@@ -28,11 +28,11 @@
   <body>
     <div class="container">
       <div class="row" id="options">
-        <c:forEach items="${tableNames}" var="table">
-          <a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}">
+        <c:forEach items="${testNames}" var="test">
+          <a href="${pageContext.request.contextPath}/show_table?testName=${test}">
             <div class="col s12 card hoverable option valign-wrapper waves-effect">
               <span class="entry valign">
-                ${table}
+                ${test}
               </span>
             </div>
           </a>

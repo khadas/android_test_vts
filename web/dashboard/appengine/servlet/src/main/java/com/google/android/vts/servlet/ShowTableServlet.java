@@ -27,12 +27,15 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
+import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +69,9 @@ public class ShowTableServlet extends HttpServlet {
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int SUMMARY_ROW_COUNT = 4;
     private static final long ONE_DAY = 86400000000000L;  // units microseconds
+    private static final String TABLE_PREFIX = "result_";
+    private static final byte[] FAMILY = Bytes.toBytes("test");
+    private static final byte[] QUALIFIER = Bytes.toBytes("data");
 
     // test result constants
     private static final int TEST_RESULT_CASES = 6;
@@ -91,12 +97,12 @@ public class ShowTableServlet extends HttpServlet {
         // message to display if profiling point data is not available
         String profilingDataAlert = "";
 
-        if (request.getParameter("tableName") == null) {
-            request.setAttribute("tableName", TABLE_NAME_ERROR);
+        if (request.getParameter("testName") == null) {
+            request.setAttribute("testName", TABLE_NAME_ERROR);
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             return;
         }
-        tableName = TableName.valueOf(request.getParameter("tableName"));
+        tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
 
         if (request.getParameter("buildIdStartTime") != null) {
             String time = request.getParameter("buildIdStartTime");
@@ -167,48 +173,47 @@ public class ShowTableServlet extends HttpServlet {
                 scan.setStopRow(Long.toString(buildIdEndTime).getBytes());
                 ResultScanner scanner = table.getScanner(scan);
                 for (Result result = scanner.next(); result != null; result = scanner.next()) {
-                    for (Cell cell : result.rawCells()) {
-                        TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                            parseFrom(cell.getValueArray());
-                        String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
+                    byte[] value = result.getValue(FAMILY, QUALIFIER);
+                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                        parseFrom(value);
+                    String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                        // filter empty build IDs and add only numbers
-                        if (buildId.length() == 0) continue;
+                    // filter empty build IDs and add only numbers
+                    if (buildId.length() == 0) continue;
 
-                        String key;
-                        try {
-                            Integer.parseInt(buildId);
-                            key = testReportMessage.getBuildInfo().getId().toStringUtf8()
-                              + "." + String.valueOf(testReportMessage.getStartTimestamp());
-                            sortedBuildIdTimeStampList.add(key);
-                            // update map based on time stamp.
-                            buildIdTimeStampMap.put(key, testReportMessage);
-                        } catch (NumberFormatException e) {
-                            /* skip a non-post-submit build */
-                            continue;
+                    String key;
+                    try {
+                        Integer.parseInt(buildId);
+                        key = testReportMessage.getBuildInfo().getId().toStringUtf8()
+                          + "." + String.valueOf(testReportMessage.getStartTimestamp());
+                        sortedBuildIdTimeStampList.add(key);
+                        // update map based on time stamp.
+                        buildIdTimeStampMap.put(key, testReportMessage);
+                    } catch (NumberFormatException e) {
+                        /* skip a non-post-submit build */
+                        continue;
+                    }
+
+                    // update map of profiling point names
+                    for (ProfilingReportMessage profilingReportMessage :
+                        testReportMessage.getProfilingList()) {
+
+                        String profilingPointName = profilingReportMessage
+                            .getName().toStringUtf8();
+                        profilingPointNameSet.add(profilingPointName);
+                    }
+
+                    // update TestCaseReportMessage list
+                    for (TestCaseReportMessage testCaseReportMessage :
+                         testReportMessage.getTestCaseList()) {
+                        String testCaseName = new String(
+                            testCaseReportMessage.getName().toStringUtf8());
+                        if (!testCaseNameList.contains(testCaseName)) {
+                            testCaseNameList.add(testCaseName);
                         }
-
-                        // update map of profiling point names
-                        for (ProfilingReportMessage profilingReportMessage :
-                            testReportMessage.getProfilingList()) {
-
-                            String profilingPointName = profilingReportMessage
-                                .getName().toStringUtf8();
-                            profilingPointNameSet.add(profilingPointName);
-                        }
-
-                        // update TestCaseReportMessage list
-                        for (TestCaseReportMessage testCaseReportMessage :
-                             testReportMessage.getTestCaseList()) {
-                            String testCaseName = new String(
-                                testCaseReportMessage.getName().toStringUtf8());
-                            if (!testCaseNameList.contains(testCaseName)) {
-                                testCaseNameList.add(testCaseName);
-                            }
-                            testCaseResultMap.put(
-                                key + "." + testCaseReportMessage.getName().toStringUtf8(),
-                                testCaseReportMessage.getTestResult().getNumber());
-                        }
+                        testCaseResultMap.put(
+                            key + "." + testCaseReportMessage.getName().toStringUtf8(),
+                            testCaseReportMessage.getTestResult().getNumber());
                     }
                 }
                 scanner.close();
@@ -421,7 +426,7 @@ public class ShowTableServlet extends HttpServlet {
             boolean hasNewer = BigtableHelper.hasNewer(table, buildIdEndTime);
             boolean hasOlder = BigtableHelper.hasOlder(table, buildIdStartTime);
 
-            request.setAttribute("tableName", table.getName());
+            request.setAttribute("testName", request.getParameter("testName"));
 
             request.setAttribute("error", profilingDataAlert);
             request.setAttribute("errorJson",
