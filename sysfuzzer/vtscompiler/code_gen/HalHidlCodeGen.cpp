@@ -255,7 +255,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     }
 
     cpp_ss << "bool " << fuzzer_extended_class_name << "::GetService() {" << endl;
-    cpp_ss << "  hidl_version version = make_hidl_version("
+    cpp_ss << "  android::hardware::hidl_version version = make_hidl_version("
            << (int)message.component_type_version() << ","
            << (int)((message.component_type_version() -
               (int)message.component_type_version()) * 10) << ");" << endl;
@@ -263,12 +263,10 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  static bool initialized = false;" << endl;
     cpp_ss << "  if (!initialized) {" << endl;
     cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
-    cpp_ss << "    status_t status = getService(String16(\""
+    cpp_ss << "    hw_binder_proxy_ = " << message.component_name()
+           << "::getService(String16(\""
            << message.package().substr(message.package().find_last_of(".") + 1)
-           << "\"), version," << endl;
-    cpp_ss << "        &hw_binder_proxy_);" << endl;
-    cpp_ss << "    cout << \"[agent:hal] HIDL getService status \""
-           << " << status << endl;" << endl;
+           << "\"), version);" << endl;
     cpp_ss << "    initialized = true;" << endl;
     cpp_ss << "  }" << endl;
     cpp_ss << "  return true;" << endl;
@@ -463,12 +461,12 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                    << "vector_index++) {" << endl;
             cpp_ss << "      arg" << arg_count << "buffer[vector_index] = "
                    << "func_msg->arg(" << arg_count << ").vector_value(vector_index)."
-                   << arg.vector_value(0).scalar_type() << "();"
+                   << "scalar_value()." << arg.vector_value(0).scalar_type() << "();"
                    << endl;
             cpp_ss << "    }" << endl;
             cpp_ss << "arg" << arg_count << ".setToExternal("
                    << "arg" << arg_count << "buffer, "
-                   << "func_msg->arg(" << arg_count << ").vector_value(0).value().size()"
+                   << "func_msg->arg(" << arg_count << ").vector_size()"
                    << ")";
           }
           cpp_ss << ";" << endl;

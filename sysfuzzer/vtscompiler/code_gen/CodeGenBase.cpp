@@ -67,15 +67,9 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
            << GetVersionString(message.component_type_version())
            << "/types.h>" << endl;
     if (message.component_name() != "types") {
-      if (!endsWith(message.component_name(), "Callback")) {
-        cpp_ss << "#include <" << package_path << "/"
-               << GetVersionString(message.component_type_version())
-               << "/Bp" << message.component_name().substr(1) << ".h>" << endl;
-      } else {
-        cpp_ss << "#include <" << package_path << "/"
-               << GetVersionString(message.component_type_version())
-               << "/Bn" << message.component_name().substr(1) << ".h>" << endl;
-      }
+      cpp_ss << "#include <" << package_path << "/"
+             << GetVersionString(message.component_type_version())
+             << "/" << message.component_name() << ".h>" << endl;
     }
     for (const auto& import : message.import()) {
       string mutable_import = import;
@@ -96,16 +90,13 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
         if (base_filename != "types") {
           cpp_ss << "#include <" << package_path << "/"
                  << GetVersionString(message.component_type_version())
-                 << "/Bp" << base_filename.substr(1) << ".h>" << endl;
-          cpp_ss << "#include <" << package_path << "/"
-                 << GetVersionString(message.component_type_version())
-                 << "/" << base_filename.substr(1) << ".h>" << endl;
+                 << "/" << base_filename << ".h>" << endl;
         }
       }
       if (base_filename != "types") {
         cpp_ss << "#include <" << package_path << "/"
                << GetVersionString(message.component_type_version())
-               << "/Bn" << base_filename.substr(1) << ".h>" << endl;
+               << "/" << base_filename << ".h>" << endl;
         if (base_filename.substr(0, 1) == "I") {
           cpp_ss << "#include \""
                  << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
@@ -232,15 +223,9 @@ void CodeGenBase::GenerateAllHeader(
          << GetVersionString(message.component_type_version())
          << "/types.h>" << endl;
     if (message.component_name() != "types") {
-      if (!endsWith(message.component_name(), "Callback")) {
-        h_ss << "#include <" << package_path << "/"
-             << GetVersionString(message.component_type_version())
-             << "/Bp" << message.component_name().substr(1) << ".h>" << endl;
-      } else {
-        h_ss << "#include <" << package_path << "/"
-             << GetVersionString(message.component_type_version())
-             << "/Bn" << message.component_name().substr(1) << ".h>" << endl;
-      }
+      h_ss << "#include <" << package_path << "/"
+           << GetVersionString(message.component_type_version())
+           << "/" << message.component_name() << ".h>" << endl;
     }
     h_ss << "#include <hidl/HidlSupport.h>" << endl;
     h_ss << "#include <hidl/IServiceManager.h>" << endl;
@@ -269,7 +254,7 @@ void CodeGenBase::GenerateAllHeader(
       endsWith(message.component_name(), "Callback")) {
     h_ss << endl;
     h_ss << "class Vts" << message.component_name().substr(1) << ": public "
-           << "Bn" << message.component_name().substr(1) << " {" << endl;
+           << message.component_name() << " {" << endl;
     h_ss << " public:" << endl;
     h_ss << "  Vts" << message.component_name().substr(1) << "() {};" << endl;
     h_ss << endl;

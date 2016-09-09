@@ -337,15 +337,7 @@ string GetCppInstanceType(
       return "";
     }
     case TYPE_HIDL_CALLBACK: {
-      if (message->component_name() != "types") {
-        if (!endsWith(arg.predefined_type(), "Callback")) {
-          return "Bp" + arg.predefined_type().substr(1) + "()";
-        } else {
-          return "Bn" + arg.predefined_type().substr(1) + "()";
-        }
-      } else {
-        return arg.predefined_type() + "()";
-      }
+      return arg.predefined_type() + "()";
     }
     default:
       break;
