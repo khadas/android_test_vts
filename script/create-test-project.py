@@ -187,13 +187,11 @@ class TestCaseCreator(object):
                     test_type=self.test_type,
                     test_path_under_vts=self.test_dir[len(
                         os.path.join(self.build_top, VTS_PATH)) + 1:],
-                    test_case_file_without_extension=self.UpperCamelToLowerUnderScore(
-                        self.test_name)))
+                    test_case_file_without_extension=self.test_name))
 
     def CreateTestCasePy(self):
         '''Create <test_case_name>.py'''
-        target = os.path.join(self.test_dir, '%s.py' %
-                              self.UpperCamelToLowerUnderScore(self.test_name))
+        target = os.path.join(self.test_dir, '%s.py' % self.test_name)
         with open(target, 'w') as f:
             print 'Creating %s' % target
             f.write(template.PY_HEADER)
