@@ -275,6 +275,27 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._profiling[name].label.append(label)
             self._profiling[name].value.append(value)
 
+    def AddProfilingDataLabeledPoint(self, name, value):
+        """Adds labeled point type profiling data for uploading to the web DB.
+
+        Args:
+            name: string, profiling point name.
+            value: int, the value.
+        """
+        if not getattr(self, self.USE_GAE_DB, False):
+            logging.error("'use_gae_db' config is not True.")
+            False
+
+        if name in self._profiling:
+            logging.error("profiling point %s is already active.", name)
+            return False
+        self._profiling[name] = self._report_msg.profiling.add()
+        self._profiling[name].name = name
+        self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_TIMESTAMP
+        self._profiling[name].start_timestamp = 0
+        self._profiling[name].end_timestamp = value
+        return True
+
     def SetCoverageData(self, raw_coverage_data):
         """Sets the given coverage data to the class-level list attribute.
 

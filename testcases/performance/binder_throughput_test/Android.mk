@@ -12,13 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  28838221_poc \
-  30149612_poc \
-  simpleperf_cpu_hotplug_test \
-  binderThroughputTest \
+LOCAL_PATH := $(call my-dir)
 
+include $(call all-subdir-makefiles)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := binder_throughput_test
+LOCAL_MODULE_CLASS := FAKE
+LOCAL_IS_HOST_MODULE := true
+LOCAL_COMPATIBILITY_SUITE := vts
+
+include $(BUILD_SYSTEM)/base_rules.mk
+
+$(LOCAL_BUILT_MODULE):
+	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
+	$(hide) touch $@
+
+VTS_CONFIG_SRC_DIR := testcases/performance/binder_throughput_test
+include test/vts/tools/build/Android.host_config.mk
