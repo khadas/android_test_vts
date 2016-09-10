@@ -51,26 +51,6 @@ public class ShowCoverageServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(ShowCoverageServlet.class);
 
-    /**
-     * Returns the table corresponding to the table name.
-     * @param tableName Describes the table name which is passed as a parameter from
-     *        dashboard_main.jsp, which represents the table to fetch data from.
-     * @return table An instance of org.apache.hadoop.hbase.client.Table
-     * @throws IOException
-     */
-    private Table getTable(TableName tableName) throws IOException {
-        Table table = null;
-
-        try {
-            table = BigtableHelper.getConnection().getTable(tableName);
-        } catch (IOException e) {
-            logger.error("Exception occurred in com.google.android.vts.servlet.DashboardServletTable."
-              + "getTable()", e);
-            return null;
-        }
-        return table;
-    }
-
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
@@ -96,7 +76,7 @@ public class ShowCoverageServlet extends HttpServlet {
         TestReportMessage testReportMessage = null;
 
         if (currentUser != null) {
-            table = getTable(tableName);
+            table = BigtableHelper.getTable(tableName);
             ResultScanner scanner = table.getScanner(scan);
             outerloop:
             for (Result result = scanner.next(); result != null; result = scanner.next()) {
