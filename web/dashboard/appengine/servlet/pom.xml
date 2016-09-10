@@ -19,20 +19,15 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.example.bigtable</groupId>
-  <artifactId>bigtable-hello</artifactId>
+  <groupId>com.google.android.vts</groupId>
+  <artifactId>android-vts</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
     <bigtable.version>0.9.1</bigtable.version>
     <hbase.version>1.2.1</hbase.version>
-    <bigtable.projectID>google.com:android-vts-staging</bigtable.projectID>
-    <!-- switch to below for production push
-         CAUTION only VTS release engineer shall do such production push
-         after running all of its tests and verifying the UI.
     <bigtable.projectID>google.com:android-vts-internal</bigtable.projectID>
-    -->
     <bigtable.instanceID>vts-dev</bigtable.instanceID>
 
     <hadoop.version>2.4.1</hadoop.version>
