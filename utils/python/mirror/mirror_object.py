@@ -18,6 +18,7 @@
 import copy
 import logging
 import random
+import sys
 
 from vts.utils.python.fuzzer import FuzzerUtils
 from vts.utils.python.mirror import mirror_object_for_types
@@ -111,14 +112,22 @@ class MirrorObject(object):
             if self._parent_path:
                 func_msg.parent_path = self._parent_path
             try:
-                logging.info("component_class %s",
-                             self._if_spec_msg.component_class)
-                if (self._if_spec_msg.component_class
-                    == CompSpecMsg.HAL_CONVENTIONAL_SUBMODULE):
-                    submodule_name = self._if_spec_msg.original_data_structure_name
-                    if submodule_name.endswith("*"):
-                        submodule_name = submodule_name[:-1]
-                    func_msg.submodule_name = submodule_name
+                if isinstance(self._if_spec_msg,
+                              CompSpecMsg.ComponentSpecificationMessage):
+                    logging.info("component_class %s",
+                                 self._if_spec_msg.component_class)
+                    if (self._if_spec_msg.component_class
+                        == CompSpecMsg.HAL_CONVENTIONAL_SUBMODULE):
+                        submodule_name = self._if_spec_msg.original_data_structure_name
+                        if submodule_name.endswith("*"):
+                            submodule_name = submodule_name[:-1]
+                        func_msg.submodule_name = submodule_name
+                elif isinstance(self._if_spec_msg,
+                                CompSpecMsg.StructSpecificationMessage):
+                    pass
+                else:
+                    logging.error("unknown type %s", type(self._if_spec_msg))
+                    sys.exit(1)
             except AttributeError as e:
                 logging.exception("%s" % e)
                 pass
@@ -165,13 +174,31 @@ class MirrorObject(object):
             api_name: string, the name of the target function API.
 
         Returns:
-            FunctionSpecificationMessage if found, None otherwise
+            FunctionSpecificationMessage or StructSpecificationMessage if found,
+            None otherwise
         """
         logging.debug("GetAPI %s for %s", api_name, self._if_spec_msg)
-        if self._if_spec_msg.interface and self._if_spec_msg.interface.api:
-            for api in self._if_spec_msg.interface.api:
-                if api.name == api_name:
-                    return copy.copy(api)
+        if isinstance(self._if_spec_msg, CompSpecMsg.ComponentSpecificationMessage):
+            if len(self._if_spec_msg.interface.api) > 0:
+                for api in self._if_spec_msg.interface.api:
+                    if api.name == api_name:
+                        return copy.copy(api)
+        elif isinstance(self._if_spec_msg, CompSpecMsg.StructSpecificationMessage):
+            if len(self._if_spec_msg.api) > 0:
+                for api in self._if_spec_msg.api:
+                    logging.info("api %s", api)
+                    if api.name == api_name:
+                        return copy.copy(api)
+            if len(self._if_spec_msg.sub_struct) > 0:
+                for sub_struct in self._if_spec_msg.sub_struct:
+                    if len(sub_struct.api) > 0:
+                        for api in sub_struct.api:
+                            logging.info("api %s", api)
+                            if api.name == api_name:
+                                return copy.copy(api)
+        else:
+            logging.error("unknown spec type %s", type(self._if_spec_msg))
+            sys.exit(1)
         return None
 
     def GetAttribute(self, attribute_name):
@@ -217,11 +244,17 @@ class MirrorObject(object):
         Returns:
             StructSpecificationMessage if found, None otherwise
         """
-        if (self._if_spec_msg.interface and
-            self._if_spec_msg.interface.sub_struct):
-            for sub_struct in self._if_spec_msg.interface.sub_struct:
-                if sub_struct.name == sub_struct_name:
-                    return copy.copy(sub_struct)
+        if isinstance(self._if_spec_msg, CompSpecMsg.ComponentSpecificationMessage):
+            if (self._if_spec_msg.interface and
+                self._if_spec_msg.interface.sub_struct):
+                for sub_struct in self._if_spec_msg.interface.sub_struct:
+                    if sub_struct.name == sub_struct_name:
+                        return copy.copy(sub_struct)
+        elif isinstance(self._if_spec_msg, CompSpecMsg.StructSpecificationMessage):
+            if len(self._if_spec_msg.sub_struct) > 0:
+                for sub_struct in self._if_spec_msg.sub_struct:
+                    if sub_struct.name == sub_struct_name:
+                        return copy.copy(sub_struct)
         return None
 
     def GetCustomAggregateType(self, type_name):

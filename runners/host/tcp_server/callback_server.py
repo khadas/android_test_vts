@@ -60,9 +60,9 @@ class CallbackRequestHandler(socketserver.StreamRequestHandler):
         if request_message.id in _functions:
             callback_args = []
             for arg in request_message.arg:
-                if arg.type == IfaceSpecMsg.TYPE_SCALAR:
+                if arg.type == CompSpecMsg.TYPE_SCALAR:
                     callback_args.append(getattr(arg.scalar_value, arg.scalar_type))
-                elif arg.type == IfaceSpecMsg.TYPE_PREDEFINED:
+                elif arg.type == CompSpecMsg.TYPE_PREDEFINED:
                     callback_args.append("not-supported")
                 else:
                     raise VtsCallbackServerError(
