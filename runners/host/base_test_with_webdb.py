@@ -380,5 +380,5 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                             gcno_file_content, gcda_dict[file_path])
                         coverage.total_line_count, coverage.covered_line_count = (
                             coverage_report.GetCoverageStats(coverage_vec))
-                        coverage.line_coverage_vector = coverage_vec
+                        coverage.line_coverage_vector.extend(coverage_vec)
                         return True
