@@ -96,12 +96,19 @@ The following diagram discusses the flow of the dashboard wrt to the directory :
 
 ## To run GAE on local machine:
 
-$ cd web/dashboard/appengine/servlet
-$ mvn clean gcloud:run
+`$ cd web/dashboard/appengine/servlet`
+`$ mvn clean gcloud:run`
 
 ## To deploy to Google App Engine
 
-$ cd web/dashboard/appengine/servlet
-$ mvn clean gcloud:deploy
+Caution: only a release engineer must do the following based on a procedure.
+
+`$ cd web/dashboard/appengine/servlet`
+`$ mvn clean gcloud:deploy`
+
+To update cron jobs
+
+`$ cd web/dashboard/appengine/servlet`
+`$ <your appengine-java-sdk dir>/bin/appcfg.sh update_cron src/main/webapp/`
 
 visit https://<YOUR-PROJECT-NAME>.googleplex.com
