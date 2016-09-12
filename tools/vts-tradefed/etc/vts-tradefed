@@ -96,8 +96,8 @@ OPTIONAL_JARS="
   google-tf-prod-tests"
 
 for JAR in $OPTIONAL_JARS; do
-    if [ -f "$JAR.jar" ]; then
-        JAR_PATH=${JAR_PATH}:${JAR_DIR}/${JAR}.jar
+    if [ -f "${VTS_ROOT}/${JAR}.jar" ]; then
+        JAR_PATH=${JAR_PATH}:${VTS_ROOT}/${JAR}.jar
     fi;
 done
 
