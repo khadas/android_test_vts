@@ -52,9 +52,6 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
 
-LOCAL_STATIC_LIBRARIES := \
-  libelf \
-
 LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)
