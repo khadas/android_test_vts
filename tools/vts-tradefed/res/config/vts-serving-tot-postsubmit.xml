@@ -23,8 +23,8 @@
     <option name="compatibility:include-filter" value="SampleLightTest" />
 
     <!-- For vts-hal-hidl -->
-    <option name="compatibility:include-filter" value="binder_performance_test" />
-    <option name="compatibility:include-filter" value="hwbinder_performance_test" />
+    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+    <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
 
     <!-- For vts-library -->

@@ -16,9 +16,9 @@
 <configuration description="Run New VTS Tests for HIDL HALs in the Staging environment">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="binder_throughput_test" />
-    <option name="compatibility:include-filter" value="binder_performance_test" />
-    <option name="compatibility:include-filter" value="hwbinder_performance_test" />
+    <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
+    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+    <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

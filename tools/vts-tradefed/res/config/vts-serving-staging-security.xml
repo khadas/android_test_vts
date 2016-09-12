@@ -16,6 +16,6 @@
 <configuration description="Run New VTS Security Tests in the Staging environment">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="security_poc_kernel_test" />
+    <option name="compatibility:include-filter" value="SecurityPoCKernelTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

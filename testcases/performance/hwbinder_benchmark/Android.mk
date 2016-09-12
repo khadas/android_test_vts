@@ -19,7 +19,7 @@ include $(call all-subdir-makefiles)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := hwbinder_performance_test
+LOCAL_MODULE := HwBinderPerformanceTest
 LOCAL_MODULE_CLASS := FAKE
 LOCAL_IS_HOST_MODULE := true
 LOCAL_COMPATIBILITY_SUITE := vts
