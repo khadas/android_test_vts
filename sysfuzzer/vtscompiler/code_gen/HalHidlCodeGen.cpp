@@ -264,9 +264,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  if (!initialized) {" << endl;
     cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
     cpp_ss << "    hw_binder_proxy_ = " << message.component_name()
-           << "::getService(String16(\""
+           << "::getService(\""
            << message.package().substr(message.package().find_last_of(".") + 1)
-           << "\"), version);" << endl;
+           << "\");" << endl;
     cpp_ss << "    initialized = true;" << endl;
     cpp_ss << "  }" << endl;
     cpp_ss << "  return true;" << endl;
@@ -483,22 +483,20 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       // actual function call
       GenerateCodeToStartMeasurement(cpp_ss);
 
-      bool simple_return_type = false;
-      if (api.return_type_hidl_size() > 0) {
-        if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
-            api.return_type_hidl(0).type() == TYPE_ENUM) {
-          simple_return_type = true;
-        }
-      }
-
       // may need to check whether the function is actually defined.
       cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
-      if (!simple_return_type) {
-        cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<"
-               << "const void*>(new string("
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        cpp_ss << "    *result = NULL;" << endl;
+        cpp_ss << "    " << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+        cpp_ss << "    *result = reinterpret_cast<void*>("
+               << "(" << api.return_type_hidl(0).scalar_type() << ")"
                << kInstanceVariableName << "->" << api.name() << "(";
       } else {
-        cpp_ss << "    *result = reinterpret_cast<void*>("
+        cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<"
+               << "const void*>(new string("
                << kInstanceVariableName << "->" << api.name() << "(";
       }
       if (arg_count > 0) cpp_ss << endl;
@@ -510,17 +508,21 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         }
       }
 
-      if (!simple_return_type) {
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        cpp_ss << ");" << endl;
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+        cpp_ss << "));"
+               << endl;
+      } else {
         if (api.return_type_hidl_size() > 0) {
           if (arg_count != 0) cpp_ss << ", ";
           cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
         }
+        cpp_ss << ").toString8().string())));" << endl;
       }
-      if (!simple_return_type) {
-          cpp_ss << ").toString8().string())));" << endl;
-      } else {
-          cpp_ss << ").val);" << endl;
-      }
+
       GenerateCodeToStopMeasurement(cpp_ss);
       cpp_ss << "    cout << \"called\" << endl;" << endl;
 
