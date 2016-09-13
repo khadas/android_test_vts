@@ -15,7 +15,6 @@
  */
 
 package com.google.android.vts.servlet;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -64,9 +63,9 @@ public class VtsAlertJobServlet extends HttpServlet {
     private static final byte[] DATA_QUALIFIER = Bytes.toBytes("data");
     private static final byte[] TIME_QUALIFIER = Bytes.toBytes("upload_timestamp");
     private static final String STATUS_TABLE = "vts_status_table";
-    private static final String VTS_EMAIL_ADDRESS = "vts-alert@android-vts-internal.appspotmail.com";
+    private static final String VTS_EMAIL_ADDRESS = "vts-alert@google.com";
     private static final String VTS_EMAIL_NAME = "VTS Alert Bot";
-    private static final long ONE_DAY = 86400000000000L;  // units microseconds
+    private static final long ONE_DAY = 86400000000L;  // units microseconds
 
     private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
 
