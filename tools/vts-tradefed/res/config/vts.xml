@@ -15,7 +15,7 @@
 -->
 <configuration description="Run VTS Target-Side Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="VtsHalLightsTestCases" />
     <option name="compatibility:include-filter" value="VtsHalPowerTestCases" />
     <template-include name="reporters" default="basic-reporters" />

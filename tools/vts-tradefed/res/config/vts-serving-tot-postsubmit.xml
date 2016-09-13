@@ -15,7 +15,7 @@
 -->
 <configuration description="VTS Postsubmit Test Serving Plan Using a Tip of Tree Build">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <!-- For vts-codelab -->
     <option name="compatibility:include-filter" value="CodeLabHelloWorldTest" />
 
