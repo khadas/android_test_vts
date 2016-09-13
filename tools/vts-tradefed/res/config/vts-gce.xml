@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Run selected x86 tests on GCE using Cloud Android">
+    <include name="everything" />
     <option name="gce-device" value="true" />
     <build_provider class="com.google.android.tradefed.build.DeviceLaunchControlProvider">
         <option name="test-tag" value="staging-gce" />
@@ -25,7 +26,7 @@
     <device_options class="com.google.android.tradefed.device.GceAvdTestDeviceOptions" />
     <device_requirements class="com.google.android.tradefed.device.GoogleDeviceSelectionOptions" />
     <target_preparer class="com.android.tradefed.targetprep.InstallApkSetup" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
