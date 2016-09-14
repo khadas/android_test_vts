@@ -306,12 +306,22 @@ class BaseTestClass(object):
             args: A tuple of params.
             kwargs: Extra kwargs.
         """
-        is_generate_trigger = False
+        is_silenced = False
         tr_record = records.TestResultRecord(test_name, self.TAG)
         tr_record.testBegin()
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
         try:
+            if (self.test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER] and
+                    test_name in
+                    self.test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER]):
+                raise TestSilent("Test case '%s' not in include filter." %
+                                 test_name)
+            elif (self.test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER] and
+                  test_name in
+                  self.test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER]):
+                raise TestSilent("Test case '%s' in exclude filter." %
+                                 test_name)
             ret = self._setUpTest(test_name)
             asserts.assertTrue(ret is not False,
                                "Setup for %s failed." % test_name)
@@ -339,7 +349,7 @@ class BaseTestClass(object):
             self._exec_procedure_func(self._onPass, tr_record)
         except signals.TestSilent as e:
             # This is a trigger test for generated tests, suppress reporting.
-            is_generate_trigger = True
+            is_silenced = True
             self.results.requested.remove(test_name)
         except Exception as e:
             # Exception happened during test.
@@ -359,7 +369,7 @@ class BaseTestClass(object):
             tr_record.testFail()
             self._exec_procedure_func(self._onFail, tr_record)
         finally:
-            if not is_generate_trigger:
+            if not is_silenced:
                 self.results.addRecord(tr_record)
 
     def runGeneratedTests(self,
