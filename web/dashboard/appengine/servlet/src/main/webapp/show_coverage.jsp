@@ -18,7 +18,7 @@
       <div class="nav-wrapper">
         <div class="col s12">
           <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&buildIdStartTime=${buildIdStartTime}&buildIdEndTime=${buildIdEndTime}" class="breadcrumb">${testName}</a>
+          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&startTime=${startTime}&endTime=${endTime}" class="breadcrumb">${testName}</a>
           <a href="#!" class="breadcrumb">Coverage</a>
         </div>
       </div>
