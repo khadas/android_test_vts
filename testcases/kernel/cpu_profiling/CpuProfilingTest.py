@@ -19,7 +19,7 @@ import logging
 import os
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test
+from vts.runners.host import base_test_with_webdb
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
@@ -27,7 +27,7 @@ from vts.utils.python.controllers import android_device
 
 from vts.testcases.kernel.cpu_profiling import cpu_profiling_test_config as config
 
-class CpuProfilingTest(base_test.BaseTestClass):
+class CpuProfilingTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """Runs cpu profiling test cases against Android OS kernel.
 
     Attributes:
