@@ -228,7 +228,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """
         self.PushFiles(n_bit)
         self.PreTestSetup()
-        logging.info("[Test Case] test%sBits SKIP", n_bit)
 
         test_cases = list(
             self._testcases.Load(
@@ -243,8 +242,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             settings=test_cases,
             args=(n_bit, ),
             name_func=self.GetTestName)
-        logging.info("[Test Case] test%sBits", n_bit)
-        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
     def RunGeneratedTestsMultiThread(self, test_func, settings, args,
                                      name_func):
@@ -412,13 +409,13 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("Executing %s", cmd)
         self.CheckResult(self.shell.Execute(cmd))
 
-    def test32Bits(self):
+    def generate32BitTests(self):
         """Runs all 32-bit LTP test cases."""
         asserts.skipIf(not self.run_32bit,
                        'User specified not to run 32 bit version LTP tests.')
         self.TestNBits(self._32BIT)
 
-    def test64Bits(self):
+    def generate64BitTests(self):
         """Runs all 64-bit LTP test cases."""
         asserts.skipIf(not self.run_64bit,
                        'User specified not to run 64 bit version LTP tests.')

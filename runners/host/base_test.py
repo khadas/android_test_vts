@@ -28,6 +28,8 @@ from vts.runners.host import utils
 # Macro strings for test result reporting
 TEST_CASE_TOKEN = "[Test Case]"
 RESULT_LINE_TEMPLATE = TEST_CASE_TOKEN + " %s %s"
+STR_TEST = "test"
+STR_GENERATE = "generate"
 
 
 class BaseTestClass(object):
@@ -99,9 +101,8 @@ class BaseTestClass(object):
             setattr(self, name, self.user_params[name])
         for name in opt_param_names:
             if name not in self.user_params:
-                logging.info(
-                    ("Missing optional user param '%s' in "
-                     "configuration, continue."), name)
+                logging.info(("Missing optional user param '%s' in "
+                              "configuration, continue."), name)
             else:
                 setattr(self, name, self.user_params[name])
 
@@ -402,9 +403,9 @@ class BaseTestClass(object):
                 try:
                     test_name = name_func(s, *args, **kwargs)
                 except:
-                    logging.exception(
-                        ("Failed to get test name from "
-                         "test_func. Fall back to default %s"), test_name)
+                    logging.exception(("Failed to get test name from "
+                                       "test_func. Fall back to default %s"),
+                                      test_name)
             self.results.requested.append(test_name)
             if len(test_name) > utils.MAX_FILENAME_LEN:
                 test_name = test_name[:utils.MAX_FILENAME_LEN]
@@ -446,7 +447,7 @@ class BaseTestClass(object):
         """
         test_names = []
         for name in dir(self):
-            if name.startswith("test"):
+            if name.startswith(STR_TEST) or name.startswith(STR_GENERATE):
                 attr_func = getattr(self, name)
                 if hasattr(attr_func, "__call__"):
                     test_names.append(name)
@@ -469,17 +470,17 @@ class BaseTestClass(object):
         """
         test_funcs = []
         for test_name in test_names:
-            if not test_name.startswith("test"):
+            if not hasattr(self, test_name):
+                logging.warning("%s does not have test case %s.", self.TAG,
+                                test_name)
+            elif (test_name.startswith(STR_TEST) or
+                  test_name.startswith(STR_GENERATE)):
+                test_funcs.append((test_name, getattr(self, test_name)))
+            else:
                 msg = ("Test case name %s does not follow naming convention "
                        "test*, abort.") % test_name
                 raise errors.USERError(msg)
-            try:
-                test_funcs.append((test_name, getattr(self, test_name)))
-            except AttributeError:
-                logging.warning("%s does not have test case %s.", self.TAG,
-                                test_name)
-            except BaseTestError as e:
-                logging.warning(str(e))
+
         return test_funcs
 
     def run(self, test_names=None):
@@ -511,8 +512,10 @@ class BaseTestClass(object):
             else:
                 # No test case specified by user, execute all in the test class
                 test_names = self._get_all_test_names()
-        self.results.requested = test_names
+        self.results.requested = [test_name for test_name in test_names
+                                  if test_name.startswith(STR_TEST)]
         tests = self._get_test_funcs(test_names)
+
         # Setup for the class.
         try:
             if self._setUpClass() is False:
@@ -525,7 +528,12 @@ class BaseTestClass(object):
         # Run tests in order.
         try:
             for test_name, test_func in tests:
-                self.execOneTest(test_name, test_func, None)
+                if test_name.startswith(STR_GENERATE):
+                    logging.info("Running generateTest function '%s'",
+                                 test_name)
+                    test_func()
+                else:
+                    self.execOneTest(test_name, test_func, None)
             return self.results
         except signals.TestAbortClass:
             return self.results
