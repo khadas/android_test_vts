@@ -25,6 +25,5 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/light/conventional/SampleLightTest" />
-        <option name="use-stdout-logs" value="false" />
     </test>
 </configuration>

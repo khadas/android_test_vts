@@ -95,7 +95,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
-    private boolean mUseStdoutLogs = true;
+    private boolean mUseStdoutLogs = false;
 
     @Option(name = "include-filter",
             description = "The positive filter of the test names to run.")
