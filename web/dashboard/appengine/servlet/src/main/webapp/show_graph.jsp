@@ -181,7 +181,7 @@
       <div class="nav-wrapper">
         <div class="col s12">
           <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&buildIdStartTime=${buildIdStartTime}&buildIdEndTime=${buildIdEndTime}" class="breadcrumb">${testName}</a>
+          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&startTime=${startTime}&endTime=${endTime}" class="breadcrumb">${testName}</a>
           <a href="#!" class="breadcrumb">Profiling</a>
         </div>
       </div>
@@ -261,8 +261,8 @@
           var ctx = "${pageContext.request.contextPath}";
           var link = ctx + "/show_graph?profilingPoint=${profilingPointName}" +
               "&testName=${testName}" +
-              "&buildIdStartTime=" + startTime +
-              "&buildIdEndTime=" + endTime;
+              "&startTime=" + startTime +
+              "&endTime=" + endTime;
           window.open(link,"_self");
       }
       $("#load").click(load);

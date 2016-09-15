@@ -121,8 +121,8 @@ public class ShowCoverageServlet extends HttpServlet {
 
             request.setAttribute("testName", request.getParameter("testName"));
             request.setAttribute("coverageInfo", coverageInfo);
-            request.setAttribute("buildIdStartTime", request.getParameter("buildIdStartTime"));
-            request.setAttribute("buildIdEndTime", request.getParameter("buildIdEndTime"));
+            request.setAttribute("startTime", request.getParameter("startTime"));
+            request.setAttribute("endTime", request.getParameter("endTime"));
             response.setContentType("text/plain");
             dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
 

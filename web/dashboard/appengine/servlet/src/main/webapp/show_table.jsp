@@ -63,8 +63,8 @@
               var link = ctx + "/show_graph?profilingPoint=" +
                   data.getValue(table.getSelection()[0].row, 0) +
                   "&testName=${testName}" +
-                  "&buildIdStartTime=" + ${buildIdStartTime} +
-                  "&buildIdEndTime=" + ${buildIdEndTime};
+                  "&startTime=" + ${startTime} +
+                  "&endTime=" + ${endTime};
               window.open(link,"_self");
           }
       }
@@ -155,13 +155,10 @@
           var data = new google.visualization.DataTable();
 
           // add columns
-          data.addColumn('string', 'Stats Type  \\ Build ID'); // blank column for first
-          var buildIDtimeStampArray = ${buildIDtimeStampArrayJson};
-          for (var i = 0; i < buildIDtimeStampArray.length; i++) {
-              // trim the time stamp
-              var colName = buildIDtimeStampArray[i].substring(
-                  0, buildIDtimeStampArray[i].lastIndexOf("."));
-              data.addColumn('string', colName);
+          data.addColumn('string', 'Stats Type  \\ Device Build ID'); // blank column for first
+          var deviceBuildIdArray = ${deviceBuildIdArrayJson};
+          for (var i = 0; i < deviceBuildIdArray.length; i++) {
+              data.addColumn('string', deviceBuildIdArray[i]);
           }
 
           // add rows
@@ -248,17 +245,17 @@
               if (selection.length == 0) return;
               var cell = event.target; // get selected cell
               var column = cell.cellIndex - 1;
-              var buildIDtimeStampArray = ${buildIDtimeStampArrayJson};
+              var testRunKeyArray = ${testRunKeyArrayJson};
 
               // key is a unique combination of build ID and time stamp
-              var key = buildIDtimeStampArray[column];
+              var key = testRunKeyArray[column];
 
               var ctx = "${pageContext.request.contextPath}";
 
               var link = ctx + "/show_coverage?key=" + key +
                 "&testName=${testName}" +
-                "&buildIdStartTime=${buildIdStartTime}" +
-                "&buildIdEndTime=${buildIdEndTime}";
+                "&startTime=${startTime}" +
+                "&endTime=${endTime}";
               window.open(link,"_self");
           }
       }
@@ -332,16 +329,16 @@
 
         // for navigating grid table through previous and next buttons
         function next() {
-            var endTime = ${buildIdStartTime};
+            var endTime = ${startTime};
             var link = "${pageContext.request.contextPath}" +
-              "/show_table?testName=${testName}" + "&buildIdEndTime=" + endTime;
+              "/show_table?testName=${testName}&endTime=" + endTime;
             window.open(link,"_self");
         }
 
         function prev() {
-            var startTime = ${buildIdEndTime};
+            var startTime = ${endTime};
             var link = "${pageContext.request.contextPath}" +
-              "/show_table?testName=${testName}&buildIdStartTime=" + startTime;
+              "/show_table?testName=${testName}&startTime=" + startTime;
             window.open(link,"_self");
         }
     </script>
