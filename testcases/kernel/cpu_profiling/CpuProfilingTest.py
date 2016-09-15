@@ -93,21 +93,17 @@ class CpuProfilingTest(base_test_with_webdb.BaseTestWithWebDbClass):
             n_bit: _32BIT or 32 for 32-bit tests;
                 _64BIT or 64 for 64-bit tests;
         """
-        logging.info("[Test Case] test%sBits SKIP", n_bit)
-
         self.runGeneratedTests(
             test_func=self.RunTestcase,
             settings=self._testcases,
             args=("/data/local/tmp/%s/" % n_bit, ),
             tag="%s_bit" % n_bit)
-        logging.info("[Test Case] test%sBits", n_bit)
-        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
-    def test32Bits(self):
+    def generate32BitTests(self):
         """Runs all 32-bit tests."""
         self.TestNBits(self._32BIT)
 
-    def test64Bits(self):
+    def generate64BitTests(self):
         """Runs all 64-bit tests."""
         self.TestNBits(self._64BIT)
 
