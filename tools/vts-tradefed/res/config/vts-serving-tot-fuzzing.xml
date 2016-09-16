@@ -19,4 +19,6 @@
 
     <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
     <option name="compatibility:include-filter" value="LightFuzzTest" />
+
+    <template-include name="reporters" default="basic-reporters" />
 </configuration>
