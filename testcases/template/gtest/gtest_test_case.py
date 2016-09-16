@@ -19,6 +19,19 @@ import os
 import ntpath
 
 
+def PutTag(name, tag):
+    '''Put tag on name and return the resulting string.
+
+    Args:
+        name: string, a test name
+        tag: string
+
+    Returns:
+        String, the result string after putting tag on the name
+    '''
+    return '{}{}'.format(name, tag)
+
+
 class GtestTestCase(object):
     '''A class to represent a gtest test case.
 
@@ -38,7 +51,7 @@ class GtestTestCase(object):
         self.output_file_name = None
 
     def __str__(self):
-        return '{}{}'.format(self.GetGtestName(), self.tag)
+        return PutTag(self.GetGtestName(), self.tag)
 
     def GetGtestName(self):
         '''Get a string that represents test name in gtest.
