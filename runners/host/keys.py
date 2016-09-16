@@ -35,6 +35,9 @@ class ConfigKeys(object):
     KEY_INCLUDE_FILTER = "include_filter"
     KEY_EXCLUDE_FILTER = "exclude_filter"
 
+    # Keys for Gtest
+    IKEY_GTEST_BINARY_PATHS = "gtest_binary_paths"
+
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"
     IKEY_TESTBED_NAME = "testbed_name"
