@@ -19,6 +19,12 @@
 
 .table {
     font-size:14px;
+    border:none;
+    width:100%;
+    word-spacing:4px;
+    font-family:monospace;
+    white-space:PRE;
+    border-collapse:collapse;
 }
 
 #buttons {
@@ -40,4 +46,32 @@
 
 td {
     padding:0;
+}
+
+.count {
+    white-space:nowrap;
+    text-align:right;
+    border-right:1px solid black;
+    padding-right:5px;
+    font-style:bold;
+}
+
+.line_no {
+    padding-left:35px;
+    white-space:nowrap;
+    padding-right:5px;
+    border-right:1px dotted gray;
+}
+
+.code {
+    padding-left:10px;
+    width:99%;
+}
+
+.uncovered {
+    background-color:LightPink;
+}
+
+.covered {
+    background-color:LightGreen;
 }

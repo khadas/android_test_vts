@@ -14,6 +14,105 @@
     <link rel="stylesheet" href="/css/show_coverage.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
+    <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Initialize AJAX for CORS
+            $.ajaxSetup({
+                xhrFields : {
+                    withCredentials: true
+                }
+            });
+
+            // Initialize auth2 client and scope for requests to Gerrit
+            gapi.load('auth2', function() {
+                auth2 = gapi.auth2.init({
+                    client_id: ${clientId},
+                    scope: ${gerritScope}
+                });
+                var sourceContents = [];
+                // Read the source contents. Display the results when loaded.
+                getSourceCode(sourceContents).done(
+                    function() {
+                        displaySource(sourceContents);
+                        $('#coverage').collapsible({
+                            accordion : true
+                        });
+                    }
+                );
+            });
+        });
+
+        /* Fetches the source code from Gerrit.
+           Returns a promise that resolves when all of the requests complete.
+        */
+        var getSourceCode = function(sourceContents) {
+            var gerritURI = ${gerritURI};
+            var projects = ${projects};
+            var commits = ${commits};
+            var sourceNames = ${sourceFiles};
+            var promises = sourceNames.map(function(src, i) {
+                url = gerritURI + '/projects/' + encodeURIComponent(projects[i])
+                        + '/commits/' + encodeURIComponent(commits[i])
+                        + '/files/' + encodeURIComponent(src) + '/content';
+                return $.ajax({
+                    url: url,
+                    dataType: 'text'
+                }).promise();
+            });
+            return $.when.apply($, promises).always(function() {
+                promises.forEach(function(d, i) {
+                    d.done(function(result) {
+                        sourceContents[i] = atob(result);
+                    });
+                });
+            });
+        }
+
+        /* Appends source code to the DOM given the contents of the source code.
+           Coverage vectors, source names, and test names passed from the
+           servlet.
+        */
+        var displaySource = function(sourceContents) {
+            /* Note: coverageVectors may be shorter than sourceContents due to
+               non-executable (i.e. comments or language-specific syntax) lines
+               in the code. Trailing source lines that have no coverage
+               information are assumed to be non-executable.
+            */
+            var coverageVectors = ${coverageVectors};
+            var sourceNames = ${sourceFiles};
+            var testcaseNames = ${testcaseNames};
+            sourceContents.forEach(function(src, i) {
+                if (!src) return;
+                srcLines = src.split('\n');
+                rows = srcLines.reduce(function(acc, line, j) {
+                    var count = coverageVectors[i][j];
+                    if (typeof count == 'undefined' || count < 0) {
+                        acc += '<tr>';
+                        count = "--";
+                    } else if (count == 0) {
+                        acc += '<tr class="uncovered">';
+                    } else {
+                        acc += '<tr class="covered">';
+                    }
+                    acc += '<td class="count">' + String(count) + '</td>';
+                    acc += '<td class="line_no">' + String(j+1) + '</td>';
+                    acc += '<td class="code">' + String(line) + '</td></tr>';
+                    return acc;
+                }, String());
+                html = '<li><div class="collapsible-header">';
+                html += '<i class="material-icons">library_books</i>';
+                html += testcaseNames[i];
+                html += '<div class="right">' + sourceNames[i] + '</div></div>';
+                html += '<div class="collapsible-body row">';
+                html += '<div id="html_container" class="col s10 push-s1">';
+                html += '<div><table class="table">' + rows + '</table></div>';
+                html += '</div></div></li>';
+                $('#coverage').append(html);
+            });
+        }
+
+    </script>
     <nav id="navbar">
       <div class="nav-wrapper">
         <span>
@@ -34,19 +133,7 @@
   </head>
   <body>
     <div class="container">
-      <ul class="collapsible popout" data-collapsible="accordion">
-        <c:forEach items="${coverageInfo}" var="entry">
-          <li>
-            <div class="collapsible-header">
-              <i class="material-icons">library_books</i>
-                ${entry[0]}
-                <div class="right">${entry[1]}</div>
-            </div>
-            <div class="collapsible-body row">
-              <div id="html_container" class="col s10 push-s1">${entry[2]}</div>
-            </div>
-          </li>
-        </c:forEach>
+      <ul class="collapsible popout" data-collapsible="accordion" id="coverage">
       </ul>
     </div>
     <footer class="page-footer">
