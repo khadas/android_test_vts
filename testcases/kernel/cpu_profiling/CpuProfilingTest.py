@@ -24,11 +24,11 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
-from vts.testcases.template.gtest import gtest
+from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.testcases.kernel.cpu_profiling import cpu_profiling_test_config as config
 
 
-class CpuProfilingTest(gtest.Gtest):
+class CpuProfilingTest(gtest_binary_test.GtestBinaryTest):
     """Runs cpu profiling test cases against Android OS kernel."""
 
     def setUpClass(self):
