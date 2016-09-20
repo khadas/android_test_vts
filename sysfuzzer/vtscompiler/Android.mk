@@ -32,6 +32,8 @@ LOCAL_SRC_FILES := \
   code_gen/driver/HalHidlCodeGen.cpp \
   code_gen/driver/LegacyHalCodeGen.cpp \
   code_gen/driver/LibSharedCodeGen.cpp \
+  code_gen/profiler/ProfilerCodeGenBase.cpp \
+  code_gen/profiler/HalHidlProfilerCodeGen.cpp \
 
 LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/android \
@@ -46,6 +48,8 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_common_host \
   libvts_multidevice_proto_host \
   libprotobuf-cpp-full \
+  libhidl-gen-utils \
+  libbase           \
 
 LOCAL_CFLAGS := -Wall -Werror
 
