@@ -24,6 +24,8 @@ from vts.runners.host import logger
 from vts.runners.host import records
 from vts.runners.host import signals
 from vts.runners.host import utils
+from vts.runners.host import const
+from vts.utils.python.common import list_utils
 
 # Macro strings for test result reporting
 TEST_CASE_TOKEN = "[Test Case]"
@@ -50,6 +52,10 @@ class BaseTestClass(object):
         currentTestName: A string that's the name of the test case currently
                            being executed. If no test is executing, this should
                            be None.
+        include_filer: A list of string, each representing a test case name to
+                       include.
+        exclude_filer: A list of string, each representing a test case name to
+                       exclude. Has no effect if include_filer is not empty.
     """
 
     TAG = None
@@ -63,6 +69,16 @@ class BaseTestClass(object):
             setattr(self, name, value)
         self.results = records.TestResult()
         self.currentTestName = None
+
+        test_suite = self.user_params[keys.ConfigKeys.KEY_TEST_SUITE]
+        self.include_filter = list_utils.ExpandItemDelimiters(
+            test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER],
+            const.LIST_ITEM_DELIMITER,
+            strip=True)
+        self.exclude_filter = list_utils.ExpandItemDelimiters(
+            test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER],
+            const.LIST_ITEM_DELIMITER,
+            strip=True)
 
     def __enter__(self):
         return self
@@ -293,32 +309,6 @@ class BaseTestClass(object):
                               func.__name__, self.currentTestName)
             tr_record.addError(func.__name__, e)
 
-    def checkTestFilter(self, test_name):
-        """Check whether a test should be filtered.
-
-        If include filter is not empty, only tests in include filter will be
-        executed. Exclude filter will only be check when include filter is
-        not empty.
-
-        Args:
-            test_name: string, name of test
-
-        Raises:
-            TestSilent, when a test should be filtered.
-        """
-        if not keys.ConfigKeys.KEY_TEST_SUITE in self.user_params:
-            return
-
-        test_suite = self.user_params[keys.ConfigKeys.KEY_TEST_SUITE]
-
-        if (test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER] and
-                test_name in test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER]):
-            raise TestSilent("Test case '%s' not in include filter." %
-                             test_name)
-        elif (test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER] and
-              test_name in test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER]):
-            raise TestSilent("Test case '%s' in exclude filter." % test_name)
-
     def execOneTest(self, test_name, test_func, args, **kwargs):
         """Executes one test case and update test results.
 
@@ -338,7 +328,17 @@ class BaseTestClass(object):
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
         try:
-            self.checkTestFilter(test_name)
+            if self.include_filter:
+                if test_name not in self.include_filter:
+                    logging.info("Test case '%s' not in include filter." %
+                                 test_name)
+                    raise signals.TestSilent(
+                        "Test case '%s' not in include filter." % test_name)
+            elif test_name in self.exclude_filter:
+                logging.info("Test case '%s' in exclude filter." % test_name)
+                raise signals.TestSilent("Test case '%s' in exclude filter." %
+                                         test_name)
+
             ret = self._setUpTest(test_name)
             asserts.assertTrue(ret is not False,
                                "Setup for %s failed." % test_name)

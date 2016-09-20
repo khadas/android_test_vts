@@ -15,19 +15,6 @@
 # limitations under the License.
 #
 
-CPT_HOTPLUG_TESTSUITE = "simpleperf_cpu_hotplug_test"
-
-CPT_HOTPLUG_BASIC_TESTS = [
-    "cpu_offline.offline_while_recording_on_another_cpu",
-    "cpu_offline.offline_while_recording",
-    "cpu_offline.offline_while_user_process_profiling",
-]
-
-# Tests that don't have a fix in kernel yet.
-CPT_HOTPLUG_UNAVAILABLE_TESTS = [
-    "cpu_offline.offline_while_ioctl_enable",
-]
-
 CPT_HOTPLUG_EXCLUDE_DEVICES = [
     # angler doesn't pass tests because of http://b/30971326.
     "angler",
