@@ -424,6 +424,16 @@ class AndroidDevice(object):
             return model
 
     @property
+    def cpu_abi(self):
+        """CPU ABI (Application Binary Interface) of the device."""
+        out = self.adb.shell('getprop | grep "\[ro.product.cpu.abi\]"')
+        if not out:
+            return "unknown"
+
+        cpu_abi = out.decode("utf-8").strip().split('[')[-1][:-1].lower()
+        return cpu_abi
+
+    @property
     def isAdbLogcatOn(self):
         """Whether there is an ongoing adb logcat collection.
         """
