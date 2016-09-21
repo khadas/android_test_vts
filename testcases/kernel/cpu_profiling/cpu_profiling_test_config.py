@@ -16,6 +16,4 @@
 #
 
 CPT_HOTPLUG_EXCLUDE_DEVICES = [
-    # angler doesn't pass tests because of http://b/30971326.
-    "angler",
 ]
