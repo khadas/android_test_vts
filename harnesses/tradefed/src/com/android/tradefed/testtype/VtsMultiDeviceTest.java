@@ -72,8 +72,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
-    static final String GTEST_BINARY_PATHS = "gtest_binary_paths";
-    static final String TEMPLATE_GTEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
+    static final String BINARY_PATHS = "binary_paths";
+    static final String BINARY_TEST_TYPE_GTEST = "gtest";
+    static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
+    static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -113,10 +115,13 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
 
-    @Option(name = "gtest-binary-paths",
-            description = "Gtest binary paths relative to host side path under "
-                    + "vts testcase directory.")
-    private Collection<String> mGtestBinaryPaths = new ArrayList<>();
+    @Option(name = "binary-paths",
+            description = "Binary paths relative to host side path under vts testcase directory.")
+    private Collection<String> mBinaryPaths = new ArrayList<>();
+
+    @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
+            + "running an extended binary test without a python test file. Available options: gtest")
+    private String mBinaryTestType = "";
 
     @Option(name = "collect-tests-only",
             description = "Only invoke the test binary to collect list of applicable test cases. "
@@ -248,9 +253,17 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         }
 
         if (mTestCasePath == null) {
-            if (!mGtestBinaryPaths.isEmpty()) {
-                CLog.i("Using default gtest test case path.");
-                setTestCasePath(TEMPLATE_GTEST_PATH);
+            if (!mBinaryPaths.isEmpty()) {
+                String template;
+                switch (mBinaryTestType) {
+                    case BINARY_TEST_TYPE_GTEST:
+                        template = TEMPLATE_GTEST_BINARY_TEST_PATH;
+                        break;
+                    default:
+                        template = TEMPLATE_BINARY_TEST_PATH;
+                }
+                CLog.i("Using default test case template at %s.", template);
+                setTestCasePath(template);
             } else {
                 throw new IllegalArgumentException("test-case-path is not set.");
             }
@@ -385,9 +398,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
-        if (!mGtestBinaryPaths.isEmpty()) {
-            jsonObject.put(GTEST_BINARY_PATHS, new JSONArray(mGtestBinaryPaths));
-            CLog.i("Added %s to the Json object", GTEST_BINARY_PATHS);
+        if (!mBinaryPaths.isEmpty()) {
+            jsonObject.put(BINARY_PATHS, new JSONArray(mBinaryPaths));
+            CLog.i("Added %s to the Json object", BINARY_PATHS);
         }
     }
 
