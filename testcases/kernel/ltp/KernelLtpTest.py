@@ -411,16 +411,20 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def generate32BitTests(self):
         """Runs all 32-bit LTP test cases."""
-        asserts.skipIf(not self.run_32bit,
-                       'User specified not to run 32 bit version LTP tests.')
+        if not self.run_32bit:
+            logging.info('User specified not to run 32 bit version LTP tests.')
+            return
+
         self.TestNBits(self._32BIT)
 
     def generate64BitTests(self):
         """Runs all 64-bit LTP test cases."""
-        asserts.skipIf(not self.run_64bit,
-                       'User specified not to run 64 bit version LTP tests.')
-        asserts.skipIf(not self._shell_env.IsDeviceArch64Bit(),
-                       'Target device does not support 64 bit tests.')
+        if not self.run_64bit:
+            logging.info('User specified not to run 64 bit version LTP tests.')
+            return
+        if not self._shell_env.IsDeviceArch64Bit():
+            logging.info('Target device does not support 64 bit tests.')
+            return
 
         self.TestNBits(self._64BIT)
 
