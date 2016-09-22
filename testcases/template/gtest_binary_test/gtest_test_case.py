@@ -32,8 +32,10 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
         test_name: string, test case name which does not include test suite
         path: string, absolute test binary path on device
         tag: string, test tag
+        put_tag_func: function that takes a name and tag to output a combination
         output_file_path: string, gtest output xml file name
     '''
+
     # @Override
     def GetRunCommand(self, output_file_path=None):
         '''Get the command to run the test.
