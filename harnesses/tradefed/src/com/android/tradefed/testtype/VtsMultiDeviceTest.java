@@ -73,6 +73,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String BINARY_TEST_SOURCES = "binary_test_sources";
+    static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -116,8 +117,17 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     private long mRuntimeHint = 60000;  // 1 minute
 
     @Option(name = "binary-test-sources",
-            description = "Binary test source paths relative to vts testcase directory on host.")
+            description = "Binary test source paths relative to vts testcase directory on host."
+                    + "Tags can be added to the front of each directory using ':' as delimiter. "
+                    + "Multiple directories can be separated by ','.")
     private Collection<String> mBinaryTestSources = new ArrayList<>();
+
+    @Option(name = "binary-test-working-directories", description = "Working directories for binary "
+            + "test. Tags can be added to the front of each directory using ':' as delimiter. "
+            + "Multiple directories can be separated by ','. However, each tag should only has "
+            + "one working directory. By default, tag name is used as working directory name under "
+            + "/data/local/tmp")
+    private Collection<String> mBinaryTestWorkingDirectories = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -401,6 +411,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         if (!mBinaryTestSources.isEmpty()) {
             jsonObject.put(BINARY_TEST_SOURCES, new JSONArray(mBinaryTestSources));
             CLog.i("Added %s to the Json object", BINARY_TEST_SOURCES);
+        }
+        if (!mBinaryTestWorkingDirectories.isEmpty()) {
+            jsonObject.put(BINARY_TEST_WORKING_DIRECTORIES,
+                    new JSONArray(mBinaryTestWorkingDirectories));
+            CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORIES);
         }
     }
 
