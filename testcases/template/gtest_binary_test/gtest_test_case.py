@@ -21,22 +21,10 @@ import uuid
 import re
 
 from vts.runners.host import utils
+from vts.testcases.template.binary_test import binary_test_case
 
 
-def PutTag(name, tag):
-    '''Put tag on name and return the resulting string.
-
-    Args:
-        name: string, a test name
-        tag: string
-
-    Returns:
-        String, the result string after putting tag on the name
-    '''
-    return '{}{}'.format(name, tag)
-
-
-class GtestTestCase(object):
+class GtestTestCase(binary_test_case.BinaryTestCase):
     '''A class to represent a gtest test case.
 
     Attributes:
@@ -46,38 +34,29 @@ class GtestTestCase(object):
         tag: string, test tag
         output_file_path: string, gtest output xml file name
     '''
-
-    def __init__(self, test_suite, test_name, path, tag=''):
-        self.test_suite = test_suite
-        self.test_name = test_name
-        self.path = path
-        self.tag = tag
-        self.output_file_path = 'gtest_output_{name}.xml'.format(
-            name=re.sub(r'\W+', '_', str(self)))
-
-    def __str__(self):
-        return PutTag(self.GetGtestName(), self.tag)
-
-    def GetGtestName(self):
-        '''Get a string that represents test name in gtest.
+    # @Override
+    def GetRunCommand(self, output_file_path=None):
+        '''Get the command to run the test.
 
         Returns:
-            A string test name in format '<test suite>.<test case>'
+            List of strings
         '''
-        return '{}{}'.format(self.test_suite, self.test_name)
-
-    def GetRunCommand(self, output_file_path=None):
         if output_file_path:
             self.output_file_path = output_file_path
-        return ('{path} --gtest_filter={test} '
-                '--gtest_output=xml:{output_file_path}').format(
-                    path=self.path,
-                    test=self.GetGtestName(),
-                    output_file_path=self.output_file_path)
+        return [('{path} --gtest_filter={test} '
+                 '--gtest_output=xml:{output_file_path}').format(
+                     path=self.path,
+                     test=self.GetFullName(),
+                     output_file_path=self.output_file_path), 'cat %s' %
+                self.output_file_path, 'rm -rf %s' % self.output_file_path]
 
     @property
     def output_file_path(self):
         """Get output_file_path"""
+        if not hasattr(self,
+                       '_output_file_path') or self._output_file_path is None:
+            self.output_file_path = 'gtest_output_{name}.xml'.format(
+                name=re.sub(r'\W+', '_', str(self)))
         return self._output_file_path
 
     @output_file_path.setter
@@ -111,43 +90,3 @@ class GtestTestCase(object):
                          os.path.abspath(output_file_path))
 
         self._output_file_path = output_file_path
-
-    @property
-    def test_suite(self):
-        """Get test_suite"""
-        return self._test_suite
-
-    @test_suite.setter
-    def test_suite(self, test_suite):
-        """Set test_suite"""
-        self._test_suite = test_suite
-
-    @property
-    def test_name(self):
-        """Get test_name"""
-        return self._test_name
-
-    @test_name.setter
-    def test_name(self, test_name):
-        """Set test_name"""
-        self._test_name = test_name
-
-    @property
-    def path(self):
-        """Get path"""
-        return self._path
-
-    @path.setter
-    def path(self, path):
-        """Set path"""
-        self._path = path
-
-    @property
-    def tag(self):
-        """Get tag"""
-        return self._tag
-
-    @tag.setter
-    def tag(self, tag):
-        """Set tag"""
-        self._tag = tag

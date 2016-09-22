@@ -37,13 +37,13 @@ class CpuProfilingTest(gtest_binary_test.GtestBinaryTest):
         self.getUserParams(req_param_names=required_params)
         self.product_type = self.AndroidDevice[0]['product_type']
 
-    def generateAllGtests(self):
+    def generateAllTests(self):
         """Runs all gtests. Skip if device is excluded"""
         if self.product_type in config.CPT_HOTPLUG_EXCLUDE_DEVICES:
             logging.info("Skip test on device {}.".format(self.product_type))
             return
 
-        super(CpuProfilingTest, self).generateAllGtests()
+        super(CpuProfilingTest, self).generateAllTests()
 
 
 if __name__ == "__main__":
