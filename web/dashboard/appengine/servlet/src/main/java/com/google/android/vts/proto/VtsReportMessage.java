@@ -3819,6 +3819,34 @@ public final class VtsReportMessage {
      * <code>repeated int64 value = 22;</code>
      */
     long getValue(int index);
+
+    // optional bytes x_axis_label = 31;
+    /**
+     * <code>optional bytes x_axis_label = 31;</code>
+     *
+     * <pre>
+     * x-axis and y-axis title labels when displaying the data as a graph
+     * </pre>
+     */
+    boolean hasXAxisLabel();
+    /**
+     * <code>optional bytes x_axis_label = 31;</code>
+     *
+     * <pre>
+     * x-axis and y-axis title labels when displaying the data as a graph
+     * </pre>
+     */
+    com.google.protobuf.ByteString getXAxisLabel();
+
+    // optional bytes y_axis_label = 32;
+    /**
+     * <code>optional bytes y_axis_label = 32;</code>
+     */
+    boolean hasYAxisLabel();
+    /**
+     * <code>optional bytes y_axis_label = 32;</code>
+     */
+    com.google.protobuf.ByteString getYAxisLabel();
   }
   /**
    * Protobuf type {@code android.vts.ProfilingReportMessage}
@@ -3928,6 +3956,16 @@ public final class VtsReportMessage {
                 value_.add(input.readInt64());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 250: {
+              bitField0_ |= 0x00000010;
+              xAxisLabel_ = input.readBytes();
+              break;
+            }
+            case 258: {
+              bitField0_ |= 0x00000020;
+              yAxisLabel_ = input.readBytes();
               break;
             }
           }
@@ -4102,6 +4140,46 @@ public final class VtsReportMessage {
       return value_.get(index);
     }
 
+    // optional bytes x_axis_label = 31;
+    public static final int X_AXIS_LABEL_FIELD_NUMBER = 31;
+    private com.google.protobuf.ByteString xAxisLabel_;
+    /**
+     * <code>optional bytes x_axis_label = 31;</code>
+     *
+     * <pre>
+     * x-axis and y-axis title labels when displaying the data as a graph
+     * </pre>
+     */
+    public boolean hasXAxisLabel() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional bytes x_axis_label = 31;</code>
+     *
+     * <pre>
+     * x-axis and y-axis title labels when displaying the data as a graph
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getXAxisLabel() {
+      return xAxisLabel_;
+    }
+
+    // optional bytes y_axis_label = 32;
+    public static final int Y_AXIS_LABEL_FIELD_NUMBER = 32;
+    private com.google.protobuf.ByteString yAxisLabel_;
+    /**
+     * <code>optional bytes y_axis_label = 32;</code>
+     */
+    public boolean hasYAxisLabel() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional bytes y_axis_label = 32;</code>
+     */
+    public com.google.protobuf.ByteString getYAxisLabel() {
+      return yAxisLabel_;
+    }
+
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
       type_ = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
@@ -4109,6 +4187,8 @@ public final class VtsReportMessage {
       endTimestamp_ = 0L;
       label_ = java.util.Collections.emptyList();
       value_ = java.util.Collections.emptyList();
+      xAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+      yAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -4139,6 +4219,12 @@ public final class VtsReportMessage {
       }
       for (int i = 0; i < value_.size(); i++) {
         output.writeInt64(22, value_.get(i));
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(31, xAxisLabel_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(32, yAxisLabel_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -4182,6 +4268,14 @@ public final class VtsReportMessage {
         }
         size += dataSize;
         size += 2 * getValueList().size();
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(31, xAxisLabel_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(32, yAxisLabel_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -4315,6 +4409,10 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000010);
         value_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000020);
+        xAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        yAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -4369,6 +4467,14 @@ public final class VtsReportMessage {
           bitField0_ = (bitField0_ & ~0x00000020);
         }
         result.value_ = value_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.xAxisLabel_ = xAxisLabel_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.yAxisLabel_ = yAxisLabel_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -4416,6 +4522,12 @@ public final class VtsReportMessage {
             value_.addAll(other.value_);
           }
           onChanged();
+        }
+        if (other.hasXAxisLabel()) {
+          setXAxisLabel(other.getXAxisLabel());
+        }
+        if (other.hasYAxisLabel()) {
+          setYAxisLabel(other.getYAxisLabel());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -4748,6 +4860,94 @@ public final class VtsReportMessage {
       public Builder clearValue() {
         value_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+
+      // optional bytes x_axis_label = 31;
+      private com.google.protobuf.ByteString xAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes x_axis_label = 31;</code>
+       *
+       * <pre>
+       * x-axis and y-axis title labels when displaying the data as a graph
+       * </pre>
+       */
+      public boolean hasXAxisLabel() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bytes x_axis_label = 31;</code>
+       *
+       * <pre>
+       * x-axis and y-axis title labels when displaying the data as a graph
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getXAxisLabel() {
+        return xAxisLabel_;
+      }
+      /**
+       * <code>optional bytes x_axis_label = 31;</code>
+       *
+       * <pre>
+       * x-axis and y-axis title labels when displaying the data as a graph
+       * </pre>
+       */
+      public Builder setXAxisLabel(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        xAxisLabel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes x_axis_label = 31;</code>
+       *
+       * <pre>
+       * x-axis and y-axis title labels when displaying the data as a graph
+       * </pre>
+       */
+      public Builder clearXAxisLabel() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        xAxisLabel_ = getDefaultInstance().getXAxisLabel();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes y_axis_label = 32;
+      private com.google.protobuf.ByteString yAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes y_axis_label = 32;</code>
+       */
+      public boolean hasYAxisLabel() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional bytes y_axis_label = 32;</code>
+       */
+      public com.google.protobuf.ByteString getYAxisLabel() {
+        return yAxisLabel_;
+      }
+      /**
+       * <code>optional bytes y_axis_label = 32;</code>
+       */
+      public Builder setYAxisLabel(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        yAxisLabel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes y_axis_label = 32;</code>
+       */
+      public Builder clearYAxisLabel() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        yAxisLabel_ = getDefaultInstance().getYAxisLabel();
         onChanged();
         return this;
       }
@@ -9310,39 +9510,41 @@ public final class VtsReportMessage {
       "d.vts.TestCaseResult\022\027\n\017start_timestamp\030" +
       "\025 \001(\003\022\025\n\rend_timestamp\030\026 \001(\003\0224\n\010coverage" +
       "\030\037 \003(\0132\".android.vts.CoverageReportMessa" +
-      "ge\"\241\001\n\026ProfilingReportMessage\022\014\n\004name\030\001 " +
+      "ge\"\315\001\n\026ProfilingReportMessage\022\014\n\004name\030\001 " +
       "\001(\014\022+\n\004type\030\002 \001(\0162\035.android.vts.VtsProfi" +
       "lingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend" +
       "_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value" +
-      "\030\026 \003(\003\"\353\001\n\025CoverageReportMessage\022\020\n\010dir_" +
-      "path\030\001 \001(\014\022\021\n\tfile_name\030\002 \001(\014\022\014\n\004html\030\003 " +
-      "\001(\014\022\023\n\013source_code\030\013 \001(\014\022\014\n\004gcno\030\025 \001(\014\022\014",
-      "\n\004gcda\030\026 \001(\014\022\034\n\024line_coverage_vector\030\027 \003" +
-      "(\005\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_" +
-      "line_count\030e \001(\005\022\032\n\022covered_line_count\030f" +
-      " \001(\005\"\212\003\n\021TestReportMessage\022\022\n\ntest_suite" +
-      "\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162" +
-      "\030.android.vts.VtsTestType\022:\n\013device_info" +
-      "\030\004 \003(\0132%.android.vts.AndroidDeviceInfoMe" +
-      "ssage\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts." +
-      "AndroidBuildInfo\022\030\n\020subscriber_email\030\006 \003" +
-      "(\014\0225\n\ttest_case\030\013 \003(\0132\".android.vts.Test",
-      "CaseReportMessage\0226\n\tprofiling\030\025 \003(\0132#.a" +
-      "ndroid.vts.ProfilingReportMessage\022\027\n\017sta" +
-      "rt_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(" +
-      "\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020\000" +
-      "\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE" +
-      "_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020" +
-      "\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TES" +
-      "T_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022" +
-      "\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DR" +
-      "IVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZ",
-      "ZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS" +
-      "_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingTy" +
-      "pe\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VT" +
-      "S_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROF" +
-      "ILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.googl" +
-      "e.android.vts.protoB\020VtsReportMessage"
+      "\030\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014y_axis_l" +
+      "abel\030  \001(\014\"\353\001\n\025CoverageReportMessage\022\020\n\010" +
+      "dir_path\030\001 \001(\014\022\021\n\tfile_name\030\002 \001(\014\022\014\n\004htm",
+      "l\030\003 \001(\014\022\023\n\013source_code\030\013 \001(\014\022\014\n\004gcno\030\025 \001" +
+      "(\014\022\014\n\004gcda\030\026 \001(\014\022\034\n\024line_coverage_vector" +
+      "\030\027 \003(\005\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020to" +
+      "tal_line_count\030e \001(\005\022\032\n\022covered_line_cou" +
+      "nt\030f \001(\005\"\212\003\n\021TestReportMessage\022\022\n\ntest_s" +
+      "uite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 " +
+      "\001(\0162\030.android.vts.VtsTestType\022:\n\013device_" +
+      "info\030\004 \003(\0132%.android.vts.AndroidDeviceIn" +
+      "foMessage\0221\n\nbuild_info\030\005 \001(\0132\035.android." +
+      "vts.AndroidBuildInfo\022\030\n\020subscriber_email",
+      "\030\006 \003(\014\0225\n\ttest_case\030\013 \003(\0132\".android.vts." +
+      "TestCaseReportMessage\0226\n\tprofiling\030\025 \003(\013" +
+      "2#.android.vts.ProfilingReportMessage\022\027\n" +
+      "\017start_timestamp\030e \001(\003\022\025\n\rend_timestamp\030" +
+      "f \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESU" +
+      "LT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_" +
+      "CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_S" +
+      "KIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n" +
+      "\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestT" +
+      "ype\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOS",
+      "T_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN" +
+      "_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n" +
+      "\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfili" +
+      "ngType\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 " +
+      "\n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_" +
+      "PROFILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.g" +
+      "oogle.android.vts.protoB\020VtsReportMessag" +
+      "e"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9372,7 +9574,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_ProfilingReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_ProfilingReportMessage_descriptor,
-              new java.lang.String[] { "Name", "Type", "StartTimestamp", "EndTimestamp", "Label", "Value", });
+              new java.lang.String[] { "Name", "Type", "StartTimestamp", "EndTimestamp", "Label", "Value", "XAxisLabel", "YAxisLabel", });
           internal_static_android_vts_CoverageReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new

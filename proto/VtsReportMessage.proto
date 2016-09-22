@@ -124,6 +124,10 @@ message ProfilingReportMessage {
 
   repeated bytes label = 21;
   repeated int64 value = 22;
+
+  // x-axis and y-axis title labels when displaying the data as a graph
+  optional bytes x_axis_label = 31;
+  optional bytes y_axis_label = 32;
 }
 
 
