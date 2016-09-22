@@ -134,7 +134,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         }
         try {
             mVenvDir = FileUtil.createNamedTempDir(
-                    buildInfo.getTestTag() + "-virtualenv-" + buildInfo.getDeviceSerial());
+                    buildInfo.getTestTag() + "-virtualenv-" +
+                    buildInfo.getDeviceSerial().replaceAll(":", "_"));
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
             activate();
         } catch (IOException e) {
