@@ -17,7 +17,6 @@
 #ifndef __VTS_SYSFUZZER_COMPILER_CODEGENBASE_H__
 #define __VTS_SYSFUZZER_COMPILER_CODEGENBASE_H__
 
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -35,64 +34,19 @@ class CodeGenBase {
   virtual ~CodeGenBase();
 
   // Generate both a C/C++ file and its header file.
-  void GenerateAll(std::stringstream& cpp_ss, std::stringstream& h_ss,
-                   const ComponentSpecificationMessage& message);
+  virtual void GenerateAll(
+      std::stringstream& cpp_ss, std::stringstream& h_ss,
+      const ComponentSpecificationMessage& message) = 0;
+
+  const char* input_vts_file_path() const {
+    return input_vts_file_path_;
+  }
+
+  const string& vts_name() const {
+    return vts_name_;
+  }
 
  protected:
-  // Generates code for Fuzz(...) function body.
-  virtual void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name) = 0;
-
-  // Generates code for GetAttribute(...) function body.
-  virtual void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name) = 0;
-
-  // Generates header code to declare the C/C++ global functions.
-  virtual void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss, const string& function_prototype) = 0;
-
-  // Generates C/C++ code for callback functions.
-  virtual void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
-
-  // Generates code for the bodies of the C/C++ global functions.
-  virtual void GenerateCppBodyGlobalFunctions(
-      std::stringstream& cpp_ss, const string& function_prototype,
-      const string& fuzzer_extended_class_name) = 0;
-
-  // Generates code that opens the default namespaces.
-  void GenerateOpenNameSpaces(
-      std::stringstream& ss, const ComponentSpecificationMessage& message);
-
-  // Generates code that closes the default namespaces.
-  void GenerateCloseNameSpaces(std::stringstream& ss);
-
-  // Generates code that starts the measurement.
-  void GenerateCodeToStartMeasurement(std::stringstream& ss);
-
-  // Generates code that stops the measurement.
-  void GenerateCodeToStopMeasurement(std::stringstream& ss);
-
-  // Generates all header.
-  void GenerateAllHeader(const string& fuzzer_extended_class_name,
-                         std::stringstream& h_ss,
-                         const ComponentSpecificationMessage& message);
-
-  // Generate header code for a specific class.
-  void GenerateClassHeader(const string& fuzzer_extended_class_name,
-                           std::stringstream& h_ss,
-                           const ComponentSpecificationMessage& message);
-
-  string GetComponentName(const ComponentSpecificationMessage& message);
-
-  void GenerateFuzzFunctionForSubStruct(
-      std::stringstream& h_ss, const StructSpecificationMessage& message,
-      const string& parent_path);
-
- private:
   const char* input_vts_file_path_;
   const string& vts_name_;
 };

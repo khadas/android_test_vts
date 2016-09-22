@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "code_gen/HalHidlCodeGen.h"
+#include "code_gen/driver/HalHidlCodeGen.h"
 
 #include <fstream>
 #include <iostream>
@@ -25,7 +25,7 @@
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
-#include "code_gen/HalCodeGen.h"
+#include "code_gen/driver/HalCodeGen.h"
 
 using namespace std;
 using namespace android;

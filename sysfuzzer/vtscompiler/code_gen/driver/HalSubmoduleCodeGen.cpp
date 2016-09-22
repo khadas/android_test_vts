@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "code_gen/HalSubmoduleCodeGen.h"
+#include "code_gen/driver/HalSubmoduleCodeGen.h"
 
 #include <fstream>
 #include <iostream>

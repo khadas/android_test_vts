@@ -32,19 +32,25 @@
 
 #include "VtsCompilerUtils.h"
 #include "code_gen/CodeGenBase.h"
-#include "code_gen/HalCodeGen.h"
-#include "code_gen/HalSubmoduleCodeGen.h"
-#include "code_gen/HalHidlCodeGen.h"
-#include "code_gen/LegacyHalCodeGen.h"
-#include "code_gen/LibSharedCodeGen.h"
+#include "code_gen/driver/HalCodeGen.h"
+#include "code_gen/driver/HalSubmoduleCodeGen.h"
+#include "code_gen/driver/HalHidlCodeGen.h"
+#include "code_gen/driver/LegacyHalCodeGen.h"
+#include "code_gen/driver/LibSharedCodeGen.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
+enum VtsCompileMode {
+  kDriver = 0,
+  kProfiler
+};
+
 // Translates the vts proto file to C/C++ code and header files.
-void Translate(const char* input_vts_file_path,
+void Translate(VtsCompileMode mode,
+               const char* input_vts_file_path,
                const char* output_header_dir_path,
                const char* output_cpp_file_path) {
   string output_cpp_file_path_str = string(output_cpp_file_path);
@@ -64,26 +70,37 @@ void Translate(const char* input_vts_file_path,
   }
 
   unique_ptr<CodeGenBase> code_generator;
-  switch (message.component_class()) {
-    case HAL_CONVENTIONAL:
-      code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
-      break;
-    case HAL_CONVENTIONAL_SUBMODULE:
-      code_generator.reset(
-          new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
-      break;
-    case HAL_LEGACY:
-      code_generator.reset(new LegacyHalCodeGen(input_vts_file_path, vts_name));
-      break;
-    case LIB_SHARED:
-      code_generator.reset(new LibSharedCodeGen(input_vts_file_path, vts_name));
-      break;
-    case HAL_HIDL:
-      code_generator.reset(new HalHidlCodeGen(input_vts_file_path, vts_name));
-      break;
-    default:
-      cerr << "not yet supported component_class " << message.component_class();
-      exit(-1);
+  if (mode == kProfiler) {
+    switch (message.component_class()) {
+      default:
+        cerr << "not yet supported component_class " << message.component_class();
+        exit(-1);
+    }
+  } else if (mode == kDriver) {
+    switch (message.component_class()) {
+      case HAL_CONVENTIONAL:
+        code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_CONVENTIONAL_SUBMODULE:
+        code_generator.reset(
+            new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_LEGACY:
+        code_generator.reset(new LegacyHalCodeGen(input_vts_file_path, vts_name));
+        break;
+      case LIB_SHARED:
+        code_generator.reset(new LibSharedCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_HIDL:
+        code_generator.reset(new HalHidlCodeGen(input_vts_file_path, vts_name));
+        break;
+      default:
+        cerr << "not yet supported component_class " << message.component_class();
+        exit(-1);
+    }
+  } else {
+    cerr << "unknown compile mode " << mode << endl;
+    exit(-1);
   }
 
   std::stringstream cpp_ss;
@@ -123,14 +140,30 @@ void Translate(const char* input_vts_file_path,
 int main(int argc, char* argv[]) {
 #ifdef VTS_DEBUG
   cout << "Android VTS Compiler (AVTSC)" << endl;
-  for (int i = 0; i < argc; i++) {
-    cout << "- args[" << i << "] " << argv[i] << endl;
-  }
 #endif
+  int opt_count = 0;
+  android::vts::VtsCompileMode mode = android::vts::kDriver;
+  for (int i = 0; i < argc; i++) {
+#ifdef VTS_DEBUG
+    cout << "- args[" << i << "] " << argv[i] << endl;
+#endif
+    if (argv[i] && strlen(argv[i]) > 1 && argv[i][0] == '-') {
+      opt_count++;
+      if (argv[i][1] == 'm') {
+        if (!strcmp(&argv[i][2], "PROFILER")) {
+          mode = android::vts::kProfiler;
+#ifdef VTS_DEBUG
+          cout << "- mode: PROFILER" << endl;
+#endif
+        }
+      }
+    }
+  }
   if (argc < 5) {
     cerr << "argc " << argc << " < 5" << endl;
     return -1;
   }
-  android::vts::Translate(argv[2], argv[3], argv[4]);
+  android::vts::Translate(
+      mode, argv[opt_count + 1], argv[opt_count + 2], argv[opt_count + 3]);
   return 0;
 }

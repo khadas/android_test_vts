@@ -26,11 +26,12 @@ LOCAL_SRC_FILES := \
   VtsCompilerMain.cpp \
   VtsCompilerUtils.cpp \
   code_gen/CodeGenBase.cpp \
-  code_gen/HalCodeGen.cpp \
-  code_gen/HalSubmoduleCodeGen.cpp \
-  code_gen/HalHidlCodeGen.cpp \
-  code_gen/LegacyHalCodeGen.cpp \
-  code_gen/LibSharedCodeGen.cpp \
+  code_gen/driver/DriverCodeGenBase.cpp \
+  code_gen/driver/HalCodeGen.cpp \
+  code_gen/driver/HalSubmoduleCodeGen.cpp \
+  code_gen/driver/HalHidlCodeGen.cpp \
+  code_gen/driver/LegacyHalCodeGen.cpp \
+  code_gen/driver/LibSharedCodeGen.cpp \
 
 LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/android \
