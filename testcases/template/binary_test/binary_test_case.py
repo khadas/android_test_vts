@@ -17,6 +17,7 @@
 
 import os
 import operator
+import ntpath
 
 
 class BinaryTestCase(object):
@@ -62,7 +63,7 @@ class BinaryTestCase(object):
         Returns:
             String, a command to run the test.
         '''
-        return self.path
+        return 'cd {} && {}'.format(ntpath.dirname(self.path), self.path)
 
     @property
     def test_suite(self):
