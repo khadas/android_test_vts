@@ -72,7 +72,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
-    static final String BINARY_PATHS = "binary_paths";
+    static final String BINARY_TEST_SOURCES = "binary_test_sources";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -115,9 +115,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
 
-    @Option(name = "binary-paths",
-            description = "Binary paths relative to host side path under vts testcase directory.")
-    private Collection<String> mBinaryPaths = new ArrayList<>();
+    @Option(name = "binary-test-sources",
+            description = "Binary test source paths relative to vts testcase directory on host.")
+    private Collection<String> mBinaryTestSources = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -253,7 +253,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         }
 
         if (mTestCasePath == null) {
-            if (!mBinaryPaths.isEmpty()) {
+            if (!mBinaryTestSources.isEmpty()) {
                 String template;
                 switch (mBinaryTestType) {
                     case BINARY_TEST_TYPE_GTEST:
@@ -398,9 +398,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
-        if (!mBinaryPaths.isEmpty()) {
-            jsonObject.put(BINARY_PATHS, new JSONArray(mBinaryPaths));
-            CLog.i("Added %s to the Json object", BINARY_PATHS);
+        if (!mBinaryTestSources.isEmpty()) {
+            jsonObject.put(BINARY_TEST_SOURCES, new JSONArray(mBinaryTestSources));
+            CLog.i("Added %s to the Json object", BINARY_TEST_SOURCES);
         }
     }
 

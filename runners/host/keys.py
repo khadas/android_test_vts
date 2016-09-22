@@ -36,7 +36,7 @@ class ConfigKeys(object):
     KEY_EXCLUDE_FILTER = "exclude_filter"
 
     # Keys for binary tests
-    IKEY_BINARY_PATHS = "binary_paths"
+    IKEY_BINARY_TEST_SOURCES = "binary_test_sources"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"
