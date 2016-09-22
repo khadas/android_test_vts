@@ -151,7 +151,8 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def test64Bits(self):
         """Runs all 64-bit tests."""
-        self.TestNBits(self._64BIT)
+        if self._dut.is64Bit:
+            self.TestNBits(self._64BIT)
 
 if __name__ == "__main__":
     test_runner.main()
