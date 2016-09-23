@@ -43,7 +43,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
     '''
 
     DEVICE_TMP_DIR = '/data/local/tmp'
-    TAG_DELIMITER = ':'
+    TAG_DELIMITER = '::'
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
@@ -51,7 +51,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
         ]
-        opt_params = [keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES]
+        opt_params = [keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES,
+                      keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
 
@@ -73,12 +74,30 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 const.LIST_ITEM_DELIMITER,
                 strip=True,
                 to_str=True)
-            for directory in self.binary_test_working_directories:
+            for token in self.binary_test_working_directories:
                 tag = ''
-                path = directory
-                if self.TAG_DELIMITER in directory:
-                    tag, path = directory.split(self.TAG_DELIMITER)
+                path = token
+                if self.TAG_DELIMITER in token:
+                    tag, path = token.split(self.TAG_DELIMITER)
                 self.working_directories[tag] = path
+
+        self.ld_library_paths = {}
+        if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS):
+            self.binary_test_ld_library_paths = list_utils.ExpandItemDelimiters(
+                self.binary_test_ld_library_paths,
+                const.LIST_ITEM_DELIMITER,
+                strip=True,
+                to_str=True)
+            for token in self.binary_test_ld_library_paths:
+                tag = ''
+                path = token
+                if self.TAG_DELIMITER in token:
+                    tag, path = token.split(self.TAG_DELIMITER)
+                if tag in self.ld_library_paths:
+                    self.ld_library_paths[tag] = '{}:{}'.format(
+                        self.ld_library_paths[tag], path)
+                else:
+                    self.ld_library_paths[tag] = path
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
@@ -169,7 +188,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         dir_set.add(self.GetDeviceSidePath(''))
         dirs = list(dir_set)
         dirs.sort(lambda x, y: cmp(len(y), len(x)))
-        cmd = ['find %s -type d -empty -delete' % d for d in dirs]
+        cmd = ['rmdir %s' % d for d in dirs]
         cmd_results = self.shell.Execute(cmd)
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning('Failed to remove: %s', cmd_results)
@@ -207,8 +226,13 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Returns:
             A list of BinaryTestCase objects
         '''
-        return binary_test_case.BinaryTestCase('', ntpath.basename(path), path,
-                                               tag, self.PutTag)
+        working_directory = self.working_directories[
+            tag] if tag in self.working_directories else None
+        ld_library_path = self.ld_library_paths[
+            tag] if tag in self.ld_library_paths else None
+        return binary_test_case.BinaryTestCase(
+            '', ntpath.basename(path), path, tag, self.PutTag,
+            working_directory, ld_library_path)
 
     def VerifyTestResult(self, test_case, command_results):
         '''Parse command result.
