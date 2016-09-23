@@ -21,19 +21,19 @@
       google.charts.setOnLoadCallback(drawPerformanceChart);
       google.charts.setOnLoadCallback(drawPercentileTable);
 
-      ONE_DAY = 86400000000000;
-      NANO_PER_MILLI = 1000000;
+      ONE_DAY = 86400000000;
+      MICRO_PER_MILLI = 1000;
 
       $(function() {
           var startTime = ${startTime};
           var endTime = ${endTime};
           if (!startTime || !endTime) {
-              var now = (new Date()).getTime()*NANO_PER_MILLI;
+              var now = (new Date()).getTime()*MICRO_PER_MILLI;
               startTime = now - ONE_DAY;
               endTime = now;
           }
-          var fromDate = new Date(startTime/NANO_PER_MILLI);
-          var toDate = new Date(endTime/NANO_PER_MILLI);
+          var fromDate = new Date(startTime/MICRO_PER_MILLI);
+          var toDate = new Date(endTime/MICRO_PER_MILLI);
           var from = $("#from").datepicker({
                   showAnim: "slideDown",
                   defaultDate: fromDate,
@@ -114,6 +114,10 @@
       }
 
       function drawPerformanceChart() {
+          var showPerformanceGraph = ${showPerformanceGraph};
+          if (!showPerformanceGraph) {
+              return;
+          }
           var lineGraphValues = ${lineGraphValuesJson};
           var labelsList = ${labelsListJson};
           var profilingBuildIds = ${profilingBuildIdsJson};
@@ -125,23 +129,18 @@
           });
 
           var data = new google.visualization.DataTable();
-          data.addColumn('string', 'Label');
+          data.addColumn('string', ${performanceLabelY});
           profilingBuildIds.forEach(function(build) {
               data.addColumn('number', build);
           });
           data.addRows(lineGraphValues);
 
           var options = {
-            chart: {title: 'Performance'},
-            legend: { position: 'none' },
-            axes: {
-              x: {
-                Labels: {label: 'Labels'}
-              },
-              y: {
-                Values: {label: 'Values'}
-              }
-            }
+            chart: {
+                title: 'Performance',
+                subtitle: ${performanceLabelY}
+            },
+            legend: { position: 'none' }
           };
           var chart = new google.charts.Line(document.getElementById('performance_chart_div'));
           chart.draw(data, options);
@@ -149,8 +148,8 @@
 
       // table for profiling data
       function drawPercentileTable() {
-          var showPercentileTable = ${showPercentileTable};
-          if (!showPercentileTable) {
+          var showProfilingGraph = ${showProfilingGraph};
+          if (!showProfilingGraph) {
               return;
           }
 
@@ -212,27 +211,31 @@
           </a>
         </div>
       </div>
-      <div id="profiling-container" class="row card">
-        <div class="col s10 offset-s1 center-align">
-          <c:choose>
-            <c:when test="${not empty error}">
-              <!-- Error in case of profiling data is missing -->
-              <h5>${error}</h5>
-            </c:when>
-            <c:otherwise>
-              <!-- Profiling chart for profiling values. -->
-              <div id="profiling_chart_div" style="width: 80%; height: 500px;"></div>
+      <c:if test="${showProfilingGraph}">
+        <div id="profiling-container" class="row card">
+          <div class="col s10 offset-s1 center-align">
+            <!-- Profiling chart for profiling values. -->
+            <div id="profiling_chart_div" style="width: 80%; height: 500px;"></div>
 
-              <!-- Percentile table -->
-              <div id="percentile_table_div" style="margin-left:10%; margin-top:-40px; margin-bottom:125px"></div>
-            </c:otherwise>
-          </c:choose>
+            <!-- Percentile table -->
+            <div id="percentile_table_div" style="margin-left:10%; margin-top:-40px; margin-bottom:125px"></div>
+          </div>
         </div>
-      </div>
-      <div id="performance-container" class="row card">
-        <!-- Performance chart for label vs values. -->
-        <div id="performance_chart_div" style="width:80%; margin-left: 10%;height: 500px;"></div>
-      </div>
+      </c:if>
+      <c:if test="${showPerformanceGraph}">
+        <div id="performance-container" class="row card">
+          <!-- Performance chart for label vs values. -->
+          <div id="performance_chart_div" style="width:80%; margin-left: 10%;height: 500px;"></div>
+        </div>
+      </c:if>
+      <c:if test="${not empty error}">
+        <div id="error-container" class="row card">
+          <div class="col s10 offset-s1 center-align">
+            <!-- Error in case of profiling data is missing -->
+            <h5>${error}</h5>
+          </div>
+        </div>
+      </c:if>
     </div>
 
     <script type="text/javascript">
@@ -256,8 +259,8 @@
       function load() {
           var fromDate = $("#from").datepicker("getDate").getTime();
           var toDate = $("#to").datepicker("getDate").getTime();
-          var startTime = fromDate * NANO_PER_MILLI;
-          var endTime = (toDate - 1) * NANO_PER_MILLI + ONE_DAY;  // end of day
+          var startTime = fromDate * MICRO_PER_MILLI;
+          var endTime = (toDate - 1) * MICRO_PER_MILLI + ONE_DAY;  // end of day
           var ctx = "${pageContext.request.contextPath}";
           var link = ctx + "/show_graph?profilingPoint=${profilingPointName}" +
               "&testName=${testName}" +
