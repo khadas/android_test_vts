@@ -19,6 +19,9 @@ DATA/lib64/libvts_codecoverage.so->/data/local/tmp/64/libvts_codecoverage.so
 DATA/lib/libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so
 DATA/lib64/libvts_multidevice_proto.so->/data/local/tmp/64/libvts_multidevice_proto.so
 
+DATA/lib/libprotobuf-cpp-full.so->/data/local/tmp/32/libprotobuf-cpp-full.so
+DATA/lib64/libprotobuf-cpp-full.so->/data/local/tmp/64/libprotobuf-cpp-full.so
+
 DATA/bin/fuzzer32->/data/local/tmp/32/fuzzer32
 DATA/bin/fuzzer64->/data/local/tmp/64/fuzzer64
 

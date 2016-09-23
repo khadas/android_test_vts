@@ -17,8 +17,6 @@
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
-        <option name="push" value="libprotobuf-cpp-full.so->/data/local/tmp/32/libprotobuf-cpp-full.so" />
-        <option name="push" value="libprotobuf-cpp-full64.so->/data/local/tmp/64/libprotobuf-cpp-full.so" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer"></target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
