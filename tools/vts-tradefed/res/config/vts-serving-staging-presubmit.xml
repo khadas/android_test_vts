@@ -17,4 +17,7 @@
     <include name="everything" />
     <option name="plan" value="vts" />
     <template-include name="reporters" default="basic-reporters" />
+
+    <!-- For vts-system -->
+    <option name="compatibility:include-filter" value="SampleShellTest" />
 </configuration>
