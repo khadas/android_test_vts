@@ -133,7 +133,7 @@ class BinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.AddProfilingDataLabeledVector(
             "binder_vector_roundtrip_latency_benchmark_%sbits" % bits,
             label_result, value_result, x_axis_label="Message Size (Bytes)",
-            y_axis_label="Roundtrip Binder RPC Latency (naonseconds)")
+            y_axis_label="Roundtrip Binder RPC Latency (nanoseconds)")
 
         # Assertions to check the performance requirements
         for label, value in zip(label_result, value_result):
