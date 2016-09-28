@@ -21,6 +21,7 @@ import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 
 import com.google.appengine.api.users.User;
@@ -68,6 +69,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 12;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
+    private static final int TIME_INFO_ROW_COUNT = 2;
     private static final int SUMMARY_ROW_COUNT = 4;
     private static final long ONE_DAY = 86400000000L;  // units microseconds
     private static final String TABLE_PREFIX = "result_";
@@ -156,11 +158,8 @@ public class ShowTableServlet extends HttpServlet {
             // list of column headers (device build IDs)
             List<String> deviceBuildIdList = new ArrayList<>();
 
-            // set to hold all the test case names
-            List<String> testCaseNameList = new ArrayList<>();
-
-            // set to hold all the test case execution results
-            Map<String, Integer> testCaseResultMap = new HashMap<>();
+            // set to hold orderings of each test case (testcase name to index)
+            Map<String, Integer> testCaseNameMap = new HashMap<>();
 
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<>();
@@ -220,12 +219,9 @@ public class ShowTableServlet extends HttpServlet {
                          testReportMessage.getTestCaseList()) {
                         String testCaseName = new String(
                             testCaseReportMessage.getName().toStringUtf8());
-                        if (!testCaseNameList.contains(testCaseName)) {
-                            testCaseNameList.add(testCaseName);
+                        if (!testCaseNameMap.containsKey(testCaseName)) {
+                            testCaseNameMap.put(testCaseName, testCaseNameMap.size());
                         }
-                        testCaseResultMap.put(
-                            key + "." + testCaseReportMessage.getName().toStringUtf8(),
-                            testCaseReportMessage.getTestResult().getNumber());
                     }
                 }
                 scanner.close();
@@ -288,32 +284,51 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-
             // the device grid on the table has four rows - Build Alias, Product Variant,
             // Build Flavor and test build ID, and columns equal to the size of selectedBuildIdList.
             String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][
+                testRunKeyList.size() + 1];
+
+            // the time grid on the table has two rows - Start Time and End Time.
+            // These represent the start and end times for the test run.
+            String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][
                 testRunKeyList.size() + 1];
 
             // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
             String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][
                 testRunKeyList.size() + 1];
 
+            // the results an entry for each testcase result for each build.
+            String[][] resultsGrid = new String[testCaseNameMap.size()][
+                testRunKeyList.size() + 1];
+
             // first column for device grid
             String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "VTS Build ID"};
             for (int i = 0; i < rowNamesDeviceGrid.length; i++) {
-                deviceGrid[i][0] = rowNamesDeviceGrid[i];
+                deviceGrid[i][0] = "<b>" + rowNamesDeviceGrid[i] + "</b>";
+            }
+
+            // first column for time grid
+            String[] rowNamesTimeGrid = {"Test Start", "Test End"};
+            for (int i = 0; i < rowNamesTimeGrid.length; i++) {
+                timeGrid[i][0] = "<b>" + rowNamesTimeGrid[i] + "</b>";
             }
 
             // first column for summary grid
             String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
             for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
-                summaryGrid[i][0] = rowNamesSummaryGrid[i];
+                summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
+            }
+
+            // first column for results grid
+            for (String testCaseName : testCaseNameMap.keySet()) {
+                resultsGrid[testCaseNameMap.get(testCaseName)][0] = testCaseName;
             }
 
             for (int j = 0; j < testRunKeyList.size(); j++) {
                 String key = testRunKeyList.get(j);
-                List<AndroidDeviceInfoMessage> devices =
-                    buildIdTimeStampMap.get(key).getDeviceInfoList();
+                TestReportMessage report = buildIdTimeStampMap.get(key);
+                List<AndroidDeviceInfoMessage> devices = report.getDeviceInfoList();
                 List<String> buildIdList = new ArrayList<>();
                 List<String> buildAliasList = new ArrayList<>();
                 List<String> productVariantList = new ArrayList<>();
@@ -331,99 +346,66 @@ public class ShowTableServlet extends HttpServlet {
 
                 String buildId = buildIdTimeStampMap.get(key).getBuildInfo().getId().toStringUtf8();
 
+                int passCount = 0;
+                long totalLineCount = 0, coveredLineCount = 0;
+                for (TestCaseReportMessage testCaseReport : report.getTestCaseList()) {
+                    if (testCaseReport.getTestResult() ==
+                        TestCaseResult.TEST_CASE_RESULT_PASS) {
+                        passCount++;
+                    }
+                    for (CoverageReportMessage coverageReport :
+                        testCaseReport.getCoverageList()) {
+                        totalLineCount += coverageReport.getTotalLineCount();
+                        coveredLineCount += coverageReport.getCoveredLineCount();
+                    }
+
+                    int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
+                    if (testCaseReport.getTestResult() != null) {
+                        resultsGrid[i][j + 1] = Integer.toString(testCaseReport.getTestResult()
+                                                                 .getNumber());
+                        resultsGrid[i][j + 1] = "<div class=\"" +
+                                                testCaseReport.getTestResult().toString() +
+                                                " TEST_CASE_RESULT\">&nbsp;</div>";
+                    } else {
+                        resultsGrid[i][j + 1] = "<div class=\"" +
+                                                TestCaseResult.UNKNOWN_RESULT.toString() +
+                                                " TEST_CASE_RESULT\">&nbsp;</div>";
+                    }
+                }
+                String passInfo;
+                try {
+                    double passPct = Math.round((100 * passCount /
+                                                 report.getTestCaseList().size()) * 100f) / 100f;
+                    passInfo = Double.toString(passPct) + " %";
+                } catch (ArithmeticException e) {
+                    passInfo = " - ";
+                }
+
+                String coverageInfo;
+                try {
+                    double coveragePct = Math.round((100 * coveredLineCount /
+                                                     totalLineCount) * 100f) / 100f;
+                    coverageInfo = Double.toString(coveragePct) + " % " +
+                            "<a href=\"/show_coverage?key=" + key +
+                            "&testName=" + request.getParameter("testName") +
+                            "&startTime=" + startTime +
+                            "&endTime=" + endTime +
+                            "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
+                            "<i class=\"material-icons coverage-icon\">menu</i></a>";
+                } catch (ArithmeticException e) {
+                    coverageInfo = " - ";
+                }
+
                 deviceGrid[0][j + 1] = buildAlias.toLowerCase();
                 deviceGrid[1][j + 1] = buildFlavor;
                 deviceGrid[2][j + 1] = productVariant;
                 deviceGrid[3][j + 1] = buildId;
-            }
-
-
-            // rows contains the rows from test case names, device info, and from the summary.
-            String[][] finalGrid =
-                new String[testCaseNameList.size() + DEVICE_INFO_ROW_COUNT +
-                           SUMMARY_ROW_COUNT][testRunKeyList.size() + 1];
-            for (int i = 0; i < DEVICE_INFO_ROW_COUNT; i++) {
-                finalGrid[i] = deviceGrid[i];
-            }
-
-            // summary grid containing Integer -- this will be copied to original summary grid
-            float[][] summaryGridfloat = new float[3][testRunKeyList.size() + 1];
-
-            // fill the remaining grid
-            for (int i = DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i < finalGrid.length; i++) {
-                String testName = testCaseNameList.get(
-                    i - DEVICE_INFO_ROW_COUNT - SUMMARY_ROW_COUNT);
-                for (int j = 0; j < finalGrid[0].length; j++) {
-
-                    if (j == 0) {
-                        finalGrid[i][j] = testName;
-                        continue;
-                    }
-                    String key = testRunKeyList.get(j - 1) + "." + testName;
-                    summaryGridfloat[0][j]++;
-                    Integer value = testCaseResultMap.get(key);
-                    if (value != null) {
-                        if (value == 1) {
-                            summaryGridfloat[1][j]++;
-                        }
-                        finalGrid[i][j] = String.valueOf(value);
-                    } else {
-                        finalGrid[i][j] = String.valueOf(UNKNOWN_RESULT);
-                    }
-
-                    if (i == finalGrid.length - 1) {
-                        try {
-                            summaryGridfloat[2][j] =
-                                Math.round((100 * summaryGridfloat[1][j] / summaryGridfloat[0][j])
-                                           * 100f) / 100f;
-                        } catch (ArithmeticException e) {
-                            /* ignore where total test cases is zero*/
-                        }
-                    }
-                }
-            }
-
-            // copy float values from summary grid
-            for (int i = 0; i < summaryGridfloat.length; i++) {
-                for (int j = 1; j < summaryGridfloat[0].length; j++) {
-                    summaryGrid[i][j] = String.valueOf(summaryGridfloat[i][j]);
-                    // add % for second last row
-                    if (i == summaryGrid.length - 2) {
-                        summaryGrid[i][j] += " %";
-                    }
-                }
-            }
-
-            // last row of summary grid
-            // calculate coverage % for each column
-            for (int j = 0; j < testRunKeyList.size(); j++) {
-                String key = testRunKeyList.get(j);
-                TestReportMessage testReportMessage = buildIdTimeStampMap.get(key);
-
-                for (TestCaseReportMessage testCaseReportMessage
-                     : testReportMessage.getTestCaseList()) {
-                    double totalLineCount = 0, coveredLineCount = 0;
-                    for (CoverageReportMessage coverageReportMessage :
-                        testCaseReportMessage.getCoverageList()) {
-                        totalLineCount += coverageReportMessage.getTotalLineCount();
-                        coveredLineCount += coverageReportMessage.getCoveredLineCount();
-                    }
-                    // j + 1 is the column index
-                    if (totalLineCount != 0) {
-                        summaryGrid[SUMMARY_ROW_COUNT - 1][j + 1] =
-                            String.valueOf(Math.round((100 *coveredLineCount / totalLineCount)
-                                                      * 100d) / 100d)
-                                    + "%";
-                    } else {
-                        summaryGrid[SUMMARY_ROW_COUNT - 1][j + 1] = "NA";
-                    }
-                }
-            }
-
-            // copy the summary grid
-            for (int i = DEVICE_INFO_ROW_COUNT;
-                 i < DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i++) {
-                finalGrid[i] = summaryGrid[i - DEVICE_INFO_ROW_COUNT];
+                timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
+                timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
+                summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
+                summaryGrid[1][j + 1] = Integer.toString(passCount);
+                summaryGrid[2][j + 1] = passInfo;
+                summaryGrid[3][j + 1] = coverageInfo;
             }
 
             String[] profilingPointNameArray = profilingPointNameSet.
@@ -447,10 +429,14 @@ public class ShowTableServlet extends HttpServlet {
                 new Gson().toJson(profilingDataAlert));
 
             // pass values by converting to JSON
-            request.setAttribute("finalGridJson",
-                                 new Gson().toJson(finalGrid));
-            request.setAttribute("testRunKeyArrayJson",
-                                 new Gson().toJson(testRunKeyArray));
+            request.setAttribute("deviceGrid",
+                    new Gson().toJson(deviceGrid));
+            request.setAttribute("timeGrid",
+                    new Gson().toJson(timeGrid));
+            request.setAttribute("summaryGrid",
+                    new Gson().toJson(summaryGrid));
+            request.setAttribute("resultsGrid",
+                    new Gson().toJson(resultsGrid));
             request.setAttribute("profilingPointNameJson",
                                  new Gson().toJson(profilingPointNameArray));
             request.setAttribute("deviceBuildIdArrayJson",
@@ -468,12 +454,6 @@ public class ShowTableServlet extends HttpServlet {
 
             request.setAttribute("endTime",
                                   new Gson().toJson(endTime));
-
-            request.setAttribute("summaryRowCountJson",
-                new Gson().toJson(SUMMARY_ROW_COUNT));
-
-            request.setAttribute("deviceInfoRowCountJson",
-                new Gson().toJson(DEVICE_INFO_ROW_COUNT));
 
             request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
 
