@@ -14,7 +14,7 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
-    <script src="http://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js"></script>
+    <script src="https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
@@ -55,7 +55,10 @@
               alternatingRowStyle : true,
               width: '100%',
               sortColumn: 0,
-              sortAscending: true
+              sortAscending: true,
+              cssClassNames: {
+                  headerRow : 'table-header'
+              }
           };
           table.draw(data, options);
 
@@ -74,83 +77,70 @@
 
       // to draw pie chart
       function drawPieChart() {
-          var pieChartArray = ${pieChartArrayJson};
-          if (pieChartArray.length < 1) {
+          var topBuildResultCounts = ${topBuildResultCounts};
+          if (topBuildResultCounts.length < 1) {
               return;
           }
-          for (var i = 1; i < pieChartArray.length; i++) {
-              pieChartArray[i][1] = parseInt(pieChartArray[i][1]);
-          }
+          var resultNames = ${resultNames};
+          var rows = resultNames.map(function(res, i) {
+              nickname = res.replace('TEST_CASE_RESULT_', '').replace('_', ' ')
+                         .trim().toLowerCase();
+              return [nickname, parseInt(topBuildResultCounts[i])];
+          });
+          rows.unshift(['Result', 'Count']);
 
-          var data = google.visualization.arrayToDataTable(pieChartArray);
+          // Get CSS color definitions (or default to white)
+          var colors = resultNames.map(function(res) {
+              return $("." + res).css('background-color') || 'white';
+          });
+
+          var data = google.visualization.arrayToDataTable(rows);
           var topBuild = ${topBuildJson};
           var colName = topBuild.substring(0, topBuild.lastIndexOf("."));
           var title = 'Test Result Status for build ID : ' + colName;
           var options = {
             title: title,
             is3D: false,
-            colors: ['#FFFFFF', '#7FFF00', '#ff4d4d', '#A8A8A8', '#000000', '9900CC'],
+            colors: colors,
             fontName: 'Roboto',
             fontSize: '14px',
-            legend: { position: 'bottom', alignment: 'center' },
+            legend: 'none',
             tooltip: {showColorCode: true, ignoreBounds: true}
           };
 
           var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
           chart.draw(data, options);
       }
+
       // table for legend
       function drawLegendTable() {
           var data = new google.visualization.DataTable();
-
-          var columns = new Array('Unknown', 'Pass', 'Fail', 'Skipped', 'Exception', 'Timeout');
+          var resultNames = ${resultNames};
+          var cells = resultNames.map(function(res) {
+              return '<div class="' + res + ' TEST_CASE_RESULT">&nbsp;</div>';
+          });
           // add columns
           data.addColumn('string', 'Result');
-          for (var i = 0; i < columns.length; i++) {
-              data.addColumn('string', columns[i]);
-          }
 
-          var row = new Array('Color Code', ' ', ' ', ' ', ' ', ' ', ' ');
-          var rows = new  Array(1);
-          rows[0] = row;
-          data.addRows(rows);
-
-          // add colors
-          for (var row = 0; row < rows.length; row++) {
-              for (var column = 1; column < rows[0].length; column++) {
-                  var result = column - 1;
-                  switch(result) {
-                      case 0 : // case : unknown
-                          data.setValue(row, column, ' ');
-                          break;
-                      case 1 : // Case: pass - green
-                          data.setProperty(row, column, 'style',
-                              'background-color: #7FFF00;');
-                          break;
-                      case 2 : // Case : fail - red
-                          data.setProperty(row, column, 'style',
-                              'background-color: #ff4d4d;');
-                          break;
-                      case 3 : // case : skip : grey
-                          data.setProperty(row, column, 'style',
-                              'background-color: #A8A8A8;');
-                          data.setValue(row, column, ' ');
-                          break;
-                      case 4: // Case: Exception - black
-                          data.setProperty(row, column, 'style',
-                              'background-color: #000000;');
-                          break;
-                      case 5: // Case: Timeout - purple
-                          data.setProperty(row, column, 'style',
-                              'background-color: #9900CC;');
-                          break;
-                  }
-              }
-          }
+          resultNames.forEach(function(res) {
+              nickname = res.replace('TEST_CASE_RESULT_', '').replace('_', ' ')
+                         .trim().toLowerCase();
+              data.addColumn('string', nickname);
+          });
+          cells.unshift('Color');
+          data.addRows([cells]);
 
           var table = new google.visualization.Table(document.getElementById('legend_table_div'));
-          table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
-                            frozenColumns: 1});
+          var options = {
+              showRowNumber: false,
+              allowHtml: true,
+              frozenColumns: 1,
+              cssClassNames: {
+                  headerRow : 'table-header',
+                  headerCell : 'legend-header-cell'
+              }
+          };
+          table.draw(data, options);
       }
 
       // table for grid data
@@ -223,12 +213,9 @@
           <div id="pie_chart_div" class="valign center-align card"></div>
         </div>
       </div>
+
       <div class="row">
-        <div id = "legend_table_div"></div>
-      </div>
-      <div class="row">
-      </div>
-      <div class="row">
+        <div id="legend_table_div" class="card"></div>
         <div id="chart_holder" class="col s12 card">
           <!-- Grid tables-->
           <div id="grid_table_div"></div>
