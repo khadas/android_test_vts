@@ -59,7 +59,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     USE_GAE_DB = "use_gae_db"
     COVERAGE_SRC_FILES = "coverage_src_files"
     COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
+    SUBSCRIBERS = "notification_subscribers"
     STATUS_TABLE = "vts_status_table"
+    DEFAULT_SUBSCRIBER = "vts-alert@google.com"
 
     def __init__(self, configs):
         super(BaseTestWithWebDbClass, self).__init__(configs)
@@ -70,6 +72,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         self.getUserParams(opt_param_names=[self.USE_GAE_DB,
                                             self.COVERAGE_SRC_FILES,
+                                            self.SUBSCRIBERS,
                                             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                                             keys.ConfigKeys.KEY_TESTBED])
 
@@ -93,7 +96,15 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
-            self._report_msg.subscriber_email.append("vts-alert@google.com")
+            # Add email subscribers if defined
+            if hasattr(self, self.SUBSCRIBERS):
+                emails = [str(s) for s in getattr(self, self.SUBSCRIBERS)]
+                self._report_msg.subscriber_email.extend(emails)
+            # If no subscribers are specified, default to vts-alert@
+            else:
+                self._report_msg.subscriber_email.append(self.DEFAULT_SUBSCRIBER)
+            logging.info("Notification subscribers set to: %s",
+                         self._report_msg.subscriber_email)
 
         self._profiling = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
