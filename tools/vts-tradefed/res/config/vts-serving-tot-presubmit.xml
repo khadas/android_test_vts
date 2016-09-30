@@ -20,9 +20,6 @@
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />
 
-    <!-- For vts-hal-hidl -->
-    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
-
     <!-- For vts-library -->
 
     <!-- For vts-security -->
