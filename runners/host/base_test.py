@@ -70,15 +70,18 @@ class BaseTestClass(object):
         self.results = records.TestResult()
         self.currentTestName = None
 
-        test_suite = self.user_params[keys.ConfigKeys.KEY_TEST_SUITE]
-        self.include_filter = list_utils.ExpandItemDelimiters(
-            test_suite[keys.ConfigKeys.KEY_INCLUDE_FILTER],
-            const.LIST_ITEM_DELIMITER,
-            strip=True)
-        self.exclude_filter = list_utils.ExpandItemDelimiters(
-            test_suite[keys.ConfigKeys.KEY_EXCLUDE_FILTER],
-            const.LIST_ITEM_DELIMITER,
-            strip=True)
+        # Setup test filters (optional)
+        if keys.ConfigKeys.KEY_TEST_SUITE in self.user_params:
+            test_suite = self.user_params[keys.ConfigKeys.KEY_TEST_SUITE]
+            filters = [keys.ConfigKeys.KEY_INCLUDE_FILTER,
+                       keys.ConfigKeys.KEY_EXCLUDE_FILTER]
+            for filter in filters:
+                if filter in test_suite:
+                    filter_expanded = list_utils.ExpandItemDelimiters(
+                        test_suite[filter],
+                        const.LIST_ITEM_DELIMITER,
+                        strip=True)
+                    setattr(self, filter, filter_expanded)
 
     def __enter__(self):
         return self
@@ -309,6 +312,34 @@ class BaseTestClass(object):
                               func.__name__, self.currentTestName)
             tr_record.addError(func.__name__, e)
 
+    def filterOneTest(self, test_name):
+        """Check test filter for a test name.
+
+        If a include filter is not empty, only tests in include filter will
+        be executed regardless whether they are also in exclude filter. Else
+        if include filter is empty, only tests not in exclude filter will be
+        executed.
+
+        Args:
+            test_name: string, name of a test
+
+        Raises:
+            signals.TestSilent if a test should not be executed
+        """
+        if (hasattr(self, keys.ConfigKeys.KEY_INCLUDE_FILTER) and
+                getattr(self, keys.ConfigKeys.KEY_INCLUDE_FILTER)):
+            if test_name not in getattr(self,
+                                        keys.ConfigKeys.KEY_INCLUDE_FILTER):
+                logging.info("Test case '%s' not in include filter." %
+                             test_name)
+                raise signals.TestSilent(
+                    "Test case '%s' not in include filter." % test_name)
+        elif (hasattr(self, keys.ConfigKeys.KEY_EXCLUDE_FILTER) and
+              test_name in getattr(self, keys.ConfigKeys.KEY_EXCLUDE_FILTER)):
+            logging.info("Test case '%s' in exclude filter." % test_name)
+            raise signals.TestSilent("Test case '%s' in exclude filter." %
+                                     test_name)
+
     def execOneTest(self, test_name, test_func, args, **kwargs):
         """Executes one test case and update test results.
 
@@ -328,16 +359,7 @@ class BaseTestClass(object):
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
         try:
-            if self.include_filter:
-                if test_name not in self.include_filter:
-                    logging.info("Test case '%s' not in include filter." %
-                                 test_name)
-                    raise signals.TestSilent(
-                        "Test case '%s' not in include filter." % test_name)
-            elif test_name in self.exclude_filter:
-                logging.info("Test case '%s' in exclude filter." % test_name)
-                raise signals.TestSilent("Test case '%s' in exclude filter." %
-                                         test_name)
+            self.filterOneTest(test_name)
 
             ret = self._setUpTest(test_name)
             asserts.assertTrue(ret is not False,
