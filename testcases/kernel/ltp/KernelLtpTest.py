@@ -318,6 +318,11 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             args=args,
             name_func=name_func)
 
+    #@Override
+    def filterOneTest(self, test_name):
+        """"Disable runner's test filter method since LTP has its own filter."""
+        pass
+
     def RunLtpWorker(self, testcases, args, name_func, id):
         """Worker thread to run a LTP test case at a time."""
         shell = getattr(self._dut.shell, "shell_thread_{}".format(id))
