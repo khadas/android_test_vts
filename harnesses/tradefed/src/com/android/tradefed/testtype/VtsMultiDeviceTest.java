@@ -143,6 +143,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
                     + "            file to the directory."
                     + "    -><destination file>: create test case only."
                     + "            Destination is absolute device side path."
+                    + "    Note: each path in source string can be a directory. However, the"
+                    + "          default binary test runner and gtest binary test runner does not"
+                    + "          support creating test cases from a directory. You will need to"
+                    + "          override the binary test runner's CreateTestCase method in python."
                     + "    If you wish to push a source file to a specific destination and not"
                     + "    create a test case from it, please use VtsFilePusher.")
     private Collection<String> mBinaryTestSources = new ArrayList<>();
