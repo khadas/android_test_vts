@@ -26,7 +26,6 @@ from vts.runners.host import errors
 from vts.runners.host import signals
 from vts.runners.host import utils
 
-
 _DEFAULT_CONFIG_TEMPLATE = {
     "test_bed": {
         "AndroidDevice": "*",
@@ -40,7 +39,8 @@ _DEFAULT_CONFIG_TEMPLATE = {
 def GetDefaultConfig(test_name):
     """Returns a default config data structure (when no config file is given)."""
     result = copy.deepcopy(_DEFAULT_CONFIG_TEMPLATE)
-    result[keys.ConfigKeys.KEY_TESTBED][keys.ConfigKeys.KEY_TESTBED_NAME] = test_name
+    result[keys.ConfigKeys.KEY_TESTBED][
+        keys.ConfigKeys.KEY_TESTBED_NAME] = test_name
     return result
 
 

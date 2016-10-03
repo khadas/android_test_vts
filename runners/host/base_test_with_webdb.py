@@ -70,11 +70,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
-        self.getUserParams(opt_param_names=[self.USE_GAE_DB,
-                                            self.COVERAGE_SRC_FILES,
-                                            self.SUBSCRIBERS,
-                                            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-                                            keys.ConfigKeys.KEY_TESTBED])
+        self.getUserParams(opt_param_names=[
+            self.USE_GAE_DB, self.COVERAGE_SRC_FILES, self.SUBSCRIBERS,
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH, keys.ConfigKeys.KEY_TESTBED
+        ])
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
@@ -83,12 +82,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             if hasattr(self, keys.ConfigKeys.KEY_TESTBED):
                 testbed_dict = getattr(self, keys.ConfigKeys.KEY_TESTBED, {})
                 if (keys.ConfigKeys.KEY_TESTBED_NAME in testbed_dict and
-                    testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]):
-                    test_module_name = testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]
+                        testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]):
+                    test_module_name = testbed_dict[
+                        keys.ConfigKeys.KEY_TESTBED_NAME]
                 else:
-                    logging.warn("%s field not set in the given %s test config",
-                                 keys.ConfigKeys.KEY_TESTBED_NAME,
-                                 keys.ConfigKeys.KEY_TESTBED)
+                    logging.warn(
+                        "%s field not set in the given %s test config",
+                        keys.ConfigKeys.KEY_TESTBED_NAME,
+                        keys.ConfigKeys.KEY_TESTBED)
             else:
                 logging.warn("%s not defined in the given test config",
                              keys.ConfigKeys.KEY_TESTBED)
@@ -102,7 +103,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 self._report_msg.subscriber_email.extend(emails)
             # If no subscribers are specified, default to vts-alert@
             else:
-                self._report_msg.subscriber_email.append(self.DEFAULT_SUBSCRIBER)
+                self._report_msg.subscriber_email.append(
+                    self.DEFAULT_SUBSCRIBER)
             logging.info("Notification subscribers set to: %s",
                          self._report_msg.subscriber_email)
 
@@ -127,8 +129,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     self._report_msg.build_info.id = str(build["build_id"])
 
             self.SetDeviceInfo(self._report_msg)
-            bt_client.PutRow(str(self._report_msg.start_timestamp),
-                             "data", self._report_msg.SerializeToString())
+            bt_client.PutRow(
+                str(self._report_msg.start_timestamp), "data",
+                self._report_msg.SerializeToString())
 
             logging.info("_tearDownClass hook: report msg proto %s",
                          self._report_msg)
@@ -152,20 +155,19 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         dev_list = getattr(self, _ANDROID_DEVICE, False)
         if not dev_list or not isinstance(dev_list, list):
             logging.warn("attribute %s not found (available %s)",
-                         _ANDROID_DEVICE,
-                         self.user_params)
+                         _ANDROID_DEVICE, self.user_params)
             return
 
         for device_spec in dev_list:
             dev_info = msg.device_info.add()
-            for elem in [keys.ConfigKeys.IKEY_PRODUCT_TYPE,
-                         keys.ConfigKeys.IKEY_PRODUCT_VARIANT,
-                         keys.ConfigKeys.IKEY_BUILD_FLAVOR,
-                         keys.ConfigKeys.IKEY_BUILD_ID,
-                         keys.ConfigKeys.IKEY_BRANCH,
-                         keys.ConfigKeys.IKEY_BUILD_ALIAS,
-                         keys.ConfigKeys.IKEY_API_LEVEL,
-                         keys.ConfigKeys.IKEY_SERIAL]:
+            for elem in [
+                    keys.ConfigKeys.IKEY_PRODUCT_TYPE,
+                    keys.ConfigKeys.IKEY_PRODUCT_VARIANT,
+                    keys.ConfigKeys.IKEY_BUILD_FLAVOR,
+                    keys.ConfigKeys.IKEY_BUILD_ID, keys.ConfigKeys.IKEY_BRANCH,
+                    keys.ConfigKeys.IKEY_BUILD_ALIAS,
+                    keys.ConfigKeys.IKEY_API_LEVEL, keys.ConfigKeys.IKEY_SERIAL
+            ]:
                 if elem in device_spec:
                     setattr(dev_info, elem, str(device_spec[elem]))
 
@@ -292,7 +294,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddProfilingDataLabeledVector(self, name, labels, values,
+    def AddProfilingDataLabeledVector(self,
+                                      name,
+                                      labels,
+                                      values,
                                       x_axis_label="x-axis",
                                       y_axis_label="y-axis"):
         """Adds the profiling data in order to upload to the web DB.
@@ -314,7 +319,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         self._profiling[name] = self._report_msg.profiling.add()
         self._profiling[name].name = name
-        self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
+        self._profiling[
+            name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
         for label, value in zip(labels, values):
             self._profiling[name].label.append(label)
             self._profiling[name].value.append(value)
@@ -360,8 +366,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if successful, False otherwise.
         """
-        gcda_dict = getattr(
-            self, self.COVERAGE_ATTRIBUTE, [])
+        gcda_dict = getattr(self, self.COVERAGE_ATTRIBUTE, [])
         if not gcda_dict:
             logging.error("no coverage data found")
             return False
@@ -390,8 +395,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 gcno_file_name = src_file_name.replace(".cc", ".gcno")
                 gcda_file_name = src_file_name.replace(".cc", ".gcda")
             else:
-                logging.error("unsupported source file type %s",
-                              src_file_name)
+                logging.error("unsupported source file type %s", src_file_name)
                 return False
 
             abs_path = os.path.join(coverage_path, gcno_file_name)
@@ -405,7 +409,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             if gcda_dict:
                 for file_path in gcda_dict:
                     # TODO: consider path and do exact matching
-                    logging.info("check if %s in %s", gcda_file_name, file_path)
+                    logging.info("check if %s in %s", gcda_file_name,
+                                 file_path)
                     if file_path in gcda_file_name:
                         coverage_vec = coverage_report.GenerateLineCoverageVector(
                             src_file_name, len(src_file_content.split('\n')),
