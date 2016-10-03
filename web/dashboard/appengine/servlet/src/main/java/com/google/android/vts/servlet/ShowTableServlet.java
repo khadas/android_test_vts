@@ -34,16 +34,12 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
-import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +65,8 @@ public class ShowTableServlet extends HttpServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 12;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
-    private static final int TIME_INFO_ROW_COUNT = 2;
+    private static final int TIME_INFO_ROW_COUNT = 1;
+    private static final int DURATION_INFO_ROW_COUNT = 1;
     private static final int SUMMARY_ROW_COUNT = 4;
     private static final long ONE_DAY = 86400000000L;  // units microseconds
     private static final String TABLE_PREFIX = "result_";
@@ -271,9 +268,14 @@ public class ShowTableServlet extends HttpServlet {
             String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][
                 testRunKeyList.size() + 1];
 
-            // the time grid on the table has two rows - Start Time and End Time.
-            // These represent the start and end times for the test run.
+            // the time grid on the table has one - Start Time.
+            // These represent the start times for the test run.
             String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][
+                testRunKeyList.size() + 1];
+
+            // the duration grid on the table has one row - test duration.
+            // These represent the length of time the test elapsed.
+            String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][
                 testRunKeyList.size() + 1];
 
             // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
@@ -291,10 +293,10 @@ public class ShowTableServlet extends HttpServlet {
             }
 
             // first column for time grid
-            String[] rowNamesTimeGrid = {"Test Start", "Test End"};
-            for (int i = 0; i < rowNamesTimeGrid.length; i++) {
-                timeGrid[i][0] = "<b>" + rowNamesTimeGrid[i] + "</b>";
-            }
+            timeGrid[0][0] = "<b>Test Start</b>";
+
+            // first column for the duration grid
+            durationGrid[0][0] = "<b>Test Duration (microsec)</b>";
 
             // first column for summary grid
             String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
@@ -383,7 +385,8 @@ public class ShowTableServlet extends HttpServlet {
                 deviceGrid[2][j + 1] = productVariant;
                 deviceGrid[3][j + 1] = buildId;
                 timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
-                timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
+                durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
+                                                   report.getStartTimestamp());
                 summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
                 summaryGrid[1][j + 1] = Integer.toString(passCount);
                 summaryGrid[2][j + 1] = passInfo;
@@ -393,7 +396,6 @@ public class ShowTableServlet extends HttpServlet {
             String[] profilingPointNameArray = profilingPointNameSet.
                 toArray(new String[profilingPointNameSet.size()]);
 
-            String[] testRunKeyArray = testRunKeyList.toArray(new String[testRunKeyList.size()]);
             if (profilingPointNameArray.length == 0) {
                 profilingDataAlert = PROFILING_DATA_ALERT;
             }
@@ -415,6 +417,8 @@ public class ShowTableServlet extends HttpServlet {
                     new Gson().toJson(deviceGrid));
             request.setAttribute("timeGrid",
                     new Gson().toJson(timeGrid));
+            request.setAttribute("durationGrid",
+                    new Gson().toJson(durationGrid));
             request.setAttribute("summaryGrid",
                     new Gson().toJson(summaryGrid));
             request.setAttribute("resultsGrid",
