@@ -51,7 +51,7 @@ class SecurityPoCKernelTest(base_test.BaseTestClass):
         asserts.assertEqual(results[const.EXIT_CODE][0], 0)  # checks the exit code
 
     def test_30149612_kernel_bluetooth_64bit(self):
-        """A test case for b/28838221 which is from kernel bluetooth driver."""
+        """A test case for b/30149612 which is from kernel bluetooth driver."""
         binary = "/data/local/tmp/64/30149612_poc64"
         results = self.shell.Execute(
             ["chmod 755 %s" % binary,
