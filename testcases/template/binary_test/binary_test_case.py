@@ -29,6 +29,12 @@ class BinaryTestCase(object):
         path: string, absolute test binary path on device
         tag: string, test tag
         put_tag_func: function that takes a name and tag to output a combination
+        working_directory: string, working directory to call the command
+        ld_library_path: string, a path for LD_LIBRARY_PATH environment variable
+        cmd: string, a shell command to execute the test case. If empty, path will be used.
+        envp: string, environment veriable. shoud be in format 'name1=value1 name2=value2...'
+              Will be called using 'env <envp> <cmd> <args>'
+        args: string, arguments following cmd.
     '''
 
     def __init__(self,
@@ -38,7 +44,10 @@ class BinaryTestCase(object):
                  tag='',
                  put_tag_func=operator.add,
                  working_directory=None,
-                 ld_library_path=None):
+                 ld_library_path=None,
+                 cmd='',
+                 envp='',
+                 args=''):
         self.test_suite = test_suite
         self.test_name = test_name
         self.path = path
@@ -46,6 +55,9 @@ class BinaryTestCase(object):
         self.put_tag_func = put_tag_func
         self.working_directory = working_directory
         self.ld_library_path = ld_library_path
+        self.cmd = cmd
+        self.envp = envp
+        self.args = args
 
     def __str__(self):
         return self.put_tag_func(self.GetFullName(), self.tag)
@@ -67,11 +79,22 @@ class BinaryTestCase(object):
         Returns:
             String, a command to run the test.
         '''
-        return 'cd {working_directory} && {env}{path}'.format(
-            working_directory=self.working_directory,
-            env='' if self.ld_library_path is None else
-            'env LD_LIBRARY_PATH=%s ' % self.ld_library_path,
-            path=self.path)
+        working_directory = ('cd %s &&' % self.working_directory
+                             if self.working_directory else '')
+
+        envp = 'env %s' % self.envp if self.envp else ''
+        ld_library_path = 'LD_LIBRARY_PATH=%s ' if self.ld_library_path else ''
+        if ld_library_path:
+            envp = ('{}{}'.format(envp, ld_library_path)
+                    if envp else 'env %s' % ld_library_path)
+
+        args = ' %s' % self.args if self.args else ''
+
+        return '{working_directory}{envp}{cmd}{args}'.format(
+            working_directory=working_directory,
+            envp=envp,
+            cmd=self.cmd,
+            args=args)
 
     @property
     def test_suite(self):
@@ -104,6 +127,19 @@ class BinaryTestCase(object):
         self._path = path
 
     @property
+    def cmd(self):
+        '''Get test command. If command is empty, path is returned.'''
+        if not self._cmd:
+            return self.path
+
+        return self._cmd
+
+    @cmd.setter
+    def cmd(self, cmd):
+        '''Set path'''
+        self._cmd = cmd
+
+    @property
     def tag(self):
         '''Get tag'''
         return self._tag
@@ -116,10 +152,7 @@ class BinaryTestCase(object):
     @property
     def working_directory(self):
         '''Get working_directory'''
-        if self._working_directory is None:
-            return ntpath.dirname(self.path)
-        else:
-            return self._working_directory
+        return self._working_directory
 
     @working_directory.setter
     def working_directory(self, working_directory):
@@ -135,3 +168,23 @@ class BinaryTestCase(object):
     def ld_library_path(self, ld_library_path):
         '''Set ld_library_path'''
         self._ld_library_path = ld_library_path
+
+    @property
+    def envp(self):
+        '''Get envp'''
+        return self._envp
+
+    @envp.setter
+    def envp(self, envp):
+        '''Set env'''
+        self._envp = envp
+
+    @property
+    def args(self):
+        '''Get args'''
+        return self._args
+
+    @args.setter
+    def args(self, args):
+        '''Set args'''
+        self._args = args
