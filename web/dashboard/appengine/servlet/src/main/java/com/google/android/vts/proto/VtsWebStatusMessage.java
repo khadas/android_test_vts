@@ -177,6 +177,32 @@ public final class VtsWebStatusMessage {
      * </pre>
      */
     com.google.android.vts.proto.VtsWebStatusMessage.TestStatus getStatus();
+
+    // repeated bytes failed_testcases = 5;
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    java.util.List<com.google.protobuf.ByteString> getFailedTestcasesList();
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    int getFailedTestcasesCount();
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    com.google.protobuf.ByteString getFailedTestcases(int index);
   }
   /**
    * Protobuf type {@code android.vts.TestStatusMessage}
@@ -259,6 +285,14 @@ public final class VtsWebStatusMessage {
               }
               break;
             }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                failedTestcases_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              failedTestcases_.add(input.readBytes());
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -267,6 +301,9 @@ public final class VtsWebStatusMessage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          failedTestcases_ = java.util.Collections.unmodifiableList(failedTestcases_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -395,11 +432,47 @@ public final class VtsWebStatusMessage {
       return status_;
     }
 
+    // repeated bytes failed_testcases = 5;
+    public static final int FAILED_TESTCASES_FIELD_NUMBER = 5;
+    private java.util.List<com.google.protobuf.ByteString> failedTestcases_;
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getFailedTestcasesList() {
+      return failedTestcases_;
+    }
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    public int getFailedTestcasesCount() {
+      return failedTestcases_.size();
+    }
+    /**
+     * <code>repeated bytes failed_testcases = 5;</code>
+     *
+     * <pre>
+     * failed tests
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getFailedTestcases(int index) {
+      return failedTestcases_.get(index);
+    }
+
     private void initFields() {
       testSuite_ = com.google.protobuf.ByteString.EMPTY;
       test_ = com.google.protobuf.ByteString.EMPTY;
       statusTimestamp_ = 0L;
       status_ = com.google.android.vts.proto.VtsWebStatusMessage.TestStatus.TEST_UNKNOWN;
+      failedTestcases_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -425,6 +498,9 @@ public final class VtsWebStatusMessage {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeEnum(4, status_.getNumber());
       }
+      for (int i = 0; i < failedTestcases_.size(); i++) {
+        output.writeBytes(5, failedTestcases_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -449,6 +525,15 @@ public final class VtsWebStatusMessage {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, status_.getNumber());
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < failedTestcases_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(failedTestcases_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getFailedTestcasesList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -578,6 +663,8 @@ public final class VtsWebStatusMessage {
         bitField0_ = (bitField0_ & ~0x00000004);
         status_ = com.google.android.vts.proto.VtsWebStatusMessage.TestStatus.TEST_UNKNOWN;
         bitField0_ = (bitField0_ & ~0x00000008);
+        failedTestcases_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -622,6 +709,11 @@ public final class VtsWebStatusMessage {
           to_bitField0_ |= 0x00000008;
         }
         result.status_ = status_;
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          failedTestcases_ = java.util.Collections.unmodifiableList(failedTestcases_);
+          bitField0_ = (bitField0_ & ~0x00000010);
+        }
+        result.failedTestcases_ = failedTestcases_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -649,6 +741,16 @@ public final class VtsWebStatusMessage {
         }
         if (other.hasStatus()) {
           setStatus(other.getStatus());
+        }
+        if (!other.failedTestcases_.isEmpty()) {
+          if (failedTestcases_.isEmpty()) {
+            failedTestcases_ = other.failedTestcases_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureFailedTestcasesIsMutable();
+            failedTestcases_.addAll(other.failedTestcases_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -882,6 +984,106 @@ public final class VtsWebStatusMessage {
         return this;
       }
 
+      // repeated bytes failed_testcases = 5;
+      private java.util.List<com.google.protobuf.ByteString> failedTestcases_ = java.util.Collections.emptyList();
+      private void ensureFailedTestcasesIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          failedTestcases_ = new java.util.ArrayList<com.google.protobuf.ByteString>(failedTestcases_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getFailedTestcasesList() {
+        return java.util.Collections.unmodifiableList(failedTestcases_);
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public int getFailedTestcasesCount() {
+        return failedTestcases_.size();
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getFailedTestcases(int index) {
+        return failedTestcases_.get(index);
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public Builder setFailedTestcases(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureFailedTestcasesIsMutable();
+        failedTestcases_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public Builder addFailedTestcases(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureFailedTestcasesIsMutable();
+        failedTestcases_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public Builder addAllFailedTestcases(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureFailedTestcasesIsMutable();
+        super.addAll(values, failedTestcases_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes failed_testcases = 5;</code>
+       *
+       * <pre>
+       * failed tests
+       * </pre>
+       */
+      public Builder clearFailedTestcases() {
+        failedTestcases_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:android.vts.TestStatusMessage)
     }
 
@@ -908,12 +1110,13 @@ public final class VtsWebStatusMessage {
   static {
     java.lang.String[] descriptorData = {
       "\n\031VtsWebStatusMessage.proto\022\013android.vts" +
-      "\"x\n\021TestStatusMessage\022\022\n\ntest_suite\030\001 \001(" +
-      "\014\022\014\n\004test\030\002 \001(\014\022\030\n\020status_timestamp\030\003 \001(" +
-      "\003\022\'\n\006status\030\004 \001(\0162\027.android.vts.TestStat" +
-      "us*:\n\nTestStatus\022\020\n\014TEST_UNKNOWN\020\000\022\013\n\007TE" +
-      "ST_OK\020\001\022\r\n\tTEST_FAIL\020\002B3\n\034com.google.and" +
-      "roid.vts.protoB\023VtsWebStatusMessage"
+      "\"\222\001\n\021TestStatusMessage\022\022\n\ntest_suite\030\001 \001" +
+      "(\014\022\014\n\004test\030\002 \001(\014\022\030\n\020status_timestamp\030\003 \001" +
+      "(\003\022\'\n\006status\030\004 \001(\0162\027.android.vts.TestSta" +
+      "tus\022\030\n\020failed_testcases\030\005 \003(\014*:\n\nTestSta" +
+      "tus\022\020\n\014TEST_UNKNOWN\020\000\022\013\n\007TEST_OK\020\001\022\r\n\tTE" +
+      "ST_FAIL\020\002B3\n\034com.google.android.vts.prot" +
+      "oB\023VtsWebStatusMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -925,7 +1128,7 @@ public final class VtsWebStatusMessage {
           internal_static_android_vts_TestStatusMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestStatusMessage_descriptor,
-              new java.lang.String[] { "TestSuite", "Test", "StatusTimestamp", "Status", });
+              new java.lang.String[] { "TestSuite", "Test", "StatusTimestamp", "Status", "FailedTestcases", });
           return null;
         }
       };
