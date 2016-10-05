@@ -19,5 +19,6 @@
     <option name="compatibility:include-filter" value="SampleQtaguidTest" />
     <option name="compatibility:include-filter" value="LibcTest" />
     <option name="compatibility:include-filter" value="SyscallExistenceTest" />
+    <option name="compatibility:include-filter" value="CameraITSTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
