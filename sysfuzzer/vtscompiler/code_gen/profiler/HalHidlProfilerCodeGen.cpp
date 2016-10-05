@@ -43,8 +43,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForEnumVariable(Formatter& out,
   const VariableSpecificationMessage&, const std::string& arg_name,
   const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_ENUM);\n";
-  out << arg_name << "->mutable_enum_value()->add_value(static_cast<uint8_t>"
+  out << arg_name << "->mutable_enum_value()->add_scalar_value().set_uint8_t(static_cast<uint8_t>"
       << "(" << arg_value << "));\n";
+  out << arg_name << "->mutable_enum_value()->set_scalar_type(\"uint8_t\");\n";
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForVectorVariable(Formatter& out,
