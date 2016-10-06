@@ -97,6 +97,7 @@ enum VariableType {
   TYPE_VOID = 9;
   TYPE_HIDL_CALLBACK = 10;
   TYPE_SUBMODULE = 11;
+  TYPE_UNION = 12;
 }
 
 
@@ -243,7 +244,8 @@ message EnumDataValueMessage {
   repeated bytes enumerator = 1;
 
   // for the corresponding values.
-  repeated uint32 value = 2;
+  repeated ScalarDataValueMessage scalar_value = 2;
+  optional bytes scalar_type = 3;
 }
 
 
@@ -279,8 +281,16 @@ message VariableSpecificationMessage {
   // the type name of this struct.
   optional bytes struct_type = 142;
 
+  // for nested struct type declarations (without actual definitions).
+  repeated VariableSpecificationMessage sub_struct = 143;
+
   // for sub variables when this's a union type.
   repeated VariableSpecificationMessage union_value = 151;
+  // the type name of this union.
+  optional bytes union_type = 152;
+
+  // for nested union type declarations (without actual definitions).
+  repeated VariableSpecificationMessage sub_union = 153;
 
   // for non HIDL HAL, to use a custom type defined in C/C++.
   optional bytes predefined_type = 201;
