@@ -131,9 +131,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             if tag is not None:
                 # tag not being None means to create a test case
                 self.tags.add(tag)
+                logging.info('Creating test case from %s with tag %s', dst, tag)
                 testcase = self.CreateTestCase(dst, tag)
-                logging.info('Creating test case from %s with tag %s: %s', dst,
-                             tag, map(str, testcase))
                 if not testcase:
                     continue
 
