@@ -78,9 +78,32 @@
     color: white;
 }
 
+table {
+    font-family: Roboto !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+}
+
+.table-header {
+    background-color: white;
+}
+
 #profiling-container, #performance-container, #error-container {
     padding-top: 25px;
     padding-bottom: 25px;
+}
+
+#performance-chart-div {
+    height: 500px;
+}
+
+#profiling-chart-div {
+    height: 500px;
+    margin-bottom: 35px;
+}
+
+#percentile-table-div {
+    margin-bottom: 20px;
 }
 
 .ui-datepicker-next.ui-state-hover.ui-datepicker-next-hover {
