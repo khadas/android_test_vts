@@ -144,8 +144,8 @@ public class ShowTableServlet extends HttpServlet {
             // Stores results for top build
             int[] topBuildResultCounts = new int[resultNames.size()];
 
-            // list to hold a unique combination - build IDs.startTimeStamp
-            List<String> testRunKeyList = new ArrayList<>();
+            // list to hold the test report messages that will be shown on the dashboard
+            List<TestReportMessage> tests = new ArrayList<TestReportMessage>();
 
             // list of column headers (device build IDs)
             List<String> deviceBuildIdList = new ArrayList<>();
@@ -155,10 +155,6 @@ public class ShowTableServlet extends HttpServlet {
 
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<>();
-
-            // Map to hold TestReportMessage based on build ID and start time stamp.
-            // This will be used to obtain the corresponding device info later.
-            Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<>();
 
             while (true) {
                 // Scan until there is a full page of data or until there is no
@@ -182,16 +178,12 @@ public class ShowTableServlet extends HttpServlet {
                     String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
                                               .getBuildId().toStringUtf8();
 
-                    String key;
                     try {
                         // filter non-integer build IDs
                         Integer.parseInt(buildId);
                         Integer.parseInt(firstDeviceBuildId);
-                        key = testReportMessage.getBuildInfo().getId().toStringUtf8()
-                          + "." + String.valueOf(testReportMessage.getStartTimestamp());
-                        testRunKeyList.add(0, key);
-                        // update map based on time stamp.
-                        buildIdTimeStampMap.put(key, testReportMessage);
+                        tests.add(0, testReportMessage);
+                        topBuild = firstDeviceBuildId;
                     } catch (NumberFormatException e) {
                         /* skip a non-post-submit build */
                         continue;
@@ -217,7 +209,7 @@ public class ShowTableServlet extends HttpServlet {
                     }
                 }
                 scanner.close();
-                if (testRunKeyList.size() < MAX_BUILD_IDS_PER_PAGE
+                if (tests.size() < MAX_BUILD_IDS_PER_PAGE
                     && BigtableHelper.hasOlder(table, startTime)) {
                     // Look further back in time a day
                     endTime = startTime;
@@ -229,28 +221,23 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-            if (testRunKeyList.size() > MAX_BUILD_IDS_PER_PAGE) {
+            if (tests.size() > MAX_BUILD_IDS_PER_PAGE) {
                 int startIndex;
                 int endIndex;
                 if (showMostRecent) {
                     startIndex = 0;
                     endIndex = MAX_BUILD_IDS_PER_PAGE;
                 } else {
-                    endIndex = testRunKeyList.size();
+                    endIndex = tests.size();
                     startIndex = endIndex - MAX_BUILD_IDS_PER_PAGE;
                 }
-                testRunKeyList = testRunKeyList.subList(startIndex, endIndex);
+                tests = tests.subList(startIndex, endIndex);
             }
 
-            if (testRunKeyList.size() > 0) {
-                startTime = buildIdTimeStampMap
-                    .get(testRunKeyList
-                        .get(testRunKeyList.size()-1))
-                    .getStartTimestamp();
-                topBuild = testRunKeyList.get(0);
-                topBuildTestReportMessage = buildIdTimeStampMap.get(topBuild);
-                endTime = topBuildTestReportMessage
-                    .getStartTimestamp() + 1;
+            if (tests.size() > 0) {
+                startTime = tests.get(tests.size() - 1).getStartTimestamp();
+                topBuildTestReportMessage = tests.get(0);
+                endTime = topBuildTestReportMessage.getStartTimestamp() + 1;
             }
 
             if (topBuildTestReportMessage != null) {
@@ -265,26 +252,21 @@ public class ShowTableServlet extends HttpServlet {
 
             // the device grid on the table has four rows - Build Alias, Product Variant,
             // Build Flavor and test build ID, and columns equal to the size of selectedBuildIdList.
-            String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][
-                testRunKeyList.size() + 1];
+            String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][tests.size() + 1];
 
             // the time grid on the table has one - Start Time.
             // These represent the start times for the test run.
-            String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][
-                testRunKeyList.size() + 1];
+            String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][tests.size() + 1];
 
             // the duration grid on the table has one row - test duration.
             // These represent the length of time the test elapsed.
-            String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][
-                testRunKeyList.size() + 1];
+            String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][tests.size() + 1];
 
             // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
-            String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][
-                testRunKeyList.size() + 1];
+            String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][tests.size() + 1];
 
             // the results an entry for each testcase result for each build.
-            String[][] resultsGrid = new String[testCaseNameMap.size()][
-                testRunKeyList.size() + 1];
+            String[][] resultsGrid = new String[testCaseNameMap.size()][tests.size() + 1];
 
             // first column for device grid
             String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "VTS Build ID"};
@@ -309,9 +291,8 @@ public class ShowTableServlet extends HttpServlet {
                 resultsGrid[testCaseNameMap.get(testCaseName)][0] = testCaseName;
             }
 
-            for (int j = 0; j < testRunKeyList.size(); j++) {
-                String key = testRunKeyList.get(j);
-                TestReportMessage report = buildIdTimeStampMap.get(key);
+            for (int j = 0; j < tests.size(); j++) {
+                TestReportMessage report = tests.get(j);
                 List<AndroidDeviceInfoMessage> devices = report.getDeviceInfoList();
                 List<String> buildIdList = new ArrayList<>();
                 List<String> buildAliasList = new ArrayList<>();
@@ -326,9 +307,9 @@ public class ShowTableServlet extends HttpServlet {
                 String buildAlias = StringUtils.join(buildAliasList, ",");
                 String productVariant = StringUtils.join(productVariantList, ",");
                 String buildFlavor = StringUtils.join(buildFlavorList, ",");
-                deviceBuildIdList.add(0, StringUtils.join(buildIdList, ","));
+                deviceBuildIdList.add(StringUtils.join(buildIdList, ","));
 
-                String buildId = buildIdTimeStampMap.get(key).getBuildInfo().getId().toStringUtf8();
+                String buildId = report.getBuildInfo().getId().toStringUtf8();
 
                 int passCount = 0;
                 long totalLineCount = 0, coveredLineCount = 0;
@@ -370,7 +351,7 @@ public class ShowTableServlet extends HttpServlet {
                     double coveragePct = Math.round((100 * coveredLineCount /
                                                      totalLineCount) * 100f) / 100f;
                     coverageInfo = Double.toString(coveragePct) + " % " +
-                            "<a href=\"/show_coverage?key=" + key +
+                            "<a href=\"/show_coverage?key=" + report.getStartTimestamp() +
                             "&testName=" + request.getParameter("testName") +
                             "&startTime=" + startTime +
                             "&endTime=" + endTime +
