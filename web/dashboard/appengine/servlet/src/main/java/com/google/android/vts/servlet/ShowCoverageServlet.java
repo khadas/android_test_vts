@@ -66,15 +66,13 @@ public class ShowCoverageServlet extends HttpServlet {
         // key is a unique combination of build Id and timestamp that helps identify the
         // corresponding build id.
         String key = request.getParameter("key");
-        String[] parts = key.split("\\.");
         Scan scan = new Scan();
-        if (parts.length > 1) {
-            try {
-                long time = Long.parseLong(parts[1]);
-                scan.setStartRow(parts[1].getBytes());
-                scan.setStopRow(Long.toString((time + 1)).getBytes());
-            } catch (NumberFormatException e) { }  // Use unbounded scan
-        }
+        long time = -1;
+        try {
+            time = Long.parseLong(key);
+            scan.setStartRow(key.getBytes());
+            scan.setStopRow(Long.toString((time + 1)).getBytes());
+        } catch (NumberFormatException e) { }  // Use unbounded scan
 
         TestReportMessage testReportMessage = null;
 
@@ -91,10 +89,7 @@ public class ShowCoverageServlet extends HttpServlet {
                 if (buildId.length() > 0) {
                     try {
                         Integer.parseInt(buildId);
-                        String currentKey = currentTestReportMessage.getBuildInfo().getId().toStringUtf8() +
-                                "." + String.valueOf(currentTestReportMessage.getStartTimestamp());
-
-                        if (key.equals(currentKey)) {
+                        if (time == currentTestReportMessage.getStartTimestamp()) {
                           testReportMessage = currentTestReportMessage;
                           break;
                         }
