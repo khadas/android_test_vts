@@ -28,6 +28,11 @@ using namespace std;
 namespace android {
 namespace vts {
 
+enum VtsCompileMode {
+  kDriver = 0,
+  kProfiler
+};
+
 class CodeGenBase {
  public:
   explicit CodeGenBase(const char* input_vts_file_path, const string& vts_name);
@@ -50,6 +55,11 @@ class CodeGenBase {
   const char* input_vts_file_path_;
   const string& vts_name_;
 };
+
+void Translate(VtsCompileMode mode,
+               const char* input_vts_file_path,
+               const char* output_header_dir_path,
+               const char* output_cpp_file_path);
 
 }  // namespace vts
 }  // namespace android
