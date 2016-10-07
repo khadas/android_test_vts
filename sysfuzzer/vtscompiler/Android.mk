@@ -18,12 +18,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vtsc
+LOCAL_MODULE := libvtsc
 LOCAL_MODULE_HOST_OS := darwin linux
 
 LOCAL_CPP_EXTENSION := .cpp
 LOCAL_SRC_FILES := \
-  VtsCompilerMain.cpp \
   VtsCompilerUtils.cpp \
   code_gen/CodeGenBase.cpp \
   code_gen/driver/DriverCodeGenBase.cpp \
@@ -50,6 +49,36 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
   libhidl-gen-utils \
   libbase           \
+
+LOCAL_CFLAGS := -Wall -Werror
+
+include $(BUILD_HOST_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := vtsc
+LOCAL_MODULE_HOST_OS := darwin linux
+
+LOCAL_CPP_EXTENSION := .cpp
+LOCAL_SRC_FILES := \
+  VtsCompilerMain.cpp \
+
+LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/android \
+  $(LOCAL_PATH)/src \
+  test/vts/sysfuzzer/common \
+
+LOCAL_STATIC_LIBRARIES += \
+  libz \
+
+LOCAL_SHARED_LIBRARIES := \
+  libprotobuf-cpp-full \
+  libvts_common_host \
+  libvts_multidevice_proto_host \
+  libprotobuf-cpp-full \
+  libhidl-gen-utils \
+  libbase \
+  libvtsc \
 
 LOCAL_CFLAGS := -Wall -Werror
 
