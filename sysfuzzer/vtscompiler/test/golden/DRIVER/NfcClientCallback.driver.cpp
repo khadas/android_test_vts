@@ -18,14 +18,14 @@ namespace vts {
 
 
 Return<void> VtsNfcClientCallback::sendEvent(
-    nfc_event_t arg0,
-    nfc_status_t arg1) {
+    NfcEvent arg0,
+    NfcStatus arg1) {
   cout << "sendEvent called" << endl;
   return Void();
 }
 
 Return<void> VtsNfcClientCallback::sendData(
-    const nfc_data_t& arg0) {
+    const hidl_vec<uint8_t>& arg0) {
   cout << "sendData called" << endl;
   return Void();
 }

@@ -53,14 +53,14 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
             "a non-Treble device.")
 
         # TODO: extend to make realistic testcases
-        def send_event(nfc_event_t, nfc_status_t):
+        def send_event(NfcEvent, NfcStatus):
             logging.info("callback send_event")
-            logging.info("arg0 %s", nfc_event_t)
-            logging.info("arg1 %s", nfc_status_t)
+            logging.info("arg0 %s", NfcEvent)
+            logging.info("arg1 %s", NfcStatus)
 
-        def send_data(nfc_data_t):
+        def send_data(NfcData):
             logging.info("callback send_data")
-            logging.info("arg0 %s", nfc_data_t)
+            logging.info("arg0 %s", NfcData)
 
         client_callback = self.dut.hal.nfc.GetHidlCallbackInterface(
             "INfcClientCallback",
@@ -70,22 +70,20 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
         result = self.dut.hal.nfc.open(client_callback)
         logging.info("open result: %s", result)
 
-        result = self.dut.hal.nfc.pre_discover()
-        logging.info("pre_discover result: %s", result)
+        result = self.dut.hal.nfc.prediscover()
+        logging.info("prediscover result: %s", result)
 
-        result = self.dut.hal.nfc.control_granted()
-        logging.info("control_granted result: %s", result)
+        result = self.dut.hal.nfc.controlGranted()
+        logging.info("controlGranted result: %s", result)
 
-        result = self.dut.hal.nfc.power_cycle()
-        logging.info("power_cycle result: %s", result)
+        result = self.dut.hal.nfc.powerCycle()
+        logging.info("powerCycle result: %s", result)
 
-        result = self.dut.hal.nfc.core_initialized([0, 9, 8])
-        logging.info("core_initialized result: %s", result)
+        result = self.dut.hal.nfc.coreInitialized([0, 9, 8])
+        logging.info("coreInitialized result: %s", result)
 
         nfc_types = self.dut.hal.nfc.GetHidlTypeInterface("types")
         logging.info("nfc_types: %s", nfc_types)
-        data_vec = nfc_types.nfc_data_t(data=[0, 1, 2, 3, 4, 5])
-        logging.info("data_vec: %s", data_vec)
 
         result = self.dut.hal.nfc.write(data_vec)
         logging.info("write result: %s", result)

@@ -37,7 +37,7 @@ class FuzzerExtended_INfc : public FuzzerBase {
 
 extern "C" {
 extern android::vts::FuzzerBase* 
-vts_func_4_8_1_(
+vts_func_4_0_1_(
 );
 }
 }  // namespace vts

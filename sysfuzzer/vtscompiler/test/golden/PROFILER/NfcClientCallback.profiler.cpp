@@ -33,13 +33,13 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             case SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
-                nfc_event_t *arg_val_0 = reinterpret_cast<nfc_event_t*> ((*args)[0]);
+                NfcEvent *arg_val_0 = reinterpret_cast<NfcEvent*> ((*args)[0]);
                 arg_0->set_type(TYPE_ENUM);
-                profile__nfc_event_t(arg_0, (*arg_val_0));
+                profile__NfcEvent(arg_0, (*arg_val_0));
                 auto *arg_1 = msg.add_arg();
-                nfc_status_t *arg_val_1 = reinterpret_cast<nfc_status_t*> ((*args)[1]);
+                NfcStatus *arg_val_1 = reinterpret_cast<NfcStatus*> ((*args)[1]);
                 arg_1->set_type(TYPE_ENUM);
-                profile__nfc_status_t(arg_1, (*arg_val_1));
+                profile__NfcStatus(arg_1, (*arg_val_1));
                 break;
             }
             case SERVER_API_EXIT:
@@ -60,9 +60,12 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             case SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
-                nfc_data_t *arg_val_0 = reinterpret_cast<nfc_data_t*> ((*args)[0]);
-                arg_0->set_type(TYPE_STRUCT);
-                profile__nfc_data_t(arg_0, (*arg_val_0));
+                hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
+                for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
+                    auto *arg_0_vector_i = arg_0->add_vector_value();
+                    arg_0_vector_i->set_type(TYPE_SCALAR);
+                    arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                }
                 break;
             }
             case SERVER_API_EXIT:
