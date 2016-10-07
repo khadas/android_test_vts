@@ -22,6 +22,7 @@
         <option name="dep-module" value="numpy" />
         <option name="dep-module" value="scipy" />
         <option name="dep-module" value="matplotlib" />
+        <option name="dep-module" value="Pillow" />
     </target_preparer>
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.ApkInstaller">
         <option name="test-file-name" value="DATA/app/CtsVerifier/CtsVerifier.apk" />
