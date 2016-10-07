@@ -56,7 +56,7 @@
 
 .ui-datepicker td span.ui-state-default, .ui-datepicker td a.ui-state-default {
     text-align: center;
-    padding: 0.6em 0.4em;
+    padding: 0.7em 0.4em;
     border: none;
     border-radius: 10em;
     background: none;
@@ -119,8 +119,4 @@ table {
 .ui-datepicker-next.ui-corner-all.ui-state-hover, .ui-datepicker-prev.ui-corner-all.ui-state-hover {
     background: none;
     border: none;
-}
-
-.ui-icon.ui-icon-circle-triangle-e, .ui-icon.ui-icon-circle-triangle-w {
-    background-image: url("/images/ui-icons_ffffff_256x240.png") !important;
 }
