@@ -166,11 +166,10 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
       GenerateProfilerForStructVariable(out, val, arg_name, arg_value);
       break;
     }
-    // uncomment once vts support union type.
-    /*case TYPE_UNION: {
+    case TYPE_UNION: {
        GenerateProfilerForUnionVariable(out, val, arg_name, arg_value);
        break;
-    }*/
+    }
     case TYPE_HIDL_CALLBACK:
     {
       GenerateProfilerForHidlCallbackVariable(out, val, arg_name, arg_value);
@@ -183,51 +182,40 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
   }
 }
 
-void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(
-    Formatter& out, const VariableSpecificationMessage& attribute) {
-  // TODO(zhuoyao): handle union type once vts support union type.
-  if (attribute.type() == TYPE_STRUCT) {
+void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(Formatter& out,
+  const VariableSpecificationMessage& attribute) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
     // Recursively generate profiler method declaration for all sub_types.
-    for (const auto sub_struct : attribute.struct_value()) {
-      // TODO(zhuoyao): update the condition once vts distinguish between
-      // sub_types and fields.
-      // TODO(zhuoyao): handle union sub_type once vts support union type.
-      if (sub_struct.type() == TYPE_STRUCT
-          && !sub_struct.has_predefined_type()) {
-        GenerateProfilerMethodDeclForAttribute(out, sub_struct);
-      }
+    for (const auto sub_struct : attribute.sub_struct()) {
+      GenerateProfilerMethodDeclForAttribute(out, sub_struct);
     }
-
-    out << "void profile__" << attribute.name()
-        << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
-        << " arg_val_name);\n";
+    for (const auto sub_union : attribute.sub_union()) {
+      GenerateProfilerMethodDeclForAttribute(out, sub_union);
+    }
   }
+  out << "void profile__" << attribute.name()
+      << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
+      << " arg_val_name);\n";
 }
 
 void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
     Formatter& out, const VariableSpecificationMessage& attribute) {
-  // TODO(zhuoyao): handle union type once vts support union type.
-  if (attribute.type() == TYPE_STRUCT) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
     // Recursively generate profiler method implementation for all sub_types.
-    for (const auto sub_struct : attribute.struct_value()) {
-      // TODO(zhuoyao): update the condition once vts distinguish between
-      // sub_types and fields.
-      // TODO(zhuoyao): handle union sub_type once vts support union type.
-      if (sub_struct.type() == TYPE_STRUCT
-          && !sub_struct.has_predefined_type()) {
-        GenerateProfilerMethodImplForAttribute(out, sub_struct);
-      }
+    for (const auto sub_struct : attribute.sub_struct()) {
+      GenerateProfilerMethodImplForAttribute(out, sub_struct);
     }
-
-    out << "void profile__" << attribute.name()
-        << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
-        << " arg_val_name) {\n";
-    out.indent();
-    GenerateProfilerForTypedVariable(out, attribute, "arg_name",
-                                     "arg_val_name");
-    out.unindent();
-    out << "}\n\n";
+    for (const auto sub_union : attribute.sub_union()) {
+      GenerateProfilerMethodDeclForAttribute(out, sub_union);
+    }
   }
+  out << "void profile__" << attribute.name()
+      << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
+      << " arg_val_name) {\n";
+  out.indent();
+  GenerateProfilerForTypedVariable(out, attribute, "arg_name", "arg_val_name");
+  out.unindent();
+  out << "}\n\n";
 }
 
 void ProfilerCodeGenBase::GenerateProfierSanityCheck(Formatter&,
