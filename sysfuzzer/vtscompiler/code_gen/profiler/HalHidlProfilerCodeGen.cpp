@@ -40,12 +40,24 @@ void HalHidlProfilerCodeGen::GenerateProfilerForStringVariable(Formatter& out,
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForEnumVariable(Formatter& out,
-  const VariableSpecificationMessage&, const std::string& arg_name,
+  const VariableSpecificationMessage& val, const std::string& arg_name,
   const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_ENUM);\n";
-  out << arg_name << "->mutable_enum_value()->add_scalar_value().set_uint8_t(static_cast<uint8_t>"
-      << "(" << arg_value << "));\n";
-  out << arg_name << "->mutable_enum_value()->set_scalar_type(\"uint8_t\");\n";
+
+  // For predefined type, call the corresponding profile method.
+  if (val.has_predefined_type()) {
+    out << "profile__" << val.predefined_type() << "(" << arg_name << ", "
+        << arg_value << ");\n";
+  } else {
+    const std::string scalar_type = val.enum_value().scalar_type();
+    out << arg_name << "->mutable_enum_value()->add_scalar_value()->set_"
+        << scalar_type << "(static_cast<" << scalar_type << ">(" << arg_value
+        << "));\n";
+    out << arg_name
+        << "->mutable_enum_value()->set_scalar_type(\""
+        << scalar_type
+        << "\");\n";
+  }
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForVectorVariable(Formatter& out,
@@ -87,14 +99,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerForStructVariable(Formatter& out,
         << arg_value << ");\n";
   } else {
     for (const auto struct_field : val.struct_value()) {
-      // skip sub_type.
-      // TODO(zhuoyao): update the condition once vts distinguish between
-      // sub_types and fields.
-      // TODO(zhuoyao): handle union sub_type once vts support union type.
-      if (struct_field.type() == TYPE_STRUCT
-          && !struct_field.has_predefined_type()) {
-        continue;
-      }
       std::string struct_field_name = arg_name + "_" + struct_field.name();
       out << "auto *" << struct_field_name << " = " << arg_name
           << "->add_struct_value();\n";
@@ -105,10 +109,22 @@ void HalHidlProfilerCodeGen::GenerateProfilerForStructVariable(Formatter& out,
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForUnionVariable(Formatter& out,
-  const VariableSpecificationMessage&, const std::string& arg_name,
-  const std::string&) {
+  const VariableSpecificationMessage& val, const std::string& arg_name,
+  const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_UNION);\n";
-  // TODO(zhuoyao): add profiling method once vts support union type.
+  // For predefined type, call the corresponding profile method.
+  if (val.union_value().size() == 0 && val.has_predefined_type()) {
+    out << "profile__" << val.predefined_type() << "(" << arg_name << ", "
+        << arg_value << ");\n";
+  } else {
+    for (const auto union_field : val.union_value()) {
+      std::string union_field_name = arg_name + "_" + union_field.name();
+      out << "auto *" << union_field_name << " = " << arg_name
+          << "->add_union_value();\n";
+      GenerateProfilerForTypedVariable(out, union_field, union_field_name,
+                                       arg_value + "." + union_field.name());
+    }
+  }
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForHidlCallbackVariable(
