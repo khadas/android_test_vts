@@ -155,15 +155,40 @@ void DriverCodeGenBase::GenerateAll(
         if (arg_count > 0) cpp_ss << "," << endl;
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
-            cpp_ss << "    const " /*<<  message.component_name() << "::" */
-                   << arg.predefined_type() << "&";
+            cpp_ss << "    const " << arg.predefined_type() << "&";
           } else {
-            cpp_ss << "    " /* << message.component_name() << "::" */
-                   << arg.predefined_type();
+            cpp_ss << "    " << arg.predefined_type();
           }
-          cpp_ss << " arg" << arg_count;;
+          cpp_ss << " arg" << arg_count;
+        } else if (arg.type() == TYPE_VECTOR) {
+          cpp_ss << "    ";
+          if (arg.is_const()) {
+            cpp_ss << "const ";
+          }
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            cpp_ss << arg.vector_value(0).scalar_type() << "*";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << endl;
+            exit(-1);
+          }
+          cpp_ss << " arg" << arg_count;
+        } else if (arg.type() == TYPE_ARRAY) {
+          cpp_ss << "    ";
+          if (arg.is_const()) {
+            cpp_ss << "const ";
+          }
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            cpp_ss << arg.vector_value(0).scalar_type()
+                   << "[" << arg.vector_size() << "]";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << endl;
+            exit(-1);
+          }
+          cpp_ss << " arg" << arg_count;
         } else {
-          cerr << "unknown arg type " << arg.type() << endl;
+          cerr << __func__ << " unknown arg type " << arg.type() << endl;
           exit(-1);
         }
         arg_count++;
@@ -292,15 +317,40 @@ void DriverCodeGenBase::GenerateAllHeader(
         if (arg_count > 0) h_ss << "," << endl;
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
-            h_ss << "    const " /*<< message.component_name() << "::" */
-                 << arg.predefined_type() << "&";
+            h_ss << "    const " << arg.predefined_type() << "&";
           } else {
-            h_ss << "    " /*<< message.component_name() << "::"*/
-                 << arg.predefined_type();
+            h_ss << "    " << arg.predefined_type();
           }
-          h_ss << " arg" << arg_count;;
+          h_ss << " arg" << arg_count;
+        } else if (arg.type() == TYPE_VECTOR) {
+          h_ss << "    ";
+          if (arg.is_const()) {
+            h_ss << "const ";
+          }
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            h_ss << arg.vector_value(0).scalar_type() << "*";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << endl;
+            exit(-1);
+          }
+          h_ss << " arg" << arg_count;
+        } else if (arg.type() == TYPE_ARRAY) {
+          h_ss << "    ";
+          if (arg.is_const()) {
+            h_ss << "const ";
+          }
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            h_ss << arg.vector_value(0).scalar_type()
+                 << "[" << arg.vector_size() << "]";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << endl;
+            exit(-1);
+          }
+          h_ss << " arg" << arg_count;
         } else {
-          cerr << "unknown arg type " << arg.type() << endl;
+          cerr << __func__ << " unknown arg type " << arg.type() << endl;
           exit(-1);
         }
         arg_count++;
