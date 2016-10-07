@@ -69,7 +69,7 @@ public class DashboardMainServlet extends HttpServlet {
             try {
                 dispatcher.forward(request, response);
             } catch (ServletException e) {
-              logger.info("Servlet Excpetion caught : ", e);
+                logger.info("Servlet Excpetion caught : ", e);
             }
         } else {
             response.sendRedirect(userService.createLoginURL(request.getRequestURI()));

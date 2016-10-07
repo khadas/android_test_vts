@@ -17,6 +17,7 @@
 package com.google.android.vts.servlet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -39,10 +40,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -107,26 +108,40 @@ public class VtsAlertJobServlet extends HttpServlet {
     /**
      * Checks whether any new failures have occurred beginning since (and including) startTime.
      * @param tableName The name of the table that stores the results for a test, string.
-     * @param startTime The (inclusive) lower time bound, long, microseconds.
-     * @param prevStatus The TestStatus for the previous iteration.
+     * @param lastUploadTimestamp The timestamp (long) representing when test data was last updated.
+     * @param prevStatusMessage The raw (byte[]) TestStatusMessage for the previous iteration.
      * @param messages The email Message queue.
-     * @returns latest test status.
+     * @returns latest raw TestStatusMessage (byte[]).
      * @throws IOException
      */
-    public TestStatus getTestStatus(String tableName, long startTime, TestStatus prevStatus,
-            List<Message> messages) throws IOException {
+    public byte[] getTestStatus(String tableName, long lastUploadTimestamp,
+                                byte[] prevStatusMessage, List<Message> messages) throws IOException {
         Scan scan = new Scan();
+        long startTime = lastUploadTimestamp - ONE_DAY;
+        Set<ByteString> failedTestcases = new HashSet<>();
+        if (prevStatusMessage != null) {
+            TestStatusMessage testStatusMessage = VtsWebStatusMessage.TestStatusMessage
+                                                      .parseFrom(prevStatusMessage);
+            long statusTimestamp = testStatusMessage.getStatusTimestamp();
+            if (lastUploadTimestamp <= statusTimestamp) {
+                return testStatusMessage.toByteArray();
+            }
+            startTime = statusTimestamp + 1;
+            failedTestcases.addAll(testStatusMessage.getFailedTestcasesList());
+        }
         scan.setStartRow(Long.toString(startTime).getBytes());
         TableName tableNameObject = TableName.valueOf(tableName);
         Table table = BigtableHelper.getTable(tableNameObject);
         if (!BigtableHelper.getConnection().getAdmin().tableExists(tableNameObject)){
-            return prevStatus;
+            return null;
         }
         ResultScanner scanner = table.getScanner(scan);
-        List<String> testRunKeyList = new ArrayList<>();
-        Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<>();
-
-        boolean anyFailed = false;
+        List<TestReportMessage> testReports = new ArrayList<>();
+        Set<ByteString> failingTestcases = new HashSet<>();
+        Set<String> fixedTestcases = new HashSet<>();
+        Set<String> newTestcaseFailures = new HashSet<>();
+        Set<String> continuedTestcaseFailures = new HashSet<>();
+        Set<String> transientTestcaseFailures = new HashSet<>();
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             byte[] value = result.getValue(RESULTS_FAMILY, DATA_QUALIFIER);
             TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage
@@ -140,18 +155,13 @@ public class VtsAlertJobServlet extends HttpServlet {
             if (testReportMessage.getDeviceInfoList().size() == 0) continue;
 
             String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
-                                      .getBuildId().toStringUtf8();
+                                        .getBuildId().toStringUtf8();
 
-            String key;
             try {
                 // filter non-integer build IDs
                 Integer.parseInt(buildId);
                 Integer.parseInt(firstDeviceBuildId);
-                key = testReportMessage.getBuildInfo().getId().toStringUtf8()
-                  + "." + String.valueOf(testReportMessage.getStartTimestamp());
-                testRunKeyList.add(0, key);
-                // update map based on time stamp.
-                buildIdTimeStampMap.put(key, testReportMessage);
+                testReports.add(0, testReportMessage);
             } catch (NumberFormatException e) {
                 /* skip a non-post-submit build */
                 continue;
@@ -159,21 +169,35 @@ public class VtsAlertJobServlet extends HttpServlet {
 
             for (TestCaseReportMessage testCaseReportMessage :
                  testReportMessage.getTestCaseList()) {
-                if (testCaseReportMessage.getTestResult() ==
-                    TestCaseResult.TEST_CASE_RESULT_FAIL) {
-                     anyFailed = true;
+                if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_FAIL) {
+                    transientTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
                 }
             }
         }
         scanner.close();
-        if (testRunKeyList.size() == 0) return prevStatus;
+        if (testReports.size() == 0) return null;
 
-        boolean latestFailing = false;
-        TestReportMessage latestTest = buildIdTimeStampMap.get(testRunKeyList.get(0));
+        TestReportMessage latestTest = testReports.get(0);
         for (TestCaseReportMessage testCaseReportMessage : latestTest.getTestCaseList()) {
-            if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_FAIL) {
-                latestFailing = true;
-            }
+            if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_PASS) {
+                 if (failedTestcases.contains(testCaseReportMessage.getName())) {
+                     fixedTestcases.add(testCaseReportMessage.getName().toStringUtf8());
+                 }
+             } else if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_SKIP) {
+                 if (failedTestcases.contains(testCaseReportMessage.getName())) {
+                     failingTestcases.add(testCaseReportMessage.getName());
+                     continuedTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
+                 }
+                 transientTestcaseFailures.remove(testCaseReportMessage.getName().toStringUtf8());
+             } else {
+                 failingTestcases.add(testCaseReportMessage.getName());
+                 if (!failedTestcases.contains(testCaseReportMessage.getName())) {
+                     newTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
+                 } else {
+                     continuedTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
+                 }
+                 transientTestcaseFailures.remove(testCaseReportMessage.getName().toStringUtf8());
+             }
         }
 
         String test = latestTest.getTest().toStringUtf8();
@@ -182,48 +206,97 @@ public class VtsAlertJobServlet extends HttpServlet {
             buildIdList.add(device.getBuildId().toStringUtf8());
         }
         String buildId = StringUtils.join(buildIdList, ",");
+        String summary = new String();
+        TestStatus newStatus = TestStatus.TEST_OK;
+        if (failingTestcases.size() > 0) {
+            summary += "The following test cases failed in the latest test run:<br>";
 
-        if (latestFailing) {
-            String subject = "New test failure in " + test + " @ " + buildId;
+            // Add new test case failures to top of summary in bold font.
+            List<String> sortedNewTestcaseFailures = new ArrayList<>(newTestcaseFailures);
+            Collections.sort(sortedNewTestcaseFailures);
+            for (String testcaseName : sortedNewTestcaseFailures) {
+                summary += "- " + "<b>" + testcaseName + "</b><br>";
+            }
+
+            // Add continued test case failures to summary.
+            List<String> sortedContinuedTestcaseFailures =
+                    new ArrayList<>(continuedTestcaseFailures);
+            Collections.sort(sortedContinuedTestcaseFailures);
+            for (String testcaseName : sortedContinuedTestcaseFailures) {
+                summary += "- " + testcaseName + "<br>";
+            }
+            newStatus = TestStatus.TEST_FAIL;
+        }
+        if (fixedTestcases.size() > 0) {
+            // Add fixed test cases to summary.
+            summary += "<br><br>The following test cases were fixed in the latest test run:<br>";
+            List<String> sortedFixedTestcases = new ArrayList<>(fixedTestcases);
+            Collections.sort(sortedFixedTestcases);
+            for (String testcaseName : sortedFixedTestcases) {
+                summary += "- <i>" + testcaseName + "</i><br>";
+            }
+        }
+        if (transientTestcaseFailures.size() > 0) {
+            // Add transient test case failures to summary.
+            summary += "<br><br>The following transient test case failures occured:<br>";
+            List<String> sortedTransientTestcaseFailures =
+                    new ArrayList<>(transientTestcaseFailures);
+            Collections.sort(sortedTransientTestcaseFailures);
+            for (String testcaseName : sortedTransientTestcaseFailures) {
+                summary += "- " + testcaseName + "<br>";
+            }
+        }
+
+        String footer = "<br><br>For details, visit the"
+                        + " <a href='https://android-vts-internal.googleplex.com/'>"
+                        + "VTS dashboard.</a>";
+
+        if (newTestcaseFailures.size() > 0) {
+            String subject = "New test failures in " + test + " @ " + buildId;
             String body = "Hello,<br><br>Test cases are failing in " + test
-                          + " for device build ID(s): " + buildId
-                          + ".<br><br>For details, visit the"
-                          + " <a href='https://android-vts-internal.googleplex.com/'>"
-                          + "VTS dashboard.</a>";
+                          + " for device build ID(s): " + buildId + ".<br><br>"
+                          + summary + footer;
             try {
                 messages.add(composeEmail(latestTest.getSubscriberEmailList(), subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
                 logger.error("Error composing email : ", e);
             }
-            return TestStatus.TEST_FAIL;
-        } else if (anyFailed && prevStatus == TestStatus.TEST_OK) {
-            // Transient fail case (i.e. pass, pass, fail, pass, pass)
+        } else if (continuedTestcaseFailures.size() > 0) {
+            String subject = "Continued test failures in " + test + " @ " + buildId;
+            String body = "Hello,<br><br>Test cases are failing in " + test
+                          + " for device build ID(s): " + buildId + ".<br><br>"
+                          + summary + footer;
+            try {
+                messages.add(composeEmail(latestTest.getSubscriberEmailList(), subject, body));
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                logger.error("Error composing email : ", e);
+            }
+        } else if (transientTestcaseFailures.size() > 0) {
             String subject = "Transient test failure in " + test + " @ " + buildId;
             String body = "Hello,<br><br>Some test cases failed in " + test + " but tests all "
-                          + "are passing in the latest device build(s): "
-                          + buildId + ".<br><br>For details, visit the"
-                          + " <a href='https://android-vts-internal.googleplex.com/'>"
-                          + "VTS dashboard.</a>";
+                          + "are passing in the latest device build(s): " + buildId + ".<br><br>"
+                          + summary + footer;
             try {
                 messages.add(composeEmail(latestTest.getSubscriberEmailList(), subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
                 logger.error("Error composing email : ", e);
             }
-        } else if (prevStatus == TestStatus.TEST_FAIL) {
-            // Test failure fixed
+        } else if (fixedTestcases.size() > 0) {
             String subject = "All test cases passing in " + test + " @ " + buildId;
             String body = "Hello,<br><br>All test cases passed in " + test
-                          + " for device build ID(s): " + buildId
-                          + "!<br><br>For details, visit the "
-                          + "<a href='https://android-vts-internal.googleplex.com/'>"
-                          + "VTS dashboard.</a>";
+                          + " for device build ID(s): " + buildId + "!<br><br>"
+                          + summary + footer;
             try {
                 messages.add(composeEmail(latestTest.getSubscriberEmailList(), subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
                 logger.error("Error composing email : ", e);
             }
         }
-        return TestStatus.TEST_OK;
+        Builder builder = VtsWebStatusMessage.TestStatusMessage.newBuilder();
+        builder.setStatusTimestamp(lastUploadTimestamp);
+        builder.setStatus(newStatus);
+        builder.addAllFailedTestcases(failingTestcases);
+        return builder.build().toByteArray();
     }
 
     @Override
@@ -231,6 +304,7 @@ public class VtsAlertJobServlet extends HttpServlet {
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
         Scan scan = new Scan();
         ResultScanner scanner = table.getScanner(scan);
+
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             String testName = Bytes.toString(result.getRow());
             byte[] value = result.getValue(STATUS_FAMILY, DATA_QUALIFIER);
@@ -245,60 +319,36 @@ public class VtsAlertJobServlet extends HttpServlet {
                 logger.warn("Error parsing upload timestamp: ", e);
                 continue;
             }
-            Builder builder;
-            TestStatus status;
             List<Message> messageQueue = new ArrayList<>();
-            if (value == null) {
-                // No table entries yet. Fetch tests as far back as one day.
-                status = getTestStatus(testName, lastUploadTimestamp - ONE_DAY,
-                                       VtsWebStatusMessage.TestStatus.TEST_OK, messageQueue);
+            byte[] newStatus = getTestStatus(testName, lastUploadTimestamp, value, messageQueue);
 
-                // Create a new TestStatusMessage.
-                builder = VtsWebStatusMessage.TestStatusMessage.newBuilder();
-            } else {
-                TestStatusMessage testStatusMessage = VtsWebStatusMessage.TestStatusMessage
-                                                          .parseFrom(value);
-                long statusTimestamp = testStatusMessage.getStatusTimestamp();
+            if (newStatus != null) {
+                // Create row insertion operation.
+                Put put = new Put(Bytes.toBytes(testName));
+                put.addColumn(STATUS_FAMILY, DATA_QUALIFIER, newStatus);
 
-                // If newer data exists, get the latest test status.
-                if (lastUploadTimestamp > statusTimestamp) {
-                    status = getTestStatus(testName, statusTimestamp + 1,
-                                           testStatusMessage.getStatus(), messageQueue);
-                } else {
-                    status = testStatusMessage.getStatus();  // keep the old status
-                }
+                // To preserve ACID properties, only perform the PUT if the value stored in the DB
+                // for the row/col/qualifier is the same as at the time of the READ.
+                // Note: if value is null, this method checks for cell non-existence.
+                boolean success = table.checkAndPut(
+                                      Bytes.toBytes(testName), STATUS_FAMILY,
+                                      DATA_QUALIFIER,
+                                      value, put);
 
-                // Create a new TestStatusMessage based off of the old status.
-                builder = VtsWebStatusMessage.TestStatusMessage.newBuilder(testStatusMessage);
-            }
-
-            // Update the status and status timestamp.
-            builder.setStatusTimestamp(lastUploadTimestamp);
-            builder.setStatus(status);
-
-            // Create row insertion operation.
-            Put put = new Put(Bytes.toBytes(testName));
-            put.addColumn(STATUS_FAMILY, DATA_QUALIFIER,
-                          builder.build().toByteArray());
-
-            // To preserve ACID properties, only perform the PUT if the value stored in the DB
-            // for the row/col/qualifier is the same as at the time of the READ.
-            // Note: if value is null, this method checks for cell non-existence.
-            boolean success = table.checkAndPut(
-                                  Bytes.toBytes(testName), STATUS_FAMILY,
-                                  DATA_QUALIFIER,
-                                  value, put);
-
-            // Send emails if the PUT operation succeeds (i.e. another job did not already
-            // process the same data)
-            if (success) {
-                for (Message msg: messageQueue) {
-                    try {
-                        Transport.send(msg);
-                    } catch (MessagingException e) {
-                        logger.error("Error sending email : ", e);
+                // Send emails if the PUT operation succeeds (i.e. another job did not already
+                // process the same data)
+                if (success) {
+                    for (Message msg: messageQueue) {
+                        try {
+                            Transport.send(msg);
+                        } catch (MessagingException e) {
+                            logger.error("Error sending email : ", e);
+                        }
                     }
                 }
+            } else {
+                Delete del = new Delete(Bytes.toBytes(testName));
+                table.delete(del);
             }
         }
     }
