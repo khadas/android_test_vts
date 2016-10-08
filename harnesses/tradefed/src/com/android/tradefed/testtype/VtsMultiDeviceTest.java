@@ -571,7 +571,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
      * @return the file named test_run_details.txt
      * @throws IllegalArgumentException
      */
-    private File getFileTestRunSummary (File logDir) throws IllegalArgumentException {
+    private File getFileTestRunSummary(File logDir) throws IllegalArgumentException {
         File[] children;
         if (logDir == null) {
             throw new IllegalArgumentException("Argument logDir is null.");

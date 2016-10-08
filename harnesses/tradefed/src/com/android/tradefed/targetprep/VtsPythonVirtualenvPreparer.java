@@ -101,8 +101,13 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
                 CLog.i("Attempting installation of %s", dep);
                 CommandResult result = mRunUtil.runTimedCmd(
                         BASE_TIMEOUT * 5, mPip, "install", dep);
-                if (result.getStatus() != CommandStatus.SUCCESS) {
-                    CLog.e("Installing %s failed", dep);
+                CLog.i(String.format(
+                    "Result %s. stdout: %s, stderr: %s",
+                    result.getStatus(), result.getStdout(), result.getStderr()));
+                if (result.getStatus() != CommandStatus.SUCCESS ||
+                    result.getStdout().contains(
+                        "Requirement already satisfied (use --upgrade to upgrade):")) {
+                    CLog.e("Installing %s failed or may require upgrade.", dep);
                     CLog.i("Attempting to upgrade %s", dep);
                     result = mRunUtil.runTimedCmd(
                             BASE_TIMEOUT * 5, mPip, "install", "--upgrade", dep);
@@ -110,6 +115,10 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
                         throw new TargetSetupError(String.format(
                             "Failed to install dependencies with pip. "
                                     + "Result %s. stdout: %s, stderr: %s",
+                            result.getStatus(), result.getStdout(), result.getStderr()));
+                    } else {
+                        CLog.i(String.format(
+                            "Result %s. stdout: %s, stderr: %s",
                             result.getStatus(), result.getStdout(), result.getStderr()));
                     }
                 }
