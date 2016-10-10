@@ -142,14 +142,12 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
             settings=relevant_testcases,
             name_func=lambda testcase: "%s_%sbit" % (
                 testcase.testname.replace('/','_'), n_bit))
-        logging.info("[Test Case] test%sBits", n_bit)
-        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
-    def test32Bits(self):
+    def generate32BitTests(self):
         """Runs all 32-bit tests."""
         self.TestNBits(self._32BIT)
 
-    def test64Bits(self):
+    def generate64BitTests(self):
         """Runs all 64-bit tests."""
         if self._dut.is64Bit:
             self.TestNBits(self._64BIT)
