@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import inspect
 import logging
 import os
 import re
@@ -52,6 +53,12 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 "Python version %s found; "
                 "CameraITSTest only tested with Python 2.7." % (
                     str(sys.version_info[:3])))
+        print "==============================="
+        print "Python path is:", sys.executable
+        import matplotlib
+        print "matplotlib version is " + matplotlib.__version__
+        print "matplotlib path is " + inspect.getfile(matplotlib)
+        print "==============================="
         modules = ["numpy", "PIL", "Image", "matplotlib", "pylab",
                    "scipy.stats", "scipy.spatial"]
         for m in modules:
