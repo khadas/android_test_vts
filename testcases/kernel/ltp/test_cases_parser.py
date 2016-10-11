@@ -84,64 +84,131 @@ class TestCasesParser(object):
 
     def Load(self, ltp_dir, n_bit, run_staging=False):
         """Read the definition file and yields a TestCase generator."""
-        case_definition_path = os.path.join(self._data_path, n_bit, 'ltp',
-                                            'ltp_vts_testcases.txt')
+        run_scritp = self.GenerateLtpRunScript()
 
-        with open(case_definition_path, 'r') as f:
-            for line in f:
-                items = self.ValidateDefinition(line)
-                if not items:
-                    continue
+        for line in run_scritp:
+            items = self.ValidateDefinition(line)
+            if not items:
+                continue
 
-                testsuite, testname, command = items
+            testsuite, testname, command = items
 
-                # Tests failed to build will have prefix "DISABLED_"
-                if testname.startswith("DISABLED_"):
-                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
-                                 "not built".format(testsuite, testname))
-                    continue
+            # Tests failed to build will have prefix "DISABLED_"
+            if testname.startswith("DISABLED_"):
+                logging.info("[Parser] Skipping test case {}-{}. Reason: "
+                             "not built".format(testsuite, testname))
+                continue
 
-                # Some test cases contain semicolons in their commands,
-                # and we replace them with &&
-                command = command.replace(';', '&&')
+            # Some test cases contain semicolons in their commands,
+            # and we replace them with &&
+            command = command.replace(';', '&&')
 
-                testcase = test_case.TestCase(
-                    testsuite=testsuite, testname=testname, command=command)
+            testcase = test_case.TestCase(
+                testsuite=testsuite, testname=testname, command=command)
 
-                # If include filter is set from TradeFed command, then
-                # yield only the included tests, regardless whether the test
-                # is disabled in configuration
-                if self._include_filter:
-                    if self.IsTestcaseInList(testcase, self._include_filter,
-                                             n_bit):
-                        logging.info("[Parser] Adding test case %s. Reason: "
-                                     "include filter" % testcase.fullname)
-                        yield testcase
-                    continue
-
-                # Check exclude filter set from TradeFed command. If a test
-                # case is in both include and exclude filter, it will be
-                # included
-                if self.IsTestcaseInList(testcase, self._exclude_filter,
+            # If include filter is set from TradeFed command, then
+            # yield only the included tests, regardless whether the test
+            # is disabled in configuration
+            if self._include_filter:
+                if self.IsTestcaseInList(testcase, self._include_filter,
                                          n_bit):
-                    logging.info("[Parser] Skipping test case %s. Reason: "
-                                 "exclude filter" % testcase.fullname)
-                    continue
+                    logging.info("[Parser] Adding test case %s. Reason: "
+                                 "include filter" % testcase.fullname)
+                    yield testcase
+                continue
 
-                # For skipping tests that are not designed for Android
-                if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
-                                         n_bit):
-                    logging.info("[Parser] Skipping test case %s. Reason: "
-                                 "disabled" % testcase.fullname)
-                    continue
+            # Check exclude filter set from TradeFed command. If a test
+            # case is in both include and exclude filter, it will be
+            # included
+            if self.IsTestcaseInList(testcase, self._exclude_filter, n_bit):
+                logging.info("[Parser] Skipping test case %s. Reason: "
+                             "exclude filter" % testcase.fullname)
+                continue
 
-                # For failing tests that are being inspected
-                if (not run_staging and self.IsTestcaseInList(
-                        testcase, ltp_configs.STAGING_TESTS, n_bit)):
-                    logging.info("[Parser] Skipping test case %s. Reason: "
-                                 "staging" % testcase.fullname)
-                    continue
+            # For skipping tests that are not designed for Android
+            if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
+                                     n_bit):
+                logging.info("[Parser] Skipping test case %s. Reason: "
+                             "disabled" % testcase.fullname)
+                continue
 
-                logging.info("[Parser] Adding test case %s." %
-                             testcase.fullname)
-                yield testcase
+            # For failing tests that are being inspected
+            if (not run_staging and self.IsTestcaseInList(
+                    testcase, ltp_configs.STAGING_TESTS, n_bit)):
+                logging.info("[Parser] Skipping test case %s. Reason: "
+                             "staging" % testcase.fullname)
+                continue
+
+            logging.info("[Parser] Adding test case %s." % testcase.fullname)
+            yield testcase
+
+    def ReadCommentedTxt(self, filepath):
+        '''Read a lines of a file that are not commented by #.
+
+        Args:
+            filepath: string, path of file to read
+
+        Returns:
+            A set of string representing non-commented lines in given file
+        '''
+        if not filepath:
+            logging.error('Invalid file path')
+            return None
+
+        with open(filepath, 'r') as f:
+            lines_gen = (line.strip() for line in f)
+            return set(
+                line for line in lines_gen
+                if line and not line.startswith('#'))
+
+    def GenerateLtpTestCases(self, testsuite, disabled_tests_list):
+        '''Generate test cases for each ltp test suite.
+
+        Args:
+            testsuite: string, test suite name
+
+        Returns:
+            A list of string
+        '''
+        testsuite_script = os.path.join(self._data_path,
+                                        ltp_configs.LTP_RUNTEST_DIR, testsuite)
+        testsuite = testsuite.replace('-', '_')
+
+        result = []
+        for line in open(testsuite_script, 'r'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+
+            testname = line.split()[0]
+            testname_prefix = ('DISABLED_'
+                               if testname in disabled_tests_list else '')
+            testname_modified = testname_prefix + testname.replace('-', '_')
+
+            result.append("\t".join([testsuite, testname_modified, line[len(
+                testname):].strip()]))
+        return result
+
+    def GenerateLtpRunScript(self):
+        '''Given a scenario group generate test case script.
+
+        Args:
+            scenario_group: string, file path of scanerio group file
+
+        Returns:
+            A list of string
+        '''
+        disabled_tests_path = os.path.join(
+            self._data_path, ltp_configs.LTP_DISABLED_BUILD_TESTS_CONFIG_PATH)
+        disabled_tests_list = self.ReadCommentedTxt(disabled_tests_path)
+
+        ltp_testsuites = ltp_configs.TEST_SUITES
+
+        result = []
+        for testsuite in ltp_testsuites:
+            result.extend(
+                self.GenerateLtpTestCases(testsuite, disabled_tests_list))
+
+        #TODO(yuexima): remove duplicate
+
+        return result
