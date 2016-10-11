@@ -31,6 +31,7 @@ LOCAL_SRC_FILES := \
   hal_camera.cpp \
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/include \
   bionic \
   libcore \
   external/protobuf/src \
@@ -44,5 +45,9 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
 
 LOCAL_MULTILIB := both
+
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+  $(LOCAL_PATH)/include \
+  system/media/camera/include \
 
 include $(BUILD_SHARED_LIBRARY)

@@ -1,5 +1,5 @@
-#include "test/vts/specification/hal_hidl/Nfc/Nfc.vts.h"
-#include "test/vts/specification/hal_hidl/Nfc/types.vts.h"
+#include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
+#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
