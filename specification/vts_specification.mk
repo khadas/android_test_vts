@@ -11,7 +11,8 @@ PRODUCT_COPY_FILES += \
     test/vts/specification/hal_conventional/WifiHalV1.vts:system/etc/WifiHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1.vts:system/etc/BluetoothHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts:system/etc/BluetoothHalV1bt_interface_t.vts \
-    test/vts/specification/hal_hidl/Nfc/Nfc.vts:system/etc/Nfc.vts \
-    test/vts/specification/hal_hidl/Nfc/NfcClientCallback.vts:system/etc/NfcClientCallback.vts \
+    harware/interfaces/nfc/1.0/vts/Nfc.vts:system/etc/Nfc.vts \
+    harware/interfaces/nfc/1.0/vts/NfcClientCallback.vts:system/etc/NfcClientCallback.vts \
+    harware/interfaces/nfc/1.0/vts/types.vts:system/etc/types.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
     test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \

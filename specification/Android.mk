@@ -33,14 +33,6 @@ vtslib_interfacespec_srcfiles := \
 
 VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
 
-ifeq ($(VTS_ENABLE_TREBLE),true)
-vtslib_interfacespec_srcfiles += \
-  hal_hidl/Nfc/Nfc.vts \
-  hal_hidl/Nfc/NfcClientCallback.vts \
-  hal_hidl/Nfc/types.vts \
-
-endif
-
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
   test/vts/sysfuzzer \
@@ -96,6 +88,7 @@ LOCAL_SHARED_LIBRARIES += \
   libhidl \
   libutils \
   android.hardware.nfc@1.0 \
+  libvts_driver_hidl_nfc@1.0 \
 
 endif
 

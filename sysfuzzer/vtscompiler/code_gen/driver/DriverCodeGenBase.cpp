@@ -243,8 +243,8 @@ void DriverCodeGenBase::GenerateAllHeader(
   h_ss << "#include <string.h>" << endl;
   h_ss << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << endl;
   h_ss << "#include <utils/Log.h>" << endl;
-  h_ss << "#include \"common/fuzz_tester/FuzzerBase.h\"" << endl;
-  h_ss << "#include \"common/fuzz_tester/FuzzerCallbackBase.h\"" << endl;
+  h_ss << "#include <fuzz_tester/FuzzerBase.h>" << endl;
+  h_ss << "#include <fuzz_tester/FuzzerCallbackBase.h>" << endl;
   for (auto const& header : message.header()) {
     h_ss << "#include " << header << endl;
   }
