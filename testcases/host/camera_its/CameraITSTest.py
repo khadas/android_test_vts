@@ -53,12 +53,26 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 "Python version %s found; "
                 "CameraITSTest only tested with Python 2.7." % (
                     str(sys.version_info[:3])))
-        print "==============================="
-        print "Python path is:", sys.executable
+        logging.info("===============================")
+        logging.info("Python path is: %s" % (sys.executable))
+        logging.info("PYTHONPATH env is: " + os.environ["PYTHONPATH"])
+        import PIL
+        logging.info("PIL version is " + PIL.__version__)
+        logging.info("PIL path is " + inspect.getfile(PIL))
+        from PIL import Image
+        logging.info("Image path is " + inspect.getfile(Image))
+        import numpy
+        logging.info("numpy version is " + numpy.__version__)
+        logging.info("numpy path is " + inspect.getfile(numpy))
+        import scipy
+        logging.info("scipy version is " + scipy.__version__)
+        logging.info("scipy path is " + inspect.getfile(scipy))
         import matplotlib
-        print "matplotlib version is " + matplotlib.__version__
-        print "matplotlib path is " + inspect.getfile(matplotlib)
-        print "==============================="
+        logging.info("matplotlib version is " + matplotlib.__version__)
+        logging.info("matplotlib path is " + inspect.getfile(matplotlib))
+        from matplotlib import pylab
+        logging.info("pylab path is " + inspect.getfile(pylab))
+        logging.info("===============================")
         modules = ["numpy", "PIL", "Image", "matplotlib", "pylab",
                    "scipy.stats", "scipy.spatial"]
         for m in modules:
@@ -70,12 +84,14 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                     exec ("from matplotlib import pylab")
                 else:
                     exec ("import " + m)
-            except ImportError:
-                asserts.fail("Cannot found python module " + m)
+            except ImportError as e:
+                asserts.fail("Cannot import python module %s: %s" % (m, str(e)))
 
         # Add ITS module path to path
-        self.pythonpath = "%s/pymodules:%s" % (self.its_path,
-                                               os.environ["PYTHONPATH"])
+        its_path = "%s/pymodules" % (self.its_path)
+        env_python_path = os.environ["PYTHONPATH"]
+        self.pythonpath = env_python_path if its_path in env_python_path else \
+                "%s:%s" % (its_path, env_python_path)
         os.environ["PYTHONPATH"] = self.pythonpath
 
     def RunTestcase(self, testpath):
