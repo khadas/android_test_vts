@@ -14,6 +14,9 @@
     <env-variables>
       <env-var name="BIGTABLE_PROJECT" value="${bigtable.projectID}" />
       <env-var name="BIGTABLE_INSTANCE" value="${bigtable.instanceID}" />
+      <env-var name="EMAIL_DOMAIN" value="${appengine.emailDomain}" />
+      <env-var name="SENDER_EMAIL" value="${appengine.senderEmail}" />
+      <env-var name="DEFAULT_EMAIL" value="${appengine.defaultEmail}" />
     </env-variables>
 
     <system-properties>
