@@ -187,6 +187,14 @@ STAGING_TESTS = [
     'syscalls-accept4_01',
     # Bug#30689411
     'mm-mmapstress03',
+    # New tests from timers Securebits test suite
+    'check_keepcaps01',
+    'check_keepcaps02',
+    'check_keepcaps03',
+    # New tests from timers Tracing test suite
+    'ftrace_regression01',
+    'ftrace_regression02',
+    'ftrace-stress-test',
 ]
 
 # Tests disabled
