@@ -18,6 +18,7 @@
     <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
     <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+    <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
     <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
     <template-include name="reporters" default="basic-reporters" />
