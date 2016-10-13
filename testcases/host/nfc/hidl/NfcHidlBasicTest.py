@@ -39,6 +39,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                  bits=64)
 
         self.dut.shell.InvokeTerminal("one")
+        self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
         self.dut.shell.one.Execute("service call nfc 4")  # Turn off
         self.dut.shell.one.Execute("service call nfc 5")  # Turn on
 
