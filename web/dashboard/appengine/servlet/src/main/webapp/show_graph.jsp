@@ -211,11 +211,19 @@
     </script>
     <nav id="navbar">
       <div class="nav-wrapper">
-        <div class="col s12">
+        <span>
           <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
           <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&startTime=${startTime}&endTime=${endTime}" class="breadcrumb">${testName}</a>
           <a href="#!" class="breadcrumb">Profiling</a>
-        </div>
+        </span>
+        <ul class='right'><li>
+          <a id='dropdown-button' class='dropdown-button btn red lighten-3' href='#' data-activates='dropdown'>
+            ${email}
+          </a>
+        </li></ul>
+        <ul id='dropdown' class='dropdown-content'>
+          <li><a href='${logoutURL}'>Log out</a></li>
+        </ul>
       </div>
     </nav>
   </head>

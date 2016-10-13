@@ -19,6 +19,9 @@ package com.google.android.vts.servlet;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
@@ -61,6 +64,10 @@ public class ShowGraphServlet extends HttpServlet {
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
+        UserService userService = UserServiceFactory.getUserService();
+        User currentUser = userService.getCurrentUser();
+        String loginURI = userService.createLoginURL(request.getRequestURI());
+        String logoutURI = userService.createLogoutURL(loginURI);
 
         String profilingPointName = request.getParameter("profilingPoint");
         long startTime;
@@ -189,6 +196,8 @@ public class ShowGraphServlet extends HttpServlet {
             request.setAttribute("error", PROFILING_DATA_ALERT);
         }
 
+        request.setAttribute("logoutURL", logoutURI);
+        request.setAttribute("email", currentUser.getEmail());
         // performance data for scatter plot
         request.setAttribute("showProfilingGraph", showProfilingGraph);
         request.setAttribute("showPerformanceGraph", showPerformanceGraph);
