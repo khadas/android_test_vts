@@ -225,30 +225,6 @@ STAGING_TESTS = [
     'ftrace_regression01',
     'ftrace_regression02',
     'ftrace-stress-test',
-    # Bug#30675453
-    'syscalls-perf_event_open02',
-    # Bug#30688551
-    'syscalls-lstat03_64',
-    'syscalls-lstat03',
-    # Bug#30688061
-    'input-input03',
-    # Bug#30688056
-    'cpuhotplug-cpuhotplug04',
-    # Bug#30699880
-    'mm-mtest01w',
-    'mm-mtest01',
-    # Bug#30688574
-    'syscalls-accept4_01',
-    # Bug#30689411
-    'mm-mmapstress03',
-    # Bug #32100169
-    'dma_thread_diotest-dma_thread_diotest1',
-    'dma_thread_diotest-dma_thread_diotest2',
-    'dma_thread_diotest-dma_thread_diotest3',
-    'dma_thread_diotest-dma_thread_diotest4',
-    'dma_thread_diotest-dma_thread_diotest5',
-    'dma_thread_diotest-dma_thread_diotest6',
-    'dma_thread_diotest-dma_thread_diotest7',
 ]
 
 # Tests disabled
@@ -649,4 +625,28 @@ DISABLED_TESTS = [
     #
     # https://android-review.googlesource.com/#/c/127908/
     'open13',
+    # Bug#30675453
+    'syscalls-perf_event_open02',
+    # Bug#30688551
+    'syscalls-lstat03_64',
+    'syscalls-lstat03',
+    # Bug#30688061
+    'input-input03',
+    # Bug#30688056
+    'cpuhotplug-cpuhotplug04',
+    # Bug#30699880
+    'mm-mtest01w',
+    'mm-mtest01',
+    # Bug#30688574
+    'syscalls-accept4_01',
+    # Bug#30689411
+    'mm-mmapstress03',
+    # Bug #32100169
+    'dma_thread_diotest-dma_thread_diotest1',
+    'dma_thread_diotest-dma_thread_diotest2',
+    'dma_thread_diotest-dma_thread_diotest3',
+    'dma_thread_diotest-dma_thread_diotest4',
+    'dma_thread_diotest-dma_thread_diotest5',
+    'dma_thread_diotest-dma_thread_diotest6',
+    'dma_thread_diotest-dma_thread_diotest7',
 ]
