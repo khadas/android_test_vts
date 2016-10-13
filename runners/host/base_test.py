@@ -596,6 +596,10 @@ class BaseTestClass(object):
             # results from this test class.
             setattr(e, "results", self.results)
             raise e
+        except Exception as e:
+            # Exception happened during test.
+            logging.exception(e)
+            raise e
         finally:
             self._exec_func(self._tearDownClass)
             logging.info("Summary for test class %s: %s", self.TAG,
