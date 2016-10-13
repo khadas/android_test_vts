@@ -66,7 +66,8 @@ bool FuzzerExtended_INfc::GetService() {
   static bool initialized = false;
   if (!initialized) {
     cout << "[agent:hal] HIDL getService" << endl;
-    hw_binder_proxy_ = INfc::getService("nfc");
+    hw_binder_proxy_ = INfc::getService("nfc_nci", true);
+    cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
     initialized = true;
   }
   return true;
@@ -81,7 +82,8 @@ bool FuzzerExtended_INfc::Fuzz(
     sp<INfcClientCallback> arg0(VtsFuzzerCreateINfcClientCallback(callback_socket_name));
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->open(
       arg0));
     vector<float>* measured = vts_measurement.Stop();
@@ -98,7 +100,8 @@ bool FuzzerExtended_INfc::Fuzz(
 arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->write(
       arg0));
     vector<float>* measured = vts_measurement.Stop();
@@ -115,7 +118,8 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
 arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->coreInitialized(
       arg0));
     vector<float>* measured = vts_measurement.Stop();
@@ -126,7 +130,8 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   if (!strcmp(func_name, "prediscover")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->prediscover());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
@@ -136,7 +141,8 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   if (!strcmp(func_name, "close")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->close());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
@@ -146,7 +152,8 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   if (!strcmp(func_name, "controlGranted")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->controlGranted());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
@@ -156,7 +163,8 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   if (!strcmp(func_name, "powerCycle")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
-    cout << "ok. let's call." << endl;
+    cout << "Call an API" << endl;
+    cout << "local_device = " << hw_binder_proxy_.get();
     *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->powerCycle());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
@@ -173,7 +181,7 @@ bool FuzzerExtended_INfc::GetAttribute(
 }
 extern "C" {
 android::vts::FuzzerBase* 
-vts_func_4_0_1_(
+vts_func_4_8_1_(
 ) {
   return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_INfc();
 }

@@ -434,7 +434,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "      return false;" << endl;
     cpp_ss << "    }" << endl;
 
-    cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
+    cpp_ss << "    cout << \"Call an API.\" << endl;" << endl;
+    cpp_ss << "    cout << \"local_device = \" << local_device;" << endl;
+
     cpp_ss << "    ";
     if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
       cpp_ss << "*result = NULL;" << endl;
@@ -626,7 +628,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "      return false;" << endl;
     cpp_ss << "    }" << endl;
 
-    cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
+    cpp_ss << "    cout << \"Call an API.\" << endl;" << endl;
     cpp_ss << "    ";
     if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
       cpp_ss << "*result = NULL;" << endl;
