@@ -136,8 +136,8 @@ TEST_SUITES = [
     'pty',
     'sched',
     'syscalls',
-    # The following are newly included suites. Test cases are put in staging
     'timers',
+    # The following are not included in default LTP scenario group
     'securebits',
     'tracing'
 ]
@@ -169,7 +169,6 @@ STAGING_TESTS = [
     'epoll_ctl02',
     'fcntl07',
     'fcntl07_64',
-    'syscalls-getrusage04',
     'madvise05',
     'mkdir02',
     'mkdir04',
@@ -192,6 +191,8 @@ STAGING_TESTS = [
     'syscall01',
     'utime03',
     'commands-ldd',
+    # getrusage04 gives inconsistent result over different runs
+    'syscalls-getrusage04',
     # Fail on local device but pass on lab devices
     'fs-proc01',
     # Fail on lab devices but pass on local device
@@ -216,6 +217,14 @@ STAGING_TESTS = [
     'numa-move_pages01_32bit',
     # Fail on staging but passing on stable
     'fs-fs_di',
+    # New tests from timers Securebits test suite
+    'check_keepcaps01',
+    'check_keepcaps02',
+    'check_keepcaps03',
+    # New tests from timers Tracing test suite
+    'ftrace_regression01',
+    'ftrace_regression02',
+    'ftrace-stress-test',
     # Bug#30675453
     'syscalls-perf_event_open02',
     # Bug#30688551
@@ -232,14 +241,14 @@ STAGING_TESTS = [
     'syscalls-accept4_01',
     # Bug#30689411
     'mm-mmapstress03',
-    # New tests from timers Securebits test suite
-    'check_keepcaps01',
-    'check_keepcaps02',
-    'check_keepcaps03',
-    # New tests from timers Tracing test suite
-    'ftrace_regression01',
-    'ftrace_regression02',
-    'ftrace-stress-test',
+    # Bug #32100169
+    'dma_thread_diotest-dma_thread_diotest1',
+    'dma_thread_diotest-dma_thread_diotest2',
+    'dma_thread_diotest-dma_thread_diotest3',
+    'dma_thread_diotest-dma_thread_diotest4',
+    'dma_thread_diotest-dma_thread_diotest5',
+    'dma_thread_diotest-dma_thread_diotest6',
+    'dma_thread_diotest-dma_thread_diotest7',
 ]
 
 # Tests disabled
