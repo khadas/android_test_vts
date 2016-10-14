@@ -29,6 +29,9 @@
     <hbase.version>1.2.1</hbase.version>
     <bigtable.projectID>google.com:android-vts-internal</bigtable.projectID>
     <bigtable.instanceID>vts-dev</bigtable.instanceID>
+    <appengine.senderEmail></appengine.senderEmail>
+    <appengine.emailDomain></appengine.emailDomain>
+    <appengine.defaultEmail></appengine.defaultEmail>
 
     <hadoop.version>2.4.1</hadoop.version>
     <compat.module>hbase-hadoop2-compat</compat.module>
