@@ -161,22 +161,14 @@ void DriverCodeGenBase::GenerateAll(
           }
           cpp_ss << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
-          cpp_ss << "    ";
-          if (arg.is_const() ||
-              message.component_class() == HAL_HIDL) {
-            cpp_ss << "const ";
-          }
+          cpp_ss << "    const ";
           if (arg.vector_value(0).type() == TYPE_SCALAR) {
             if (arg.vector_value(0).scalar_type().length() == 0) {
               cerr << __func__ << ":" << __LINE__
                    << " ERROR scalar_type not set" << endl;
               exit(-1);
             }
-            cpp_ss << "hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
-            if (arg.is_const() ||
-                message.component_class() == HAL_HIDL) {
-              cpp_ss << "&";
-            }
+            cpp_ss << "hidl_vec<" + arg.vector_value(0).scalar_type() + ">&";
           } else {
             cerr << __func__ << " unknown vector arg type "
                  << arg.vector_value(0).type() << endl;
@@ -333,22 +325,14 @@ void DriverCodeGenBase::GenerateAllHeader(
           }
           h_ss << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
-          h_ss << "    ";
-          if (arg.is_const() ||
-              message.component_class() == HAL_HIDL) {
-            h_ss << "const ";
-          }
+          h_ss << "    const ";
           if (arg.vector_value(0).type() == TYPE_SCALAR) {
             if (arg.vector_value(0).scalar_type().length() == 0) {
               cerr << __func__ << ":" << __LINE__
                    << " ERROR scalar_type not set" << endl;
               exit(-1);
             }
-            h_ss << "hidl_vec<" << arg.vector_value(0).scalar_type() << ">";
-            if (arg.is_const() ||
-                message.component_class() == HAL_HIDL) {
-              h_ss << "&";
-            }
+            h_ss << "hidl_vec<" << arg.vector_value(0).scalar_type() << ">&";
           } else {
             cerr << __func__ << " unknown vector arg type "
                  << arg.vector_value(0).type() << endl;
