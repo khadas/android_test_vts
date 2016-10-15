@@ -54,6 +54,10 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
             "a non-Treble device.")
 
         # TODO: extend to make realistic testcases
+        # For example, call after CORE_INIT_RSP is received.
+        # result = self.dut.hal.nfc.coreInitialized([1])
+        # logging.info("coreInitialized result: %s", result)
+
         def send_event(NfcEvent, NfcStatus):
             logging.info("callback send_event")
             logging.info("arg0 %s", NfcEvent)
@@ -80,13 +84,10 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
         result = self.dut.hal.nfc.powerCycle()
         logging.info("powerCycle result: %s", result)
 
-        result = self.dut.hal.nfc.coreInitialized([0, 9, 8])
-        logging.info("coreInitialized result: %s", result)
-
         nfc_types = self.dut.hal.nfc.GetHidlTypeInterface("types")
         logging.info("nfc_types: %s", nfc_types)
 
-        result = self.dut.hal.nfc.write(data_vec)
+        result = self.dut.hal.nfc.write([0, 1, 2, 3, 4, 5])
         logging.info("write result: %s", result)
 
         result = self.dut.hal.nfc.close()
