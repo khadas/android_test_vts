@@ -26,6 +26,7 @@
 
 #include "VtsCompilerUtils.h"
 #include "code_gen/driver/HalCodeGen.h"
+#include "utils/StringUtil.h"
 
 using namespace std;
 using namespace android;

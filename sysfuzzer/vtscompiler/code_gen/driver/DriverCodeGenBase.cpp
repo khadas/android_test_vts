@@ -26,6 +26,7 @@
 #include "utils/InterfaceSpecUtil.h"
 
 #include "VtsCompilerUtils.h"
+#include "utils/StringUtil.h"
 
 using namespace std;
 
