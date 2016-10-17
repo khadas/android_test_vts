@@ -145,15 +145,13 @@
       function drawGridTable() {
           var data = new google.visualization.DataTable();
 
-          // add columns
-          data.addColumn('string', 'Stats Type  \\ Device Build ID'); // blank column for first
-          var deviceBuildIdArray = ${deviceBuildIdArrayJson};
-          for (var i = 0; i < deviceBuildIdArray.length; i++) {
-              data.addColumn('string', deviceBuildIdArray[i]);
-          }
+          // Add column headers.
+          headerRow = ${headerRow};
+          headerRow.forEach(function(d) {
+              data.addColumn('string', '<span class="table-header-content">' +
+                             d + '</span>');
+          });
 
-          // add rows
-          var deviceGrid = ${deviceGrid};
           var timeGrid = ${timeGrid};
           var durationGrid = ${durationGrid};
           var summaryGrid = ${summaryGrid};
@@ -173,7 +171,6 @@
           });
 
           // add rows to the data.
-          data.addRows(deviceGrid);
           data.addRows(timeGrid);
           data.addRows(durationGrid);
           data.addRows(summaryGrid);

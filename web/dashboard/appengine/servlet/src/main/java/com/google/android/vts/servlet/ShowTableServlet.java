@@ -66,7 +66,6 @@ public class ShowTableServlet extends HttpServlet {
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
-    private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int TIME_INFO_ROW_COUNT = 1;
     private static final int DURATION_INFO_ROW_COUNT = 1;
     private static final int SUMMARY_ROW_COUNT = 4;
@@ -267,9 +266,9 @@ public class ShowTableServlet extends HttpServlet {
             }
         }
 
-        // the device grid on the table has four rows - Build Alias, Product Variant,
-        // Build Flavor and test build ID, and columns equal to the size of selectedBuildIdList.
-        String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][tests.size() + 1];
+        // The header grid on the table has 5 fields - Device build ID, Build Alias, Product Variant,
+        // Build Flavor and test build ID.
+        String[] headerRow = new String[tests.size() + 1];
 
         // the time grid on the table has one - Start Time.
         // These represent the start times for the test run.
@@ -286,10 +285,9 @@ public class ShowTableServlet extends HttpServlet {
         String[][] resultsGrid = new String[testCaseNameMap.size()][tests.size() + 1];
 
         // first column for device grid
-        String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "VTS Build ID"};
-        for (int i = 0; i < rowNamesDeviceGrid.length; i++) {
-            deviceGrid[i][0] = "<b>" + rowNamesDeviceGrid[i] + "</b>";
-        }
+        String[] headerFields = {"<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target",
+                                 "Device", "VTS Build ID"};
+        headerRow[0] = StringUtils.join(headerFields, "<br>");
 
         // first column for time grid
         timeGrid[0][0] = "<b>Test Start</b>";
@@ -378,10 +376,9 @@ public class ShowTableServlet extends HttpServlet {
                 coverageInfo = " - ";
             }
 
-            deviceGrid[0][j + 1] = buildAlias.toLowerCase();
-            deviceGrid[1][j + 1] = buildFlavor;
-            deviceGrid[2][j + 1] = productVariant;
-            deviceGrid[3][j + 1] = buildId;
+            headerRow[j + 1] = "<b>" + StringUtils.join(buildIdList, ",") + "</b><br>" +
+                               buildAlias.toLowerCase() + "<br>" + buildFlavor + "<br>" +
+                               productVariant + "<br>" + buildId;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
                                                report.getStartTimestamp());
@@ -412,7 +409,7 @@ public class ShowTableServlet extends HttpServlet {
         request.setAttribute("errorJson", new Gson().toJson(profilingDataAlert));
 
         // pass values by converting to JSON
-        request.setAttribute("deviceGrid", new Gson().toJson(deviceGrid));
+        request.setAttribute("headerRow", new Gson().toJson(headerRow));
         request.setAttribute("timeGrid", new Gson().toJson(timeGrid));
         request.setAttribute("durationGrid", new Gson().toJson(durationGrid));
         request.setAttribute("summaryGrid", new Gson().toJson(summaryGrid));
