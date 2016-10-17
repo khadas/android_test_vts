@@ -40,8 +40,10 @@ import com.google.android.vts.proto.VtsWebStatusMessage.TestStatusMessage.Builde
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -70,10 +72,13 @@ public class VtsAlertJobServlet extends HttpServlet {
     private static final byte[] TIME_QUALIFIER = Bytes.toBytes("upload_timestamp");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String VTS_EMAIL_NAME = "VTS Alert Bot";
+    private static final String TABLE_PREFIX = "result_";
     private static final String EMAIL_DOMAIN = System.getenv("EMAIL_DOMAIN");
     private static final String SENDER_EMAIL = System.getenv("SENDER_EMAIL");
     private static final String DEFAULT_EMAIL = System.getenv("DEFAULT_EMAIL");
+    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
     private static final long ONE_DAY = 86400000000L;  // units microseconds
+    private static final long THREE_MINUTES = 180000000L;  // units microseconds
 
     private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
 
@@ -156,11 +161,35 @@ public class VtsAlertJobServlet extends HttpServlet {
         Scan scan = new Scan();
         long startTime = lastUploadTimestamp - ONE_DAY;
         Set<ByteString> failedTestcases = new HashSet<>();
+        String footer = "<br><br>For details, visit the"
+                        + " <a href='https://android-vts-internal.googleplex.com/'>"
+                        + "VTS dashboard.</a>";
         if (prevStatusMessage != null) {
             TestStatusMessage testStatusMessage = VtsWebStatusMessage.TestStatusMessage
                                                       .parseFrom(prevStatusMessage);
             long statusTimestamp = testStatusMessage.getStatusTimestamp();
             if (lastUploadTimestamp <= statusTimestamp) {
+                long now = System.currentTimeMillis() * MILLI_TO_MICRO;
+                long diff = now - lastUploadTimestamp;
+                // Send an email daily to notify that the test hasn't been running.
+                // After 7 full days have passed, notifications will no longer be sent (i.e. the
+                // test is assumed to be deprecated).
+                if (diff > ONE_DAY && diff < ONE_DAY * 8 && diff % ONE_DAY < THREE_MINUTES) {
+                    String test = tableName.substring(TABLE_PREFIX.length());
+                    String uploadTimeString =
+                            new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                            .format(new Date(lastUploadTimestamp / MILLI_TO_MICRO));
+                    String subject = "Warning! Inactive test: " + test;
+                    String body = "Hello,<br><br>Test \"" + test + "\" is inactive. "
+                            + "No new data has been uploaded since "
+                            + uploadTimeString + "."
+                            + footer;
+                    try {
+                        messages.add(composeEmail(emails, subject, body));
+                    } catch (MessagingException | UnsupportedEncodingException e) {
+                        logger.error("Error composing email : ", e);
+                    }
+                }
                 return testStatusMessage.toByteArray();
             }
             startTime = statusTimestamp + 1;
@@ -284,10 +313,6 @@ public class VtsAlertJobServlet extends HttpServlet {
             }
         }
 
-        String footer = "<br><br>For details, visit the"
-                        + " <a href='https://android-vts-internal.googleplex.com/'>"
-                        + "VTS dashboard.</a>";
-
         if (newTestcaseFailures.size() > 0) {
             String subject = "New test failures in " + test + " @ " + buildId;
             String body = "Hello,<br><br>Test cases are failing in " + test
@@ -346,7 +371,6 @@ public class VtsAlertJobServlet extends HttpServlet {
             String testName = Bytes.toString(result.getRow());
             List<String> emails = getSubscriberEmails(table, testName);
             byte[] value = result.getValue(STATUS_FAMILY, DATA_QUALIFIER);
-            if (value == null) continue;
 
             // Get the time stamp for the last upload.
             long lastUploadTimestamp;
