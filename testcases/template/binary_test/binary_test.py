@@ -120,18 +120,25 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
-        for source in self.binary_test_sources:
-            logging.info('Parsing binary test source: %s', source)
-            src, dst, tag = self.ParseTestSource(source)
+        source_list = list(map(self.ParseTestSource, self.binary_test_sources))
+        logging.info('Parsed test sources: %s', source_list)
+
+        # Push source files first
+        for src, dst, tag in source_list:
             if src:
                 if os.path.isdir(src):
                     src = os.path.join(src, '.')
                 logging.info('Pushing from %s to %s.', src, dst)
-                self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
+                self._dut.adb.push('{src} {dst}'.format(src=src, dst=dst))
+                self.shell.Execute('ls %s' % dst)
+
+        # Then create test cases
+        for src, dst, tag in source_list:
             if tag is not None:
                 # tag not being None means to create a test case
                 self.tags.add(tag)
-                logging.info('Creating test case from %s with tag %s', dst, tag)
+                logging.info('Creating test case from %s with tag %s', dst,
+                             tag)
                 testcase = self.CreateTestCase(dst, tag)
                 if not testcase:
                     continue
