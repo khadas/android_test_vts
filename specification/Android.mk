@@ -75,14 +75,14 @@ LOCAL_C_INCLUDES := \
   android.hardware.nfc@1.0 \
   system/core/base/include \
 
-ifeq ($(VTS_ENABLE_TREBLE),true)
+ifeq ($(VTS_ENABLE_TREBLE), true)
 LOCAL_CFLAGS += -DENABLE_TREBLE
 endif
 
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
 
-ifeq ($(VTS_ENABLE_TREBLE),true)
+ifeq ($(VTS_ENABLE_TREBLE), true)
 LOCAL_SHARED_LIBRARIES += \
   libhwbinder \
   libhidl \
