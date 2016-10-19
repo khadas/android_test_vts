@@ -66,7 +66,7 @@ bool FuzzerExtended_INfc::GetService() {
   static bool initialized = false;
   if (!initialized) {
     cout << "[agent:hal] HIDL getService" << endl;
-    hw_binder_proxy_ = INfc::getService("nfc_nci", true);
+    hw_binder_proxy_ = INfc::getService("nfc_nci", false /*get stub*/);
     cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
     initialized = true;
   }
