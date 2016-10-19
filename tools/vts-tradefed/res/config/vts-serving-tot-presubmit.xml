@@ -20,15 +20,6 @@
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />
 
-    <!-- For vts-hal-hidl -->
-    <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
-    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
-
-    <!-- For vts-library -->
-    <option name="compatibility:include-filter" value="CpuProfilingTest" />
-
-    <!-- For vts-security -->
-
     <!-- For vts-system -->
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
