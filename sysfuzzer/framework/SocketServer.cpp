@@ -112,20 +112,20 @@ const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
 }
 
 string VtsDriverHalSocketServer::ListFunctions() const {
-  printf("VtsFuzzerServer::%s\n", __FUNCTION__);
+  cout << "VtsFuzzerServer::" << __func__ << endl;
   vts::ComponentSpecificationMessage* spec =
       spec_builder_.GetComponentSpecification();
   string output;
   if (!spec) {
     return output;
   }
-  printf("VtsFuzzerServer::%s serialize\n", __FUNCTION__);
+  cout << "VtsFuzzerServer::" << __func__ << " serialize" << endl;
   if (google::protobuf::TextFormat::PrintToString(*spec, &output)) {
-    printf("VtsFuzzerServer::%s result length %lu\n",
-           __FUNCTION__, output.length());
+    cout << "VtsFuzzerServer::" << __func__ << " result length "
+         << output.length() << endl;
     return output;
   } else {
-    printf("can't serialize the interface spec message to a string.\n");
+    cout << "can't serialize the interface spec message to a string." << endl;
     return output;
   }
 }
@@ -204,6 +204,8 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
+    default:
+      break;
   }
   cerr << __func__ << " failed." << endl;
   return false;

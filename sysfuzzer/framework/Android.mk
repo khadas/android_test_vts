@@ -22,6 +22,7 @@ LOCAL_MODULE := vtssysfuzzer
 LOCAL_MODULE_STEM_64 := fuzzer64
 LOCAL_MODULE_STEM_32 := fuzzer32
 LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS += -Wno-unused-parameter -Werror
 
 LOCAL_SRC_FILES := \
   VtsFuzzerMain.cpp \
@@ -55,4 +56,3 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)
-
