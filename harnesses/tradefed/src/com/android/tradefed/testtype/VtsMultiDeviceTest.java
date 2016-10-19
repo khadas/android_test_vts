@@ -87,7 +87,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     @Option(name = "test-timeout", description = "maximum amount of time"
             + "(im milliseconds) tests are allowed to run",
             isTimeVal = true)
-    private static long TEST_TIMEOUT = 1000 * 60 * 5;
+    private static long TEST_TIMEOUT = 1000 * 60 * 30;
 
     @Option(name = "test-module-name",
         description = "The name for a test module.")
