@@ -30,6 +30,7 @@ import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
+import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.TreeSet;
 import java.util.Set;
@@ -369,6 +371,23 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
      */
     private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
+        CLog.i("Load vendor test config %s", "/config/google-tradefed-vts-config.config");
+        InputStream config = getClass().getResourceAsStream("/config/google-tradefed-vts-config.config");
+        if (config != null) {
+            try {
+                String content = StreamUtil.getStringFromStream(config);
+                CLog.i("Loaded vendor test config %s", content);
+                if (content != null) {
+                    JSONObject vendorConfigJson = new JSONObject(content);
+                    JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
+                }
+            } catch(IOException e) {
+                throw new RuntimeException("Failed to read vendor config json file");
+            } catch(JSONException e) {
+                throw new RuntimeException("Failed to build updated vendor config json data");
+            }
+        }
+
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
         String content = null;
 
@@ -489,6 +508,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         } catch(JSONException e) {
             throw new RuntimeException("Failed to build updated test config json data");
         }
+
         CLog.i("config json: %s", jsonObject.toString());
 
         String jsonFilePath = null;

@@ -24,8 +24,9 @@ ifneq ($(filter vts, $(MAKECMDGOALS)),)
 include $(CLEAR_VARS)
 
 VTS_PYTHON_ZIP := $(HOST_OUT)/vts_runner_python/vts_runner_python.zip
-VTS_CAMERAITS_ZIP := $(HOST_OUT)/vts/CameraITS.zip
-VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+VTS_OUT_ROOT := $(HOST_OUT)/vts
+VTS_CAMERAITS_ZIP := $(VTS_OUT_ROOT)/CameraITS.zip
+VTS_TESTCASES_OUT := $(VTS_OUT_ROOT)/android-vts/testcases
 
 .PHONY: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
@@ -49,7 +50,12 @@ $(VTS_CAMERAITS_ZIP): $(SOONG_ZIP)
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)/CameraITS
 
 .PHONY: vts
-vts: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP)
+
+my_deps_copy_pairs :=
+  $(foreach d,$(ADDITIONAL_VTS_JARS),\
+    $(eval my_deps_copy_pairs += $(d):$(VTS_OUT_ROOT)/$(notdir $(d))))
+
+vts: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP) $(call copy-many-files,$(my_deps_copy_pairs))
 
 endif # vts
 endif # linux
