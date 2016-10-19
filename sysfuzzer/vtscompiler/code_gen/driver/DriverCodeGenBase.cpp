@@ -26,6 +26,7 @@
 #include "utils/InterfaceSpecUtil.h"
 
 #include "VtsCompilerUtils.h"
+#include "utils/StringUtil.h"
 
 using namespace std;
 
@@ -447,8 +448,10 @@ void DriverCodeGenBase::GenerateClassHeader(
           message.attribute(attr_idx) :
           message.interface().attribute(attr_idx - message.attribute_size());
       if (attribute.type() == TYPE_ENUM) {
-        h_ss << attribute.name() << " " << "Random" << attribute.name() << "();"
-               << endl;
+        GenerateNamespaceName(h_ss, message);
+        h_ss << "::" << attribute.name() << " "
+             << "Random" << attribute.name() << "();"
+             << endl;
       } else if (attribute.type() == TYPE_STRUCT) {
         h_ss << "void " << "MessageTo" << attribute.name()
              << "(const VariableSpecificationMessage& var_msg, "
@@ -478,16 +481,27 @@ void DriverCodeGenBase::GenerateFuzzFunctionForSubStruct(
   }
 }
 
+void DriverCodeGenBase::GenerateNamespaceName(
+    std::stringstream& ss, const ComponentSpecificationMessage& message) {
+  if (message.component_class() == HAL_HIDL && message.has_package()) {
+    string name = message.package();
+    ReplaceSubString(name, ".", "::");
+    ss << name
+       << "::"
+       << GetVersionString(message.component_type_version(), true);
+  } else {
+    cerr << __func__ << ":" << __LINE__ << " no namespace" << endl;
+    exit(-1);
+  }
+}
+
 void DriverCodeGenBase::GenerateOpenNameSpaces(
     std::stringstream& ss, const ComponentSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
     ss << "using namespace android::hardware;" << endl;
     ss << "using namespace ";
-    string name = message.package();
-    ReplaceSubString(name, ".", "::");
-    ss << name << "::"
-       << GetVersionString(message.component_type_version(), true)
-       << ";" << endl;
+    GenerateNamespaceName(ss, message);
+    ss << ";" << endl;
   }
 
   ss << "namespace android {" << endl;

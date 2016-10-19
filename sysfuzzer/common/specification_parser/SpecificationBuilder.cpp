@@ -45,7 +45,8 @@ vts::ComponentSpecificationMessage*
 SpecificationBuilder::FindComponentSpecification(const int target_class,
                                                  const int target_type,
                                                  const float target_version,
-                                                 const string submodule_name) {
+                                                 const string submodule_name,
+                                                 const string package) {
   DIR* dir;
   struct dirent* ent;
 
@@ -61,17 +62,26 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
       vts::ComponentSpecificationMessage* message =
           new vts::ComponentSpecificationMessage();
       if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
-        if (message->component_type() == target_type &&
-            message->component_type_version() == target_version) {
-          if (submodule_name.length() > 0) {
-            if (message->component_class() != HAL_CONVENTIONAL_SUBMODULE ||
-                message->original_data_structure_name() != submodule_name) {
-              continue;
+        if (message->component_class() != target_class) continue;
+
+        if (message->component_class() != HAL_HIDL) {
+          if (message->component_type() == target_type &&
+              message->component_type_version() == target_version) {
+            if (submodule_name.length() > 0) {
+              if (message->component_class() != HAL_CONVENTIONAL_SUBMODULE ||
+                  message->original_data_structure_name() != submodule_name) {
+                continue;
+              }
             }
-          } else if (message->component_class() != target_class)
-            continue;
-          closedir(dir);
-          return message;
+            closedir(dir);
+            return message;
+          }
+        } else {
+          if (message->package() == package &&
+              message->component_type_version() == target_version) {
+            closedir(dir);
+            return message;
+          }
         }
       }
       delete message;
@@ -213,9 +223,11 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
 
 bool SpecificationBuilder::LoadTargetComponent(
     const char* dll_file_name, const char* spec_lib_file_path, int target_class,
-    int target_type, float target_version, const char* module_name) {
+    int target_type, float target_version, const char* target_package,
+    const char* module_name) {
   if_spec_msg_ =
-      FindComponentSpecification(target_class, target_type, target_version);
+      FindComponentSpecification(target_class, target_type, target_version,
+                                 module_name, target_package);
   if (!if_spec_msg_) {
     cerr << __FUNCTION__ << ": no interface specification file found for "
          << "class " << target_class << " type " << target_type << " version "
@@ -426,7 +438,8 @@ const string& SpecificationBuilder::CallFunction(
         submodule_iface_spec_msg =
             FindComponentSpecification(
                 if_spec_msg_->component_class(), if_spec_msg_->component_type(),
-                if_spec_msg_->component_type_version(), submodule_name);
+                if_spec_msg_->component_type_version(), submodule_name,
+                if_spec_msg_->package());
         if (!submodule_iface_spec_msg) {
           cerr << __func__ << " submodule InterfaceSpecification not found" << endl;
         } else {
@@ -575,7 +588,8 @@ const string& SpecificationBuilder::GetAttribute(
         submodule_iface_spec_msg =
             FindComponentSpecification(
                 if_spec_msg_->component_class(), if_spec_msg_->component_type(),
-                if_spec_msg_->component_type_version(), submodule_name);
+                if_spec_msg_->component_type_version(), submodule_name,
+                if_spec_msg_->package());
         if (!submodule_iface_spec_msg) {
           cerr << __func__ << " submodule InterfaceSpecification not found" << endl;
         } else {
@@ -599,9 +613,11 @@ const string& SpecificationBuilder::GetAttribute(
 bool SpecificationBuilder::Process(const char* dll_file_name,
                                    const char* spec_lib_file_path,
                                    int target_class, int target_type,
-                                   float target_version) {
+                                   float target_version,
+                                   const char* target_package) {
   vts::ComponentSpecificationMessage* interface_specification_message =
-      FindComponentSpecification(target_class, target_type, target_version);
+      FindComponentSpecification(target_class, target_type, target_version,
+                                 target_package);
   cout << "ifspec addr " << interface_specification_message << endl;
 
   if (!interface_specification_message) {

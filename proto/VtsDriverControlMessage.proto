@@ -80,6 +80,8 @@ message VtsDriverControlCommandMessage {
   optional float target_version = 1204;
   // the name of a HAL module to open.
   optional bytes module_name = 1205;
+  // the package of a HIDL HAL to open.
+  optional bytes target_package = 1206;
 
   // for LIST_FUNCTIONS
   // none

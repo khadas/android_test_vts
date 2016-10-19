@@ -36,6 +36,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.dut.hal.InitHidlHal(target_type="nfc",
                                  target_basepaths=["/system/lib64"],
                                  target_version=1.0,
+                                 target_package="android.hardware.nfc",
                                  bits=64)
 
         self.dut.shell.InvokeTerminal("one")

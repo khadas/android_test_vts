@@ -112,7 +112,7 @@ class HalMirror(object):
         self._CreateMirrorObject("hal_conventional",
                                  target_type,
                                  target_version,
-                                 target_basepaths,
+                                 target_basepaths=target_basepaths,
                                  handler_name=handler_name,
                                  bits=bits)
 
@@ -139,13 +139,14 @@ class HalMirror(object):
         self._CreateMirrorObject("hal_legacy",
                                  target_type,
                                  target_version,
-                                 target_basepaths,
+                                 target_basepaths=target_basepaths,
                                  handler_name=handler_name,
                                  bits=bits)
 
     def InitHidlHal(self,
                     target_type,
                     target_version,
+                    target_package=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
                     bits=64):
@@ -157,6 +158,7 @@ class HalMirror(object):
         Args:
             target_type: string, the target type name (e.g., light, camera).
             target_version: float, the target component version (e.g., 1.0).
+            target_package: string, the package name of a target HIDL HAL.
             target_basepaths: list of strings, the paths to look for target
                               files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             handler_name: string, the name of the handler. target_type is used
@@ -166,7 +168,8 @@ class HalMirror(object):
         self._CreateMirrorObject("hal_hidl",
                                  target_type,
                                  target_version,
-                                 target_basepaths,
+                                 target_package=target_package,
+                                 target_basepaths=target_basepaths,
                                  handler_name=handler_name,
                                  bits=bits)
 
@@ -192,6 +195,7 @@ class HalMirror(object):
                             target_class,
                             target_type,
                             target_version,
+                            target_package=None,
                             target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                             handler_name=None,
                             bits=64):
@@ -204,6 +208,7 @@ class HalMirror(object):
             target_class: string, the target class name (e.g., hal).
             target_type: string, the target type name (e.g., light, camera).
             target_version: float, the target component version (e.g., 1.0).
+            target_package: string, the package name of a HIDL HAL.
             target_basepaths: list of strings, the paths to look for target
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             handler_name: string, the name of the handler. target_type is used
@@ -269,7 +274,8 @@ class HalMirror(object):
             file_path=target_filename,
             target_class=target_class_id,
             target_type=target_type_id,
-            target_version=target_version)
+            target_version=target_version,
+            target_package=target_package)
 
         if not launched:
             raise errors.ComponentLoadingError(

@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 
+#include "utils/StringUtil.h"
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
@@ -29,9 +30,17 @@ namespace vts {
 
 string GetFunctionNamePrefix(const ComponentSpecificationMessage& message) {
   stringstream prefix_ss;
-  prefix_ss << VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX
-            << message.component_class() << "_" << message.component_type()
-            << "_" << int(message.component_type_version()) << "_";
+  if (message.component_class() != HAL_HIDL) {
+    prefix_ss << VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX
+              << message.component_class() << "_" << message.component_type()
+              << "_" << int(message.component_type_version()) << "_";
+  } else {
+    string package_as_function_name(message.package());
+    ReplaceSubString(package_as_function_name, ".", "_");
+    prefix_ss << VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX
+              << message.component_class() << "_" << package_as_function_name
+              << "_" << int(message.component_type_version()) << "_";
+  }
   return prefix_ss.str();
 }
 
