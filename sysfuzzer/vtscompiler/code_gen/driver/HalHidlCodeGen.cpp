@@ -584,7 +584,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           message.interface().attribute(attr_idx - message.attribute_size());
 
       if (attribute.type() == TYPE_ENUM) {
-        cpp_ss << attribute.name() << " " << "Random" << attribute.name() << "() {"
+        GenerateNamespaceName(cpp_ss, message);
+        cpp_ss << "::" << attribute.name() << " " << "Random" << attribute.name() << "() {"
                << endl;
         cpp_ss << "int choice = rand() / " << attribute.enum_value().enumerator().size() << ";" << endl;
         cpp_ss << "if (choice < 0) choice *= -1;" << endl;
@@ -599,11 +600,15 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                  << attribute.enum_value().scalar_type() << endl;
             exit(-1);
           }
-          cpp_ss << ") return " << attribute.name() << "::"
+          cpp_ss << ") return ";
+          GenerateNamespaceName(cpp_ss, message);
+          cpp_ss <<"::" << attribute.name() << "::"
                  << attribute.enum_value().enumerator(index)
                  << ";" << endl;
         }
-        cpp_ss << "    return " << attribute.name() << "::"
+        cpp_ss << "    return ";
+        GenerateNamespaceName(cpp_ss, message);
+        cpp_ss <<"::" << attribute.name() << "::"
                << attribute.enum_value().enumerator(0)
                << ";" << endl;
         cpp_ss << "}" << endl;
