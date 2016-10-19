@@ -53,6 +53,8 @@ VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
 include test/vts/tools/build/Android.packaging_gcno.mk
 
 # Sancov-enabled target.
+# TODO(trong): enable for mips.
+ifeq (,$(findstring mips, $(TARGET_PRODUCT)))
 include $(CLEAR_VARS)
 LOCAL_MODULE := lights.vts.sancov
 LOCAL_MODULE_TAGS := optional
@@ -62,21 +64,13 @@ LOCAL_SHARED_LIBRARIES := \
     liblog \
 
 LOCAL_ARM_MODE := arm
-LOCAL_CLANG := true
 LOCAL_CFLAGS += \
-    -fsanitize=address \
-    -fsanitize-coverage=edge \
     -fno-omit-frame-pointer
 
-LOCAL_LDFLAGS += \
-    -fsanitize=address \
-    -fsanitize-coverage=edge \
-
-LOCAL_ADDRESS_SANITIZER := true
-
+LOCAL_SANITIZE := address coverage
 LOCAL_MULTILIB := both
-
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
+endif
