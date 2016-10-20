@@ -276,7 +276,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "    hw_binder_proxy_ = " << message.component_name()
            << "::getService(\""
            << service_name
-           << "\", true);" << endl;
+           << "\", false /*get stub*/);" << endl;
     cpp_ss << "    cout << \"[agent:hal] hw_binder_proxy_ = \" << "
            << "hw_binder_proxy_.get() << endl;" << endl;
     cpp_ss << "    initialized = true;" << endl;
