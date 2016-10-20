@@ -58,8 +58,7 @@ status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
 
   data.checkInterface(this);
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  data.print(PLOG);
-  endl(PLOG);
+  alog << data << endl;
 #endif
 
   switch (code) {
@@ -80,8 +79,7 @@ status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
         abort();
       }
 #ifdef VTS_FUZZER_BINDER_DEBUG
-      reply->print(PLOG);
-      endl(PLOG);
+      alog << reply << endl;
 #endif
       reply->writeInt32(result);
       break;
@@ -96,8 +94,7 @@ status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
         abort();
       }
 #ifdef VTS_FUZZER_BINDER_DEBUG
-      reply->print(PLOG);
-      endl(PLOG);
+      alog << reply << endl;
 #endif
       reply->writeInt32(result);
       break;
@@ -112,8 +109,7 @@ status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
         abort();
       }
 #ifdef VTS_FUZZER_BINDER_DEBUG
-      reply->print(PLOG);
-      endl(PLOG);
+      alog << reply << endl;
 #endif
       reply->writeCString(result);
       break;
@@ -126,8 +122,7 @@ status_t BnVtsFuzzer::onTransact(uint32_t code, const Parcel& data,
         abort();
       }
 #ifdef VTS_FUZZER_BINDER_DEBUG
-      reply->print(PLOG);
-      endl(PLOG);
+      alog << reply << endl;
 #endif
       reply->writeCString(result);
       break;
