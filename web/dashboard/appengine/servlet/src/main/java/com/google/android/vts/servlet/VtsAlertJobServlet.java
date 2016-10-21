@@ -18,7 +18,6 @@ package com.google.android.vts.servlet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -404,9 +403,6 @@ public class VtsAlertJobServlet extends HttpServlet {
                         logger.error("Error sending email : ", e);
                     }
                 }
-            } else {
-                Delete del = new Delete(Bytes.toBytes(testName));
-                table.delete(del);
             }
         }
     }

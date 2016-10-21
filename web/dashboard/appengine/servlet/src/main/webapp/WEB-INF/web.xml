@@ -38,6 +38,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 </servlet>
 
 <servlet>
+  <servlet-name>bigtable</servlet-name>
+  <servlet-class>com.google.android.vts.api.BigtableApiServlet</servlet-class>
+</servlet>
+
+<servlet>
   <servlet-name>vts_alert_job</servlet-name>
   <servlet-class>com.google.android.vts.servlet.VtsAlertJobServlet</servlet-class>
 </servlet>
@@ -49,7 +54,7 @@ Copyright 2016 Google Inc. All Rights Reserved.
 
 <servlet-mapping>
   <servlet-name>preferences</servlet-name>
-  <url-pattern>/preferences/*</url-pattern>
+  <url-pattern>/show_preferences/*</url-pattern>
 </servlet-mapping>
 
 <servlet-mapping>
@@ -65,6 +70,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <servlet-mapping>
   <servlet-name>show_coverage</servlet-name>
   <url-pattern>/show_coverage/*</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>bigtable</servlet-name>
+  <url-pattern>/api/bigtable/*</url-pattern>
 </servlet-mapping>
 
 <servlet-mapping>
@@ -90,7 +100,7 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <security-constraint>
   <web-resource-collection>
     <web-resource-name>all</web-resource-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/show_*</url-pattern>
   </web-resource-collection>
   <auth-constraint>
     <role-name>*</role-name>

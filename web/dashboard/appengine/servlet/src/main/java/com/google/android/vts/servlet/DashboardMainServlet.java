@@ -54,7 +54,6 @@ public class DashboardMainServlet extends HttpServlet {
     private static final String DASHBOARD_ALL_LINK = "/?showAll=true";
     private static final String DASHBOARD_FAVORITES_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
-    private static final byte[] TEST_FAMILY = Bytes.toBytes("test_to_email");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String TABLE_PREFIX = "result_";
     private static final String ALL_HEADER = "All Tests";
@@ -76,6 +75,10 @@ public class DashboardMainServlet extends HttpServlet {
         RequestDispatcher dispatcher = null;
         String loginURI = userService.createLoginURL(request.getRequestURI());
         String logoutURI = userService.createLogoutURL(loginURI);
+        if (currentUser == null || currentUser.getEmail() == null) {
+            response.sendRedirect(loginURI);
+            return;
+        }
 
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
         List<String> displayedTests = new ArrayList<>();
@@ -139,6 +142,7 @@ public class DashboardMainServlet extends HttpServlet {
         String[] testArray = new String[displayedTests.size()];
         displayedTests.toArray(testArray);
         response.setContentType("text/plain");
+        response.setStatus(HttpServletResponse.SC_OK);
         request.setAttribute("testNames", testArray);
         request.setAttribute("headerLabel", header);
         request.setAttribute("showAll", showAll);
