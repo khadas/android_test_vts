@@ -200,8 +200,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
       if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         cpp_ss << api.return_type_hidl(0).scalar_type();
       } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
-        GenerateNamespaceName(cpp_ss, message);
-        cpp_ss << "::" << GetCppVariableType(api.return_type_hidl(0), &message);
+        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
         cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else {
@@ -219,8 +218,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
       if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         cpp_ss << api.return_type_hidl(0).scalar_type();
       } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
-        GenerateNamespaceName(cpp_ss, message);
-        cpp_ss << "::" << GetCppVariableType(api.return_type_hidl(0), &message);
+        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
         cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else {
@@ -515,10 +513,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         } else if (api.return_type_hidl(0).has_predefined_type()) {
           cpp_ss << "    *result = reinterpret_cast<void*>("
                  << "(";
-          GenerateNamespaceName(cpp_ss, message);
-          // TODO(yim): check whether predefined_type is defined in the
-          // message's namespace.
-          cpp_ss << "::" << api.return_type_hidl(0).predefined_type() << ")"
+          cpp_ss << api.return_type_hidl(0).predefined_type() << ")"
                  << kInstanceVariableName << "->" << api.name() << "(";
         } else {
           cerr << __func__ << ":" << __LINE__ << " unknown return type" << endl;
@@ -584,8 +579,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           message.interface().attribute(attr_idx - message.attribute_size());
 
       if (attribute.type() == TYPE_ENUM) {
-        GenerateNamespaceName(cpp_ss, message);
-        cpp_ss << "::" << attribute.name() << " " << "Random" << attribute.name() << "() {"
+        std::string attribute_name = attribute.name();
+        ReplaceSubString(attribute_name, "::", "__");
+        cpp_ss << attribute.name() << " " << "Random" << attribute_name << "() {"
                << endl;
         cpp_ss << "int choice = rand() / " << attribute.enum_value().enumerator().size() << ";" << endl;
         cpp_ss << "if (choice < 0) choice *= -1;" << endl;
@@ -600,15 +596,12 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                  << attribute.enum_value().scalar_type() << endl;
             exit(-1);
           }
-          cpp_ss << ") return ";
-          GenerateNamespaceName(cpp_ss, message);
-          cpp_ss <<"::" << attribute.name() << "::"
+          cpp_ss << ") return " << attribute.name() << "::"
                  << attribute.enum_value().enumerator(index)
                  << ";" << endl;
         }
-        cpp_ss << "    return ";
-        GenerateNamespaceName(cpp_ss, message);
-        cpp_ss <<"::" << attribute.name() << "::"
+        cpp_ss << "    return "
+               << attribute.name() << "::"
                << attribute.enum_value().enumerator(0)
                << ";" << endl;
         cpp_ss << "}" << endl;
