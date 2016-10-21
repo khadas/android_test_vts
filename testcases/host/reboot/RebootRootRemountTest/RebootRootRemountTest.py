@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+import logging
+
 from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
@@ -23,18 +25,25 @@ from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 
 
-class RootRemountAfterRebootTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class RebootRootRemountTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """Tests if device can root and remount /system partition after reboot.
 
     Attributes:
-        dut: AndroidDevice, the device under test as config
+        dut: AndroidDevice, the device under test as config.
+        verity: boolean, True if verity was enabled before test,
+            False otherwise.
     """
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
+        self.verity = self.dut.verityEnabled
 
-    def testRootRemountAfterReboot(self):
+    def testRebootRootRemount(self):
         """Tests if /system partition can be remounted as r/w after reboot."""
-        self.dut.adb.disable_verity()
+        # Disable verity if it's enabled.
+        if self.verity:
+            logging.info("Disable verity.")
+            self.dut.adb.disable_verity()
+
         try:
             self.dut.reboot()
             self.dut.waitForBootCompletion()
@@ -50,6 +59,18 @@ class RootRemountAfterRebootTest(base_test_with_webdb.BaseTestWithWebDbClass):
         except adb.AdbError():
             asserts.fail("Root/remount failed.")
 
+        # Restore verity to its original state.
+        if self.verity:
+            logging.info("Enable verity.")
+            self.dut.adb.enable_verity()
+            try:
+                self.dut.reboot()
+                self.dut.waitForBootCompletion()
+            except utils.TimeoutError:
+                asserts.fail("Reboot failed after re-enabling verity.")
+
+        asserts.assertEqual(self.verity, self.dut.verityEnabled,
+            "Verity state was successfully restored.")
 
 if __name__ == "__main__":
     test_runner.main()
