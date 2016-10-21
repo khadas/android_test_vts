@@ -16,6 +16,7 @@
 
 package com.google.android.vts.servlet;
 
+import com.google.android.vts.helpers.BigtableHelper;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage;
@@ -341,8 +342,6 @@ public class ShowTableServlet extends HttpServlet {
 
                 int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
                 if (testCaseReport.getTestResult() != null) {
-                    resultsGrid[i][j + 1] = Integer.toString(testCaseReport.getTestResult()
-                                                             .getNumber());
                     resultsGrid[i][j + 1] = "<div class=\"" +
                                             testCaseReport.getTestResult().toString() +
                                             " TEST_CASE_RESULT\">&nbsp;</div>";

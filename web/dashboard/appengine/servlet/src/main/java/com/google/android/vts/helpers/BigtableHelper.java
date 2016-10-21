@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.vts.servlet;
+package com.google.android.vts.helpers;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
@@ -34,15 +33,12 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
 
 /**
- * BigtableHelper, a ServletContextListener, is setup in web.xml to run before a JSP is run.
+ * BigtableHelper, a helper class for interacting with a Bigtable instance.
  **/
-public class BigtableHelper implements ServletContextListener {
+public class BigtableHelper {
 
     private static String PROJECT_ID = System.getenv("BIGTABLE_PROJECT");
     private static String INSTANCE_ID = System.getenv("BIGTABLE_INSTANCE");
@@ -52,11 +48,6 @@ public class BigtableHelper implements ServletContextListener {
     // The initial connection to Cloud Bigtable is an expensive operation -- We cache this
     // connection to speed things up.
     private static Connection connection = null;     // The authenticated connection
-
-    private static ServletContext servletContext;
-
-    // Holds the list of tables in the instance.
-    private static HTableDescriptor[] tableDescriptor = null;
 
     /**
      * Connect will establish the connection to Cloud Bigtable.
@@ -70,8 +61,8 @@ public class BigtableHelper implements ServletContextListener {
             org.apache.hadoop.hbase.client.Connection.class);   // Required for Cloud Bigtable
 
         if (PROJECT_ID == null || INSTANCE_ID == null) {
-            servletContext.log("environment variables BIGTABLE_PROJECT, and BIGTABLE_INSTANCE need "
-                + "to be defined.");
+            logger.info("environment variables BIGTABLE_PROJECT, and BIGTABLE_INSTANCE need "
+                        + "to be defined.");
             return;
         }
         conf.set("google.bigtable.project.id", PROJECT_ID);
@@ -87,28 +78,22 @@ public class BigtableHelper implements ServletContextListener {
      * @throws IOException
      */
     public static HTableDescriptor[] getTables() throws IOException {
-        if (tableDescriptor != null) {
-            return tableDescriptor;
-        }
-
+        HTableDescriptor[] tableDescriptors = null;
         try {
             // Instantiating HBaseAdmin object
             Admin admin = getConnection().getAdmin();
             // Getting all the list of tables using HBaseAdmin object
-            tableDescriptor = admin.listTables();
+            tableDescriptors = admin.listTables();
 
         } catch (MasterNotRunningException e) {
-            servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper"
-                               + ".getTables() ", e);
-        } catch (ZooKeeperConnectionException e) {
-            servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
-                               + "getTables() ", e);
+            logger.info("Exception occurred in com.google.android.vts.servlet.BigtableHelper"
+                        + ".getTables() ", e);
         } catch (IOException e) {
-            servletContext.log("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
-                               + "getTables() ", e);
+            logger.info("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
+                        + "getTables() ", e);
         }
 
-        return tableDescriptor;
+        return tableDescriptors;
     }
 
     /**
@@ -191,37 +176,8 @@ public class BigtableHelper implements ServletContextListener {
             connect();
         }
         if (connection == null) {
-            servletContext.log("BigtableHelper-No Connection");
+            logger.info("BigtableHelper-No Connection");
         }
         return connection;
-    }
-
-    @Override
-    public void contextInitialized(ServletContextEvent event) {
-        // This will be invoked as part of a warmup request, or the first user
-        // request if no warmup request was invoked.
-        servletContext = event.getServletContext();
-        try {
-            connect();
-        } catch (IOException e) {
-            servletContext.log("BigtableHelper - connect ", e);
-        }
-        if (connection == null) {
-            servletContext.log("BigtableHelper-No Connection");
-        }
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent event) {
-        // App Engine does not currently invoke this method.
-        if (connection == null) {
-            return;
-        }
-        try {
-            connection.close();
-        } catch (IOException io) {
-            servletContext.log("contextDestroyed ", io);
-        }
-        connection = null;
     }
 }
