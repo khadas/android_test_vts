@@ -32,3 +32,5 @@ vts_spec_file_list += \
   hardware/interfaces/nfc/1.0/vts/Nfc.vts \
   hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
   hardware/interfaces/nfc/1.0/vts/types.vts \
+  hardware/interfaces/vibrator/1.0/vts/Vibrator.vts \
+  hardware/interfaces/vibrator/1.0/vts/types.vts \

@@ -81,6 +81,8 @@ string ComponentTypeToString(int component_type) {
       return "bluetooth";
     case NFC:
       return "nfc";
+    case VIBRATOR:
+      return "vibrator";
     case BIONIC_LIBM:
       return "bionic_libm";
   }
