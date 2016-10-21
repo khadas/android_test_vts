@@ -42,6 +42,7 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   // Sends a LOAD_HAL request.
   int32_t LoadHal(const string& file_path, int target_class, int target_type,
                   float target_version, const string& target_package,
+                  const string& target_component_name,
                   const string& module_name);
 
   // Sends a LIST_FUNCTIONS request.

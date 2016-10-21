@@ -48,7 +48,8 @@ class SpecificationBuilder {
   // component.
   vts::ComponentSpecificationMessage* FindComponentSpecification(
       const int target_class, const int target_type, const float target_version,
-      const string submodule_name = "", const string package = "");
+      const string submodule_name = "", const string package = "",
+      const string component_name = "");
 
   vts::ComponentSpecificationMessage*
       FindComponentSpecification(const string& component_name);
@@ -69,12 +70,14 @@ class SpecificationBuilder {
   // the target component.
   bool Process(const char* dll_file_name, const char* spec_lib_file_path,
                int target_class, int target_type, float target_version,
-               const char* target_package);
+               const char* target_package, const char* target_component_name);
 
   bool LoadTargetComponent(const char* dll_file_name,
                            const char* spec_lib_file_path, int target_class,
                            int target_type, float target_version,
-                           const char* target_package, const char* module_name);
+                           const char* target_package,
+                           const char* target_component_name,
+                           const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
       const ComponentSpecificationMessage& iface_spec_msg,

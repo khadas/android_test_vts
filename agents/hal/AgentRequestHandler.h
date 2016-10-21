@@ -66,6 +66,7 @@ class AgentRequestHandler : public VtsDriverCommUtil {
                            const string& file_path, int target_class,
                            int target_type, float target_version,
                            const string& target_package,
+                           const string& target_component_name,
                            const string& module_name, int bits);
 
   // for the VTS_AGENT_COMMAND_READ_SPECIFICATION`
