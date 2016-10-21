@@ -16,9 +16,6 @@
 <configuration description="Run New VTS System Tests in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
-    <option name="compatibility:include-filter" value="SampleQtaguidTest" />
-    <option name="compatibility:include-filter" value="LibcTest" />
-    <option name="compatibility:include-filter" value="SyscallExistenceTest" />
     <option name="compatibility:include-filter" value="CameraITSTest" />
     <option name="compatibility:include-filter" value="RebootTest" />
     <option name="compatibility:include-filter" value="RebootRootRemountTest" />
