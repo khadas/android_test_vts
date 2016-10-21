@@ -31,6 +31,9 @@
     <!-- For vts-system -->
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
+    <option name="compatibility:include-filter" value="SyscallExistenceTest" />
+    <option name="compatibility:include-filter" value="SampleQtaguidTest" />
+    <option name="compatibility:include-filter" value="LibcTest" />
 
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
