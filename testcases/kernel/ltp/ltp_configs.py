@@ -147,90 +147,11 @@ TEST_SUITES = [
 # or testsuite.testname_**bit, or just testname. Using just testname
 # is not recommended
 STAGING_TESTS = [
-    # Tests currently only failing on sailfish and marlin,
+    # Tests currently only failing on pixels,
     # these will be inspected soon
     'syscalls.open14',
     'syscalls.openat03',
     # Recently fixed
-    'connectors.Connectors',
-    'kernel_misc.kmsg01',
-    'syscalls.access01',
-    'syscalls.add_key01',
-    'syscalls.add_key02',
-    'syscalls.chdir03',
-    'syscalls.chroot01',
-    'syscalls.creat01',
-    'syscalls.creat01',
-    'syscalls.creat03',
-    'syscalls.creat04',
-    'syscalls.creat05',
-    'epoll_create1_01',
-    'epoll_ctl01',
-    'epoll_ctl02',
-    'fcntl07',
-    'fcntl07_64',
-    'madvise05',
-    'mkdir02',
-    'mkdir04',
-    'pause01',
-    'pipe01',
-    'pipe02',
-    'pipe03',
-    'posix_fadvise01',
-    'posix_fadvise01_64',
-    'posix_fadvise03',
-    'posix_fadvise03_64',
-    'ppoll01',
-    'preadv01',
-    'preadv01_64',
-    'preadv02_64',
-    'pwritev01',
-    'pwritev02_64',
-    'recvmsg02',
-    'rename09',
-    'syscall01',
-    'utime03',
-    'commands.ldd',
-    # getrusage04 gives inconsistent result over different runs
-    'syscalls.getrusage04',
-    # Fail on local device but pass on lab devices
-    'fs.proc01',
-    # Fail on lab devices but pass on local device
-    'syscalls.execl01',
-    'syscalls.execle01',
-    'syscalls.execlp01',
-    'syscalls.execv01',
-    'syscalls.execve01',
-    'syscalls.execve04',
-    'syscalls.execvp01',
-    'syscalls.ioctl01_02',
-    'syscalls.move_pages01',
-    'syscalls.move_pages02',
-    'syscalls.move_pages04',
-    'syscalls.move_pages05',
-    'syscalls.move_pages06',
-    'syscalls.move_pages07',
-    'syscalls.move_pages08',
-    'syscalls.move_pages09',
-    'syscalls.move_pages10',
-    'syscalls.setpgid03',
-    'numa.move_pages01_32bit',
-    # Fail on staging but passing on stable
-    'fs.fs_di',
-    # New tests from timers Securebits test suite
-    'securebits.check_keepcaps01',
-    'securebits.check_keepcaps02',
-    'securebits.check_keepcaps03',
-    # New tests from timers Tracing test suite
-    'tracing.ftrace_regression01',
-    'tracing.ftrace_regression02',
-    'tracing.ftrace-stress.test',
-]
-
-# Tests disabled
-# Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
-DISABLED_TESTS = [
-    # Recently fixed, will push to staging soon
     'syscalls.getrusage03',
     'syscalls.creat07',
     'syscalls.creat08',
@@ -248,6 +169,17 @@ DISABLED_TESTS = [
     'numa.move_pages08',
     'numa.move_pages09',
     'numa.move_pages10',
+    # getrusage04 gives inconsistent result over different runs
+    'syscalls.getrusage04',
+    # Fail on local device but pass on lab devices
+    'fs.proc01',
+    # Fail on staging but passing on stable
+    'fs.fs_di',
+]
+
+# Tests disabled
+# Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
+DISABLED_TESTS = [
     # The following test case is designed only for i386
     'f00f',
     # The following test cases are uncategorized
@@ -596,7 +528,7 @@ DISABLED_TESTS = [
     'mm.overcommit_memory06_64bit',
     # 'which' in Android does not accept the tested options b/31152668
     'commands.which01',
-    # tests that are currently killing some lab devices 64bit on (sailfish and bullhead)
+    # tests that are currently killing some lab devices 64bit on (pixel and bullhead)
     # b/31181781
     'mm.oom01_64bit',
     'mm.oom02_64bit',
