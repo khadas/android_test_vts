@@ -21,5 +21,6 @@
     <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
     <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
+    <option name="compatibility:include-filter" value="VibratorHidlTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
