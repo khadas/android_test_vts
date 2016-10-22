@@ -9,13 +9,13 @@
 `> run vts-kernel -m KernelLtpTest -t <testname1,testname2,...>`
 
 Test names in filter can be any of the following formats:
-`<testsuite-testname>`, `<testsuite-testname_Nbit>`, `<testname>`
+`<testsuite.testname>`, `<testsuite.testname_bitness>`, `<testname>`
 
 It is recommended to include test suite, i.e., the first two formats above.
 
 Example:
 
-`> run vts-kernel -m KernelLtpTest -t syscalls-accept01,mm-mmapstress05`
+`> run vts-kernel -m KernelLtpTest -t syscalls.accept01,mm.mmapstress05_64bit`
 
 Test cases specified in this filter will be run regardless of
 whether they are disabled in configuration, unless a specified test case name

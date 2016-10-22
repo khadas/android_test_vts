@@ -138,7 +138,7 @@ class TestCase(object):
     @property
     def fullname(self):
         """Return full test name in <testsuite-testname> format"""
-        return "%s-%s" % (self.testsuite, self.testname)
+        return "%s.%s" % (self.testsuite, self.testname)
 
     def __str__(self):
         return self.fullname
