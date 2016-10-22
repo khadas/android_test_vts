@@ -140,7 +140,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "FunctionSpecificationMessage msg;\n";
   out << "switch (event) {\n";
   out.indent();
-  out << "case SERVER_API_ENTRY:\n";
+  out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
@@ -159,7 +159,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "break;\n";
   out.unindent();
   out << "}\n";
-  out << "case SERVER_API_EXIT:\n";
+  out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
   out << "{\n";
   out.indent();
   for (int i = 0; i < method.return_type_hidl().size(); i++) {

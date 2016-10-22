@@ -9,7 +9,7 @@ namespace vts {
 
 
 void HIDL_INSTRUMENTATION_FUNCTION(
-        InstrumentationEvent event,
+        HidlInstrumentor::InstrumentationEvent event,
         const char* package,
         const char* version,
         const char* interface,
@@ -30,14 +30,14 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "open") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 INfcClientCallback *arg_val_0 = reinterpret_cast<INfcClientCallback*> ((*args)[0]);
                 arg_0->set_type(TYPE_HIDL_CALLBACK);
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -56,7 +56,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "write") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
@@ -67,7 +67,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -86,7 +86,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "coreInitialized") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
@@ -97,7 +97,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -116,11 +116,11 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "prediscover") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -139,11 +139,11 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "close") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -162,11 +162,11 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "controlGranted") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -185,11 +185,11 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "powerCycle") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
