@@ -186,7 +186,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "}\n";
   out.unindent();
   out << "}\n";
-  out << "VtsProfilingInterface::getInstance().AddTraceEvent(msg);\n";
+  out << "profiler.AddTraceEvent(package, version, interface, msg);\n";
   out.unindent();
   out << "}\n";
 }
@@ -196,6 +196,7 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
   // Basic includes.
   out << "#include <android-base/logging.h>\n";
   out << "#include <hidl/HidlSupport.h>\n";
+  out << "#include <linux/limits.h>\n";
   out << "#include <test/vts/proto/ComponentSpecificationMessage.pb.h>\n";
   out << "#include <VtsProfilingInterface.h>\n";
   out << "\n";
@@ -243,6 +244,12 @@ void HalHidlProfilerCodeGen::GenerateUsingDeclaration(Formatter& out,
   out << "\n";
 }
 
+void HalHidlProfilerCodeGen::GenerateMacros(Formatter& out,
+    const ComponentSpecificationMessage&) {
+  out << "#define TRACEFILEPREFIX \"/data/local/tmp\"\n";
+  out << "\n";
+}
+
 void HalHidlProfilerCodeGen::GenerateProfierSanityCheck(Formatter& out,
   const ComponentSpecificationMessage& message) {
   out << "if (strcmp(package, \"" << GetPackage(message) << "\") != 0) {\n";
@@ -267,6 +274,21 @@ void HalHidlProfilerCodeGen::GenerateProfierSanityCheck(Formatter& out,
   out << "return;\n";
   out.unindent();
   out << "}\n";
+  out << "\n";
+}
+
+void HalHidlProfilerCodeGen::GenerateLocalVariableDefinition(Formatter& out,
+  const ComponentSpecificationMessage&) {
+  // generate the name of file to store the trace.
+  out << "char trace_file[PATH_MAX];\n";
+  out << "sprintf(trace_file, \"%s/%s@%s\", TRACEFILEPREFIX, package, version);"
+      << "\n";
+
+  // create and initialize the VTS profiler interface.
+  out << "VtsProfilingInterface& profiler = "
+      << "VtsProfilingInterface::getInstance(trace_file);\n";
+  out << "profiler.Init();\n";
+  out << "\n";
 }
 
 }  // namespace vts

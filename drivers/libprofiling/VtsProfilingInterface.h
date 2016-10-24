@@ -18,6 +18,8 @@
 #define __VTS_DRIVER_PROFILING_INTERFACE_H_
 
 #include <android-base/macros.h>
+#include <fstream>
+#include <utils/Condition.h>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
@@ -37,18 +39,26 @@ class VtsProfilingInterface {
   // for the API exit on the stub side.
   static const int kProfilingPointExit;
 
-  //Get and create the VtsProfilingInterface singleton.
-  static VtsProfilingInterface& getInstance();
+  explicit VtsProfilingInterface(const string& trace_file_path);
 
-  VtsProfilingInterface() {};
+  virtual ~VtsProfilingInterface();
 
-  virtual ~VtsProfilingInterface() {};
+  void Init();
+
+  // Get and create the VtsProfilingInterface singleton.
+  static VtsProfilingInterface& getInstance(const string& trace_file_path);
 
   // returns true if the given message is added to the tracing queue.
-  bool AddTraceEvent(const FunctionSpecificationMessage& message);
+  bool AddTraceEvent(const char* package, const char* version,
+      const char* interface, const FunctionSpecificationMessage& message);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(VtsProfilingInterface);
+  string trace_file_path_;  // Path of the trace file.
+  std::ofstream trace_output_;  // Writer to the trace file.
+  Mutex mutex_;  // Mutex used to synchronize the writing to the trace file.
+  bool initialized_;
+
+  DISALLOW_COPY_AND_ASSIGN (VtsProfilingInterface);
 };
 
 }  // namespace vts

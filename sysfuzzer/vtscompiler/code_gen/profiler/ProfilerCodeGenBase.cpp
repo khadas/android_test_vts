@@ -87,6 +87,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     Formatter& out, const ComponentSpecificationMessage& message) {
   GenerateSourceIncludeFiles(out, message);
   GenerateUsingDeclaration(out, message);
+  GenerateMacros(out, message);
   GenerateOpenNameSpaces(out);
 
   if (message.has_interface()) {
@@ -109,8 +110,11 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     out << "std::vector<void *> *args) {\n";
     out.unindent();
 
-    // Code for sanity check.
+    // Generate code for sanity check.
     GenerateProfierSanityCheck(out, message);
+
+    // Generate code to define local variables.
+    GenerateLocalVariableDefinition(out, message);
 
     // Generate the profiler code for each method.
     for (const FunctionSpecificationMessage api : interface.api()) {
@@ -216,11 +220,6 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
   GenerateProfilerForTypedVariable(out, attribute, "arg_name", "arg_val_name");
   out.unindent();
   out << "}\n\n";
-}
-
-void ProfilerCodeGenBase::GenerateProfierSanityCheck(Formatter&,
-  const ComponentSpecificationMessage&) {
-  return;
 }
 
 void ProfilerCodeGenBase::GenerateOpenNameSpaces(Formatter& out) {

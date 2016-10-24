@@ -4,6 +4,8 @@
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 
+#define TRACEFILEPREFIX "/data/local/tmp"
+
 namespace android {
 namespace vts {
 
