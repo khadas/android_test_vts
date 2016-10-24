@@ -19,17 +19,10 @@ import logging
 import base64
 from collections import OrderedDict
 import json
-
 import requests
 
-_DEFAULT_BASE_URL = "http://146.148.105.120:8080"
-_PROJECT_ID = 'google.com:android-vts-internal'
-_INSTANCE_ID = 'vts-dev'
-_DEFAULT_COLUMN_FAMILY_ID = 'cf_data'
-
-
 class HbaseRestClient(object):
-    """Instane of an Hbase REST client.
+    """Instance of an Hbase REST client.
 
     Attributes:
         base_url: The hostname and port of the Hbase REST server.
@@ -38,7 +31,7 @@ class HbaseRestClient(object):
         column_family: The selected column family.
     """
 
-    def __init__(self, table_name, base_url=_DEFAULT_BASE_URL):
+    def __init__(self, table_name, base_url):
         self.base_url = base_url
         self.table_name = table_name
         self.column_family = None
@@ -52,7 +45,7 @@ class HbaseRestClient(object):
 
         Args:
             row_key: The row we want to put a value into.
-            column: The fully qualified column (e.g. my_column_family:content)
+            column: The column qualifier
             value: A string representing the sequence of bytes we want to
                    put into the cell
 

@@ -59,9 +59,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     USE_GAE_DB = "use_gae_db"
     COVERAGE_SRC_FILES = "coverage_src_files"
     COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
-    SUBSCRIBERS = "notification_subscribers"
     STATUS_TABLE = "vts_status_table"
-    DEFAULT_SUBSCRIBER = "vts-alert@google.com"
+    BIGTABLE_BASE_URL = "bigtable_base_url"
 
     def __init__(self, configs):
         super(BaseTestWithWebDbClass, self).__init__(configs)
@@ -71,7 +70,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[
-            self.USE_GAE_DB, self.COVERAGE_SRC_FILES, self.SUBSCRIBERS,
+            self.USE_GAE_DB, self.COVERAGE_SRC_FILES, self.BIGTABLE_BASE_URL,
             keys.ConfigKeys.IKEY_DATA_FILE_PATH, keys.ConfigKeys.KEY_TESTBED_NAME
         ])
 
@@ -96,23 +95,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
-            # Add email subscribers if defined
-            if hasattr(self, self.SUBSCRIBERS):
-                emails = [str(s) for s in getattr(self, self.SUBSCRIBERS)]
-                self._report_msg.subscriber_email.extend(emails)
-            # If no subscribers are specified, default to vts-alert@
-            else:
-                self._report_msg.subscriber_email.append(
-                    self.DEFAULT_SUBSCRIBER)
-            logging.info("Notification subscribers set to: %s",
-                         self._report_msg.subscriber_email)
 
         self._profiling = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
-        if getattr(self, self.USE_GAE_DB, False):
+        if (getattr(self, self.USE_GAE_DB, False) and
+            getattr(self, self.BIGTABLE_BASE_URL, "")):
             # Handle case when runner fails, tests aren't executed
             if (self.results.executed and
                 self.results.executed[-1].test_name == "setup_class"):
@@ -133,8 +123,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
             logging.info("_tearDownClass hook: start (username: %s)",
                          getpass.getuser())
+
+            bt_url = getattr(self, self.BIGTABLE_BASE_URL)
             bt_client = bigtable_rest_client.HbaseRestClient(
-                "result_%s" % self._report_msg.test)
+                "result_%s" % self._report_msg.test, bt_url)
             bt_client.CreateTable("test")
 
             self.getUserParams(opt_param_names=[keys.ConfigKeys.IKEY_BUILD])
@@ -151,7 +143,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.info("_tearDownClass hook: report msg proto %s",
                          self._report_msg)
 
-            bt_client = bigtable_rest_client.HbaseRestClient(self.STATUS_TABLE)
+            bt_client = bigtable_rest_client.HbaseRestClient(self.STATUS_TABLE,
+                                                             bt_url)
             bt_client.CreateTable("status")
 
             bt_client.PutRow("result_%s" % self._report_msg.test,
@@ -162,6 +155,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                          str(self._report_msg.start_timestamp))
 
             logging.info("_tearDownClass hook: done")
+        else:
+            logging.info("_tearDownClass hook: missing USE_GAE_DB and/or "
+                         "BIGTABLE_BASE_URL. Web uploading disabled.")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
 
     def SetDeviceInfo(self, msg):
