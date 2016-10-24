@@ -11,7 +11,7 @@ namespace vts {
 
 
 void HIDL_INSTRUMENTATION_FUNCTION(
-        InstrumentationEvent event,
+        HidlInstrumentor::InstrumentationEvent event,
         const char* package,
         const char* version,
         const char* interface,
@@ -38,7 +38,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "sendEvent") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 NfcEvent *arg_val_0 = reinterpret_cast<NfcEvent*> ((*args)[0]);
@@ -50,7 +50,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 profile__NfcStatus(arg_1, (*arg_val_1));
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 break;
             }
@@ -65,7 +65,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "sendData") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
-            case SERVER_API_ENTRY:
+            case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
@@ -76,7 +76,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 break;
             }
-            case SERVER_API_EXIT:
+            case HidlInstrumentor::SERVER_API_EXIT:
             {
                 break;
             }

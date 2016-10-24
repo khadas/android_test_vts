@@ -21,7 +21,7 @@ namespace vts {
 extern "C" {
 
     void HIDL_INSTRUMENTATION_FUNCTION(
-            InstrumentationEvent event,
+            HidlInstrumentor::InstrumentationEvent event,
             const char* package,
             const char* version,
             const char* interface,
