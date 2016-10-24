@@ -17,6 +17,7 @@
       <env-var name="EMAIL_DOMAIN" value="${appengine.emailDomain}" />
       <env-var name="SENDER_EMAIL" value="${appengine.senderEmail}" />
       <env-var name="DEFAULT_EMAIL" value="${appengine.defaultEmail}" />
+      <env-var name="SERVICE_CLIENT_ID" value="${appengine.serviceClientID}" />
     </env-variables>
 
     <system-properties>

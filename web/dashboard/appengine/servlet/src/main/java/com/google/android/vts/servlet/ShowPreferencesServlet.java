@@ -21,7 +21,6 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -30,8 +29,6 @@ import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
@@ -52,16 +49,16 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Represents the servlet that is invoked on loading the preferences page to manage favorites.
  */
-@WebServlet(name = "preferences", urlPatterns = {"/preferences"})
-public class PreferencesServlet extends HttpServlet {
+@WebServlet(name = "preferences", urlPatterns = {"/show_preferences"})
+public class ShowPreferencesServlet extends HttpServlet {
 
-    private static final String PREFERENCES_JSP = "/preferences.jsp";
+    private static final String PREFERENCES_JSP = "/show_preferences.jsp";
     private static final String DASHBOARD_MAIN_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
     private static final byte[] TEST_FAMILY = Bytes.toBytes("test_to_email");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String TABLE_PREFIX = "result_";
-    private static final Logger logger = LoggerFactory.getLogger(PreferencesServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShowPreferencesServlet.class);
 
 
     @Override
