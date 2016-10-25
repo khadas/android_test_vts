@@ -199,8 +199,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             result: int, which is one of the values of _PASS, _SKIP, and _FAIL
             note: string, reason why a test failed or get skipped
         """
-        logging.info("Checking results: '{}', '{}', '{}'".format(cmd_results,
-                                                                 result, note))
         asserts.assertTrue(cmd_results, "No response received. Socket timeout")
 
         logging.info("stdout: %s", cmd_results[const.STDOUT])
@@ -209,6 +207,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         if result is None:
             result, note = self.Verify(cmd_results)
+        logging.info("verify result: %s", result)
+        logging.info("note: %s", note)
 
         asserts.skipIf(result == self._SKIP, note)
         asserts.assertEqual(result, self._PASS, note)
