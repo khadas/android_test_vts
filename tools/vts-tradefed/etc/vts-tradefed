@@ -98,7 +98,10 @@ OPTIONAL_JARS="
 
 for JAR in $OPTIONAL_JARS; do
     if [ -f "${VTS_ROOT}/${JAR}.jar" ]; then
+        echo "Including optional JAR: $VTS_ROOT/$JAR.jar"
         JAR_PATH=${JAR_PATH}:${VTS_ROOT}/${JAR}.jar
+    else
+        echo "Optional JAR not found: $VTS_ROOT/$JAR.jar"
     fi;
 done
 
