@@ -30,6 +30,8 @@ vts_test_lib_hidl_packages := \
   libvts_driver_hidl_light@2.0 \
   libvts_driver_hidl_boot@1.0 \
   libvts_profiler_hidl_boot@1.0 \
+  libvts_driver_hidl_vr@1.0 \
+  libvts_profiler_hidl_vr@1.0 \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
@@ -40,4 +42,4 @@ vts_test_lib_hidl_packages += \
   power_hidl_hal_test \
   light_hidl_hal_test \
   boot_hidl_hal_test \
-
+  vr_hidl_hal_test \

@@ -18,5 +18,6 @@ PRODUCT_COPY_FILES += \
     harware/interfaces/vibrator/1.0/vts/types.vts:system/etc/types.vts \
     harware/interfaces/thermal/1.0/vts/Thermal.vts:system/etc/Thermal.vts \
     harware/interfaces/thermal/1.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/vr/1.0/vts/Vr.vts:system/etc/Vr.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
     test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \
