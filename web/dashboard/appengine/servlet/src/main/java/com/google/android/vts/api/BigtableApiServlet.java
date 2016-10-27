@@ -25,6 +25,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
@@ -158,9 +159,9 @@ public class BigtableApiServlet extends HttpServlet {
         String row = payloadJson.getString("rowKey").trim();
         String family = payloadJson.getString("family").trim();
         String qualifier = payloadJson.getString("qualifier").trim();
-        String value = payloadJson.getString("value");
+        byte[] value = Base64.decodeBase64(payloadJson.getString("value"));
         Put put = new Put(Bytes.toBytes(row));
-        put.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier), Bytes.toBytes(value));
+        put.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier), value);
         table.put(put);
     }
 }
