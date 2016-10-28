@@ -479,7 +479,6 @@ bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
     return false;
   }
 
-  int dir_count = 0;
   struct dirent* dent;
   FILE* gcda_file;
   while ((dent = readdir(srcdir)) != NULL) {

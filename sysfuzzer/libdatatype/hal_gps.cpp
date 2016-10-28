@@ -27,19 +27,19 @@ namespace android {
 namespace vts {
 
 // Callbacks {
-static void vts_gps_location_callback(GpsLocation* location) {}
-static void vts_gps_status_callback(GpsStatus* status) {}
-static void vts_gps_sv_status_callback(GpsSvStatus* sv_info) {}
-static void vts_gps_nmea_callback(GpsUtcTime timestamp, const char* nmea,
-                                  int length) {}
-static void vts_gps_set_capabilities(uint32_t capabilities) {}
+static void vts_gps_location_callback(GpsLocation* /*location*/) {}
+static void vts_gps_status_callback(GpsStatus* /*status*/) {}
+static void vts_gps_sv_status_callback(GpsSvStatus* /*sv_info*/) {}
+static void vts_gps_nmea_callback(
+    GpsUtcTime /*timestamp*/, const char* /*nmea*/, int /*length*/) {}
+static void vts_gps_set_capabilities(uint32_t /*capabilities*/) {}
 static void vts_gps_acquire_wakelock() {}
 static void vts_gps_release_wakelock() {}
 static void vts_gps_request_utc_time() {}
 
-static pthread_t vts_gps_create_thread(const char* name, void (*start)(void*),
-                                       void* arg) {
-  return NULL;
+static pthread_t vts_gps_create_thread(
+    const char* /*name*/, void (*/*start*/)(void*), void* /*arg*/) {
+  return (pthread_t)NULL;
 }
 // } Callbacks
 
