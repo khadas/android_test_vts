@@ -15,10 +15,13 @@
 # limitations under the License.
 
 import getpass
+import io
 import logging
 import os
 import traceback
 import time
+import xml.etree.ElementTree as ET
+import zipfile
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 
@@ -32,7 +35,11 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 
 from vts.utils.app_engine import bigtable_rest_client
+from vts.utils.python.archive import archive_parser
 from vts.utils.python.coverage import coverage_report
+from vts.utils.python.coverage import gcda_parser
+from vts.utils.python.coverage import gcno_parser
+from vts.utils.python.build.api import artifact_fetcher
 
 _ANDROID_DEVICE = "AndroidDevice"
 
@@ -57,10 +64,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         _profiling: a dict containing the current profiling information.
     """
     USE_GAE_DB = "use_gae_db"
-    COVERAGE_SRC_FILES = "coverage_src_files"
+    MODULES = "modules"
+    GIT_PROJECT_NAME = "git_project_name"
+    GIT_PROJECT_PATH = "git_project_path"
+    SERVICE_JSON_PATH = "service_key_json_path"
     COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
+    BRANCH = "master"
 
     def __init__(self, configs):
         super(BaseTestWithWebDbClass, self).__init__(configs)
@@ -70,8 +81,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[
-            self.USE_GAE_DB, self.COVERAGE_SRC_FILES, self.BIGTABLE_BASE_URL,
-            keys.ConfigKeys.IKEY_DATA_FILE_PATH, keys.ConfigKeys.KEY_TESTBED_NAME
+            self.USE_GAE_DB, self.BIGTABLE_BASE_URL,
+            self.MODULES, self.GIT_PROJECT_NAME, self.GIT_PROJECT_PATH,
+            self.SERVICE_JSON_PATH, keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+            keys.ConfigKeys.KEY_TESTBED_NAME
         ])
 
         if getattr(self, self.USE_GAE_DB, False):
@@ -95,6 +108,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
+            self.SetDeviceInfo(self._report_msg)
 
         self._profiling = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
@@ -132,13 +146,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self.getUserParams(opt_param_names=[keys.ConfigKeys.IKEY_BUILD])
             if getattr(self, keys.ConfigKeys.IKEY_BUILD, False):
                 build = self.build
-                if "build_id" in build:
-                    self._report_msg.build_info.id = str(build["build_id"])
+                if keys.ConfigKeys.IKEY_BUILD_ID in build:
+                    build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
+                    self._report_msg.build_info.id = build_id
 
-            self.SetDeviceInfo(self._report_msg)
-            bt_client.PutRow(
-                str(self._report_msg.start_timestamp), "data",
-                self._report_msg.SerializeToString())
+            bt_client.PutRow(str(self._report_msg.start_timestamp),
+                             "data", self._report_msg.SerializeToString())
+
 
             logging.info("_tearDownClass hook: report msg proto %s",
                          self._report_msg)
@@ -202,7 +216,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if getattr(self, self.USE_GAE_DB, False):
             self._current_test_report_msg.end_timestamp = self.GetTimestamp()
-            if hasattr(self, self.COVERAGE_SRC_FILES):
+            if hasattr(self, self.MODULES):
                 if not hasattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH):
                     logging.warning("data_file_path not set. PATH=%s",
                                     os.environ["PATH"])
@@ -372,61 +386,147 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
 
     def ProcessCoverageData(self):
-        """Process reported coverage data and store the produced html(s).
+        """Process reported coverage data.
 
         Returns:
             True if successful, False otherwise.
         """
+        logging.info("processing coverage data")
+
+        build_flavor = None
+        product = None
+        if len(self._report_msg.device_info) > 0:
+            # Use first device info to get product, flavor, and ID
+            # TODO: support multi-device builds
+            device_spec = self._report_msg.device_info[0]
+            build_flavor = getattr(device_spec,
+                                   keys.ConfigKeys.IKEY_BUILD_FLAVOR, None)
+            product = getattr(device_spec,
+                              keys.ConfigKeys.IKEY_PRODUCT_VARIANT, None)
+            device_build_id = getattr(device_spec,
+                              keys.ConfigKeys.IKEY_BUILD_ID, None)
+
+        if not build_flavor or not product or not device_build_id:
+            logging.error("Could not read device information.")
+            return False
+        else:
+            build_flavor += "_coverage"
+
         gcda_dict = getattr(self, self.COVERAGE_ATTRIBUTE, [])
         if not gcda_dict:
             logging.error("no coverage data found")
             return False
-        for src_file in getattr(self, self.COVERAGE_SRC_FILES):
-            src_file_name = str(src_file)
-            logging.info("coverage - src file: %s", src_file_name)
-            coverage = self._current_test_report_msg.coverage.add()
 
-            coverage.file_name = src_file_name
-            coverage_path = os.path.join(self.data_file_path, "coverage")
-            abs_path = os.path.join(coverage_path, src_file_name)
-            src_file_content = None
-            if not os.path.exists(abs_path):
-                logging.error("couldn't find src file %s", abs_path)
-                return False
-            with open(abs_path, "rb") as f:
-                src_file_content = f.read()
+        # Get service json path
+        service_json_path = getattr(self, self.SERVICE_JSON_PATH, False)
+        if not service_json_path:
+            logging.error("couldn't find project name")
+            return False
 
-            if src_file_name.endswith(".c"):
-                gcno_file_name = src_file_name.replace(".c", ".gcno")
-                gcda_file_name = src_file_name.replace(".c", ".gcda")
-            elif src_file_name.endswith(".cpp"):
-                gcno_file_name = src_file_name.replace(".cpp", ".gcno")
-                gcda_file_name = src_file_name.replace(".cpp", ".gcda")
-            elif src_file_name.endswith(".cc"):
-                gcno_file_name = src_file_name.replace(".cc", ".gcno")
-                gcda_file_name = src_file_name.replace(".cc", ".gcda")
-            else:
-                logging.error("unsupported source file type %s", src_file_name)
-                return False
+        # Get project name
+        project_name = getattr(self, self.GIT_PROJECT_NAME, False)
+        if not project_name:
+            logging.error("couldn't find project name")
+            return False
 
-            abs_path = os.path.join(coverage_path, gcno_file_name)
-            gcno_file_content = None
-            if not os.path.exists(abs_path):
-                logging.error("couldn't find gcno file %s", abs_path)
-                return False
-            with open(abs_path, "rb") as f:
-                gcno_file_content = f.read()
+        # Get project path
+        project_path = getattr(self, self.GIT_PROJECT_PATH, False)
+        if not project_path:
+            logging.error("couldn't find project path")
+            return False
 
-            if gcda_dict:
-                for file_path in gcda_dict:
-                    # TODO: consider path and do exact matching
-                    logging.info("check if %s in %s", gcda_file_name,
-                                 file_path)
-                    if file_path in gcda_file_name:
-                        coverage_vec = coverage_report.GenerateLineCoverageVector(
-                            src_file_name, len(src_file_content.split('\n')),
-                            gcno_file_content, gcda_dict[file_path])
-                        coverage.total_line_count, coverage.covered_line_count = (
-                            coverage_report.GetCoverageStats(coverage_vec))
-                        coverage.line_coverage_vector.extend(coverage_vec)
-                        return True
+        # Instantiate build client
+        try:
+            build_client = artifact_fetcher.AndroidBuildClient(
+                service_json_path)
+        except Exception:
+            logging.error("Invalid service JSON file %s",
+                service_json_path)
+            return False
+
+        # Fetch repo dictionary
+        try:
+            repos = build_client.GetRepoDictionary(self.BRANCH,
+                build_flavor, device_build_id)
+        except:
+            logging.error("Could not read build info for branch %s, " +
+                "target %s, id: %s" % (self.BRANCH, build_flavor,
+                    device_build_id))
+            return False
+
+        # Get revision (commit ID) from manifest
+        if project_name not in repos:
+            logging.error("Could not find project %s in repo dictionary",
+                project_name)
+            return False
+        revision = str(repos[project_name])
+
+        # Fetch coverage zip
+        try:
+            cov_zip = io.BytesIO(build_client.GetCoverage("master",
+                build_flavor, device_build_id, product))
+            cov_zip = zipfile.ZipFile(cov_zip)
+        except:
+            logging.error("Could not read coverage zip for branch %s, " +
+                "target %s, id: %s, product: %s" %
+                (self.BRANCH, build_flavor, device_build_id, product))
+            return False
+
+        # Load and parse the gcno archive
+        modules = getattr(self, self.MODULES)
+        gcnodirs = set([m + '.gcnodir' for m in modules])
+
+
+        for name in [name for name in cov_zip.namelist() if name in gcnodirs]:
+            archive = archive_parser.Archive(cov_zip.open(name).read())
+            try:
+                archive.Parse()
+            except ValueError:
+                logging.error("Archive could not be parsed: %s" % name)
+                continue
+
+            for gcno_file_path in archive.files:
+                file_name_path = gcno_file_path.rsplit(".", 1)[0]
+                file_name = os.path.basename(file_name_path)
+                gcno_content = archive.files[gcno_file_path]
+                gcno_stream = io.BytesIO(gcno_content)
+                gcno_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
+                src_file_path = None
+
+                # Match gcno file with source files
+                for key in gcno_summary.functions:
+                    src_file_path = gcno_summary.functions[key].src_file_name
+                    src_parts = src_file_path.rsplit(".", 1)
+                    src_file_name = src_parts[0]
+                    src_extension = src_parts[1]
+                    if src_extension not in ["c", "cpp", "cc"]:
+                        logging.warn("Found unsupported file type: %s" %
+                                     src_file_path)
+                        continue
+                    if src_file_name.endswith(file_name):
+                        logging.info("Coverage source file: %s" % src_file_path)
+                        break
+
+                if not src_file_path:
+                    logging.error("No source file found for %s." % gcno_file_path)
+                    continue
+
+                gcda_name = file_name + ".gcda"
+                if gcda_name in gcda_dict:
+                    gcda_content = gcda_dict[gcda_name]
+                    gcda_stream = io.BytesIO(gcda_content)
+                    gcda_parser.GCDAParser(gcda_stream, gcno_summary).Parse()
+                    coverage_vec = coverage_report.GenerateLineCoverageVector(
+                        src_file_path, gcno_summary)
+                    coverage = self._current_test_report_msg.coverage.add()
+                    coverage.total_line_count, coverage.covered_line_count = (
+                        coverage_report.GetCoverageStats(coverage_vec))
+                    coverage.line_coverage_vector.extend(coverage_vec)
+                    src_file_path = os.path.relpath(src_file_path, project_path)
+                    coverage.file_path = src_file_path
+                    coverage.revision = str(revision)
+                    coverage.project_name = str(project_name)
+                else:
+                    logging.error("No gcda file found %s." % gcda_name)
+                    continue
+        return True
