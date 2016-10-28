@@ -549,17 +549,24 @@ class AndroidDevice(object):
         except adb.AdbError as e:
             # adb wait-for-device is not always possible in the lab
             logging.exception(e)
-        while True:
-            try:
-                out = self.adb.shell("getprop sys.boot_completed")
-                completed = out.decode('utf-8').strip()
-                if completed == '1':
-                    return
-            except adb.AdbError:
-                # adb shell calls may fail during certain period of booting
-                # process, which is normal. Ignoring these errors.
-                pass
+        while not self.hasBooted():
             time.sleep(5)
+
+    def hasBooted(self):
+        """Checks whether the device has booted.
+
+        Returns:
+            True if booted, False otherwise.
+        """
+        try:
+            out = self.adb.shell("getprop sys.boot_completed")
+            completed = out.decode('utf-8').strip()
+            if completed == '1':
+                return True
+        except adb.AdbError:
+            # adb shell calls may fail during certain period of booting
+            # process, which is normal. Ignoring these errors.
+            return False
 
     def reboot(self):
         """Reboots the device and wait for device to complete booting.
