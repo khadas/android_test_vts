@@ -19,6 +19,7 @@
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="HalNfcHidlTargetBasicTest" />
         <option name="binary-test-sources" value="
             _32bit::DATA/nativetest/nfc_hidl_hal_test/nfc_hidl_hal_test,
             _64bit::DATA/nativetest64/nfc_hidl_hal_test/nfc_hidl_hal_test,
