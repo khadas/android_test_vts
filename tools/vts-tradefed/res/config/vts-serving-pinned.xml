@@ -19,7 +19,6 @@
     <!-- For vts-kernel -->
     <option name="compatibility:include-filter" value="KernelLtpTest" />
     <option name="compatibility:include-filter" value="LinuxKselftestTest" />
-    <!-- For vts-security -->
-    <option name="compatibility:include-filter" value="SecurityPoCKernelTest" />
+
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
