@@ -39,41 +39,41 @@ class HalCodeGen : public DriverCodeGenBase {
 
  protected:
   void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      Formatter& out, const StructSpecificationMessage& message,
       const string& fuzzer_extended_class_name,
       const string& original_data_structure_name,
       const string& parent_path);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      Formatter& out, const StructSpecificationMessage& message,
       const string& fuzzer_extended_class_name,
       const string& original_data_structure_name, const string& parent_path);
 
   void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss, const string& function_prototype);
+      Formatter& out, const string& function_prototype);
 
-  void GenerateCppBodyGlobalFunctions(std::stringstream& cpp_ss,
+  void GenerateCppBodyGlobalFunctions(Formatter& out,
                                       const string& function_prototype,
                                       const string& fuzzer_extended_class_name);
 
   void GenerateSubStructFuzzFunctionCall(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      Formatter& out, const StructSpecificationMessage& message,
       const string& parent_path);
 
   void GenerateSubStructGetAttributeFunctionCall(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+      Formatter& out, const StructSpecificationMessage& message,
       const string& parent_path);
 
   // instance variable name (e.g., device_);

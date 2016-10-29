@@ -16,6 +16,7 @@
 
 #include "code_gen/driver/DriverCodeGenBase.h"
 
+#include <hidl-util/Formatter.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -34,64 +35,12 @@ namespace android {
 namespace vts {
 
 void DriverCodeGenBase::GenerateAll(
-    std::stringstream& cpp_ss, std::stringstream& h_ss,
+    Formatter& header_out, Formatter& source_out,
     const ComponentSpecificationMessage& message) {
-  string input_vfs_file_path(input_vts_file_path_);
-
-  cpp_ss << "#include \"" << input_vfs_file_path << ".h\"" << endl;
-
-  if (message.component_class() == HAL_HIDL) {
-    cpp_ss << "#include <hidl/HidlSupport.h>" << endl;
-  }
-
-  cpp_ss << "#include <iostream>" << endl;
-  cpp_ss << "#include \"vts_datatype.h\"" << endl;
-  cpp_ss << "#include \"vts_measurement.h\"" << endl;
-  for (auto const& header : message.header()) {
-    cpp_ss << "#include " << header << endl;
-  }
-  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
-    string package_path = message.package();
-    ReplaceSubString(package_path, ".", "/");
-    cpp_ss << "#include <" << package_path << "/"
-           << GetVersionString(message.component_type_version())
-           << "/" << message.component_name() << ".h>" << endl;
-    for (const auto& import : message.import()) {
-      string mutable_import = import;
-      ReplaceSubString(mutable_import, ".", "/");
-      ReplaceSubString(mutable_import, "@", "/");
-      string base_dirpath = mutable_import.substr(
-          0, mutable_import.find_last_of("::") + 1);
-      string base_filename = mutable_import.substr(
-          mutable_import.find_last_of("::") + 1);
-
-      if (base_filename != "types") {
-        if (message.component_name() != base_filename) {
-          cpp_ss << "#include <" << package_path << "/"
-                 << GetVersionString(message.component_type_version())
-                 << "/" << base_filename << ".h>" << endl;
-        }
-        if (base_filename.substr(0, 1) == "I") {
-          cpp_ss << "#include \""
-                 << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
-                 << "/" << base_filename.substr(1, base_filename.find_last_of(".h"))
-                 << ".vts.h\"" << endl;
-        }
-      } else if (message.component_name() != base_filename) {
-        // TODO: consider restoring this when hidl packaging is fully defined.
-        // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
-        cpp_ss << "#include <" << package_path << "/"
-               << GetVersionString(message.component_type_version())
-               << "/" << base_filename << ".h>" << endl;
-      }
-    }
-  }
-  GenerateOpenNameSpaces(cpp_ss, message);
-
   string component_name = GetComponentName(message);
   if (component_name.empty()) {
     cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
-         << endl;
+         << "\n";
     exit(-1);
   }
   string fuzzer_extended_class_name;
@@ -102,313 +51,403 @@ void DriverCodeGenBase::GenerateAll(
       message.component_class() == LIB_SHARED) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
+  GenerateHeaderFile(header_out, message, fuzzer_extended_class_name);
+  GenerateSourceFile(source_out, message, fuzzer_extended_class_name);
+}
 
-  GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
-  cpp_ss << endl << endl;
-  if (message.component_class() == HAL_CONVENTIONAL ||
-      message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-    GenerateCppBodyCallbackFunction(cpp_ss, message,
-                                    fuzzer_extended_class_name);
+
+void DriverCodeGenBase::GenerateHeaderFile(
+    Formatter& out, const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  out << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << "\n";
+  out << "#define __VTS_SPEC_" << vts_name_ << "__" << "\n";
+  out << "\n";
+  out << "#include <stdio.h>" << "\n";
+  out << "#include <stdarg.h>" << "\n";
+  out << "#include <stdlib.h>" << "\n";
+  out << "#include <string.h>" << "\n";
+  out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";
+  out << "#include <utils/Log.h>" << "\n";
+  out << "#include <fuzz_tester/FuzzerBase.h>" << "\n";
+  out << "#include <fuzz_tester/FuzzerCallbackBase.h>" << "\n";
+  for (auto const& header : message.header()) {
+    out << "#include " << header << "\n";
   }
+  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
+    string package_path = message.package();
+    ReplaceSubString(package_path, ".", "/");
 
-  cpp_ss << endl;
-  GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
-  GenerateCppBodyGetAttributeFunction(
-      cpp_ss, message, fuzzer_extended_class_name);
+    out << "#include <" << package_path << "/"
+        << GetVersionString(message.component_type_version())
+        << "/" << message.component_name() << ".h>" << "\n";
+    if (message.component_name() != "types") {
+      out << "#include <" << package_path << "/"
+          << GetVersionString(message.component_type_version())
+          << "/" << message.component_name() << ".h>" << "\n";
+    }
+    out << "#include <hidl/HidlSupport.h>" << "\n";
+  }
+  out << "\n\n" << "\n";
+  GenerateOpenNameSpaces(out, message);
+
+  GenerateClassHeader(fuzzer_extended_class_name, out, message);
+
+  string function_name_prefix = GetFunctionNamePrefix(message);
+
+  std::stringstream ss;
+  // return type
+  out << "\n";
+  ss << "android::vts::FuzzerBase* " << "\n";
+  // function name
+  ss << function_name_prefix << "(" << "\n";
+  ss << ")";
+
+  if (message.component_class() == HAL_HIDL &&
+      message.component_name() != "types" &&
+      !endsWith(message.component_name(), "Callback")) {
+    GenerateHeaderGlobalFunctionDeclarations(out, ss.str());
+  }
 
   if (message.component_class() == HAL_HIDL &&
       endsWith(message.component_name(), "Callback")) {
-    cpp_ss << endl;
+    out << "\n";
+    out << "class Vts" << message.component_name().substr(1) << ": public "
+        << message.component_name() << " {" << "\n";
+    out << " public:" << "\n";
+    out.indent();
+    out << "Vts" << message.component_name().substr(1) << "() {};" << "\n";
+    out << "\n";
+    out << "virtual ~Vts" << message.component_name().substr(1) << "()"
+        << " = default;" << "\n";
+    out << "\n";
     for (const auto& api : message.interface().api()) {
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
-        cpp_ss << "Return<void> ";
+        out << "::android::hardware::Return<void> ";
+
       } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
                  api.return_type_hidl(0).type() == TYPE_ENUM) {
-        cpp_ss << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
+        out << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
       } else {
-        cpp_ss << "Status " << endl;
+        out << "Status " << "\n";
       }
 
-      cpp_ss << "Vts" << message.component_name().substr(1) << "::"
-             << api.name() << "(" << endl;
+      out << api.name() << "(" << "\n";
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
-        if (arg_count > 0) cpp_ss << "," << endl;
+        if (arg_count > 0) out << "," << "\n";
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
-            cpp_ss << "    const " << arg.predefined_type() << "&";
+            out << "    const " << arg.predefined_type() << "&";
           } else {
-            cpp_ss << "    " << arg.predefined_type();
+            out << "    " << arg.predefined_type();
           }
-          cpp_ss << " arg" << arg_count;
+          out << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
-          cpp_ss << "    const ";
+          out << "    const ";
           if (arg.vector_value(0).type() == TYPE_SCALAR) {
             if (arg.vector_value(0).scalar_type().length() == 0) {
               cerr << __func__ << ":" << __LINE__
-                   << " ERROR scalar_type not set" << endl;
+                   << " ERROR scalar_type not set" << "\n";
               exit(-1);
             }
-            cpp_ss << "hidl_vec<" + arg.vector_value(0).scalar_type() + ">&";
+            out << "::android::hardware::hidl_vec<"
+                << arg.vector_value(0).scalar_type()
+                << ">&";
           } else {
             cerr << __func__ << " unknown vector arg type "
-                 << arg.vector_value(0).type() << endl;
+                 << arg.vector_value(0).type() << "\n";
             exit(-1);
           }
-          cpp_ss << " arg" << arg_count;
+          out << " arg" << arg_count;
         } else if (arg.type() == TYPE_ARRAY) {
-          cpp_ss << "    ";
+          out << "    ";
           if (arg.is_const()) {
-            cpp_ss << "const ";
+            out << "const ";
           }
           if (arg.vector_value(0).type() == TYPE_SCALAR) {
-            cpp_ss << arg.vector_value(0).scalar_type()
-                   << "[" << arg.vector_size() << "]";
+            out << arg.vector_value(0).scalar_type()
+                << "[" << arg.vector_size() << "]";
           } else {
             cerr << __func__ << " unknown vector arg type "
-                 << arg.vector_value(0).type() << endl;
+                 << arg.vector_value(0).type() << "\n";
             exit(-1);
           }
-          cpp_ss << " arg" << arg_count;
+          out << " arg" << arg_count;
         } else {
-          cerr << __func__ << " unknown arg type " << arg.type() << endl;
+          cerr << __func__ << " unknown arg type " << arg.type() << "\n";
           exit(-1);
         }
         arg_count++;
       }
-      cpp_ss << ") {" << endl;
-      cpp_ss << "  cout << \"" << api.name() << " called\" << endl;" << endl;
+      out << ") override;" << "\n";
+      out << "\n";
+    }
+    out.unindent();
+    out << "};" << "\n";
+    out << "\n";
+
+    out << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+        << message.component_name() << "(const string& callback_socket_name);" << "\n";
+    out << "\n";
+  }
+
+  GenerateCloseNameSpaces(out);
+  out << "#endif" << "\n";
+}
+
+
+void DriverCodeGenBase::GenerateSourceFile(
+    Formatter& out, const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  string input_vfs_file_path(input_vts_file_path_);
+
+  out << "#include \"" << input_vfs_file_path << ".h\"" << "\n";
+
+  if (message.component_class() == HAL_HIDL) {
+
+    out << "#include <hidl/HidlSupport.h>" << "\n";
+  }
+
+  out << "#include <iostream>" << "\n";
+  out << "#include \"vts_datatype.h\"" << "\n";
+  out << "#include \"vts_measurement.h\"" << "\n";
+  for (auto const& header : message.header()) {
+    out << "#include " << header << "\n";
+  }
+  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
+    out << "#include <hidl/HidlSupport.h>" << "\n";
+
+    string package_path = message.package();
+    ReplaceSubString(package_path, ".", "/");
+    out << "#include <" << package_path << "/"
+        << GetVersionString(message.component_type_version())
+        << "/" << message.component_name() << ".h>" << "\n";
+    for (const auto& import : message.import()) {
+      string mutable_import = import;
+      ReplaceSubString(mutable_import, ".", "/");
+      ReplaceSubString(mutable_import, "@", "/");
+      string base_dirpath = mutable_import.substr(
+          0, mutable_import.find_last_of("::") + 1);
+      string base_filename = mutable_import.substr(
+          mutable_import.find_last_of("::") + 1);
+
+      if (base_filename == "types") {
+        out << "#include \""
+            << input_vfs_file_path.substr(
+                0, input_vfs_file_path.find_last_of("\\/"))
+            << "/types.vts.h\"" << "\n";
+      }
+      if (base_filename != "types") {
+        if (message.component_name() != base_filename) {
+          out << "#include <" << package_path << "/"
+              << GetVersionString(message.component_type_version())
+              << "/" << base_filename << ".h>" << "\n";
+        }
+        if (base_filename.substr(0, 1) == "I") {
+          out << "#include \""
+              << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
+              << "/" << base_filename.substr(1, base_filename.find_last_of(".h"))
+              << ".vts.h\"" << "\n";
+        }
+      } else if (message.component_name() != base_filename) {
+        // TODO: consider restoring this when hidl packaging is fully defined.
+        // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << "\n";
+        out << "#include <" << package_path << "/"
+            << GetVersionString(message.component_type_version())
+            << "/" << base_filename << ".h>" << "\n";
+      }
+    }
+  }
+  GenerateOpenNameSpaces(out, message);
+
+  out << "\n" << "\n";
+  if (message.component_class() == HAL_CONVENTIONAL ||
+      message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+    GenerateCppBodyCallbackFunction(out, message,
+                                    fuzzer_extended_class_name);
+  }
+
+  out << "\n";
+  GenerateCppBodyFuzzFunction(out, message, fuzzer_extended_class_name);
+  GenerateCppBodyGetAttributeFunction(
+      out, message, fuzzer_extended_class_name);
+
+  if (message.component_class() == HAL_HIDL &&
+      endsWith(message.component_name(), "Callback")) {
+    out << "\n";
+    for (const auto& api : message.interface().api()) {
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
-        cpp_ss << "  return Void();" << endl;
+        out << "::android::hardware::Return<void> ";
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+        out << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
       } else {
-        cpp_ss << "  return Status::ok();" << endl;
+        out << "Status " << "\n";
       }
-      cpp_ss << "}" << endl;
-      cpp_ss << endl;
+
+      out << "Vts" << message.component_name().substr(1) << "::"
+          << api.name() << "(" << "\n";
+      int arg_count = 0;
+      for (const auto& arg : api.arg()) {
+        if (arg_count > 0) out << "," << "\n";
+        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
+          if (arg.is_const()) {
+            out << "    const " << arg.predefined_type() << "&";
+          } else {
+            out << "    " << arg.predefined_type();
+          }
+          out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_VECTOR) {
+          out << "    const ";
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            if (arg.vector_value(0).scalar_type().length() == 0) {
+              cerr << __func__ << ":" << __LINE__
+                   << " ERROR scalar_type not set" << "\n";
+              exit(-1);
+            }
+            out << "::android::hardware::hidl_vec<"
+                << arg.vector_value(0).scalar_type()
+                << ">&";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << "\n";
+            exit(-1);
+          }
+          out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_ARRAY) {
+          out << "    ";
+          if (arg.is_const()) {
+            out << "const ";
+          }
+          if (arg.vector_value(0).type() == TYPE_SCALAR) {
+            out << arg.vector_value(0).scalar_type()
+                << "[" << arg.vector_size() << "]";
+          } else {
+            cerr << __func__ << " unknown vector arg type "
+                 << arg.vector_value(0).type() << "\n";
+            exit(-1);
+          }
+          out << " arg" << arg_count;
+        } else {
+          cerr << __func__ << " unknown arg type " << arg.type() << "\n";
+          exit(-1);
+        }
+        arg_count++;
+      }
+      out << ") {" << "\n";
+      out.indent();
+      out << "cout << \"" << api.name() << " called\" << endl;" << "\n";
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        out << "return ::android::hardware::Void();" << "\n";
+      } else {
+        out << "return Status::ok();" << "\n";
+      }
+      out.unindent();
+      out << "}" << "\n";
+      out << "\n";
     }
 
-    cpp_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
-           << message.component_name() << "(const string& callback_socket_name)";
-    cpp_ss << " {" << endl
-           << "  return new Vts" << message.component_name().substr(1) << "();"
-           << endl;
-    cpp_ss << "}" << endl << endl;
+    out << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+        << message.component_name() << "(const string& callback_socket_name)";
+    out << " {" << "\n";
+    out.indent();
+    out << "return new Vts" << message.component_name().substr(1) << "();"
+        << "\n";
+    out.unindent();
+    out << "}" << "\n" << "\n";
   } else {
     if (message.component_class() != HAL_HIDL ||
         (message.component_name() != "types" &&
          !endsWith(message.component_name(), "Callback"))) {
       std::stringstream ss;
       // return type
-      ss << "android::vts::FuzzerBase* " << endl;
+      ss << "android::vts::FuzzerBase* " << "\n";
       // function name
       string function_name_prefix = GetFunctionNamePrefix(message);
-      ss << function_name_prefix << "(" << endl;
+      ss << function_name_prefix << "(" << "\n";
       ss << ")";
 
-      GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(),
-                                     fuzzer_extended_class_name);
+      GenerateCppBodyGlobalFunctions(out, ss.str(), fuzzer_extended_class_name);
     }
   }
 
-  GenerateCloseNameSpaces(cpp_ss);
+  GenerateCloseNameSpaces(out);
 }
 
-void DriverCodeGenBase::GenerateAllHeader(
-    const string& fuzzer_extended_class_name, std::stringstream& h_ss,
-    const ComponentSpecificationMessage& message) {
-  h_ss << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << endl;
-  h_ss << "#define __VTS_SPEC_" << vts_name_ << "__" << endl;
-  h_ss << endl;
-  h_ss << "#include <stdio.h>" << endl;
-  h_ss << "#include <stdarg.h>" << endl;
-  h_ss << "#include <stdlib.h>" << endl;
-  h_ss << "#include <string.h>" << endl;
-  h_ss << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << endl;
-  h_ss << "#include <utils/Log.h>" << endl;
-  h_ss << "#include <fuzz_tester/FuzzerBase.h>" << endl;
-  h_ss << "#include <fuzz_tester/FuzzerCallbackBase.h>" << endl;
-  for (auto const& header : message.header()) {
-    h_ss << "#include " << header << endl;
-  }
-  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
-    string package_path = message.package();
-    ReplaceSubString(package_path, ".", "/");
-
-    h_ss << "#include <" << package_path << "/"
-         << GetVersionString(message.component_type_version())
-         << "/" << message.component_name() << ".h>" << endl;
-    h_ss << "#include <hidl/HidlSupport.h>" << endl;
-  }
-  h_ss << "\n\n" << endl;
-  GenerateOpenNameSpaces(h_ss, message);
-
-  GenerateClassHeader(fuzzer_extended_class_name, h_ss, message);
-
-  string function_name_prefix = GetFunctionNamePrefix(message);
-
-  std::stringstream ss;
-  // return type
-  h_ss << endl;
-  ss << "android::vts::FuzzerBase* " << endl;
-  // function name
-  ss << function_name_prefix << "(" << endl;
-  ss << ")";
-
-  if (message.component_class() == HAL_HIDL &&
-      message.component_name() != "types" &&
-      !endsWith(message.component_name(), "Callback")) {
-    GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
-  }
-
-  if (message.component_class() == HAL_HIDL &&
-      endsWith(message.component_name(), "Callback")) {
-    h_ss << endl;
-    h_ss << "class Vts" << message.component_name().substr(1) << ": public "
-         << message.component_name() << " {" << endl;
-    h_ss << " public:" << endl;
-    h_ss << "  Vts" << message.component_name().substr(1) << "() {};" << endl;
-    h_ss << endl;
-    h_ss << "  virtual ~Vts" << message.component_name().substr(1) << "()"
-         << " = default;" << endl;
-    h_ss << endl;
-    for (const auto& api : message.interface().api()) {
-      h_ss << "  ";
-      if (api.return_type_hidl_size() == 0 ||
-          api.return_type_hidl(0).type() == TYPE_VOID) {
-        h_ss << "Return<void> ";
-
-      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
-                 api.return_type_hidl(0).type() == TYPE_ENUM) {
-        h_ss << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
-      } else {
-        h_ss << "Status " << endl;
-      }
-
-      h_ss << api.name() << "(" << endl;
-      int arg_count = 0;
-      for (const auto& arg : api.arg()) {
-        if (arg_count > 0) h_ss << "," << endl;
-        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
-          if (arg.is_const()) {
-            h_ss << "    const " << arg.predefined_type() << "&";
-          } else {
-            h_ss << "    " << arg.predefined_type();
-          }
-          h_ss << " arg" << arg_count;
-        } else if (arg.type() == TYPE_VECTOR) {
-          h_ss << "    const ";
-          if (arg.vector_value(0).type() == TYPE_SCALAR) {
-            if (arg.vector_value(0).scalar_type().length() == 0) {
-              cerr << __func__ << ":" << __LINE__
-                   << " ERROR scalar_type not set" << endl;
-              exit(-1);
-            }
-            h_ss << "hidl_vec<" << arg.vector_value(0).scalar_type() << ">&";
-          } else {
-            cerr << __func__ << " unknown vector arg type "
-                 << arg.vector_value(0).type() << endl;
-            exit(-1);
-          }
-          h_ss << " arg" << arg_count;
-        } else if (arg.type() == TYPE_ARRAY) {
-          h_ss << "    ";
-          if (arg.is_const()) {
-            h_ss << "const ";
-          }
-          if (arg.vector_value(0).type() == TYPE_SCALAR) {
-            h_ss << arg.vector_value(0).scalar_type()
-                 << "[" << arg.vector_size() << "]";
-          } else {
-            cerr << __func__ << " unknown vector arg type "
-                 << arg.vector_value(0).type() << endl;
-            exit(-1);
-          }
-          h_ss << " arg" << arg_count;
-        } else {
-          cerr << __func__ << " unknown arg type " << arg.type() << endl;
-          exit(-1);
-        }
-        arg_count++;
-      }
-      h_ss << ") override;" << endl;
-      h_ss << endl;
-    }
-    h_ss << "};" << endl;
-    h_ss << endl;
-
-    h_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
-       << message.component_name() << "(const string& callback_socket_name);" << endl;
-    h_ss << endl;
-  }
-
-  GenerateCloseNameSpaces(h_ss);
-  h_ss << "#endif" << endl;
-}
 
 void DriverCodeGenBase::GenerateClassHeader(
-    const string& fuzzer_extended_class_name, std::stringstream& h_ss,
+    const string& fuzzer_extended_class_name, Formatter& out,
     const ComponentSpecificationMessage& message) {
   if (message.component_class() != HAL_HIDL ||
       (message.component_name() != "types" &&
        !endsWith(message.component_name(), "Callback"))) {
-    h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
-         << endl;
-    h_ss << " public:" << endl;
-    h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
+    out << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
+        << "\n";
+    out << " public:" << "\n";
+    out.indent();
+    out << fuzzer_extended_class_name << "() : FuzzerBase(";
 
     if (message.component_class() == HAL_CONVENTIONAL) {
-      h_ss << "HAL_CONVENTIONAL)";
+      out << "HAL_CONVENTIONAL)";
     } else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-      h_ss << "HAL_CONVENTIONAL_SUBMODULE)";
+      out << "HAL_CONVENTIONAL_SUBMODULE)";
     } else if (message.component_class() == HAL_HIDL) {
       if (message.component_name() != "types") {
-        h_ss << "HAL_HIDL), hw_binder_proxy_()";
+        out << "HAL_HIDL), hw_binder_proxy_()";
       } else {
-        h_ss << "HAL_HIDL)";
+        out << "HAL_HIDL)";
       }
     } else if (message.component_class() == HAL_LEGACY) {
-      h_ss << "HAL_LEGACY)";
+      out << "HAL_LEGACY)";
     } else if (message.component_class() == LIB_SHARED) {
-      h_ss << "LIB_SHARED)";
+      out << "LIB_SHARED)";
     }
 
-    h_ss << " { }" << endl;
-    h_ss << " protected:" << endl;
-    h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl
-         << "            void** result, const string& callback_socket_name);"
-         << endl;
-    h_ss << "  bool GetAttribute(FunctionSpecificationMessage* func_msg," << endl
-         << "            void** result);"
-         << endl;
+    out << " { }" << "\n";
+    out.unindent();
+    out << " protected:" << "\n";
+    out.indent();
+    out << "bool Fuzz(FunctionSpecificationMessage* func_msg," << "\n"
+        << "          void** result, const string& callback_socket_name);"
+        << "\n";
+    out << "bool GetAttribute(FunctionSpecificationMessage* func_msg," << "\n"
+        << "          void** result);"
+        << "\n";
 
     // produce Fuzz method(s) for sub_struct(s).
     for (auto const& sub_struct : message.interface().sub_struct()) {
-      GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
+      GenerateFuzzFunctionForSubStruct(out, sub_struct, "_");
     }
 
     if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
       string component_name = GetComponentName(message);
-      h_ss << "  void SetSubModule(" << component_name << "* submodule) {"
-           << endl;
-      h_ss << "    submodule_ = submodule;" << endl;
-      h_ss << "  }" << endl;
-      h_ss << endl;
-      h_ss << " private:" << endl;
-      h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
-           << endl;
+      out << "void SetSubModule(" << component_name << "* submodule) {"
+          << "\n";
+      out.indent();
+      out << "submodule_ = submodule;" << "\n";
+      out.unindent();
+      out << "}" << "\n" << "\n";
+      out.unindent();
+      out << " private:" << "\n";
+      out.indent();
+      out << message.original_data_structure_name() << "* submodule_;" << "\n";
     }
 
     if (message.component_class() == HAL_HIDL
         && message.component_name() != "types") {
-      h_ss << "  bool GetService();" << endl
-           << endl
-           << " private:" << endl
-           << "  sp<" << message.component_name() << "> hw_binder_proxy_;"
-           << endl;
+      out << "bool GetService();" << "\n"
+          << "\n";
+      out.unindent();
+      out << " private:" << "\n";
+      out.indent();
+      out << "sp<" << message.component_name() << "> hw_binder_proxy_;"
+          << "\n";
     }
-    h_ss << "};" << endl;
+    out.unindent();
+    out << "};" << "\n";
   }
 
   if (message.component_class() == HAL_HIDL &&
@@ -422,15 +461,14 @@ void DriverCodeGenBase::GenerateClassHeader(
       std::string attribute_name = attribute.name();
       ReplaceSubString(attribute_name, "::", "__");
       if (attribute.type() == TYPE_ENUM) {
-        h_ss << attribute.name() << " " << "EnumValue" << attribute_name
-             << "(const EnumDataValueMessage& arg, int index=0);" << endl;
-        h_ss << attribute.name() << " " << "Random" << attribute_name << "();"
-             << endl;
+        out << attribute.name() << " "
+            << "Random" << attribute_name << "();"
+            << "\n";
       } else if (attribute.type() == TYPE_STRUCT) {
-        h_ss << "void " << "MessageTo" << attribute_name
-             << "(const VariableSpecificationMessage& var_msg, "
-             << attribute.name() << "* arg);"
-             << endl;
+        out << "void " << "MessageTo" << attribute.name()
+            << "(const VariableSpecificationMessage& var_msg, "
+            << attribute.name() << "* arg);"
+            << "\n";
       } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
              << attribute.type() << endl;
@@ -441,64 +479,64 @@ void DriverCodeGenBase::GenerateClassHeader(
 }
 
 void DriverCodeGenBase::GenerateFuzzFunctionForSubStruct(
-    std::stringstream& h_ss, const StructSpecificationMessage& message,
+    Formatter& out, const StructSpecificationMessage& message,
     const string& parent_path) {
-  h_ss << "  bool Fuzz_" << parent_path << message.name()
-       << "(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result, const string& callback_socket_name);"
-       << endl;
+  out.indent();
+  out << "bool Fuzz_" << parent_path << message.name()
+      << "(FunctionSpecificationMessage* func_msg," << "\n";
+  out << "            void** result, const string& callback_socket_name);"
+      << "\n";
 
-  h_ss << "  bool GetAttribute_" << parent_path << message.name()
-       << "(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result);"
-       << endl;
+  out << "bool GetAttribute_" << parent_path << message.name()
+      << "(FunctionSpecificationMessage* func_msg," << "\n";
+  out << "            void** result);"
+      << "\n";
 
   for (auto const& sub_struct : message.sub_struct()) {
-    GenerateFuzzFunctionForSubStruct(h_ss, sub_struct,
+    GenerateFuzzFunctionForSubStruct(out, sub_struct,
                                      parent_path + message.name() + "_");
   }
+  out.unindent();
 }
 
 void DriverCodeGenBase::GenerateNamespaceName(
-    std::stringstream& ss, const ComponentSpecificationMessage& message) {
+    Formatter& out, const ComponentSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
     string name = message.package();
     ReplaceSubString(name, ".", "::");
-    ss << name
-       << "::"
-       << GetVersionString(message.component_type_version(), true);
+    out << name << "::"
+        << GetVersionString(message.component_type_version(), true);
   } else {
-    cerr << __func__ << ":" << __LINE__ << " no namespace" << endl;
+    cerr << __func__ << ":" << __LINE__ << " no namespace" << "\n";
     exit(-1);
   }
 }
 
 void DriverCodeGenBase::GenerateOpenNameSpaces(
-    std::stringstream& ss, const ComponentSpecificationMessage& message) {
+    Formatter& out, const ComponentSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
-    ss << "using namespace android::hardware;" << endl;
-    ss << "using namespace ";
-    GenerateNamespaceName(ss, message);
-    ss << ";" << endl;
+    out << "using namespace ";
+    GenerateNamespaceName(out, message);
+    out << ";" << "\n";
   }
 
-  ss << "namespace android {" << endl;
-  ss << "namespace vts {" << endl;
+  out << "namespace android {" << "\n";
+  out << "namespace vts {" << "\n";
 }
 
-void DriverCodeGenBase::GenerateCloseNameSpaces(std::stringstream& ss) {
-  ss << "}  // namespace vts" << endl;
-  ss << "}  // namespace android" << endl;
+void DriverCodeGenBase::GenerateCloseNameSpaces(Formatter& out) {
+  out << "}  // namespace vts" << "\n";
+  out << "}  // namespace android" << "\n";
 }
 
-void DriverCodeGenBase::GenerateCodeToStartMeasurement(std::stringstream& ss) {
-  ss << "    VtsMeasurement vts_measurement;" << endl;
-  ss << "    vts_measurement.Start();" << endl;
+void DriverCodeGenBase::GenerateCodeToStartMeasurement(Formatter& out) {
+  out << "VtsMeasurement vts_measurement;" << "\n";
+  out << "vts_measurement.Start();" << "\n";
 }
 
-void DriverCodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
-  ss << "    vector<float>* measured = vts_measurement.Stop();" << endl;
-  ss << "    cout << \"time \" << (*measured)[0] << endl;" << endl;
+void DriverCodeGenBase::GenerateCodeToStopMeasurement(Formatter& out) {
+  out << "vector<float>* measured = vts_measurement.Stop();" << "\n";
+  out << "cout << \"time \" << (*measured)[0] << endl;" << "\n";
 }
 
 string DriverCodeGenBase::GetComponentName(
@@ -520,7 +558,7 @@ string DriverCodeGenBase::GetComponentName(
 }
 
 void DriverCodeGenBase::GenerateCppBodyCallbackFunction(
-    std::stringstream& /*cpp_ss*/,
+    Formatter& /*out*/,
     const ComponentSpecificationMessage& /*message*/,
     const string& /*fuzzer_extended_class_name*/) {}
 

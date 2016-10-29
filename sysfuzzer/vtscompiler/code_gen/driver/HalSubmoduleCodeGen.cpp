@@ -34,7 +34,7 @@ namespace vts {
 const char* const HalSubmoduleCodeGen::kInstanceVariableName = "submodule_";
 
 void HalSubmoduleCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    std::stringstream& /*h_ss*/, const string& /*function_prototype*/) {}
+    Formatter& /*h_ss*/, const string& /*function_prototype*/) {}
 
 }  // namespace vts
 }  // namespace android

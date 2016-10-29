@@ -34,98 +34,100 @@ namespace vts {
 const char* const LegacyHalCodeGen::kInstanceVariableName = "legacyhal_";
 
 void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+    Formatter& out, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
+  out << "bool " << fuzzer_extended_class_name << "::Fuzz(" << "\n";
+  out << "    FunctionSpecificationMessage* func_msg," << "\n";
+  out << "    void** result, const string& callback_socket_name) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << func_name << endl;" << "\n";
 
   for (auto const& api : message.interface().api()) {
     std::stringstream ss;
 
-    cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+    out << "if (!strcmp(func_name, \"" << api.name() << "\")) {" << "\n";
 
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
-      cpp_ss << "    " << GetCppVariableType(arg) << " ";
-      cpp_ss << "arg" << arg_count << " = ";
+      out << "    " << GetCppVariableType(arg) << " ";
+      out << "arg" << arg_count << " = ";
       if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
           !strncmp(arg.predefined_type().c_str(),
                    message.original_data_structure_name().c_str(),
                    message.original_data_structure_name().length()) &&
           message.original_data_structure_name().length() > 0) {
-        cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
-               << kInstanceVariableName << ")";
+        out << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
+            << kInstanceVariableName << ")";
       } else {
-        cpp_ss << GetCppInstanceType(arg);
+        out << GetCppInstanceType(arg);
       }
-      cpp_ss << ";" << endl;
-      cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-             << " << endl;" << endl;
+      out << ";" << "\n";
+      out << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
+          << " << endl;" << "\n";
       arg_count++;
     }
 
-    cpp_ss << "    ";
-    cpp_ss << "typedef void* (*";
-    cpp_ss << "func_type_" << api.name() << ")(...";
-    cpp_ss << ");" << endl;
+    out << "    ";
+    out << "typedef void* (*";
+    out << "func_type_" << api.name() << ")(...";
+    out << ");" << "\n";
 
     // actual function call
     if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
-      cpp_ss << "*result = NULL;" << endl;
+      out << "*result = NULL;" << "\n";
     } else {
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      out << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
     }
-    cpp_ss << "    ";
-    cpp_ss << "((func_type_" << api.name() << ") "
-           << "target_loader_.GetLoaderFunction(\"" << api.name() << "\"))(";
-    // cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
+    out << "    ";
+    out << "((func_type_" << api.name() << ") "
+        << "target_loader_.GetLoaderFunction(\"" << api.name() << "\"))(";
+    // out << "reinterpret_cast<" << message.original_data_structure_name()
     //    << "*>(" << kInstanceVariableName << ")->" << api.name() << "(";
 
-    if (arg_count > 0) cpp_ss << endl;
+    if (arg_count > 0) out << "\n";
 
     for (int index = 0; index < arg_count; index++) {
-      cpp_ss << "      arg" << index;
+      out << "      arg" << index;
       if (index != (arg_count - 1)) {
-        cpp_ss << "," << endl;
+        out << "," << "\n";
       }
     }
     if (api.has_return_type() || api.return_type().type() != TYPE_VOID) {
-      cpp_ss << "))";
+      out << "))";
     }
-    cpp_ss << ");" << endl;
-    cpp_ss << "    return true;" << endl;
-    cpp_ss << "  }" << endl;
+    out << ");" << "\n";
+    out << "    return true;" << "\n";
+    out << "  }" << "\n";
   }
   // TODO: if there were pointers, free them.
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 void LegacyHalCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& cpp_ss,
+    Formatter& out,
     const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
-      << endl;
-
-  cpp_ss << "  cerr << \"attribute not supported for legacy hal yet\" << endl;"
-         << endl;
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << "\n";
+  out << "    FunctionSpecificationMessage* func_msg," << "\n";
+  out << "    void** result) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
+      << "\n";
+  out << "cerr << \"attribute not supported for legacy hal yet\" << endl;"
+      << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 
 void LegacyHalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    std::stringstream& /*h_ss*/, const string& /*function_prototype*/) {}
+    Formatter& /*h_ss*/, const string& /*function_prototype*/) {}
 
 }  // namespace vts
 }  // namespace android

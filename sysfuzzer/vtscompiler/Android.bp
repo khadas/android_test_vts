@@ -61,6 +61,8 @@ cc_binary_host {
     static_libs: ["libz"],
 
     shared_libs: [
+        "libbase",
+        "libhidl-gen-utils",
         "libvts_multidevice_proto",
         "libvtsc",
     ],

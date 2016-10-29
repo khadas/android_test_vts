@@ -36,7 +36,7 @@ const char* const HalCodeGen::kInstanceVariableName = "device_";
 
 
 void HalCodeGen::GenerateCppBodyCallbackFunction(
-    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+    Formatter& out, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   bool first_callback = true;
 
@@ -48,59 +48,62 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
     string name =
         "vts_callback_" + fuzzer_extended_class_name + "_" + attribute.name();
     if (first_callback) {
-      cpp_ss << "static string callback_socket_name_;" << endl;
+      out << "static string callback_socket_name_;" << "\n";
       first_callback = false;
     }
-    cpp_ss << endl;
-    cpp_ss << "class " << name << " : public FuzzerCallbackBase {" << endl;
-    cpp_ss << " public:" << endl;
-    cpp_ss << "  " << name << "(const string& callback_socket_name) {" << endl;
-    cpp_ss << "      callback_socket_name_ = callback_socket_name;" << endl;
-    cpp_ss << "    }" << endl;
+    out << "\n";
+    out << "class " << name << " : public FuzzerCallbackBase {" << "\n";
+    out << " public:" << "\n";
+    out.indent();
+    out << name << "(const string& callback_socket_name) {" << "\n";
+    out.indent();
+    out << "callback_socket_name_ = callback_socket_name;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
 
     int primitive_format_index = 0;
     for (const FunctionPointerSpecificationMessage& func_pt_spec :
          attribute.function_pointer()) {
       const string& callback_name = func_pt_spec.function_name();
       // TODO: callback's return value is assumed to be 'void'.
-      cpp_ss << endl;
-      cpp_ss << "  static ";
+      out << "\n";
+      out << "static ";
       bool has_return_value = false;
       if (!func_pt_spec.has_return_type() ||
           !func_pt_spec.return_type().has_type() ||
           func_pt_spec.return_type().type() == TYPE_VOID) {
-        cpp_ss << "void" << endl;
+        out << "void" << "\n";
       } else if (func_pt_spec.return_type().type() == TYPE_PREDEFINED) {
-        cpp_ss << func_pt_spec.return_type().predefined_type();
+        out << func_pt_spec.return_type().predefined_type();
         has_return_value = true;
       } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR unknown type "
-             << func_pt_spec.return_type().type() << endl;
+             << func_pt_spec.return_type().type() << "\n";
         exit(-1);
       }
-      cpp_ss << " " << callback_name << "(";
+      out << " " << callback_name << "(";
       int primitive_type_index;
       primitive_type_index = 0;
       for (const auto& arg : func_pt_spec.arg()) {
         if (primitive_type_index != 0) {
-          cpp_ss << ", ";
+          out << ", ";
         }
         if (arg.is_const()) {
-          cpp_ss << "const ";
+          out << "const ";
         }
         if (arg.type() == TYPE_SCALAR) {
           /*
           if (arg.scalar_type() == "pointer") {
-            cpp_ss << definition.aggregate_value(
+            out << definition.aggregate_value(
                 primitive_format_index).primitive_name(primitive_type_index)
                     << " ";
           } */
           if (arg.scalar_type() == "char_pointer") {
-            cpp_ss << "char* ";
+            out << "char* ";
           } else if (arg.scalar_type() == "uchar_pointer") {
-            cpp_ss << "unsigned char* ";
+            out << "unsigned char* ";
           } else if (arg.scalar_type() == "bool_t") {
-            cpp_ss << "bool ";
+            out << "bool ";
           } else if (arg.scalar_type() == "int8_t" ||
                      arg.scalar_type() == "uint8_t" ||
                      arg.scalar_type() == "int16_t" ||
@@ -110,199 +113,210 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
                      arg.scalar_type() == "size_t" ||
                      arg.scalar_type() == "int64_t" ||
                      arg.scalar_type() == "uint64_t") {
-            cpp_ss << arg.scalar_type() << " ";
+            out << arg.scalar_type() << " ";
           } else if (arg.scalar_type() == "void_pointer") {
-            cpp_ss << "void*";
+            out << "void*";
           } else {
             cerr << __func__ << " unsupported scalar type " << arg.scalar_type()
-                 << endl;
+                 << "\n";
             exit(-1);
           }
         } else if (arg.type() == TYPE_PREDEFINED) {
-          cpp_ss << arg.predefined_type() << " ";
+          out << arg.predefined_type() << " ";
         } else {
-          cerr << __func__ << " unsupported type" << endl;
+          cerr << __func__ << " unsupported type" << "\n";
           exit(-1);
         }
-        cpp_ss << "arg" << primitive_type_index;
+        out << "arg" << primitive_type_index;
         primitive_type_index++;
       }
-      cpp_ss << ") {" << endl;
+      out << ") {" << "\n";
+      out.indent();
 #if USE_VAARGS
-      cpp_ss << "    const char fmt[] = \""
+      out << "    const char fmt[] = \""
              << definition.primitive_format(primitive_format_index) << "\";"
-             << endl;
-      cpp_ss << "    va_list argp;" << endl;
-      cpp_ss << "    const char* p;" << endl;
-      cpp_ss << "    int i;" << endl;
-      cpp_ss << "    char* s;" << endl;
-      cpp_ss << "    char fmtbuf[256];" << endl;
-      cpp_ss << endl;
-      cpp_ss << "    va_start(argp, fmt);" << endl;
-      cpp_ss << endl;
-      cpp_ss << "    for (p = fmt; *p != '\\0'; p++) {" << endl;
-      cpp_ss << "      if (*p != '%') {" << endl;
-      cpp_ss << "        putchar(*p);" << endl;
-      cpp_ss << "        continue;" << endl;
-      cpp_ss << "      }" << endl;
-      cpp_ss << "      switch (*++p) {" << endl;
-      cpp_ss << "        case 'c':" << endl;
-      cpp_ss << "          i = va_arg(argp, int);" << endl;
-      cpp_ss << "          putchar(i);" << endl;
-      cpp_ss << "          break;" << endl;
-      cpp_ss << "        case 'd':" << endl;
-      cpp_ss << "          i = va_arg(argp, int);" << endl;
-      cpp_ss << "          s = itoa(i, fmtbuf, 10);" << endl;
-      cpp_ss << "          fputs(s, stdout);" << endl;
-      cpp_ss << "          break;" << endl;
-      cpp_ss << "        case 's':" << endl;
-      cpp_ss << "          s = va_arg(argp, char *);" << endl;
-      cpp_ss << "          fputs(s, stdout);" << endl;
-      cpp_ss << "          break;" << endl;
-      // cpp_ss << "        case 'p':
-      cpp_ss << "        case '%':" << endl;
-      cpp_ss << "          putchar('%');" << endl;
-      cpp_ss << "          break;" << endl;
-      cpp_ss << "      }" << endl;
-      cpp_ss << "    }" << endl;
-      cpp_ss << "    va_end(argp);" << endl;
+             << "\n";
+      out << "    va_list argp;" << "\n";
+      out << "    const char* p;" << "\n";
+      out << "    int i;" << "\n";
+      out << "    char* s;" << "\n";
+      out << "    char fmtbuf[256];" << "\n";
+      out << "\n";
+      out << "    va_start(argp, fmt);" << "\n";
+      out << "\n";
+      out << "    for (p = fmt; *p != '\\0'; p++) {" << "\n";
+      out << "      if (*p != '%') {" << "\n";
+      out << "        putchar(*p);" << "\n";
+      out << "        continue;" << "\n";
+      out << "      }" << "\n";
+      out << "      switch (*++p) {" << "\n";
+      out << "        case 'c':" << "\n";
+      out << "          i = va_arg(argp, int);" << "\n";
+      out << "          putchar(i);" << "\n";
+      out << "          break;" << "\n";
+      out << "        case 'd':" << "\n";
+      out << "          i = va_arg(argp, int);" << "\n";
+      out << "          s = itoa(i, fmtbuf, 10);" << "\n";
+      out << "          fputs(s, stdout);" << "\n";
+      out << "          break;" << "\n";
+      out << "        case 's':" << "\n";
+      out << "          s = va_arg(argp, char *);" << "\n";
+      out << "          fputs(s, stdout);" << "\n";
+      out << "          break;" << "\n";
+      // out << "        case 'p':
+      out << "        case '%':" << "\n";
+      out << "          putchar('%');" << "\n";
+      out << "          break;" << "\n";
+      out << "      }" << "\n";
+      out << "    }" << "\n";
+      out << "    va_end(argp);" << "\n";
 #endif
       // TODO: check whether bytes is set and handle properly if not.
-      cpp_ss << "    AndroidSystemCallbackRequestMessage callback_message;"
-             << endl;
-      cpp_ss << "    callback_message.set_id(GetCallbackID(\"" << callback_name
-             << "\"));" << endl;
+      out << "AndroidSystemCallbackRequestMessage callback_message;"
+             << "\n";
+      out << "callback_message.set_id(GetCallbackID(\"" << callback_name
+             << "\"));" << "\n";
 
       primitive_type_index = 0;
       for (const auto& arg : func_pt_spec.arg()) {
-        cpp_ss << "VariableSpecificationMessage* var_msg" << primitive_type_index
-               << " = callback_message.add_arg();" << endl;
+        out << "VariableSpecificationMessage* var_msg" << primitive_type_index
+               << " = callback_message.add_arg();" << "\n";
         if (arg.type() == TYPE_SCALAR) {
-          cpp_ss << "var_msg" << primitive_type_index << "->set_type("
-                 << "TYPE_SCALAR);" << endl;
-          cpp_ss << "var_msg" << primitive_type_index << "->set_scalar_type(\""
-                 << arg.scalar_type() << "\");" << endl;
-          cpp_ss << "var_msg" << primitive_type_index << "->mutable_scalar_value()";
+          out << "var_msg" << primitive_type_index << "->set_type("
+                 << "TYPE_SCALAR);" << "\n";
+          out << "var_msg" << primitive_type_index << "->set_scalar_type(\""
+                 << arg.scalar_type() << "\");" << "\n";
+          out << "var_msg" << primitive_type_index << "->mutable_scalar_value()";
           if (arg.scalar_type() == "bool_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().bool_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().bool_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int8_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int8_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int8_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint8_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint8_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint8_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int16_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int16_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int16_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint16_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint16_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint16_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int32_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int32_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint32_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint32_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "size_t") {
-            cpp_ss << "->set_uint32_t("
-                   << arg.scalar_value().uint32_t() << ");" << endl;
+            out << "->set_uint32_t("
+                   << arg.scalar_value().uint32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int64_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int64_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().int64_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint64_t") {
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint64_t() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uint64_t() << ");" << "\n";
           } else if (arg.scalar_type() == "char_pointer") {
             // pointer value is not meaning when it is passed to another machine.
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().char_pointer() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().char_pointer() << ");" << "\n";
           } else if (arg.scalar_type() == "uchar_pointer") {
             // pointer value is not meaning when it is passed to another machine.
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uchar_pointer() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().uchar_pointer() << ");" << "\n";
           } else if (arg.scalar_type() == "void_pointer") {
             // pointer value is not meaning when it is passed to another machine.
-            cpp_ss << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().void_pointer() << ");" << endl;
+            out << "->set_" << arg.scalar_type() << "("
+                   << arg.scalar_value().void_pointer() << ");" << "\n";
           } else {
             cerr << __func__ << " unsupported scalar type " << arg.scalar_type()
-                 << endl;
+                 << "\n";
             exit(-1);
           }
         } else if (arg.type() == TYPE_PREDEFINED) {
-          cpp_ss << "var_msg" << primitive_type_index << "->set_type("
-                 << "TYPE_PREDEFINED);" << endl;
+          out << "var_msg" << primitive_type_index << "->set_type("
+                 << "TYPE_PREDEFINED);" << "\n";
           // TODO: actually handle such case.
         } else {
-          cerr << __func__ << " unsupported type" << endl;
+          cerr << __func__ << " unsupported type" << "\n";
           exit(-1);
         }
         primitive_type_index++;
       }
-      cpp_ss << "    RpcCallToAgent(callback_message, callback_socket_name_);"
-             << endl;
+      out << "RpcCallToAgent(callback_message, callback_socket_name_);"
+          << "\n";
       if (has_return_value) {
         // TODO: consider actual return type.
-        cpp_ss << "    return NULL;";
+        out << "return NULL;";
       }
-      cpp_ss << "  }" << endl;
-      cpp_ss << endl;
+      out.unindent();
+      out << "}" << "\n";
+      out << "\n";
 
       primitive_format_index++;
     }
-    cpp_ss << endl;
-    cpp_ss << " private:" << endl;
-    cpp_ss << "};" << endl;
-    cpp_ss << endl;
+    out << "\n";
+    out.unindent();
+    out << " private:" << "\n";
+    out << "};" << "\n";
+    out << "\n";
   }
 }
 
 void HalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+    Formatter& out, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   for (auto const& sub_struct : message.interface().sub_struct()) {
-    GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
+    GenerateCppBodyFuzzFunction(out, sub_struct, fuzzer_extended_class_name,
                                 message.original_data_structure_name(),
                                 sub_struct.is_pointer() ? "->" : ".");
   }
 
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
-      << endl;
+  out << "bool " << fuzzer_extended_class_name << "::Fuzz(" << "\n";
+  out << "    FunctionSpecificationMessage* func_msg," << "\n";
+  out << "    void** result, const string& callback_socket_name) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
+      << "\n";
 
   // to call another function if it's for a sub_struct
   if (message.interface().sub_struct().size() > 0) {
-    cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
+    out << "if (func_msg->parent_path().length() > 0) {" << "\n";
+    out.indent();
     for (auto const& sub_struct : message.interface().sub_struct()) {
-      GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, "");
+      GenerateSubStructFuzzFunctionCall(out, sub_struct, "");
     }
-    cpp_ss << "  }" << endl;
+    out.unindent();
+    out << "}" << "\n";
   }
+  out.unindent();
 
-  cpp_ss << "    " << message.original_data_structure_name()
-         << "* local_device = ";
-  cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-         << "*>(" << kInstanceVariableName << ");" << endl;
+  out << message.original_data_structure_name()
+      << "* local_device = ";
+  out << "reinterpret_cast<" << message.original_data_structure_name()
+      << "*>(" << kInstanceVariableName << ");" << "\n";
 
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
-  cpp_ss << "      local_device = reinterpret_cast<"
-         << message.original_data_structure_name() << "*>(hmi_);" << endl;
-  cpp_ss << "    }" << endl;
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-         << endl;
-  cpp_ss << "      return false;" << endl;
-  cpp_ss << "    }" << endl;
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << "\n";
+  out << "local_device = reinterpret_cast<"
+         << message.original_data_structure_name() << "*>(hmi_);" << "\n";
+  out.unindent();
+  out << "}" << "\n";
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+      << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 
   for (auto const& api : message.interface().api()) {
-    cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
-    cpp_ss << "    cout << \"match\" << endl;" << endl;
+    out << "if (!strcmp(func_name, \"" << api.name() << "\")) {" << "\n";
+    out.indent();
+    out << "cout << \"match\" << endl;" << "\n";
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
@@ -311,37 +325,37 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
                       arg.predefined_type();  // TODO - check to make sure name
                                               // is always correct
         if (name.back() == '*') name.pop_back();
-        cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
-        cpp_ss << name << "(callback_socket_name);" << endl;
-        cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
-               << arg_count << "));" << endl;
+        out << name << "* arg" << arg_count << "callback = new ";
+        out << name << "(callback_socket_name);" << "\n";
+        out << "arg" << arg_count << "callback->Register(func_msg->arg("
+            << arg_count << "));" << "\n";
 
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
-        cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg)
-               << ") malloc(sizeof(" << GetCppVariableType(arg) << "));"
-               << endl;
+        out << GetCppVariableType(arg) << " ";
+        out << "arg" << arg_count << " = (" << GetCppVariableType(arg)
+            << ") malloc(sizeof(" << GetCppVariableType(arg) << "));"
+            << "\n";
         // TODO: think about how to free the malloced callback data structure.
         // find the spec.
         bool found = false;
-        cout << name << endl;
+        cout << name << "\n";
         for (auto const& attribute : message.interface().attribute()) {
           if (attribute.type() == TYPE_FUNCTION_POINTER &&
               attribute.is_callback()) {
             string target_name = "vts_callback_" + fuzzer_extended_class_name +
                                  "_" + attribute.name();
-            cout << "compare" << endl;
-            cout << target_name << endl;
+            cout << "compare" << "\n";
+            cout << target_name << "\n";
             if (name == target_name) {
               if (attribute.function_pointer_size() > 1) {
                 for (auto const& func_pt : attribute.function_pointer()) {
-                  cpp_ss << "    arg" << arg_count << "->"
-                         << func_pt.function_name() << " = arg" << arg_count
-                         << "callback->" << func_pt.function_name() << ";"
-                         << endl;
+                  out << "arg" << arg_count << "->"
+                      << func_pt.function_name() << " = arg" << arg_count
+                      << "callback->" << func_pt.function_name() << ";"
+                      << "\n";
                 }
               } else {
-                cpp_ss << "    arg" << arg_count << " = arg" << arg_count
-                       << "callback->" << attribute.name() << ";" << endl;
+                out << "arg" << arg_count << " = arg" << arg_count
+                    << "callback->" << attribute.name() << ";" << "\n";
               }
               found = true;
               break;
@@ -350,17 +364,17 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         }
         if (!found) {
           cerr << __func__ << " ERROR callback definition missing for " << name
-               << " of " << api.name() << endl;
+               << " of " << api.name() << "\n";
           exit(-1);
         }
       } else {
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
-        cpp_ss << "arg" << arg_count << " = ";
+        out << GetCppVariableType(arg) << " ";
+        out << "arg" << arg_count << " = ";
         if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
             !strncmp(arg.predefined_type().c_str(),
                      message.original_data_structure_name().c_str(),
                      message.original_data_structure_name().length())) {
-          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
+          out << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
                  << kInstanceVariableName << ")";
         } else {
           std::stringstream msg_ss;
@@ -368,16 +382,16 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           string msg = msg_ss.str();
 
           if (arg.type() == TYPE_SCALAR) {
-            cpp_ss << "(" << msg << ".type() == TYPE_SCALAR)? ";
+            out << "(" << msg << ".type() == TYPE_SCALAR)? ";
             if (arg.scalar_type() == "pointer" ||
                 arg.scalar_type() == "pointer_pointer" ||
                 arg.scalar_type() == "char_pointer" ||
                 arg.scalar_type() == "uchar_pointer" ||
                 arg.scalar_type() == "void_pointer" ||
                 arg.scalar_type() == "function_pointer") {
-              cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+              out << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
             }
-            cpp_ss << "(" << msg << ".scalar_value()";
+            out << "(" << msg << ".scalar_value()";
 
             if (arg.scalar_type() == "bool_t" ||
                 arg.scalar_type() == "int32_t" ||
@@ -390,105 +404,108 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
                 arg.scalar_type() == "uint8_t" ||
                 arg.scalar_type() == "float_t" ||
                 arg.scalar_type() == "double_t") {
-              cpp_ss << "." << arg.scalar_type() << "() ";
+              out << "." << arg.scalar_type() << "() ";
             } else if (arg.scalar_type() == "pointer" ||
                        arg.scalar_type() == "char_pointer" ||
                        arg.scalar_type() == "uchar_pointer" ||
                        arg.scalar_type() == "void_pointer") {
-              cpp_ss << ".pointer() ";
+              out << ".pointer() ";
             } else {
               cerr << __func__ << " ERROR unsupported scalar type "
-                   << arg.scalar_type() << endl;
+                   << arg.scalar_type() << "\n";
               exit(-1);
             }
-            cpp_ss << ") : ";
+            out << ") : ";
           } else {
-            cerr << __func__ << " unknown type " << msg << endl;
+            cerr << __func__ << " unknown type " << msg << "\n";
           }
 
-          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
+          out << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
                  << ".type() == TYPE_STRUCT || " << msg
                  << ".type() == TYPE_SCALAR)? ";
-          cpp_ss << GetCppInstanceType(arg, msg);
-          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+          out << GetCppInstanceType(arg, msg);
+          out << " : " << GetCppInstanceType(arg) << " )";
           // TODO: use the given message and call a lib function which converts
           // a message to a C/C++ struct.
         }
-        cpp_ss << ";" << endl;
+        out << ";" << "\n";
       }
-      cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-             << " << endl;" << endl;
+      out << "cout << \"arg" << arg_count << " = \" << arg" << arg_count
+          << " << endl;" << "\n";
       arg_count++;
     }
 
     // actual function call
-    GenerateCodeToStartMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+    GenerateCodeToStartMeasurement(out);
+    out << "cout << \"hit2.\" << device_ << endl;" << "\n";
 
     // checks whether the function is actually defined.
-    cpp_ss << "    if (reinterpret_cast<"
+    out << "if (reinterpret_cast<"
            << message.original_data_structure_name() << "*>(local_device)->"
-           << api.name() << " == NULL" << ") {" << endl;
-    cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
+           << api.name() << " == NULL" << ") {" << "\n";
+    out.indent();
+    out << "cerr << \"api not set.\" << endl;" << "\n";
     // todo: consider throwing an exception at least a way to tell more
     // specifically to the caller.
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
+    out << "return false;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
 
-    cpp_ss << "    cout << \"Call an API.\" << endl;" << endl;
-    cpp_ss << "    cout << \"local_device = \" << local_device;" << endl;
+    out << "cout << \"Call an API.\" << endl;" << "\n";
+    out << "cout << \"local_device = \" << local_device;" << "\n";
 
-    cpp_ss << "    ";
     if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
-      cpp_ss << "*result = NULL;" << endl;
+      out << "*result = NULL;" << "\n";
     } else {
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      out << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
     }
-    cpp_ss << "local_device->" << api.name() << "(";
-    if (arg_count > 0) cpp_ss << endl;
+    out << "local_device->" << api.name() << "(";
+    if (arg_count > 0) out << "\n";
 
     for (int index = 0; index < arg_count; index++) {
-      cpp_ss << "      arg" << index;
+      out << "arg" << index;
       if (index != (arg_count - 1)) {
-        cpp_ss << "," << endl;
+        out << "," << "\n";
       }
     }
 
     if (api.has_return_type() && api.return_type().type() != TYPE_VOID) {
-      cpp_ss << "))";
+      out << "))";
     }
-    cpp_ss << ");" << endl;
-    GenerateCodeToStopMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"called\" << endl;" << endl;
+    out << ");" << "\n";
+    GenerateCodeToStopMeasurement(out);
+    out << "cout << \"called\" << endl;" << "\n";
 
     // Copy the output (call by pointer or reference cases).
     arg_count = 0;
     for (auto const& arg : api.arg()) {
       if (arg.is_output()) {
         // TODO check the return value
-        cpp_ss << "    " << GetConversionToProtobufFunctionName(arg) << "(arg"
-               << arg_count << ", "
-               << "func_msg->mutable_arg(" << arg_count << "));" << endl;
+        out << GetConversionToProtobufFunctionName(arg) << "(arg"
+            << arg_count << ", "
+            << "func_msg->mutable_arg(" << arg_count << "));" << "\n";
       }
       arg_count++;
     }
 
-    cpp_ss << "    return true;" << endl;
-    cpp_ss << "  }" << endl;
+    out << "return true;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
   }
   // TODO: if there were pointers, free them.
-  cpp_ss << "  cerr << \"func not found\" << endl;" << endl;
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "cerr << \"func not found\" << endl;" << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    Formatter& out, const StructSpecificationMessage& message,
     const string& fuzzer_extended_class_name,
     const string& original_data_structure_name, const string& parent_path) {
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateCppBodyFuzzFunction(
-        cpp_ss, sub_struct, fuzzer_extended_class_name,
+        out, sub_struct, fuzzer_extended_class_name,
         original_data_structure_name,
         parent_path + message.name() + (sub_struct.is_pointer() ? "->" : "."));
   }
@@ -497,14 +514,14 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   ReplaceSubString(parent_path_printable, "->", "_");
   replace(parent_path_printable.begin(), parent_path_printable.end(), '.', '_');
 
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz_"
-         << parent_path_printable + message.name() << "(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
-      << endl;
+  out << "bool " << fuzzer_extended_class_name << "::Fuzz_"
+         << parent_path_printable + message.name() << "(" << "\n";
+  out << "FunctionSpecificationMessage* func_msg," << "\n";
+  out << "void** result, const string& callback_socket_name) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+      << "\n";
 
   bool is_open;
   for (auto const& api : message.api()) {
@@ -514,33 +531,39 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       is_open = true;
     }
 
-    cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+    out << "if (!strcmp(func_name, \"" << api.name() << "\")) {" << "\n";
+    out.indent();
 
-    cpp_ss << "    " << original_data_structure_name << "* local_device = ";
-    cpp_ss << "reinterpret_cast<" << original_data_structure_name << "*>("
-           << kInstanceVariableName << ");" << endl;
+    out << original_data_structure_name << "* local_device = ";
+    out << "reinterpret_cast<" << original_data_structure_name << "*>("
+           << kInstanceVariableName << ");" << "\n";
 
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
-    cpp_ss << "      local_device = reinterpret_cast<"
-           << original_data_structure_name << "*>(hmi_);" << endl;
-    cpp_ss << "    }" << endl;
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-           << endl;
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
+    out << "if (local_device == NULL) {" << "\n";
+    out.indent();
+    out << "cout << \"use hmi\" << endl;" << "\n";
+    out << "local_device = reinterpret_cast<"
+           << original_data_structure_name << "*>(hmi_);" << "\n";
+    out.unindent();
+    out << "}" << "\n";
+    out << "if (local_device == NULL) {" << "\n";
+    out.indent();
+    out << "cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+        << "\n";
+    out.indent();
+    out << "return false;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
 
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
-      cpp_ss << "    " << GetCppVariableType(arg) << " ";
-      cpp_ss << "arg" << arg_count << " = ";
+      out << GetCppVariableType(arg) << " ";
+      out << "arg" << arg_count << " = ";
       if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
           !strncmp(arg.predefined_type().c_str(),
                    original_data_structure_name.c_str(),
                    original_data_structure_name.length())) {
-        cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
+        out << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
                << kInstanceVariableName << ")";
       } else {
         std::stringstream msg_ss;
@@ -548,19 +571,19 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         string msg = msg_ss.str();
 
         if (arg.type() == TYPE_SCALAR) {
-          cpp_ss << "(" << msg << ".type() == TYPE_SCALAR && " << msg
+          out << "(" << msg << ".type() == TYPE_SCALAR && " << msg
                  << ".scalar_value()";
           if (arg.scalar_type() == "pointer" ||
               arg.scalar_type() == "char_pointer" ||
               arg.scalar_type() == "uchar_pointer" ||
               arg.scalar_type() == "void_pointer" ||
               arg.scalar_type() == "function_pointer") {
-            cpp_ss << ".has_pointer())? ";
-            cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+            out << ".has_pointer())? ";
+            out << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
           } else {
-            cpp_ss << ".has_" << arg.scalar_type() << "())? ";
+            out << ".has_" << arg.scalar_type() << "())? ";
           }
-          cpp_ss << "(" << msg << ".scalar_value()";
+          out << "(" << msg << ".scalar_value()";
 
           if (arg.scalar_type() == "int32_t" ||
               arg.scalar_type() == "uint32_t" ||
@@ -571,185 +594,196 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
               arg.scalar_type() == "int8_t" || arg.scalar_type() == "uint8_t" ||
               arg.scalar_type() == "float_t" ||
               arg.scalar_type() == "double_t") {
-            cpp_ss << "." << arg.scalar_type() << "() ";
+            out << "." << arg.scalar_type() << "() ";
           } else if (arg.scalar_type() == "pointer" ||
                      arg.scalar_type() == "char_pointer" ||
                      arg.scalar_type() == "uchar_pointer" ||
                      arg.scalar_type() == "function_pointer" ||
                      arg.scalar_type() == "void_pointer") {
-            cpp_ss << ".pointer() ";
+            out << ".pointer() ";
           } else {
             cerr << __func__ << " ERROR unsupported type " << arg.scalar_type()
-                 << endl;
+                 << "\n";
             exit(-1);
           }
-          cpp_ss << ") : ";
+          out << ") : ";
         }
 
         if (is_open) {
           if (arg_count == 0) {
-            cpp_ss << "hmi_;" << endl;
+            out << "hmi_;" << "\n";
           } else if (arg_count == 1) {
-            cpp_ss << "((hmi_) ? const_cast<char*>(hmi_->name) : NULL)" << endl;
+            out << "((hmi_) ? const_cast<char*>(hmi_->name) : NULL)" << "\n";
           } else if (arg_count == 2) {
-            cpp_ss << "(struct hw_device_t**) &device_" << endl;
+            out << "(struct hw_device_t**) &device_" << "\n";
           } else {
             cerr << __func__ << " ERROR additional args for open " << arg_count
-                 << endl;
+                 << "\n";
             exit(-1);
           }
         } else {
-          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
+          out << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
                  << ".type() == TYPE_STRUCT || " << msg
                  << ".type() == TYPE_SCALAR)? ";
-          cpp_ss << GetCppInstanceType(arg, msg);
-          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+          out << GetCppInstanceType(arg, msg);
+          out << " : " << GetCppInstanceType(arg) << " )";
           // TODO: use the given message and call a lib function which converts
           // a message to a C/C++ struct.
         }
       }
-      cpp_ss << ";" << endl;
-      cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-             << " << endl;" << endl
-             << endl;
+      out << ";" << "\n";
+      out << "cout << \"arg" << arg_count << " = \" << arg" << arg_count
+          << " << endl;" << "\n"
+          << "\n";
       arg_count++;
     }
 
     // actual function call
-    GenerateCodeToStartMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+    GenerateCodeToStartMeasurement(out);
+    out << "cout << \"hit2.\" << device_ << endl;" << "\n";
 
-    cpp_ss << "    if (reinterpret_cast<" << original_data_structure_name
+    out << "if (reinterpret_cast<" << original_data_structure_name
            << "*>(local_device)" << parent_path << message.name() << "->"
            << api.name() << " == NULL";
-    cpp_ss << ") {" << endl;
-    cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
+    out << ") {" << "\n";
+    out.indent();
+    out << "cerr << \"api not set.\" << endl;" << "\n";
     // todo: consider throwing an exception at least a way to tell more
     // specifically to the caller.
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
+    out << "return false;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
 
-    cpp_ss << "    cout << \"Call an API.\" << endl;" << endl;
-    cpp_ss << "    ";
+    out << "cout << \"Call an API.\" << endl;" << "\n";
     if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
-      cpp_ss << "*result = NULL;" << endl;
+      out << "*result = NULL;" << "\n";
     } else {
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      out << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
     }
-    cpp_ss << "local_device" << parent_path << message.name() << "->"
-           << api.name() << "(";
-    if (arg_count > 0) cpp_ss << endl;
+    out << "local_device" << parent_path << message.name() << "->"
+        << api.name() << "(";
+    if (arg_count > 0) out << "\n";
 
     for (int index = 0; index < arg_count; index++) {
-      cpp_ss << "      arg" << index;
+      out << "arg" << index;
       if (index != (arg_count - 1)) {
-        cpp_ss << "," << endl;
+        out << "," << "\n";
       }
     }
     if (api.has_return_type() && api.return_type().type() != TYPE_VOID) {
-      cpp_ss << "))";
+      out << "))";
     }
-    cpp_ss << ");" << endl;
-    GenerateCodeToStopMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"called\" << endl;" << endl;
+    out << ");" << "\n";
+    GenerateCodeToStopMeasurement(out);
+    out << "cout << \"called\" << endl;" << "\n";
 
     // Copy the output (call by pointer or reference cases).
     arg_count = 0;
     for (auto const& arg : api.arg()) {
       if (arg.is_output()) {
         // TODO check the return value
-        cpp_ss << "    " << GetConversionToProtobufFunctionName(arg) << "(arg"
-               << arg_count << ", "
-               << "func_msg->mutable_arg(" << arg_count << "));" << endl;
+        out << GetConversionToProtobufFunctionName(arg) << "(arg"
+            << arg_count << ", "
+            << "func_msg->mutable_arg(" << arg_count << "));" << "\n";
       }
       arg_count++;
     }
 
-    cpp_ss << "    return true;" << endl;
-    cpp_ss << "  }" << endl;
+    out << "return true;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
   }
   // TODO: if there were pointers, free them.
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+    Formatter& out, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   for (auto const& sub_struct : message.interface().sub_struct()) {
     GenerateCppBodyGetAttributeFunction(
-        cpp_ss, sub_struct, fuzzer_extended_class_name,
+        out, sub_struct, fuzzer_extended_class_name,
         message.original_data_structure_name(),
         sub_struct.is_pointer() ? "->" : ".");
   }
 
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
-      << endl;
+  out << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << "\n";
+  out << "    FunctionSpecificationMessage* func_msg," << "\n";
+  out << "    void** result) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
+      << "\n";
 
   // to call another function if it's for a sub_struct
   if (message.interface().sub_struct().size() > 0) {
-    cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
+    out << "  if (func_msg->parent_path().length() > 0) {" << "\n";
+    out.indent();
     for (auto const& sub_struct : message.interface().sub_struct()) {
-      GenerateSubStructGetAttributeFunctionCall(cpp_ss, sub_struct, "");
+      GenerateSubStructGetAttributeFunctionCall(out, sub_struct, "");
     }
-    cpp_ss << "  }" << endl;
+    out.unindent();
+    out << "}" << "\n";
   }
 
-  cpp_ss << "    " << message.original_data_structure_name()
-         << "* local_device = ";
-  cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-         << "*>(" << kInstanceVariableName << ");" << endl;
+  out << message.original_data_structure_name()
+      << "* local_device = ";
+  out << "reinterpret_cast<" << message.original_data_structure_name()
+      << "*>(" << kInstanceVariableName << ");" << "\n";
 
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
-  cpp_ss << "      local_device = reinterpret_cast<"
-         << message.original_data_structure_name() << "*>(hmi_);" << endl;
-  cpp_ss << "    }" << endl;
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-         << endl;
-  cpp_ss << "      return false;" << endl;
-  cpp_ss << "    }" << endl;
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << "\n";
+  out << "local_device = reinterpret_cast<"
+         << message.original_data_structure_name() << "*>(hmi_);" << "\n";
+  out.unindent();
+  out << "}" << "\n";
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+      << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 
   for (auto const& attribute : message.interface().attribute()) {
     if (attribute.type() == TYPE_SUBMODULE ||
         attribute.type() == TYPE_SCALAR) {
-      cpp_ss << "  if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << endl;
-      cpp_ss << "    cout << \"match\" << endl;" << endl;
+      out << "if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << "\n";
+      out.indent();
+      out << "cout << \"match\" << endl;" << "\n";
 
       // actual function call
-      cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+      out << "cout << \"hit2.\" << device_ << endl;" << "\n";
 
-      cpp_ss << "    cout << \"ok. let's read attribute.\" << endl;" << endl;
-      cpp_ss << "    ";
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
-      cpp_ss << "local_device->" << attribute.name();
-      cpp_ss << "));" << endl;
+      out << "cout << \"ok. let's read attribute.\" << endl;" << "\n";
+      out << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      out << "local_device->" << attribute.name();
+      out << "));" << "\n";
 
-      cpp_ss << "    cout << \"got\" << endl;" << endl;
+      out << "cout << \"got\" << endl;" << "\n";
 
-      cpp_ss << "    return true;" << endl;
-      cpp_ss << "  }" << endl;
+      out << "return true;" << "\n";
+      out.unindent();
+      out << "}" << "\n";
     }
   }
   // TODO: if there were pointers, free them.
-  cpp_ss << "  cerr << \"attribute not found\" << endl;" << endl;
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "cerr << \"attribute not found\" << endl;" << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    Formatter& out, const StructSpecificationMessage& message,
     const string& fuzzer_extended_class_name,
     const string& original_data_structure_name, const string& parent_path) {
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateCppBodyGetAttributeFunction(
-        cpp_ss, sub_struct, fuzzer_extended_class_name,
+        out, sub_struct, fuzzer_extended_class_name,
         original_data_structure_name,
         parent_path + message.name() + (sub_struct.is_pointer() ? "->" : "."));
   }
@@ -758,80 +792,88 @@ void HalCodeGen::GenerateCppBodyGetAttributeFunction(
   ReplaceSubString(parent_path_printable, "->", "_");
   replace(parent_path_printable.begin(), parent_path_printable.end(), '.', '_');
 
-  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute_"
-         << parent_path_printable + message.name() << "(" << endl;
-  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result) {" << endl;
-  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss
-      << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
-      << endl;
+  out << "bool " << fuzzer_extended_class_name << "::GetAttribute_"
+         << parent_path_printable + message.name() << "(" << "\n";
+  out << "    FunctionSpecificationMessage* func_msg," << "\n";
+  out << "    void** result) {" << "\n";
+  out.indent();
+  out << "const char* func_name = func_msg->name().c_str();" << "\n";
+  out << "cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+      << "\n";
 
-  cpp_ss << "    " << original_data_structure_name
-         << "* local_device = ";
-  cpp_ss << "reinterpret_cast<" << original_data_structure_name
-         << "*>(" << kInstanceVariableName << ");" << endl;
+  out << original_data_structure_name
+      << "* local_device = ";
+  out << "reinterpret_cast<" << original_data_structure_name
+      << "*>(" << kInstanceVariableName << ");" << "\n";
 
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << endl;
-  cpp_ss << "      local_device = reinterpret_cast<"
-         << original_data_structure_name << "*>(hmi_);" << endl;
-  cpp_ss << "    }" << endl;
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-         << endl;
-  cpp_ss << "      return false;" << endl;
-  cpp_ss << "    }" << endl;
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "  cout << \"use hmi \" << (uint64_t)hmi_ << endl;" << "\n";
+  out << "  local_device = reinterpret_cast<"
+      << original_data_structure_name << "*>(hmi_);" << "\n";
+  out.unindent();
+  out << "}" << "\n";
+  out << "if (local_device == NULL) {" << "\n";
+  out.indent();
+  out << "cerr << \"both device_ and hmi_ are NULL.\" << endl;"
+      << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 
   for (auto const& attribute : message.attribute()) {
     if (attribute.type() == TYPE_SUBMODULE ||
         attribute.type() == TYPE_SCALAR) {
-      cpp_ss << "  if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << endl;
-      cpp_ss << "    cout << \"match\" << endl;" << endl;
+      out << "if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << "\n";
+      out.indent();
+      out << "cout << \"match\" << endl;" << "\n";
 
       // actual function call
-      cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
+      out << "cout << \"hit2.\" << device_ << endl;" << "\n";
 
-      cpp_ss << "    cout << \"ok. let's read attribute.\" << endl;" << endl;
-      cpp_ss << "    ";
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
-      cpp_ss << "local_device" << parent_path << message.name() << ".";
+      out << "cout << \"ok. let's read attribute.\" << endl;" << "\n";
+      out << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
+      out << "local_device" << parent_path << message.name() << ".";
       // TODO: use parent's is_pointer()
-      cpp_ss << attribute.name();
-      cpp_ss << "));" << endl;
+      out << attribute.name();
+      out << "));" << "\n";
 
-      cpp_ss << "    cout << \"got\" << endl;" << endl;
+      out << "cout << \"got\" << endl;" << "\n";
 
-      cpp_ss << "    return true;" << endl;
-      cpp_ss << "  }" << endl;
+      out << "return true;" << "\n";
+      out.unindent();
+      out << "}" << "\n";
     }
   }
   // TODO: if there were pointers, free them.
-  cpp_ss << "  cerr << \"attribute not found\" << endl;" << endl;
-  cpp_ss << "  return false;" << endl;
-  cpp_ss << "}" << endl;
+  out << "cerr << \"attribute not found\" << endl;" << "\n";
+  out << "return false;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    std::stringstream& h_ss, const string& function_prototype) {
-  h_ss << "extern \"C\" {" << endl;
-  h_ss << "extern " << function_prototype << ";" << endl;
-  h_ss << "}" << endl;
+    Formatter& out, const string& function_prototype) {
+  out << "extern \"C\" {" << "\n";
+  out << "extern " << function_prototype << ";" << "\n";
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateCppBodyGlobalFunctions(
-    std::stringstream& cpp_ss, const string& function_prototype,
+    Formatter& out, const string& function_prototype,
     const string& fuzzer_extended_class_name) {
-  cpp_ss << "extern \"C\" {" << endl;
-  cpp_ss << function_prototype << " {" << endl;
-  cpp_ss << "  return (android::vts::FuzzerBase*) "
-         << "new android::vts::" << fuzzer_extended_class_name << "();" << endl;
-  cpp_ss << "}" << endl << endl;
-  cpp_ss << "}" << endl;
+  out << "extern \"C\" {" << "\n";
+  out << function_prototype << " {" << "\n";
+  out.indent();
+  out << "return (android::vts::FuzzerBase*) "
+      << "new android::vts::" << fuzzer_extended_class_name << "();" << "\n";
+  out.unindent();
+  out << "}" << "\n" << "\n";
+  out << "}" << "\n";
 }
 
 void HalCodeGen::GenerateSubStructFuzzFunctionCall(
-    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    Formatter& out, const StructSpecificationMessage& message,
     const string& parent_path) {
   string current_path(parent_path);
   if (current_path.length() > 0) {
@@ -843,19 +885,21 @@ void HalCodeGen::GenerateSubStructFuzzFunctionCall(
   replace(current_path_printable.begin(), current_path_printable.end(), '.',
           '_');
 
-  cpp_ss << "    if (func_msg->parent_path() == \"" << current_path << "\") {"
-         << endl;
-  cpp_ss << "      return Fuzz__" << current_path_printable
-         << "(func_msg, result, callback_socket_name);" << endl;
-  cpp_ss << "    }" << endl;
+  out << "if (func_msg->parent_path() == \"" << current_path << "\") {"
+      << "\n";
+  out.indent();
+  out << "return Fuzz__" << current_path_printable
+      << "(func_msg, result, callback_socket_name);" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 
   for (auto const& sub_struct : message.sub_struct()) {
-    GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, current_path);
+    GenerateSubStructFuzzFunctionCall(out, sub_struct, current_path);
   }
 }
 
 void HalCodeGen::GenerateSubStructGetAttributeFunctionCall(
-    std::stringstream& cpp_ss, const StructSpecificationMessage& message,
+    Formatter& out, const StructSpecificationMessage& message,
     const string& parent_path) {
   string current_path(parent_path);
   if (current_path.length() > 0) {
@@ -867,14 +911,16 @@ void HalCodeGen::GenerateSubStructGetAttributeFunctionCall(
   replace(current_path_printable.begin(), current_path_printable.end(), '.',
           '_');
 
-  cpp_ss << "    if (func_msg->parent_path() == \"" << current_path << "\") {"
-         << endl;
-  cpp_ss << "      return GetAttribute__" << current_path_printable
-         << "(func_msg, result);" << endl;
-  cpp_ss << "    }" << endl;
+  out << "if (func_msg->parent_path() == \"" << current_path << "\") {"
+         << "\n";
+  out.indent();
+  out << "      return GetAttribute__" << current_path_printable
+         << "(func_msg, result);" << "\n";
+  out.unindent();
+  out << "}" << "\n";
 
   for (auto const& sub_struct : message.sub_struct()) {
-    GenerateSubStructGetAttributeFunctionCall(cpp_ss, sub_struct, current_path);
+    GenerateSubStructGetAttributeFunctionCall(out, sub_struct, current_path);
   }
 }
 
