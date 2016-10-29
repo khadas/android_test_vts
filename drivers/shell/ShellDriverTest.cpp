@@ -124,7 +124,6 @@ static string vts_shell_driver_test_client_start(const string& command,
  */
 static string test_shell_command_output(const string& command,
                                         const string& socket_address) {
-  int res = 0;
   pid_t p_driver;
   string res_client;
 
