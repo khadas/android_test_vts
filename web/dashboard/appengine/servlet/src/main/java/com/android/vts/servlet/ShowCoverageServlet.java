@@ -14,13 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package com.google.android.vts.servlet;
+package com.android.vts.servlet;
 
-import com.google.android.vts.helpers.BigtableHelper;
-import com.google.android.vts.proto.VtsReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
+import com.android.vts.helpers.BigtableHelper;
+import com.android.vts.proto.VtsReportMessage;
+import com.android.vts.proto.VtsReportMessage.CoverageReportMessage;
+import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
+import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
