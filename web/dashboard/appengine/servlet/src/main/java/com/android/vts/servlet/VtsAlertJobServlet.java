@@ -14,7 +14,8 @@
  * permissions and limitations under the License.
  */
 
-package com.google.android.vts.servlet;
+package com.android.vts.servlet;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
@@ -27,16 +28,16 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.android.vts.helpers.BigtableHelper;
-import com.google.android.vts.proto.VtsReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
-import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.TestCaseResult;
-import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
-import com.google.android.vts.proto.VtsWebStatusMessage;
-import com.google.android.vts.proto.VtsWebStatusMessage.TestStatus;
-import com.google.android.vts.proto.VtsWebStatusMessage.TestStatusMessage;
-import com.google.android.vts.proto.VtsWebStatusMessage.TestStatusMessage.Builder;
+import com.android.vts.helpers.BigtableHelper;
+import com.android.vts.proto.VtsReportMessage;
+import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
+import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
+import com.android.vts.proto.VtsReportMessage.TestCaseResult;
+import com.android.vts.proto.VtsReportMessage.TestReportMessage;
+import com.android.vts.proto.VtsWebStatusMessage;
+import com.android.vts.proto.VtsWebStatusMessage.TestStatus;
+import com.android.vts.proto.VtsWebStatusMessage.TestStatusMessage;
+import com.android.vts.proto.VtsWebStatusMessage.TestStatusMessage.Builder;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
