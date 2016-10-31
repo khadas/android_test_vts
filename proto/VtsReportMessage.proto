@@ -133,28 +133,17 @@ message ProfilingReportMessage {
 
 // To specify a coverage report.
 message CoverageReportMessage {
-  // the directory path of a source file.
-  optional bytes dir_path = 1;
+  // the path to the source file from the project root.
+  optional bytes file_path = 11;
 
-  // the name of the source file.
-  optional bytes file_name = 2;
+  // the name of the project where the file can be found
+  optional bytes project_name = 12;
 
-  // produced html report.
-  optional bytes html = 3;
+  // the commit ID identifying the code revision
+  optional bytes revision = 13;
 
-  // the source file content.
-  optional bytes source_code = 11;
-
-  // gcov produced data files.
-  optional bytes gcno = 21;
-  optional bytes gcda = 22;
   // i-th element gives the number of times i-th line is executed.
   repeated int32 line_coverage_vector = 23;
-
-  // measured coverage data.
-  repeated bytes data = 31;
-  // generated gcov data file.
-  optional bytes gcov = 32;
 
   // the number of source code lines that are instrumented for code coverage
   // measurement.
@@ -162,6 +151,18 @@ message CoverageReportMessage {
 
   // the number of source code lines that are executed.
   optional int32 covered_line_count = 102;
+
+  // TODO(ryanjcampbell@) delete deprecated field
+  // the directory path of a source file.
+  optional bytes dir_path = 1 [deprecated=true];
+
+  // TODO(ryanjcampbell@) delete deprecated field
+  // the name of the source file.
+  optional bytes file_name = 2 [deprecated=true];
+
+  // TODO(ryanjcampbell@) delete deprecated field
+  // produced html report.
+  optional bytes html = 3 [deprecated=true];
 }
 
 

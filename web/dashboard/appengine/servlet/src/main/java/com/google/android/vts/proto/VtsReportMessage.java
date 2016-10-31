@@ -4966,105 +4966,59 @@ public final class VtsReportMessage {
   public interface CoverageReportMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional bytes dir_path = 1;
+    // optional bytes file_path = 11;
     /**
-     * <code>optional bytes dir_path = 1;</code>
+     * <code>optional bytes file_path = 11;</code>
      *
      * <pre>
-     * the directory path of a source file.
+     * the path to the source file from the project root.
      * </pre>
      */
-    boolean hasDirPath();
+    boolean hasFilePath();
     /**
-     * <code>optional bytes dir_path = 1;</code>
+     * <code>optional bytes file_path = 11;</code>
      *
      * <pre>
-     * the directory path of a source file.
+     * the path to the source file from the project root.
      * </pre>
      */
-    com.google.protobuf.ByteString getDirPath();
+    com.google.protobuf.ByteString getFilePath();
 
-    // optional bytes file_name = 2;
+    // optional bytes project_name = 12;
     /**
-     * <code>optional bytes file_name = 2;</code>
+     * <code>optional bytes project_name = 12;</code>
      *
      * <pre>
-     * the name of the source file.
+     * the name of the project where the file can be found
      * </pre>
      */
-    boolean hasFileName();
+    boolean hasProjectName();
     /**
-     * <code>optional bytes file_name = 2;</code>
+     * <code>optional bytes project_name = 12;</code>
      *
      * <pre>
-     * the name of the source file.
+     * the name of the project where the file can be found
      * </pre>
      */
-    com.google.protobuf.ByteString getFileName();
+    com.google.protobuf.ByteString getProjectName();
 
-    // optional bytes html = 3;
+    // optional bytes revision = 13;
     /**
-     * <code>optional bytes html = 3;</code>
+     * <code>optional bytes revision = 13;</code>
      *
      * <pre>
-     * produced html report.
+     * the commit ID identifying the code revision
      * </pre>
      */
-    boolean hasHtml();
+    boolean hasRevision();
     /**
-     * <code>optional bytes html = 3;</code>
+     * <code>optional bytes revision = 13;</code>
      *
      * <pre>
-     * produced html report.
+     * the commit ID identifying the code revision
      * </pre>
      */
-    com.google.protobuf.ByteString getHtml();
-
-    // optional bytes source_code = 11;
-    /**
-     * <code>optional bytes source_code = 11;</code>
-     *
-     * <pre>
-     * the source file content.
-     * </pre>
-     */
-    boolean hasSourceCode();
-    /**
-     * <code>optional bytes source_code = 11;</code>
-     *
-     * <pre>
-     * the source file content.
-     * </pre>
-     */
-    com.google.protobuf.ByteString getSourceCode();
-
-    // optional bytes gcno = 21;
-    /**
-     * <code>optional bytes gcno = 21;</code>
-     *
-     * <pre>
-     * gcov produced data files.
-     * </pre>
-     */
-    boolean hasGcno();
-    /**
-     * <code>optional bytes gcno = 21;</code>
-     *
-     * <pre>
-     * gcov produced data files.
-     * </pre>
-     */
-    com.google.protobuf.ByteString getGcno();
-
-    // optional bytes gcda = 22;
-    /**
-     * <code>optional bytes gcda = 22;</code>
-     */
-    boolean hasGcda();
-    /**
-     * <code>optional bytes gcda = 22;</code>
-     */
-    com.google.protobuf.ByteString getGcda();
+    com.google.protobuf.ByteString getRevision();
 
     // repeated int32 line_coverage_vector = 23;
     /**
@@ -5091,50 +5045,6 @@ public final class VtsReportMessage {
      * </pre>
      */
     int getLineCoverageVector(int index);
-
-    // repeated bytes data = 31;
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    java.util.List<com.google.protobuf.ByteString> getDataList();
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    int getDataCount();
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    com.google.protobuf.ByteString getData(int index);
-
-    // optional bytes gcov = 32;
-    /**
-     * <code>optional bytes gcov = 32;</code>
-     *
-     * <pre>
-     * generated gcov data file.
-     * </pre>
-     */
-    boolean hasGcov();
-    /**
-     * <code>optional bytes gcov = 32;</code>
-     *
-     * <pre>
-     * generated gcov data file.
-     * </pre>
-     */
-    com.google.protobuf.ByteString getGcov();
 
     // optional int32 total_line_count = 101;
     /**
@@ -5173,6 +5083,66 @@ public final class VtsReportMessage {
      * </pre>
      */
     int getCoveredLineCount();
+
+    // optional bytes dir_path = 1 [deprecated = true];
+    /**
+     * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the directory path of a source file.
+     * </pre>
+     */
+    @java.lang.Deprecated boolean hasDirPath();
+    /**
+     * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the directory path of a source file.
+     * </pre>
+     */
+    @java.lang.Deprecated com.google.protobuf.ByteString getDirPath();
+
+    // optional bytes file_name = 2 [deprecated = true];
+    /**
+     * <code>optional bytes file_name = 2 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the name of the source file.
+     * </pre>
+     */
+    @java.lang.Deprecated boolean hasFileName();
+    /**
+     * <code>optional bytes file_name = 2 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the name of the source file.
+     * </pre>
+     */
+    @java.lang.Deprecated com.google.protobuf.ByteString getFileName();
+
+    // optional bytes html = 3 [deprecated = true];
+    /**
+     * <code>optional bytes html = 3 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * produced html report.
+     * </pre>
+     */
+    @java.lang.Deprecated boolean hasHtml();
+    /**
+     * <code>optional bytes html = 3 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * produced html report.
+     * </pre>
+     */
+    @java.lang.Deprecated com.google.protobuf.ByteString getHtml();
   }
   /**
    * Protobuf type {@code android.vts.CoverageReportMessage}
@@ -5230,39 +5200,39 @@ public final class VtsReportMessage {
               break;
             }
             case 10: {
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000020;
               dirPath_ = input.readBytes();
               break;
             }
             case 18: {
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000040;
               fileName_ = input.readBytes();
               break;
             }
             case 26: {
-              bitField0_ |= 0x00000004;
+              bitField0_ |= 0x00000080;
               html_ = input.readBytes();
               break;
             }
             case 90: {
-              bitField0_ |= 0x00000008;
-              sourceCode_ = input.readBytes();
+              bitField0_ |= 0x00000001;
+              filePath_ = input.readBytes();
               break;
             }
-            case 170: {
-              bitField0_ |= 0x00000010;
-              gcno_ = input.readBytes();
+            case 98: {
+              bitField0_ |= 0x00000002;
+              projectName_ = input.readBytes();
               break;
             }
-            case 178: {
-              bitField0_ |= 0x00000020;
-              gcda_ = input.readBytes();
+            case 106: {
+              bitField0_ |= 0x00000004;
+              revision_ = input.readBytes();
               break;
             }
             case 184: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000008;
               }
               lineCoverageVector_.add(input.readInt32());
               break;
@@ -5270,9 +5240,9 @@ public final class VtsReportMessage {
             case 186: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
                 lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000008;
               }
               while (input.getBytesUntilLimit() > 0) {
                 lineCoverageVector_.add(input.readInt32());
@@ -5280,26 +5250,13 @@ public final class VtsReportMessage {
               input.popLimit(limit);
               break;
             }
-            case 250: {
-              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
-                data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-                mutable_bitField0_ |= 0x00000080;
-              }
-              data_.add(input.readBytes());
-              break;
-            }
-            case 258: {
-              bitField0_ |= 0x00000040;
-              gcov_ = input.readBytes();
-              break;
-            }
             case 808: {
-              bitField0_ |= 0x00000080;
+              bitField0_ |= 0x00000008;
               totalLineCount_ = input.readInt32();
               break;
             }
             case 816: {
-              bitField0_ |= 0x00000100;
+              bitField0_ |= 0x00000010;
               coveredLineCount_ = input.readInt32();
               break;
             }
@@ -5311,11 +5268,8 @@ public final class VtsReportMessage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           lineCoverageVector_ = java.util.Collections.unmodifiableList(lineCoverageVector_);
-        }
-        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
-          data_ = java.util.Collections.unmodifiableList(data_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -5349,140 +5303,76 @@ public final class VtsReportMessage {
     }
 
     private int bitField0_;
-    // optional bytes dir_path = 1;
-    public static final int DIR_PATH_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString dirPath_;
+    // optional bytes file_path = 11;
+    public static final int FILE_PATH_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString filePath_;
     /**
-     * <code>optional bytes dir_path = 1;</code>
+     * <code>optional bytes file_path = 11;</code>
      *
      * <pre>
-     * the directory path of a source file.
+     * the path to the source file from the project root.
      * </pre>
      */
-    public boolean hasDirPath() {
+    public boolean hasFilePath() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes dir_path = 1;</code>
+     * <code>optional bytes file_path = 11;</code>
      *
      * <pre>
-     * the directory path of a source file.
+     * the path to the source file from the project root.
      * </pre>
      */
-    public com.google.protobuf.ByteString getDirPath() {
-      return dirPath_;
+    public com.google.protobuf.ByteString getFilePath() {
+      return filePath_;
     }
 
-    // optional bytes file_name = 2;
-    public static final int FILE_NAME_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString fileName_;
+    // optional bytes project_name = 12;
+    public static final int PROJECT_NAME_FIELD_NUMBER = 12;
+    private com.google.protobuf.ByteString projectName_;
     /**
-     * <code>optional bytes file_name = 2;</code>
+     * <code>optional bytes project_name = 12;</code>
      *
      * <pre>
-     * the name of the source file.
+     * the name of the project where the file can be found
      * </pre>
      */
-    public boolean hasFileName() {
+    public boolean hasProjectName() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bytes file_name = 2;</code>
+     * <code>optional bytes project_name = 12;</code>
      *
      * <pre>
-     * the name of the source file.
+     * the name of the project where the file can be found
      * </pre>
      */
-    public com.google.protobuf.ByteString getFileName() {
-      return fileName_;
+    public com.google.protobuf.ByteString getProjectName() {
+      return projectName_;
     }
 
-    // optional bytes html = 3;
-    public static final int HTML_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString html_;
+    // optional bytes revision = 13;
+    public static final int REVISION_FIELD_NUMBER = 13;
+    private com.google.protobuf.ByteString revision_;
     /**
-     * <code>optional bytes html = 3;</code>
+     * <code>optional bytes revision = 13;</code>
      *
      * <pre>
-     * produced html report.
+     * the commit ID identifying the code revision
      * </pre>
      */
-    public boolean hasHtml() {
+    public boolean hasRevision() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional bytes html = 3;</code>
+     * <code>optional bytes revision = 13;</code>
      *
      * <pre>
-     * produced html report.
+     * the commit ID identifying the code revision
      * </pre>
      */
-    public com.google.protobuf.ByteString getHtml() {
-      return html_;
-    }
-
-    // optional bytes source_code = 11;
-    public static final int SOURCE_CODE_FIELD_NUMBER = 11;
-    private com.google.protobuf.ByteString sourceCode_;
-    /**
-     * <code>optional bytes source_code = 11;</code>
-     *
-     * <pre>
-     * the source file content.
-     * </pre>
-     */
-    public boolean hasSourceCode() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional bytes source_code = 11;</code>
-     *
-     * <pre>
-     * the source file content.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getSourceCode() {
-      return sourceCode_;
-    }
-
-    // optional bytes gcno = 21;
-    public static final int GCNO_FIELD_NUMBER = 21;
-    private com.google.protobuf.ByteString gcno_;
-    /**
-     * <code>optional bytes gcno = 21;</code>
-     *
-     * <pre>
-     * gcov produced data files.
-     * </pre>
-     */
-    public boolean hasGcno() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional bytes gcno = 21;</code>
-     *
-     * <pre>
-     * gcov produced data files.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getGcno() {
-      return gcno_;
-    }
-
-    // optional bytes gcda = 22;
-    public static final int GCDA_FIELD_NUMBER = 22;
-    private com.google.protobuf.ByteString gcda_;
-    /**
-     * <code>optional bytes gcda = 22;</code>
-     */
-    public boolean hasGcda() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional bytes gcda = 22;</code>
-     */
-    public com.google.protobuf.ByteString getGcda() {
-      return gcda_;
+    public com.google.protobuf.ByteString getRevision() {
+      return revision_;
     }
 
     // repeated int32 line_coverage_vector = 23;
@@ -5520,65 +5410,6 @@ public final class VtsReportMessage {
       return lineCoverageVector_.get(index);
     }
 
-    // repeated bytes data = 31;
-    public static final int DATA_FIELD_NUMBER = 31;
-    private java.util.List<com.google.protobuf.ByteString> data_;
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    public java.util.List<com.google.protobuf.ByteString>
-        getDataList() {
-      return data_;
-    }
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    public int getDataCount() {
-      return data_.size();
-    }
-    /**
-     * <code>repeated bytes data = 31;</code>
-     *
-     * <pre>
-     * measured coverage data.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getData(int index) {
-      return data_.get(index);
-    }
-
-    // optional bytes gcov = 32;
-    public static final int GCOV_FIELD_NUMBER = 32;
-    private com.google.protobuf.ByteString gcov_;
-    /**
-     * <code>optional bytes gcov = 32;</code>
-     *
-     * <pre>
-     * generated gcov data file.
-     * </pre>
-     */
-    public boolean hasGcov() {
-      return ((bitField0_ & 0x00000040) == 0x00000040);
-    }
-    /**
-     * <code>optional bytes gcov = 32;</code>
-     *
-     * <pre>
-     * generated gcov data file.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getGcov() {
-      return gcov_;
-    }
-
     // optional int32 total_line_count = 101;
     public static final int TOTAL_LINE_COUNT_FIELD_NUMBER = 101;
     private int totalLineCount_;
@@ -5591,7 +5422,7 @@ public final class VtsReportMessage {
      * </pre>
      */
     public boolean hasTotalLineCount() {
-      return ((bitField0_ & 0x00000080) == 0x00000080);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional int32 total_line_count = 101;</code>
@@ -5616,7 +5447,7 @@ public final class VtsReportMessage {
      * </pre>
      */
     public boolean hasCoveredLineCount() {
-      return ((bitField0_ & 0x00000100) == 0x00000100);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional int32 covered_line_count = 102;</code>
@@ -5629,18 +5460,94 @@ public final class VtsReportMessage {
       return coveredLineCount_;
     }
 
+    // optional bytes dir_path = 1 [deprecated = true];
+    public static final int DIR_PATH_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString dirPath_;
+    /**
+     * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the directory path of a source file.
+     * </pre>
+     */
+    @java.lang.Deprecated public boolean hasDirPath() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the directory path of a source file.
+     * </pre>
+     */
+    @java.lang.Deprecated public com.google.protobuf.ByteString getDirPath() {
+      return dirPath_;
+    }
+
+    // optional bytes file_name = 2 [deprecated = true];
+    public static final int FILE_NAME_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString fileName_;
+    /**
+     * <code>optional bytes file_name = 2 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the name of the source file.
+     * </pre>
+     */
+    @java.lang.Deprecated public boolean hasFileName() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bytes file_name = 2 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * the name of the source file.
+     * </pre>
+     */
+    @java.lang.Deprecated public com.google.protobuf.ByteString getFileName() {
+      return fileName_;
+    }
+
+    // optional bytes html = 3 [deprecated = true];
+    public static final int HTML_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString html_;
+    /**
+     * <code>optional bytes html = 3 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * produced html report.
+     * </pre>
+     */
+    @java.lang.Deprecated public boolean hasHtml() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional bytes html = 3 [deprecated = true];</code>
+     *
+     * <pre>
+     * TODO(ryanjcampbell@) delete deprecated field
+     * produced html report.
+     * </pre>
+     */
+    @java.lang.Deprecated public com.google.protobuf.ByteString getHtml() {
+      return html_;
+    }
+
     private void initFields() {
+      filePath_ = com.google.protobuf.ByteString.EMPTY;
+      projectName_ = com.google.protobuf.ByteString.EMPTY;
+      revision_ = com.google.protobuf.ByteString.EMPTY;
+      lineCoverageVector_ = java.util.Collections.emptyList();
+      totalLineCount_ = 0;
+      coveredLineCount_ = 0;
       dirPath_ = com.google.protobuf.ByteString.EMPTY;
       fileName_ = com.google.protobuf.ByteString.EMPTY;
       html_ = com.google.protobuf.ByteString.EMPTY;
-      sourceCode_ = com.google.protobuf.ByteString.EMPTY;
-      gcno_ = com.google.protobuf.ByteString.EMPTY;
-      gcda_ = com.google.protobuf.ByteString.EMPTY;
-      lineCoverageVector_ = java.util.Collections.emptyList();
-      data_ = java.util.Collections.emptyList();
-      gcov_ = com.google.protobuf.ByteString.EMPTY;
-      totalLineCount_ = 0;
-      coveredLineCount_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5654,37 +5561,31 @@ public final class VtsReportMessage {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeBytes(1, dirPath_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeBytes(2, fileName_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeBytes(3, html_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBytes(11, sourceCode_);
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(11, filePath_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBytes(21, gcno_);
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(12, projectName_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(22, gcda_);
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(13, revision_);
       }
       for (int i = 0; i < lineCoverageVector_.size(); i++) {
         output.writeInt32(23, lineCoverageVector_.get(i));
       }
-      for (int i = 0; i < data_.size(); i++) {
-        output.writeBytes(31, data_.get(i));
-      }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeBytes(32, gcov_);
-      }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeInt32(101, totalLineCount_);
       }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeInt32(102, coveredLineCount_);
       }
       getUnknownFields().writeTo(output);
@@ -5696,29 +5597,29 @@ public final class VtsReportMessage {
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, dirPath_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, fileName_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(3, html_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(11, sourceCode_);
+          .computeBytesSize(11, filePath_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(21, gcno_);
+          .computeBytesSize(12, projectName_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(22, gcda_);
+          .computeBytesSize(13, revision_);
       }
       {
         int dataSize = 0;
@@ -5729,24 +5630,11 @@ public final class VtsReportMessage {
         size += dataSize;
         size += 2 * getLineCoverageVectorList().size();
       }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < data_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(data_.get(i));
-        }
-        size += dataSize;
-        size += 2 * getDataList().size();
-      }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(32, gcov_);
-      }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(101, totalLineCount_);
       }
-      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(102, coveredLineCount_);
       }
@@ -5870,28 +5758,24 @@ public final class VtsReportMessage {
 
       public Builder clear() {
         super.clear();
-        dirPath_ = com.google.protobuf.ByteString.EMPTY;
+        filePath_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        fileName_ = com.google.protobuf.ByteString.EMPTY;
+        projectName_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
-        html_ = com.google.protobuf.ByteString.EMPTY;
+        revision_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
-        sourceCode_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        gcno_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        gcda_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
         lineCoverageVector_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
-        data_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000080);
-        gcov_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000008);
         totalLineCount_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000010);
         coveredLineCount_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000020);
+        dirPath_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        fileName_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000080);
+        html_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -5923,49 +5807,40 @@ public final class VtsReportMessage {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.dirPath_ = dirPath_;
+        result.filePath_ = filePath_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.fileName_ = fileName_;
+        result.projectName_ = projectName_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.html_ = html_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.sourceCode_ = sourceCode_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.gcno_ = gcno_;
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.gcda_ = gcda_;
-        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        result.revision_ = revision_;
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
           lineCoverageVector_ = java.util.Collections.unmodifiableList(lineCoverageVector_);
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.lineCoverageVector_ = lineCoverageVector_;
-        if (((bitField0_ & 0x00000080) == 0x00000080)) {
-          data_ = java.util.Collections.unmodifiableList(data_);
-          bitField0_ = (bitField0_ & ~0x00000080);
-        }
-        result.data_ = data_;
-        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
-          to_bitField0_ |= 0x00000040;
-        }
-        result.gcov_ = gcov_;
-        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
-          to_bitField0_ |= 0x00000080;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.totalLineCount_ = totalLineCount_;
-        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
-          to_bitField0_ |= 0x00000100;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000010;
         }
         result.coveredLineCount_ = coveredLineCount_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.dirPath_ = dirPath_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.fileName_ = fileName_;
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.html_ = html_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5982,6 +5857,31 @@ public final class VtsReportMessage {
 
       public Builder mergeFrom(com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage other) {
         if (other == com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.getDefaultInstance()) return this;
+        if (other.hasFilePath()) {
+          setFilePath(other.getFilePath());
+        }
+        if (other.hasProjectName()) {
+          setProjectName(other.getProjectName());
+        }
+        if (other.hasRevision()) {
+          setRevision(other.getRevision());
+        }
+        if (!other.lineCoverageVector_.isEmpty()) {
+          if (lineCoverageVector_.isEmpty()) {
+            lineCoverageVector_ = other.lineCoverageVector_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureLineCoverageVectorIsMutable();
+            lineCoverageVector_.addAll(other.lineCoverageVector_);
+          }
+          onChanged();
+        }
+        if (other.hasTotalLineCount()) {
+          setTotalLineCount(other.getTotalLineCount());
+        }
+        if (other.hasCoveredLineCount()) {
+          setCoveredLineCount(other.getCoveredLineCount());
+        }
         if (other.hasDirPath()) {
           setDirPath(other.getDirPath());
         }
@@ -5990,44 +5890,6 @@ public final class VtsReportMessage {
         }
         if (other.hasHtml()) {
           setHtml(other.getHtml());
-        }
-        if (other.hasSourceCode()) {
-          setSourceCode(other.getSourceCode());
-        }
-        if (other.hasGcno()) {
-          setGcno(other.getGcno());
-        }
-        if (other.hasGcda()) {
-          setGcda(other.getGcda());
-        }
-        if (!other.lineCoverageVector_.isEmpty()) {
-          if (lineCoverageVector_.isEmpty()) {
-            lineCoverageVector_ = other.lineCoverageVector_;
-            bitField0_ = (bitField0_ & ~0x00000040);
-          } else {
-            ensureLineCoverageVectorIsMutable();
-            lineCoverageVector_.addAll(other.lineCoverageVector_);
-          }
-          onChanged();
-        }
-        if (!other.data_.isEmpty()) {
-          if (data_.isEmpty()) {
-            data_ = other.data_;
-            bitField0_ = (bitField0_ & ~0x00000080);
-          } else {
-            ensureDataIsMutable();
-            data_.addAll(other.data_);
-          }
-          onChanged();
-        }
-        if (other.hasGcov()) {
-          setGcov(other.getGcov());
-        }
-        if (other.hasTotalLineCount()) {
-          setTotalLineCount(other.getTotalLineCount());
-        }
-        if (other.hasCoveredLineCount()) {
-          setCoveredLineCount(other.getCoveredLineCount());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -6056,298 +5918,158 @@ public final class VtsReportMessage {
       }
       private int bitField0_;
 
-      // optional bytes dir_path = 1;
-      private com.google.protobuf.ByteString dirPath_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes file_path = 11;
+      private com.google.protobuf.ByteString filePath_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes dir_path = 1;</code>
+       * <code>optional bytes file_path = 11;</code>
        *
        * <pre>
-       * the directory path of a source file.
+       * the path to the source file from the project root.
        * </pre>
        */
-      public boolean hasDirPath() {
+      public boolean hasFilePath() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes dir_path = 1;</code>
+       * <code>optional bytes file_path = 11;</code>
        *
        * <pre>
-       * the directory path of a source file.
+       * the path to the source file from the project root.
        * </pre>
        */
-      public com.google.protobuf.ByteString getDirPath() {
-        return dirPath_;
+      public com.google.protobuf.ByteString getFilePath() {
+        return filePath_;
       }
       /**
-       * <code>optional bytes dir_path = 1;</code>
+       * <code>optional bytes file_path = 11;</code>
        *
        * <pre>
-       * the directory path of a source file.
+       * the path to the source file from the project root.
        * </pre>
        */
-      public Builder setDirPath(com.google.protobuf.ByteString value) {
+      public Builder setFilePath(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        dirPath_ = value;
+        filePath_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes dir_path = 1;</code>
+       * <code>optional bytes file_path = 11;</code>
        *
        * <pre>
-       * the directory path of a source file.
+       * the path to the source file from the project root.
        * </pre>
        */
-      public Builder clearDirPath() {
+      public Builder clearFilePath() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        dirPath_ = getDefaultInstance().getDirPath();
+        filePath_ = getDefaultInstance().getFilePath();
         onChanged();
         return this;
       }
 
-      // optional bytes file_name = 2;
-      private com.google.protobuf.ByteString fileName_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes project_name = 12;
+      private com.google.protobuf.ByteString projectName_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes file_name = 2;</code>
+       * <code>optional bytes project_name = 12;</code>
        *
        * <pre>
-       * the name of the source file.
+       * the name of the project where the file can be found
        * </pre>
        */
-      public boolean hasFileName() {
+      public boolean hasProjectName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bytes file_name = 2;</code>
+       * <code>optional bytes project_name = 12;</code>
        *
        * <pre>
-       * the name of the source file.
+       * the name of the project where the file can be found
        * </pre>
        */
-      public com.google.protobuf.ByteString getFileName() {
-        return fileName_;
+      public com.google.protobuf.ByteString getProjectName() {
+        return projectName_;
       }
       /**
-       * <code>optional bytes file_name = 2;</code>
+       * <code>optional bytes project_name = 12;</code>
        *
        * <pre>
-       * the name of the source file.
+       * the name of the project where the file can be found
        * </pre>
        */
-      public Builder setFileName(com.google.protobuf.ByteString value) {
+      public Builder setProjectName(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000002;
-        fileName_ = value;
+        projectName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes file_name = 2;</code>
+       * <code>optional bytes project_name = 12;</code>
        *
        * <pre>
-       * the name of the source file.
+       * the name of the project where the file can be found
        * </pre>
        */
-      public Builder clearFileName() {
+      public Builder clearProjectName() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        fileName_ = getDefaultInstance().getFileName();
+        projectName_ = getDefaultInstance().getProjectName();
         onChanged();
         return this;
       }
 
-      // optional bytes html = 3;
-      private com.google.protobuf.ByteString html_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes revision = 13;
+      private com.google.protobuf.ByteString revision_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes html = 3;</code>
+       * <code>optional bytes revision = 13;</code>
        *
        * <pre>
-       * produced html report.
+       * the commit ID identifying the code revision
        * </pre>
        */
-      public boolean hasHtml() {
+      public boolean hasRevision() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional bytes html = 3;</code>
+       * <code>optional bytes revision = 13;</code>
        *
        * <pre>
-       * produced html report.
+       * the commit ID identifying the code revision
        * </pre>
        */
-      public com.google.protobuf.ByteString getHtml() {
-        return html_;
+      public com.google.protobuf.ByteString getRevision() {
+        return revision_;
       }
       /**
-       * <code>optional bytes html = 3;</code>
+       * <code>optional bytes revision = 13;</code>
        *
        * <pre>
-       * produced html report.
+       * the commit ID identifying the code revision
        * </pre>
        */
-      public Builder setHtml(com.google.protobuf.ByteString value) {
+      public Builder setRevision(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000004;
-        html_ = value;
+        revision_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes html = 3;</code>
+       * <code>optional bytes revision = 13;</code>
        *
        * <pre>
-       * produced html report.
+       * the commit ID identifying the code revision
        * </pre>
        */
-      public Builder clearHtml() {
+      public Builder clearRevision() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        html_ = getDefaultInstance().getHtml();
-        onChanged();
-        return this;
-      }
-
-      // optional bytes source_code = 11;
-      private com.google.protobuf.ByteString sourceCode_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes source_code = 11;</code>
-       *
-       * <pre>
-       * the source file content.
-       * </pre>
-       */
-      public boolean hasSourceCode() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>optional bytes source_code = 11;</code>
-       *
-       * <pre>
-       * the source file content.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getSourceCode() {
-        return sourceCode_;
-      }
-      /**
-       * <code>optional bytes source_code = 11;</code>
-       *
-       * <pre>
-       * the source file content.
-       * </pre>
-       */
-      public Builder setSourceCode(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        sourceCode_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes source_code = 11;</code>
-       *
-       * <pre>
-       * the source file content.
-       * </pre>
-       */
-      public Builder clearSourceCode() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        sourceCode_ = getDefaultInstance().getSourceCode();
-        onChanged();
-        return this;
-      }
-
-      // optional bytes gcno = 21;
-      private com.google.protobuf.ByteString gcno_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes gcno = 21;</code>
-       *
-       * <pre>
-       * gcov produced data files.
-       * </pre>
-       */
-      public boolean hasGcno() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <code>optional bytes gcno = 21;</code>
-       *
-       * <pre>
-       * gcov produced data files.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getGcno() {
-        return gcno_;
-      }
-      /**
-       * <code>optional bytes gcno = 21;</code>
-       *
-       * <pre>
-       * gcov produced data files.
-       * </pre>
-       */
-      public Builder setGcno(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
-        gcno_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes gcno = 21;</code>
-       *
-       * <pre>
-       * gcov produced data files.
-       * </pre>
-       */
-      public Builder clearGcno() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        gcno_ = getDefaultInstance().getGcno();
-        onChanged();
-        return this;
-      }
-
-      // optional bytes gcda = 22;
-      private com.google.protobuf.ByteString gcda_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes gcda = 22;</code>
-       */
-      public boolean hasGcda() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      /**
-       * <code>optional bytes gcda = 22;</code>
-       */
-      public com.google.protobuf.ByteString getGcda() {
-        return gcda_;
-      }
-      /**
-       * <code>optional bytes gcda = 22;</code>
-       */
-      public Builder setGcda(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-        gcda_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes gcda = 22;</code>
-       */
-      public Builder clearGcda() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        gcda_ = getDefaultInstance().getGcda();
+        revision_ = getDefaultInstance().getRevision();
         onChanged();
         return this;
       }
@@ -6355,9 +6077,9 @@ public final class VtsReportMessage {
       // repeated int32 line_coverage_vector = 23;
       private java.util.List<java.lang.Integer> lineCoverageVector_ = java.util.Collections.emptyList();
       private void ensureLineCoverageVectorIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           lineCoverageVector_ = new java.util.ArrayList<java.lang.Integer>(lineCoverageVector_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000008;
          }
       }
       /**
@@ -6441,159 +6163,7 @@ public final class VtsReportMessage {
        */
       public Builder clearLineCoverageVector() {
         lineCoverageVector_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
-        onChanged();
-        return this;
-      }
-
-      // repeated bytes data = 31;
-      private java.util.List<com.google.protobuf.ByteString> data_ = java.util.Collections.emptyList();
-      private void ensureDataIsMutable() {
-        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
-          data_ = new java.util.ArrayList<com.google.protobuf.ByteString>(data_);
-          bitField0_ |= 0x00000080;
-         }
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public java.util.List<com.google.protobuf.ByteString>
-          getDataList() {
-        return java.util.Collections.unmodifiableList(data_);
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public int getDataCount() {
-        return data_.size();
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getData(int index) {
-        return data_.get(index);
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public Builder setData(
-          int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureDataIsMutable();
-        data_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public Builder addData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureDataIsMutable();
-        data_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public Builder addAllData(
-          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
-        ensureDataIsMutable();
-        super.addAll(values, data_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated bytes data = 31;</code>
-       *
-       * <pre>
-       * measured coverage data.
-       * </pre>
-       */
-      public Builder clearData() {
-        data_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000080);
-        onChanged();
-        return this;
-      }
-
-      // optional bytes gcov = 32;
-      private com.google.protobuf.ByteString gcov_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes gcov = 32;</code>
-       *
-       * <pre>
-       * generated gcov data file.
-       * </pre>
-       */
-      public boolean hasGcov() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
-      }
-      /**
-       * <code>optional bytes gcov = 32;</code>
-       *
-       * <pre>
-       * generated gcov data file.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getGcov() {
-        return gcov_;
-      }
-      /**
-       * <code>optional bytes gcov = 32;</code>
-       *
-       * <pre>
-       * generated gcov data file.
-       * </pre>
-       */
-      public Builder setGcov(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000100;
-        gcov_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes gcov = 32;</code>
-       *
-       * <pre>
-       * generated gcov data file.
-       * </pre>
-       */
-      public Builder clearGcov() {
-        bitField0_ = (bitField0_ & ~0x00000100);
-        gcov_ = getDefaultInstance().getGcov();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -6609,7 +6179,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasTotalLineCount() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional int32 total_line_count = 101;</code>
@@ -6631,7 +6201,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setTotalLineCount(int value) {
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000010;
         totalLineCount_ = value;
         onChanged();
         return this;
@@ -6645,7 +6215,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearTotalLineCount() {
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000010);
         totalLineCount_ = 0;
         onChanged();
         return this;
@@ -6661,7 +6231,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasCoveredLineCount() {
-        return ((bitField0_ & 0x00000400) == 0x00000400);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
        * <code>optional int32 covered_line_count = 102;</code>
@@ -6681,7 +6251,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setCoveredLineCount(int value) {
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000020;
         coveredLineCount_ = value;
         onChanged();
         return this;
@@ -6694,8 +6264,176 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearCoveredLineCount() {
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000020);
         coveredLineCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes dir_path = 1 [deprecated = true];
+      private com.google.protobuf.ByteString dirPath_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the directory path of a source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public boolean hasDirPath() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the directory path of a source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public com.google.protobuf.ByteString getDirPath() {
+        return dirPath_;
+      }
+      /**
+       * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the directory path of a source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder setDirPath(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        dirPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes dir_path = 1 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the directory path of a source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder clearDirPath() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        dirPath_ = getDefaultInstance().getDirPath();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes file_name = 2 [deprecated = true];
+      private com.google.protobuf.ByteString fileName_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes file_name = 2 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the name of the source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public boolean hasFileName() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional bytes file_name = 2 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the name of the source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public com.google.protobuf.ByteString getFileName() {
+        return fileName_;
+      }
+      /**
+       * <code>optional bytes file_name = 2 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the name of the source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder setFileName(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes file_name = 2 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * the name of the source file.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder clearFileName() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        fileName_ = getDefaultInstance().getFileName();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes html = 3 [deprecated = true];
+      private com.google.protobuf.ByteString html_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes html = 3 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * produced html report.
+       * </pre>
+       */
+      @java.lang.Deprecated public boolean hasHtml() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional bytes html = 3 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * produced html report.
+       * </pre>
+       */
+      @java.lang.Deprecated public com.google.protobuf.ByteString getHtml() {
+        return html_;
+      }
+      /**
+       * <code>optional bytes html = 3 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * produced html report.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder setHtml(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+        html_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes html = 3 [deprecated = true];</code>
+       *
+       * <pre>
+       * TODO(ryanjcampbell@) delete deprecated field
+       * produced html report.
+       * </pre>
+       */
+      @java.lang.Deprecated public Builder clearHtml() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        html_ = getDefaultInstance().getHtml();
         onChanged();
         return this;
       }
@@ -9515,36 +9253,35 @@ public final class VtsReportMessage {
       "lingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend" +
       "_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value" +
       "\030\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014y_axis_l" +
-      "abel\030  \001(\014\"\353\001\n\025CoverageReportMessage\022\020\n\010" +
-      "dir_path\030\001 \001(\014\022\021\n\tfile_name\030\002 \001(\014\022\014\n\004htm",
-      "l\030\003 \001(\014\022\023\n\013source_code\030\013 \001(\014\022\014\n\004gcno\030\025 \001" +
-      "(\014\022\014\n\004gcda\030\026 \001(\014\022\034\n\024line_coverage_vector" +
-      "\030\027 \003(\005\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020to" +
-      "tal_line_count\030e \001(\005\022\032\n\022covered_line_cou" +
-      "nt\030f \001(\005\"\212\003\n\021TestReportMessage\022\022\n\ntest_s" +
-      "uite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 " +
-      "\001(\0162\030.android.vts.VtsTestType\022:\n\013device_" +
-      "info\030\004 \003(\0132%.android.vts.AndroidDeviceIn" +
-      "foMessage\0221\n\nbuild_info\030\005 \001(\0132\035.android." +
-      "vts.AndroidBuildInfo\022\030\n\020subscriber_email",
-      "\030\006 \003(\014\0225\n\ttest_case\030\013 \003(\0132\".android.vts." +
-      "TestCaseReportMessage\0226\n\tprofiling\030\025 \003(\013" +
-      "2#.android.vts.ProfilingReportMessage\022\027\n" +
-      "\017start_timestamp\030e \001(\003\022\025\n\rend_timestamp\030" +
-      "f \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESU" +
-      "LT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_" +
-      "CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_S" +
-      "KIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n" +
-      "\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestT" +
-      "ype\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOS",
-      "T_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN" +
-      "_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n" +
-      "\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfili" +
-      "ngType\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 " +
-      "\n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_" +
-      "PROFILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.g" +
-      "oogle.android.vts.protoB\020VtsReportMessag" +
-      "e"
+      "abel\030  \001(\014\"\345\001\n\025CoverageReportMessage\022\021\n\t" +
+      "file_path\030\013 \001(\014\022\024\n\014project_name\030\014 \001(\014\022\020\n",
+      "\010revision\030\r \001(\014\022\034\n\024line_coverage_vector\030" +
+      "\027 \003(\005\022\030\n\020total_line_count\030e \001(\005\022\032\n\022cover" +
+      "ed_line_count\030f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030" +
+      "\001\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002" +
+      "\030\001\"\212\003\n\021TestReportMessage\022\022\n\ntest_suite\030\001" +
+      " \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030." +
+      "android.vts.VtsTestType\022:\n\013device_info\030\004" +
+      " \003(\0132%.android.vts.AndroidDeviceInfoMess" +
+      "age\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts.An" +
+      "droidBuildInfo\022\030\n\020subscriber_email\030\006 \003(\014",
+      "\0225\n\ttest_case\030\013 \003(\0132\".android.vts.TestCa" +
+      "seReportMessage\0226\n\tprofiling\030\025 \003(\0132#.and" +
+      "roid.vts.ProfilingReportMessage\022\027\n\017start" +
+      "_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003*" +
+      "\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031" +
+      "\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE_R" +
+      "ESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022" +
+      "\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TEST_" +
+      "CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n" +
+      "\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIV",
+      "EN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZI" +
+      "NG\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_T" +
+      "ARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingType" +
+      "\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VTS_" +
+      "PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROFIL" +
+      "ING_TYPE_LABELED_VECTOR\020\002B0\n\034com.google." +
+      "android.vts.protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9580,7 +9317,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_CoverageReportMessage_descriptor,
-              new java.lang.String[] { "DirPath", "FileName", "Html", "SourceCode", "Gcno", "Gcda", "LineCoverageVector", "Data", "Gcov", "TotalLineCount", "CoveredLineCount", });
+              new java.lang.String[] { "FilePath", "ProjectName", "Revision", "LineCoverageVector", "TotalLineCount", "CoveredLineCount", "DirPath", "FileName", "Html", });
           internal_static_android_vts_TestReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new
