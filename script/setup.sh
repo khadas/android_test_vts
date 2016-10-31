@@ -21,6 +21,8 @@ sudo pip install concurrent
 sudo pip install protobuf
 sudo pip install setuptools
 sudo pip install requests
+sudo pip install httplib2
+sudo pip install google-api-python-client
 
 echo "Install packages for Camera ITS tests"
 sudo apt-get install python-tk
