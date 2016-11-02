@@ -43,6 +43,10 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_multidevice_proto.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_multidevice_proto.so /data/local/tmp/64/
 
+  echo "install system packages that are not always installed by default"
+  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib/libprotobuf-cpp-full.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/libprotobuf-cpp-full.so /data/local/tmp/64/
+
   echo "install vts driver for hidl"
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/64/
