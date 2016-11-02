@@ -18,8 +18,8 @@ namespace vts {
 
 
 Return<void> VtsNfcClientCallback::sendEvent(
-    NfcEvent arg0,
-    NfcStatus arg1) {
+    ::android::hardware::nfc::V1_0::NfcEvent arg0,
+    ::android::hardware::nfc::V1_0::NfcStatus arg1) {
   cout << "sendEvent called" << endl;
   return Void();
 }
