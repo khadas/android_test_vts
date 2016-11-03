@@ -17,45 +17,27 @@
 cc_library_shared {
 
     name: "libvts_multidevice_proto",
-    tags: ["optional"],
+    host_supported: true,
 
     srcs: [
         "AndroidSystemControlMessage.proto",
         "ComponentSpecificationMessage.proto",
-        "VtsDriverControlMessage.proto",
     ],
-
-    include_dirs: ["external/protobuf/src"],
-
-    shared_libs: ["libprotobuf-cpp-full"],
 
     proto: {
         export_proto_headers: true,
-    },
-}
-
-cc_library_host_shared {
-
-    name: "libvts_multidevice_proto_host",
-    tags: ["optional"],
-
-    cflags: [
-        "-Wno-unused-parameter",
-        "-Werror",
-    ],
-
-    // Files needed for VTSC.
-    srcs: [
-        "AndroidSystemControlMessage.proto",
-        "ComponentSpecificationMessage.proto",
-    ],
-
-    include_dirs: ["external/protobuf/src"],
-
-    shared_libs: ["libprotobuf-cpp-full"],
-
-    proto: {
-        export_proto_headers: true,
+        type: "full",
     },
 
+    target: {
+        android: {
+            srcs: ["VtsDriverControlMessage.proto"],
+        },
+        host: {
+            cflags: [
+                "-Wno-unused-parameter",
+                "-Werror",
+            ],
+        },
+    },
 }

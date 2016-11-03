@@ -17,17 +17,11 @@
 cc_library_shared {
 
     name: "libvts_codecoverage",
-    tags: ["optional"],
 
     srcs: [
         "gcda_parser.cpp",
         "gcov_basic_io.cpp",
     ],
 
-    include_dirs: [
-        "bionic",
-        "libcore",
-    ],
-
-    shared_libs: ["libcutils"],
+    export_include_dirs: ["."],
 }

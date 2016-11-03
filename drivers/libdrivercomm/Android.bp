@@ -17,17 +17,10 @@
 cc_library_shared {
 
     name: "libvts_drivercomm",
-    tags: ["optional"],
 
     srcs: [
         "VtsDriverCommUtil.cpp",
         "VtsDriverFileUtil.cpp",
-    ],
-
-    include_dirs: [
-        "bionic",
-        "external/protobuf/src",
-        "libcore",
     ],
 
     shared_libs: [
@@ -36,4 +29,5 @@ cc_library_shared {
         "libvts_multidevice_proto",
     ],
 
+    export_include_dirs: ["."],
 }
