@@ -32,6 +32,11 @@ vts_spec_file_list += \
   hardware/interfaces/tv/input/1.0/vts/TvInput.vts \
   hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts \
   hardware/interfaces/tv/input/1.0/vts/types.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/Allocator.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/AllocatorClient.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/types.vts \
+  hardware/interfaces/graphics/mapper/2.0/vts/Mapper.vts \
+  hardware/interfaces/graphics/mapper/2.0/vts/types.vts \
   hardware/interfaces/nfc/1.0/vts/Nfc.vts \
   hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
   hardware/interfaces/nfc/1.0/vts/types.vts \

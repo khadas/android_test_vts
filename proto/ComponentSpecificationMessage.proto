@@ -80,6 +80,11 @@ enum ComponentType {
   VEHICLE=17;
   // For a VR submodule.
   VR = 18;
+  // For a graphics allocator submodule.
+  GRAPHICS_ALLOCATOR = 19;
+  // For a graphics mapper submodule.
+  GRAPHICS_MAPPER = 20;
+
   // for bionic's libm
   BIONIC_LIBM = 1001;
 

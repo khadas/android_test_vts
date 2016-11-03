@@ -63,6 +63,20 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	#
+	@echo "build vts python package for graphics allocator HAL"
+	$(hide) find hardware/interfaces/graphics/allocator/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when the list is non-empty
+	#$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/graphics/allocator/2.0/vts/functional -l $@.list
+	@rm -f $@.list
+	#$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	@echo "build vts python package for graphics mapper HAL"
+	$(hide) find hardware/interfaces/graphics/mapper/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when the list is non-empty
+	#$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/graphics/mapper/2.0/vts/functional -l $@.list
+	@rm -f $@.list
+	#$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
 	@echo "build vts python package for memtrack HAL"
 	$(hide) find hardware/interfaces/memtrack/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/memtrack/1.0/vts/functional -l $@.list

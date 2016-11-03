@@ -94,6 +94,10 @@ string ComponentTypeToString(int component_type) {
       return "sensors";
     case VR:
       return "vr";
+    case GRAPHICS_ALLOCATOR:
+      return "graphics_allocator";
+    case GRAPHICS_MAPPER:
+      return "graphics_mapper";
     case BIONIC_LIBM:
       return "bionic_libm";
     case TV_CEC:
