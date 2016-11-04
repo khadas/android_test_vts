@@ -45,24 +45,33 @@ class SyscallExistenceTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def testSyscall_name_to_handle_at(self):
         """Testcase to verify syscall [name_to_handle_at] is disabled."""
-        logging.info("testing syscall: name_to_handle_at [%d]",
-                     self.AARCH64__NR_name_to_handle_at)
-        asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_name_to_handle_at),
-                           "syscall [name_to_handle_at] should be disabled")
+        if self.dut.is64Bit:
+            logging.info("testing syscall: name_to_handle_at [%d]",
+                         self.AARCH64__NR_name_to_handle_at)
+            asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_name_to_handle_at),
+                               "syscall [name_to_handle_at] should be disabled")
+        else:
+            asserts.skip("32-bit not supported")
 
     def testSyscall_open_by_handle_at(self):
         """Testcase to verify syscall [open_by_handle_at] is disabled."""
-        logging.info("testing syscall: open_by_handle_at [%d]",
-                     self.AARCH64__NR_open_by_handle_at)
-        asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_open_by_handle_at),
-                           "syscall [open_by_handle_at] should be disabled")
+        if self.dut.is64Bit:
+            logging.info("testing syscall: open_by_handle_at [%d]",
+                         self.AARCH64__NR_open_by_handle_at)
+            asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_open_by_handle_at),
+                               "syscall [open_by_handle_at] should be disabled")
+        else:
+            asserts.skip("32-bit not supported")
 
     def testSyscall_uselib(self):
         """Testcase to verify syscall [uselib] is disabled."""
-        logging.info("testing syscall: uselib [%d]",
-                     self.AARCH64__NR_uselib)
-        asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_uselib),
-                           "syscall [uselib] should be disabled")
+        if self.dut.is64Bit:
+            logging.info("testing syscall: uselib [%d]",
+                         self.AARCH64__NR_uselib)
+            asserts.assertTrue(self.SyscallDisabled(self.AARCH64__NR_uselib),
+                               "syscall [uselib] should be disabled")
+        else:
+            asserts.skip("32-bit not supported")
 
     def SyscallDisabled(self, syscallid):
         """Helper function to check if a syscall is disabled."""
