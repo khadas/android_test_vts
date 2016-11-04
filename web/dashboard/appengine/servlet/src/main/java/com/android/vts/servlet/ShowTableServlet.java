@@ -67,7 +67,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
-    private static final int TIME_INFO_ROW_COUNT = 1;
+    private static final int TIME_INFO_ROW_COUNT = 2;
     private static final int DURATION_INFO_ROW_COUNT = 1;
     private static final int SUMMARY_ROW_COUNT = 4;
     private static final long ONE_DAY = 86400000000L;  // units microseconds
@@ -291,7 +291,10 @@ public class ShowTableServlet extends HttpServlet {
         headerRow[0] = StringUtils.join(headerFields, "<br>");
 
         // first column for time grid
-        timeGrid[0][0] = "<b>Test Start</b>";
+        String[] rowNamesTimeGrid = {"Test Start", "Test End"};
+        for (int i = 0; i < rowNamesTimeGrid.length; i++) {
+            timeGrid[i][0] = "<b>" + rowNamesTimeGrid[i] + "</b>";
+        }
 
         // first column for the duration grid
         durationGrid[0][0] = "<b>Test Duration (microsec)</b>";
@@ -379,6 +382,7 @@ public class ShowTableServlet extends HttpServlet {
                                buildAlias.toLowerCase() + "<br>" + buildFlavor + "<br>" +
                                productVariant + "<br>" + buildId;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
+            timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
                                                report.getStartTimestamp());
             summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
