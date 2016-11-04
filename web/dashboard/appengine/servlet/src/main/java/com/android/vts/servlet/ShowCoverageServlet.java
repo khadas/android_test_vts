@@ -89,20 +89,12 @@ public class ShowCoverageServlet extends HttpServlet {
             TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
                 parseFrom(value);
             String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
-            String firstDeviceBuildId = currentTestReportMessage.getDeviceInfoList().get(0)
-                                        .getBuildId().toStringUtf8();
 
             // filter empty build IDs and add only numbers
             if (buildId.length() > 0) {
-                try {
-                    Integer.parseInt(buildId);
-                    Integer.parseInt(firstDeviceBuildId);
-                    if (time == currentTestReportMessage.getStartTimestamp()) {
-                      testReportMessage = currentTestReportMessage;
-                      break;
-                    }
-                } catch (NumberFormatException e) {
-                    /* skip a non-post-submit build */
+                if (time == currentTestReportMessage.getStartTimestamp()) {
+                    testReportMessage = currentTestReportMessage;
+                    break;
                 }
             }
         }
