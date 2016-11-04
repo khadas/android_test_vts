@@ -1,17 +1,11 @@
 #include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <hidl/HidlSupport.h>
 #include <iostream>
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <android/hardware/nfc/1.0/INfc.h>
-#include <android/hardware/nfc/1.0/types.h>
-#include <android/hardware/nfc/1.0/INfc.h>
-#include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
-#include <android/hardware/nfc/1.0/types.h>
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/types.h>
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
@@ -20,43 +14,43 @@ namespace vts {
 
 
 
-static void FuzzerExtended_INfcopen_cb_func(int32_t arg) {
+static void FuzzerExtended_INfcopen_cb_func(int32_t arg0) {
   cout << "callback open called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfcopen_cb = FuzzerExtended_INfcopen_cb_func;
 
 
-static void FuzzerExtended_INfcwrite_cb_func(int32_t arg) {
+static void FuzzerExtended_INfcwrite_cb_func(int32_t arg0) {
   cout << "callback write called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfcwrite_cb = FuzzerExtended_INfcwrite_cb_func;
 
 
-static void FuzzerExtended_INfccoreInitialized_cb_func(int32_t arg) {
+static void FuzzerExtended_INfccoreInitialized_cb_func(int32_t arg0) {
   cout << "callback coreInitialized called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfccoreInitialized_cb = FuzzerExtended_INfccoreInitialized_cb_func;
 
 
-static void FuzzerExtended_INfcprediscover_cb_func(int32_t arg) {
+static void FuzzerExtended_INfcprediscover_cb_func(int32_t arg0) {
   cout << "callback prediscover called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfcprediscover_cb = FuzzerExtended_INfcprediscover_cb_func;
 
 
-static void FuzzerExtended_INfcclose_cb_func(int32_t arg) {
+static void FuzzerExtended_INfcclose_cb_func(int32_t arg0) {
   cout << "callback close called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfcclose_cb = FuzzerExtended_INfcclose_cb_func;
 
 
-static void FuzzerExtended_INfccontrolGranted_cb_func(int32_t arg) {
+static void FuzzerExtended_INfccontrolGranted_cb_func(int32_t arg0) {
   cout << "callback controlGranted called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfccontrolGranted_cb = FuzzerExtended_INfccontrolGranted_cb_func;
 
 
-static void FuzzerExtended_INfcpowerCycle_cb_func(int32_t arg) {
+static void FuzzerExtended_INfcpowerCycle_cb_func(int32_t arg0) {
   cout << "callback powerCycle called" << endl;
 }
 std::function<void(int32_t)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
@@ -93,7 +87,7 @@ bool FuzzerExtended_INfc::Fuzz(
   }
   if (!strcmp(func_name, "write")) {
     uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
-    hidl_vec<uint8_t> arg0;
+    ::android::hardware::hidl_vec<uint8_t> arg0;
     for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
       arg0buffer[vector_index] = func_msg->arg(0).vector_value(vector_index).scalar_value().uint8_t();
     }
@@ -111,7 +105,7 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   }
   if (!strcmp(func_name, "coreInitialized")) {
     uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
-    hidl_vec<uint8_t> arg0;
+    ::android::hardware::hidl_vec<uint8_t> arg0;
     for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
       arg0buffer[vector_index] = func_msg->arg(0).vector_value(vector_index).scalar_value().uint8_t();
     }

@@ -1,10 +1,8 @@
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <hidl/HidlSupport.h>
 #include <iostream>
 #include "vts_datatype.h"
 #include "vts_measurement.h"
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/types.h>
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
@@ -13,6 +11,9 @@ namespace vts {
 
 
 
+::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const EnumDataValueMessage& arg, int index) {
+  return (::android::hardware::nfc::V1_0::NfcEvent) arg.scalar_value(index).uint32_t();
+}
 ::android::hardware::nfc::V1_0::NfcEvent Random__android__hardware__nfc__V1_0__NfcEvent() {
 int choice = rand() / 7;
 if (choice < 0) choice *= -1;
@@ -24,6 +25,9 @@ if (choice < 0) choice *= -1;
     if (choice == 5) return ::android::hardware::nfc::V1_0::NfcEvent::RELEASE_CONTROL;
     if (choice == 6) return ::android::hardware::nfc::V1_0::NfcEvent::ERROR;
     return ::android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
+}
+::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const EnumDataValueMessage& arg, int index) {
+  return (::android::hardware::nfc::V1_0::NfcStatus) arg.scalar_value(index).uint32_t();
 }
 ::android::hardware::nfc::V1_0::NfcStatus Random__android__hardware__nfc__V1_0__NfcStatus() {
 int choice = rand() / 5;

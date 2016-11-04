@@ -1,13 +1,9 @@
 #include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <hidl/HidlSupport.h>
 #include <iostream>
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
-#include <android/hardware/nfc/1.0/types.h>
-#include <android/hardware/nfc/1.0/INfcClientCallback.h>
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/types.h>
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;

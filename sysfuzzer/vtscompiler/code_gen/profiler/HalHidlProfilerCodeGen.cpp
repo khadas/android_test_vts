@@ -232,14 +232,22 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
 }
 
 void HalHidlProfilerCodeGen::GenerateSourceIncludeFiles(Formatter& out,
-  const ComponentSpecificationMessage&) {
+  const ComponentSpecificationMessage& message) {
   // First include the corresponding profiler header file.
   out << "#include \"" << input_vts_file_path_ << ".h\"\n";
 
   // Include the header file for types profiler.
   std::string header_path_prefix = input_vts_file_path_.substr(
       0, input_vts_file_path_.find_last_of("\\/"));
-  out << "#include \"" << header_path_prefix << "/types.vts.h\"\n";
+  bool include_types = false;
+  for (const auto& import : message.import()) {
+    if (endsWith(import, "::types")) {
+      include_types = true;
+    }
+  }
+  if (include_types || message.component_name() == "types") {
+    out << "#include \"" << header_path_prefix << "/types.vts.h\"\n";
+  }
   out << "\n";
 }
 
