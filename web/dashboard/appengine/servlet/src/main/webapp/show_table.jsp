@@ -172,6 +172,7 @@
           var summaryGrid = ${summaryGrid};
           var resultsGrid = ${resultsGrid};
 
+          // Format time grid to a formatted date
           timeGrid = timeGrid.map(function(row) {
               return row.map(function(cell, j) {
                   if (j == 0) return cell;
@@ -182,6 +183,14 @@
                   } else {
                       return time.format("M/D/YY H:mm:ssZZ");
                   }
+              });
+          });
+
+          // Format duration grid to HH:mm:ss.SSS
+          durationGrid = durationGrid.map(function(row) {
+              return row.map(function(cell, j) {
+                  if (j == 0) return cell;
+                  return moment.utc(cell/1000).format("HH:mm:ss.SSS");
               });
           });
 
