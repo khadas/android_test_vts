@@ -15,6 +15,7 @@
  */
 #include "VtsProfilingInterface.h"
 
+#include <cutils/properties.h>
 #include <fstream>
 #include <string>
 
@@ -58,8 +59,19 @@ VtsProfilingInterface& VtsProfilingInterface::getInstance(
 
 void VtsProfilingInterface::Init() {
   if (initialized_) return;
-  // Attach timestamp for the trace file.
-  string file_path = trace_file_path_ + "_" + to_string(NanoTime());
+
+  // Attach device info and timestamp for the trace file.
+  char build_number[PROPERTY_VALUE_MAX];
+  char device_id[PROPERTY_VALUE_MAX];
+  char product_name[PROPERTY_VALUE_MAX];
+  property_get("ro.build.version.incremental", build_number, "unknown_build");
+  property_get("ro.serialno", device_id, "unknown_device");
+  property_get("ro.build.product", product_name, "unknown_product");
+
+  string file_path = trace_file_path_ + "_" + string(product_name) + "_"
+      + string(device_id) + "_" + string(build_number) + "_"
+      + to_string(NanoTime()) + "_" + ".vts.trace";
+
   LOG(INFO) << "Creating new profiler instance with file path: " << file_path;
   trace_output_ = std::ofstream(file_path, std::fstream::out);
   if (!trace_output_) {
@@ -69,8 +81,9 @@ void VtsProfilingInterface::Init() {
   initialized_ = true;
 }
 
-bool VtsProfilingInterface::AddTraceEvent(const char* package,
-    const char* version, const char* interface,
+bool VtsProfilingInterface::AddTraceEvent(
+    android::hardware::HidlInstrumentor::InstrumentationEvent event,
+    const char* package, const char* version, const char* interface,
     const FunctionSpecificationMessage& message) {
   if (!initialized_) {
     LOG(ERROR) << "Profiler not initialized. ";
@@ -84,9 +97,10 @@ bool VtsProfilingInterface::AddTraceEvent(const char* package,
 
   mutex_.lock();
   // Record the event data with the following format:
-  // timestamp,package_name,package_version,interface_name,message
-  trace_output_ << NanoTime() << "," << package << "," << version << ","
-                << interface << "," << msg_str << "\n";
+  // timestamp,event,package_name,package_version,interface_name,message
+  trace_output_ << NanoTime() << "," << event << "," << package << ","
+                << version << "," << interface << "," << message.name() << "\n";
+  trace_output_ << msg_str << "\n";
   trace_output_.flush();
   mutex_.unlock();
 

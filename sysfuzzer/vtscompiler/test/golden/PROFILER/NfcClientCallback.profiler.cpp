@@ -41,6 +41,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 ::android::hardware::nfc::V1_0::NfcEvent *arg_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcEvent*> ((*args)[0]);
@@ -54,6 +55,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 break;
             }
@@ -63,7 +65,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "sendData") == 0) {
         FunctionSpecificationMessage msg;
@@ -71,6 +73,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
@@ -83,6 +86,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 break;
             }
@@ -92,7 +96,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
 }
 
