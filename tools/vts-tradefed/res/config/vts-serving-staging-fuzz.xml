@@ -16,5 +16,6 @@
 <configuration description="Run New VTS Fuzz Tests in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="compatibility:include-filter" value="ILightFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
