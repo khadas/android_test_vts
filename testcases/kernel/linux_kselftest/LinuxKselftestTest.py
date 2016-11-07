@@ -42,7 +42,7 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """Creates a remote shell instance, and copies data files."""
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            config.ConfigKeys.RUN_STAGING
+            config.ConfigKeys.TEST_TYPE
         ]
         self.getUserParams(required_params)
 
@@ -52,9 +52,22 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
-        self._testcases = config.KSFT_CASES_STABLE
-        if self.run_staging:
-            self._testcases += config.KSFT_CASES_STAGING
+
+        # Presubmit test cases are always a subset of stable test cases.
+        # Stable test cases are always a subset of staging test cases.
+        if self.test_type == "presubmit":
+            self._testcases = config.KSFT_CASES_PRESUBMIT
+        elif self.test_type == "stable":
+            self._testcases = (
+                config.KSFT_CASES_PRESUBMIT +
+                config.KSFT_CASES_STABLE)
+        elif self.test_type == "staging":
+            self._testcases = (
+                config.KSFT_CASES_PRESUBMIT +
+                config.KSFT_CASES_STABLE +
+                config.KSFT_CASES_STAGING)
+        else:
+            asserts.fail("Test config is incorrect!")
 
     def tearDownClass(self):
         """Deletes all copied data."""
