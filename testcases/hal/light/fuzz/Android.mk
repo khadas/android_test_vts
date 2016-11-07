@@ -27,7 +27,13 @@ module_src_files := ILightSetLight_fuzzer.cpp
 module_shared_libraries := \
     android.hardware.light@2.0 \
 
-include test/vts/testcases/hal/common/fuzz/Android.hal_fuzzer_blind.mk
+include test/vts/testcases/hal/common/fuzz/Android.hal_fuzzer.mk
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := ILightFuzzTest
+VTS_CONFIG_SRC_DIR := testcases/hal/light/fuzz
+include test/vts/tools/build/Android.host_config.mk
 
 endif
 endif
