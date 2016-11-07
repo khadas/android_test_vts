@@ -16,6 +16,7 @@
 <configuration description="Run New VTS Tests for Linux Kernel Selftest in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="compatibility:include-filter" value="LinuxKselftestTestPresubmit" />
     <option name="compatibility:include-filter" value="LinuxKselftestTest" />
     <option name="compatibility:include-filter" value="LinuxKselftestTestStaging" />
     <template-include name="reporters" default="basic-reporters" />
