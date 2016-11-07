@@ -436,7 +436,8 @@ public class ShowTableServlet extends HttpServlet {
         request.setAttribute("resultsGrid", new Gson().toJson(resultsGrid));
         request.setAttribute("profilingPointNameJson", new Gson().toJson(profilingPointNameArray));
         request.setAttribute("deviceBuildIdArrayJson", new Gson().toJson(deviceBuildIdArray));
-        request.setAttribute("resultNames", new Gson().toJson(resultNames));
+        request.setAttribute("resultNames", resultNames);
+        request.setAttribute("resultNamesJson", new Gson().toJson(resultNames));
 
         // data for pie chart
         request.setAttribute("topBuildResultCounts", new Gson().toJson(topBuildResultCounts));

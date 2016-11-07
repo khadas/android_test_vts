@@ -38,10 +38,9 @@ table {
 #profiling_container {
     padding: 30px 25px;
 }
-#legend_table_div {
+#legend_wrapper {
     display: inline-block;
-    padding: 10px 30px;
-    margin-bottom: 0;
+    padding: 10px 15px 12px;
 }
 
 #refresh {
@@ -74,8 +73,16 @@ a.legend-circle {
 .legend-header-cell {
     text-transform: capitalize;
 }
-.TEST_CASE_RESULT {
-    border-radius: 50px;
+.legend-entry {
+    display: inline-block;
+    margin: 0 5px;
+    min-width: 50px;
+}
+.legend-bubble {
+    border-radius: 20px;
+    height: 20px;
+    width: 20px;
+    margin: 0 auto;
 }
 .TEST_CASE_RESULT_PASS {
     background-color: #7FFF00;
