@@ -16,10 +16,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# TODO(trong): enable for mips and x86.
-ifeq (,$(findstring mips, $(TARGET_ARCH)))
-ifeq (,$(findstring x86, $(TARGET_ARCH)))
-
 include $(CLEAR_VARS)
 
 module_name := ILightSetLight_fuzzer
@@ -34,6 +30,3 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := ILightFuzzTest
 VTS_CONFIG_SRC_DIR := testcases/hal/light/fuzz
 include test/vts/tools/build/Android.host_config.mk
-
-endif
-endif
