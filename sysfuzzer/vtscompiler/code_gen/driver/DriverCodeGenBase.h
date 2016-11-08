@@ -17,6 +17,7 @@
 #ifndef __VTS_SYSFUZZER_COMPILER_DRIVER_CODEGENBASE_H__
 #define __VTS_SYSFUZZER_COMPILER_DRIVER_CODEGENBASE_H__
 
+#include <hidl-util/Formatter.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -38,65 +39,70 @@ class DriverCodeGenBase : public CodeGenBase {
       CodeGenBase(input_vts_file_path, vts_name) {}
 
   // Generate both a C/C++ file and its header file.
-  void GenerateAll(std::stringstream& cpp_ss, std::stringstream& h_ss,
-                   const ComponentSpecificationMessage& message);
+  virtual void GenerateAll(Formatter& header_out, Formatter& source_out,
+                           const ComponentSpecificationMessage& message);
 
  protected:
+  // Generates source file.
+  virtual void GenerateSourceFile(
+      Formatter& out, const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // Generates header file.
+  virtual void GenerateHeaderFile(
+      Formatter& out, const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
   // Generates code for Fuzz(...) function body.
   virtual void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates code for GetAttribute(...) function body.
   virtual void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates header code to declare the C/C++ global functions.
   virtual void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss, const string& function_prototype) = 0;
+      Formatter& out, const string& function_prototype) = 0;
 
   // Generates C/C++ code for callback functions.
   virtual void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   // Generates code for the bodies of the C/C++ global functions.
   virtual void GenerateCppBodyGlobalFunctions(
-      std::stringstream& cpp_ss, const string& function_prototype,
+      Formatter& out, const string& function_prototype,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates the namespace name of a HIDL component, crashes otherwise.
   void GenerateNamespaceName(
-      std::stringstream& ss, const ComponentSpecificationMessage& message);
+      Formatter& out, const ComponentSpecificationMessage& message);
 
   // Generates code that opens the default namespaces.
   void GenerateOpenNameSpaces(
-      std::stringstream& ss, const ComponentSpecificationMessage& message);
+      Formatter& out, const ComponentSpecificationMessage& message);
 
   // Generates code that closes the default namespaces.
-  void GenerateCloseNameSpaces(std::stringstream& ss);
+  void GenerateCloseNameSpaces(Formatter& out);
 
   // Generates code that starts the measurement.
-  void GenerateCodeToStartMeasurement(std::stringstream& ss);
+  void GenerateCodeToStartMeasurement(Formatter& out);
 
   // Generates code that stops the measurement.
-  void GenerateCodeToStopMeasurement(std::stringstream& ss);
-
-  // Generates all header.
-  void GenerateAllHeader(const string& fuzzer_extended_class_name,
-                         std::stringstream& h_ss,
-                         const ComponentSpecificationMessage& message);
+  void GenerateCodeToStopMeasurement(Formatter& out);
 
   // Generate header code for a specific class.
   void GenerateClassHeader(const string& fuzzer_extended_class_name,
-                           std::stringstream& h_ss,
+                           Formatter& out,
                            const ComponentSpecificationMessage& message);
 
   string GetComponentName(const ComponentSpecificationMessage& message);
 
   void GenerateFuzzFunctionForSubStruct(
-      std::stringstream& h_ss, const StructSpecificationMessage& message,
+      Formatter& out, const StructSpecificationMessage& message,
       const string& parent_path);
 };
 
