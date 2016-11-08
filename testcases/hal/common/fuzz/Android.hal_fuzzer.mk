@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+include $(CLEAR_VARS)
+
 # TODO(trong): enable for mips and x86.
 ifeq (,$(findstring mips, $(TARGET_ARCH)))
 ifeq (,$(findstring x86, $(TARGET_ARCH)))
@@ -33,6 +35,7 @@ LOCAL_C_INCLUDES := \
 LOCAL_SHARED_LIBRARIES := \
     $(module_shared_libraries) \
     libutils \
+    libhidl \
     libhardware \
 
 LOCAL_ARM_MODE := arm
