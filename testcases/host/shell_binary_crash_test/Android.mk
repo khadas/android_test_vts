@@ -31,6 +31,8 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES += \
   bionic \
 
+LOCAL_CFLAGS := -Werror -Wall
+
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
