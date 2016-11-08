@@ -144,8 +144,8 @@ class SecurityPoCKernelTest(base_test_with_webdb.BaseTestWithWebDbClass):
             logging.info("EXIT_CODE: %s", exit_codes)
 
             # Last exit code is the exit code of PoC executable.
-            asserts.skipIf(exit_codes[-1] == ExitCode.POC_TEST_SKIP,
-                "%s test case was skipped." % testcase)
+            asserts.skipIf(exit_codes[-1] == config.ExitCode.POC_TEST_SKIP,
+                "Test case was skipped.")
             asserts.assertFalse(
                 any(exit_codes), "Test case failed.")
         else:
