@@ -70,7 +70,7 @@ void VtsProfilingInterface::Init() {
 
   string file_path = trace_file_path_ + "_" + string(product_name) + "_"
       + string(device_id) + "_" + string(build_number) + "_"
-      + to_string(NanoTime()) + "_" + ".vts.trace";
+      + to_string(NanoTime()) + ".vts.trace";
 
   LOG(INFO) << "Creating new profiler instance with file path: " << file_path;
   trace_output_ = std::ofstream(file_path, std::fstream::out);

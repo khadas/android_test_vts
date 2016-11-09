@@ -26,56 +26,139 @@ HAL_INSTRUMENTATION_LIB_PATH = "/data/local/tmp/64/hw/"
 
 
 def EnableVTSProfiling(
-        shell,
-        target_profiling_trace_path=TARGET_PROFILING_TRACE_PATH,
-        hal_instrumentation_lib_path=HAL_INSTRUMENTATION_LIB_PATH):
+        shell, hal_instrumentation_lib_path=HAL_INSTRUMENTATION_LIB_PATH):
     """ Enable profiling by setting the system property.
 
     Args:
-      shell: shell to control the testing device.
-      target_profiling_trace_path: directory that stores trace files on target.
-      hal_instrumentation_lib_path: directory that stores profiling libraries.
+        shell: shell to control the testing device.
+        hal_instrumentation_lib_path: directory that stores profiling libraries.
     """
     # cleanup any existing traces.
-    shell.Execute("rm " + os.path.join(target_profiling_trace_path, "*.trace"))
+    shell.Execute("rm " + os.path.join(TARGET_PROFILING_TRACE_PATH,
+                                       "*.vts.trace"))
     logging.info("enable VTS profiling.")
 
     shell.Execute("setprop hal.instrumentation.lib.path " +
                   hal_instrumentation_lib_path)
     shell.Execute("setprop hal.instrumentation.enable true")
 
+
 def DisableVTSProfiling(shell):
     """ Disable profiling by resetting the system property.
 
     Args:
-      shell: shell to control the testing device.
+        shell: shell to control the testing device.
     """
     shell.Execute("setprop hal.instrumentation.lib.path \"\"")
     shell.Execute("setprop hal.instrumentation.enable false")
 
 
-def GetTraceData(dut,
-                 host_profiling_trace_path,
-                 target_profiling_trace_path=TARGET_PROFILING_TRACE_PATH):
-    """ Pull the trace file and save it under the profiling trace path.
+class VTSProfilingData(object):
+    """Class to store the VTS profiling data.
+
+    Attributes:
+        name: A string to describe the profiling data. e.g. server_side_latency.
+        labels: A list of profiling data labels. e.g. a list of api names.
+        values: A dict that stores the profiling data for different metrics.
+    """
+
+    def __init__(self):
+        self.name = ""
+        self.labels = []
+        self.values = {"avg": [], "max": [], "min": []}
+
+
+EVENT_TYPE_DICT = {
+    0: "SERVER_API_ENTRY",
+    1: "SERVER_API_EXIT",
+    2: "CLIENT_API_ENTRY",
+    3: "CLIENT_API_EXIT",
+    4: "SYNC_CALLBACK_ENTRY",
+    5: "SYNC_CALLBACK_EXIT",
+    6: "PASSTHROUGH_ENTRY",
+    7: "PASSTHROUGH_EXIT",
+}
+
+
+def ParseTraceData(trace_file):
+    """Parses the data stored in trace_file, calculates the avg/max/min
+    latency for each API.
 
     Args:
-      dut: the testing device.
-      host_profiling_trace_path: directory that stores trace files on host.
-      target_profiling_trace_path: directory that stores trace files on target.
+        trace_file: file that stores the trace data.
+
+    Returns:
+        VTSProfilingData which contain the list of API names and the avg/max/min
+        latency for each API.
+    """
+    profiling_data = VTSProfilingData()
+    api_timestamps = {}
+    api_latencies = {}
+
+    myfile = open(trace_file, "r")
+    new_entry = True
+    for line in myfile.readlines():
+        if new_entry:
+            time_stamp, event, package, version, interface, api = line.strip(
+            ).split(",")
+            if not profiling_data.name:
+                logging.warning("no name set for the profiling data. ")
+                # TODO(zhuoyao): figure out a better way to set the data name.
+                profiling_data.name = EVENT_TYPE_DICT[int(event)]
+            if api_timestamps.get(api):
+                api_timestamps[api].append(time_stamp)
+            else:
+                api_timestamps[api] = [time_stamp]
+            new_entry = False
+        else:
+            # get the msg data.
+            if not line.strip():
+                new_entry = True
+    for api, time_stamps in api_timestamps.items():
+        latencies = []
+        # TODO(zhuoyao): figure out a way to get the latencies, e.g based on the
+        # event type of each entry.
+        for index in range(1, len(time_stamps), 2):
+            latencies.append(
+                long(time_stamps[index]) - long(time_stamps[index - 1]))
+        api_latencies[api] = latencies
+    for api, latencies in api_latencies.items():
+        profiling_data.labels.append(api)
+        profiling_data.values["max"].append(max(latencies))
+        profiling_data.values["min"].append(min(latencies))
+        profiling_data.values["avg"].append(sum(latencies) / len(latencies))
+
+    return profiling_data
+
+
+def GetTraceFiles(dut, host_profiling_trace_path):
+    """Pulls the trace file and save it under the profiling trace path.
+
+    Args:
+        dut: the testing device.
+        host_profiling_trace_path: directory that stores trace files on host.
+
+    Returns:
+        Name list of trace files that stored on host.
     """
     if not host_profiling_trace_path:
         host_profiling_trace_path = LOCAL_PROFILING_TRACE_PATH
     if not os.path.exists(host_profiling_trace_path):
         os.makedirs(host_profiling_trace_path)
-    logging.info("Saving profiling traces under: %s", host_profiling_trace_path)
+    logging.info("Saving profiling traces under: %s",
+                 host_profiling_trace_path)
 
     dut.shell.InvokeTerminal("profiling_shell")
     results = dut.shell.profiling_shell.Execute("ls " + os.path.join(
-        target_profiling_trace_path, "*.trace"))
+        TARGET_PROFILING_TRACE_PATH, "*.vts.trace"))
     asserts.assertTrue(results, "failed to find trace file")
     stdout_lines = results[const.STDOUT][0].split("\n")
     logging.info("stdout: %s", stdout_lines)
+    trace_files = []
     for line in stdout_lines:
-        if (line):
-            dut.adb.pull("%s %s" % (line, host_profiling_trace_path))
+        if line:
+            file_name = os.path.join(host_profiling_trace_path,
+                                     os.path.basename(line.strip()))
+            dut.adb.pull("%s %s" % (line, file_name))
+            trace_files.append(file_name)
+    return trace_files
