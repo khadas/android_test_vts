@@ -30,6 +30,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "specification_parser/InterfaceSpecificationParser.h"
+#include "utils/StringUtil.h"
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
@@ -316,7 +317,9 @@ string GetCppInstanceType(
         if (!message || message->component_class() != HAL_HIDL) {
           return "(" + arg.predefined_type() +  ") RandomUint32()";
         } else {
-          return "Random" + arg.predefined_type() + "()";
+          std::string predefined_type_name = arg.predefined_type();
+          ReplaceSubString(predefined_type_name, "::", "__");
+          return "Random" + predefined_type_name + "()";
           // TODO: generate a function which can dynamically choose the value.
           /* for (const auto& attribute : message->attribute()) {
             if (attribute.type() == TYPE_ENUM &&

@@ -298,7 +298,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                                   sub_struct.is_pointer() ? "->" : ".");
     }
 
-    out << "bool " << fuzzer_extended_class_name << "::GetService() {" << "\n";
+    out << "bool " << fuzzer_extended_class_name
+        << "::GetService(bool get_stub) {" << "\n";
     out.indent();
 
     out << "static bool initialized = false;" << "\n";
@@ -314,7 +315,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     out << "hw_binder_proxy_ = " << message.component_name()
         << "::getService(\""
         << service_name
-        << "\", false /*get stub*/);" << "\n";
+        << "\", get_stub);" << "\n";
     out << "cout << \"[agent:hal] hw_binder_proxy_ = \" << "
         << "hw_binder_proxy_.get() << endl;" << "\n";
     out << "initialized = true;" << "\n";

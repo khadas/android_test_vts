@@ -40,7 +40,7 @@ class FuzzerBase {
 
   // Gets the HIDL service.
   // Returns true iff successful.
-  virtual bool GetService();
+  virtual bool GetService(bool get_stub);
 
   // Open Conventional Hal
   int OpenConventionalHal(const char* module_name = NULL);
