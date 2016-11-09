@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for VTS HAL NFC test cases">
+<configuration description="Config for VTS HAL NFC (Passthrough) test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="push-group" value="HidlHalTest.push" />
         <option name="cleanup" value="true" />
@@ -24,5 +24,6 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/hal/nfc/hidl/host/NfcHidlBasicTest" />
+        <option name="test-config-path" value="vts-config/testcases/hal/nfc/hidl/host/passthrough/NfcHidlPassthroughBasicTest.config" />
     </test>
 </configuration>
