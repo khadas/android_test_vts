@@ -14,31 +14,4 @@
 # limitations under the License.
 #
 
-LOCAL_PATH:= $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libvts_profiling
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_SRC_FILES := \
-  VtsProfilingInterface.cpp
-
-LOCAL_C_INCLUDES := \
-  libbase \
-  libcore \
-  external/protobuf/src \
-
-LOCAL_SHARED_LIBRARIES := \
-  libbase \
-  libcutils \
-  libhidl \
-  libhwbinder \
-  libvts_multidevice_proto \
-  libprotobuf-cpp-full \
-
-LOCAL_CFLAGS := -Werror -Wall
-
-LOCAL_MULTILIB := both
-
-include $(BUILD_SHARED_LIBRARY)
+include $(call all-subdir-makefiles)
