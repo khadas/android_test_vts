@@ -1,5 +1,4 @@
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <hidl/HidlSupport.h>
 #include <iostream>
 #include "vts_datatype.h"

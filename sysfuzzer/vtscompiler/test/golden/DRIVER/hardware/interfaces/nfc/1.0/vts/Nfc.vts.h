@@ -10,7 +10,6 @@
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
 #include <android/hardware/nfc/1.0/INfc.h>
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/INfc.h>
 #include <hidl/HidlSupport.h>
 
@@ -27,7 +26,7 @@ class FuzzerExtended_INfc : public FuzzerBase {
               void** result, const string& callback_socket_name);
     bool GetAttribute(FunctionSpecificationMessage* func_msg,
               void** result);
-    bool GetService();
+    bool GetService(bool get_stub);
 
  private:
     sp<INfc> hw_binder_proxy_;

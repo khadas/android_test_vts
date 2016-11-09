@@ -10,7 +10,6 @@
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <hidl/HidlSupport.h>
 

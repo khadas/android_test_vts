@@ -1,5 +1,4 @@
 #include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <hidl/HidlSupport.h>
 #include <iostream>
 #include "vts_datatype.h"
@@ -8,6 +7,7 @@
 #include <android/hardware/nfc/1.0/INfc.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
+#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <android/hardware/nfc/1.0/types.h>
 using namespace android::hardware::nfc::V1_0;
 namespace android {
@@ -57,11 +57,11 @@ static void FuzzerExtended_INfcpowerCycle_cb_func(int32_t arg0) {
 std::function<void(int32_t)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
 
 
-bool FuzzerExtended_INfc::GetService() {
+bool FuzzerExtended_INfc::GetService(bool get_stub) {
     static bool initialized = false;
     if (!initialized) {
         cout << "[agent:hal] HIDL getService" << endl;
-        hw_binder_proxy_ = INfc::getService("nfc_nci", false /*get stub*/);
+        hw_binder_proxy_ = INfc::getService("nfc_nci", get_stub);
         cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }
