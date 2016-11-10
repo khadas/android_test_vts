@@ -121,6 +121,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
+        """Calls sub-class's tearDownClass first and then uploads to web DB."""
+        result = super(BaseTestWithWebDbClass, self)._tearDownClass()
         if (getattr(self, self.USE_GAE_DB, False) and
                 getattr(self, self.BIGTABLE_BASE_URL, "")):
             # Handle case when runner fails, tests aren't executed
@@ -178,7 +180,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         else:
             logging.info("_tearDownClass hook: missing USE_GAE_DB and/or "
                          "BIGTABLE_BASE_URL. Web uploading disabled.")
-        return super(BaseTestWithWebDbClass, self)._tearDownClass()
+        return result
 
     def SetDeviceInfo(self, msg):
         """Sets device info to the given protobuf message, msg."""
