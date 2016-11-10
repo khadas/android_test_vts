@@ -81,6 +81,7 @@ public class ShowTableServlet extends HttpServlet {
         User currentUser = userService.getCurrentUser();
         String loginURI = userService.createLoginURL(request.getRequestURI());
         String logoutURI = userService.createLogoutURL(loginURI);
+        boolean unfiltered = request.getParameter("unfiltered") != null;
         boolean showPresubmit = request.getParameter("showPresubmit") != null;
         boolean showPostsubmit = request.getParameter("showPostsubmit") != null;
         Long startTime = null;  // time in microseconds
@@ -134,6 +135,12 @@ public class ShowTableServlet extends HttpServlet {
         // If no params are specified, set to default of postsubmit-only.
         if (!(showPresubmit || showPostsubmit)) {
             showPostsubmit = true;
+        }
+
+        // If unfiltered, set showPre- and Post-submit to true for accurate UI.
+        if (unfiltered) {
+            showPostsubmit = true;
+            showPresubmit = true;
         }
 
         // Add result names to list
@@ -201,14 +208,16 @@ public class ShowTableServlet extends HttpServlet {
 
                 try {
                     // filter non-integer build IDs
-                    Integer.parseInt(buildId);
-                    if (!showPostsubmit && firstDeviceBuildId.charAt(0) != 'P') {
-                        continue;
+                    if (!unfiltered) {
+                        Integer.parseInt(buildId);
+                        if (!showPostsubmit && firstDeviceBuildId.charAt(0) != 'P') {
+                            continue;
+                        }
+                        if (showPresubmit && firstDeviceBuildId.charAt(0) == 'P') {
+                            firstDeviceBuildId = firstDeviceBuildId.substring(1);
+                        }
+                        Integer.parseInt(firstDeviceBuildId);
                     }
-                    if (showPresubmit && firstDeviceBuildId.charAt(0) == 'P') {
-                        firstDeviceBuildId = firstDeviceBuildId.substring(1);
-                    }
-                    Integer.parseInt(firstDeviceBuildId);
                     tests.add(0, testReportMessage);
                 } catch (NumberFormatException e) {
                     /* skip a non-post-submit build */
@@ -446,6 +455,7 @@ public class ShowTableServlet extends HttpServlet {
         request.setAttribute("endTime", new Gson().toJson(endTime));
         request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
         request.setAttribute("hasOlder", new Gson().toJson(hasOlder));
+        request.setAttribute("unfiltered", unfiltered);
         request.setAttribute("showPresubmit", showPresubmit);
         request.setAttribute("showPostsubmit", showPostsubmit);
 

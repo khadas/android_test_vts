@@ -174,6 +174,12 @@ it is automatically executed in a test lab (e.g., using some common devices).
 The exact schedule, and the used branches and devices are all customizable.
 Please contact an EngProd representative to your team, or vts-dev@google.com.
 
+Results from the test lab are automatically visible on the dashboard, but local
+runs may also be visible for debugging purposes if tests are run on a machine
+with access to the database service key file. To view local runs on the dashboard
+for debugging purposes, add the following to the end of the URL from the table
+summary page: '&unfiltered='.
+
 ## 5. Notifications
 
 For notifications when test cases fail, go to the VTS dashboard and click the
