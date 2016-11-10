@@ -38,14 +38,15 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   AgentRequestHandler(const char* spec_dir_path, const char* hal_path32,
                       const char* hal_path64, const char* shell_path32,
                       const char* shell_path64)
-      : service_name_(),
+      : VtsDriverCommUtil(),
+        service_name_(),
         driver_client_(NULL),
         driver_hal_spec_dir_path_(spec_dir_path),
         driver_hal_binary32_(hal_path32),
         driver_hal_binary64_(hal_path64),
         driver_shell_binary32_(shell_path32),
-        driver_shell_binary64_(shell_path64),
-        VtsDriverCommUtil() {}
+        driver_shell_binary64_(shell_path64) {}
+
 
   // handles a new session.
   bool ProcessOneCommand();
