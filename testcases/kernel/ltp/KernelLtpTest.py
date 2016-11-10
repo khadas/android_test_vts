@@ -149,7 +149,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.shell.Execute("mkdir %s -p" % ltp_configs.LTPDIR)
         src = os.path.join(self.data_file_path, str(n_bit), 'ltp', '.')
         self._dut.adb.push(src, ltp_configs.LTPDIR)
-        logging.info('finished pushing files from %s to %s', src, ltp_configs.LTPDIR)
+        logging.info('finished pushing files from %s to %s', src,
+                     ltp_configs.LTPDIR)
 
     def GetEnvp(self):
         """Generate the environment variable required to run the tests."""
@@ -286,18 +287,33 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 args=args,
                 name_func=name_func)
 
+        settings_multithread = []
+        settings_singlethread = []
+        for test_case in settings:
+            if (test_case.note == 'staging' or test_case.testsuite in
+                    ltp_configs.TEST_SUITES_MULTITHREAD_DISABLED):
+                settings_singlethread.append(test_case)
+            else:
+                settings_multithread.append(test_case)
+
+        failed_tests = self.runGeneratedTests(
+            test_func=test_func,
+            settings=settings_singlethread,
+            args=args,
+            name_func=name_func)
+
         # Shuffle the tests to reduce resource competition probability
-        random.shuffle(settings)
+        random.shuffle(settings_multithread)
 
         # Create a queue for thread workers to pull tasks
         q = queue.Queue()
-        map(q.put, settings)
+        map(q.put, settings_multithread)
 
         # Create individual shell sessions for thread workers
         for i in xrange(n_workers):
             self._dut.shell.InvokeTerminal("shell_thread_{}".format(i))
 
-        failed_tests = set()
+        failed_multithread_tests = set()
         with futures.ThreadPoolExecutor(max_workers=n_workers) as executor:
             fs = [executor.submit(self.RunLtpWorker, q, args, name_func, i)
                   for i in xrange(n_workers)]
@@ -305,20 +321,23 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             failed_test_sets = map(futures.Future.result, fs)
             for failed_test_set in failed_test_sets:
                 for test_case in failed_test_set:
-                    failed_tests.add(test_case)
+                    failed_multithread_tests.add(test_case)
 
-        for test_case in failed_tests:
+        for test_case in failed_multithread_tests:
             logging.info(
                 "Test case %s failed during multi-thread run, rerunning...",
                 test_case)
 
         # In the end, rerun all failed tests to confirm their failure
         # in sequential.
-        return self.runGeneratedTests(
-            test_func=test_func,
-            settings=failed_tests,
-            args=args,
-            name_func=name_func)
+        failed_tests.extend(
+            self.runGeneratedTests(
+                test_func=test_func,
+                settings=failed_multithread_tests,
+                args=args,
+                name_func=name_func))
+
+        return failed_tests
 
     #@Override
     def filterOneTest(self, test_name):
