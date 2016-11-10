@@ -79,15 +79,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("%s: %s", ltp_enums.ConfigKeys.NUMBER_OF_THREADS,
                      self.number_of_threads)
 
-        self.include_filter = self.test_suite[
-            keys.ConfigKeys.KEY_INCLUDE_FILTER]
-        logging.info("%s: %s", keys.ConfigKeys.KEY_INCLUDE_FILTER,
-                     self.include_filter)
-
-        self.exclude_filter = self.test_suite[
-            keys.ConfigKeys.KEY_EXCLUDE_FILTER]
-        logging.info("%s: %s", keys.ConfigKeys.KEY_EXCLUDE_FILTER,
-                     self.exclude_filter)
+        self.include_filter = self.ExpandFilter(self.include_filter)
+        self.exclude_filter = self.ExpandFilter(self.exclude_filter)
 
         self._dut = self.registerController(android_device)[0]
         logging.info("product_type: %s", self._dut.product_type)
@@ -98,8 +91,12 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self.shell)
         self._shell_env = shell_environment.ShellEnvironment(self.shell)
 
+        disabled_tests = self.ExpandFilter(ltp_configs.DISABLED_TESTS)
+        staging_tests = self.ExpandFilter(ltp_configs.STAGING_TESTS)
         self._testcases = test_cases_parser.TestCasesParser(
-            self.data_file_path, self.include_filter, self.exclude_filter)
+            self.data_file_path, self.filterOneTest, disabled_tests,
+            staging_tests)
+
         self._env = {ltp_enums.ShellEnvKeys.TMP: ltp_configs.TMP,
                      ltp_enums.ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
                      ltp_enums.ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
@@ -118,6 +115,30 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def shell(self, shell):
         """Set shell object"""
         self._shell = shell
+
+    def ExpandFilter(self, input_list):
+        '''Expand filter items with bitness suffix.
+
+        If a filter item contains bitness suffix, only test name with that tag will be included
+        in output.
+        Otherwise, both 32bit and 64bit suffix will be paired to the test name in output
+        list.
+
+        Args:
+            input_list: list of string, the list to expand
+
+        Returns:
+            A list of string
+        '''
+        result = []
+        for item in input_list:
+            if item.endswith(const.SUFFIX_32BIT) or item.endswith(
+                    const.SUFFIX_64BIT):
+                result.append(item)
+            else:
+                result.append("%s_%s" % (item, const.SUFFIX_32BIT))
+                result.append("%s_%s" % (item, const.SUFFIX_64BIT))
+        return result
 
     def PreTestSetup(self):
         """Setups that needs to be done before any tests."""
@@ -291,7 +312,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         settings_singlethread = []
         for test_case in settings:
             if (test_case.note == 'staging' or test_case.testsuite in
-                    ltp_configs.TEST_SUITES_MULTITHREAD_DISABLED):
+                    ltp_configs.TEST_SUITES_REQUIRE_SINGLE_THREAD_MODE):
                 settings_singlethread.append(test_case)
             else:
                 settings_multithread.append(test_case)
@@ -338,11 +359,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 name_func=name_func))
 
         return failed_tests
-
-    #@Override
-    def filterOneTest(self, test_name):
-        """"Disable runner's test filter method since LTP has its own filter."""
-        pass
 
     def RunLtpWorker(self, testcases, args, name_func, id):
         """Worker thread to run a LTP test case at a time."""

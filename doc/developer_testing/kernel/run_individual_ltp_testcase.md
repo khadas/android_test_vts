@@ -9,7 +9,7 @@
 `> run vts-kernel -m KernelLtpTest -t <testname1,testname2,...>`
 
 Test names in filter can be any of the following formats:
-`<testsuite.testname>`, `<testsuite.testname_bitness>`, `<testname>`
+`<testsuite.testname>`, `<testsuite.testname_bitness>`
 
 It is recommended to include test suite, i.e., the first two formats above.
 

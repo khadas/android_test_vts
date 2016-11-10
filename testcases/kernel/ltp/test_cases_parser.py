@@ -19,6 +19,8 @@ import os
 import logging
 import itertools
 
+from vts.runners.host import const
+
 from vts.testcases.kernel.ltp import ltp_configs
 from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import test_case
@@ -29,37 +31,16 @@ class TestCasesParser(object):
 
     Attributes:
         _data_path: string, the vts data path on host side
+        _filter_func: function, a filter method that will emit exception if a test is filtered
+        disabled_tests: list of string
+        staging_tests: list of string
     """
 
-    def __init__(self, data_path, include_filter, exclude_filter):
+    def __init__(self, data_path, filter_func, disabled_tests, staging_tests):
         self._data_path = data_path
-        self._include_filter = self.ExpandFilters(include_filter)
-        self._exclude_filter = self.ExpandFilters(exclude_filter)
-
-    def ExpandFilters(self, filter):
-        """Expend comma delimited filter list to a full list of test names.
-
-        This is a workaround for developers' convenience to specify multiple
-        test names within one filter command.
-
-        Arguments:
-            filter: list of strings, items in the list that are comma delimited
-                    will be expanded
-
-        Returns:
-            A expanded list of strings contains test names in filter.
-        """
-        expended_list_generator = (
-            item.split(ltp_enums.Delimiters.TESTCASE_FILTER)
-            for item in filter)
-        return list(itertools.chain.from_iterable(expended_list_generator))
-
-    def IsTestcaseInList(self, testcase, name_list, n_bit):
-        """Check whether a given testcase object is in a disabled test list"""
-        name_set = (testcase.fullname, testcase.testname,
-                    "{test_name}_{n_bit}bit".format(
-                        test_name=testcase.fullname, n_bit=n_bit))
-        return len(set(name_set).intersection(name_list)) > 0
+        self._filter_func = filter_func
+        self._disabled_tests = disabled_tests
+        self._staging_tests = staging_tests
 
     def ValidateDefinition(self, line):
         """Validate a tab delimited test case definition.
@@ -106,34 +87,24 @@ class TestCasesParser(object):
             testcase = test_case.TestCase(
                 testsuite=testsuite, testname=testname, command=command)
 
-            # If include filter is set from TradeFed command, then
-            # yield only the included tests, regardless whether the test
-            # is disabled in configuration
-            if self._include_filter:
-                if self.IsTestcaseInList(testcase, self._include_filter,
-                                         n_bit):
-                    logging.info("[Parser] Adding test case %s. Reason: "
-                                 "include filter" % testcase.fullname)
-                    yield testcase
-                continue
+            test_display_name = "{}_{}bit".format(str(testcase), n_bit)
 
-            # Check exclude filter set from TradeFed command. If a test
-            # case is in both include and exclude filter, it will be
-            # included
-            if self.IsTestcaseInList(testcase, self._exclude_filter, n_bit):
+            # Check runner's base_test filtering method
+            try:
+                self._filter_func(test_display_name)
+            except:
                 logging.info("[Parser] Skipping test case %s. Reason: "
-                             "exclude filter" % testcase.fullname)
+                             "filtered" % testcase.fullname)
                 continue
 
             # For skipping tests that are not designed for Android
-            if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
-                                     n_bit):
+            if test_display_name in self._disabled_tests:
                 logging.info("[Parser] Skipping test case %s. Reason: "
                              "disabled" % testcase.fullname)
                 continue
 
             # For failing tests that are being inspected
-            if self.IsTestcaseInList(testcase, ltp_configs.STAGING_TESTS, n_bit):
+            if test_display_name in self._staging_tests:
                 if not run_staging:
                     logging.info("[Parser] Skipping test case %s. Reason: "
                                  "staging" % testcase.fullname)
