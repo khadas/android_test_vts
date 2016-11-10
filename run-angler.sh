@@ -22,6 +22,6 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.light.conventional.Sample
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.camera.conventional.2_1.SampleCameraV2Test
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.camera.conventional.3_4.SampleCameraV3Test
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.nfc.hidl.host.NfcHidlBasicTest
-# PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.vibrator.hidl.VibratorHidlTest
+# PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.vibrator.hidl.host.VibratorHidlTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.shell.SampleShellTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.fuzz_test.lib_bionic.LibBionicLibmFuzzTest
