@@ -21,5 +21,7 @@ EXIT_CODE = 2
 
 LIST_ITEM_DELIMITER = ','
 
+# Note: filterOneTest method in base_test.py assumes SUFFIX_32BIT and SUFFIX_64BIT
+# are in lower cases.
 SUFFIX_32BIT = "32bit"
 SUFFIX_64BIT = "64bit"

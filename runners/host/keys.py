@@ -46,6 +46,7 @@ class ConfigKeys(object):
     IKEY_TESTBED_NAME = "testbed_name"
     IKEY_LOG_PATH = "log_path"
     IKEY_ABI_BITNESS = "abi_bitness"
+    IKEY_RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi"
 
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
