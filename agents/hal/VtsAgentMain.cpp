@@ -37,16 +37,16 @@ int main(int argc, char* argv[]) {
   printf("|| VTS AGENT ||\n");
 
   if (argc == 1) {
-    hal_path32 = DEFAULT_HAL_DRIVER_FILE_PATH32;
-    hal_path64 = DEFAULT_HAL_DRIVER_FILE_PATH64;
-    shell_path32 = DEFAULT_SHELL_DRIVER_FILE_PATH32;
-    shell_path64 = DEFAULT_SHELL_DRIVER_FILE_PATH64;
+    hal_path32 = (char*) DEFAULT_HAL_DRIVER_FILE_PATH32;
+    hal_path64 = (char*) DEFAULT_HAL_DRIVER_FILE_PATH64;
+    shell_path32 = (char*) DEFAULT_SHELL_DRIVER_FILE_PATH32;
+    shell_path64 = (char*) DEFAULT_SHELL_DRIVER_FILE_PATH64;
   } else if (argc == 2) {
-    hal_path32 = DEFAULT_HAL_DRIVER_FILE_PATH32;
-    hal_path64 = DEFAULT_HAL_DRIVER_FILE_PATH64;
+    hal_path32 = (char*) DEFAULT_HAL_DRIVER_FILE_PATH32;
+    hal_path64 = (char*) DEFAULT_HAL_DRIVER_FILE_PATH64;
     spec_dir_path = argv[1];
-    shell_path32 = DEFAULT_SHELL_DRIVER_FILE_PATH32;
-    shell_path64 = DEFAULT_SHELL_DRIVER_FILE_PATH64;
+    shell_path32 = (char*) DEFAULT_SHELL_DRIVER_FILE_PATH32;
+    shell_path64 = (char*) DEFAULT_SHELL_DRIVER_FILE_PATH64;
   } else if (argc == 3) {
     hal_path32 = argv[1];
     hal_path64 = argv[2];

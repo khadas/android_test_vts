@@ -32,8 +32,8 @@ extern int StartSocketServerForDriver(const string& callback_socket_name,
 class SocketServerForDriver : public VtsDriverCommUtil {
  public:
   SocketServerForDriver(int sock, int runner_port)
-      : runner_port_(runner_port),
-        VtsDriverCommUtil(sock) {}
+      : VtsDriverCommUtil(sock),
+        runner_port_(runner_port) {}
 
   // Starts to process requests.
   void Start();

@@ -138,7 +138,7 @@ bool AgentRequestHandler::LaunchDriverService(
       Close();
 
       string driver_binary_path;
-      char* cmd;
+      char* cmd = NULL;
       if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL ||
           driver_type == VTS_DRIVER_TYPE_HAL_LEGACY ||
           driver_type == VTS_DRIVER_TYPE_HAL_HIDL) {
