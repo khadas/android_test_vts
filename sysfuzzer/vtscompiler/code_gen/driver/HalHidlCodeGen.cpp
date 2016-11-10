@@ -233,11 +233,18 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
             out << return_type_hidl.scalar_type();
           }
         } else if (return_type_hidl.type() == TYPE_ENUM ||
-                   return_type_hidl.type() == TYPE_VECTOR ||
-                   return_type_hidl.type() == TYPE_STRUCT) {
+                   return_type_hidl.type() == TYPE_VECTOR) {
           out << GetCppVariableType(return_type_hidl, &message);
         } else if (return_type_hidl.type() == TYPE_STRING) {
-          out << "::std::string ";
+          out << "::android::hardware::hidl_string ";
+        } else if (return_type_hidl.type() == TYPE_STRUCT) {
+          if (return_type_hidl.has_predefined_type()) {
+            out << return_type_hidl.predefined_type() << " ";
+          } else {
+            cerr << __func__ << ":" << __LINE__ << " ERROR no predefined type "
+                 << "\n";
+            exit(-1);
+          }
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                << return_type_hidl.type() << " for " << api.name() << "\n";
@@ -269,9 +276,12 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
                    return_type_hidl.type() == TYPE_VECTOR ||
                    return_type_hidl.type() == TYPE_STRUCT) {
           out << GetCppVariableType(return_type_hidl, &message);
+        } else if (return_type_hidl.type() == TYPE_STRING) {
+          out << "::android::hardware::hidl_string";
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                << return_type_hidl.type() << " for " << api.name() << "\n";
+          exit(-1);
         }
       }
       out << ")> "
@@ -626,8 +636,6 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           // TODO(yim): support non-scalar return type.
           out << ");" << "\n";
         }
-        //  out << fuzzer_extended_class_name << api.name() << "_cb_func";
-        //  out << ").toString8().string())));" << "\n";
       } else {
         if (arg_count != 0) out << ", ";
         out << fuzzer_extended_class_name << api.name() << "_cb_func";
