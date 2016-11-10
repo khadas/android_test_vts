@@ -24,13 +24,14 @@ class BinaryTestCase(object):
     '''A class to represent a binary test case.
 
     Attributes:
-        test_suite: string, test suite name
-        test_name: string, test case name which does not include test suite
-        path: string, absolute test binary path on device
-        tag: string, test tag
-        put_tag_func: function that takes a name and tag to output a combination
-        working_directory: string, working directory to call the command
-        ld_library_path: string, a path for LD_LIBRARY_PATH environment variable
+        test_suite: string, test suite name.
+        test_name: string, test case name which does not include test suite.
+        path: string, absolute test binary path on device.
+        tag: string, test tag.
+        put_tag_func: function that takes a name and tag to output a combination.
+        working_directory: string, working directory to call the command.
+        ld_library_path: string, a path for LD_LIBRARY_PATH environment variable.
+        profiling_library_path: string, path to lookup and load VTS profiling libraries.
         cmd: string, a shell command to execute the test case. If empty, path will be used.
         envp: string, environment veriable. shoud be in format 'name1=value1 name2=value2...'
               Will be called using 'env <envp> <cmd> <args>'
@@ -45,6 +46,7 @@ class BinaryTestCase(object):
                  put_tag_func=operator.add,
                  working_directory=None,
                  ld_library_path=None,
+                 profiling_library_path=None,
                  cmd='',
                  envp='',
                  args=''):
@@ -55,6 +57,7 @@ class BinaryTestCase(object):
         self.put_tag_func = put_tag_func
         self.working_directory = working_directory
         self.ld_library_path = ld_library_path
+        self.profiling_library_path = profiling_library_path
         self.cmd = cmd
         self.envp = envp
         self.args = args
