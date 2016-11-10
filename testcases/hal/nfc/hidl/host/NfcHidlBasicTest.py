@@ -30,8 +30,6 @@ PASSTHROUGH_MODE_KEY = "passthrough_mode"
 class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A simple testcase for the NFC HIDL HAL."""
 
-    _TREBLE_DEVICE_NAME_SUFFIX = "_treble"
-
     def setUpClass(self):
         """Creates a mirror and turns on the framework-layer NFC service."""
         self.dut = self.registerController(android_device)[0]
@@ -62,10 +60,6 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def testBase(self):
         """A simple test case which just calls each registered function."""
-        asserts.skipIf(
-            not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
-            "a non-Treble device.")
-
         # TODO: extend to make realistic testcases
         # For example, call after CORE_INIT_RSP is received.
         # result = self.dut.hal.nfc.coreInitialized([1])
