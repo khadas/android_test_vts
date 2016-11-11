@@ -33,26 +33,27 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def setUpClass(self):
         """Creates a mirror and turns on the framework-layer NFC service."""
         self.dut = self.registerController(android_device)[0]
-        self.dut.hal.InitHidlHal(target_type="nfc",
-                                 target_basepaths=["/system/lib64"],
-                                 target_version=1.0,
-                                 target_package="android.hardware.nfc",
-                                 target_component_name="INfc",
-                                 bits=64)
 
-        self.getUserParams([PASSTHROUGH_MODE_KEY])
+        self.getUserParams(opt_param_names=[PASSTHROUGH_MODE_KEY])
 
         self.dut.shell.InvokeTerminal("one")
         self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
         self.dut.shell.one.Execute("service call nfc 4")  # Turn off
         self.dut.shell.one.Execute("service call nfc 5")  # Turn on
 
-        if getattr(self, PASSTHROUGH_MODE_KEY, False):
+        if getattr(self, PASSTHROUGH_MODE_KEY, True):
             self.dut.shell.one.Execute(
                 "setprop vts.hal.vts.hidl.get_stub true")
         else:
             self.dut.shell.one.Execute(
                 "setprop vts.hal.vts.hidl.get_stub false")
+
+        self.dut.hal.InitHidlHal(target_type="nfc",
+                                 target_basepaths=["/system/lib64"],
+                                 target_version=1.0,
+                                 target_package="android.hardware.nfc",
+                                 target_component_name="INfc",
+                                 bits=64)
 
     def tearDownClass(self):
         """Turns off the framework-layer NFC service."""
