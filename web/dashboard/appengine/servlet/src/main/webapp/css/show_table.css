@@ -96,6 +96,13 @@ a.legend-circle {
 .pie-chart-title {
     cursor: default;
 }
+div.status-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-left: 5px;
+}
 .test-case-status {
     border-radius: 50px;
 }
