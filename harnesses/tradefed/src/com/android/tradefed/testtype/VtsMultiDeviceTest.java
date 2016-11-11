@@ -34,6 +34,7 @@ import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
+import com.android.tradefed.testtype.IAbi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -58,7 +59,7 @@ import java.util.ArrayList;
 
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-IRuntimeHintProvider, ITestCollector, IBuildReceiver {
+IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
@@ -70,6 +71,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
+    static final String ABI_BITNESS = "abi_bitness";
     static final String VTS = "vts";
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
@@ -87,6 +89,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
 
     private ITestDevice mDevice = null;
+    private IAbi mAbi = null;
 
     @Option(name = "test-timeout", description = "maximum amount of time"
             + "(im milliseconds) tests are allowed to run",
@@ -338,6 +341,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         doRunTest(listener);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setBuild(IBuildInfo buildInfo) {
         mBuildInfo = buildInfo;
@@ -469,6 +475,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         CLog.i("Added exclude filter to test suite: %s", mExcludeFilters);
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
+        if (mAbi != null){
+            jsonObject.put(ABI_BITNESS, mAbi.getBitness());
+            CLog.i("Added %s to the Json object", ABI_BITNESS);
+        }
 
         if (!mBinaryTestSources.isEmpty()) {
             jsonObject.put(BINARY_TEST_SOURCES, new JSONArray(mBinaryTestSources));
@@ -717,5 +727,13 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
                     + "machine");
         }
         return pythonBin;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setAbi(IAbi abi){
+        mAbi = abi;
     }
 }

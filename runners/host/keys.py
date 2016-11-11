@@ -45,6 +45,7 @@ class ConfigKeys(object):
     IKEY_USER_PARAM = "user_params"
     IKEY_TESTBED_NAME = "testbed_name"
     IKEY_LOG_PATH = "log_path"
+    IKEY_ABI_BITNESS = "abi_bitness"
 
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
