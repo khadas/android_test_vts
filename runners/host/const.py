@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from vts.utils.python.common import cmd_utils
 
-STDOUT = 0
-STDERR = 1
-EXIT_CODE = 2
+STDOUT = cmd_utils.STDOUT
+STDERR = cmd_utils.STDERR
+EXIT_CODE = cmd_utils.EXIT_CODE
 
 LIST_ITEM_DELIMITER = ','
