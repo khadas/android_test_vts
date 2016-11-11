@@ -451,14 +451,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("Executing %s", cmd)
         self.CheckResult(self.shell.Execute(cmd))
 
-    def generate32BitTests(self):
-        """Runs all 32-bit LTP test cases."""
-        if not self.run_32bit:
-            logging.info('User specified not to run 32 bit version LTP tests.')
-            return
-
-        self.TestNBits(self._32BIT)
-
     def generate64BitTests(self):
         """Runs all 64-bit LTP test cases."""
         if not self.run_64bit:
@@ -469,6 +461,14 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             return
 
         self.TestNBits(self._64BIT)
+
+    def generate32BitTests(self):
+        """Runs all 32-bit LTP test cases."""
+        if not self.run_32bit:
+            logging.info('User specified not to run 32 bit version LTP tests.')
+            return
+
+        self.TestNBits(self._32BIT)
 
 
 if __name__ == "__main__":
