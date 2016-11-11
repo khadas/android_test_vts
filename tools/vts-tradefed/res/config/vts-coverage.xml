@@ -13,8 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for Fuzzing">
+<configuration description="Run VTS Host-Driven Coverage Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
+    <option name="compatibility:include-filter" value="LightFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
