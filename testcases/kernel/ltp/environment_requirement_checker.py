@@ -137,7 +137,8 @@ class EnvironmentRequirementChecker(object):
             test_case: list of TestCase objects.
         """
         executables_generators = (test_case.GetRequiredExecutablePaths()
-                                  for test_case in test_cases)
+                                  for test_case in test_cases
+                                  if not test_case.is_filtered)
         executables = list(
             set(itertools.chain.from_iterable(executables_generators)))
 
