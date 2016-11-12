@@ -122,6 +122,8 @@ void ProfilerCodeGenBase::GenerateSourceFile(
       out << "if (strcmp(method, \"" << api.name() << "\") == 0) {\n";
       out.indent();
       GenerateProfilerForMethod(out, api);
+      out.unindent();
+      out << "}\n";
     }
 
     out.unindent();
