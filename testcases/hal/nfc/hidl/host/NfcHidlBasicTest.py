@@ -18,7 +18,6 @@
 import logging
 import time
 
-
 from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
@@ -38,8 +37,8 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.dut.shell.InvokeTerminal("one")
         self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
-        self.dut.shell.one.Execute("service call nfc 4")  # Turn off
-        self.dut.shell.one.Execute("service call nfc 5")  # Turn on
+        self.dut.shell.one.Execute("service call nfc 6")  # Turn off
+        time.sleep(2)
 
         if getattr(self, PASSTHROUGH_MODE_KEY, True):
             self.dut.shell.one.Execute(
@@ -57,7 +56,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def tearDownClass(self):
         """Turns off the framework-layer NFC service."""
-        self.dut.shell.one.Execute("service call nfc 4")
+        self.dut.shell.one.Execute("service call nfc 6")  # make sure it's off
 
     def testBase(self):
         """A simple test case which just calls each registered function."""
