@@ -141,6 +141,13 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHidlCallbackVariable(
   // TODO(zhuoyao): figure the right way to profile hidl callback type.
 }
 
+void HalHidlProfilerCodeGen::GenerateProfilerForHidlInterfaceVariable(
+  Formatter& out, const VariableSpecificationMessage&,
+  const std::string& arg_name, const std::string&) {
+  out << arg_name << "->set_type(TYPE_HIDL_INTERFACE);\n";
+  // TODO(zhuoyao): figure the right way to profile hidl interface type.
+}
+
 void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
