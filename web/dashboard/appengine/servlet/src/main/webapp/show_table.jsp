@@ -54,6 +54,9 @@
           $('#postsubmit').prop('checked', ${showPostsubmit} || false)
                           .change(verify);
           $('#refresh').click(refresh);
+          $('#help-icon').click(function() {
+              $('#help-modal').openModal()
+          });
 
           // disable buttons on load
           if (!${hasNewer}) {
@@ -77,6 +80,10 @@
           }
           if ($('#postsubmit').prop('checked')) {
               link += '&showPostsubmit=';
+          }
+          var searchString = $('#input-box').val();
+          if (searchString) {
+              link += '&search=' + encodeURIComponent(searchString);
           }
           window.open(link,'_self');
       }
@@ -276,16 +283,16 @@
     <div class='container'>
       <div class='row'>
         <div class='col s12'>
-          <div class='card s12 card'>
-            <div id='legend_wrapper'>
-              <c:forEach items='${resultNames}' var='res'>
-                <div class='center-align legend-entry'>
-                  <c:set var="trimmed" value="${fn:replace(res, 'TEST_CASE_RESULT_', '')}"/>
-                  <c:set var="nickname" value="${fn:replace(trimmed, '_', ' ')}"/>
-                  <label for='${res}'>${nickname}</label>
-                  <div id='${res}' class='${res} legend-bubble'></div>
-                </div>
-              </c:forEach>
+          <div class='card' id='filter-wrapper'>
+            <div id='search-icon-wrapper'>
+              <i class='material-icons' id='search-icon'>search</i>
+            </div>
+            <div class='input-field' id='search-wrapper'>
+              <input value='${searchString}' type='text' id='input-box'>
+              <label for='input-box'>Search for test results</label>
+            </div>
+            <div id='help-icon-wrapper'>
+              <i class='material-icons' id='help-icon'>help</i>
             </div>
             <div id='build_type_div' class='right'>
               <input type='checkbox' id='presubmit' />
@@ -299,6 +306,18 @@
           </div>
         </div>
         <div class='col s6'>
+          <div class='col s12 card center-align'>
+            <div id='legend_wrapper'>
+              <c:forEach items='${resultNames}' var='res'>
+                <div class='center-align legend-entry'>
+                  <c:set var='trimmed' value='${fn:replace(res, "TEST_CASE_RESULT_", "")}'/>
+                  <c:set var='nickname' value='${fn:replace(trimmed, "_", " ")}'/>
+                  <label for='${res}'>${nickname}</label>
+                  <div id='${res}' class='${res} legend-bubble'></div>
+                </div>
+              </c:forEach>
+            </div>
+          </div>
           <div id='profiling_container' class='col s12 card'>
             <c:choose>
               <c:when test='${not empty error}'>
@@ -323,13 +342,22 @@
       <div class='col s12'>
         <div id='chart_holder' class='col s12 card'>
           <!-- Grid tables-->
-          <div id='grid_table_div' class='center-align'></div>
+          <div id='grid_table_div'></div>
 
           <div id='buttons' class='col s12'>
             <a id='newer_button' class='btn-floating waves-effect waves-light red'><i class='material-icons'>keyboard_arrow_left</i></a>
             <a id='older_button' class='btn-floating waves-effect waves-light red right'><i class='material-icons'>keyboard_arrow_right</i></a>
           </div>
         </div>
+      </div>
+    </div>
+    <div id="help-modal" class="modal">
+      <div class="modal-content">
+        <h4>${searchHelpHeader}</h4>
+        <p>${searchHelpBody}</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect btn-flat">Close</a>
       </div>
     </div>
     <footer class='page-footer'>
