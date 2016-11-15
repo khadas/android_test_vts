@@ -57,6 +57,11 @@
           $('#help-icon').click(function() {
               $('#help-modal').openModal()
           });
+          $('#input-box').keypress(function(e) {
+              if (e.which == 13) {
+                  refresh();
+              }
+          });
 
           // disable buttons on load
           if (!${hasNewer}) {
@@ -75,11 +80,16 @@
           var link = '${pageContext.request.contextPath}' +
               '/show_table?testName=${testName}&startTime=${startTime}' +
               '&endTime=${endTime}';
-          if ($('#presubmit').prop('checked')) {
+          var presubmit = $('#presubmit').prop('checked');
+          var postsubmit = $('#postsubmit').prop('checked');
+          if (presubmit) {
               link += '&showPresubmit=';
           }
-          if ($('#postsubmit').prop('checked')) {
+          if (postsubmit) {
               link += '&showPostsubmit=';
+          }
+          if (${unfiltered} && postsubmit && presubmit) {
+              link += '&unfiltered=';
           }
           var searchString = $('#input-box').val();
           if (searchString) {
