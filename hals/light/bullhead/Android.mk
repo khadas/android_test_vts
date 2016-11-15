@@ -51,27 +51,3 @@ include test/vts/tools/build/Android.packaging_sharedlib.mk
 VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
 VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
 include test/vts/tools/build/Android.packaging_gcno.mk
-
-# Sancov-enabled target.
-# TODO(trong): enable for mips.
-ifeq (,$(findstring mips, $(TARGET_ARCH)))
-include $(CLEAR_VARS)
-LOCAL_MODULE := lights.vts.sancov
-LOCAL_MODULE_TAGS := optional
-LOCAL_SRC_FILES := lights.c
-LOCAL_MODULE_RELATIVE_PATH := hw
-LOCAL_SHARED_LIBRARIES := \
-    liblog \
-
-LOCAL_ARM_MODE := arm
-LOCAL_CFLAGS += \
-    -fno-omit-frame-pointer
-
-LOCAL_SANITIZE := address coverage
-LOCAL_MULTILIB := both
-LOCAL_COMPATIBILITY_SUITE := vts
-
-# TODO(trong): b/30713453
-##include $(BUILD_SHARED_LIBRARY)
-#include test/vts/tools/build/Android.packaging_sharedlib.mk
-endif
