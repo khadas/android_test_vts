@@ -36,11 +36,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
       <env-var name="CLIENT_ID" value="${appengine.clientID}" />
       <env-var name="GERRIT_URI" value="${gerrit.uri}" />
       <env-var name="GERRIT_SCOPE" value="${gerrit.scope}" />
+      <env-var name="ANALYTICS_ID" value="${analytics.id}" />
     </env-variables>
 
     <system-properties>
       <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-      <property name="log4j.debug" value="true" />
     </system-properties>
 
     <beta-settings>

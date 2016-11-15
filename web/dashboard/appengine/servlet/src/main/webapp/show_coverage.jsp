@@ -27,10 +27,12 @@
     <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
     <link rel="stylesheet" href="/css/navbar.css">
     <link rel="stylesheet" href="/css/show_coverage.css">
+    <script src='/js/analytics.js' type='text/javascript'></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
     <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
     <script type="text/javascript">
+        if (${analytics_id}) analytics_init(${analytics_id});
         $(document).ready(function() {
             // Initialize AJAX for CORS
             $.ajaxSetup({
