@@ -74,6 +74,7 @@ LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
   android.hardware.nfc@1.0 \
   android.hardware.vibrator@1.0 \
+  android.hardware.thermal@1.0 \
   system/core/base/include \
 
 ifeq ($(VTS_ENABLE_TREBLE), true)
@@ -92,6 +93,8 @@ LOCAL_SHARED_LIBRARIES += \
   libvts_driver_hidl_nfc@1.0 \
   android.hardware.vibrator@1.0 \
   libvts_driver_hidl_vibrator@1.0 \
+  android.hardware.thermal@1.0 \
+  libvts_driver_hidl_thermal@1.0 \
 
 endif
 
