@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-
 #include <FuzzerInterface.h>
 #include <android/hardware/light/2.0/ILight.h>
 
 using ::android::hardware::light::V2_0::ILight;
 using ::android::hardware::light::V2_0::LightState;
-using ::android::hardware::light::V2_0::Status;
 using ::android::hardware::light::V2_0::Type;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
@@ -36,8 +33,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   memcpy(&type, data, sizeof(Type));
 
   LightState light_state;
-
   size_t copy_amount = std::min(sizeof(LightState), size - sizeof(Type));
+  data += sizeof(Type);
   memcpy(&light_state, data, copy_amount);
 
   light_hal->setLight(type, light_state);
