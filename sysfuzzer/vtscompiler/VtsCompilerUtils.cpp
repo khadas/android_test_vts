@@ -167,6 +167,9 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       }
       return "::android::hardware::hidl_vec<"
           + arg.vector_value(0).scalar_type() + ">";
+    } else if (arg.vector_value(0).type() == TYPE_ENUM) {
+      return "::android::hardware::hidl_vec<"
+          + arg.vector_value(0).predefined_type() + ">";
     } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
       if (arg.vector_value(0).struct_type().length() > 0) {
         return "::android::hardware::hidl_vec<"
