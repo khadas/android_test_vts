@@ -6720,6 +6720,51 @@ public final class VtsReportMessage {
      * <code>optional int64 end_timestamp = 102;</code>
      */
     long getEndTimestamp();
+
+    // repeated .android.vts.CoverageReportMessage coverage = 103;
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage> 
+        getCoverageList();
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index);
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    int getCoverageCount();
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    java.util.List<? extends com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
+        getCoverageOrBuilderList();
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code android.vts.TestReportMessage}
@@ -6852,6 +6897,14 @@ public final class VtsReportMessage {
               endTimestamp_ = input.readInt64();
               break;
             }
+            case 826: {
+              if (!((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+                coverage_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.CoverageReportMessage>();
+                mutable_bitField0_ |= 0x00000400;
+              }
+              coverage_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.CoverageReportMessage.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -6871,6 +6924,9 @@ public final class VtsReportMessage {
         }
         if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           profiling_ = java.util.Collections.unmodifiableList(profiling_);
+        }
+        if (((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+          coverage_ = java.util.Collections.unmodifiableList(coverage_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -7253,6 +7309,62 @@ public final class VtsReportMessage {
       return endTimestamp_;
     }
 
+    // repeated .android.vts.CoverageReportMessage coverage = 103;
+    public static final int COVERAGE_FIELD_NUMBER = 103;
+    private java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage> coverage_;
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    public java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage> getCoverageList() {
+      return coverage_;
+    }
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    public java.util.List<? extends com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
+        getCoverageOrBuilderList() {
+      return coverage_;
+    }
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    public int getCoverageCount() {
+      return coverage_.size();
+    }
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index) {
+      return coverage_.get(index);
+    }
+    /**
+     * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+     *
+     * <pre>
+     * coverage report per file
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
+        int index) {
+      return coverage_.get(index);
+    }
+
     private void initFields() {
       testSuite_ = com.google.protobuf.ByteString.EMPTY;
       test_ = com.google.protobuf.ByteString.EMPTY;
@@ -7264,6 +7376,7 @@ public final class VtsReportMessage {
       profiling_ = java.util.Collections.emptyList();
       startTimestamp_ = 0L;
       endTimestamp_ = 0L;
+      coverage_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -7306,6 +7419,9 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeInt64(102, endTimestamp_);
+      }
+      for (int i = 0; i < coverage_.size(); i++) {
+        output.writeMessage(103, coverage_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -7360,6 +7476,10 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(102, endTimestamp_);
+      }
+      for (int i = 0; i < coverage_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(103, coverage_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -7477,6 +7597,7 @@ public final class VtsReportMessage {
           getBuildInfoFieldBuilder();
           getTestCaseFieldBuilder();
           getProfilingFieldBuilder();
+          getCoverageFieldBuilder();
         }
       }
       private static Builder create() {
@@ -7521,6 +7642,12 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000100);
         endTimestamp_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000200);
+        if (coverageBuilder_ == null) {
+          coverage_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+        } else {
+          coverageBuilder_.clear();
+        }
         return this;
       }
 
@@ -7609,6 +7736,15 @@ public final class VtsReportMessage {
           to_bitField0_ |= 0x00000020;
         }
         result.endTimestamp_ = endTimestamp_;
+        if (coverageBuilder_ == null) {
+          if (((bitField0_ & 0x00000400) == 0x00000400)) {
+            coverage_ = java.util.Collections.unmodifiableList(coverage_);
+            bitField0_ = (bitField0_ & ~0x00000400);
+          }
+          result.coverage_ = coverage_;
+        } else {
+          result.coverage_ = coverageBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -7730,6 +7866,32 @@ public final class VtsReportMessage {
         }
         if (other.hasEndTimestamp()) {
           setEndTimestamp(other.getEndTimestamp());
+        }
+        if (coverageBuilder_ == null) {
+          if (!other.coverage_.isEmpty()) {
+            if (coverage_.isEmpty()) {
+              coverage_ = other.coverage_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+            } else {
+              ensureCoverageIsMutable();
+              coverage_.addAll(other.coverage_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.coverage_.isEmpty()) {
+            if (coverageBuilder_.isEmpty()) {
+              coverageBuilder_.dispose();
+              coverageBuilder_ = null;
+              coverage_ = other.coverage_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+              coverageBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getCoverageFieldBuilder() : null;
+            } else {
+              coverageBuilder_.addAllMessages(other.coverage_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -9185,6 +9347,318 @@ public final class VtsReportMessage {
         return this;
       }
 
+      // repeated .android.vts.CoverageReportMessage coverage = 103;
+      private java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage> coverage_ =
+        java.util.Collections.emptyList();
+      private void ensureCoverageIsMutable() {
+        if (!((bitField0_ & 0x00000400) == 0x00000400)) {
+          coverage_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.CoverageReportMessage>(coverage_);
+          bitField0_ |= 0x00000400;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.CoverageReportMessage, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder, com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> coverageBuilder_;
+
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage> getCoverageList() {
+        if (coverageBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(coverage_);
+        } else {
+          return coverageBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public int getCoverageCount() {
+        if (coverageBuilder_ == null) {
+          return coverage_.size();
+        } else {
+          return coverageBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index) {
+        if (coverageBuilder_ == null) {
+          return coverage_.get(index);
+        } else {
+          return coverageBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder setCoverage(
+          int index, com.android.vts.proto.VtsReportMessage.CoverageReportMessage value) {
+        if (coverageBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoverageIsMutable();
+          coverage_.set(index, value);
+          onChanged();
+        } else {
+          coverageBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder setCoverage(
+          int index, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder builderForValue) {
+        if (coverageBuilder_ == null) {
+          ensureCoverageIsMutable();
+          coverage_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          coverageBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder addCoverage(com.android.vts.proto.VtsReportMessage.CoverageReportMessage value) {
+        if (coverageBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoverageIsMutable();
+          coverage_.add(value);
+          onChanged();
+        } else {
+          coverageBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder addCoverage(
+          int index, com.android.vts.proto.VtsReportMessage.CoverageReportMessage value) {
+        if (coverageBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureCoverageIsMutable();
+          coverage_.add(index, value);
+          onChanged();
+        } else {
+          coverageBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder addCoverage(
+          com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder builderForValue) {
+        if (coverageBuilder_ == null) {
+          ensureCoverageIsMutable();
+          coverage_.add(builderForValue.build());
+          onChanged();
+        } else {
+          coverageBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder addCoverage(
+          int index, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder builderForValue) {
+        if (coverageBuilder_ == null) {
+          ensureCoverageIsMutable();
+          coverage_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          coverageBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder addAllCoverage(
+          java.lang.Iterable<? extends com.android.vts.proto.VtsReportMessage.CoverageReportMessage> values) {
+        if (coverageBuilder_ == null) {
+          ensureCoverageIsMutable();
+          super.addAll(values, coverage_);
+          onChanged();
+        } else {
+          coverageBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder clearCoverage() {
+        if (coverageBuilder_ == null) {
+          coverage_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+          onChanged();
+        } else {
+          coverageBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public Builder removeCoverage(int index) {
+        if (coverageBuilder_ == null) {
+          ensureCoverageIsMutable();
+          coverage_.remove(index);
+          onChanged();
+        } else {
+          coverageBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder getCoverageBuilder(
+          int index) {
+        return getCoverageFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
+          int index) {
+        if (coverageBuilder_ == null) {
+          return coverage_.get(index);  } else {
+          return coverageBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public java.util.List<? extends com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
+           getCoverageOrBuilderList() {
+        if (coverageBuilder_ != null) {
+          return coverageBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(coverage_);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder addCoverageBuilder() {
+        return getCoverageFieldBuilder().addBuilder(
+            com.android.vts.proto.VtsReportMessage.CoverageReportMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder addCoverageBuilder(
+          int index) {
+        return getCoverageFieldBuilder().addBuilder(
+            index, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.CoverageReportMessage coverage = 103;</code>
+       *
+       * <pre>
+       * coverage report per file
+       * </pre>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder> 
+           getCoverageBuilderList() {
+        return getCoverageFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.CoverageReportMessage, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder, com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
+          getCoverageFieldBuilder() {
+        if (coverageBuilder_ == null) {
+          coverageBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.android.vts.proto.VtsReportMessage.CoverageReportMessage, com.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder, com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder>(
+                  coverage_,
+                  ((bitField0_ & 0x00000400) == 0x00000400),
+                  getParentForChildren(),
+                  isClean());
+          coverage_ = null;
+        }
+        return coverageBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:android.vts.TestReportMessage)
     }
 
@@ -9259,7 +9733,7 @@ public final class VtsReportMessage {
       "\027 \003(\005\022\030\n\020total_line_count\030e \001(\005\022\032\n\022cover" +
       "ed_line_count\030f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030" +
       "\001\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002" +
-      "\030\001\"\212\003\n\021TestReportMessage\022\022\n\ntest_suite\030\001" +
+      "\030\001\"\300\003\n\021TestReportMessage\022\022\n\ntest_suite\030\001" +
       " \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030." +
       "android.vts.VtsTestType\022:\n\013device_info\030\004" +
       " \003(\0132%.android.vts.AndroidDeviceInfoMess" +
@@ -9268,20 +9742,22 @@ public final class VtsReportMessage {
       "\0225\n\ttest_case\030\013 \003(\0132\".android.vts.TestCa" +
       "seReportMessage\0226\n\tprofiling\030\025 \003(\0132#.and" +
       "roid.vts.ProfilingReportMessage\022\027\n\017start" +
-      "_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003*" +
-      "\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031" +
-      "\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE_R" +
-      "ESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022" +
-      "\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TEST_" +
-      "CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n" +
-      "\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIV",
-      "EN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZI" +
-      "NG\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_T" +
-      "ARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingType" +
-      "\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VTS_" +
-      "PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROFIL" +
-      "ING_TYPE_LABELED_VECTOR\020\002B)\n\025com.android" +
-      ".vts.protoB\020VtsReportMessage"
+      "_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\022" +
+      "4\n\010coverage\030g \003(\0132\".android.vts.Coverage" +
+      "ReportMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKN" +
+      "OWN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022" +
+      "\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_" +
+      "RESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPT" +
+      "ION\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013",
+      "VtsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n" +
+      "\032VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOS" +
+      "T_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GT" +
+      "EST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020Vt" +
+      "sProfilingType\022\036\n\032UNKNOWN_VTS_PROFILING_" +
+      "TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001" +
+      "\022%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020\002B" +
+      ")\n\025com.android.vts.protoB\020VtsReportMessa" +
+      "ge"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9323,7 +9799,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestReportMessage_descriptor,
-              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "TestCase", "Profiling", "StartTimestamp", "EndTimestamp", });
+              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "TestCase", "Profiling", "StartTimestamp", "EndTimestamp", "Coverage", });
           return null;
         }
       };
