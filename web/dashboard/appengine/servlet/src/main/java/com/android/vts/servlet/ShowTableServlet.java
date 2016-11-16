@@ -444,6 +444,10 @@ public class ShowTableServlet extends BaseServlet {
             int nonpassCount = 0;
             TestCaseResult aggregateStatus = TestCaseResult.UNKNOWN_RESULT;
             long totalLineCount = 0, coveredLineCount = 0;
+            for (CoverageReportMessage coverageReport : report.getCoverageList()) {
+                totalLineCount += coverageReport.getTotalLineCount();
+                coveredLineCount += coverageReport.getCoveredLineCount();
+            }
             for (TestCaseReportMessage testCaseReport : report.getTestCaseList()) {
                 if (testCaseReport.getTestResult() ==
                     TestCaseResult.TEST_CASE_RESULT_PASS) {
