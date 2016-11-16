@@ -80,6 +80,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_SOURCES = "binary_test_sources";
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
     static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
+    static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
@@ -178,6 +179,13 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             + "later automatically be combined using ':' as delimiter. Paths without a tag "
             + "will only used for binaries without tag. This option is optional for binary tests.")
     private Collection<String> mBinaryTestLdLibraryPaths = new ArrayList<>();
+
+    @Option(name = "binary-test-profiling-library-paths", description = "Path to lookup and load "
+            + "profiling libraries for tests with profiling enabled. Tags can be added to the "
+            + "front of each directory using '::' as delimiter. Only one directory could be "
+            + "specified for the same tag. This option is optional for binary tests. If not "
+            + "specified, default directories will be used for files with different tags.")
+    private Collection<String> mBinaryTestProfilingLibraryPaths = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -504,6 +512,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     new JSONArray(mBinaryTestLdLibraryPaths));
             CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHS);
         }
+        if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
+          jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
+                  new JSONArray(mBinaryTestProfilingLibraryPaths));
+          CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
+      }
     }
 
     /**

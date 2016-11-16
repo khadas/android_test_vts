@@ -55,6 +55,8 @@ class GtestBinaryTest(binary_test.BinaryTest):
             tag] if tag in self.working_directories else None
         ld_library_path = self.ld_library_paths[
             tag] if tag in self.ld_library_paths else None
+        profiling_library_path = self.profiling_library_paths[
+            tag] if tag in self.ld_library_paths else None
 
         list_test_case = binary_test_case.BinaryTestCase(
             'gtest_list_tests',
@@ -64,12 +66,12 @@ class GtestBinaryTest(binary_test.BinaryTest):
             self.PutTag,
             working_directory,
             ld_library_path,
+            profiling_library_path,
             args="--gtest_list_tests")
         cmd = ['chmod 755 %s' % path, list_test_case.GetRunCommand()]
         cmd_results = self.shell.Execute(cmd)
-        if any(cmd_results[
-                const.
-                EXIT_CODE]):  # gtest binary doesn't exist or is corrupted
+        if any(cmd_results[const.EXIT_CODE]
+               ):  # gtest binary doesn't exist or is corrupted
             logging.error('Failed to list test cases from binary %s' % path)
 
         test_cases = []
@@ -83,7 +85,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 test_name = line.strip()
                 test_case = gtest_test_case.GtestTestCase(
                     test_suite, test_name, path, tag, self.PutTag,
-                    working_directory, ld_library_path)
+                    working_directory, ld_library_path, profiling_library_path)
                 logging.info('Gtest test case: %s' % test_case)
                 test_cases.append(test_case)
             else:  # Test suite name

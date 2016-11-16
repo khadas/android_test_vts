@@ -26,6 +26,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
+from vts.utils.python.profiling import profiling_utils
 
 from vts.testcases.template.binary_test import binary_test_case
 
@@ -45,6 +46,12 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
     DEVICE_TMP_DIR = '/data/local/tmp'
     TAG_DELIMITER = '::'
     PUSH_DELIMITER = '->'
+    DEFAULT_TAG_32 = '_32bit'
+    DEFAULT_TAG_64 = '_64bit'
+    DEFAULT_LD_LIBRARY_PATH_32 = '/data/local/tmp/32/'
+    DEFAULT_LD_LIBRARY_PATH_64 = '/data/local/tmp/64/'
+    DEFAULT_PROFILING_LIBRARY_PATH_32 = '/data/local/tmp/32/hw/'
+    DEFAULT_PROFILING_LIBRARY_PATH_64 = '/data/local/tmp/64/hw/'
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
@@ -52,8 +59,11 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
         ]
-        opt_params = [keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES,
-                      keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS]
+        opt_params = [
+            keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES,
+            keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS,
+            keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS,
+        ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
 
@@ -82,7 +92,10 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                     tag, path = token.split(self.TAG_DELIMITER)
                 self.working_directories[tag] = path
 
-        self.ld_library_paths = {}
+        self.ld_library_paths = {
+            self.DEFAULT_TAG_32: self.DEFAULT_LD_LIBRARY_PATH_32,
+            self.DEFAULT_TAG_64: self.DEFAULT_LD_LIBRARY_PATH_64,
+        }
         if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS):
             self.binary_test_ld_library_paths = list_utils.ExpandItemDelimiters(
                 self.binary_test_ld_library_paths,
@@ -96,9 +109,27 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                     tag, path = token.split(self.TAG_DELIMITER)
                 if tag in self.ld_library_paths:
                     self.ld_library_paths[tag] = '{}:{}'.format(
-                        self.ld_library_paths[tag], path)
+                        path, self.ld_library_paths[tag])
                 else:
                     self.ld_library_paths[tag] = path
+
+        self.profiling_library_paths = {
+            self.DEFAULT_TAG_32: self.DEFAULT_PROFILING_LIBRARY_PATH_32,
+            self.DEFAULT_TAG_64: self.DEFAULT_PROFILING_LIBRARY_PATH_64,
+        }
+        if hasattr(self,
+                   keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS):
+            self.binary_test_profiling_library_paths = list_utils.ExpandItemDelimiters(
+                self.binary_test_profiling_library_paths,
+                const.LIST_ITEM_DELIMITER,
+                strip=True,
+                to_str=True)
+            for token in self.binary_test_profiling_library_paths:
+                tag = ''
+                path = token
+                if self.TAG_DELIMITER in token:
+                    tag, path = token.split(self.TAG_DELIMITER)
+                self.profiling_library_paths[tag] = path
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
@@ -266,9 +297,13 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             tag] if tag in self.working_directories else None
         ld_library_path = self.ld_library_paths[
             tag] if tag in self.ld_library_paths else None
+        profiling_library_path = self.profiling_library_paths[
+            tag] if tag in self.profiling_library_paths else None
+
         return binary_test_case.BinaryTestCase(
-            '', ntpath.basename(path), path, tag, self.PutTag,
-            working_directory, ld_library_path)
+            '',
+            ntpath.basename(path), path, tag, self.PutTag, working_directory,
+            ld_library_path, profiling_library_path)
 
     def VerifyTestResult(self, test_case, command_results):
         '''Parse command result.
@@ -288,11 +323,21 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Args:
             test_case: BinaryTestCase object
         '''
+        if getattr(self, self.ENABLE_PROFILING, False):
+            profiling_utils.EnableVTSProfiling(
+                self.shell, test_case.profiling_library_path)
+
         cmd = test_case.GetRunCommand()
         logging.info("Executing binary test command: %s", cmd)
         command_results = self.shell.Execute(cmd)
 
         self.VerifyTestResult(test_case, command_results)
+
+        if getattr(self, self.ENABLE_PROFILING, False):
+            profiling_trace_path = getattr(self,
+                                           self.VTS_PROFILING_TRACING_PATH, "")
+            self.ProcessAndUploadTraceData(self._dut, profiling_trace_path)
+            profiling_utils.DisableVTSProfiling(self.shell)
 
     def generateAllTests(self):
         '''Runs all binary tests.'''
