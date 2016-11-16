@@ -208,7 +208,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """Returns the caller's function name."""
         return traceback.extract_stack(None, 2)[0][2]
 
-    def _setUpTest(self, test_name):
+    def _testEntry(self, test_name):
         """Proxy function to guarantee the base implementation of setUpTest is
         called.
         """
@@ -216,9 +216,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._current_test_report_msg = self._report_msg.test_case.add()
             self._current_test_report_msg.name = test_name
             self._current_test_report_msg.start_timestamp = self.GetTimestamp()
-        return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
+        return super(BaseTestWithWebDbClass, self)._testEntry(test_name)
 
-    def _tearDownTest(self, test_name):
+    def _testExit(self, test_name):
         """Proxy function to guarantee the base implementation of tearDownTest
         is called.
         """
@@ -232,7 +232,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     self.ProcessCoverageData()
             else:
                 logging.info("coverage - no coverage src file specified")
-        return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
+        return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
     def _onFail(self, record):
         """Proxy function to guarantee the base implementation of onFail is

@@ -209,11 +209,14 @@ class BaseTestClass(object):
         """
         pass
 
+    def _testEntry(self, test_name):
+        """Internal function to be called upon entry of a test."""
+        self.currentTestName = test_name
+
     def _setUpTest(self, test_name):
         """Proxy function to guarantee the base implementation of setUpTest is
         called.
         """
-        self.currentTestName = test_name
         return self.setUpTest()
 
     def setUpTest(self):
@@ -227,14 +230,15 @@ class BaseTestClass(object):
         Implementation is optional.
         """
 
+    def _testExit(self, test_name):
+        """Internal function to be called upon exit of a test."""
+        self.currentTestName = None
+
     def _tearDownTest(self, test_name):
         """Proxy function to guarantee the base implementation of tearDownTest
         is called.
         """
-        try:
-            self.tearDownTest()
-        finally:
-            self.currentTestName = None
+        self.tearDownTest()
 
     def tearDownTest(self):
         """Teardown function that will be called every time a test case has
@@ -430,12 +434,15 @@ class BaseTestClass(object):
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
         try:
-            self.filterOneTest(test_name)
-
-            ret = self._setUpTest(test_name)
+            ret = self._testEntry(test_name)
             asserts.assertTrue(ret is not False,
-                               "Setup for %s failed." % test_name)
+                               "Setup test entry for %s failed." % test_name)
+            self.filterOneTest(test_name)
             try:
+                ret = self._setUpTest(test_name)
+                asserts.assertTrue(ret is not False,
+                                   "Setup for %s failed." % test_name)
+
                 if args or kwargs:
                     verdict = test_func(*args, **kwargs)
                 else:
@@ -480,6 +487,7 @@ class BaseTestClass(object):
             tr_record.testFail()
             self._exec_procedure_func(self._onFail, tr_record)
         finally:
+            self._testExit(test_name)
             if not is_silenced:
                 self.results.addRecord(tr_record)
 
