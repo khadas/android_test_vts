@@ -23,6 +23,7 @@ from vts.utils.python.archive import archive_parser
 from vts.utils.python.coverage import coverage_report
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
+from vts.utils.python.coverage.parser import FileFormatError
 
 TARGET_COVERAGE_PATH = "/data/local/tmp/"
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"
@@ -112,7 +113,11 @@ def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
             file_name = os.path.basename(file_name_path)
             gcno_content = archive.files[gcno_file_path]
             gcno_stream = io.BytesIO(gcno_content)
-            gcno_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
+            try:
+                gcno_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
+            except FileFormatError:
+                logging.error("Error parsing gcno file %s", gcno_file_path)
+                continue
             src_file_path = None
 
             # Match gcno file with gcda file
@@ -144,7 +149,11 @@ def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
 
             # Process and merge gcno/gcda data
             gcda_stream = io.BytesIO(gcda_content)
-            gcda_parser.GCDAParser(gcda_stream, gcno_summary).Parse()
+            try:
+                gcda_parser.GCDAParser(gcda_stream, gcno_summary).Parse()
+            except FileFormatError:
+                logging.error("Error parsing gcda file %s", gcda_content)
+                continue
             coverage_vec = coverage_report.GenerateLineCoverageVector(
                 src_file_path, gcno_summary)
             coverage = report_msg.coverage.add()

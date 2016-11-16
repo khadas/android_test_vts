@@ -98,6 +98,8 @@ class GCNOParser(parser.GcovStreamParserUtil):
                         break
                 length = self.ReadInt()
             except parser.FileFormatError:
+                if not func:
+                    raise parser.FileFormatError("Invalid file.")
                 self.file_summary.functions[func.ident] = func
                 return self.file_summary  #  end of file reached
 
