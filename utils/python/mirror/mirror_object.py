@@ -46,6 +46,8 @@ class MirrorObject(object):
                       mirror.
         _callback_server: the instance of a callback server.
         _parent_path: the name of a sub struct this object mirrors.
+        _last_raw_code_coverage_data: NativeCodeCoverageRawDataMessage,
+                                      last seen raw code coverage data.
     """
 
     def __init__(self, client, msg, callback_server, parent_path=None):
@@ -53,6 +55,7 @@ class MirrorObject(object):
         self._if_spec_msg = msg
         self._callback_server = callback_server
         self._parent_path = parent_path
+        self._last_raw_code_coverage_data = None
 
     def GetFunctionPointerID(self, function_pointer):
         """Returns the function pointer ID for the given one."""
@@ -443,6 +446,11 @@ class MirrorObject(object):
                         func_msg.submodule_name = submodule_name
             result = self._client.CallApi(text_format.MessageToString(func_msg))
             logging.debug(result)
+            if (isinstance(result, tuple) and len(result) == 2 and
+                isinstance(result[1], dict) and "coverage" in result[1]):
+                self._last_raw_code_coverage_data = copy.copy(
+                    result[1]["coverage"])
+                return result[0]
             return result
 
         def MessageGenerator(*args, **kwargs):
@@ -585,3 +593,7 @@ class MirrorObject(object):
             logging.debug("const %s *\n%s", api_name, arg_msg)
             return ConstGenerator()
         raise MirrorObjectError("unknown api name %s" % api_name)
+
+    def GetRawCodeCoverage(self):
+      """Returns any measured raw code coverage data."""
+      return self._last_raw_code_coverage_data

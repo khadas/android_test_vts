@@ -261,9 +261,13 @@ FuzzerBase::FuzzerBase(int target_class)
 
 FuzzerBase::~FuzzerBase() { free(component_filename_); }
 
-void wfn() { cout << "wfn" << endl; }
+void wfn() {
+  cout << __func__ << endl;
+}
 
-void ffn() { cout << "ffn" << endl; }
+void ffn() {
+  cout << __func__ << endl;
+}
 
 bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   cout << __func__ << ":" << __LINE__ << " entry" << endl;
@@ -291,10 +295,11 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
 #if SANCOV
   cout << __FUNCTION__ << "sancov reset "
        << target_loader_.SancovResetCoverage() << endl;
-  ;
 #endif
 
   if (target_dll_path_) {
+    cout << __func__ << ":" << __LINE__ << " target DLL path "
+         << target_dll_path_ << endl;
     string target_path(target_dll_path_);
 
     size_t offset = target_path.rfind("/", target_path.length());
@@ -463,25 +468,89 @@ void FuzzerBase::FunctionCallBegin() {
   cout << __func__ << ":" << __LINE__ << " end" << endl;
 }
 
-bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
-  cout << __FUNCTION__ << ": gcov flush " << endl;
-  cout << __func__ << endl;
-#if USE_GCOV
-  target_loader_.GcovFlush();
-  // find the file.
-  if (!gcov_output_basepath_) {
-    cerr << __FUNCTION__ << ": no gcov basepath set" << endl;
-    return false;
+const string default_gcov_output_basepath = "/data/local/tmp";
+
+bool FuzzerBase::ReadGcdaFile(
+    const string& basepath, const string& filename,
+    FunctionSpecificationMessage* msg) {
+#if VTS_GCOV_DEBUG
+      cout << __func__ << ":" << __LINE__
+           << " file = " << dent->d_name << endl;
+#endif
+  if (string(filename).rfind(".gcda") != string::npos) {
+    string buffer = basepath + "/" + filename;
+    vector<unsigned>* processed_data = android::vts::parse_gcda_file(
+        buffer.c_str());
+    for (const auto& data : *processed_data) {
+      msg->mutable_processed_coverage_data()->Add(data);
+    }
+
+    FILE* gcda_file = fopen(buffer.c_str(), "rb");
+    if (!gcda_file) {
+      cerr << __func__ << ":" << __LINE__
+           << " Unable to open a gcda file. " << buffer << endl;
+    } else {
+      cout << __func__ << ":" << __LINE__
+           << " Opened a gcda file. " << buffer << endl;
+      fseek(gcda_file, 0, SEEK_END);
+      long gcda_file_size = ftell(gcda_file);
+#if VTS_GCOV_DEBUG
+      cout << __func__ << ":" << __LINE__
+           << " File size " << gcda_file_size << " bytes" << endl;
+#endif
+      fseek(gcda_file, 0, SEEK_SET);
+
+      char* gcda_file_buffer = (char*)malloc(gcda_file_size + 1);
+      if (!gcda_file_buffer) {
+        cerr << __func__ << ":" << __LINE__
+             << "Unable to allocate memory to read a gcda file. " << endl;
+      } else {
+        if (fread(gcda_file_buffer, gcda_file_size, 1, gcda_file) != 1) {
+          cerr << __func__ << ":" << __LINE__
+               << "File read error" << endl;
+        } else {
+#if VTS_GCOV_DEBUG
+          cout << __func__ << ":" << __LINE__
+               << " GCDA field populated." << endl;
+#endif
+          gcda_file_buffer[gcda_file_size] = '\0';
+          NativeCodeCoverageRawDataMessage* raw_msg =
+              msg->mutable_raw_coverage_data()->Add();
+          raw_msg->set_file_path(filename.c_str());
+          string gcda_file_buffer_string(gcda_file_buffer, gcda_file_size);
+          raw_msg->set_gcda(gcda_file_buffer_string);
+          free(gcda_file_buffer);
+        }
+      }
+      fclose(gcda_file);
+    }
+#if USE_GCOV_DEBUG
+    if (result) {
+      for (unsigned int index = 0; index < result->size(); index++) {
+        cout << result->at(index) << endl;
+      }
+    }
+#endif
+    return true;
   }
-  DIR* srcdir = opendir(gcov_output_basepath_);
+  return false;
+}
+
+bool FuzzerBase::ScanAllGcdaFiles(
+    const string& basepath, FunctionSpecificationMessage* msg) {
+  DIR* srcdir = opendir(basepath.c_str());
   if (!srcdir) {
-    cerr << __func__ << " couln't open " << gcov_output_basepath_ << endl;
+    cerr << __func__ << ":" << __LINE__
+         << " couln't open " << basepath << endl;
     return false;
   }
 
   struct dirent* dent;
-  FILE* gcda_file;
   while ((dent = readdir(srcdir)) != NULL) {
+#if VTS_GCOV_DEBUG
+    cout << __func__ << ":" << __LINE__
+         << " readdir(" << basepath << ") for " << dent->d_name << endl;
+#endif
     struct stat st;
     if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
       continue;
@@ -490,64 +559,54 @@ bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
       cerr << "error " << dent->d_name << endl;
       continue;
     }
-    if (!S_ISDIR(st.st_mode)) {
-      cout << dent->d_name << endl;
-      if (string(dent->d_name).rfind(".gcda") != string::npos) {
-        char* buffer;
-        buffer = (char*)malloc(strlen(gcov_output_basepath_) +
-                               strlen(dent->d_name) + 2);
-        if (!buffer) {
-          cerr << __FUNCTION__ << ": OOM" << endl;
-          closedir(srcdir);
-          return false;
-        }
-        sprintf(buffer, "%s/%s", gcov_output_basepath_, dent->d_name);
-
-        vector<unsigned>* processed_data = android::vts::parse_gcda_file(buffer);
-        for (const auto& data : *processed_data) {
-          msg->mutable_processed_coverage_data()->Add(data);
-        }
-
-        gcda_file = fopen(buffer, "rb");
-        if (!gcda_file) {
-          cerr << "Unable to open a gcda file. " << buffer << endl;
-        } else {
-          cout << "Opened a gcda file. " << buffer << endl;
-          fseek(gcda_file, 0, SEEK_END);
-          long gcda_file_size = ftell(gcda_file);
-          cout << "File size " << gcda_file_size << " bytes" << endl;
-          fseek(gcda_file, 0, SEEK_SET);
-
-          char* gcda_file_buffer = (char*)malloc(gcda_file_size + 1);
-          if (!gcda_file_buffer) {
-            cerr << "Unable to allocate memory to read a gcda file. " << endl;
-          } else {
-            if (fread(gcda_file_buffer, gcda_file_size, 1, gcda_file) != 1) {
-              cerr << "File read error" << endl;
-            } else {
-              gcda_file_buffer[gcda_file_size] = '\0';
-              NativeCodeCoverageRawDataMessage* raw_msg =
-                  msg->mutable_raw_coverage_data()->Add();
-              raw_msg->set_file_path(dent->d_name);
-              string gcda_file_buffer_string(gcda_file_buffer, gcda_file_size);
-              raw_msg->set_gcda(gcda_file_buffer_string);
-              free(gcda_file_buffer);
-            }
-          }
-          fclose(gcda_file);
-        }
-#if USE_GCOV_DEBUG
-        if (result) {
-          for (unsigned int index = 0; index < result->size(); index++) {
-            cout << result->at(index) << endl;
-          }
-        }
-#endif
-        free(buffer);
-        break;
-      }
+    if (S_ISDIR(st.st_mode)) {
+      ScanAllGcdaFiles(basepath + "/" + dent->d_name, msg);
+    } else {
+      ReadGcdaFile(basepath, dent->d_name, msg);
     }
   }
+#if VTS_GCOV_DEBUG
+  cout << __func__ << ":" << __LINE__
+       << " closedir(" << srcdir << ")" << endl;
+#endif
+  closedir(srcdir);
+  return true;
+}
+
+bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
+  cout << __func__ << ": gcov flush " << endl;
+#if USE_GCOV
+  target_loader_.GcovFlush();
+  // find the file.
+  if (!gcov_output_basepath_) {
+    cerr << __FUNCTION__ << ": no gcov basepath set" << endl;
+    return ScanAllGcdaFiles(default_gcov_output_basepath, msg);
+  }
+  DIR* srcdir = opendir(gcov_output_basepath_);
+  if (!srcdir) {
+    cerr << __func__ << " couln't open " << gcov_output_basepath_ << endl;
+    return false;
+  }
+
+  struct dirent* dent;
+  while ((dent = readdir(srcdir)) != NULL) {
+    cout << __func__ << ": readdir(" << srcdir << ") for " << dent->d_name
+         << endl;
+
+    struct stat st;
+    if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+      continue;
+    }
+    if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
+      cerr << "error " << dent->d_name << endl;
+      continue;
+    }
+    if (!S_ISDIR(st.st_mode)
+        && ReadGcdaFile(gcov_output_basepath_, dent->d_name, msg)) {
+      break;
+    }
+  }
+  cout << __func__ << ": closedir(" << srcdir << ")" << endl;
   closedir(srcdir);
 #endif
   return true;
