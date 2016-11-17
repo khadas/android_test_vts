@@ -29,5 +29,6 @@
             hal_fuzz/ISensorsPoll_fuzzer
             "/>
         <option name="binary-test-type" value="llvmfuzzer" />
+        <option name="test-config-path" value="vts-config/testcases/hal/sensors/fuzz/ISensorsFuzzTest.config" />
     </test>
 </configuration>

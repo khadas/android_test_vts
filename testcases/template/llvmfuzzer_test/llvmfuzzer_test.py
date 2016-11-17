@@ -35,13 +35,13 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         _dut: AndroidDevice, the device under test as config
         _shell: ShellMirrorObject, shell mirror
         _testcases: string list, list of testcases to run
-        _test_flags: string, flags that will be passed to fuzzer
     """
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES
+            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
+            config.ConfigKeys.FUZZER_CONFIGS
         ]
         self.getUserParams(required_params)
 
@@ -55,11 +55,12 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self.data_file_path)
         logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
             self._testcases)
+        logging.info("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
+            self.fuzzer_configs)
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
-        self._test_flags = " ".join(["-%s=%s" % (k, v) for k, v in config.FUZZER_PARAMS.items()])
         self._shell.Execute("mkdir %s -p" % config.FUZZER_TEST_DIR)
 
     def tearDownClass(self):
@@ -76,6 +77,46 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.adb.push("%s %s" % (push_src, config.FUZZER_TEST_DIR))
         logging.info("Adb pushed: %s", testcase)
 
+    def CreateFuzzerFlags(self, fuzzer_config):
+        """Creates flags for the fuzzer executable.
+
+        Args:
+            fuzzer_config: dict, contains configuration for the fuzzer.
+
+        Returns:
+            string, of form "-<flag0>=<val0> -<flag1>=<val1> ... "
+        """
+        fuzzer_params = config.FUZZER_PARAMS.copy()
+        fuzzer_params.update(fuzzer_config.get("fuzzer_params", {}))
+
+        test_flags = " ".join(
+            ["-%s=%s" % (k, v) for k, v in fuzzer_params.items()])
+        return test_flags
+
+    def CreateCorpus(self, fuzzer, fuzzer_config):
+        """Creates a corpus directory on target.
+
+        Args:
+            fuzzer: string, name of the fuzzer executable.
+            fuzzer_config: dict, contains configuration for the fuzzer.
+
+        Returns:
+            string, path to corpus directory on the target.
+        """
+        corpus = fuzzer_config.get("corpus", [])
+        corpus_dir = os.path.join(config.FUZZER_TEST_DIR, "%s_corpus" % fuzzer)
+
+        self._shell.Execute("mkdir %s -p" % corpus_dir)
+        for idx, corpus_entry in enumerate(corpus):
+            corpus_entry = corpus_entry.replace("x", "\\x")
+            corpus_entry_file = os.path.join(corpus_dir, "input%s" % idx)
+            cmd = "echo -ne '%s' > %s" % (str(corpus_entry), corpus_entry_file)
+            # Vts shell drive doesn't play nicely with escape characters,
+            # so we use adb shell.
+            self._dut.adb.shell("\"%s\"" % cmd)
+
+        return corpus_dir
+
     def RunTestcase(self, testcase):
         """Runs the given testcase and asserts the result.
 
@@ -85,6 +126,10 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.PushFiles(testcase)
         fuzzer = testcase.split("/")[-1]
 
+        fuzzer_config = self.fuzzer_configs.get(fuzzer, {})
+        test_flags = self.CreateFuzzerFlags(fuzzer_config)
+        corpus_dir = self.CreateCorpus(fuzzer, fuzzer_config)
+
         chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, fuzzer)
         cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
         ld_path = "LD_LIBRARY_PATH=/data/local/tmp/32:/data/local/tmp/64:$LD_LIBRARY_PATH"
@@ -92,7 +137,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         cmd = [
             chmod_cmd,
-            "%s && %s %s %s" % (cd_cmd, ld_path, test_cmd, self._test_flags)
+            "%s && %s %s %s %s" % (cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
         ]
         logging.info("Executing: %s", cmd)
 

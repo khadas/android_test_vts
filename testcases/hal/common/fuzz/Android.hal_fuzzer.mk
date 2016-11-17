@@ -22,7 +22,7 @@ ifeq (,$(findstring x86, $(TARGET_ARCH)))
 
 hal_common_fuzz_dir := test/vts/testcases/hal/common/fuzz
 
-module_path := hal_fuzz
+module_path := hal_fuzzer
 
 LOCAL_MODULE := $(module_name)
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA_NATIVE_TESTS)/$(module_path)
