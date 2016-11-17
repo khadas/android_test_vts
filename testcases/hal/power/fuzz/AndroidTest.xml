@@ -25,6 +25,6 @@
             IPowerSetFeature_fuzzer
             "/>
         <option name="binary-test-type" value="llvmfuzzer" />
-        <option name="test-config-path" value="vts-config/testcases/hal/power/fuzz/IPowerFuzzTest.config" />
+        <option name="test-config-path" value="vts/testcases/hal/power/fuzz/IPowerFuzzTest.config" />
     </test>
 </configuration>
