@@ -32,7 +32,8 @@ LOCAL_C_INCLUDES := \
 LOCAL_SHARED_LIBRARIES := \
   libbase \
   libcutils \
-  libhidl \
+  libhidlbase \
+  libhidltransport\
   libhwbinder \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \

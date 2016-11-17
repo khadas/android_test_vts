@@ -86,7 +86,8 @@ LOCAL_SHARED_LIBRARIES := \
 ifeq ($(VTS_ENABLE_TREBLE), true)
 LOCAL_SHARED_LIBRARIES += \
   libhwbinder \
-  libhidl \
+  libhidlbase \
+  libhidltransport \
   libutils \
   android.hardware.nfc@1.0 \
   libvts_driver_hidl_nfc@1.0 \
