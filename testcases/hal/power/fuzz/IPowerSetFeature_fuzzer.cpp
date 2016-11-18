@@ -25,16 +25,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (power_hal == nullptr) {
     return 0;
   }
-  if (size < sizeof(Feature)) {
+
+  size_t min_size = sizeof(Feature) + sizeof(uint8_t);
+  if (size < min_size) {
     return 0;
   }
+
   Feature feature;
   memcpy(&feature, data, sizeof(Feature));
-
-  bool activate;
-  size_t copy_amount = std::min(sizeof(activate), size - sizeof(Feature));
   data += sizeof(Feature);
-  memcpy(&activate, data, copy_amount);
+
+  bool activate = (*data) % 2 ? false : true;
 
   power_hal->setFeature(feature, activate);
   return 0;

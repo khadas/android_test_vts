@@ -73,7 +73,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Args:
             testcase: string, path to executable fuzzer.
         """
-        push_src = os.path.join(self.data_file_path, testcase)
+        push_src = os.path.join(self.data_file_path, config.FUZZER_SRC_DIR, testcase)
         self._dut.adb.push("%s %s" % (push_src, config.FUZZER_TEST_DIR))
         logging.info("Adb pushed: %s", testcase)
 
@@ -117,14 +117,13 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         return corpus_dir
 
-    def RunTestcase(self, testcase):
+    def RunTestcase(self, fuzzer):
         """Runs the given testcase and asserts the result.
 
         Args:
-            testcase: string, path to fuzzer executable.
+            fuzzer: string, name of fuzzer executable.
         """
-        self.PushFiles(testcase)
-        fuzzer = testcase.split("/")[-1]
+        self.PushFiles(fuzzer)
 
         fuzzer_config = self.fuzzer_configs.get(fuzzer, {})
         test_flags = self.CreateFuzzerFlags(fuzzer_config)
