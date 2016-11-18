@@ -210,7 +210,7 @@ class BaseTestClass(object):
         pass
 
     def _testEntry(self, test_name):
-        """Internal function to be called upon entry of a test."""
+        """Internal function to be called upon entry of a test case."""
         self.currentTestName = test_name
 
     def _setUpTest(self, test_name):
@@ -313,6 +313,29 @@ class BaseTestClass(object):
 
     def onSkip(self, test_name, begin_time):
         """A function that is executed upon a test case being skipped.
+
+        Implementation is optional.
+
+        Args:
+            test_name: Name of the test that triggered this function.
+            begin_time: Logline format timestamp taken when the test started.
+        """
+
+
+    def _onSilent(self, record):
+        """Proxy function to guarantee the base implementation of onSilent is
+        called.
+
+        Args:
+            record: The records.TestResultRecord object for the skipped test
+                    case.
+        """
+        test_name = record.test_name
+        begin_time = logger.epochToLogLineTimestamp(record.begin_time)
+        self.onSilent(test_name, begin_time)
+
+    def onSilent(self, test_name, begin_time):
+        """A function that is executed upon a test case being marked as silent.
 
         Implementation is optional.
 
@@ -467,6 +490,7 @@ class BaseTestClass(object):
         except signals.TestSilent as e:
             # Suppress test reporting.
             is_silenced = True
+            self._exec_procedure_func(self._onSilent, tr_record)
             self.results.requested.remove(test_name)
         except Exception as e:
             # Exception happened during test.
@@ -487,9 +511,9 @@ class BaseTestClass(object):
             tr_record.testFail()
             self._exec_procedure_func(self._onFail, tr_record)
         finally:
-            self._testExit(test_name)
             if not is_silenced:
                 self.results.addRecord(tr_record)
+            self._testExit(test_name)
 
     def runGeneratedTests(self,
                           test_func,
