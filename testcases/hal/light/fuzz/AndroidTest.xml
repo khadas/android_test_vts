@@ -20,9 +20,8 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="ILightFuzzTest" />
-        <option name="binary-test-sources" value="hal_fuzz/ILightSetLight_fuzzer"/>
+        <option name="binary-test-sources" value="ILightSetLight_fuzzer"/>
         <option name="binary-test-type" value="llvmfuzzer" />
         <option name="test-config-path" value="vts-config/testcases/hal/light/fuzz/ILightFuzzTest.config" />
-        <option name="test-timeout" value="2m" />
     </test>
 </configuration>

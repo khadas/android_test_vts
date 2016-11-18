@@ -25,13 +25,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     return 0;
   }
 
-  if (size < sizeof(int32_t)) {
+  size_t min_size = sizeof(int32_t) + sizeof(uint8_t);
+  if (size < min_size) {
     return 0;
   }
+
   int32_t sensorHandle;
   memcpy(&sensorHandle, data, sizeof(int32_t));
+  data += sizeof(int32_t);
 
-  bool enabled = (size % 2) ? false : true;
+  bool enabled = (*data) % 2 ? false : true;
 
   sensors_hal->activate(sensorHandle, enabled);
   return 0;
