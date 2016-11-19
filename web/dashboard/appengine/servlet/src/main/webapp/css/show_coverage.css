@@ -46,6 +46,14 @@
     padding:  25px 25px;
 }
 
+.login-button {
+    border: 1px solid gray;
+    color: gray;
+    border-radius: 15px;
+    padding: 4px 15px;
+    cursor: pointer;
+}
+
 td {
     padding: 0;
 }
