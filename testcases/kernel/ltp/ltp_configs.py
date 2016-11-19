@@ -92,6 +92,7 @@ REQUIREMENTS_TO_TESTCASE = {
         'syscalls.utime06',
         'syscalls.utimes01',
         'syscalls.mkfs01',
+        'fs.quota_remount_test01',
     ],
     ltp_enums.Requirements.BIN_IN_PATH_LDD: ['commands.ldd'],
 }
@@ -569,4 +570,6 @@ DISABLED_TESTS = [
     'dma_thread_diotest.dma_thread_diotest5',
     'dma_thread_diotest.dma_thread_diotest6',
     'dma_thread_diotest.dma_thread_diotest7',
+    # b/33008689 (closed) requires mkfs.ext4 and loop device support.
+    'fs.quota_remount_test01',
 ]
