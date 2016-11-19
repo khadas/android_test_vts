@@ -41,7 +41,6 @@ def InitializeDeviceCoverage(dut):
     logging.info("Removing existing gcda files.")
     gcda_files = dut.adb.shell("find %s -name \"*.gcda\" -type f -delete" %
                                TARGET_COVERAGE_PATH)
-    logging.info("Removed files:", gcda_files)
 
 
 def GetGcdaDict(dut, local_coverage_path=None):
@@ -77,7 +76,6 @@ def GetGcdaDict(dut, local_coverage_path=None):
             dut.adb.pull("%s %s" % (gcda, file_name))
             gcda_content = open(file_name, "rb").read()
             gcda_dict[basename] = gcda_content
-            logging.info("Found gcda %s", gcda)
     return gcda_dict
 
 def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
