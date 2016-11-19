@@ -26,6 +26,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
+from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.profiling import profiling_utils
 
 from vts.testcases.template.binary_test import binary_test_case
@@ -130,10 +131,11 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 if self.TAG_DELIMITER in token:
                     tag, path = token.split(self.TAG_DELIMITER)
                 self.profiling_library_paths[tag] = path
-
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
+        if getattr(self, self.COVERAGE, False):
+            coverage_utils.InitializeDeviceCoverage(self._dut)
 
         self.testcases = []
         self.tags = set()
@@ -217,7 +219,14 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         return result
 
     def tearDownClass(self):
-        '''Perform clean-up jobs'''
+        '''Perform clean-up tasks'''
+
+        # Retrieve coverage if applicable
+        if getattr(self, self.COVERAGE, False):
+            logging.info('Retrieving coverage data.')
+            gcda_dict = coverage_utils.GetGcdaDict(self._dut)
+            self.SetCoverageData(gcda_dict, True)
+
         # Clean up the pushed binaries
         logging.info('Start class cleaning up jobs.')
         # Delete pushed files
