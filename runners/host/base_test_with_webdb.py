@@ -46,6 +46,7 @@ _MAX = "max"
 _MIN = "min"
 _AVG = "avg"
 
+
 class BaseTestWithWebDbClass(base_test.BaseTestClass):
     """Base class with Web DB interface for test classes to inherit from.
 
@@ -202,6 +203,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             ]:
                 if elem in device_spec:
                     setattr(dev_info, elem, str(device_spec[elem]))
+            # TODO: get abi information differently for multi-device support.
+            if hasattr(self, keys.ConfigKeys.IKEY_ABI_NAME):
+                setattr(dev_info, keys.ConfigKeys.IKEY_ABI_NAME,
+                        str(getattr(self, keys.ConfigKeys.IKEY_ABI_NAME)))
+            if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
+                setattr(dev_info, keys.ConfigKeys.IKEY_ABI_BITNESS,
+                        str(getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)))
 
     def GetFunctionName(self):
         """Returns the caller's function name."""
@@ -221,9 +229,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if getattr(self, self.USE_GAE_DB, False):
             if self._current_test_report_msg:
-                self._current_test_report_msg.end_timestamp = self.GetTimestamp()
+                self._current_test_report_msg.end_timestamp = self.GetTimestamp(
+                )
             else:
-                logging.info("test result of '%s' is empty and will not be uploaded.", test_name)
+                logging.info(
+                    "test result of '%s' is empty and will not be uploaded.",
+                    test_name)
         return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
     def _onFail(self, record):
@@ -403,12 +414,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         # Use first device info to get product, flavor, and ID
         # TODO: support multi-device builds
         device_spec = self._report_msg.device_info[0]
-        build_flavor = getattr(device_spec,
-                               keys.ConfigKeys.IKEY_BUILD_FLAVOR, None)
-        product = getattr(device_spec,
-                          keys.ConfigKeys.IKEY_PRODUCT_VARIANT, None)
-        device_build_id = getattr(device_spec,
-                                  keys.ConfigKeys.IKEY_BUILD_ID, None)
+        build_flavor = getattr(device_spec, keys.ConfigKeys.IKEY_BUILD_FLAVOR,
+                               None)
+        product = getattr(device_spec, keys.ConfigKeys.IKEY_PRODUCT_VARIANT,
+                          None)
+        device_build_id = getattr(device_spec, keys.ConfigKeys.IKEY_BUILD_ID,
+                                  None)
 
         if not build_flavor or not product or not device_build_id:
             logging.error("Could not read device information.")
@@ -467,7 +478,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         except:
             logging.error("Could not read coverage zip for branch %s, " +
                           "target %s, id: %s, product: %s" %
-                          (self.BRANCH, build_flavor, device_build_id, product))
+                          (self.BRANCH, build_flavor, device_build_id, product
+                           ))
             return False
         setattr(self, self.COVERAGE_ZIP, cov_zip)
         setattr(self, self.REVISION, revision)
@@ -504,8 +516,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         if isinstance(coverage_data, RepeatedCompositeFieldContainer):
             gcda_dict = {}
             for coverage_msg in coverage_data:
-                logging.info("coverage file_path %s",
-                             coverage_msg.file_path)
+                logging.info("coverage file_path %s", coverage_msg.file_path)
                 logging.info("coverage gcda len %d bytes",
                              len(coverage_msg.gcda))
                 gcda_dict[coverage_msg.file_path] = coverage_msg.gcda
@@ -513,7 +524,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             gcda_dict = coverage_data
         else:
             logging.error("unexpected coverage_data type: %s",
-                         str(type(coverage_data)))
+                          str(type(coverage_data)))
             return False
         report_msg = self._report_msg if isGlobal else self._current_test_report_msg
 

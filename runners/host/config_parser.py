@@ -64,7 +64,8 @@ def gen_term_signal_handler(test_runners):
     return termination_sig_handler
 
 
-def load_test_config_file(test_config_path, tb_filters=None,
+def load_test_config_file(test_config_path,
+                          tb_filters=None,
                           baseline_config=None):
     """Processes the test configuration file provided by user.
 
@@ -283,8 +284,8 @@ def _validate_testbed_name(name):
     if not name:
         raise errors.USERError("Test bed names can't be empty.")
     if not isinstance(name, str) and not isinstance(name, basestring):
-        raise errors.USERError(
-            "Test bed names have to be string. Found: %s" % type(name))
+        raise errors.USERError("Test bed names have to be string. Found: %s" %
+                               type(name))
     for l in name:
         if l not in utils.valid_filename_chars:
             raise errors.USERError(
