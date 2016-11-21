@@ -226,7 +226,27 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
     cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
     return NULL;
   }
-  if (!fuzzer->LoadTargetComponent(dll_file_name)) return NULL;
+
+  if (iface_spec_msg.component_class() == HAL_HIDL) {
+    char get_sub_property[PROPERTY_VALUE_MAX];
+    bool get_stub = false; /* default is binderized */
+    if (property_get("vts.hidl.get_stub", get_sub_property, "") > 0) {
+      if (!strcmp(get_sub_property, "true") || !strcmp(get_sub_property, "True")
+          || !strcmp(get_sub_property, "1")) {
+        get_stub = true;
+      }
+    }
+    if (!fuzzer->GetService(get_stub)) {
+      cerr << __FUNCTION__ << ": couldn't get service" << endl;
+      return NULL;
+    }
+  } else {
+    if (!fuzzer->LoadTargetComponent(dll_file_name)) {
+      cerr << __FUNCTION__ << ": couldn't load target component file, "
+          << dll_file_name << endl;
+      return NULL;
+    }
+  }
 
   for (const vts::FunctionSpecificationMessage& func_msg :
        iface_spec_msg.interface().api()) {
@@ -634,7 +654,7 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
                                    const char* target_component_name) {
   vts::ComponentSpecificationMessage* interface_specification_message =
       FindComponentSpecification(target_class, target_type, target_version,
-                                 target_package, target_component_name);
+                                 "", target_package, target_component_name);
   cout << "ifspec addr " << interface_specification_message << endl;
 
   if (!interface_specification_message) {
