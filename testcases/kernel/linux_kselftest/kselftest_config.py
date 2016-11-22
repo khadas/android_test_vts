@@ -58,7 +58,8 @@ KSFT_CASES_STABLE = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
 ])
 
 KSFT_CASES_STAGING = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
-    ("pstore/pstore_tests", ["arm", "x86"], [32, 64]),
+# TODO(trong): enable pstore test.
+#    ("pstore/pstore_tests", ["arm", "x86"], [32, 64]),
     ("x86/single_step_syscall", ["x86"], [32, 64]),
     ("x86/sysret_ss_attrs", ["x86"], [32]),
     ("x86/syscall_nt", ["x86"], [32, 64]),

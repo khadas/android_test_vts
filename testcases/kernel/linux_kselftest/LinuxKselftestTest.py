@@ -53,19 +53,12 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
 
-        # Presubmit test cases are always a subset of stable test cases.
-        # Stable test cases are always a subset of staging test cases.
         if self.test_type == "presubmit":
             self._testcases = config.KSFT_CASES_PRESUBMIT
         elif self.test_type == "stable":
-            self._testcases = (
-                config.KSFT_CASES_PRESUBMIT +
-                config.KSFT_CASES_STABLE)
+            self._testcases = config.KSFT_CASES_STABLE
         elif self.test_type == "staging":
-            self._testcases = (
-                config.KSFT_CASES_PRESUBMIT +
-                config.KSFT_CASES_STABLE +
-                config.KSFT_CASES_STAGING)
+            self._testcases = config.KSFT_CASES_STAGING
         else:
             asserts.fail("Test config is incorrect!")
 
@@ -119,6 +112,9 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
             testcase: string, format testsuite/testname, specifies which
                 test case to run.
         """
+        if not testcase:
+            asserts.skip("Test is not supported on this abi.")
+
         chmod_cmd = "chmod -R 755 %s" % os.path.join(
             config.KSFT_DIR, testcase.testsuite)
         cd_cmd = "cd %s" % os.path.join(config.KSFT_DIR, testcase.testsuite)
@@ -147,8 +143,9 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.PreTestSetup()
 
         cpu_abi = self._dut.cpu_abi
-        relevant_testcases = filter(
-            lambda x: x.IsRelevant(cpu_abi, n_bit), self._testcases)
+        relevant_testcases = map(
+            lambda x: x if x.IsRelevant(cpu_abi, n_bit) else None,
+            self._testcases)
 
         self.runGeneratedTests(
             test_func=self.RunTestcase,
