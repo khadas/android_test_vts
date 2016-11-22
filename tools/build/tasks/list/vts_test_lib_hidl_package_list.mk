@@ -22,10 +22,13 @@ vts_test_lib_hidl_packages := \
   libvts_driver_hidl_vibrator@1.0 \
   libvts_profiler_hidl_vibrator@1.0 \
   libvts_driver_hidl_thermal@1.0 \
-  libvts_profiler_hidl_thermal@1.0
+  libvts_profiler_hidl_thermal@1.0 \
+  libvts_driver_hidl_power@1.0 \
+  libvts_profiler_hidl_power@1.0 \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
   nfc_hidl_hal_test \
   vibrator_hidl_hal_test \
-  thermal_hidl_hal_test
+  thermal_hidl_hal_test \
+  power_hidl_hal_test \
