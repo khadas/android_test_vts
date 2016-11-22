@@ -29,6 +29,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="HwBinderPassthroughPerformanceTest" />
         <option name="test-case-path" value="vts/testcases/performance/hwbinder_benchmark/HwBinderPerformanceTest" />
-        <option name="test-config-path" value="vts-config/testcases/performance/hwbinder_benchmark/passthrough/HwBinderPassthroughPerformanceTest.config" />
+        <option name="test-config-path" value="vts/testcases/performance/hwbinder_benchmark/passthrough/HwBinderPassthroughPerformanceTest.config" />
     </test>
 </configuration>

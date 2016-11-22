@@ -23,6 +23,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="LinuxKselftestTestStaging" />
         <option name="test-case-path" value="vts/testcases/kernel/linux_kselftest/LinuxKselftestTest" />
-        <option name="test-config-path" value="vts-config/testcases/kernel/linux_kselftest/staging/LinuxKselftestTestStaging.config" />
+        <option name="test-config-path" value="vts/testcases/kernel/linux_kselftest/staging/LinuxKselftestTestStaging.config" />
     </test>
 </configuration>

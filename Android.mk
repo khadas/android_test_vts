@@ -32,11 +32,31 @@ VTS_TESTCASES_OUT := $(VTS_OUT_ROOT)/android-vts/testcases
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	$(hide) mkdir -p $(dir $@)
-	@rm -f $@.list
+	$(hide) rm -rf $(VTS_TESTCASES_OUT)/vts
 	$(hide) find test -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
 	@rm -f $@.list
-	$(hide) rm -rf $(VTS_TESTCASES_OUT)/vts
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	@echo "build vts python package for audio effect HAL"
+	$(hide) find hardware/interfaces/audio/effect/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when audio effect HAL test has some py, config, or push files
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/audio/effect/2.0/vts/functional -l $@.list
+	@rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	@echo "build vts python package for NFC HAL"
+	$(hide) find hardware/interfaces/nfc/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/nfc/1.0/vts/functional -l $@.list
+	@rm -f $@.list
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	@echo "build vts python package for thermal HAL"
+	$(hide) find hardware/interfaces/thermal/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/thermal/1.0/vts/functional -l $@.list
+	@rm -f $@.list
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	@echo "build vts python package for vibrator HAL"
+	$(hide) find hardware/interfaces/vibrator/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/vibrator/1.0/vts/functional -l $@.list
+	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
 
