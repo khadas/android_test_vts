@@ -77,7 +77,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
     BRANCH = "master"
-    ENABLE_PROFILING = "enable_profiling"
     VTS_PROFILING_TRACING_PATH = "profiling_trace_path"
 
     def __init__(self, configs):
@@ -91,9 +90,11 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self.USE_GAE_DB, self.BIGTABLE_BASE_URL, self.MODULES,
             self.GIT_PROJECT_NAME, self.GIT_PROJECT_PATH,
             self.SERVICE_JSON_PATH, keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.KEY_TESTBED_NAME, self.ENABLE_PROFILING,
-            self.VTS_PROFILING_TRACING_PATH
+            keys.ConfigKeys.KEY_TESTBED_NAME, self.VTS_PROFILING_TRACING_PATH
         ])
+
+        self.enable_profiling = self.getUserParam(
+            keys.ConfigKeys.IKEY_ENABLE_PROFILING, default_value=False)
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
