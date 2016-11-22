@@ -38,6 +38,7 @@ sudo pip install setuptools
 sudo pip install requests
 sudo pip install httplib2
 sudo pip install google-api-python-client
+sudo pip install google-cloud-pubsub
 
 echo "Install packages for Camera ITS tests"
 sudo apt-get install python-tk
