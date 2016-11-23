@@ -72,6 +72,11 @@ class HalHidlCodeGen : public DriverCodeGenBase {
 
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
+
+ protected:
+  // Generates a scalar type in C/C++.
+  void GenerateScalarTypeInC(Formatter& out, const string& type);
+
 };
 
 }  // namespace vts
