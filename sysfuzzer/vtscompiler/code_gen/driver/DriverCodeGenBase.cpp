@@ -62,14 +62,7 @@ void DriverCodeGenBase::GenerateHeaderFile(
   out << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << "\n";
   out << "#define __VTS_SPEC_" << vts_name_ << "__" << "\n";
   out << "\n";
-  out << "#include <stdio.h>" << "\n";
-  out << "#include <stdarg.h>" << "\n";
-  out << "#include <stdlib.h>" << "\n";
-  out << "#include <string.h>" << "\n";
-  out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";
-  out << "#include <utils/Log.h>" << "\n";
-  out << "#include <fuzz_tester/FuzzerBase.h>" << "\n";
-  out << "#include <fuzz_tester/FuzzerCallbackBase.h>" << "\n";
+
   for (auto const& header : message.header()) {
     out << "#include " << header << "\n";
   }
@@ -88,6 +81,18 @@ void DriverCodeGenBase::GenerateHeaderFile(
     out << "#include <hidl/HidlSupport.h>" << "\n";
   }
   out << "\n\n" << "\n";
+
+  out << "#include <stdio.h>" << "\n";
+  out << "#include <stdarg.h>" << "\n";
+  out << "#include <stdlib.h>" << "\n";
+  out << "#include <string.h>" << "\n";
+  out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";
+  out << "#include <utils/Log.h>" << "\n";
+
+  out << "#include <fuzz_tester/FuzzerBase.h>" << "\n";
+  out << "#include <fuzz_tester/FuzzerCallbackBase.h>" << "\n";
+  out << "\n\n" << "\n";
+
   GenerateOpenNameSpaces(out, message);
 
   GenerateClassHeader(fuzzer_extended_class_name, out, message);
@@ -143,6 +148,12 @@ void DriverCodeGenBase::GenerateHeaderFile(
             out << "    " << arg.predefined_type();
           }
           out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_SCALAR) {
+          if (arg.is_const()) {
+            out << "    const " << arg.scalar_type() << "&";
+          } else {
+            out << "    " << arg.scalar_type();
+          }
         } else if (arg.type() == TYPE_STRUCT) {
           out << "    const " << arg.predefined_type() << "&";
           out << " arg" << arg_count;
@@ -157,8 +168,18 @@ void DriverCodeGenBase::GenerateHeaderFile(
             out << "::android::hardware::hidl_vec<"
                 << arg.vector_value(0).scalar_type()
                 << ">&";
+          } else if (arg.vector_value(0).type() == TYPE_STRUCT
+                     || arg.vector_value(0).type() == TYPE_ENUM) {
+            if (arg.vector_value(0).predefined_type().length() == 0) {
+              cerr << __func__ << ":" << __LINE__
+                   << " ERROR predefined_type not set" << "\n";
+              exit(-1);
+            }
+            out << "::android::hardware::hidl_vec<"
+                << arg.vector_value(0).predefined_type()
+                << ">&";
           } else {
-            cerr << __func__ << " unknown vector arg type "
+            cerr << __func__ << ":" << __LINE__ << " unknown vector arg type "
                  << arg.vector_value(0).type() << "\n";
             exit(-1);
           }
@@ -178,7 +199,8 @@ void DriverCodeGenBase::GenerateHeaderFile(
           }
           out << " arg" << arg_count;
         } else {
-          cerr << __func__ << " unknown arg type " << arg.type() << "\n";
+          cerr << __func__ << ":" << __LINE__
+               << " unknown arg type " << arg.type() << "\n";
           exit(-1);
         }
         arg_count++;
@@ -208,19 +230,14 @@ void DriverCodeGenBase::GenerateSourceFile(
   out << "#include \"" << input_vfs_file_path << ".h\"" << "\n";
 
   if (message.component_class() == HAL_HIDL) {
-
     out << "#include <hidl/HidlSupport.h>" << "\n";
   }
 
-  out << "#include <iostream>" << "\n";
-  out << "#include \"vts_datatype.h\"" << "\n";
-  out << "#include \"vts_measurement.h\"" << "\n";
   for (auto const& header : message.header()) {
     out << "#include " << header << "\n";
   }
-  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
-    out << "#include <hidl/HidlSupport.h>" << "\n";
 
+  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
     string package_path = message.package();
     ReplaceSubString(package_path, ".", "/");
     out << "#include <" << package_path << "/"
@@ -250,7 +267,7 @@ void DriverCodeGenBase::GenerateSourceFile(
         if (base_filename.substr(0, 1) == "I") {
           out << "#include \""
               << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
-              << "/" << base_filename.substr(1, base_filename.find_last_of(".h"))
+              << "/" << base_filename.substr(1, base_filename.length() - 1)
               << ".vts.h\"" << "\n";
         }
       } else if (message.component_name() != base_filename) {
@@ -262,6 +279,12 @@ void DriverCodeGenBase::GenerateSourceFile(
       }
     }
   }
+
+  out << "#include \"vts_datatype.h\"" << "\n";
+  out << "#include \"vts_measurement.h\"" << "\n";
+
+  out << "#include <iostream>" << "\n";
+
   GenerateOpenNameSpaces(out, message);
 
   out << "\n" << "\n";
@@ -302,6 +325,13 @@ void DriverCodeGenBase::GenerateSourceFile(
             out << "    " << arg.predefined_type();
           }
           out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_SCALAR) {
+          if (arg.is_const()) {
+            out << "    const " << arg.scalar_type() << "&";
+          } else {
+            out << "    " << arg.scalar_type();
+          }
+          out << " arg" << arg_count;
         } else if (arg.type() == TYPE_STRUCT) {
           out << "    const " << arg.predefined_type() << "&";
           out << " arg" << arg_count;
@@ -316,8 +346,13 @@ void DriverCodeGenBase::GenerateSourceFile(
             out << "::android::hardware::hidl_vec<"
                 << arg.vector_value(0).scalar_type()
                 << ">&";
+          } else if (arg.vector_value(0).type() == TYPE_STRUCT ||
+                     arg.vector_value(0).type() == TYPE_ENUM) {
+            out << "::android::hardware::hidl_vec<"
+                << arg.vector_value(0).predefined_type()
+                << ">&";
           } else {
-            cerr << __func__ << " unknown vector arg type "
+            cerr << __func__ << ":" << __LINE__ << " unknown vector arg type "
                  << arg.vector_value(0).type() << "\n";
             exit(-1);
           }
@@ -337,7 +372,8 @@ void DriverCodeGenBase::GenerateSourceFile(
           }
           out << " arg" << arg_count;
         } else {
-          cerr << __func__ << " unknown arg type " << arg.type() << "\n";
+          cerr << __func__ << ":" << __LINE__
+               << " unknown arg type " << arg.type() << "\n";
           exit(-1);
         }
         arg_count++;
@@ -467,6 +503,9 @@ void DriverCodeGenBase::GenerateClassHeader(
       std::string attribute_name = attribute.name();
       ReplaceSubString(attribute_name, "::", "__");
       if (attribute.type() == TYPE_ENUM) {
+        out << attribute.name() << " " << "EnumValue" << attribute_name
+            << "(const EnumDataValueMessage& arg);" << "\n";
+        out << "\n";
         out << attribute.name() << " "
             << "Random" << attribute_name << "();"
             << "\n";
