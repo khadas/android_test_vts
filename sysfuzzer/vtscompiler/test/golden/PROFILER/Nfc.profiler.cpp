@@ -44,6 +44,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
@@ -56,6 +57,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
@@ -85,6 +87,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
@@ -101,6 +104,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
@@ -130,6 +134,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
@@ -146,6 +151,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
@@ -175,6 +181,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
@@ -184,6 +191,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
@@ -213,6 +221,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: close, event type: " << event;
@@ -222,6 +231,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: close, event type: " << event;
@@ -251,6 +261,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
@@ -260,6 +271,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
@@ -289,6 +301,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             switch (event) {
                 case HidlInstrumentor::CLIENT_API_ENTRY:
                 case HidlInstrumentor::SERVER_API_ENTRY:
+                case HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
@@ -298,6 +311,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 }
                 case HidlInstrumentor::CLIENT_API_EXIT:
                 case HidlInstrumentor::SERVER_API_EXIT:
+                case HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
