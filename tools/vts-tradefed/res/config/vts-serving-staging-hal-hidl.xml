@@ -31,6 +31,8 @@
     <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
+    <option name="compatibility:include-filter" value="SensorsHidlTest" /><!-- need runtime stopped -->
+    <option name="compatibility:include-filter" value="SensorsHidlTargetTest" /><!-- need runtime stopped -->
     <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
     <option name="compatibility:include-filter" value="HidlTraceRecorder" />
     <option name="compatibility:include-filter" value="LightHidlTargetTest" />

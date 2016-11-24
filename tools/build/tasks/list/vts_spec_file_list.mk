@@ -36,3 +36,5 @@ vts_spec_file_list += \
   hardware/interfaces/vibrator/1.0/vts/types.vts \
   hardware/interfaces/thermal/1.0/vts/Thermal.vts \
   hardware/interfaces/thermal/1.0/vts/types.vts \
+  hardware/interfaces/sensors/1.0/vts/Sensors.vts \
+  hardware/interfaces/sensors/1.0/vts/types.vts \
