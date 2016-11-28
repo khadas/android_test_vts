@@ -390,10 +390,10 @@ class VtsTcpClient(object):
             try:
                 if index != 0:
                     logging.info("retrying...")
-                header = self.channel.readline()
-                len = int(header.strip("\n"))
-                logging.info("resp %d bytes", len)
-                data = self.channel.read(len)
+                header = self.channel.readline().strip("\n")
+                length = int(header) if header else 0
+                logging.info("resp %d bytes", length)
+                data = self.channel.read(length)
                 response_msg = SysMsg_pb2.AndroidSystemControlResponseMessage()
                 response_msg.ParseFromString(data)
                 logging.debug("Response %s", "success"
