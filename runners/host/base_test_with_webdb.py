@@ -458,8 +458,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                                    device_build_id)
         except:
             logging.error("Could not read build info for branch %s, " +
-                          "target %s, id: %s" % (self.BRANCH, build_flavor,
-                                                 device_build_id))
+                          "target %s, id: %s", self.BRANCH, build_flavor,
+                          device_build_id)
             return False
 
         # Get revision (commit ID) from manifest
