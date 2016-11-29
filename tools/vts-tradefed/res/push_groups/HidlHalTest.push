@@ -20,3 +20,9 @@ DATA/lib64/libvts_driver_hidl_power@1.0.so->/data/local/tmp/64/libvts_driver_hid
 
 DATA/lib/libvts_profiler_hidl_power@1.0.so->/data/local/tmp/32/hw/android.hardware.power@1.0::IPower.profiler.so
 DATA/lib64/libvts_profiler_hidl_power@1.0.so->/data/local/tmp/64/hw/android.hardware.power@1.0::IPower.profiler.so
+
+DATA/lib/libvts_driver_hidl_boot@1.0.so->/data/local/tmp/32/libvts_driver_hidl_boot@1.0.so
+DATA/lib64/libvts_driver_hidl_boot@1.0.so->/data/local/tmp/64/libvts_driver_hidl_boot@1.0.so
+
+DATA/lib/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/32/hw/android.hardware.boot@1.0::IBoot.profiler.so
+DATA/lib64/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/64/hw/android.hardware.boot@1.0::IBoot.profiler.so
