@@ -70,11 +70,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     USE_GAE_DB = "use_gae_db"
     COVERAGE = "coverage"
     MODULES = "modules"
-    GIT_PROJECT_NAME = "git_project_name"
-    GIT_PROJECT_PATH = "git_project_path"
     SERVICE_JSON_PATH = "service_key_json_path"
     COVERAGE_ZIP = "coverage_zip"
-    REVISION = "revision"
+    REVISION_DICT = "revision_dict"
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
     BRANCH = "master"
@@ -88,8 +86,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[
-            self.USE_GAE_DB, self.BIGTABLE_BASE_URL, self.MODULES,
-            self.GIT_PROJECT_NAME, self.GIT_PROJECT_PATH,
+            self.USE_GAE_DB, self.BIGTABLE_BASE_URL, self.MODULES, self.COVERAGE,
             self.SERVICE_JSON_PATH, keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.KEY_TESTBED_NAME, self.VTS_PROFILING_TRACING_PATH
         ])
@@ -409,6 +406,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if test is ready for coverage instrumentation, False otherwise.
         """
+        if not getattr(self, self.COVERAGE, False):
+            logging.info("coverage disabled in config")
+            return
         setattr(self, self.COVERAGE, False)
         if len(self._report_msg.device_info) == 0:
             logging.error("could not read device info")
@@ -435,18 +435,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.error("couldn't find service json path")
             return False
 
-        # Get project name
-        project_name = getattr(self, self.GIT_PROJECT_NAME, False)
-        if not project_name:
-            logging.error("couldn't find git project name")
-            return False
-
-        # Get project path
-        project_path = getattr(self, self.GIT_PROJECT_PATH, False)
-        if not project_path:
-            logging.error("couldn't find project path")
-            return False
-
         # Instantiate build client
         try:
             build_client = artifact_fetcher.AndroidBuildClient(
@@ -457,20 +445,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         # Fetch repo dictionary
         try:
-            repos = build_client.GetRepoDictionary(self.BRANCH, build_flavor,
-                                                   device_build_id)
+            revision_dict = build_client.GetRepoDictionary(self.BRANCH,
+                                                           build_flavor,
+                                                           device_build_id)
         except:
             logging.error("Could not read build info for branch %s, " +
                           "target %s, id: %s", self.BRANCH, build_flavor,
                           device_build_id)
             return False
-
-        # Get revision (commit ID) from manifest
-        if project_name not in repos:
-            logging.error("Could not find project %s in repo dictionary",
-                          project_name)
-            return False
-        revision = str(repos[project_name])
 
         # Fetch coverage zip
         try:
@@ -485,7 +467,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                            ))
             return False
         setattr(self, self.COVERAGE_ZIP, cov_zip)
-        setattr(self, self.REVISION, revision)
+        setattr(self, self.REVISION_DICT, revision_dict)
         setattr(self, self.COVERAGE, True)
         return True
 
@@ -530,16 +512,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         try:
             cov_zip = getattr(self, self.COVERAGE_ZIP)
             modules = getattr(self, self.MODULES)
-            project_name = getattr(self, self.GIT_PROJECT_NAME)
-            project_path = getattr(self, self.GIT_PROJECT_PATH)
-            revision = getattr(self, self.REVISION)
+            revision_dict = getattr(self, self.REVISION_DICT)
         except AttributeError as e:
             logging.error("attributes not found %s", str(e))
             return False
 
         coverage_utils.ProcessCoverageData(report_msg, cov_zip, modules,
-                                           gcda_dict, project_name,
-                                           project_path, revision)
+                                           gcda_dict, revision_dict)
         return True
 
     def ProcessAndUploadTraceData(self, dut, profiling_trace_path):
