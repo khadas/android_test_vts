@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.vts.test;
+package com.android.vts.test;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
