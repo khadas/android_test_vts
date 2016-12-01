@@ -24,7 +24,7 @@ import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
-
+import com.android.vts.proto.VtsReportMessage.VtsHostInfo;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
@@ -382,7 +382,7 @@ public class ShowTableServlet extends BaseServlet {
         // Build Flavor and test build ID.
         String[] headerRow = new String[tests.size() + 1];
 
-        // the time grid on the table has one - Start Time.
+        // the time grid on the table has two rows - Start Time and End Time.
         // These represent the start times for the test run.
         String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][tests.size() + 1];
 
@@ -390,7 +390,8 @@ public class ShowTableServlet extends BaseServlet {
         // These represent the length of time the test elapsed.
         String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][tests.size() + 1];
 
-        // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
+        // the summary grid has four rows - Total, Passing Count, Non-Passing Count, Passing %,
+        // Covered line count, and Coverage %.
         String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][tests.size() + 1];
 
         // the results an entry for each testcase result for each build.
@@ -398,7 +399,7 @@ public class ShowTableServlet extends BaseServlet {
 
         // first column for device grid
         String[] headerFields = {"<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target",
-                                 "Device", "ABI Target", "VTS Build ID"};
+                                 "Device", "ABI Target", "VTS Build ID", "Hostname"};
         headerRow[0] = StringUtils.join(headerFields, "<br>");
 
         // first column for time grid
@@ -517,11 +518,12 @@ public class ShowTableServlet extends BaseServlet {
                 coverageInfo = " - ";
             }
             String icon = "<div class='status-icon " + aggregateStatus.toString() + "'>&nbsp</div>";
-
+            VtsHostInfo hostInfo = report.getHostInfo();
+            String hostname = hostInfo == null ? "" : hostInfo.getHostname().toStringUtf8();
             headerRow[j + 1] = "<span class='valign-wrapper'><b>" + buildIds + "</b>" + icon +
                                "</span>" + buildAlias.toLowerCase() + "<br>" + buildFlavor +
                                "<br>" + productVariant + "<br>" +
-                               abiInfo + "<br>" + vtsBuildId;
+                               abiInfo + "<br>" + vtsBuildId + "<br>" + hostname;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -

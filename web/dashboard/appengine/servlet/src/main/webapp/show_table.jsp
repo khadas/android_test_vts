@@ -266,10 +266,18 @@
 
           var table = new google.visualization.Table(document.getElementById('grid_table_div'));
           var classNames = {
-              headerRow : 'table-header'
+              headerRow : 'table-header',
+              headerCell : 'table-header-cell'
           };
-          table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
-                            frozenColumns: 1, cssClassNames: classNames});
+          var options = {
+              showRowNumber: false,
+              alternatingRowStyle: true,
+              allowHtml: true,
+              frozenColumns: 1,
+              cssClassNames: classNames,
+              sort: 'disable'
+          };
+          table.draw(data, options);
       }
     </script>
 

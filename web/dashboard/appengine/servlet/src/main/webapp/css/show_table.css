@@ -27,9 +27,22 @@ table {
 .table-header {
     background-color: white;
 }
+.table-header-cell {
+    transition: max-width 1s;
+    max-width: 150px;
+}
+.table-header-cell:hover {
+    transition-delay: 0.5s;
+    max-width: 1000px;
+}
 .table-header-content {
     font-weight: initial;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: inline-block;
+    max-width: inherit;
+    width: 100%;
 }
 #buttons {
     margin: 25px 10px 0;
