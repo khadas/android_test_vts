@@ -26,6 +26,16 @@ import time
 class AdbError(Exception):
     """Raised when there is an error in adb operations."""
 
+    def __init__(self, cmd, stdout, stderr, ret_code):
+        self.cmd = cmd
+        self.stdout = stdout
+        self.stderr = stderr
+        self.ret_code = ret_code
+
+    def __str__(self):
+        return ("Error executing adb cmd '%s'. ret: %d, stdout: %s, stderr: %s"
+                ) % (self.cmd, self.ret_code, self.stdout, self.stderr)
+
 
 SL4A_LAUNCH_CMD = (
     "am start -a com.googlecode.android_scripting.action.LAUNCH_SERVER "
@@ -127,18 +137,18 @@ class AdbProxy():
         Raises:
             AdbError if the adb command exit code is not 0.
         """
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                shell=True)
         (out, err) = proc.communicate()
         ret = proc.returncode
-        total_output = "stdout: {}, stderr: {}, ret: {}".format(out, err, ret)
-        # TODO(angli): Fix this when global logger is done.
-        if self.log:
-            self.log.debug("{}\n{}".format(cmd, total_output))
-        if ret != 0:
-            logging.error("adb '%s' failed error code %s", cmd, ret)
-            logging.error("total_output: %s", total_output)
-            raise AdbError(total_output)
-        return out
+        logging.debug("cmd: %s, stdout: %s, stderr: %s, ret: %s", cmd, out,
+                      err, ret)
+        if ret == 0:
+            return out
+        else:
+            raise AdbError(cmd=cmd, stdout=out, stderr=err, ret_code=ret)
 
     def _exec_adb_cmd(self, name, arg_str):
         return self._exec_cmd(' '.join((self.adb_str, name, arg_str)))
