@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-#include "gcda_parser.h"
-#include "gcda_basic_io.h"
+#include "gcov_basic_io.h"
 
 #include <iostream>
 #include <vector>
+#include "GcdaParser.h"
 
 /*
  * To test locally:
- * $ rm a.out; gcc gcda_parser.cpp gcov_basic_io.cpp -lstdc++; ./a.out
+ * $ rm a.out; gcc GcdaParser.cpp gcda_parser_test.cpp GcdaFile.cpp -lstdc++; ./a.out
  */
 
 using namespace std;
 
 int main() {
-  std::vector<unsigned>* result =
-      android::vts::parse_gcda_file("testdata/lights.gcda");
-  if (result) {
-    for (unsigned int index = 0; index < result->size(); index++) {
-      cout << result->at(index) << endl;
-    }
-    delete result;
+  std::vector<unsigned> result =
+      android::vts::GcdaRawCoverageParser("testdata/lights.gcda").Parse();
+  for (unsigned int index = 0; index < result.size(); index++) {
+    cout << result.at(index) << endl;
   }
   return 0;
 }
