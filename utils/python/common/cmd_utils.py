@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright 2016 - The Android Open Source Project
 #
