@@ -4,10 +4,10 @@
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <iostream>
+
+
 namespace android {
 namespace vts {
-
-
 static string callback_socket_name_;
 
 class vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t : public FuzzerCallbackBase {
@@ -266,6 +266,7 @@ if (!strcmp(func_name, "init")) {
 cerr << "func not found" << endl;
 return false;
     }
+
     bool FuzzerExtended_bt_interface_t::GetAttribute(
         FunctionSpecificationMessage* func_msg,
         void** result) {
@@ -283,10 +284,9 @@ if (local_device == NULL) {
 cerr << "attribute not found" << endl;
 return false;
     }
+
     extern "C" {
-    android::vts::FuzzerBase* 
-    vts_func_2_7_1_(
-    ) {
+    android::vts::FuzzerBase* vts_func_2_7_1_() {
 return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_bt_interface_t();
     }
 

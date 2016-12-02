@@ -33,8 +33,27 @@ namespace vts {
 
 const char* const HalSubmoduleCodeGen::kInstanceVariableName = "submodule_";
 
-void HalSubmoduleCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    Formatter& /*h_ss*/, const string& /*function_prototype*/) {}
+void HalSubmoduleCodeGen::GenerateClassConstructionFunction(Formatter& out,
+    const ComponentSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  out << fuzzer_extended_class_name
+      << "() : FuzzerBase(HAL_CONVENTIONAL_SUBMODULE) {}\n";
+}
+
+void HalSubmoduleCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
+    const ComponentSpecificationMessage& message) {
+  string component_name = GetComponentName(message);
+  out << "void SetSubModule(" << component_name << "* submodule) {" << "\n";
+  out.indent();
+  out << "submodule_ = submodule;" << "\n";
+  out.unindent();
+  out << "}" << "\n" << "\n";
+}
+
+void HalSubmoduleCodeGen::GeneratePrivateMemberDeclarations(Formatter& out,
+    const ComponentSpecificationMessage& message) {
+  out << message.original_data_structure_name() << "* submodule_;\n";
+}
 
 }  // namespace vts
 }  // namespace android
