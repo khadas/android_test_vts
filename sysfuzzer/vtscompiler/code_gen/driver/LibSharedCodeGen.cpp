@@ -144,7 +144,7 @@ void LibSharedCodeGen::GenerateCppBodyFuzzFunction(
   }
   // TODO: if there were pointers, free them.
   out << "return false;" << "\n";
-  out.indent();
+  out.unindent();
   out << "}" << "\n";
 }
 
@@ -166,8 +166,11 @@ void LibSharedCodeGen::GenerateCppBodyGetAttributeFunction(
   out << "}" << "\n";
 }
 
-void LibSharedCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    Formatter& /*out*/, const string& /*function_prototype*/) {}
+void LibSharedCodeGen::GenerateClassConstructionFunction(Formatter& out,
+    const ComponentSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  out << fuzzer_extended_class_name << "() : FuzzerBase(LIB_SHARED) {}\n";
+}
 
 }  // namespace vts
 }  // namespace android
