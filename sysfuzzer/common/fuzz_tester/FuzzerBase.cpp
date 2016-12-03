@@ -35,7 +35,7 @@
 #include "component_loader/DllLoader.h"
 #include "utils/InterfaceSpecUtil.h"
 
-#include "gcda_parser.h"
+#include "GcdaParser.h"
 
 using namespace std;
 using namespace android;
@@ -479,9 +479,9 @@ bool FuzzerBase::ReadGcdaFile(
 #endif
   if (string(filename).rfind(".gcda") != string::npos) {
     string buffer = basepath + "/" + filename;
-    vector<unsigned>* processed_data = android::vts::parse_gcda_file(
-        buffer.c_str());
-    for (const auto& data : *processed_data) {
+    vector<unsigned> processed_data =
+      android::vts::GcdaRawCoverageParser(buffer.c_str()).Parse();
+    for (const auto& data : processed_data) {
       msg->mutable_processed_coverage_data()->Add(data);
     }
 

@@ -1,9 +1,6 @@
 #ifndef __VTS_SYSFUZZER_LIBMEASUREMENT_GCOV_BASIC_IO_H__
 #define __VTS_SYSFUZZER_LIBMEASUREMENT_GCOV_BASIC_IO_H__
 
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,11 +46,6 @@ struct source_info;
 typedef long long gcov_type;
 
 enum { GCOV_COUNTERS };
-
-#define assert(EXPR)       \
-  {                        \
-    if (!(EXPR)) exit(-1); \
-  }
 
 #define GCOV_VERSION ((unsigned)0x34303670) /* 406p */
 
@@ -122,33 +114,19 @@ typedef struct arc_info {
 } arc_t;
 
 struct gcov_var_t {
-  FILE *file;
-  unsigned start;    /* Position of first byte of block */
-  unsigned offset;   /* Read/write position within the block.  */
-  unsigned length;   /* Read limit in the block.  */
-  unsigned overread; /* Number of words overread.  */
-  int error;         /* < 0 overflow, > 0 disk error.  */
-  int mode;          /* < 0 writing, > 0 reading */
-  int endian;        /* Swap endianness.  */
+  FILE* file;
+  unsigned start;  /* Position of first byte of block */
+  unsigned offset;  /* Read/write position within the block.  */
+  unsigned length;  /* Read limit in the block.  */
+  unsigned overread;  /* Number of words overread.  */
+  int error;  /* < 0 overflow, > 0 disk error.  */
+  int mode;  /* < 0 writing, > 0 reading */
+  int endian;  /* Swap endianness.  */
   /* Holds a variable length block, as the compiler can write
      strings and needs to backtrack.  */
   size_t alloc;
-  unsigned *buffer;
+  unsigned* buffer;
 };
-
-unsigned gcov_position(void);
-int gcov_is_error();
-unsigned gcov_read_string_array(char **string_array, unsigned num_strings);
-unsigned gcov_read_unsigned();
-void gcov_allocate(unsigned length);
-const unsigned *gcov_read_words(unsigned words);
-int gcov_magic(unsigned magic, unsigned expected);
-gcov_type gcov_read_counter();
-void gcov_write_block(unsigned size);
-const char *gcov_read_string();
-bool gcov_open(const char *name, int mode);
-void gcov_sync(unsigned base, unsigned length);
-int gcov_close();
 
 }  // namespace vts
 }  // namespace android

@@ -19,8 +19,8 @@ cc_library_shared {
     name: "libvts_codecoverage",
 
     srcs: [
-        "gcda_parser.cpp",
-        "gcov_basic_io.cpp",
+        "GcdaParser.cpp",
+        "GcdaFile.cpp",
     ],
 
     export_include_dirs: ["."],
