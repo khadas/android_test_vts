@@ -25,6 +25,7 @@ vts_test_lib_hidl_packages := \
   libvts_profiler_hidl_thermal@1.0 \
   libvts_driver_hidl_power@1.0 \
   libvts_profiler_hidl_power@1.0 \
+  libvts_driver_hidl_light@2.0 \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
@@ -32,3 +33,4 @@ vts_test_lib_hidl_packages += \
   vibrator_hidl_hal_test \
   thermal_hidl_hal_test \
   power_hidl_hal_test \
+  light_hidl_hal_test \

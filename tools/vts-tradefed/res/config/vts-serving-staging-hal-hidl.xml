@@ -33,5 +33,6 @@
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
     <option name="compatibility:include-filter" value="HidlTraceRecorder" />
+    <option name="compatibility:include-filter" value="LightHidlTargetTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
