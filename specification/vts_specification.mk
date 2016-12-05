@@ -11,6 +11,9 @@ PRODUCT_COPY_FILES += \
     test/vts/specification/hal_conventional/WifiHalV1.vts:system/etc/WifiHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1.vts:system/etc/BluetoothHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts:system/etc/BluetoothHalV1bt_interface_t.vts \
+    hardware/interfaces/contexthub/1.0/vts/Contexthub.vts:system/etc/Contexthub.vts \
+    hardware/interfaces/contexthub/1.0/vts/ContexthubCallback.vts:system/etc/ContexthubCallback.vts \
+    hardware/interfaces/contexthub/1.0/vts/types.vts:system/etc/types.vts \
     hardware/interfaces/graphics/allocator/2.0/vts/Allocator.vts:system/etc/Allocator.vts \
     hardware/interfaces/graphics/allocator/2.0/vts/AllocatorClient.vts:system/etc/AllocatorClient.vts \
     hardware/interfaces/graphics/allocator/2.0/vts/types.vts:system/etc/types.vts \
