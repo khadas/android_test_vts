@@ -130,17 +130,28 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         corpus_dir = self.CreateCorpus(fuzzer, fuzzer_config)
 
         chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, fuzzer)
+        self._shell.Execute(chmod_cmd)
+
         cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
         ld_path = "LD_LIBRARY_PATH=/data/local/tmp/32:/data/local/tmp/64:$LD_LIBRARY_PATH"
         test_cmd = "./%s" % fuzzer
 
-        cmd = [
-            chmod_cmd,
-            "%s && %s %s %s %s" % (cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
-        ]
-        logging.info("Executing: %s", cmd)
-
-        result = self._shell.Execute(cmd)
+        fuzz_cmd = "%s && %s %s %s %s" % (cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
+        logging.info("Executing: %s", fuzz_cmd)
+        # TODO(trong): vts shell doesn't handle timeouts properly, change this after it does.
+        try:
+            stdout = self._dut.adb.shell("'%s'" % fuzz_cmd)
+            result = {
+                const.STDOUT: stdout,
+                const.STDERR: "",
+                const.EXIT_CODE: 0
+            }
+        except adb.AdbError as e:
+            result = {
+                const.STDOUT: e.stdout,
+                const.STDERR: e.stderr,
+                const.EXIT_CODE: e.ret_code
+            }
         self.AssertTestResult(fuzzer, result)
 
     def LogCrashReport(self, fuzzer):
@@ -178,14 +189,13 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         Args:
             fuzzer: string, name of fuzzer executable.
-            result: dict([str],[str],[int]), command results from shell.
+            result: dict(str, str, int), command results from shell.
         """
         if not self._dut.hasBooted():
             self._dut.waitForBootCompletion()
             asserts.fail("%s left the device in unresponsive state." % fuzzer)
 
-        # Last exit code is the exit code of the fuzzer executable.
-        exit_code = result[const.EXIT_CODE][-1]
+        exit_code = result[const.EXIT_CODE]
         if exit_code == config.ExitCode.FUZZER_TEST_FAIL:
             self.LogCrashReport(fuzzer)
             asserts.fail("%s failed normally." % fuzzer)
