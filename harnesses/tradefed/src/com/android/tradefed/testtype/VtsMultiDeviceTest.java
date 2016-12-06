@@ -84,6 +84,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
     static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
     static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
+    static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String ENABLE_PROFILING = "enable_profiling";
@@ -193,6 +194,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             + "specified for the same tag. This option is optional for binary tests. If not "
             + "specified, default directories will be used for files with different tags.")
     private Collection<String> mBinaryTestProfilingLibraryPaths = new ArrayList<>();
+
+    @Option(name = "binary-test-disable-framework", description = "Adb stop/start before/after test.")
+    private boolean mBinaryTestDisableFramework = false;
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -530,7 +534,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
           jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
                   new JSONArray(mBinaryTestProfilingLibraryPaths));
           CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
-      }
+        }
+
+        if (mBinaryTestDisableFramework) {
+          jsonObject.put(BINARY_TEST_DISABLE_FRAMEWORK, mBinaryTestDisableFramework);
+          CLog.i("Added %s to the Json object", BINARY_TEST_DISABLE_FRAMEWORK);
+        }
     }
 
     /**

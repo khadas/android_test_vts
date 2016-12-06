@@ -568,6 +568,16 @@ class AndroidDevice(object):
             # process, which is normal. Ignoring these errors.
             return False
 
+    def stop(self):
+        """Stops Android runtime."""
+        self.adb.shell("stop")
+        self.adb.shell("setprop sys.boot_completed 0")
+
+    def start(self):
+        """Starts Android runtime and waits for ACTION_BOOT_COMPLETED."""
+        self.adb.shell("start")
+        self.waitForBootCompletion()
+
     def reboot(self):
         """Reboots the device and wait for device to complete booting.
 
