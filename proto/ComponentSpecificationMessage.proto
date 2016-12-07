@@ -72,6 +72,8 @@ enum ComponentType {
   THERMAL=13;
   // For sensors submodule
   SENSORS=16;
+  // For vehicle submodule
+  VEHICLE=17;
   // for bionic's libm
   BIONIC_LIBM = 1001;
 

@@ -3,6 +3,12 @@ HostDrivenTest.push
 DATA/lib/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/32/libvts_driver_hidl_nfc@1.0.so
 DATA/lib64/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/64/libvts_driver_hidl_nfc@1.0.so
 
+DATA/lib/libvts_driver_hidl_vehicle@2.0.so->/data/local/tmp/32/libvts_driver_hidl_vehicle@2.0.so
+DATA/lib64/libvts_driver_hidl_vehicle@2.0.so->/data/local/tmp/64/libvts_driver_hidl_vehicle@2.0.so
+
+DATA/lib/libvts_profiler_hidl_vehicle@2.0.so->/data/local/tmp/32/hw/android.hardware.vehicle@2.0::IVehicle.profiler.so
+DATA/lib64/libvts_profiler_hidl_vehicle@2.0.so->/data/local/tmp/64/hw/android.hardware.vehicle@2.0::IVehicle.profiler.so
+
 DATA/lib/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/32/libvts_driver_hidl_vibrator@1.0.so
 DATA/lib64/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/64/libvts_driver_hidl_vibrator@1.0.so
 
