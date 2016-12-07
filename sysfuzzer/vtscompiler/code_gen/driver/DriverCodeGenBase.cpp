@@ -75,13 +75,7 @@ void DriverCodeGenBase::GenerateSourceFile(
   GenerateSourceIncludeFiles(out, message, fuzzer_extended_class_name);
   out << "\n\n";
   GenerateOpenNameSpaces(out, message);
-  GenerateCppBodyCallbackFunction(out, message, fuzzer_extended_class_name);
-  out << "\n";
-  GenerateCppBodyFuzzFunction(out, message, fuzzer_extended_class_name);
-  out << "\n";
-  GenerateCppBodyGetAttributeFunction(
-      out, message, fuzzer_extended_class_name);
-  out << "\n";
+  GenerateClassImpl(out, message, fuzzer_extended_class_name);
   GenerateCppBodyGlobalFunctions(out, message, fuzzer_extended_class_name);
   GenerateCloseNameSpaces(out);
 }
@@ -100,26 +94,42 @@ void DriverCodeGenBase::GenerateClassHeader(Formatter& out,
   out << " protected:" << "\n";
 
   out.indent();
-  out << "bool Fuzz(FunctionSpecificationMessage* func_msg,\n"
-      << "          void** result, const string& callback_socket_name);\n";
-  out << "bool GetAttribute(FunctionSpecificationMessage* func_msg,\n"
-      << "          void** result);\n";
+  out << "bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, "
+      << "const string& callback_socket_name);\n";
+  out << "bool CallFunction(FunctionSpecificationMessage* func_msg, "
+      << "void** result, const string& callback_socket_name);\n";
+  out << "bool VerifyResults(FunctionSpecificationMessage* func_msg, "
+      << "vector<void *> results);\n";
+  out << "bool GetAttribute(FunctionSpecificationMessage* func_msg, "
+      << "void** result);\n";
 
   // Produce Fuzz method(s) for sub_struct(s).
   for (auto const& sub_struct : message.interface().sub_struct()) {
     GenerateFuzzFunctionForSubStruct(out, sub_struct, "_");
   }
   // Generate additional function declarations if any.
-  GenerateAdditionalFuctionDeclarations(out, message);
+  GenerateAdditionalFuctionDeclarations(out, message,
+                                        fuzzer_extended_class_name);
   out.unindent();
 
   out << " private:" << "\n";
 
   out.indent();
+  // Generate declarations of private members if any.
   GeneratePrivateMemberDeclarations(out, message);
   out.unindent();
 
   out << "};\n";
+}
+
+void DriverCodeGenBase::GenerateClassImpl(Formatter& out,
+    const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  GenerateCppBodyCallbackFunction(out, message, fuzzer_extended_class_name);
+  GenerateCppBodyFuzzFunction(out, message, fuzzer_extended_class_name);
+  GenerateCppBodyGetAttributeFunction(out, message, fuzzer_extended_class_name);
+  GenerateDriverFunctionImpl(out, message, fuzzer_extended_class_name);
+  GenerateVerificationFunctionImpl(out, message, fuzzer_extended_class_name);
 }
 
 void DriverCodeGenBase::GenerateHeaderIncludeFiles(Formatter& out,
@@ -195,6 +205,31 @@ void DriverCodeGenBase::GenerateFuzzFunctionForSubStruct(
                                      parent_path + message.name() + "_");
   }
   out.unindent();
+}
+
+void DriverCodeGenBase::GenerateDriverFunctionImpl(Formatter& out,
+    const ComponentSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  out << "bool " << fuzzer_extended_class_name
+      << "::CallFunction(FunctionSpecificationMessage*, "
+      << "void**, const string&) {\n";
+  out.indent();
+  out << "/* No implementation yet. */\n";
+  out << "return true;\n";
+  out.unindent();
+  out << "}\n";
+}
+
+void DriverCodeGenBase::GenerateVerificationFunctionImpl(Formatter& out,
+    const ComponentSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  out << "bool " << fuzzer_extended_class_name
+      << "::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {\n";
+  out.indent();
+  out << "/* No implementation yet. */\n";
+  out << "return true;\n";
+  out.unindent();
+  out << "}\n";
 }
 
 void DriverCodeGenBase::GenerateNamespaceName(

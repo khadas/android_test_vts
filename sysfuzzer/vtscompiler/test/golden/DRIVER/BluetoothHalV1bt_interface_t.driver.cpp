@@ -213,83 +213,88 @@ class vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t : public FuzzerC
  private:
 };
 
-
 bool FuzzerExtended_bt_interface_t::Fuzz(
     FunctionSpecificationMessage* func_msg,
     void** result, const string& callback_socket_name) {
     const char* func_name = func_msg->name().c_str();
     cout << "Function: " << __func__ << " '" << func_name << "'" << endl;
-bt_interface_t* local_device = reinterpret_cast<bt_interface_t*>(device_);
-if (local_device == NULL) {
-    cout << "use hmi " << (uint64_t)hmi_ << endl;
-    local_device = reinterpret_cast<bt_interface_t*>(hmi_);
-}
-if (local_device == NULL) {
-    cerr << "both device_ and hmi_ are NULL." << endl;
-    return false;
-}
-if (!strcmp(func_name, "init")) {
-    cout << "match" << endl;
-    vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t* arg0callback = new vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t(callback_socket_name);
-    arg0callback->Register(func_msg->arg(0));
-    bt_callbacks_t* arg0 = (bt_callbacks_t*) malloc(sizeof(bt_callbacks_t*));
-    arg0->adapter_state_changed_cb = arg0callback->adapter_state_changed_cb;
-    arg0->adapter_properties_cb = arg0callback->adapter_properties_cb;
-    arg0->remote_device_properties_cb = arg0callback->remote_device_properties_cb;
-    arg0->device_found_cb = arg0callback->device_found_cb;
-    arg0->discovery_state_changed_cb = arg0callback->discovery_state_changed_cb;
-    arg0->pin_request_cb = arg0callback->pin_request_cb;
-    arg0->ssp_request_cb = arg0callback->ssp_request_cb;
-    arg0->bond_state_changed_cb = arg0callback->bond_state_changed_cb;
-    arg0->acl_state_changed_cb = arg0callback->acl_state_changed_cb;
-    arg0->thread_evt_cb = arg0callback->thread_evt_cb;
-    arg0->dut_mode_recv_cb = arg0callback->dut_mode_recv_cb;
-    arg0->le_test_mode_cb = arg0callback->le_test_mode_cb;
-    arg0->energy_info_cb = arg0callback->energy_info_cb;
-    cout << "arg0 = " << arg0 << endl;
-    VtsMeasurement vts_measurement;
-    vts_measurement.Start();
-    cout << "hit2." << device_ << endl;
-    if (reinterpret_cast<bt_interface_t*>(local_device)->init == NULL) {
-        cerr << "api not set." << endl;
+    bt_interface_t* local_device = reinterpret_cast<bt_interface_t*>(device_);
+    if (local_device == NULL) {
+        cout << "use hmi " << (uint64_t)hmi_ << endl;
+        local_device = reinterpret_cast<bt_interface_t*>(hmi_);
+    }
+    if (local_device == NULL) {
+        cerr << "both device_ and hmi_ are NULL." << endl;
         return false;
     }
-    cout << "Call an API." << endl;
-    cout << "local_device = " << local_device;
-    *result = const_cast<void*>(reinterpret_cast<const void*>(local_device->init(
-    arg0)));
-    vector<float>* measured = vts_measurement.Stop();
-    cout << "time " << (*measured)[0] << endl;
-    cout << "called" << endl;
-    return true;
-}
-cerr << "func not found" << endl;
-return false;
+    if (!strcmp(func_name, "init")) {
+        cout << "match" << endl;
+        vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t* arg0callback = new vts_callback_FuzzerExtended_bt_interface_t_bt_callbacks_t(callback_socket_name);
+        arg0callback->Register(func_msg->arg(0));
+        bt_callbacks_t* arg0 = (bt_callbacks_t*) malloc(sizeof(bt_callbacks_t*));
+        arg0->adapter_state_changed_cb = arg0callback->adapter_state_changed_cb;
+        arg0->adapter_properties_cb = arg0callback->adapter_properties_cb;
+        arg0->remote_device_properties_cb = arg0callback->remote_device_properties_cb;
+        arg0->device_found_cb = arg0callback->device_found_cb;
+        arg0->discovery_state_changed_cb = arg0callback->discovery_state_changed_cb;
+        arg0->pin_request_cb = arg0callback->pin_request_cb;
+        arg0->ssp_request_cb = arg0callback->ssp_request_cb;
+        arg0->bond_state_changed_cb = arg0callback->bond_state_changed_cb;
+        arg0->acl_state_changed_cb = arg0callback->acl_state_changed_cb;
+        arg0->thread_evt_cb = arg0callback->thread_evt_cb;
+        arg0->dut_mode_recv_cb = arg0callback->dut_mode_recv_cb;
+        arg0->le_test_mode_cb = arg0callback->le_test_mode_cb;
+        arg0->energy_info_cb = arg0callback->energy_info_cb;
+        cout << "arg0 = " << arg0 << endl;
+        VtsMeasurement vts_measurement;
+        vts_measurement.Start();
+        cout << "hit2." << device_ << endl;
+        if (reinterpret_cast<bt_interface_t*>(local_device)->init == NULL) {
+            cerr << "api not set." << endl;
+            return false;
+        }
+        cout << "Call an API." << endl;
+        cout << "local_device = " << local_device;
+        *result = const_cast<void*>(reinterpret_cast<const void*>(local_device->init(
+        arg0)));
+        vector<float>* measured = vts_measurement.Stop();
+        cout << "time " << (*measured)[0] << endl;
+        cout << "called" << endl;
+        return true;
     }
-
-    bool FuzzerExtended_bt_interface_t::GetAttribute(
-        FunctionSpecificationMessage* func_msg,
-        void** result) {
-const char* func_name = func_msg->name().c_str();
-cout << "Function: " << __func__ << " '" << func_name << "'" << endl;
-bt_interface_t* local_device = reinterpret_cast<bt_interface_t*>(device_);
-if (local_device == NULL) {
-    cout << "use hmi " << (uint64_t)hmi_ << endl;
-    local_device = reinterpret_cast<bt_interface_t*>(hmi_);
-}
-if (local_device == NULL) {
-    cerr << "both device_ and hmi_ are NULL." << endl;
+    cerr << "func not found" << endl;
     return false;
 }
-cerr << "attribute not found" << endl;
-return false;
+bool FuzzerExtended_bt_interface_t::GetAttribute(
+    FunctionSpecificationMessage* func_msg,
+    void** result) {
+    const char* func_name = func_msg->name().c_str();
+    cout << "Function: " << __func__ << " '" << func_name << "'" << endl;
+    bt_interface_t* local_device = reinterpret_cast<bt_interface_t*>(device_);
+    if (local_device == NULL) {
+        cout << "use hmi " << (uint64_t)hmi_ << endl;
+        local_device = reinterpret_cast<bt_interface_t*>(hmi_);
     }
+    if (local_device == NULL) {
+        cerr << "both device_ and hmi_ are NULL." << endl;
+        return false;
+    }
+    cerr << "attribute not found" << endl;
+    return false;
+}
+bool FuzzerExtended_bt_interface_t::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+    /* No implementation yet. */
+    return true;
+}
+bool FuzzerExtended_bt_interface_t::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+    /* No implementation yet. */
+    return true;
+}
+extern "C" {
+android::vts::FuzzerBase* vts_func_2_7_1_() {
+    return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_bt_interface_t();
+}
 
-    extern "C" {
-    android::vts::FuzzerBase* vts_func_2_7_1_() {
-return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_bt_interface_t();
-    }
-
-    }
-    }  // namespace vts
-    }  // namespace android
+}
+}  // namespace vts
+}  // namespace android
