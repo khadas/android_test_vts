@@ -25,12 +25,11 @@ namespace vts {
     return ::android::hardware::Void();
 }
 
-VtsNfcClientCallback* VtsFuzzerCreateINfcClientCallback(const string& callback_socket_name) {
-    return new VtsNfcClientCallback();
+sp<INfcClientCallback> VtsFuzzerCreateINfcClientCallback(const string& callback_socket_name) {
+    sp<INfcClientCallback> result;
+    result = new VtsNfcClientCallback();
+    return result;
 }
-
-
-
 
 }  // namespace vts
 }  // namespace android

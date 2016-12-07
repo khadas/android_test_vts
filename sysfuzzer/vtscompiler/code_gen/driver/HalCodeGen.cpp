@@ -292,7 +292,6 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     out.unindent();
     out << "}" << "\n";
   }
-  out.unindent();
 
   out << message.original_data_structure_name()
       << "* local_device = ";

@@ -37,14 +37,25 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       : DriverCodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(Formatter& out,
+  void GenerateClassHeader(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateClassImpl(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
 
   void GenerateCppBodyFuzzFunction(Formatter& out,
-      const StructSpecificationMessage& message,
-      const string& fuzzer_extended_class_name,
-      const string& original_data_structure_name, const string& parent_path);
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  virtual void GenerateDriverFunctionImpl(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateVerificationFunctionImpl(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateCppBodyGetAttributeFunction(Formatter& out,
       const ComponentSpecificationMessage& message,
@@ -73,30 +84,65 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
 
-  void GenerateClassHeader(Formatter& out,
+  void GenerateAdditionalFuctionDeclarations(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
-
-  void GenerateAdditionalFuctionDeclarations(Formatter& out,
-      const ComponentSpecificationMessage& message) override;
 
   void GeneratePrivateMemberDeclarations(Formatter& out,
       const ComponentSpecificationMessage& message) override;
 
-  void GenerateSubStructFuzzFunctionCall(Formatter& out,
-      const StructSpecificationMessage& message, const string& parent_path);
+  void GenerateCppBodyFuzzFunction(Formatter& out,
+      const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name, const string& parent_path);
 
   void GenerateCppBodySyncCallbackFunction(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
-  // instance variable name (e.g., device_);
-  static const char* const kInstanceVariableName;
+  void GenerateSubStructFuzzFunctionCall(Formatter& out,
+      const StructSpecificationMessage& message, const string& parent_path);
 
- protected:
   // Generates a scalar type in C/C++.
   void GenerateScalarTypeInC(Formatter& out, const string& type);
 
+  // Generates the driver function implementation for attributes defined within
+  // an interface or in a types.hal.
+  void GenerateDriverImplForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the driver code for a typed variable.
+  void GenerateDriverImplForTypedVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const string& arg_name,
+      const string& arg_value_name);
+
+  // Generates the verification function declarations for attributes defined
+  // within an interface or in a types.hal.
+  void GenerateVerificationDeclForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the verification function declarations for attributes defined
+  // within an interface or in a types.hal.
+  void GenerateVerificationImplForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the verification code for a typed variable.
+  void GenerateVerificationForTypedVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const string& result_value,
+      const string& expected_result);
+
+  // Generates the random function implementation for attributes defined within
+  // an interface or in a types.hal.
+  void GenerateRandomFunctionForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the getService function implementation for an interface.
+  void GenerateGetServiceImpl(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // instance variable name (e.g., device_);
+  static const char* const kInstanceVariableName;
 };
 
 }  // namespace vts

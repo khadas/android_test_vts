@@ -413,5 +413,10 @@ string GetVersionString(float version, bool for_macro) {
   return out.str();
 }
 
+string ClearStringWithNameSpaceAccess(const string& str) {
+  string result = str;
+  ReplaceSubString(result, "::", "__");
+  return result;
+}
 }  // namespace vts
 }  // namespace android
