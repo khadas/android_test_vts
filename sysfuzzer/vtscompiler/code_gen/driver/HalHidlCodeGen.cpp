@@ -219,6 +219,8 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
                  << "\n";
             exit(-1);
           }
+        } else if (return_type_hidl.type() == TYPE_HANDLE) {
+          out << "native_handle_t* ";
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                << return_type_hidl.type() << " for " << api.name() << "\n";
@@ -248,6 +250,8 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
           out << GetCppVariableType(return_type_hidl, &message);
         } else if (return_type_hidl.type() == TYPE_STRING) {
           out << "::android::hardware::hidl_string";
+        } else if (return_type_hidl.type() == TYPE_HANDLE) {
+          out << "native_handle_t* ";
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                << return_type_hidl.type() << " for " << api.name() << "\n";
@@ -832,6 +836,20 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                   exit(-1);
                 }
               }
+              out.unindent();
+              out << "}" << "\n";
+            } else if (struct_value.vector_value(0).type() == TYPE_ENUM) {
+              std::string enum_attribute_name =
+                  struct_value.vector_value(0).predefined_type();
+              out << "for (int value_index = 0; value_index < "
+                  << "var_msg.struct_value(" << struct_index
+                  << ").vector_size(); "
+                  << "value_index++) {" << "\n";
+              out.indent();
+              out << "arg->" << struct_value.name() << "[value_index] = "
+                  << "EnumValue" << enum_attribute_name << "("
+                  << "var_msg.struct_value(" << struct_index
+                  << ").vector_value(value_index).enum_value());" << "\n";
               out.unindent();
               out << "}" << "\n";
             } else {
