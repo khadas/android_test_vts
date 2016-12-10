@@ -19,8 +19,6 @@ vts_test_lib_hidl_packages := \
   libhidltransport \
   libvts_driver_hidl_nfc@1.0 \
   libvts_profiler_hidl_nfc@1.0 \
-  libvts_driver_hidl_vehicle@2.0 \
-  libvts_profiler_hidl_vehicle@2.0 \
   libvts_driver_hidl_vibrator@1.0 \
   libvts_profiler_hidl_vibrator@1.0 \
   libvts_driver_hidl_thermal@1.0 \
