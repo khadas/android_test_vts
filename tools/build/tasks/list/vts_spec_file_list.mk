@@ -39,3 +39,6 @@ vts_spec_file_list += \
   hardware/interfaces/sensors/1.0/vts/Sensors.vts \
   hardware/interfaces/sensors/1.0/vts/types.vts \
   hardware/interfaces/vr/1.0/vts/Vr.vts \
+  hardware/interfaces/tv/cec/1.0/vts/HdmiCec.vts \
+  hardware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts \
+  hardware/interfaces/tv/cec/1.0/vts/types.vts \

@@ -70,6 +70,8 @@ enum ComponentType {
   VIBRATOR = 12;
   // For a thermal submodule.
   THERMAL=13;
+  // For tv hdmi_cec submodule
+  TV_CEC = 15;
   // For sensors submodule
   SENSORS=16;
   // For a VR submodule.

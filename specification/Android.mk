@@ -77,6 +77,7 @@ LOCAL_C_INCLUDES := \
   android.hardware.vibrator@1.0 \
   android.hardware.thermal@1.0 \
   android.hardware.vr@1.0 \
+  android.hardware.tv.cec@1.0 \
   system/core/base/include \
 
 ifeq ($(VTS_ENABLE_TREBLE), true)
@@ -100,6 +101,8 @@ LOCAL_SHARED_LIBRARIES += \
   libvts_driver_hidl_thermal@1.0 \
   android.hardware.vr@1.0 \
   libvts_driver_hidl_vr@1.0 \
+  android.hardware.tv.cec@1.0 \
+  libvts_driver_hidl_tv_cec@1.0 \
 
 endif
 

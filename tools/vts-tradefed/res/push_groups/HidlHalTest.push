@@ -29,3 +29,9 @@ DATA/lib64/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/64/hw/android.hardw
 
 DATA/lib/libvts_driver_hidl_vr@1.0.so->/data/local/tmp/32/libvts_driver_hidl_vr@1.0.so
 DATA/lib64/libvts_driver_hidl_vr@1.0.so->/data/local/tmp/64/libvts_driver_hidl_vr@1.0.so
+ 
+DATA/lib/libvts_driver_hidl_tv_cec@1.0.so->/data/local/tmp/32/libvts_driver_hidl_tv_cec@1.0.so
+DATA/lib64/libvts_driver_hidl_tv_cec@1.0.so->/data/local/tmp/64/libvts_driver_hidl_tv_cec@1.0.so
+
+DATA/lib/libvts_profiler_hidl_tv_cec@1.0.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0::IHdmiCec.profiler.so
+DATA/lib64/libvts_profiler_hidl_tv_cec@1.0.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0::IHdmiCec.profiler.so

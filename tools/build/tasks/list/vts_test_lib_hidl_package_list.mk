@@ -32,6 +32,8 @@ vts_test_lib_hidl_packages := \
   libvts_profiler_hidl_boot@1.0 \
   libvts_driver_hidl_vr@1.0 \
   libvts_profiler_hidl_vr@1.0 \
+  libvts_driver_hidl_tv_cec@1.0 \
+  libvts_profiler_hidl_tv_cec@1.0 \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
