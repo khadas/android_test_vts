@@ -31,8 +31,6 @@ vtslib_interfacespec_srcfiles := \
   lib_bionic/libcV1.vts \
   lib_bionic/libcutilsV1.vts \
 
-VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
-
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
   test/vts/sysfuzzer \
@@ -77,15 +75,8 @@ LOCAL_C_INCLUDES := \
   android.hardware.thermal@1.0 \
   system/core/base/include \
 
-ifeq ($(VTS_ENABLE_TREBLE), true)
-LOCAL_CFLAGS += -DENABLE_TREBLE
-endif
-
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
-
-ifeq ($(VTS_ENABLE_TREBLE), true)
-LOCAL_SHARED_LIBRARIES += \
   libhwbinder \
   libhidlbase \
   libhidltransport \
@@ -96,8 +87,6 @@ LOCAL_SHARED_LIBRARIES += \
   libvts_driver_hidl_vibrator@1.0 \
   android.hardware.thermal@1.0 \
   libvts_driver_hidl_thermal@1.0 \
-
-endif
 
 LOCAL_STATIC_LIBRARIES := \
   ${vtslib_interfacespec_static_libraries}
