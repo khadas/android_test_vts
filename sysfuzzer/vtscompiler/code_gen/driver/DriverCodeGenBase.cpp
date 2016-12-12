@@ -37,6 +37,12 @@ namespace vts {
 void DriverCodeGenBase::GenerateAll(
     Formatter& header_out, Formatter& source_out,
     const ComponentSpecificationMessage& message) {
+  GenerateHeaderFile(header_out, message);
+  GenerateSourceFile(source_out, message);
+}
+
+void DriverCodeGenBase::GenerateHeaderFile(
+    Formatter& out, const ComponentSpecificationMessage& message) {
   string component_name = GetComponentName(message);
   if (component_name.empty()) {
     cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
@@ -45,14 +51,6 @@ void DriverCodeGenBase::GenerateAll(
   }
   string fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
 
-  GenerateHeaderFile(header_out, message, fuzzer_extended_class_name);
-  GenerateSourceFile(source_out, message, fuzzer_extended_class_name);
-}
-
-
-void DriverCodeGenBase::GenerateHeaderFile(
-    Formatter& out, const ComponentSpecificationMessage& message,
-    const string& fuzzer_extended_class_name) {
   out << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << "\n";
   out << "#define __VTS_SPEC_" << vts_name_ << "__" << "\n";
   out << "\n";
@@ -70,8 +68,15 @@ void DriverCodeGenBase::GenerateHeaderFile(
 }
 
 void DriverCodeGenBase::GenerateSourceFile(
-    Formatter& out, const ComponentSpecificationMessage& message,
-    const string& fuzzer_extended_class_name) {
+    Formatter& out, const ComponentSpecificationMessage& message) {
+  string component_name = GetComponentName(message);
+  if (component_name.empty()) {
+    cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
+         << "\n";
+    exit(-1);
+  }
+  string fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
+
   GenerateSourceIncludeFiles(out, message, fuzzer_extended_class_name);
   out << "\n\n";
   GenerateOpenNameSpaces(out, message);
