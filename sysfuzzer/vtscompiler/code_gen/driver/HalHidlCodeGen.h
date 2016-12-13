@@ -38,36 +38,56 @@ class HalHidlCodeGen : public DriverCodeGenBase {
 
  protected:
   void GenerateCppBodyFuzzFunction(Formatter& out,
-                                   const ComponentSpecificationMessage& message,
-                                   const string& fuzzer_extended_class_name);
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateCppBodyFuzzFunction(Formatter& out,
-                                   const StructSpecificationMessage& message,
-                                   const string& fuzzer_extended_class_name,
-                                   const string& original_data_structure_name,
-                                   const string& parent_path);
+      const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name, const string& parent_path);
 
-  void GenerateCppBodyGetAttributeFunction(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyGetAttributeFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateCppBodyCallbackFunction(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyCallbackFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateHeaderGlobalFunctionDeclarations(
-      Formatter& out, const string& function_prototype);
+  void GenerateClassConstructionFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateHeaderGlobalFunctionDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message) override;
 
   void GenerateCppBodyGlobalFunctions(Formatter& out,
-                                      const string& function_prototype,
-                                      const string& fuzzer_extended_class_name);
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateSubStructFuzzFunctionCall(
-      Formatter& out, const StructSpecificationMessage& message,
-      const string& parent_path);
+  void GenerateHeaderIncludeFiles(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateCppBodySyncCallbackFunction(
-      Formatter& out, const ComponentSpecificationMessage& message,
+  void GenerateSourceIncludeFiles(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateClassHeader(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateAdditionalFuctionDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message) override;
+
+  void GeneratePrivateMemberDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message) override;
+
+  void GenerateSubStructFuzzFunctionCall(Formatter& out,
+      const StructSpecificationMessage& message, const string& parent_path);
+
+  void GenerateCppBodySyncCallbackFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   // instance variable name (e.g., device_);
