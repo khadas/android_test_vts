@@ -105,10 +105,11 @@ void DriverCodeGenBase::GenerateClassHeader(Formatter& out,
   out.indent();
   out << "bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, "
       << "const string& callback_socket_name);\n";
-  out << "bool CallFunction(FunctionSpecificationMessage* func_msg, "
-      << "void** result, const string& callback_socket_name);\n";
-  out << "bool VerifyResults(FunctionSpecificationMessage* func_msg, "
-      << "vector<void *> results);\n";
+  out << "bool CallFunction(const FunctionSpecificationMessage& func_msg, "
+      << "const string& callback_socket_name, "
+      << "FunctionSpecificationMessage* result_msg);\n";
+  out << "bool VerifyResults(const FunctionSpecificationMessage& expected_result, "
+      << "const FunctionSpecificationMessage& actual_result);\n";
   out << "bool GetAttribute(FunctionSpecificationMessage* func_msg, "
       << "void** result);\n";
 
@@ -220,8 +221,8 @@ void DriverCodeGenBase::GenerateDriverFunctionImpl(Formatter& out,
     const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
   out << "bool " << fuzzer_extended_class_name
-      << "::CallFunction(FunctionSpecificationMessage*, "
-      << "void**, const string&) {\n";
+      << "::CallFunction(const FunctionSpecificationMessage&, const string&, "
+      << "FunctionSpecificationMessage* ) {\n";
   out.indent();
   out << "/* No implementation yet. */\n";
   out << "return true;\n";
@@ -233,7 +234,8 @@ void DriverCodeGenBase::GenerateVerificationFunctionImpl(Formatter& out,
     const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
   out << "bool " << fuzzer_extended_class_name
-      << "::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {\n";
+      << "::VerifyResults(const FunctionSpecificationMessage&, "
+      << "const FunctionSpecificationMessage&) {\n";
   out.indent();
   out << "/* No implementation yet. */\n";
   out << "return true;\n";

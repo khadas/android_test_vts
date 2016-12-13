@@ -199,11 +199,11 @@ bool FuzzerExtended_libc::GetAttribute(
     cerr << "attribute not supported for shared lib yet" << endl;
     return false;
 }
-bool FuzzerExtended_libc::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+bool FuzzerExtended_libc::CallFunction(const FunctionSpecificationMessage&, const string&, FunctionSpecificationMessage* ) {
     /* No implementation yet. */
     return true;
 }
-bool FuzzerExtended_libc::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+bool FuzzerExtended_libc::VerifyResults(const FunctionSpecificationMessage&, const FunctionSpecificationMessage&) {
     /* No implementation yet. */
     return true;
 }

@@ -128,6 +128,7 @@ string GetCppVariableType(const std::string scalar_type_string) {
   exit(-1);
 }
 
+// TODO(zhuoyao): refactor and support TYPE_ARRAY.
 string GetCppVariableType(const VariableSpecificationMessage& arg,
                           const ComponentSpecificationMessage* message) {
   if (arg.type() == TYPE_VOID) {
@@ -193,7 +194,9 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
            << arg.vector_value(0).type() << endl;
     }
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
-    return arg.predefined_type();
+    return "sp<" + arg.predefined_type() + ">";
+  } else if (arg.type() == TYPE_HANDLE) {
+    return "::android::hardware::hidl_handle";
   }
   cerr << __func__ << ":" << __LINE__ << " "
        << ": type " << arg.type() << " not supported" << endl;
