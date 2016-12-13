@@ -59,7 +59,7 @@ import java.util.ArrayList;
 
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
+IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
 
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
@@ -313,7 +313,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     /**
      * {@inheritDoc}
      */
-    @Override
+    // TODO(yim): enable below annotation and ITestCollector
+    //            when available on AOSP
+    // @Override
     public void setCollectTestsOnly(boolean shouldCollectTest) {
         mCollectTestsOnly = shouldCollectTest;
     }
