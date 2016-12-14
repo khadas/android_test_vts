@@ -14,10 +14,20 @@
 // limitations under the License.
 //
 
-subdirs = [
-     "common",
-     "libcodecoverage",
-     "libdatatype",
-     "libmeasurement",
-     "vtscompiler",
-]
+cc_library_shared {
+    name: "libvts_measurement",
+    srcs: [
+        "vts_measurement.cpp",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    shared_libs: [
+        "libcutils",
+        "libvts_common",
+    ],
+    export_include_dirs: [
+        "include",
+    ],
+}
