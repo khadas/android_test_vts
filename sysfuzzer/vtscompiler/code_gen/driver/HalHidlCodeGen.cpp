@@ -1409,37 +1409,49 @@ void HalHidlCodeGen::GenerateSourceIncludeFiles(Formatter& out,
         << message.component_name() << ".h>" << "\n";
     for (const auto& import : message.import()) {
       string mutable_import = import;
-      ReplaceSubString(mutable_import, ".", "/");
-      ReplaceSubString(mutable_import, "@", "/");
-      string base_dirpath = mutable_import.substr(
-          0, mutable_import.find_last_of("::") + 1);
+
       string base_filename = mutable_import.substr(
           mutable_import.find_last_of("::") + 1);
+      string base_dirpath = mutable_import.substr(
+          0, mutable_import.find_last_of("::") - 1);
+      string base_dirpath_without_version = base_dirpath.substr(
+          0, mutable_import.find_last_of("@"));
+      string base_dirpath_version = base_dirpath.substr(
+          mutable_import.find_last_of("@") + 1);
+      ReplaceSubString(base_dirpath_without_version, ".", "/");
+      base_dirpath = base_dirpath_without_version + "/" + base_dirpath_version;
 
-      if (base_filename == "types") {
-        out << "#include \""
-            << input_vfs_file_path.substr(
-                0, input_vfs_file_path.find_last_of("\\/")) << "/types.vts.h\""
-            << "\n";
-      }
-      if (base_filename != "types") {
-        if (message.component_name() != base_filename) {
+      string package_path_with_version = package_path + "/" +
+          GetVersionString(message.component_type_version());
+      if (base_dirpath == package_path_with_version) {
+        if (base_filename == "types") {
+          out << "#include \""
+              << input_vfs_file_path.substr(
+                  0, input_vfs_file_path.find_last_of("\\/")) << "/types.vts.h\""
+              << "\n";
+        }
+        if (base_filename != "types") {
+          if (message.component_name() != base_filename) {
+            out << "#include <" << package_path << "/"
+                << GetVersionString(message.component_type_version()) << "/"
+                << base_filename << ".h>" << "\n";
+          }
+          if (base_filename.substr(0, 1) == "I") {
+            out << "#include \""
+                << input_vfs_file_path.substr(
+                    0, input_vfs_file_path.find_last_of("\\/")) << "/"
+                << base_filename.substr(1, base_filename.length() - 1)
+                << ".vts.h\"" << "\n";
+          }
+        } else if (message.component_name() != base_filename) {
+          // TODO: consider restoring this when hidl packaging is fully defined.
+          // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << "\n";
           out << "#include <" << package_path << "/"
               << GetVersionString(message.component_type_version()) << "/"
               << base_filename << ".h>" << "\n";
         }
-        if (base_filename.substr(0, 1) == "I") {
-          out << "#include \""
-              << input_vfs_file_path.substr(
-                  0, input_vfs_file_path.find_last_of("\\/")) << "/"
-              << base_filename.substr(1, base_filename.length() - 1)
-              << ".vts.h\"" << "\n";
-        }
-      } else if (message.component_name() != base_filename) {
-        // TODO: consider restoring this when hidl packaging is fully defined.
-        // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << "\n";
-        out << "#include <" << package_path << "/"
-            << GetVersionString(message.component_type_version()) << "/"
+      } else {
+        out << "#include <" << base_dirpath << "/"
             << base_filename << ".h>" << "\n";
       }
     }

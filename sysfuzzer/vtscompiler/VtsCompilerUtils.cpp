@@ -418,5 +418,36 @@ string ClearStringWithNameSpaceAccess(const string& str) {
   ReplaceSubString(result, "::", "__");
   return result;
 }
+
+// Returns a string which joins the given dir_path and file_name.
+string PathJoin(const char* dir_path, const char* file_name) {
+  string result;
+  if (dir_path) {
+    result = dir_path;
+    if (!file_name) return result;
+  } else if (!file_name) return result;
+
+  if (file_name[0] != '.') {
+    if (result.c_str()[result.length()-1] != '/') {
+      result += "/";
+    }
+  }
+  result += file_name;
+  return result;
+}
+
+// Returns a string which remove given base_path from file_path if included.
+string RemoveBaseDir(const string& file_path, const string& base_path) {
+  if (strncmp(file_path.c_str(), base_path.c_str(), base_path.length())) {
+    return file_path;
+  }
+  string result;
+  result = &file_path.c_str()[base_path.length()];
+  if (result.c_str()[0] == '/') {
+    result = &result.c_str()[1];
+  }
+  return result;
+}
+
 }  // namespace vts
 }  // namespace android
