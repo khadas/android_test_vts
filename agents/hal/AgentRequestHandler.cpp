@@ -118,7 +118,8 @@ bool AgentRequestHandler::LaunchDriverService(
     int target_class, int target_type, float target_version,
     const string& target_package, const string& target_component_name,
     const string& module_name, int bits) {
-  cout << "[runner->agent] command " << __FUNCTION__ << endl;
+  cout << "[runner->agent] command " << __FUNCTION__ << " (file_path="
+       << file_path << ")" << endl;
   ResponseCode result = FAIL;
 
   // TODO: shall check whether there's a service with the same name and return

@@ -16,4 +16,4 @@
 
 source create-image.sh
 
-vts_multidevice_create_image angler_treble
+vts_multidevice_create_image angler ENABLE_TREBLE=true

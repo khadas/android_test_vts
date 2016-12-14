@@ -54,6 +54,7 @@ vtslib_interfacespec_shared_libraries := \
   liblog \
   libdl \
   libandroid_runtime \
+  libcamera_metadata \
   libvts_datatype \
   libvts_common \
   libvts_measurement \
