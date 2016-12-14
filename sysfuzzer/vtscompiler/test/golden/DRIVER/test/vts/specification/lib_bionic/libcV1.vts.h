@@ -1,5 +1,5 @@
-#ifndef __VTS_SPEC_libcV1.driver__
-#define __VTS_SPEC_libcV1.driver__
+#ifndef __VTS_SPEC__libcV1.driver__
+#define __VTS_SPEC__libcV1.driver__
 
 #define LOG_TAG "FuzzerExtended_libc"
 #include <unistd.h>

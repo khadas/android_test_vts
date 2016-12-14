@@ -1,5 +1,5 @@
-#ifndef __VTS_SPEC_NfcClientCallback.driver__
-#define __VTS_SPEC_NfcClientCallback.driver__
+#ifndef __VTS_SPEC_android_hardware_nfc_NfcClientCallback.driver__
+#define __VTS_SPEC_android_hardware_nfc_NfcClientCallback.driver__
 
 #define LOG_TAG "FuzzerExtended_INfcClientCallback"
 
