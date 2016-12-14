@@ -16,7 +16,7 @@
 
 package com.android.vts.servlet;
 
-import com.android.vts.helpers.BigtableHelper;
+import com.android.vts.util.BigtableHelper;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
