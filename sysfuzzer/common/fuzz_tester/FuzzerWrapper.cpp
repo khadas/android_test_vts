@@ -38,14 +38,15 @@ FuzzerWrapper::FuzzerWrapper()
 bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
     const char* spec_dll_path) {
   if (!spec_dll_path) {
-    cerr << __func__ << " arg is NULL" << endl;
+    cerr << __func__ << ":" << __LINE__ << " arg is NULL" << endl;
     return false;
   }
-  if (spec_dll_path_ && !strcmp(spec_dll_path, spec_dll_path_)) {
+  if (spec_dll_path_.size() > 0 &&
+      !strcmp(spec_dll_path, spec_dll_path_.c_str())) {
     return true;
   }
   spec_dll_path_ = spec_dll_path;
-  if (!dll_loader_.Load(spec_dll_path_, false)) return false;
+  if (!dll_loader_.Load(spec_dll_path_.c_str(), false)) return false;
   cout << "DLL loaded " << spec_dll_path_ << endl;
   return true;
 }
@@ -53,7 +54,7 @@ bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
 FuzzerBase* FuzzerWrapper::GetFuzzer(
     const vts::ComponentSpecificationMessage& message) {
   cout << __func__ << endl;
-  if (!spec_dll_path_) {
+  if (spec_dll_path_.size() == 0) {
     cerr << __func__ << ": spec_dll_path_ not set" << endl;
     return NULL;
   }

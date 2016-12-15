@@ -43,7 +43,7 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
   const char* ReadSpecification(const string& name);
   const char* Call(const string& arg);
   const char* GetAttribute(const string& arg);
-  const char* GetFunctions();
+  string ListFunctions() const;
 
  private:
   android::vts::SpecificationBuilder& spec_builder_;
