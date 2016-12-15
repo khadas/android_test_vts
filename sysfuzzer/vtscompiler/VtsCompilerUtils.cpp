@@ -90,13 +90,15 @@ string ComponentTypeToString(int component_type) {
 }
 
 string GetCppVariableType(const std::string scalar_type_string) {
-  if (scalar_type_string == "void" || scalar_type_string == "bool" ||
+  if (scalar_type_string == "void" ||
       scalar_type_string == "int32_t" || scalar_type_string == "uint32_t" ||
       scalar_type_string == "int8_t" || scalar_type_string == "uint8_t" ||
       scalar_type_string == "int64_t" || scalar_type_string == "uint64_t" ||
       scalar_type_string == "int16_t" || scalar_type_string == "uint16_t" ||
       scalar_type_string == "float_t" || scalar_type_string == "double_t") {
     return scalar_type_string;
+  } else if (scalar_type_string == "bool_t") {
+    return "bool";
   } else if (scalar_type_string == "ufloat") {
     return "unsigned float";
   } else if (scalar_type_string == "udouble") {
@@ -242,6 +244,11 @@ string GetCppInstanceType(
       return "(struct camera_device*) malloc(sizeof(struct camera_device))";
     } else if (arg.predefined_type() == "struct preview_stream_ops*") {
       return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
+    } else if (endsWith(arg.predefined_type(), "*")) {
+      // known use cases: bt_callbacks_t
+      return "(" + arg.predefined_type() + ") malloc(sizeof("
+          + arg.predefined_type().substr(0, arg.predefined_type().size() - 1)
+          + "))";
     } else {
       cerr << __func__ << ":" << __LINE__ << " "
            << "error: unknown instance type " << arg.predefined_type() << endl;
@@ -269,6 +276,8 @@ string GetCppInstanceType(
       return "RandomDouble()";
     } else if (arg.scalar_type() == "char_pointer") {
       return "RandomCharPointer()";
+    } else if (arg.scalar_type() == "uchar_pointer") {
+      return "(unsigned char*) RandomCharPointer()";
     } else if (arg.scalar_type() == "pointer" ||
                arg.scalar_type() == "void_pointer") {
       return "RandomVoidPointer()";

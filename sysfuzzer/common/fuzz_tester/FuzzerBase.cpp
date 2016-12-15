@@ -318,6 +318,12 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   return true;
 }
 
+bool FuzzerBase::SetTargetObject(void* object_pointer) {
+  device_ = NULL;
+  hmi_ = reinterpret_cast<struct hw_module_t*>(object_pointer);
+  return true;
+}
+
 bool FuzzerBase::GetService() {
   cerr << __func__ << " not impl" << endl;
   return false;

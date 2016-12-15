@@ -25,12 +25,16 @@
 #define DEFAULT_SHELL_DRIVER_FILE_PATH32 "./vts_shell_driver32"
 #define DEFAULT_SHELL_DRIVER_FILE_PATH64 "./vts_shell_driver64"
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
   char* spec_dir_path = NULL;
   char* hal_path32;
   char* hal_path64;
   char* shell_path32;
   char* shell_path64;
+
+  printf("|| VTS AGENT ||\n");
 
   if (argc == 1) {
     hal_path32 = DEFAULT_HAL_DRIVER_FILE_PATH32;

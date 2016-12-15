@@ -62,7 +62,8 @@ class MirrorObject(object):
                 max_num = key
         _function_pointer_id_dict[max_num + 1] = function_pointer
         id = str(max_num + 1)
-        self._callback_server.RegisterCallback(id, function_pointer)
+        if self._callback_server:
+            self._callback_server.RegisterCallback(id, function_pointer)
         return id
 
     def OpenConventionalHal(self, module_name=None):
@@ -247,6 +248,12 @@ class MirrorObject(object):
 
             if self._parent_path:
                 func_msg.parent_path = self._parent_path
+            logging.info("component_class %s", self._if_spec_msg.component_class)
+            if self._if_spec_msg.component_class == IfaceSpecMsg.HAL_CONVENTIONAL_SUBMODULE:
+                submodule_name = self._if_spec_msg.original_data_structure_name
+                if submodule_name.endswith("*"):
+                    submodule_name = submodule_name[:-1]
+                func_msg.submodule_name = submodule_name
             result = self._client.CallApi(text_format.MessageToString(func_msg))
             logging.debug(result)
             return result
