@@ -5,5 +5,6 @@ PRODUCT_PACKAGES += \
     vtsc \
     libvts_interfacespecification \
     vts_hal_agent \
+    lights.bullhead-vts \
 
 -include test/vts/sysfuzzer/libinterfacespecification/vts_specification.mk
