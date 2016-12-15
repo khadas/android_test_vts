@@ -38,6 +38,6 @@ module := libVtsGtestMain
 module_tag := optional
 build_type := target
 build_target := STATIC_TEST_LIBRARY
-include $(LOCAL_PATH)/../Android.build.mk
+include $(LOCAL_PATH)/../../../testcases/target/Android.build.mk
 build_type := host
-include $(LOCAL_PATH)/../Android.build.mk
+include $(LOCAL_PATH)/../../../testcases/target/Android.build.mk
