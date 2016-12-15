@@ -292,14 +292,30 @@ def parse(file_name):
         return Parser(stream).parse()
 
 
-def GenerateCoverageReport(src_file_content, gcov_file_content, basicblock_id_list):
-    """Returns the produced html file contents."""
+def GenerateCoverageReport(src_file_name, src_file_content, gcov_file_content,
+                           gcda_file_content):
+    """Returns the produced html file contents.
+
+    This merges the given GCDA files and produces merged coverage html file for
+    each source file.
+
+    Args:
+        src_file_name: string, the source file name.
+        src_file_content: string, the C/C++ source file content.
+        gcov_file_content: string, the raw gcov binary file content.
+        gcda_file_content: string, the raw gcda binary file content.
+
+    Returns:
+        the coverage HTML produced for 'src_file_name'.
+    """
     logging.info("GenerateCoverageReport: src_file_content %s",
                  src_file_content)
-    logging.info("GenerateCoverageReport: gcov_file_content %s",
-                 gcov_file_content)
-    logging.info("GenerateCoverageReport: basicblock_id_list %s",
-                 basicblock_id_list)
+    if gcov_file_content:
+        logging.info("GenerateCoverageReport: gcov_file_content %d bytes",
+                     len(gcov_file_content))
+    if gcda_file_content:
+        logging.info("GenerateCoverageReport: gcda_file_content %d bytes",
+                     len(gcda_file_content))
     return "<table border=0><tr><td>Code coverage will show up at here</table>"
 
 

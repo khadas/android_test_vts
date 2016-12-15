@@ -2353,7 +2353,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     java.util.List<com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage> 
@@ -2362,7 +2362,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index);
@@ -2370,7 +2370,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     int getCoverageCount();
@@ -2378,7 +2378,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     java.util.List<? extends com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
@@ -2387,7 +2387,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
@@ -2620,7 +2620,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     public java.util.List<com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage> getCoverageList() {
@@ -2630,7 +2630,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     public java.util.List<? extends com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
@@ -2641,7 +2641,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     public int getCoverageCount() {
@@ -2651,7 +2651,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index) {
@@ -2661,7 +2661,7 @@ public final class VtsReportMessage {
      * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
      *
      * <pre>
-     * coverage reports
+     * coverage report per file
      * </pre>
      */
     public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
@@ -3204,7 +3204,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public java.util.List<com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage> getCoverageList() {
@@ -3218,7 +3218,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public int getCoverageCount() {
@@ -3232,7 +3232,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage getCoverage(int index) {
@@ -3246,7 +3246,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder setCoverage(
@@ -3267,7 +3267,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder setCoverage(
@@ -3285,7 +3285,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder addCoverage(com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage value) {
@@ -3305,7 +3305,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder addCoverage(
@@ -3326,7 +3326,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder addCoverage(
@@ -3344,7 +3344,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder addCoverage(
@@ -3362,7 +3362,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder addAllCoverage(
@@ -3380,7 +3380,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder clearCoverage() {
@@ -3397,7 +3397,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public Builder removeCoverage(int index) {
@@ -3414,7 +3414,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder getCoverageBuilder(
@@ -3425,7 +3425,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
@@ -3439,7 +3439,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public java.util.List<? extends com.google.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder> 
@@ -3454,7 +3454,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder addCoverageBuilder() {
@@ -3465,7 +3465,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder addCoverageBuilder(
@@ -3477,7 +3477,7 @@ public final class VtsReportMessage {
        * <code>repeated .android.vts.CoverageReportMessage coverage = 31;</code>
        *
        * <pre>
-       * coverage reports
+       * coverage report per file
        * </pre>
        */
       public java.util.List<com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.Builder> 
@@ -4146,27 +4146,81 @@ public final class VtsReportMessage {
   public interface CoverageReportMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional bytes file_name = 1;
+    // optional bytes dir_path = 1;
     /**
-     * <code>optional bytes file_name = 1;</code>
+     * <code>optional bytes dir_path = 1;</code>
      *
      * <pre>
-     * source or object file name.
+     * the directory path of a source file.
+     * </pre>
+     */
+    boolean hasDirPath();
+    /**
+     * <code>optional bytes dir_path = 1;</code>
+     *
+     * <pre>
+     * the directory path of a source file.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getDirPath();
+
+    // optional bytes file_name = 2;
+    /**
+     * <code>optional bytes file_name = 2;</code>
+     *
+     * <pre>
+     * the name of the source file.
      * </pre>
      */
     boolean hasFileName();
     /**
-     * <code>optional bytes file_name = 1;</code>
+     * <code>optional bytes file_name = 2;</code>
      *
      * <pre>
-     * source or object file name.
+     * the name of the source file.
      * </pre>
      */
     com.google.protobuf.ByteString getFileName();
 
-    // optional bytes gcno = 11;
+    // optional bytes html = 3;
     /**
-     * <code>optional bytes gcno = 11;</code>
+     * <code>optional bytes html = 3;</code>
+     *
+     * <pre>
+     * produced html report.
+     * </pre>
+     */
+    boolean hasHtml();
+    /**
+     * <code>optional bytes html = 3;</code>
+     *
+     * <pre>
+     * produced html report.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getHtml();
+
+    // optional bytes source_code = 11;
+    /**
+     * <code>optional bytes source_code = 11;</code>
+     *
+     * <pre>
+     * the source file content.
+     * </pre>
+     */
+    boolean hasSourceCode();
+    /**
+     * <code>optional bytes source_code = 11;</code>
+     *
+     * <pre>
+     * the source file content.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getSourceCode();
+
+    // optional bytes gcno = 21;
+    /**
+     * <code>optional bytes gcno = 21;</code>
      *
      * <pre>
      * gcov produced data files.
@@ -4174,7 +4228,7 @@ public final class VtsReportMessage {
      */
     boolean hasGcno();
     /**
-     * <code>optional bytes gcno = 11;</code>
+     * <code>optional bytes gcno = 21;</code>
      *
      * <pre>
      * gcov produced data files.
@@ -4182,19 +4236,19 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getGcno();
 
-    // optional bytes gcda = 12;
+    // optional bytes gcda = 22;
     /**
-     * <code>optional bytes gcda = 12;</code>
+     * <code>optional bytes gcda = 22;</code>
      */
     boolean hasGcda();
     /**
-     * <code>optional bytes gcda = 12;</code>
+     * <code>optional bytes gcda = 22;</code>
      */
     com.google.protobuf.ByteString getGcda();
 
-    // repeated bytes data = 101;
+    // repeated bytes data = 31;
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
@@ -4202,7 +4256,7 @@ public final class VtsReportMessage {
      */
     java.util.List<com.google.protobuf.ByteString> getDataList();
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
@@ -4210,13 +4264,31 @@ public final class VtsReportMessage {
      */
     int getDataCount();
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
      * </pre>
      */
     com.google.protobuf.ByteString getData(int index);
+
+    // optional bytes gcov = 32;
+    /**
+     * <code>optional bytes gcov = 32;</code>
+     *
+     * <pre>
+     * generated gcov data file.
+     * </pre>
+     */
+    boolean hasGcov();
+    /**
+     * <code>optional bytes gcov = 32;</code>
+     *
+     * <pre>
+     * generated gcov data file.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getGcov();
   }
   /**
    * Protobuf type {@code android.vts.CoverageReportMessage}
@@ -4275,25 +4347,45 @@ public final class VtsReportMessage {
             }
             case 10: {
               bitField0_ |= 0x00000001;
+              dirPath_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
               fileName_ = input.readBytes();
               break;
             }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              html_ = input.readBytes();
+              break;
+            }
             case 90: {
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000008;
+              sourceCode_ = input.readBytes();
+              break;
+            }
+            case 170: {
+              bitField0_ |= 0x00000010;
               gcno_ = input.readBytes();
               break;
             }
-            case 98: {
-              bitField0_ |= 0x00000004;
+            case 178: {
+              bitField0_ |= 0x00000020;
               gcda_ = input.readBytes();
               break;
             }
-            case 810: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            case 250: {
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
                 data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000040;
               }
               data_.add(input.readBytes());
+              break;
+            }
+            case 258: {
+              bitField0_ |= 0x00000040;
+              gcov_ = input.readBytes();
               break;
             }
           }
@@ -4304,7 +4396,7 @@ public final class VtsReportMessage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
           data_ = java.util.Collections.unmodifiableList(data_);
         }
         this.unknownFields = unknownFields.build();
@@ -4339,45 +4431,117 @@ public final class VtsReportMessage {
     }
 
     private int bitField0_;
-    // optional bytes file_name = 1;
-    public static final int FILE_NAME_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString fileName_;
+    // optional bytes dir_path = 1;
+    public static final int DIR_PATH_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString dirPath_;
     /**
-     * <code>optional bytes file_name = 1;</code>
+     * <code>optional bytes dir_path = 1;</code>
      *
      * <pre>
-     * source or object file name.
+     * the directory path of a source file.
      * </pre>
      */
-    public boolean hasFileName() {
+    public boolean hasDirPath() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes file_name = 1;</code>
+     * <code>optional bytes dir_path = 1;</code>
      *
      * <pre>
-     * source or object file name.
+     * the directory path of a source file.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getDirPath() {
+      return dirPath_;
+    }
+
+    // optional bytes file_name = 2;
+    public static final int FILE_NAME_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString fileName_;
+    /**
+     * <code>optional bytes file_name = 2;</code>
+     *
+     * <pre>
+     * the name of the source file.
+     * </pre>
+     */
+    public boolean hasFileName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes file_name = 2;</code>
+     *
+     * <pre>
+     * the name of the source file.
      * </pre>
      */
     public com.google.protobuf.ByteString getFileName() {
       return fileName_;
     }
 
-    // optional bytes gcno = 11;
-    public static final int GCNO_FIELD_NUMBER = 11;
+    // optional bytes html = 3;
+    public static final int HTML_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString html_;
+    /**
+     * <code>optional bytes html = 3;</code>
+     *
+     * <pre>
+     * produced html report.
+     * </pre>
+     */
+    public boolean hasHtml() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes html = 3;</code>
+     *
+     * <pre>
+     * produced html report.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getHtml() {
+      return html_;
+    }
+
+    // optional bytes source_code = 11;
+    public static final int SOURCE_CODE_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString sourceCode_;
+    /**
+     * <code>optional bytes source_code = 11;</code>
+     *
+     * <pre>
+     * the source file content.
+     * </pre>
+     */
+    public boolean hasSourceCode() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bytes source_code = 11;</code>
+     *
+     * <pre>
+     * the source file content.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getSourceCode() {
+      return sourceCode_;
+    }
+
+    // optional bytes gcno = 21;
+    public static final int GCNO_FIELD_NUMBER = 21;
     private com.google.protobuf.ByteString gcno_;
     /**
-     * <code>optional bytes gcno = 11;</code>
+     * <code>optional bytes gcno = 21;</code>
      *
      * <pre>
      * gcov produced data files.
      * </pre>
      */
     public boolean hasGcno() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional bytes gcno = 11;</code>
+     * <code>optional bytes gcno = 21;</code>
      *
      * <pre>
      * gcov produced data files.
@@ -4387,27 +4551,27 @@ public final class VtsReportMessage {
       return gcno_;
     }
 
-    // optional bytes gcda = 12;
-    public static final int GCDA_FIELD_NUMBER = 12;
+    // optional bytes gcda = 22;
+    public static final int GCDA_FIELD_NUMBER = 22;
     private com.google.protobuf.ByteString gcda_;
     /**
-     * <code>optional bytes gcda = 12;</code>
+     * <code>optional bytes gcda = 22;</code>
      */
     public boolean hasGcda() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
-     * <code>optional bytes gcda = 12;</code>
+     * <code>optional bytes gcda = 22;</code>
      */
     public com.google.protobuf.ByteString getGcda() {
       return gcda_;
     }
 
-    // repeated bytes data = 101;
-    public static final int DATA_FIELD_NUMBER = 101;
+    // repeated bytes data = 31;
+    public static final int DATA_FIELD_NUMBER = 31;
     private java.util.List<com.google.protobuf.ByteString> data_;
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
@@ -4418,7 +4582,7 @@ public final class VtsReportMessage {
       return data_;
     }
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
@@ -4428,7 +4592,7 @@ public final class VtsReportMessage {
       return data_.size();
     }
     /**
-     * <code>repeated bytes data = 101;</code>
+     * <code>repeated bytes data = 31;</code>
      *
      * <pre>
      * measured coverage data.
@@ -4438,11 +4602,39 @@ public final class VtsReportMessage {
       return data_.get(index);
     }
 
+    // optional bytes gcov = 32;
+    public static final int GCOV_FIELD_NUMBER = 32;
+    private com.google.protobuf.ByteString gcov_;
+    /**
+     * <code>optional bytes gcov = 32;</code>
+     *
+     * <pre>
+     * generated gcov data file.
+     * </pre>
+     */
+    public boolean hasGcov() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bytes gcov = 32;</code>
+     *
+     * <pre>
+     * generated gcov data file.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getGcov() {
+      return gcov_;
+    }
+
     private void initFields() {
+      dirPath_ = com.google.protobuf.ByteString.EMPTY;
       fileName_ = com.google.protobuf.ByteString.EMPTY;
+      html_ = com.google.protobuf.ByteString.EMPTY;
+      sourceCode_ = com.google.protobuf.ByteString.EMPTY;
       gcno_ = com.google.protobuf.ByteString.EMPTY;
       gcda_ = com.google.protobuf.ByteString.EMPTY;
       data_ = java.util.Collections.emptyList();
+      gcov_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -4457,16 +4649,28 @@ public final class VtsReportMessage {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, fileName_);
+        output.writeBytes(1, dirPath_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(11, gcno_);
+        output.writeBytes(2, fileName_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(12, gcda_);
+        output.writeBytes(3, html_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(11, sourceCode_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(21, gcno_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(22, gcda_);
       }
       for (int i = 0; i < data_.size(); i++) {
-        output.writeBytes(101, data_.get(i));
+        output.writeBytes(31, data_.get(i));
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBytes(32, gcov_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -4479,15 +4683,27 @@ public final class VtsReportMessage {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, fileName_);
+          .computeBytesSize(1, dirPath_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(11, gcno_);
+          .computeBytesSize(2, fileName_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(12, gcda_);
+          .computeBytesSize(3, html_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, sourceCode_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(21, gcno_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(22, gcda_);
       }
       {
         int dataSize = 0;
@@ -4497,6 +4713,10 @@ public final class VtsReportMessage {
         }
         size += dataSize;
         size += 2 * getDataList().size();
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(32, gcov_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -4618,14 +4838,22 @@ public final class VtsReportMessage {
 
       public Builder clear() {
         super.clear();
-        fileName_ = com.google.protobuf.ByteString.EMPTY;
+        dirPath_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        gcno_ = com.google.protobuf.ByteString.EMPTY;
+        fileName_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
-        gcda_ = com.google.protobuf.ByteString.EMPTY;
+        html_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
-        data_ = java.util.Collections.emptyList();
+        sourceCode_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        gcno_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        gcda_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        data_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        gcov_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -4657,20 +4885,36 @@ public final class VtsReportMessage {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.fileName_ = fileName_;
+        result.dirPath_ = dirPath_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.gcno_ = gcno_;
+        result.fileName_ = fileName_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.html_ = html_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.sourceCode_ = sourceCode_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.gcno_ = gcno_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
         result.gcda_ = gcda_;
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
           data_ = java.util.Collections.unmodifiableList(data_);
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000040);
         }
         result.data_ = data_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.gcov_ = gcov_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -4687,8 +4931,17 @@ public final class VtsReportMessage {
 
       public Builder mergeFrom(com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage other) {
         if (other == com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage.getDefaultInstance()) return this;
+        if (other.hasDirPath()) {
+          setDirPath(other.getDirPath());
+        }
         if (other.hasFileName()) {
           setFileName(other.getFileName());
+        }
+        if (other.hasHtml()) {
+          setHtml(other.getHtml());
+        }
+        if (other.hasSourceCode()) {
+          setSourceCode(other.getSourceCode());
         }
         if (other.hasGcno()) {
           setGcno(other.getGcno());
@@ -4699,12 +4952,15 @@ public final class VtsReportMessage {
         if (!other.data_.isEmpty()) {
           if (data_.isEmpty()) {
             data_ = other.data_;
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000040);
           } else {
             ensureDataIsMutable();
             data_.addAll(other.data_);
           }
           onChanged();
+        }
+        if (other.hasGcov()) {
+          setGcov(other.getGcov());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -4733,72 +4989,228 @@ public final class VtsReportMessage {
       }
       private int bitField0_;
 
-      // optional bytes file_name = 1;
-      private com.google.protobuf.ByteString fileName_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes dir_path = 1;
+      private com.google.protobuf.ByteString dirPath_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes file_name = 1;</code>
+       * <code>optional bytes dir_path = 1;</code>
        *
        * <pre>
-       * source or object file name.
+       * the directory path of a source file.
        * </pre>
        */
-      public boolean hasFileName() {
+      public boolean hasDirPath() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes file_name = 1;</code>
+       * <code>optional bytes dir_path = 1;</code>
        *
        * <pre>
-       * source or object file name.
+       * the directory path of a source file.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getDirPath() {
+        return dirPath_;
+      }
+      /**
+       * <code>optional bytes dir_path = 1;</code>
+       *
+       * <pre>
+       * the directory path of a source file.
+       * </pre>
+       */
+      public Builder setDirPath(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        dirPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes dir_path = 1;</code>
+       *
+       * <pre>
+       * the directory path of a source file.
+       * </pre>
+       */
+      public Builder clearDirPath() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        dirPath_ = getDefaultInstance().getDirPath();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes file_name = 2;
+      private com.google.protobuf.ByteString fileName_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes file_name = 2;</code>
+       *
+       * <pre>
+       * the name of the source file.
+       * </pre>
+       */
+      public boolean hasFileName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes file_name = 2;</code>
+       *
+       * <pre>
+       * the name of the source file.
        * </pre>
        */
       public com.google.protobuf.ByteString getFileName() {
         return fileName_;
       }
       /**
-       * <code>optional bytes file_name = 1;</code>
+       * <code>optional bytes file_name = 2;</code>
        *
        * <pre>
-       * source or object file name.
+       * the name of the source file.
        * </pre>
        */
       public Builder setFileName(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         fileName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes file_name = 1;</code>
+       * <code>optional bytes file_name = 2;</code>
        *
        * <pre>
-       * source or object file name.
+       * the name of the source file.
        * </pre>
        */
       public Builder clearFileName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         fileName_ = getDefaultInstance().getFileName();
         onChanged();
         return this;
       }
 
-      // optional bytes gcno = 11;
+      // optional bytes html = 3;
+      private com.google.protobuf.ByteString html_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes html = 3;</code>
+       *
+       * <pre>
+       * produced html report.
+       * </pre>
+       */
+      public boolean hasHtml() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes html = 3;</code>
+       *
+       * <pre>
+       * produced html report.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getHtml() {
+        return html_;
+      }
+      /**
+       * <code>optional bytes html = 3;</code>
+       *
+       * <pre>
+       * produced html report.
+       * </pre>
+       */
+      public Builder setHtml(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        html_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes html = 3;</code>
+       *
+       * <pre>
+       * produced html report.
+       * </pre>
+       */
+      public Builder clearHtml() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        html_ = getDefaultInstance().getHtml();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes source_code = 11;
+      private com.google.protobuf.ByteString sourceCode_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes source_code = 11;</code>
+       *
+       * <pre>
+       * the source file content.
+       * </pre>
+       */
+      public boolean hasSourceCode() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bytes source_code = 11;</code>
+       *
+       * <pre>
+       * the source file content.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getSourceCode() {
+        return sourceCode_;
+      }
+      /**
+       * <code>optional bytes source_code = 11;</code>
+       *
+       * <pre>
+       * the source file content.
+       * </pre>
+       */
+      public Builder setSourceCode(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        sourceCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes source_code = 11;</code>
+       *
+       * <pre>
+       * the source file content.
+       * </pre>
+       */
+      public Builder clearSourceCode() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        sourceCode_ = getDefaultInstance().getSourceCode();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes gcno = 21;
       private com.google.protobuf.ByteString gcno_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes gcno = 11;</code>
+       * <code>optional bytes gcno = 21;</code>
        *
        * <pre>
        * gcov produced data files.
        * </pre>
        */
       public boolean hasGcno() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>optional bytes gcno = 11;</code>
+       * <code>optional bytes gcno = 21;</code>
        *
        * <pre>
        * gcov produced data files.
@@ -4808,7 +5220,7 @@ public final class VtsReportMessage {
         return gcno_;
       }
       /**
-       * <code>optional bytes gcno = 11;</code>
+       * <code>optional bytes gcno = 21;</code>
        *
        * <pre>
        * gcov produced data files.
@@ -4818,71 +5230,71 @@ public final class VtsReportMessage {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000010;
         gcno_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes gcno = 11;</code>
+       * <code>optional bytes gcno = 21;</code>
        *
        * <pre>
        * gcov produced data files.
        * </pre>
        */
       public Builder clearGcno() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000010);
         gcno_ = getDefaultInstance().getGcno();
         onChanged();
         return this;
       }
 
-      // optional bytes gcda = 12;
+      // optional bytes gcda = 22;
       private com.google.protobuf.ByteString gcda_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes gcda = 12;</code>
+       * <code>optional bytes gcda = 22;</code>
        */
       public boolean hasGcda() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>optional bytes gcda = 12;</code>
+       * <code>optional bytes gcda = 22;</code>
        */
       public com.google.protobuf.ByteString getGcda() {
         return gcda_;
       }
       /**
-       * <code>optional bytes gcda = 12;</code>
+       * <code>optional bytes gcda = 22;</code>
        */
       public Builder setGcda(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000020;
         gcda_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes gcda = 12;</code>
+       * <code>optional bytes gcda = 22;</code>
        */
       public Builder clearGcda() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000020);
         gcda_ = getDefaultInstance().getGcda();
         onChanged();
         return this;
       }
 
-      // repeated bytes data = 101;
+      // repeated bytes data = 31;
       private java.util.List<com.google.protobuf.ByteString> data_ = java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
           data_ = new java.util.ArrayList<com.google.protobuf.ByteString>(data_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000040;
          }
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4893,7 +5305,7 @@ public final class VtsReportMessage {
         return java.util.Collections.unmodifiableList(data_);
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4903,7 +5315,7 @@ public final class VtsReportMessage {
         return data_.size();
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4913,7 +5325,7 @@ public final class VtsReportMessage {
         return data_.get(index);
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4930,7 +5342,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4946,7 +5358,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4960,7 +5372,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 101;</code>
+       * <code>repeated bytes data = 31;</code>
        *
        * <pre>
        * measured coverage data.
@@ -4968,7 +5380,59 @@ public final class VtsReportMessage {
        */
       public Builder clearData() {
         data_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+
+      // optional bytes gcov = 32;
+      private com.google.protobuf.ByteString gcov_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes gcov = 32;</code>
+       *
+       * <pre>
+       * generated gcov data file.
+       * </pre>
+       */
+      public boolean hasGcov() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional bytes gcov = 32;</code>
+       *
+       * <pre>
+       * generated gcov data file.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getGcov() {
+        return gcov_;
+      }
+      /**
+       * <code>optional bytes gcov = 32;</code>
+       *
+       * <pre>
+       * generated gcov data file.
+       * </pre>
+       */
+      public Builder setGcov(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        gcov_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes gcov = 32;</code>
+       *
+       * <pre>
+       * generated gcov data file.
+       * </pre>
+       */
+      public Builder clearGcov() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        gcov_ = getDefaultInstance().getGcov();
         onChanged();
         return this;
       }
@@ -7582,28 +8046,30 @@ public final class VtsReportMessage {
       "\026 \001(\003\0224\n\010coverage\030\037 \003(\0132\".android.vts.Co" +
       "verageReportMessage\"V\n\026ProfilingReportMe" +
       "ssage\022\014\n\004name\030\001 \001(\014\022\027\n\017start_timestamp\030\013" +
-      " \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\"T\n\025CoverageR" +
-      "eportMessage\022\021\n\tfile_name\030\001 \001(\014\022\014\n\004gcno\030" +
-      "\013 \001(\014\022\014\n\004gcda\030\014 \001(\014\022\014\n\004data\030e \003(\014\"\360\002\n\021Te" +
-      "stReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004t" +
-      "est\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.android.v" +
-      "ts.VtsTestType\022:\n\013device_info\030\004 \003(\0132%.an",
-      "droid.vts.AndroidDeviceInfoMessage\0221\n\nbu" +
-      "ild_info\030\005 \001(\0132\035.android.vts.AndroidBuil" +
-      "dInfo\0225\n\ttest_case\030\013 \003(\0132\".android.vts.T" +
-      "estCaseReportMessage\0226\n\tprofiling\030\025 \003(\0132" +
-      "#.android.vts.ProfilingReportMessage\022\027\n\017" +
-      "start_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f" +
-      " \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESUL" +
-      "T\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_C" +
-      "ASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SK" +
-      "IP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030",
-      "TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestTy" +
-      "pe\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST" +
-      "_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_" +
-      "FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027" +
-      "VTS_TARGET_SIDE_FUZZING\020\004B0\n\034com.google." +
-      "android.vts.protoB\020VtsReportMessage"
+      " \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\"\227\001\n\025Coverage" +
+      "ReportMessage\022\020\n\010dir_path\030\001 \001(\014\022\021\n\tfile_" +
+      "name\030\002 \001(\014\022\014\n\004html\030\003 \001(\014\022\023\n\013source_code\030" +
+      "\013 \001(\014\022\014\n\004gcno\030\025 \001(\014\022\014\n\004gcda\030\026 \001(\014\022\014\n\004dat" +
+      "a\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\"\360\002\n\021TestReportMess" +
+      "age\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n",
+      "\ttest_type\030\003 \001(\0162\030.android.vts.VtsTestTy" +
+      "pe\022:\n\013device_info\030\004 \003(\0132%.android.vts.An" +
+      "droidDeviceInfoMessage\0221\n\nbuild_info\030\005 \001" +
+      "(\0132\035.android.vts.AndroidBuildInfo\0225\n\ttes" +
+      "t_case\030\013 \003(\0132\".android.vts.TestCaseRepor" +
+      "tMessage\0226\n\tprofiling\030\025 \003(\0132#.android.vt" +
+      "s.ProfilingReportMessage\022\027\n\017start_timest" +
+      "amp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003*\263\001\n\016Tes" +
+      "tCaseResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_" +
+      "CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE_RESULT_F",
+      "AIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST" +
+      "_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RE" +
+      "SULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOW" +
+      "N_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRU" +
+      "CTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n" +
+      "\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_S" +
+      "IDE_FUZZING\020\004B0\n\034com.google.android.vts." +
+      "protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -7639,7 +8105,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_CoverageReportMessage_descriptor,
-              new java.lang.String[] { "FileName", "Gcno", "Gcda", "Data", });
+              new java.lang.String[] { "DirPath", "FileName", "Html", "SourceCode", "Gcno", "Gcda", "Data", "Gcov", });
           internal_static_android_vts_TestReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new

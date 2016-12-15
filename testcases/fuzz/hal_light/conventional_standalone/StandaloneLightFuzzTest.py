@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import copy
 import logging
 import random
 import time
@@ -84,6 +85,7 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             flashOffMs=200,
             brightnessMode=self.dut.hal.light.BRIGHTNESS_MODE_USER)
 
+        last_coverage_data = None
         for iteration in range(self.iteartion_count):
             index = 0
             logging.info("whitebox iteration %d", iteration)
@@ -91,18 +93,20 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             for gene in genes:
                 logging.debug("Gene %d", index)
                 result = self.dut.hal.light.set_light(None, gene)
-                if len(result.coverage_data) > 0:
+                if len(result.processed_coverage_data) > 0:
                     gene_coverage = []
-                    logging.info("coverage: %s", result.coverage_data)
-                    for coverage_data in result.coverage_data:
-                        gene_coverage.append(coverage_data)
-                        self.AddCoverageData(coverage_data)
+                    logging.info("coverage: %s", result.processed_coverage_data)
+                    for processed_coverage_data in result.processed_coverage_data:
+                        gene_coverage.append(processed_coverage_data)
                     coverages.append(gene_coverage)
+                    last_coverage_data = copy.copy(result.raw_coverage_data)
                 index += 1
             evolution = GenePool.Evolution()
             genes = evolution.Evolve(genes,
                                      self.dut.hal.light.light_state_t_fuzz,
                                      coverages=coverages)
+        if len(last_coverage_data) > 0:
+            self.SetCoverageData(last_coverage_data)
 
 
 if __name__ == "__main__":

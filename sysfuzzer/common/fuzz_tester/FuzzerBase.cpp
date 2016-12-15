@@ -24,7 +24,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -449,21 +451,20 @@ void FuzzerBase::FunctionCallBegin() {
   cout << __func__ << ":" << __LINE__ << " end" << endl;
 }
 
-vector<unsigned>* FuzzerBase::FunctionCallEnd() {
+bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
   cout << __FUNCTION__ << ": gcov flush " << endl;
-  std::vector<unsigned>* result = NULL;
   cout << __func__ << endl;
 #if USE_GCOV
   target_loader_.GcovFlush();
   // find the file.
   if (!gcov_output_basepath_) {
     cerr << __FUNCTION__ << ": no gcov basepath set" << endl;
-    return NULL;
+    return false;
   }
   DIR* srcdir = opendir(gcov_output_basepath_);
   if (!srcdir) {
     cerr << __func__ << " couln't open " << gcov_output_basepath_ << endl;
-    return NULL;
+    return false;
   }
 
   int dir_count = 0;
@@ -486,10 +487,27 @@ vector<unsigned>* FuzzerBase::FunctionCallEnd() {
         if (!buffer) {
           cerr << __FUNCTION__ << ": OOM" << endl;
           closedir(srcdir);
-          return NULL;
+          return false;
         }
         sprintf(buffer, "%s/%s", gcov_output_basepath_, dent->d_name);
-        result = android::vts::parse_gcda_file(buffer);
+
+        vector<unsigned>* processed_data = android::vts::parse_gcda_file(buffer);
+        for (const auto& data : *processed_data) {
+          msg->mutable_processed_coverage_data()->Add(data);
+        }
+
+        ifstream gcda_file(buffer);
+        if (gcda_file.is_open()) {
+          cerr << "Unable to open a gcda file. " << buffer << endl;
+        } else {
+          stringstream str_stream;
+          str_stream << gcda_file.rdbuf();
+          gcda_file.close();
+          NativeCodeCoverageRawDataMessage* raw_msg =
+              msg->mutable_raw_coverage_data()->Add();
+          raw_msg->set_file_path(dent->d_name);
+          raw_msg->set_gcda(str_stream.str());
+        }
 #if USE_GCOV_DEBUG
         if (result) {
           for (unsigned int index = 0; index < result->size(); index++) {
@@ -504,7 +522,7 @@ vector<unsigned>* FuzzerBase::FunctionCallEnd() {
   }
   closedir(srcdir);
 #endif
-  return result;
+  return true;
 }
 
 }  // namespace vts
