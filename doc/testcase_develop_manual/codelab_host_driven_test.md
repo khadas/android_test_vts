@@ -20,150 +20,31 @@ Then to check the vts project directory,
 
 ### 1.2. Create a test project
 
-Create your test project directory under,
+Create your test project using:
 
-`$ mkdir test/vts/testcases/codelab/hello_world`  # note that the dir is already created.
+`scripts/init_test_case.py <your project name> <your project directory>`
+
+Project name is required to be upper camel case (trailing numbers are allowed), and test directory
+is a relative directory under `test/vts/testcases`.
+
+For example, to create your test project `HelloAndroid` under directory
+`test/vts/testcases/codelab/hello_android`, use the following command:
+
+`scripts/init_test_case.py --name HelloAndroid --dir codelab/hello_android`
+
+This will create `Android.mk file`, `AndroidTest.xml`, `__init__.py`, and populate parent directories
+with necessary packaging files.
+
+The actual python test case file, which contains two simple hello world tests, is created under the
+specified project directory using the lower under score version of the project name.
 
 In practice, use
 
-- `test/vts/testcases/**host**/<your project name>` if your project is for HAL (Hardware Abstraction Layer) or libraries
+- `-dir **host**/<your project name>` if your project is for HAL (Hardware Abstraction Layer) or libraries
 
-- `test/vts/testcases/**kernel**/<your project name>` if your project is for kernel or kernel modules
+- `-dir **kernel**/<your project name>` if your project is for kernel or kernel modules
 
-### 1.3. Create Android.mk file
-
-`$ vi test/vts/testcases/host/codelab/hello_world/Android.mk`
-
-Then edit its contents to:
-
----
-```makefile
-LOCAL_PATH := $(call my-dir)
-
-include $(call all-subdir-makefiles)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := CodeLabHelloWorld
-LOCAL_MODULE_CLASS := FAKE
-LOCAL_IS_HOST_MODULE := true
-LOCAL_COMPATIBILITY_SUITE := vts
-
-include $(BUILD_SYSTEM)/base_rules.mk
-
-$(LOCAL_BUILT_MODULE):
-  @echo "VTS host-driven test target: $(LOCAL_MODULE)"
-  $(hide) touch $@
-
-VTS_CONFIG_SRC_DIR := testcases/codelab/hello_world
-include test/vts/tools/build/Android.host_config.mk
-```
----
-
-That file tells the Android build system the `CodeLabHelloWorld` VTS test case
-so that the Android build system can store the compiled executable to
-a designated output directory (under `out/` directory) for packaging.
-
-### 1.4. Create AndroidTest.xml file
-
-`$ vi test/vts/testcases/host/codelab/hello_world/AndroidTest.xml`
-
-Then edit its contents to:
-
----
-```xml
-<configuration description="Config for VTS CodeLab HelloWorld test case">
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
-        <option name="push-group" value="HostDrivenTest.push" />
-    </target_preparer>
-    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-    </target_preparer>
-    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/codelab/hello_world/CodeLabHelloWorldTest" />
-        <option name="test-config-path" value="vts-config/testcases/codelab/hello_world/CodeLabHelloWorldTest.config" />
-    </test>
-</configuration>
-```
----
-
-## 2. Design your test case
-
-### 2.1. Declare a python module
-
-`$ touch test/vts/testcases/host/codelab/hello_world/__init__.py`
-
-### 2.2. Actual test case code
-
-`$ vi test/vts/testcases/host/codelab/hello_world/CodeLabHelloWorldTest.py`
-
-Then edit its contents to:
-
----
-```python
-import logging
-
-from vts.runners.host import asserts
-from vts.runners.host import base_test
-from vts.runners.host import const
-from vts.runners.host import test_runner
-from vts.utils.python.controllers import android_device
-
-
-class CodeLabHelloWorldTest(base_test.BaseTestClass):
-    """Two hello world test cases which use the shell driver."""
-
-    def setUpClass(self):
-        self.dut = self.registerController(android_device)[0]
-
-    def testEcho1(self):
-        """A simple testcase which sends a command."""
-        self.dut.shell.InvokeTerminal("my_shell1")  # creates a remote shell instance.
-        results = self.dut.shell.my_shell1.Execute("echo hello_world")  # runs a shell command.
-        logging.info(str(results[const.STDOUT]))  # prints the stdout
-        asserts.assertEqual(results[const.STDOUT][0].strip(), "hello_world")  # checks the stdout
-        asserts.assertEqual(results[const.EXIT_CODE][0], 0)  # checks the exit code
-
-    def testEcho2(self):
-        """A simple testcase which sends two commands."""
-        self.dut.shell.InvokeTerminal("my_shell2")
-        my_shell = getattr(self.dut.shell, "my_shell2")
-        results = my_shell.Execute(["echo hello", "echo world"])
-        logging.info(str(results[const.STDOUT]))
-        asserts.assertEqual(len(results[const.STDOUT]), 2)  # check the number of processed commands
-        asserts.assertEqual(results[const.STDOUT][0].strip(), "hello")
-        asserts.assertEqual(results[const.STDOUT][1].strip(), "world")
-        asserts.assertEqual(results[const.EXIT_CODE][0], 0)
-        asserts.assertEqual(results[const.EXIT_CODE][1], 0)
-
-
-if __name__ == "__main__":
-    test_runner.main()
-```
----
-
-### 2.3. Test case config
-
-`$ vi test/vts/testcases/host/codelab/hello_world/CodeLabHelloWorldTest.config`
-
-Then edit its contents to:
-
----
-```json
-{
-    "test_bed":
-    [
-        {
-            "name": "VTS-CodeLab-HelloWorld",
-            "AndroidDevice": "*"
-        }
-    ],
-    "log_path": "/tmp/logs",
-    "test_paths": ["./"]
-}
-```
----
-
-### 2.4. Create a test suite
+### 1.3. Create a test suite
 
 `$ vi test/vts/tools/vts-tradefed/res/config/vts-codelab.xml`
 
@@ -174,16 +55,18 @@ Then edit its contents to:
 <configuration description="Run VTS CodeLab Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="CodeLabHelloWorldTest" />
+    <option name="compatibility:include-filter" value="<your project name>" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
 ```
 ---
 
+Multiple instances of `compatibility:include-filter` option can be added to include more tests under a test suite.
 
-## 3. Build and Run
 
-### 3.1. Build
+## 2. Build and Run
+
+### 2.1. Build
 
 `$ . build/envsetup.sh`
 
@@ -195,7 +78,7 @@ To run the tests against physical devices,
 
 `$ make vts -j 10`
 
-### 3.2. Run
+### 2.2. Run
 
 `$ vts-tradefed`
 
@@ -208,6 +91,80 @@ If your test case can violate some SELinux rules, please run:
 `target$ su`
 
 `target$ setenforce 0`
+
+
+## 3. Customize your test configuration
+
+### 3.1. AndroidTest.xml file
+
+Pre-test file pushes from host to device can be configured for `VtsFilePusher` in `AndroidTest.xml`.
+
+By default, `AndroidText.xml` pushes a group of files required to run VTS framework specified in
+`test/vts/tools/vts-tradefed/res/push_groups/HidlHalTest.push`. Individual file push can be defined with
+"push" option inside `VtsFilePusher`. Please refer to TradeFed for more detail.
+
+Python module dependencies can be specified as "dep-module" option for
+`VtsPythonVirtualenvPreparer` in `Android.xml`. This will trigger the runner to install or update
+the modules using pip before running tests. `VtsPythonVirtualenvPreparer` will install a set of
+package including future, futures, enum, and protobuf by default. To add a dependency module,
+please add `<option name="dep-module" value="<module name>" />` inside `VtsPythonVirtualenvPreparer`
+ in 'AndroidTest.xml'
+
+### 3.2. Test case config
+
+Optionally, a .config file can be used to pass variables in json format to test case.
+
+To add a .config file, create a .config file under your project directory using project name:
+
+`$ vi test/vts/testcases/host/<your project directiry>/<your project name>.config`
+
+Then edit its contents to:
+
+---
+```json
+{
+    <key_1>: <value_1>,
+    <key_2>: <value_2>
+}
+```
+---
+
+And in your test case python class, you can get the json value by using self.getUserParams method.
+
+For example:
+
+---
+```py
+    required_params = ["key_1"]
+    self.getUserParams(required_params)
+    logging.info("%s: %s", "key_1", self.key_1)
+```
+---
+
+Then, add the following line to `com.android.tradefed.testtype.VtsMultiDeviceTest` class
+in `AndroidTest.xml`:
+
+`<option name="test-config-path" value="vts-config/testcases/<your project directiry>/<your project name>.config" />`
+
+Your config file will overwrite the following default json object defined at
+`test/vts/tools/vts-tradefed/res/default/DefaultTestCase.config`
+
+---
+```json
+{
+    "test_bed":
+    [
+        {
+            "name": "<your project name>",
+            "AndroidDevice": "*"
+        }
+    ],
+    "log_path": "/tmp/logs",
+    "test_paths": ["./"]
+}
+```
+---
+
 
 ## 4. Serving
 
