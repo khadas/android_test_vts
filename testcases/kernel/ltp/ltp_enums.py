@@ -32,6 +32,7 @@ class RequirementState(object):
 
 class ConfigKeys(object):
     RUN_STAGING = "run_staging"
+    NUMBER_OF_THREADS = "number_of_threads"
 
 
 class ShellEnvKeys(object):

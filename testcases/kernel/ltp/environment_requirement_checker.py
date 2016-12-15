@@ -147,7 +147,7 @@ class EnvironmentRequirementChecker(object):
 
         self._executable_exist_dict = dict(zip(executables, results))
 
-        permission_commands = ["chmod 755 %s" % executable
+        permission_commands = ["chmod 775 %s" % executable
                                for executable in executables
                                if (executable not in ltp_configs.EXTERNAL_BINS
                                    and self._executable_exist_dict[executable])
