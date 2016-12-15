@@ -35,7 +35,8 @@
 
         <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
         <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
-        <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
+        <option name="push" value="vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
+        <option name="push" value="vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
 
         <option name="push" value="vts_test_binary_crash_app->/data/local/tmp/64/vts_test_binary_crash_app" />
         <option name="append-bitness" value="false" />
