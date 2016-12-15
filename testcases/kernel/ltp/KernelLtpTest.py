@@ -121,10 +121,17 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def PreTestSetup(self):
         """Setups that needs to be done before any tests."""
         find_sh_command = "find %s -name '*.sh' -print0" % ltp_configs.LTPBINPATH
-        binsh_sed_pattern = "s=#!/bin/sh=#!/system/bin/sh=g"
-        dd_sed_pattern = "s/bs=1M/bs=1m/g"
 
-        patterns = (binsh_sed_pattern, dd_sed_pattern)
+        # Required for executing any shell scripts in Android
+        binsh_sed_pattern = self._shell_env.CreateSedPattern(
+            '#!/bin/sh', '#!/system/bin/sh')
+        # Required for using dd command in Android
+        dd_sed_pattern = self._shell_env.CreateSedPattern('bs=1M', 'bs=1m')
+        # Required for creating pid files since /var is not available in Android
+        pid_sed_pattern = self._shell_env.CreateSedPattern('/var/run',
+                                                           ltp_configs.TMP)
+
+        patterns = (binsh_sed_pattern, dd_sed_pattern, pid_sed_pattern)
 
         replace_commands = ["{find} | xargs -0 sed -i \'{pattern}\'".format(
             find=find_sh_command, pattern=pattern) for pattern in patterns]
