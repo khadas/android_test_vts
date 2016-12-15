@@ -17,12 +17,12 @@
 LOCAL_PATH := $(call my-dir)
 
 vtslib_interfacespec_srcfiles := \
-  specification/CameraHalV2.vts \
-  specification/CameraHalV2hw_device_t.vts \
-  specification/GpsHalV1.vts \
-  specification/GpsHalV1GpsInterface.vts \
-  specification/LightHalV1.vts \
-  specification/WifiHalV1.vts \
+  hal_conventional/CameraHalV2.vts \
+  hal_conventional/CameraHalV2hw_device_t.vts \
+  hal_conventional/GpsHalV1.vts \
+  hal_conventional/GpsHalV1GpsInterface.vts \
+  hal_conventional/LightHalV1.vts \
+  hal_conventional/WifiHalV1.vts \
 
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
