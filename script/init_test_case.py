@@ -41,10 +41,6 @@ class TestCaseCreator(object):
 
     Attributes:
         test_name: string, test case name in UpperCamel
-        test_dir_under_testcases: string, test case relative directory unter
-                                  test/vts/testcases
-
-        test_name: string, test case name in UpperCamel
         build_top: string, equal to environment variable ANDROID_BUILD_TOP
         test_dir: string, test case absolute directory
         test_name: string, test case name in UpperCamel
@@ -54,10 +50,17 @@ class TestCaseCreator(object):
     '''
 
     def __init__(self, test_name, test_dir_under_testcases, test_type):
+        '''Initialize class attributes.
+
+        Args:
+            test_name: string, test case name in UpperCamel
+            test_dir_under_testcases: string, test case relative directory under
+                                      test/vts/testcases.
+        '''
         if not test_dir_under_testcases:
             print 'Error: Empty test directory entered. Exiting'
             sys.exit(3)
-        self.test_dir_under_testcases = os.path.normpath(
+        test_dir_under_testcases = os.path.normpath(
             test_dir_under_testcases.strip())
 
         if not self.IsUpperCamel(test_name):
@@ -80,8 +83,7 @@ class TestCaseCreator(object):
             os.path.join(self.build_top, VTS_TEST_CASE_PATH))
 
         self.test_dir = os.path.abspath(
-            os.path.join(self.vts_test_case_dir,
-                         self.test_dir_under_testcases))
+            os.path.join(self.vts_test_case_dir, test_dir_under_testcases))
 
         self.current_year = datetime.datetime.now().year
 
