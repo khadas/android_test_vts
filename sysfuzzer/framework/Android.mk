@@ -41,7 +41,11 @@ LOCAL_C_INCLUDES := \
   test/vts/sysfuzzer/common \
 
 LOCAL_SHARED_LIBRARIES := \
+  libutils \
+  libcutils \
+  liblog \
   libbinder \
+  libdl \
   libandroid_runtime \
   libvts_common \
   libvts_drivercomm \
@@ -49,10 +53,6 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
 
 LOCAL_STATIC_LIBRARIES := \
-  libutils \
-  libcutils \
-  liblog \
-  libdl \
   libelf \
 
 LOCAL_MULTILIB := both

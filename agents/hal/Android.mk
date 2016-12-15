@@ -32,17 +32,14 @@ LOCAL_SRC_FILES := \
   SocketServerForDriver.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
-  libbinder \
-  libprotobuf-cpp-full \
-  libvts_common \
-  libvts_multidevice_proto \
-  libvts_drivercomm \
-
-LOCAL_STATIC_LIBRARIES := \
-  libc++_static \
   libutils \
   libcutils \
-
+  libbinder \
+  libvts_common \
+  libc++ \
+  libvts_multidevice_proto \
+  libprotobuf-cpp-full \
+  libvts_drivercomm \
 
 LOCAL_C_INCLUDES += \
   bionic \
