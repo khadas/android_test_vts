@@ -63,8 +63,13 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 continue
             elif line.startswith(' '):  # Test case name
                 test_name = line.strip()
-                test_case = gtest_test_case.GtestTestCase(test_suite,
-                                                          test_name, path, tag)
+                working_directory = self.working_directories[
+                    tag] if tag in self.working_directories else None
+                ld_library_path = self.ld_library_paths[
+                    tag] if tag in self.ld_library_paths else None
+                test_case = gtest_test_case.GtestTestCase(
+                    test_suite, test_name, path, tag, self.PutTag,
+                    working_directory, ld_library_path)
                 logging.info('Gtest test case: %s' % test_case)
                 test_cases.append(test_case)
             else:  # Test suite name

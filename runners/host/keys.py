@@ -38,6 +38,7 @@ class ConfigKeys(object):
     # Keys for binary tests
     IKEY_BINARY_TEST_SOURCES = "binary_test_sources"
     IKEY_BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories"
+    IKEY_BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"
