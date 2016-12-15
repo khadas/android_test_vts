@@ -27,14 +27,14 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
 
-from vts.testcases.template.gtest import gtest_test_case
+from vts.testcases.template.gtest_binary_test import gtest_test_case
 
 DEVICE_TEST_DIR = '/data/local/tmp'
 TAG_PATH_SEPARATOR = ':'
 
 
-class Gtest(base_test_with_webdb.BaseTestWithWebDbClass):
-    '''Bese class to run gtests.
+class GtestBinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
+    '''Bese class to run gtests binary on target.
 
     Attributes:
         _dut: AndroidDevice, the device under test as config
@@ -82,7 +82,7 @@ class Gtest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.exclude_filter = self.ExpandListItemTags(self.exclude_filter)
 
     def ExpandListItemTags(self, input_list):
-        '''Expand list items with given tags
+        '''Expand list items with given tags.
 
         Since gtest binary allows a tag to be added in front of the binary
         path, test names are generated with tags attached. This function is
@@ -190,8 +190,8 @@ class Gtest(base_test_with_webdb.BaseTestWithWebDbClass):
             test_case: GtestTestCase object
         '''
         cmd = [test_case.GetRunCommand(),
-               'cat %s' % test_case.GetGtestOutputFileName(),
-               'rm -rf %s' % test_case.GetGtestOutputFileName()]
+               'cat %s' % test_case.output_file_path,
+               'rm -rf %s' % test_case.output_file_path]
 
         logging.info("Executing gtest command: %s", cmd)
         command_results = self.shell.Execute(cmd)

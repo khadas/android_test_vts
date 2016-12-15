@@ -73,7 +73,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String GTEST_BINARY_PATHS = "gtest_binary_paths";
-    static final String TEMPLATE_GTEST_PATH = "vts/testcases/template/gtest/gtest";
+    static final String TEMPLATE_GTEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
