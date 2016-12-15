@@ -25,9 +25,8 @@ from vts.runners.host import const
 
 
 class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
-    """A testcase for the HWBinder Performance Benchmarking."""
+    """A test case for the HWBinder performance benchmarking."""
 
-    BENCHMARK_BINARY_PATH = "/data/local/tmp/libhwbinder_benchmark"
     DELIMITER = "\033[m\033[0;33m"
     SCREEN_COMMANDS = ["\x1b[0;32m", "\x1b[m\x1b[0;36m", "\x1b[m", "\x1b[m"]
     THRESHOLD = {
@@ -65,11 +64,12 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """
         # Runs the benchmark.
         logging.info("Start to run the benchmark (%s bit mode)", bits)
+        binary = "/data/local/tmp/%s/libhwbinder_benchmark%s" % (bits, bits)
         results = self.dut.shell.one.Execute(
-            ["chmod 755 %s" % self.BENCHMARK_BINARY_PATH,
+            ["chmod 755 %s" % binary,
              "LD_LIBRARY_PATH=/data/local/tmp/%s/hal:"
              "/data/local/tmp/%s:"
-             "$LD_LIBRARY_PATH %s" % (bits, bits, self.BENCHMARK_BINARY_PATH)])
+             "$LD_LIBRARY_PATH %s" % (bits, bits, binary)])
 
         # Parses the result.
         asserts.assertEqual(len(results[const.STDOUT]), 2)
