@@ -94,6 +94,15 @@ The following diagram discusses the flow of the dashboard wrt to the directory :
    Install the Google App Engine Python SDK:
    https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python
 
+4. (Optional) Configure App Engine authorized senders
+
+   In order for the dashboard to send alert emails when test failures occur, the
+   sender address must be added to the authorized list. Navigate to the App Engine
+   settings page and edit the list "Email API Authorized senders". The address
+   VTS_EMAIL_ADDRESS in VtsAlertJobServlet must be authorized before alerts will
+   successfully send. For more information about sending mail on App Engine, visit:
+   https://cloud.google.com/appengine/docs/java/mail/
+
 ## To run GAE on local machine:
 
 `$ cd web/dashboard/appengine/servlet`
