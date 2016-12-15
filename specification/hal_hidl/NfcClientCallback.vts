@@ -72,6 +72,7 @@ api: {
   arg: {
     type: TYPE_STRUCT
     predefined_type: "nfc_data_t"
+    is_const: true
   }
 }
 

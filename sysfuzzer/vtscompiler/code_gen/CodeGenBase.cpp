@@ -65,9 +65,9 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
         // TODO: ditto
         // cpp_ss << "#include <" << base_dirpath << ...
         cpp_ss << "#include <" << "Bp" << base_filename.substr(1) << ".h>" << endl;
-      } else {
-        cpp_ss << "#include <" << "Bn" << base_filename.substr(1) << ".h>" << endl;
+        cpp_ss << "#include <" << base_filename.substr(1) << ".h>" << endl;
       }
+      cpp_ss << "#include <" << "Bn" << base_filename.substr(1) << ".h>" << endl;
     }
   }
   GenerateOpenNameSpaces(cpp_ss, message);
@@ -95,13 +95,48 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
                                     fuzzer_extended_class_name);
   }
 
-  if (message.component_class() != HAL_HIDL ||
-      !endsWith(message.component_name(), "Callback")) {
+  cpp_ss << endl;
+  GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+  if (message.component_class() == HAL_HIDL &&
+      endsWith(message.component_name(), "Callback")) {
     cpp_ss << endl;
-    GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+    for (const auto& api : message.api()) {
+      cpp_ss << "Status Vts" << message.component_name().substr(1) << "::"
+             << api.name() << "(" << endl;
+      int arg_count = 0;
+      for (const auto& arg : api.arg()) {
+        if (arg_count > 0) cpp_ss << "," << endl;
+        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
+          if (arg.is_const()) {
+            cpp_ss << "    const " << message.component_name() << "::"
+                   << arg.predefined_type() << "&";
+          } else {
+            cpp_ss << "    " << message.component_name() << "::"
+                   << arg.predefined_type();
+          }
+          cpp_ss << " arg" << arg_count;;
+        } else {
+          cerr << "unknown arg type " << arg.type() << endl;
+          exit(-1);
+        }
+        arg_count++;
+      }
+      cpp_ss << ") {" << endl;
+      cpp_ss << "  cout << \"" << api.name() << " called\" << endl;" << endl;
+      cpp_ss << "  return Status::ok();" << endl;
+      cpp_ss << "}" << endl;
+      cpp_ss << endl;
+    }
 
     GenerateCppBodyGetAttributeFunction(cpp_ss, message, fuzzer_extended_class_name);
 
+    cpp_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+           << message.component_name() << "()";
+    cpp_ss << " {" << endl
+           << "  return new Vts" << message.component_name().substr(1) << "();"
+           << endl;
+    cpp_ss << "}" << endl << endl;
+  } else {
     std::stringstream ss;
     // return type
     ss << "android::vts::FuzzerBase* " << endl;
@@ -110,7 +145,8 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     ss << function_name_prefix << "(" << endl;
     ss << ")";
 
-    GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(), fuzzer_extended_class_name);
+    GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(),
+                                   fuzzer_extended_class_name);
   }
 
   GenerateCloseNameSpaces(cpp_ss);
@@ -158,6 +194,48 @@ void CodeGenBase::GenerateAllHeader(
   ss << ")";
 
   GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
+
+  if (message.component_class() == HAL_HIDL &&
+      endsWith(message.component_name(), "Callback")) {
+    h_ss << endl;
+    h_ss << "class Vts" << message.component_name().substr(1) << ": public "
+           << "Bn" << message.component_name().substr(1) << " {" << endl;
+    h_ss << " public:" << endl;
+    h_ss << "  Vts" << message.component_name().substr(1) << "() {};" << endl;
+    h_ss << endl;
+    h_ss << "  virtual ~Vts" << message.component_name().substr(1) << "()"
+           << " = default;" << endl;
+    h_ss << endl;
+    for (const auto& api : message.api()) {
+      h_ss << "  virtual Status " << api.name() << "(" << endl;
+      int arg_count = 0;
+      for (const auto& arg : api.arg()) {
+        if (arg_count > 0) h_ss << ", ";
+        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
+          if (arg.is_const()) {
+            h_ss << "    const " << message.component_name() << "::"
+                 << arg.predefined_type() << "&";
+          } else {
+            h_ss << "    " << message.component_name() << "::"
+                 << arg.predefined_type();
+          }
+          h_ss << " arg" << arg_count;;
+        } else {
+          cerr << "unknown arg type " << arg.type() << endl;
+          exit(-1);
+        }
+        arg_count++;
+      }
+      h_ss << ");" << endl;
+      h_ss << endl;
+    }
+    h_ss << "};" << endl;
+    h_ss << endl;
+
+    h_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+       << message.component_name() << "();" << endl;
+    h_ss << endl;
+  }
 
   GenerateCloseNameSpaces(h_ss);
   h_ss << "#endif" << endl;

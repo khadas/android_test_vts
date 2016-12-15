@@ -267,11 +267,14 @@ message VariableSpecificationMessage {
   // for sub variables when this's a union type.
   repeated VariableSpecificationMessage union_value = 151;
 
-  // for non HIDL HALs, to use a custom type defined in C/C++.
+  // for non HIDL HAL, to use a custom type defined in C/C++.
   optional bytes predefined_type = 201;
 
-  // for non HIDL HALs, to set function pointer(s).
+  // for non HIDL HAL, to set function pointer(s).
   repeated FunctionPointerSpecificationMessage function_pointer = 221;
+
+  // for HIDL HAL, to use a HIDL callback instance.
+  optional bytes hidl_callback_type = 231;
 
   // true if the argument is an input (valid only for the top-level message).
   optional bool is_input = 301 [default = true];
