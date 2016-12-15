@@ -36,7 +36,7 @@ class ShellBinaryCrashTest(base_test_with_webdb.BaseTestWithWebDbClass):
         target = "/data/local/tmp/64/vts_test_binary_crash_app"
         results = self.dut.shell.my_shell1.Execute(
             ["chmod 755 %s" % target,
-             ".%s" % target])
+             "%s" % target])
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 2)
         asserts.assertEqual(results[const.STDOUT][1].strip(), "")
@@ -52,7 +52,7 @@ class ShellBinaryCrashTest(base_test_with_webdb.BaseTestWithWebDbClass):
         target = "/data/local/tmp/32/connect01"
         results = self.dut.shell.my_shell1.Execute(
             ["chmod 755 %s" % target,
-             ".%s" % target])
+             "%s" % target])
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 2)
         asserts.assertEqual(results[const.STDOUT][1].strip(), "")
