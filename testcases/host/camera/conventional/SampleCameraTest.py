@@ -18,6 +18,7 @@
 import logging
 import time
 
+from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
@@ -25,6 +26,7 @@ from vts.utils.python.controllers import android_device
 
 class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
+    MAX_RETRIES = 3
 
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
@@ -51,7 +53,8 @@ class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """A simple testcase which just emulates a normal usage pattern."""
         result = self.dut.hal.camera.get_number_of_cameras()
         count = result.return_type.scalar_value.int32_t
-        logging.info(count)
+        logging.info("# of found cameras: %s", count)
+        asserts.assertTrue(count > 0, "no camera found")
         for index in range(0, count):
             arg = self.dut.hal.camera.camera_info_t(facing=0)
             logging.info(self.dut.hal.camera.get_camera_info(index, arg))
@@ -78,11 +81,17 @@ class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.dut.hal.camera.set_callbacks(my_callback)
         self.StartProfiling("callback_latency_torch_mode_status_change")
         self.dut.hal.camera.common.methods.open()  # note args are skipped
-        while self.call_count_torch_mode_status_change < 1:
+        retries = 0
+        while (self.call_count_torch_mode_status_change < 1 and
+               retries < self.MAX_RETRIES):
             logging.info("waiting %s %s",
                          self.call_count_camera_device_status_change,
                          self.call_count_torch_mode_status_change)
             time.sleep(1)
+            retries += 1
+        if self.call_count_torch_mode_status_change < 1:
+            asserts.fail("Callback not called within %s seconds",
+                         self.MAX_RETRIES)
 
 
 if __name__ == "__main__":
