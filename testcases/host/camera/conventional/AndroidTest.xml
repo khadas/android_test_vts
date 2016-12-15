@@ -17,49 +17,17 @@
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="push" value="libvts_common.so->/data/local/tmp/64/libvts_common.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_interfacespecification.so->/data/local/tmp/64/libvts_interfacespecification.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_drivercomm.so->/data/local/tmp/64/libvts_drivercomm.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_datatype.so->/data/local/tmp/64/libvts_datatype.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_measurement.so->/data/local/tmp/64/libvts_measurement.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_codecoverage.so->/data/local/tmp/64/libvts_codecoverage.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="libvts_multidevice_proto.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <!-- TODO: copy camera HAL so files -->
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="fuzzer64->/data/local/tmp/64/fuzzer64" />
-        <option name="append-bitness" value="false" />
-    </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="true" />
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
         <option name="append-bitness" value="false" />
     </target_preparer>
+    <!-- TODO: copy camera HAL so files -->
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/camera/conventional/SampleCameraTest" />
         <option name="test-config-path" value="vts-config/testcases/host/camera/conventional/SampleCameraTest.config" />
