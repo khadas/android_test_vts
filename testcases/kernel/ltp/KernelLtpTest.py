@@ -69,6 +69,23 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                      ltp_enums.ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
                      ltp_enums.ShellEnvKeys.PATH: ltp_configs.PATH}
 
+    def PreTestSetup(self):
+        find_sh_command = "find %s -name '*.sh' -print0" % ltp_configs.LTPBINPATH
+        binsh_sed_pattern = "s=#!/bin/sh=#!/system/bin/sh=g"
+        dd_sed_pattern = "s/bs=1M/bs=1m/g"
+
+        patterns = (binsh_sed_pattern, dd_sed_pattern)
+
+        replace_commands = ["{find} | xargs -0 sed -i \'{pattern}\'".format(
+            find=find_sh_command, pattern=pattern) for pattern in patterns]
+
+        results = self._shell.Execute(replace_commands)
+        asserts.assertFalse(
+            any(results[const.EXIT_CODE]),
+            "Error: pre-test setup failed. "
+            "Commands: {commands}. Results: {results}".format(
+                commands=replace_commands, results=results))
+
     def PushFiles(self, n_bit):
         """Push the related files to target.
 
@@ -121,6 +138,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
         self.PushFiles(n_bit)
+        self.PreTestSetup()
         logging.info("[Test Case] test%sBits SKIP", n_bit)
 
         test_cases = list(
@@ -144,7 +162,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def RunLtpOnce(self, test_case, n_bit):
         "Run one LTP test case"
-        self._requirement.Check(test_case)
+        asserts.skipIf(not self._requirement.Check(test_case), test_case.note)
 
         cmd = "export {envp} && {commands}".format(
             envp=self.GetEnvp(), commands=test_case.GetCommand())

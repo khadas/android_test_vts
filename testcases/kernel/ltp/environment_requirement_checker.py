@@ -20,7 +20,6 @@ import logging
 import itertools
 import operator
 
-from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.testcases.kernel.ltp.shell_environment import shell_environment
 from vts.testcases.kernel.ltp import ltp_enums
@@ -95,13 +94,19 @@ class EnvironmentRequirementChecker(object):
         """Check whether a given test case's requirement has been satisfied.
         Skip the test if not.
 
+        If check failed, this method returns False and the reason is set
+        to test_case.note.
+
         Args:
             test_case: TestCase object, a given test case to check
-        """
-        asserts.skipIf(test_case.requirement_state ==
-                       ltp_enums.RequirementState.UNSATISFIED, test_case.note)
 
-        asserts.skipIf(not self.TestBinaryExists(test_case), test_case.note)
+        Returns:
+            True if check pass; False otherwise
+        """
+        if (test_case.requirement_state ==
+                ltp_enums.RequirementState.UNSATISFIED or
+                not self.TestBinaryExists(test_case)):
+            return False
 
         for requirement in self.GetRequirements(test_case):
             if requirement not in self._result_cache:
@@ -116,9 +121,10 @@ class EnvironmentRequirementChecker(object):
             if result is False:
                 test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
                 test_case.note = note
-                asserts.skip(note)
+                return False
 
         test_case.requirement_state = ltp_enums.RequirementState.SATISFIED
+        return True
 
     def CheckAllTestCaseExecutables(self, test_cases):
         """Run a batch job to check the all test executable exists and set

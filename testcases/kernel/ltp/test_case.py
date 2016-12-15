@@ -45,7 +45,7 @@ class TestCase(object):
         self.testname = testname
         self._command = command
         self.requirement_state = ltp_enums.RequirementState.UNCHECKED
-        self.note = None
+        self.note = ""
 
     @property
     def note(self):
