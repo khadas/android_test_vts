@@ -109,5 +109,50 @@ loader_function DllLoader::GetLoaderFunction(const char* function_name) {
   return func;
 }
 
+bool DllLoader::SancovResetCoverage() {
+  const char* error;
+  void (*func)();
+
+  func = (void (*)()) dlsym(handle_, "__sanitizer_reset_coverage");
+  if ((error = dlerror()) != NULL)  {
+    fputs(error, stderr);
+    cerr << __FUNCTION__ << ": Can't find __sanitizer_reset_coverage" << endl;
+    return false;
+  }
+  func();
+  return true;
+}
+
+
+bool DllLoader::GcovInit(writeout_fn wfn, flush_fn ffn) {
+  const char* error;
+  void (*func)(writeout_fn, flush_fn);
+
+  func = (void (*)(writeout_fn, flush_fn)) dlsym(handle_, "llvm_gcov_init");
+  if ((error = dlerror()) != NULL)  {
+    fputs(error, stderr);
+    cerr << __FUNCTION__ << ": Can't find llvm_gcov_init" << endl;
+    return false;
+  }
+  func(wfn, ffn);
+  return true;
+}
+
+
+bool DllLoader::GcovFlush() {
+  const char* error;
+  void (*func)();
+
+  func = (void (*)()) dlsym(handle_, "__gcov_flush");
+  if ((error = dlerror()) != NULL)  {
+    fputs(error, stderr);
+    cerr << __FUNCTION__ << ": Can't find __gcov_flush" << endl;
+    return false;
+  }
+  func();
+
+  return true;
+}
+
 }  // namespace vts
 }  // namespace android

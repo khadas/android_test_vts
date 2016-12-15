@@ -28,6 +28,8 @@ class FuzzerBase;
 
 // Pointer type for a function in a loaded component.
 typedef FuzzerBase* (*loader_function)();
+typedef void (*writeout_fn)();
+typedef void (*flush_fn)();
 
 
 // Component loader implementation for a DLL file.
@@ -47,6 +49,15 @@ class DllLoader {
   // Finds and returns a requested function defined in the loaded file.
   // Returns NULL if not found.
   loader_function GetLoaderFunction(const char* function_name);
+
+  // (for sancov) Reset coverage data.
+  bool SancovResetCoverage();
+
+  // (for gcov) initialize.
+  bool GcovInit(writeout_fn wfn, flush_fn ffn);
+
+  // (for gcov) flush to file(s).
+  bool GcovFlush();
 
  private:
   // pointer to a handle of the loaded DLL file.

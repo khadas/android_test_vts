@@ -39,6 +39,7 @@ LOCAL_C_INCLUDES := \
   system/extras \
   external/protobuf/src \
   frameworks/native/include \
+  test/vts/sysfuzzer/libcodecoverage \
   system/core/include
 
 LOCAL_SHARED_LIBRARIES := \
@@ -48,6 +49,7 @@ LOCAL_SHARED_LIBRARIES := \
   liblog \
   libdl \
   libandroid_runtime \
+  libvts_codecoverage \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 

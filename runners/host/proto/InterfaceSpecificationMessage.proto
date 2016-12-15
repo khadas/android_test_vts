@@ -78,6 +78,12 @@ message FunctionSpecificationMessage {
 
   // a specification of the call flows of the function.
   repeated CallFlowSpecificationMessage callflow = 31;
+
+  // profiling data.
+  repeated float profiling_data = 101;
+
+  // coverage measurement data.
+  repeated uint32 coverage_data = 201;
 }
 
 
