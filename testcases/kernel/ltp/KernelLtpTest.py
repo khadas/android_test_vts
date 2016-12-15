@@ -68,7 +68,11 @@ class KernelLtpTest(base_test.BaseTestClass):
             shell = getattr(self.dut.shell, testcase_name)
             shell.Execute("chmod 755 " + path)
             stdouts = shell.Execute("env TMPDIR=/data/local/tmp " + path)
-            self.Verify(testcase_name, "\n".join(stdouts))
+            if not stdouts:
+                # TIMEOUT
+                logging.info("[Test Case] %s FAIL" % testcase_name)
+            else:
+                self.Verify(testcase_name, "\n".join(stdouts))
 
     def test64Bits(self):
         """Runs all 64-bit LTP test cases."""
@@ -83,7 +87,11 @@ class KernelLtpTest(base_test.BaseTestClass):
             shell = getattr(self.dut.shell, testcase_name)
             shell.Execute("chmod 755 " + path)
             stdouts = shell.Execute("env TMPDIR=/data/local/tmp " + path)
-            self.Verify(testcase_name, "\n".join(stdouts))
+            if not stdouts:
+                # TIMEOUT
+                logging.info("[Test Case] %s FAIL" % testcase_name)
+            else:
+                self.Verify(testcase_name, "\n".join(stdouts))
 
 
 if __name__ == "__main__":
