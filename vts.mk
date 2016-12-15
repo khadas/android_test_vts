@@ -7,6 +7,7 @@ PRODUCT_PACKAGES += \
     vtsc \
     libvts_interfacespecification \
     vts_hal_agent \
+    libvts_profiling \
     lights.bullhead-vts \
     camera.bullhead-vts
 
