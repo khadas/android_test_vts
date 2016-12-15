@@ -48,15 +48,15 @@ static int kMaxRetry = 3;
  * send a command to the driver on specified UNIX domain socket and print out
  * the outputs from driver.
  */
-static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
+static string vts_shell_driver_test_client_start(const string& command,
+                                                 const string& socket_address) {
   struct sockaddr_un address;
   int socket_fd;
-  int nbytes;
 
   socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (socket_fd < 0) {
     fprintf(stderr, "socket() failed\n");
-    return NULL;
+    return "";
   }
 
   VtsDriverCommUtil driverUtil(socket_fd);
@@ -64,7 +64,9 @@ static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
   memset(&address, 0, sizeof(struct sockaddr_un));
 
   address.sun_family = AF_UNIX;
-  strcpy(address.sun_path, addr_socket);
+  strncpy(address.sun_path,
+          socket_address.c_str(),
+          sizeof(address.sun_path) - 1);
 
   int conn_success;
   int retry_count = 0;
@@ -85,13 +87,12 @@ static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
 
   if (conn_success != 0) {
     fprintf(stderr, "connect() failed\n");
-    return NULL;
+    return "";
   }
 
   VtsDriverControlCommandMessage cmd_msg;
 
-  string cmd_str(cmd);
-  cmd_msg.add_shell_command(cmd_str);
+  cmd_msg.add_shell_command(command);
 
   if (!driverUtil.VtsSocketSendMessage(cmd_msg)) {
     return NULL;
@@ -102,9 +103,8 @@ static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
 
   if (!driverUtil.VtsSocketRecvMessage(
           static_cast<google::protobuf::Message*>(&out_msg))) {
-    return NULL;
+    return "";
   }
-
 
   // TODO(yuexima) use vector for output messages
   stringstream ss;
@@ -114,16 +114,10 @@ static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
         << ": " << out_str << endl;
     ss << out_str;
   }
-
   close(socket_fd);
 
-  string res_str = ss.str();
-  char* res = static_cast<char*>(malloc(res_str.length() + 1));
-  strcpy(res, res_str.c_str());
-
-  cout << "[Client] receiving output: " << res << endl;
-
-  return res;
+  cout << "[Client] receiving output: " << ss.str() << endl;
+  return ss.str();
 }
 
 
@@ -131,12 +125,13 @@ static char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
  * Prototype unit test helper. It first forks a vts_shell_driver process
  * and then call a client function to execute a command.
  */
-static char* test_shell_command_output(char* command, char* addr_socket) {
+static string test_shell_command_output(const string& command,
+                                        const string& socket_address) {
   int res = 0;
   pid_t p_driver;
-  char* res_client;
+  string res_client;
 
-  VtsShellDriver shellDriver(addr_socket);
+  VtsShellDriver shellDriver(socket_address.c_str());
 
   p_driver = fork();
   if (p_driver == 0) {  // child
@@ -150,11 +145,9 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
 
     exit(0);
   } else if (p_driver > 0) {  // parent
-    res_client = vts_shell_driver_test_client_start(command, addr_socket);
-
-    int res_client_len;
-    res_client_len = strlen(res_client);
-    if (res_client == NULL) {
+    res_client = vts_shell_driver_test_client_start(command,
+                                                    socket_address);
+    if (res_client.empty()) {
       fprintf(stderr, "Client reported error.\n");
       exit(1);
     }
@@ -176,30 +169,18 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
  * This test tests whether the output of "uname" is "Linux\n"
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_uname) {
-  char cmd[] = "uname";
-  char expected[] = "Linux\n";
-  char addr_socket[] = "test1_1.tmp";
-  char* output;
-
-  output = test_shell_command_output(cmd, addr_socket);
-  ASSERT_TRUE(!strcmp(output, expected));
-
-  free(output);
+  string expected = "Linux\n";
+  string output = test_shell_command_output("uname", "test1_1.tmp");
+  ASSERT_EQ(output.compare(expected), 0);
 }
 
 /*
  * This test tests whether the output of "uname" is "Linux\n"
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_which_ls) {
-  char cmd[] = "which ls";
-  char expected[] = "/system/bin/ls\n";
-  char addr_socket[] = "test1_2.tmp";
-  char* output;
-
-  output = test_shell_command_output(cmd, addr_socket);
-  ASSERT_TRUE(!strcmp(output, expected));
-
-  free(output);
+  string expected = "/system/bin/ls\n";
+  string output = test_shell_command_output("which ls", "test1_2.tmp");
+  ASSERT_EQ(output.compare(expected), 0);
 }
 
 }  // namespace vts
