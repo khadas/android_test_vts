@@ -365,6 +365,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             CLog.e("Python path: %s", mPythonPath);
             CLog.e("Stderr: %s", commandResult.getStderr());
             CLog.e("Stdout: %s", commandResult.getStdout());
+            printVtsLogs(vtsRunnerLogDir);
             throw new RuntimeException("Failed to run VTS test");
         }
         if (commandResult != null){
