@@ -218,8 +218,10 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
 
         // get end time
         toks = lines[lines.length - 1].split(" ");
-        if (toks.length < 2) {
-            parseError("Incorrect length");
+        if (toks.length < 3) {
+            throw new PythonUnitTestParseException(
+                String.format("Insufficient length of line %d, : %s ",
+                        mLineNum + 1, mCurrentLine));
         }
         String endTime = toks[2];
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
