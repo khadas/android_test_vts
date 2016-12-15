@@ -602,23 +602,30 @@ class AndroidDevice(object):
                     "A command to setup the env to start the VTS Agent failed %s",
                     e)
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
-        cmd = (
-            'adb -s {s} shell LD_LIBRARY_PATH={path}/64 '
-            '{path}/64/vts_hal_agent64'
-            ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec'
-            ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log}'
-        ).format(s=self.serial,
-                 path=DEFAULT_AGENT_BASE_DIR,
-                 log=vts_agent_log_path)
-        try:
-            self.vts_agent_process = utils.start_standing_subprocess(
-                cmd, check_health_delay=1)
-        except utils.VTSUtilsError as e:
-            logging.exception(e)
-            with open(vts_agent_log_path, 'r') as log_file:
-                logging.error("VTS agent output:\n")
-                logging.error(log_file.read())
-            raise
+        for bitness in ['64', '32']:
+            cmd = (
+                'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
+                '{path}/{bitness}/vts_hal_agent{bitness}'
+                ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec'
+                ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log}'
+            ).format(s=self.serial,
+                     bitness=bitness,
+                     path=DEFAULT_AGENT_BASE_DIR,
+                     log=vts_agent_log_path)
+            try:
+                self.vts_agent_process = utils.start_standing_subprocess(
+                    cmd, check_health_delay=1)
+            except utils.VTSUtilsError as e:
+                logging.exception(e)
+                with open(vts_agent_log_path, 'r') as log_file:
+                    logging.error("VTS agent output:\n")
+                    logging.error(log_file.read())
+                # one common cause is that 64-bit executable is not supported
+                # in low API level devices.
+                if bitness == '32':
+                    raise
+                else:
+                    logging.error('retrying using a 32-bit binary.')
 
     def stopVtsAgent(self):
         """Stop the HAL agent running on the AndroidDevice.
