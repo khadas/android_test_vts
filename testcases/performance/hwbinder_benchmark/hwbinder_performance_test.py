@@ -148,11 +148,11 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
             if benchmark_name in self.THRESHOLD[bits]:
                 asserts.assertLess(
                     result[benchmark_name],
-                    self.THRESHOLD[benchmark_name],
+                    self.THRESHOLD[bits][benchmark_name],
                     "%s ns for %s is longer than the threshold %s ns" % (
                         result[benchmark_name],
                         benchmark_name,
-                        self.THRESHOLD[benchmark_name]))
+                        self.THRESHOLD[bits][benchmark_name]))
 
 if __name__ == "__main__":
     test_runner.main()
