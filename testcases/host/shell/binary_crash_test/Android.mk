@@ -24,8 +24,6 @@ LOCAL_SRC_FILES := \
   crash_app.c \
 
 LOCAL_SHARED_LIBRARIES := \
-
-LOCAL_STATIC_LIBRARIES := \
   libutils \
   libcutils \
   liblog \
