@@ -22,9 +22,9 @@ LOCAL_MODULE := vts_shell_driver
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  shell_msg_protocol.c \
-  shell_driver.c \
-  shell_driver_main.c \
+  shell_msg_protocol.cpp \
+  shell_driver.cpp \
+  shell_driver_main.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
@@ -39,9 +39,9 @@ LOCAL_MODULE := vts_shell_driver_test
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  shell_msg_protocol.c \
-  shell_driver.c \
-  shell_driver_test_client.c \
+  shell_msg_protocol.cpp \
+  shell_driver.cpp \
+  shell_driver_test_client.cpp \
   shell_driver_test.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
