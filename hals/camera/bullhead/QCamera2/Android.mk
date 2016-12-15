@@ -79,7 +79,10 @@ LOCAL_SHARED_LIBRARIES := libcamera_client liblog libhardware libutils libcutils
 LOCAL_SHARED_LIBRARIES += libmmcamera_interface.vts libmmjpeg_interface.vts libui libcamera_metadata
 LOCAL_SHARED_LIBRARIES += libqdMetaData.vts
 
-LOCAL_NATIVE_COVERAGE := true
+LOCAL_SANITIZE := never
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
 
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_MODULE := camera.bullhead-vts
