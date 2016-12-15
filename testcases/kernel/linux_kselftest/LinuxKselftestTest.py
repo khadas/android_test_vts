@@ -35,8 +35,8 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         _shell: ShellMirrorObject, shell mirror
         _testcases: string list, list of testcases to run
     """
-    _32BIT = "32"
-    _64BIT = "64"
+    _32BIT = 32
+    _64BIT = 64
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
@@ -73,15 +73,26 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def PreTestSetup(self):
         """Sets up test before running."""
+        # This sed command makes shell scripts compatible wiht android shell.
         sed_pattern = [
-            '-i "s?/bin/echo?echo?"'
+            's?/bin/echo?echo?',
+            's?#!/bin/sh?#!/system/bin/sh?',
+            's?#!/bin/bash?#!/system/bin/sh?'
         ]
+        sed_cmd = 'sed %s' % ' '.join(
+            ['-i -e ' + ('"%s"' % p) for p in sed_pattern])
 
-        sed_cmd = 'sed %s' % " ".join(sed_pattern)
+        # This grep command is used to identify shell scripts.
+        grep_pattern = [
+           'bin/sh',
+           'bin/bash'
+        ]
+        grep_cmd = 'grep -l %s' % ' '.join(
+            ['-e ' + ('"%s"' % p) for p in grep_pattern])
 
         # This applies sed_cmd to every shell script.
-        cmd = 'find %s -type f | xargs grep -l "bin/sh" | xargs %s' % (
-            config.KSFT_DIR, sed_cmd)
+        cmd = 'find %s -type f | xargs %s | xargs %s' % (
+            config.KSFT_DIR, grep_cmd, sed_cmd)
         result = self._shell.Execute(cmd)
 
         asserts.assertFalse(
@@ -95,16 +106,13 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
             testcase: string, format testsuite/testname, specifies which
                 test case to run.
         """
-        items = testcase.split("/", 1)
-        testsuite = items[0]
-
-        chmod_cmd = "chmod -R 755 %s" % os.path.join(config.KSFT_DIR, testsuite)
-        cd_cmd = "cd %s" % os.path.join(config.KSFT_DIR, testsuite)
-        test_cmd = "./%s" % items[1]
+        chmod_cmd = "chmod -R 755 %s" % os.path.join(
+            config.KSFT_DIR, testcase.testsuite)
+        cd_cmd = "cd %s" % os.path.join(config.KSFT_DIR, testcase.testsuite)
 
         cmd = [
             chmod_cmd,
-            "%s && %s" % (cd_cmd, test_cmd)
+            "%s && %s" % (cd_cmd, testcase.test_cmd)
         ]
         logging.info("Executing: %s", cmd)
 
@@ -113,7 +121,7 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         asserts.assertFalse(
             any(result[const.EXIT_CODE]),
-            "%s failed." % testcase)
+            "%s failed." % testcase.testname)
 
     def TestNBits(self, n_bit):
         """Runs all 32-bit or all 64-bit tests.
@@ -125,17 +133,23 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.PushFiles(n_bit)
         self.PreTestSetup()
 
+        cpu_abi = self._dut.cpu_abi
+        relevant_testcases = filter(
+            lambda x: x.IsRelevant(cpu_abi, n_bit), self._testcases)
+
         self.runGeneratedTests(
             test_func=self.RunTestcase,
-            settings=self._testcases,
-            name_func=
-                lambda name: "%s_%sbit" % (name.replace('/','_'), n_bit))
+            settings=relevant_testcases,
+            name_func=lambda testcase: "%s_%sbit" % (
+                testcase.testname.replace('/','_'), n_bit))
+        logging.info("[Test Case] test%sBits", n_bit)
+        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
-    def generate32BitTests(self):
+    def test32Bits(self):
         """Runs all 32-bit tests."""
         self.TestNBits(self._32BIT)
 
-    def generate64BitTests(self):
+    def test64Bits(self):
         """Runs all 64-bit tests."""
         self.TestNBits(self._64BIT)
 
