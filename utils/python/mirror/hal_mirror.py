@@ -196,11 +196,11 @@ class HalMirror(object):
         target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
         launched = client.LaunchDriverService(service_name=service_name,
-                                            file_path=target_filename,
-                                            bits=bits,
-                                            target_class=target_class_id,
-                                            target_type=target_type_id,
-                                            target_version=target_version)
+                                              file_path=target_filename,
+                                              bits=bits,
+                                              target_class=target_class_id,
+                                              target_type=target_type_id,
+                                              target_version=target_version)
         if not launched:
             raise errors.ComponentLoadingError(
                 "Failed to launch driver service %s from file path %s" %

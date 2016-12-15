@@ -40,7 +40,8 @@ class FuzzerCallbackBase {
  protected:
   static const char* GetCallbackID(const string& name);
 
-  static void RpcCallToAgent(const char* id, int agent_port);
+  static void RpcCallToAgent(const char* id,
+                             const string& callback_socket_name);
 };
 
 }  // namespace vts

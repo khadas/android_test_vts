@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include "TcpServer.h"
+#include "TcpServerForRunner.h"
 
 #define DEFAULT_FUZZER_FILE_PATH32 "./fuzzer32"
 #define DEFAULT_FUZZER_FILE_PATH64 "./fuzzer64"
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
   printf("chdir %s\n", dir_path);
   chdir(dir_path);
 
-  android::vts::StartTcpServer(
+  android::vts::StartTcpServerForRunner(
       (const char*) fuzzer_path32, (const char*) fuzzer_path64,
       (const char*) spec_dir_path);
   return 0;

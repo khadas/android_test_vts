@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
@@ -81,15 +82,16 @@ const char* FuzzerCallbackBase::GetCallbackID(const string& name) {
 }
 
 
-void FuzzerCallbackBase::RpcCallToAgent(const char* id, int agent_port) {
+void FuzzerCallbackBase::RpcCallToAgent(const char* id,
+                                        const string& callback_socket_name) {
   cout << __func__ << ":" << __LINE__ << " id = '" << id << "'" << endl;
 
-  struct sockaddr_in serv_addr;
+  struct sockaddr_un serv_addr;
   struct hostent* server;
   char buffer[256];
 
   int sockfd;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (sockfd < 0) {
     cerr << __func__ << " ERROR opening socket" << endl;
     exit(-1);
@@ -102,10 +104,8 @@ void FuzzerCallbackBase::RpcCallToAgent(const char* id, int agent_port) {
     return;
   }
   bzero((char*) &serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  bcopy((char*) server->h_addr, (char*) &serv_addr.sin_addr.s_addr,
-        server->h_length);
-  serv_addr.sin_port = htons(agent_port);
+  serv_addr.sun_family = AF_UNIX;
+  strcpy(serv_addr.sun_path, callback_socket_name.c_str());
 
   if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
     cerr << __func__ << " ERROR connecting" << endl;

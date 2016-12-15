@@ -26,7 +26,7 @@
 #include <binder/IServiceManager.h>
 
 #include "binder/VtsFuzzerBinderService.h"
-#include "BinderClient.h"
+#include "BinderClientToDriver.h"
 
 using namespace std;
 

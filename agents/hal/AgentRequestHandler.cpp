@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "RequestHandler.h"
+#include "AgentRequestHandler.h"
 
 #include <errno.h>
 
@@ -36,11 +36,11 @@
 #include <sstream>
 #include <vector>
 
+#include "BinderClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
-#include "BinderClient.h"
+#include "SocketClientToDriver.h"
 #include "SocketServerForDriver.h"
-#include "TcpClient.h"
 
 using namespace std;
 using namespace google::protobuf;
@@ -63,6 +63,7 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::ListHals(
       cerr << "Error(" << errno << ") opening " << path << endl;
       continue;
     }
+
     struct dirent* dirp;
     int len;
     while ((dirp = readdir(dp)) != NULL) {
@@ -99,8 +100,7 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::CheckDriverService(
       new AndroidSystemControlResponseMessage();
 
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-  int port = GetSocketPortFromFile(service_name, 10);
-  if (port != -1) {
+  if (IsDriverRunning(service_name, 10)) {
 #else  // binder
   sp<IVtsFuzzer> binder = GetBinderClient(service_name);
   if (binder.get()) {
@@ -115,6 +115,9 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::CheckDriverService(
   }
   return response_msg;
 }
+
+static const char kUnixSocketNamePrefixForCallbackServer[] =
+    "/data/local/tmp/vts_agent_callback";
 
 
 AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchDriverService(
@@ -142,9 +145,11 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchDriverService(
     pid_t pid = fork();
     if (pid == 0) {  // child
       // TODO: check whether the port is available and handle if fails.
-      static int port = 21000;
-      port++;
-      StartSocketServerForDriver(port, -1);
+      static int port = 0;
+      string callback_socket_name(kUnixSocketNamePrefixForCallbackServer);
+      callback_socket_name += std::to_string(port++);
+      cout << "callback_socket_name: " << callback_socket_name << endl;
+      StartSocketServerForDriver(callback_socket_name, -1);
 
       string fuzzer_path_string(fuzzer_path);
       size_t offset = fuzzer_path_string.find_last_of("/");
@@ -156,30 +161,32 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchDriverService(
         asprintf(
             &cmd,
             "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
-            "--agent_port=%d",
-            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(), port);
+            "--callback_socket_name=%s",
+            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(),
+            callback_socket_name.c_str());
   #else  // binder
         asprintf(
             &cmd,
             "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-            "--agent_port=%d",
-            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(), port);
+            "--callback_socket_name=%s",
+            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
+            callback_socket_name.c_str());
   #endif
       } else {
   #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
         asprintf(
             &cmd,
             "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
-            "--spec_dir=%s --agent_port=%d",
+            "--spec_dir=%s --callback_socket_name=%s",
             ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(),
-            spec_dir_path, port);
+            spec_dir_path, callback_socket_name.c_str());
   #else  // binder
         asprintf(
             &cmd,
             "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-            "--spec_dir=%s --agent_port=%d",
+            "--spec_dir=%s --callback_socket_name=%s",
             ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
-            spec_dir_path, port);
+            spec_dir_path, callback_socket_name.c_str());
   #endif
       }
       cout << __func__ << "Exec " << cmd << endl;
@@ -216,7 +223,7 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchDriverService(
         int32_t result = client->LoadHal(
             file_path, target_class, target_type, target_version, module_name);
         cout << "[driver->agent]: LoadHal returns " << result << endl;
-        if (result == 0) {
+        if (result == VTS_DRIVER_RESPONSE_SUCCESS) {
           response_msg->set_response_code(SUCCESS);
           response_msg->set_reason("Loaded the selected HAL.");
           cout << "set service_name " << service_name << endl;
@@ -322,7 +329,7 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::DefaultResponse() {
 
 
 // handles a new session.
-int AgentRequestHandler::StartSession(
+int AgentRequestHandler::Start(
     int fd, const char* fuzzer_path32, const char* fuzzer_path64,
     const char* spec_dir_path) {
   // If connection is established then start communicating

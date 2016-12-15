@@ -14,47 +14,26 @@
 # limitations under the License.
 #
 
-LOCAL_PATH := $(call my-dir)
+LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vtssysfuzzer
-LOCAL_MODULE_STEM_64 := fuzzer64
-LOCAL_MODULE_STEM_32 := fuzzer32
+LOCAL_MODULE := libvts_drivercomm
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  VtsFuzzerMain.cpp \
-  BinderServer.cpp \
-  SocketServer.cpp \
+  VtsDriverCommUtil.cpp
 
 LOCAL_C_INCLUDES := \
   bionic \
   libcore \
-  device/google/gce/include \
   external/protobuf/src \
-  frameworks/native/include \
-  system/core/include \
-  system/extras \
-  test/vts/drivers/libdrivercomm \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/common \
 
 LOCAL_SHARED_LIBRARIES := \
-  libutils \
   libcutils \
-  liblog \
-  libbinder \
-  libdl \
-  libandroid_runtime \
-  libvts_common \
-  libvts_drivercomm \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
 
-LOCAL_STATIC_LIBRARIES := \
-  libelf \
-
 LOCAL_MULTILIB := both
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_LIBRARY)

@@ -36,6 +36,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 
 #include <utils/RefBase.h>
 
@@ -44,6 +45,8 @@
 #include <sstream>
 #include <string>
 
+#include <VtsDriverCommUtil.h>
+
 #include <google/protobuf/text_format.h>
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
@@ -51,8 +54,6 @@
 #include "specification_parser/SpecificationBuilder.h"
 
 using namespace std;
-
-#define MAX_HEADER_BUFFER_SIZE 128
 
 
 namespace android {
@@ -116,143 +117,18 @@ const char* VtsDriverHalSocketServer::GetFunctions() {
 }
 
 
-// Starts to run a TCP server (foreground).
-int VtsDriverHalSocketServer::Start(const string& socket_port_file) {
-  int sockfd;
-  int newsockfd;
-  socklen_t clilen;
-  struct sockaddr_in serv_addr;
-  struct sockaddr_in cli_addr;
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    cerr << "Can't open the socket." << endl;
-    return -1;
-  }
-
-  // Initialize socket structure
-  bzero((char*) &serv_addr, sizeof(serv_addr));
-
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = 0;
-
-  // Now bind the host address using bind() call.
-  if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
-    cerr << "Binding failed." << endl;
-    return -1;
-  }
-
-  socklen_t len = sizeof(serv_addr);
-  if (getsockname(sockfd, (struct sockaddr*) &serv_addr, &len) == -1) {
-    cerr << __func__ << " Couldn't get socket name." << endl;
-    return -1;
-  }
-
-  ofstream port_file;
-  port_file.open(socket_port_file);
-  port_file << ntohs(serv_addr.sin_port);
-  port_file.close();
-  cout << __func__ << " wrote the port to a file." << endl;
-
-  while (true) {
-    // Now start listening for the clients, here process will go in sleep mode
-    // and will wait for the incoming connection
-    listen(sockfd, 5);
-    clilen = sizeof(cli_addr);
-
-    // Accept actual connection from the client
-    newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
-    if (newsockfd < 0) {
-      cerr << "Accept failed" << endl;
-      return -1;
-    }
-
-    cout << "New session" << endl;
-    pid_t pid = fork();
-    if (pid == 0) {  // child
-      while(StartSession(newsockfd));
-      exit(0);
-    } else if (pid < 0) {
-      cerr << "can't fork a child process to handle a session." << endl;
-      return -1;
-    }
-  }
-  cerr << "[driver] exiting" << endl;
-  return 0;
-}
-
-
-bool VtsDriverHalSocketServer::Send(int sockfd, const string& message) {
-  std::stringstream header;
-  header << message.length() << "\n";
-  int n = write(sockfd, header.str().c_str(), header.str().length());
-  if (n < 0) {
-    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
-    return false;
-  }
-
-  n = write(sockfd, message.c_str(), message.length());
-  if (n < 0) {
-    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
-    return false;
-  }
-  return true;
-}
-
-
-bool VtsDriverHalSocketServer::StartSession(int sockfd) {
-  int header_index = 0;
-  char header_buffer[MAX_HEADER_BUFFER_SIZE];
-
-  for (header_index = 0; header_index < MAX_HEADER_BUFFER_SIZE;
-       header_index++) {
-    if (read(sockfd, &header_buffer[header_index], 1) != 1) {
-      cerr << __func__ << " ERROR reading the length" << endl;
-      return false;
-    }
-    if (header_buffer[header_index] == '\n'
-        || header_buffer[header_index] == '\r') {
-      header_buffer[header_index] = '\0';
-      break;
-    }
-  }
-
-  int msg_len = atoi(header_buffer);
-  char* msg = (char*) malloc(msg_len + 1);
-  if (!msg) {
-    cerr << __func__ << " ERROR malloc failed" << endl;
-    return false;
-  }
-
-  if (read(sockfd, msg, msg_len) !=  msg_len) {
-    cerr << __func__ << " ERROR read failed" << endl;
-    return false;
-  }
-  msg[msg_len] = '\0';
-
+bool VtsDriverHalSocketServer::ProcessOneCommand() {
   VtsDriverControlCommandMessage command_message;
-  if (!command_message.ParseFromString(string(msg, msg_len))) {
-    cerr << __func__ << " can't parse the message, length = "
-        << msg_len << endl;
-    return false;
-  }
-
+  if (!VtsSocketRecvMessage(&command_message)) return false;
   switch(command_message.command_type()) {
     case EXIT: {
       Exit();
-      VtsDriverControlResponseMessage* response_message =
-          new VtsDriverControlResponseMessage();
-      response_message->set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-
-      string message;
-      if (!response_message->SerializeToString(&message)) {
-        cerr << "can't serialize the request message to a string." << endl;
-        break;
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      if (VtsSocketSendMessage(response_message)) {
+        cout << getpid() << " " << __func__ << " exiting" << endl;
+        return false;
       }
-      delete response_message;
-
-      if (Send(sockfd, message)) return true;
       break;
     }
     case LOAD_HAL: {
@@ -261,87 +137,100 @@ bool VtsDriverHalSocketServer::StartSession(int sockfd) {
                                command_message.target_type(),
                                command_message.target_version(),
                                command_message.module_name());
-
-      VtsDriverControlResponseMessage* response_message =
-          new VtsDriverControlResponseMessage();
-      response_message->set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-      response_message->set_return_value(result);
-
-      string message;
-      if (!response_message->SerializeToString(&message)) {
-        cerr << "can't serialize the request message to a string." << endl;
-        break;
-      }
-      delete response_message;
-
-      if (Send(sockfd, message)) return true;
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      response_message.set_return_value(result);
+      if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
     case GET_STATUS: {
       int32_t result = Status(command_message.status_type());
-
-      VtsDriverControlResponseMessage* response_message =
-          new VtsDriverControlResponseMessage();
-      response_message->set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-      response_message->set_return_value(result);
-
-      string message;
-      if (!response_message->SerializeToString(&message)) {
-        cerr << "can't serialize the request message to a string." << endl;
-        break;
-      }
-      delete response_message;
-
-      if (Send(sockfd, message)) return true;
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      response_message.set_return_value(result);
+      if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
     case CALL_FUNCTION: {
       const char* result = Call(command_message.arg());
-
-      VtsDriverControlResponseMessage* response_message =
-          new VtsDriverControlResponseMessage();
-      response_message->set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-      response_message->set_return_message(result);
-
-      string message;
-      if (!response_message->SerializeToString(&message)) {
-        cerr << "can't serialize the request message to a string." << endl;
-        break;
-      }
-      delete response_message;
-
-      if (Send(sockfd, message)) return true;
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      response_message.set_return_message(result);
+      if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
     case LIST_FUNCTIONS: {
       const char* result = GetFunctions();
-
-      VtsDriverControlResponseMessage* response_message =
-                new VtsDriverControlResponseMessage();
-      response_message->set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
-      response_message->set_return_message(result);
-
-      string message;
-      if (!response_message->SerializeToString(&message)) {
-        cerr << "can't serialize the request message to a string." << endl;
-        break;
-      }
-      delete response_message;
-
-      if (Send(sockfd, message)) return true;
+      VtsDriverControlResponseMessage response_message;
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      response_message.set_return_message(result);
+      if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
   }
+  cerr << __func__ << " failed." << endl;
   return false;
 }
 
 
-void StartSocketServer(const string& socket_port_file,
-                       android::vts::SpecificationBuilder& spec_builder,
-                       const char* lib_path) {
-  VtsDriverHalSocketServer* server =
-      new VtsDriverHalSocketServer(spec_builder, lib_path);
-  server->Start(socket_port_file);
+// Starts to run a TCP server (foreground).
+int StartSocketServer(const string& socket_port_file,
+                      android::vts::SpecificationBuilder& spec_builder,
+                      const char* lib_path) {
+  int sockfd;
+  socklen_t clilen;
+  struct sockaddr_in cli_addr;
+  struct sockaddr_un serv_addr;
+
+  sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    cerr << "Can't open the socket." << endl;
+    return -1;
+  }
+
+  unlink(socket_port_file.c_str());
+  bzero((char*) &serv_addr, sizeof(serv_addr));
+  serv_addr.sun_family = AF_UNIX;
+  strcpy(serv_addr.sun_path, socket_port_file.c_str());
+
+  cout << "[driver:hal] tryimg to bind" << endl;
+
+  if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+    int error_save = errno;
+    cerr << getpid() << " " << __func__ << " ERROR binding failed. errno = "
+        << error_save << " " << strerror(error_save) << endl;
+    return -1;
+  }
+
+  listen(sockfd, 5);
+  clilen = sizeof(cli_addr);
+
+  while (true) {
+    cout << "[driver:hal] waiting for a new connection from the agent" << endl;
+    int newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
+    if (newsockfd < 0) {
+      cerr << __func__ << " ERROR accept failed." << endl;
+      return -1;
+    }
+
+    cout << "New session" << endl;
+    pid_t pid = fork();
+    if (pid == 0) {  // child
+      close(sockfd);
+      VtsDriverHalSocketServer* server =
+          new VtsDriverHalSocketServer(spec_builder, lib_path);
+      server->SetSockfd(newsockfd);
+      while(server->ProcessOneCommand());
+      delete server;
+      exit(0);
+    } else if (pid < 0) {
+      cerr << "can't fork a child process to handle a session." << endl;
+      return -1;
+    }
+    close(newsockfd);
+  }
+  cerr << "[driver] exiting" << endl;
+  return 0;
 }
 
 }  // namespace vts

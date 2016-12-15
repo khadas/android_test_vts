@@ -348,7 +348,7 @@ bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
   string function_name_prefix = GetFunctionNamePrefix(*message);
   function_name_prefix_ = function_name_prefix.c_str();
   for (vts::FunctionSpecificationMessage func_msg : *message->mutable_api()) {
-    Fuzz(&func_msg, result, -1);
+    Fuzz(&func_msg, result, "");
   }
   return true;
 }

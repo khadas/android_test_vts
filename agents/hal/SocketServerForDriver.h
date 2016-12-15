@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H__
-#define __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H__
+#ifndef __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H_
+#define __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H_
 
 namespace android {
 namespace vts {
 
-extern int StartSocketServerForDriver(int agent_port, int runner_port);
+extern int StartSocketServerForDriver(
+    const string& callback_socket_name, int runner_port);
 
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H__
+#endif  // __VTS_AGENT_SOCKET_SERVER_FOR_DRIVER_H_
