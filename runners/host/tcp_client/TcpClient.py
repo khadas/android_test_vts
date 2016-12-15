@@ -16,11 +16,11 @@
 #
 
 import json
+import logging
 import os
 import socket
 
 from proto import AndroidSystemControlMessage_pb2
-from logger import Log
 
 TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
@@ -50,11 +50,11 @@ class VtsTcpClient(object):
       Exception when the connection fails.
     """
     try:
-      Log.info("Connecting to %s:%s", ip, port)
+      logging.info("Connecting to %s:%s", ip, port)
       self.connection = socket.create_connection((ip, port),
                                                  _SOCKET_CONN_TIMEOUT_SECS)
-    except Exception as e:
-      Log.info("Socket connection timeout!")
+    except socket.error as e:
+      logging.exception(e)
       # TODO: use a custom exception
       raise
     self.channel = self.connection.makefile(mode="brw")
@@ -82,7 +82,7 @@ class VtsTcpClient(object):
 
     message = command_msg.SerializeToString()
     message_len = len(message)
-    Log.info("sending %d bytes" % message_len)
+    logging.info("sending %d bytes", message_len)
     self.channel.write(str(message_len) + b'\n')
     self.channel.write(message)
     self.channel.flush()
@@ -97,5 +97,5 @@ class VtsTcpClient(object):
       response_msg.ParseFromString(data)
       return response_msg
     except socket.timeout as e:
-      Log.error("socket timeout %s", e)
+      logging.exception(e)
       return None
