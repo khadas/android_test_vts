@@ -109,7 +109,7 @@ class BigTableClient(object):
             row: A row object that represents the top most row.
         """
 
-        if (self._end_index < self._start_index):
+        if self._end_index < self._start_index:
             return
 
         logging.info('Getting a single row by row key.')
