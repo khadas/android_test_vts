@@ -28,6 +28,12 @@
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
         <option name="append-bitness" value="false" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.PythonVirtualenvPreparer">
+        <option name="dep-module" value="future" />
+        <option name="dep-module" value="futures" />
+        <option name="dep-module" value="enum" />
+        <option name="dep-module" value="protobuf" />
+    </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/shell/SampleShellTest" />
         <option name="test-config-path" value="vts-config/testcases/host/shell/SampleShellTest.config" />
