@@ -25,6 +25,7 @@ to reconstruct a coverage report.
 import cgi
 import io
 import logging
+import os
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 
@@ -61,7 +62,11 @@ def GenerateCoverageReport(src_file_name, src_file_content, gcno_file_content,
     src_lines_counts = [None] * len(src_lines)
     logging.info("GenerateCoverageReport: src file lines %d", len(src_lines))
     for ident in file_summary.functions:
-        for block in file_summary.functions[ident].blocks:
+        func = file_summary.functions[ident]
+        if not src_file_name.endswith(os.path.basename(func.src_file_name)):
+            logging.warn("GenerateCoverageReport: %s file is skipped", func.src_file_name)
+            continue
+        for block in func.blocks:
             for line in block.lines:
                 logging.info("GenerateCoverageReport: covered line %s", line)
                 if line >= 0 and line < len(src_lines_counts):
