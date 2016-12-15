@@ -77,6 +77,8 @@ public class ShowTableServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
+        String loginURI = userService.createLoginURL(request.getRequestURI());
+        String logoutURI = userService.createLogoutURL(loginURI);
         Long startTime = null;  // time in microseconds
         Long endTime = null;  // time in microseconds
         RequestDispatcher dispatcher = null;
@@ -131,311 +133,296 @@ public class ShowTableServlet extends HttpServlet {
             resultNames.add(r.name());
         }
 
-        if (currentUser != null) {
-            response.setContentType("text/plain");
-            table = BigtableHelper.getTable(tableName);
+        response.setContentType("text/plain");
+        table = BigtableHelper.getTable(tableName);
 
-            // this is the tip of the tree and is used for populating pie chart.
-            String topBuild = null;
+        // this is the tip of the tree and is used for populating pie chart.
+        String topBuild = null;
 
-            // TestReportMessage corresponding to the top build -- will be used for pie chart.
-            TestReportMessage topBuildTestReportMessage = null;
+        // TestReportMessage corresponding to the top build -- will be used for pie chart.
+        TestReportMessage topBuildTestReportMessage = null;
 
-            // Stores results for top build
-            int[] topBuildResultCounts = new int[resultNames.size()];
+        // Stores results for top build
+        int[] topBuildResultCounts = new int[resultNames.size()];
 
-            // list to hold the test report messages that will be shown on the dashboard
-            List<TestReportMessage> tests = new ArrayList<TestReportMessage>();
+        // list to hold the test report messages that will be shown on the dashboard
+        List<TestReportMessage> tests = new ArrayList<TestReportMessage>();
 
-            // list of column headers (device build IDs)
-            List<String> deviceBuildIdList = new ArrayList<>();
+        // list of column headers (device build IDs)
+        List<String> deviceBuildIdList = new ArrayList<>();
 
-            // set to hold orderings of each test case (testcase name to index)
-            Map<String, Integer> testCaseNameMap = new HashMap<>();
+        // set to hold orderings of each test case (testcase name to index)
+        Map<String, Integer> testCaseNameMap = new HashMap<>();
 
-            // set to hold the name of profiling tests to maintain uniqueness
-            Set<String> profilingPointNameSet = new HashSet<>();
+        // set to hold the name of profiling tests to maintain uniqueness
+        Set<String> profilingPointNameSet = new HashSet<>();
 
-            while (true) {
-                // Scan until there is a full page of data or until there is no
-                // more older data.
-                Scan scan = new Scan();
-                scan.setStartRow(Bytes.toBytes(Long.toString(startTime)));
-                scan.setStopRow(Bytes.toBytes(Long.toString(endTime)));
-                ResultScanner scanner = table.getScanner(scan);
-                for (Result result = scanner.next(); result != null; result = scanner.next()) {
-                    byte[] value = result.getValue(FAMILY, QUALIFIER);
-                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(value);
-                    String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
+        while (true) {
+            // Scan until there is a full page of data or until there is no
+            // more older data.
+            Scan scan = new Scan();
+            scan.setStartRow(Bytes.toBytes(Long.toString(startTime)));
+            scan.setStopRow(Bytes.toBytes(Long.toString(endTime)));
+            ResultScanner scanner = table.getScanner(scan);
+            for (Result result = scanner.next(); result != null; result = scanner.next()) {
+                byte[] value = result.getValue(FAMILY, QUALIFIER);
+                TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                    parseFrom(value);
+                String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                    // filter empty build IDs and add only numbers
-                    if (buildId.length() == 0) continue;
+                // filter empty build IDs and add only numbers
+                if (buildId.length() == 0) continue;
 
-                    // filter empty device info lists
-                    if (testReportMessage.getDeviceInfoList().size() == 0) continue;
+                // filter empty device info lists
+                if (testReportMessage.getDeviceInfoList().size() == 0) continue;
 
-                    String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
-                                              .getBuildId().toStringUtf8();
+                String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
+                                          .getBuildId().toStringUtf8();
 
-                    try {
-                        // filter non-integer build IDs
-                        Integer.parseInt(buildId);
-                        Integer.parseInt(firstDeviceBuildId);
-                        tests.add(0, testReportMessage);
-                        topBuild = firstDeviceBuildId;
-                    } catch (NumberFormatException e) {
-                        /* skip a non-post-submit build */
-                        continue;
-                    }
-
-                    // update map of profiling point names
-                    for (ProfilingReportMessage profilingReportMessage :
-                        testReportMessage.getProfilingList()) {
-
-                        String profilingPointName = profilingReportMessage
-                            .getName().toStringUtf8();
-                        profilingPointNameSet.add(profilingPointName);
-                    }
-
-                    // update TestCaseReportMessage list
-                    for (TestCaseReportMessage testCaseReportMessage :
-                         testReportMessage.getTestCaseList()) {
-                        String testCaseName = new String(
-                            testCaseReportMessage.getName().toStringUtf8());
-                        if (!testCaseNameMap.containsKey(testCaseName)) {
-                            testCaseNameMap.put(testCaseName, testCaseNameMap.size());
-                        }
-                    }
-                }
-                scanner.close();
-                if (tests.size() < MAX_BUILD_IDS_PER_PAGE
-                    && BigtableHelper.hasOlder(table, startTime)) {
-                    // Look further back in time a day
-                    endTime = startTime;
-                    startTime -= ONE_DAY;
-                    showMostRecent = true;
-                } else {
-                    // Full page or no more data.
-                    break;
-                }
-            }
-
-            if (tests.size() > MAX_BUILD_IDS_PER_PAGE) {
-                int startIndex;
-                int endIndex;
-                if (showMostRecent) {
-                    startIndex = 0;
-                    endIndex = MAX_BUILD_IDS_PER_PAGE;
-                } else {
-                    endIndex = tests.size();
-                    startIndex = endIndex - MAX_BUILD_IDS_PER_PAGE;
-                }
-                tests = tests.subList(startIndex, endIndex);
-            }
-
-            if (tests.size() > 0) {
-                startTime = tests.get(tests.size() - 1).getStartTimestamp();
-                topBuildTestReportMessage = tests.get(0);
-                endTime = topBuildTestReportMessage.getStartTimestamp() + 1;
-            }
-
-            if (topBuildTestReportMessage != null) {
-                // create pieChartArray from top build data.
-
-                // Count array for each test result
-                for (TestCaseReportMessage testCaseReportMessage : topBuildTestReportMessage.
-                    getTestCaseList()) {
-                    topBuildResultCounts[testCaseReportMessage.getTestResult().getNumber()]++;
-                }
-            }
-
-            // the device grid on the table has four rows - Build Alias, Product Variant,
-            // Build Flavor and test build ID, and columns equal to the size of selectedBuildIdList.
-            String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][tests.size() + 1];
-
-            // the time grid on the table has one - Start Time.
-            // These represent the start times for the test run.
-            String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][tests.size() + 1];
-
-            // the duration grid on the table has one row - test duration.
-            // These represent the length of time the test elapsed.
-            String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][tests.size() + 1];
-
-            // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
-            String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][tests.size() + 1];
-
-            // the results an entry for each testcase result for each build.
-            String[][] resultsGrid = new String[testCaseNameMap.size()][tests.size() + 1];
-
-            // first column for device grid
-            String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "VTS Build ID"};
-            for (int i = 0; i < rowNamesDeviceGrid.length; i++) {
-                deviceGrid[i][0] = "<b>" + rowNamesDeviceGrid[i] + "</b>";
-            }
-
-            // first column for time grid
-            timeGrid[0][0] = "<b>Test Start</b>";
-
-            // first column for the duration grid
-            durationGrid[0][0] = "<b>Test Duration (microsec)</b>";
-
-            // first column for summary grid
-            String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
-            for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
-                summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
-            }
-
-            // first column for results grid
-            for (String testCaseName : testCaseNameMap.keySet()) {
-                resultsGrid[testCaseNameMap.get(testCaseName)][0] = testCaseName;
-            }
-
-            for (int j = 0; j < tests.size(); j++) {
-                TestReportMessage report = tests.get(j);
-                List<AndroidDeviceInfoMessage> devices = report.getDeviceInfoList();
-                List<String> buildIdList = new ArrayList<>();
-                List<String> buildAliasList = new ArrayList<>();
-                List<String> productVariantList = new ArrayList<>();
-                List<String> buildFlavorList = new ArrayList<>();
-                for (AndroidDeviceInfoMessage device : devices) {
-                    buildAliasList.add(device.getBuildAlias().toStringUtf8().toLowerCase());
-                    productVariantList.add(device.getProductVariant().toStringUtf8());
-                    buildFlavorList.add(device.getBuildFlavor().toStringUtf8());
-                    buildIdList.add(device.getBuildId().toStringUtf8());
-                }
-                String buildAlias = StringUtils.join(buildAliasList, ",");
-                String productVariant = StringUtils.join(productVariantList, ",");
-                String buildFlavor = StringUtils.join(buildFlavorList, ",");
-                deviceBuildIdList.add(StringUtils.join(buildIdList, ","));
-
-                String buildId = report.getBuildInfo().getId().toStringUtf8();
-
-                int passCount = 0;
-                long totalLineCount = 0, coveredLineCount = 0;
-                for (TestCaseReportMessage testCaseReport : report.getTestCaseList()) {
-                    if (testCaseReport.getTestResult() ==
-                        TestCaseResult.TEST_CASE_RESULT_PASS) {
-                        passCount++;
-                    }
-                    for (CoverageReportMessage coverageReport :
-                        testCaseReport.getCoverageList()) {
-                        totalLineCount += coverageReport.getTotalLineCount();
-                        coveredLineCount += coverageReport.getCoveredLineCount();
-                    }
-
-                    int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
-                    if (testCaseReport.getTestResult() != null) {
-                        resultsGrid[i][j + 1] = Integer.toString(testCaseReport.getTestResult()
-                                                                 .getNumber());
-                        resultsGrid[i][j + 1] = "<div class=\"" +
-                                                testCaseReport.getTestResult().toString() +
-                                                " TEST_CASE_RESULT\">&nbsp;</div>";
-                    } else {
-                        resultsGrid[i][j + 1] = "<div class=\"" +
-                                                TestCaseResult.UNKNOWN_RESULT.toString() +
-                                                " TEST_CASE_RESULT\">&nbsp;</div>";
-                    }
-                }
-                String passInfo;
                 try {
-                    double passPct = Math.round((100 * passCount /
-                                                 report.getTestCaseList().size()) * 100f) / 100f;
-                    passInfo = Double.toString(passPct) + " %";
-                } catch (ArithmeticException e) {
-                    passInfo = " - ";
+                    // filter non-integer build IDs
+                    Integer.parseInt(buildId);
+                    Integer.parseInt(firstDeviceBuildId);
+                    tests.add(0, testReportMessage);
+                    topBuild = firstDeviceBuildId;
+                } catch (NumberFormatException e) {
+                    /* skip a non-post-submit build */
+                    continue;
                 }
 
-                String coverageInfo;
-                try {
-                    double coveragePct = Math.round((100 * coveredLineCount /
-                                                     totalLineCount) * 100f) / 100f;
-                    coverageInfo = Double.toString(coveragePct) + " % " +
-                            "<a href=\"/show_coverage?key=" + report.getStartTimestamp() +
-                            "&testName=" + request.getParameter("testName") +
-                            "&startTime=" + startTime +
-                            "&endTime=" + endTime +
-                            "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
-                            "<i class=\"material-icons coverage-icon\">menu</i></a>";
-                } catch (ArithmeticException e) {
-                    coverageInfo = " - ";
+                // update map of profiling point names
+                for (ProfilingReportMessage profilingReportMessage :
+                    testReportMessage.getProfilingList()) {
+
+                    String profilingPointName = profilingReportMessage
+                        .getName().toStringUtf8();
+                    profilingPointNameSet.add(profilingPointName);
                 }
 
-                deviceGrid[0][j + 1] = buildAlias.toLowerCase();
-                deviceGrid[1][j + 1] = buildFlavor;
-                deviceGrid[2][j + 1] = productVariant;
-                deviceGrid[3][j + 1] = buildId;
-                timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
-                durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
-                                                   report.getStartTimestamp());
-                summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
-                summaryGrid[1][j + 1] = Integer.toString(passCount);
-                summaryGrid[2][j + 1] = passInfo;
-                summaryGrid[3][j + 1] = coverageInfo;
+                // update TestCaseReportMessage list
+                for (TestCaseReportMessage testCaseReportMessage :
+                     testReportMessage.getTestCaseList()) {
+                    String testCaseName = new String(
+                        testCaseReportMessage.getName().toStringUtf8());
+                    if (!testCaseNameMap.containsKey(testCaseName)) {
+                        testCaseNameMap.put(testCaseName, testCaseNameMap.size());
+                    }
+                }
             }
-
-            String[] profilingPointNameArray = profilingPointNameSet.
-                toArray(new String[profilingPointNameSet.size()]);
-
-            if (profilingPointNameArray.length == 0) {
-                profilingDataAlert = PROFILING_DATA_ALERT;
+            scanner.close();
+            if (tests.size() < MAX_BUILD_IDS_PER_PAGE
+                && BigtableHelper.hasOlder(table, startTime)) {
+                // Look further back in time a day
+                endTime = startTime;
+                startTime -= ONE_DAY;
+                showMostRecent = true;
+            } else {
+                // Full page or no more data.
+                break;
             }
+        }
 
-            String[] deviceBuildIdArray =
-                deviceBuildIdList.toArray(new String[deviceBuildIdList.size()]);
+        if (tests.size() > MAX_BUILD_IDS_PER_PAGE) {
+            int startIndex;
+            int endIndex;
+            if (showMostRecent) {
+                startIndex = 0;
+                endIndex = MAX_BUILD_IDS_PER_PAGE;
+            } else {
+                endIndex = tests.size();
+                startIndex = endIndex - MAX_BUILD_IDS_PER_PAGE;
+            }
+            tests = tests.subList(startIndex, endIndex);
+        }
 
-            boolean hasNewer = BigtableHelper.hasNewer(table, endTime);
-            boolean hasOlder = BigtableHelper.hasOlder(table, startTime);
+        if (tests.size() > 0) {
+            startTime = tests.get(tests.size() - 1).getStartTimestamp();
+            topBuildTestReportMessage = tests.get(0);
+            endTime = topBuildTestReportMessage.getStartTimestamp() + 1;
+        }
 
-            request.setAttribute("testName", request.getParameter("testName"));
+        if (topBuildTestReportMessage != null) {
+            // create pieChartArray from top build data.
 
-            request.setAttribute("error", profilingDataAlert);
-            request.setAttribute("errorJson",
-                new Gson().toJson(profilingDataAlert));
+            // Count array for each test result
+            for (TestCaseReportMessage testCaseReportMessage : topBuildTestReportMessage.
+                getTestCaseList()) {
+                topBuildResultCounts[testCaseReportMessage.getTestResult().getNumber()]++;
+            }
+        }
 
-            // pass values by converting to JSON
-            request.setAttribute("deviceGrid",
-                    new Gson().toJson(deviceGrid));
-            request.setAttribute("timeGrid",
-                    new Gson().toJson(timeGrid));
-            request.setAttribute("durationGrid",
-                    new Gson().toJson(durationGrid));
-            request.setAttribute("summaryGrid",
-                    new Gson().toJson(summaryGrid));
-            request.setAttribute("resultsGrid",
-                    new Gson().toJson(resultsGrid));
-            request.setAttribute("profilingPointNameJson",
-                                 new Gson().toJson(profilingPointNameArray));
-            request.setAttribute("deviceBuildIdArrayJson",
-                                 new Gson().toJson(deviceBuildIdArray));
-            request.setAttribute("resultNames",
-                                 new Gson().toJson(resultNames));
+        // the device grid on the table has four rows - Build Alias, Product Variant,
+        // Build Flavor and test build ID, and columns equal to the size of selectedBuildIdList.
+        String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][tests.size() + 1];
 
-            // data for pie chart
-            request.setAttribute("topBuildResultCounts",
-                new Gson().toJson(topBuildResultCounts));
+        // the time grid on the table has one - Start Time.
+        // These represent the start times for the test run.
+        String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][tests.size() + 1];
 
-            request.setAttribute("topBuildJson",
-                new Gson().toJson(topBuild));
+        // the duration grid on the table has one row - test duration.
+        // These represent the length of time the test elapsed.
+        String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][tests.size() + 1];
 
-            request.setAttribute("startTime",
-                                  new Gson().toJson(startTime));
+        // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
+        String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][tests.size() + 1];
 
-            request.setAttribute("endTime",
-                                  new Gson().toJson(endTime));
+        // the results an entry for each testcase result for each build.
+        String[][] resultsGrid = new String[testCaseNameMap.size()][tests.size() + 1];
 
-            request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
+        // first column for device grid
+        String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "VTS Build ID"};
+        for (int i = 0; i < rowNamesDeviceGrid.length; i++) {
+            deviceGrid[i][0] = "<b>" + rowNamesDeviceGrid[i] + "</b>";
+        }
 
-            request.setAttribute("hasOlder", new Gson().toJson(hasOlder));
+        // first column for time grid
+        timeGrid[0][0] = "<b>Test Start</b>";
 
-            dispatcher = request.getRequestDispatcher("/show_table.jsp");
+        // first column for the duration grid
+        durationGrid[0][0] = "<b>Test Duration (microsec)</b>";
+
+        // first column for summary grid
+        String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
+        for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
+            summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
+        }
+
+        // first column for results grid
+        for (String testCaseName : testCaseNameMap.keySet()) {
+            resultsGrid[testCaseNameMap.get(testCaseName)][0] = testCaseName;
+        }
+
+        for (int j = 0; j < tests.size(); j++) {
+            TestReportMessage report = tests.get(j);
+            List<AndroidDeviceInfoMessage> devices = report.getDeviceInfoList();
+            List<String> buildIdList = new ArrayList<>();
+            List<String> buildAliasList = new ArrayList<>();
+            List<String> productVariantList = new ArrayList<>();
+            List<String> buildFlavorList = new ArrayList<>();
+            for (AndroidDeviceInfoMessage device : devices) {
+                buildAliasList.add(device.getBuildAlias().toStringUtf8().toLowerCase());
+                productVariantList.add(device.getProductVariant().toStringUtf8());
+                buildFlavorList.add(device.getBuildFlavor().toStringUtf8());
+                buildIdList.add(device.getBuildId().toStringUtf8());
+            }
+            String buildAlias = StringUtils.join(buildAliasList, ",");
+            String productVariant = StringUtils.join(productVariantList, ",");
+            String buildFlavor = StringUtils.join(buildFlavorList, ",");
+            deviceBuildIdList.add(StringUtils.join(buildIdList, ","));
+
+            String buildId = report.getBuildInfo().getId().toStringUtf8();
+
+            int passCount = 0;
+            long totalLineCount = 0, coveredLineCount = 0;
+            for (TestCaseReportMessage testCaseReport : report.getTestCaseList()) {
+                if (testCaseReport.getTestResult() ==
+                    TestCaseResult.TEST_CASE_RESULT_PASS) {
+                    passCount++;
+                }
+                for (CoverageReportMessage coverageReport :
+                    testCaseReport.getCoverageList()) {
+                    totalLineCount += coverageReport.getTotalLineCount();
+                    coveredLineCount += coverageReport.getCoveredLineCount();
+                }
+
+                int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
+                if (testCaseReport.getTestResult() != null) {
+                    resultsGrid[i][j + 1] = Integer.toString(testCaseReport.getTestResult()
+                                                             .getNumber());
+                    resultsGrid[i][j + 1] = "<div class=\"" +
+                                            testCaseReport.getTestResult().toString() +
+                                            " TEST_CASE_RESULT\">&nbsp;</div>";
+                } else {
+                    resultsGrid[i][j + 1] = "<div class=\"" +
+                                            TestCaseResult.UNKNOWN_RESULT.toString() +
+                                            " TEST_CASE_RESULT\">&nbsp;</div>";
+                }
+            }
+            String passInfo;
             try {
-                dispatcher.forward(request, response);
-            } catch (ServletException e) {
-                logger.error("Servlet Exception caught : " + e.toString());
+                double passPct = Math.round((100 * passCount /
+                                             report.getTestCaseList().size()) * 100f) / 100f;
+                passInfo = Double.toString(passPct) + " %";
+            } catch (ArithmeticException e) {
+                passInfo = " - ";
             }
-        } else {
-            response.sendRedirect(userService.createLoginURL(request.getRequestURI()));
+
+            String coverageInfo;
+            try {
+                double coveragePct = Math.round((100 * coveredLineCount /
+                                                 totalLineCount) * 100f) / 100f;
+                coverageInfo = Double.toString(coveragePct) + " % " +
+                        "<a href=\"/show_coverage?key=" + report.getStartTimestamp() +
+                        "&testName=" + request.getParameter("testName") +
+                        "&startTime=" + startTime +
+                        "&endTime=" + endTime +
+                        "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
+                        "<i class=\"material-icons coverage-icon\">menu</i></a>";
+            } catch (ArithmeticException e) {
+                coverageInfo = " - ";
+            }
+
+            deviceGrid[0][j + 1] = buildAlias.toLowerCase();
+            deviceGrid[1][j + 1] = buildFlavor;
+            deviceGrid[2][j + 1] = productVariant;
+            deviceGrid[3][j + 1] = buildId;
+            timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
+            durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
+                                               report.getStartTimestamp());
+            summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
+            summaryGrid[1][j + 1] = Integer.toString(passCount);
+            summaryGrid[2][j + 1] = passInfo;
+            summaryGrid[3][j + 1] = coverageInfo;
+        }
+
+        String[] profilingPointNameArray = profilingPointNameSet.
+            toArray(new String[profilingPointNameSet.size()]);
+
+        if (profilingPointNameArray.length == 0) {
+            profilingDataAlert = PROFILING_DATA_ALERT;
+        }
+
+        String[] deviceBuildIdArray =
+            deviceBuildIdList.toArray(new String[deviceBuildIdList.size()]);
+
+        boolean hasNewer = BigtableHelper.hasNewer(table, endTime);
+        boolean hasOlder = BigtableHelper.hasOlder(table, startTime);
+
+        request.setAttribute("logoutURL", logoutURI);
+        request.setAttribute("email", currentUser.getEmail());
+        request.setAttribute("testName", request.getParameter("testName"));
+
+        request.setAttribute("error", profilingDataAlert);
+        request.setAttribute("errorJson", new Gson().toJson(profilingDataAlert));
+
+        // pass values by converting to JSON
+        request.setAttribute("deviceGrid", new Gson().toJson(deviceGrid));
+        request.setAttribute("timeGrid", new Gson().toJson(timeGrid));
+        request.setAttribute("durationGrid", new Gson().toJson(durationGrid));
+        request.setAttribute("summaryGrid", new Gson().toJson(summaryGrid));
+        request.setAttribute("resultsGrid", new Gson().toJson(resultsGrid));
+        request.setAttribute("profilingPointNameJson", new Gson().toJson(profilingPointNameArray));
+        request.setAttribute("deviceBuildIdArrayJson", new Gson().toJson(deviceBuildIdArray));
+        request.setAttribute("resultNames", new Gson().toJson(resultNames));
+
+        // data for pie chart
+        request.setAttribute("topBuildResultCounts", new Gson().toJson(topBuildResultCounts));
+
+        request.setAttribute("topBuildJson", new Gson().toJson(topBuild));
+
+        request.setAttribute("startTime", new Gson().toJson(startTime));
+
+        request.setAttribute("endTime", new Gson().toJson(endTime));
+
+        request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
+
+        request.setAttribute("hasOlder", new Gson().toJson(hasOlder));
+
+        dispatcher = request.getRequestDispatcher("/show_table.jsp");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            logger.error("Servlet Exception caught : " + e.toString());
         }
     }
 }

@@ -48,6 +48,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 </servlet-mapping>
 
 <servlet-mapping>
+  <servlet-name>preferences</servlet-name>
+  <url-pattern>/preferences/*</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
   <servlet-name>show_table</servlet-name>
   <url-pattern>/show_table/*</url-pattern>
 </servlet-mapping>
@@ -74,12 +79,21 @@ Copyright 2016 Google Inc. All Rights Reserved.
 
 <security-constraint>
   <web-resource-collection>
-      <web-resource-name>cron</web-resource-name>
-      <url-pattern>/cron/*</url-pattern>
+    <web-resource-name>cron</web-resource-name>
+    <url-pattern>/cron/*</url-pattern>
   </web-resource-collection>
   <auth-constraint>
-      <role-name>admin</role-name>
+    <role-name>admin</role-name>
   </auth-constraint>
 </security-constraint>
 
+<security-constraint>
+  <web-resource-collection>
+    <web-resource-name>all</web-resource-name>
+    <url-pattern>/*</url-pattern>
+  </web-resource-collection>
+  <auth-constraint>
+    <role-name>*</role-name>
+  </auth-constraint>
+</security-constraint>
 </web-app>

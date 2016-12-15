@@ -58,6 +58,8 @@ public class ShowCoverageServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
+        String loginURI = userService.createLoginURL(request.getRequestURI());
+        String logoutURI = userService.createLogoutURL(loginURI);
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
@@ -76,59 +78,55 @@ public class ShowCoverageServlet extends HttpServlet {
 
         TestReportMessage testReportMessage = null;
 
-        if (currentUser != null) {
-            table = BigtableHelper.getTable(tableName);
-            ResultScanner scanner = table.getScanner(scan);
-            for (Result result = scanner.next(); result != null; result = scanner.next()) {
-                byte[] value = result.getValue(FAMILY, QUALIFIER);
-                TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
-                    parseFrom(value);
-                String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
+        table = BigtableHelper.getTable(tableName);
+        ResultScanner scanner = table.getScanner(scan);
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            byte[] value = result.getValue(FAMILY, QUALIFIER);
+            TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
+                parseFrom(value);
+            String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                // filter empty build IDs and add only numbers
-                if (buildId.length() > 0) {
-                    try {
-                        Integer.parseInt(buildId);
-                        if (time == currentTestReportMessage.getStartTimestamp()) {
-                          testReportMessage = currentTestReportMessage;
-                          break;
-                        }
-                    } catch (NumberFormatException e) {
-                        /* skip a non-post-submit build */
+            // filter empty build IDs and add only numbers
+            if (buildId.length() > 0) {
+                try {
+                    Integer.parseInt(buildId);
+                    if (time == currentTestReportMessage.getStartTimestamp()) {
+                      testReportMessage = currentTestReportMessage;
+                      break;
                     }
+                } catch (NumberFormatException e) {
+                    /* skip a non-post-submit build */
                 }
-            }
-            scanner.close();
-
-            List<List<String>> coverageInfo = new ArrayList<>();
-            for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
-                for (CoverageReportMessage coverageReportMessage : testCaseReportMessage.getCoverageList()) {
-                    ArrayList<String> entry = new ArrayList<>();
-                    String dirPath = coverageReportMessage.getDirPath().toStringUtf8();
-                    String fileName = coverageReportMessage.getFileName().toStringUtf8();
-                    String path = dirPath + File.separator + fileName;
-                    entry.add(testCaseReportMessage.getName().toStringUtf8());
-                    entry.add(path);
-                    entry.add(coverageReportMessage.getHtml().toStringUtf8());
-                    coverageInfo.add(entry);
-                }
-            }
-
-            request.setAttribute("testName", request.getParameter("testName"));
-            request.setAttribute("coverageInfo", coverageInfo);
-            request.setAttribute("startTime", request.getParameter("startTime"));
-            request.setAttribute("endTime", request.getParameter("endTime"));
-            response.setContentType("text/plain");
-            dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
-
-            try {
-                dispatcher.forward(request, response);
-            } catch (ServletException e) {
-                logger.error("Servlet Excpetion caught : ", e);
             }
         }
-        else {
-          response.sendRedirect(userService.createLoginURL(request.getRequestURI()));
+        scanner.close();
+
+        List<List<String>> coverageInfo = new ArrayList<>();
+        for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
+            for (CoverageReportMessage coverageReportMessage : testCaseReportMessage.getCoverageList()) {
+                ArrayList<String> entry = new ArrayList<>();
+                String dirPath = coverageReportMessage.getDirPath().toStringUtf8();
+                String fileName = coverageReportMessage.getFileName().toStringUtf8();
+                String path = dirPath + File.separator + fileName;
+                entry.add(testCaseReportMessage.getName().toStringUtf8());
+                entry.add(path);
+                entry.add(coverageReportMessage.getHtml().toStringUtf8());
+                coverageInfo.add(entry);
+            }
+        }
+        request.setAttribute("logoutURL", logoutURI);
+        request.setAttribute("email", currentUser.getEmail());
+        request.setAttribute("testName", request.getParameter("testName"));
+        request.setAttribute("coverageInfo", coverageInfo);
+        request.setAttribute("startTime", request.getParameter("startTime"));
+        request.setAttribute("endTime", request.getParameter("endTime"));
+        response.setContentType("text/plain");
+        dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
+
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            logger.error("Servlet Excpetion caught : ", e);
         }
     }
 }

@@ -16,30 +16,38 @@
     min-height: 85%;
 }
 
-#edit-button-wrapper {
+.card.option {
+    padding: 10px 30px;
+    margin: 8px;
+    color: #039be5;
+}
+
+#add-button-wrapper {
+    margin-top: 10px;
+    height: 61px;
+}
+
+#save-button-wrapper {
     bottom: 25px;
     right: 25px;
 }
 
-th {
-    background: #551A8B;  /* Darken header a bit */
-    font-weight: bold;
-    color: white;
+.clear-button {
+    position: absolute;
+    right: 0;
 }
 
-td {
-    background: #912CEE;
-    text-align: center;
+.header {
+    cursor: default;
+    color: #ee6e73;
+    margin-bottom: 0;
 }
 
-.card.option {
-    padding: 10px 30px;
-    margin: 8px;
-}
-
-#error-container {
-    padding-top: 50px;
-    padding-bottom: 50px;
+.caption {
+    cursor: default;
+    font-size: 20px;
+    font-weight: 300;
+    margin-bottom: 30px;
 }
 
 .entry {
@@ -47,27 +55,24 @@ td {
     font-weight: 300;
 }
 
-#options {
-    min-height: 80%;
+.ui-menu {
+    z-index: 100;
 }
 
-#show-button {
-    border-radius: 100px;
+.ui-menu-item {
+    font-size: 16px;
+    padding: 4px 10px;
+    transition: background-color .25s;
 }
 
-#show-button-arrow {
-    margin-left: 3px;
+.ui-menu-item:hover {
+    background-color: #e0f2f1;
 }
 
-#section-header {
-    cursor: default;
-    color: #ee6e73;
+.ui-menu-item:active {
+    background-color: #b2dfdb;
 }
 
-#section-header:after {
-    border: 1px solid #ee6e73;
-    margin-top: 10px;
-    margin-bottom: 30px;
-    display: block;
-    content: " ";
+.ui-helper-hidden-accessible {
+    display: none;
 }
