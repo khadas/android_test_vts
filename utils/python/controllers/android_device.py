@@ -23,7 +23,6 @@ import time
 import traceback
 import threading
 import socket
-import Queue
 
 from vts.runners.host import keys
 from vts.runners.host import logger as vts_logger
@@ -32,6 +31,7 @@ from vts.runners.host import utils
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
+from vts.utils.python.controllers import sl4a_client
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import hal_mirror
 from vts.utils.python.mirror import shell_mirror
@@ -62,13 +62,12 @@ class AndroidDeviceError(signals.ControllerError):
     pass
 
 
-def create(configs, use_vts_agent=True):
+def create(configs):
     """Creates AndroidDevice controller objects.
 
     Args:
         configs: A list of dicts, each representing a configuration for an
                  Android device.
-        use_vts_agent: bool, whether to use VTS agent.
 
     Returns:
         A list of AndroidDevice objects.
@@ -86,12 +85,11 @@ def create(configs, use_vts_agent=True):
         # Configs is a list of dicts.
         ads = get_instances_with_configs(configs)
     connected_ads = list_adb_devices()
-
     for ad in ads:
         if ad.serial not in connected_ads:
             raise DoesNotExistError(("Android device %s is specified in config"
                                      " but is not attached.") % ad.serial)
-    _startServicesOnAds(ads, use_vts_agent)
+    _startServicesOnAds(ads)
     return ads
 
 
@@ -108,7 +106,7 @@ def destroy(ads):
             ad.log.exception("Failed to clean up properly.")
 
 
-def _startServicesOnAds(ads, use_vts_agent):
+def _startServicesOnAds(ads):
     """Starts long running services on multiple AndroidDevice objects.
 
     If any one AndroidDevice object fails to start services, cleans up all
@@ -116,13 +114,12 @@ def _startServicesOnAds(ads, use_vts_agent):
 
     Args:
         ads: A list of AndroidDevice objects whose services to start.
-        use_vts_agent: bool, whether to use the VTS agent.
     """
     running_ads = []
     for ad in ads:
         running_ads.append(ad)
         try:
-            ad.startServices(use_vts_agent)
+            ad.startServices()
         except:
             ad.log.exception("Failed to start some services, abort!")
             destroy(running_ads)
@@ -369,13 +366,17 @@ class AndroidDevice(object):
         self.fastboot = fastboot.FastbootProxy(serial)
         if not self.isBootloaderMode:
             self.rootAdb()
-        self.host_command_port = adb.get_available_host_port()
+        self.host_command_port = None
         self.host_callback_port = adb.get_available_host_port()
         self.adb.reverse_tcp_forward(self.device_callback_port,
                                      self.host_callback_port)
         self.hal = None
         self.lib = None
         self.shell = None
+        self.sl4a_host_port = None
+        # TODO: figure out a good way to detect which port is available
+        # on the target side, instead of hard coding a port number.
+        self.sl4a_target_port = 8082
 
     def __del__(self):
         self.cleanUp()
@@ -387,6 +388,10 @@ class AndroidDevice(object):
         self.stopServices()
         if self.host_command_port:
             self.adb.forward("--remove tcp:%s" % self.host_command_port)
+            self.host_command_port = None
+        if self.sl4a_host_port:
+            self.adb.forward("--remove tcp:%s" % self.sl4a_host_port)
+            self.sl4a_host_port = None
 
     @property
     def isBootloaderMode(self):
@@ -397,7 +402,6 @@ class AndroidDevice(object):
     def isAdbRoot(self):
         """True if adb is running as root for this device."""
         id_str = self.adb.shell("id -u").decode("utf-8")
-        self.log.info(id_str)
         return "root" in id_str
 
     @property
@@ -574,33 +578,34 @@ class AndroidDevice(object):
         if has_vts_agent:
             self.startVtsAgent()
 
-    def startServices(self, use_vts_agent):
+    def startServices(self):
         """Starts long running services on the android device.
 
         1. Start adb logcat capture.
-        2. Start VtsAgent.
-        3. Create HalMirror
-
-        Args:
-            use_vts_agent: bool, whether to use the VTS agent.
+        2. Start VtsAgent and create HalMirror unless disabled in config.
+        3. If enabled in config, start sl4a service and create sl4a clients.
         """
+        enable_vts_agent = getattr(self, "enable_vts_agent", True)
+        enable_sl4a = getattr(self, "enable_sl4a", False)
         try:
             self.startAdbLogcat()
         except:
             self.log.exception("Failed to start adb logcat!")
             raise
-        if use_vts_agent:
+        if enable_vts_agent:
             self.startVtsAgent()
             self.device_command_port = int(
                 self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
             logging.info("device_command_port: %s", self.device_command_port)
+            if not self.host_command_port:
+                self.host_command_port = adb.get_available_host_port()
             self.adb.tcp_forward(self.host_command_port, self.device_command_port)
             self.hal = hal_mirror.HalMirror(self.host_command_port,
                                             self.host_callback_port)
             self.lib = lib_mirror.LibMirror(self.host_command_port)
             self.shell = shell_mirror.ShellMirror(self.host_command_port)
-        else:
-            logging.info("not using VTS agent.")
+        if enable_sl4a:
+            self.startSl4aClient()
 
     def stopServices(self):
         """Stops long running services on the android device.
@@ -617,7 +622,7 @@ class AndroidDevice(object):
         This function starts the target side native agent and is persisted
         throughout the test run.
         """
-        self.log.info("start a VTS agent")
+        self.log.info("Starting VTS agent")
         if self.vts_agent_process:
             raise AndroidDeviceError("HAL agent is already running on %s." %
                                      self.serial)
@@ -686,6 +691,135 @@ class AndroidDevice(object):
     def product_type(self):
         """Gets the product type name."""
         return self._product_type
+
+    # Code for using SL4A client
+    def startSl4aClient(self, handle_event=True):
+        """Create an sl4a connection to the device.
+
+        Return the connection handler 'droid'. By default, another connection
+        on the same session is made for EventDispatcher, and the dispatcher is
+        returned to the caller as well.
+        If sl4a server is not started on the device, try to start it.
+
+        Args:
+            handle_event: True if this droid session will need to handle
+                          events.
+        """
+        self._sl4a_sessions = {}
+        self._sl4a_event_dispatchers = {}
+        if not self.sl4a_host_port or not adb.is_port_available(self.sl4a_host_port):
+            self.sl4a_host_port = adb.get_available_host_port()
+        self.adb.tcp_forward(self.sl4a_host_port, self.sl4a_target_port)
+        try:
+            droid = self._createNewSl4aSession()
+        except sl4a_client.Error:
+            sl4a_client.start_sl4a(self.adb)
+            droid = self._createNewSl4aSession()
+        self.sl4a = droid
+        if handle_event:
+            ed = self._getSl4aEventDispatcher(droid)
+        self.sl4a_event = ed
+
+    def _getSl4aEventDispatcher(self, droid):
+        """Return an EventDispatcher for an sl4a session
+
+        Args:
+            droid: Session to create EventDispatcher for.
+
+        Returns:
+            ed: An EventDispatcher for specified session.
+        """
+        # TODO (angli): Move service-specific start/stop functions out of
+        # android_device, including VTS Agent, SL4A, and any other
+        # target-side services.
+        ed_key = self.serial + str(droid.uid)
+        if ed_key in self._sl4a_event_dispatchers:
+            if self._sl4a_event_dispatchers[ed_key] is None:
+                raise AndroidDeviceError("EventDispatcher Key Empty")
+            self.log.debug("Returning existing key %s for event dispatcher!",
+                           ed_key)
+            return self._sl4a_event_dispatchers[ed_key]
+        event_droid = self._addNewConnectionToSl4aSession(droid.uid)
+        ed = event_dispatcher.EventDispatcher(event_droid)
+        self._sl4a_event_dispatchers[ed_key] = ed
+        return ed
+
+    def _createNewSl4aSession(self):
+        """Start a new session in sl4a.
+
+        Also caches the droid in a dict with its uid being the key.
+
+        Returns:
+            An Android object used to communicate with sl4a on the android
+                device.
+
+        Raises:
+            sl4a_client.Error: Something is wrong with sl4a and it returned an
+            existing uid to a new session.
+        """
+        droid = sl4a_client.Sl4aClient(port=self.sl4a_host_port)
+        droid.open()
+        if droid.uid in self._sl4a_sessions:
+            raise sl4a_client.Error(
+                "SL4A returned an existing uid for a new session. Abort.")
+        self._sl4a_sessions[droid.uid] = [droid]
+        return droid
+
+    def _addNewConnectionToSl4aSession(self, session_id):
+        """Create a new connection to an existing sl4a session.
+
+        Args:
+            session_id: UID of the sl4a session to add connection to.
+
+        Returns:
+            An Android object used to communicate with sl4a on the android
+                device.
+
+        Raises:
+            DoesNotExistError: Raised if the session it's trying to connect to
+            does not exist.
+        """
+        if session_id not in self._sl4a_sessions:
+            raise DoesNotExistError("Session %d doesn't exist." % session_id)
+        droid = sl4a_client.Sl4aClient(port=self.sl4a_host_port, uid=session_id)
+        droid.open(cmd=sl4a_client.Sl4aCommand.CONTINUE)
+        return droid
+
+    def _terminateSl4aSession(self, session_id):
+        """Terminate a session in sl4a.
+
+        Send terminate signal to sl4a server; stop dispatcher associated with
+        the session. Clear corresponding droids and dispatchers from cache.
+
+        Args:
+            session_id: UID of the sl4a session to terminate.
+        """
+        if self._sl4a_sessions and (session_id in self._sl4a_sessions):
+            for droid in self._sl4a_sessions[session_id]:
+                droid.closeSl4aSession()
+                droid.close()
+            del self._sl4a_sessions[session_id]
+        ed_key = self.serial + str(session_id)
+        if ed_key in self._sl4a_event_dispatchers:
+            self._sl4a_event_dispatchers[ed_key].clean_up()
+            del self._sl4a_event_dispatchers[ed_key]
+
+    def _terminateAllSl4aSessions(self):
+        """Terminate all sl4a sessions on the AndroidDevice instance.
+
+        Terminate all sessions and clear caches.
+        """
+        if self._sl4a_sessions:
+            session_ids = list(self._sl4a_sessions.keys())
+            for session_id in session_ids:
+                try:
+                    self._terminateSl4aSession(session_id)
+                except:
+                    self.log.exception("Failed to terminate session %d.",
+                                       session_id)
+            if self.sl4a_host_port:
+                self.adb.forward("--remove tcp:%d" % self.sl4a_host_port)
+                self.sl4a_host_port = None
 
 
 class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
