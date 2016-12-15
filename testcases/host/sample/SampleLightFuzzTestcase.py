@@ -16,41 +16,65 @@
 #
 
 import logging
+import random
 import sys
 import time
 
 from vts.runners.host import base_test
 from vts.runners.host.logger import Log
 from vts.utils.python.mirror_objects import Mirror
-from vts.utils.python.data_objects import HalLightsDataObject
 from vts.utils.python.fuzzer import GenePool
 
 
 class SampleLightFuzzTestcase(base_test.BaseTestClass):
     """A sample fuzz testcase for the legacy lights HAL."""
 
-    def testTurnOnBackgroundLight(self, module_name):
+    def testAll(self, gene_pool_size, iteartion_count):
+        """tests all modules.
+
+        Args:
+          gene_pool_size: integer, the number of genes to use.
+          iteartion_count: integer, the number of evolution steps.
+        """
+        self._gene_pool_size = gene_pool_size
+        self._iteartion_count = iteartion_count
+
+        self.hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
+        self.hal_mirror.InitHal("light", 1.0)
+        module_name = random.choice([
+            self.hal_mirror.light.LIGHT_ID_BACKLIGHT,
+            self.hal_mirror.light.LIGHT_ID_NOTIFICATIONS,
+            self.hal_mirror.light.LIGHT_ID_ATTENTION])
+        # TODO: broken on bullhead
+        #   self.hal_mirror.light.LIGHT_ID_KEYBOARD
+        #   self.hal_mirror.light.LIGHT_ID_BUTTONS
+        #   self.hal_mirror.light.LIGHT_ID_BATTERY
+        #   self.hal_mirror.light.LIGHT_ID_BLUETOOTH
+        #   self.hal_mirror.light.LIGHT_ID_WIFI
+        self.TestTurnOnBackgroundLight(module_name)
+        logging.info("module name: %s", module_name)
+
+    def TestTurnOnBackgroundLight(self, module_name):
         """A fuzz testcase which calls a function using different values."""
-        hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
-        hal_mirror.InitHal("light", 1.0, module_name=module_name)
+        self.hal_mirror.InitHal("light", 1.0, module_name=module_name)
         genes = GenePool.CreateGenePool(
-            10,
-            HalLightsDataObject.light_state_t,
-            HalLightsDataObject.light_state_t_fuzz,
+            self._gene_pool_size,
+            self.hal_mirror.light.light_state_t,
+            self.hal_mirror.light.light_state_t_fuzz,
             color=0xffffff00,
-            flashMode=HalLightsDataObject.LIGHT_FLASH_HARDWARE,
+            flashMode=self.hal_mirror.light.LIGHT_FLASH_HARDWARE,
             flashOnMs=100,
             flashOffMs=200,
-            brightnessMode=HalLightsDataObject.BRIGHTNESS_MODE_USER)
+            brightnessMode=self.hal_mirror.light.BRIGHTNESS_MODE_USER)
 
-        for iteration in range(10):
+        for iteration in range(self._iteartion_count):
             index = 0
             for gene in genes:
                 logging.info("Gene %d", index)
-                hal_mirror.light.set_light(None, gene)
+                self.hal_mirror.light.set_light(None, gene)
                 index += 1
             genes = GenePool.Evolve(
-                genes, HalLightsDataObject.light_state_t_fuzz)
+                genes, self.hal_mirror.light.light_state_t_fuzz)
 
 
 def main(args):
@@ -59,14 +83,7 @@ def main(args):
     Log.SetupLogger()
     # TODO: use the test runner instead.
     testcase = SampleLightFuzzTestcase({})
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_BACKLIGHT)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_KEYBOARD)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_BUTTONS)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_BATTERY)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_NOTIFICATIONS)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_ATTENTION)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_BLUETOOTH)
-    testcase.testTurnOnBackgroundLight(HalLightsDataObject.LIGHT_ID_WIFI)
+    testcase.testAll(10, 10)
 
 
 if __name__ == "__main__":
