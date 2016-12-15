@@ -45,19 +45,21 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
         '''
         if output_file_path:
             self.output_file_path = output_file_path
-        return [('{path} --gtest_filter={test} '
+        return [('{cmd} --gtest_filter={test} '
                  '--gtest_output=xml:{output_file_path}').format(
-                     path=self.path,
+                     cmd=super(GtestTestCase, self).GetRunCommand(),
                      test=self.GetFullName(),
-                     output_file_path=self.output_file_path), 'cat %s' %
-                self.output_file_path, 'rm -rf %s' % self.output_file_path]
+                     output_file_path=self.output_file_path),
+                'cat {output} && rm -rf {output}'.format(
+                    output=self.output_file_path)]
 
     @property
     def output_file_path(self):
         """Get output_file_path"""
         if not hasattr(self,
                        '_output_file_path') or self._output_file_path is None:
-            self.output_file_path = 'gtest_output_{name}.xml'.format(
+            self.output_file_path = '{directory}/gtest_output_{name}.xml'.format(
+                directory=ntpath.dirname(self.path),
                 name=re.sub(r'\W+', '_', str(self)))
         return self._output_file_path
 
