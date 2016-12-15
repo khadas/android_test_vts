@@ -41,8 +41,9 @@ namespace vts {
 
 static const int kCallbackServerPort = 5010;
 
-void SocketServerForDriver::RpcCallToRunner(const char* id) {
-  cout << __func__ << ":" << __LINE__ << " " << id << endl;
+void SocketServerForDriver::RpcCallToRunner(
+    const AndroidSystemCallbackRequestMessage& message) {
+  cout << __func__ << ":" << __LINE__ << " " << message.id() << endl;
   struct sockaddr_in serv_addr;
   struct hostent* server;
 
@@ -71,19 +72,15 @@ void SocketServerForDriver::RpcCallToRunner(const char* id) {
     return;
   }
 
-  cout << "sending " << id << endl;
-  AndroidSystemCallbackRequestMessage callback_msg;
-  callback_msg.set_id(id);
-
   VtsDriverCommUtil util(sockfd);
-  if (!util.VtsSocketSendMessage(callback_msg)) return;
+  if (!util.VtsSocketSendMessage(message)) return;
 }
 
 void SocketServerForDriver::Start() {
   AndroidSystemCallbackRequestMessage message;
   if (!VtsSocketRecvMessage(&message)) return;
   cout << __func__ << " Callback ID: " << message.id() << endl;
-  RpcCallToRunner(message.id().c_str());
+  RpcCallToRunner(message);
   Close();
 }
 
