@@ -88,3 +88,64 @@ $ cd web/dashboard/appengine/servlet
 $ mvn clean gcloud:deploy
 
 visit https://<YOUR-PROJECT-NAME>.appspot.com
+
+## Monitoring
+
+The following steps list how to create a monitoring service for the VTS Dashboard.
+
+### Create a Stackdriver account
+
+1. Go to Google Cloud Platform Console:
+   http://console.developers.google.com
+
+2. In the Google Cloud Platform Console, select Stackdriver > Monitoring.
+   If your project is not in a Stackdriver account you'll see a message to
+   create a new project.
+
+3. Click Create new Stackdriver account and then Continue.
+
+4. With your project shown, click Create account.
+
+5. In the page, "Add Google Cloud Platform projects to monitor", click Continue to skip ahead.
+
+6. In the page, "Monitor AWS accounts", click Done to skip ahead.
+
+7. In a few seconds you see the following message:
+   "Finished Initial collection"
+   Click Launch Monitoring.
+
+8. In the page, "Get reports by email", click No reports and Continue.
+
+9. You will see your Stackdriver account dashboard.
+   Close the "Welcome to Stackdriver" banner if you don't need it.
+
+### Steps to create an uptime check and an alerting policy
+
+1. Go to Stack Monitoring console:
+   https://app.google.stackdriver.com/
+
+2. Go to Alerting > Uptime Checks in the top menu and then click Add Uptime Check.
+   You see the New Uptime Check panel.
+
+3. Fill in the following fields for the uptime check:
+
+    Check type: HTTP
+    Resource Type: Instance
+    Applies To: Single, lamp-1-vm
+    Leave the other fields with their default values.
+
+4. Click Test to verify your uptime check is working.
+
+5. Click Save. After you click on save you'll see a panel to
+   'Create Alerting Policy'
+
+6. Fill out the configuration for notifications and click save policy.
+
+### Test the check and alert
+
+This procedure can take up to fifteen minutes.
+
+To test the check and alert, go to the VM Instances page, select your instance, and click Stop from the top menu.
+You'll have to wait up to five minutes for the next uptime check to fail. The alert and notification don't happen until the next failure occurs.
+
+To correct the "problem," return to the VM Instances page, select your instance, and click Start from the top menu.
