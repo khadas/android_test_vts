@@ -91,6 +91,13 @@ public class ShowGraphServlet extends HttpServlet {
         // List of build IDs for each profiling vector
         List<String> profilingBuildIds = new ArrayList<>();
 
+        // Performance X and Y labels
+        String performanceLabelX = "";
+        String performanceLabelY = "";
+
+        boolean showProfilingGraph = false;
+        boolean showPerformanceGraph = false;
+
         Scan scan = new Scan();
         scan.setStartRow(Long.toString(startTime).getBytes());
         scan.setStopRow(Long.toString(endTime).getBytes());
@@ -139,6 +146,9 @@ public class ShowGraphServlet extends HttpServlet {
             for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
                 labels.add(profilingReportMessage.getLabelList().get(i).toStringUtf8());
             }
+            performanceLabelX = profilingReportMessage.getXAxisLabel().toStringUtf8();
+            performanceLabelY = profilingReportMessage.getYAxisLabel().toStringUtf8();
+            showPerformanceGraph = true;
         }
         for (int i = 0; i < labels.size(); i++) {
             labelIndexMap.put(labels.get(i), i);
@@ -173,19 +183,20 @@ public class ShowGraphServlet extends HttpServlet {
                 Math.round(new Percentile().evaluate(performanceProfilingValues, percentiles[i]) * 1000d) / 1000d;
         }
 
-        if (performanceProfilingValues.length == 0) {
+        showProfilingGraph = performanceProfilingValues.length != 0;
+
+        if (!showProfilingGraph && !showPerformanceGraph) {
             request.setAttribute("error", PROFILING_DATA_ALERT);
-            request.setAttribute("showPercentileTable", false);
-            request.setAttribute("showProfilingGraph", false);
-        } else {
-            request.setAttribute("showPercentileTable", true);
-            request.setAttribute("showProfilingGraph", true);
         }
 
         // performance data for scatter plot
+        request.setAttribute("showProfilingGraph", showProfilingGraph);
+        request.setAttribute("showPerformanceGraph", showPerformanceGraph);
         request.setAttribute("lineGraphValuesJson", new Gson().toJson(lineGraphValues));
         request.setAttribute("labelsListJson", new Gson().toJson(labels));
         request.setAttribute("profilingBuildIdsJson", new Gson().toJson(profilingBuildIds));
+        request.setAttribute("performanceLabelX", new Gson().toJson(performanceLabelX));
+        request.setAttribute("performanceLabelY", new Gson().toJson(performanceLabelY));
 
         request.setAttribute("testName", request.getParameter("testName"));
         request.setAttribute("startTime", new Gson().toJson(startTime));
