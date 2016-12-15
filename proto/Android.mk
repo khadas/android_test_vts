@@ -34,6 +34,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
+LOCAL_COMPATIBILITY_SUITE := vts
+
 include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/../tools/build/Android.packaging_sharedlib.mk
 
