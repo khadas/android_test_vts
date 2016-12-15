@@ -110,30 +110,38 @@ class BinderThroughputBenchmark(base_test_with_webdb.BaseTestWithWebDbClass):
         # To upload to the web DB.
         self.AddProfilingDataLabeledVector(
             "binder_throughput_iterations_per_second_%sbits" % bits,
-            labels, iterations_per_second)
+            labels, iterations_per_second, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Iterations Per Second")
 
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_average_ns_%sbits" % bits,
-            labels, time_average)
+            labels, time_average, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - Average (nanoseconds)")
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_best_ns_%sbits" % bits,
-            labels, time_best)
+            labels, time_best, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - Best Case (nanoseconds)")
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_worst_ns_%sbits" % bits,
-            labels, time_worst)
+            labels, time_worst, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - Worst Case (nanoseconds)")
 
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_50percentile_ns_%sbits" % bits,
-            labels, time_percentile_50)
+            labels, time_percentile_50, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - 50 Percentile (nanoseconds)")
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_90percentile_ns_%sbits" % bits,
-            labels, time_percentile_90)
+            labels, time_percentile_90, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - 90 Percentile (nanoseconds)")
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_95percentile_ns_%sbits" % bits,
-            labels, time_percentile_95)
+            labels, time_percentile_95, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - 95 Percentile (nanoseconds)")
         self.AddProfilingDataLabeledVector(
             "binder_throughput_time_99percentile_ns_%sbits" % bits,
-            labels, time_percentile_99)
+            labels, time_percentile_99, x_axis_label="Number of Threads",
+            y_axis_label="Binder RPC Time - 99 Percentile (nanoseconds)")
 
     def RunBenchmark(self, bits, threads):
         """Runs the native binary and parses its result.
