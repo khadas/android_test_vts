@@ -83,6 +83,8 @@ vts_spec_file3 := $(VTS_TESTCASES_OUT)/GpsHalV1.vts
 vts_spec_file4 := $(VTS_TESTCASES_OUT)/GpsHalV1GpsInterface.vts
 vts_spec_file5 := $(VTS_TESTCASES_OUT)/LightHalV1.vts
 vts_spec_file6 := $(VTS_TESTCASES_OUT)/WifiHalV1.vts
+vts_spec_file7 := $(VTS_TESTCASES_OUT)/Nfc.vts
+vts_spec_file8 := $(VTS_TESTCASES_OUT)/NfcClientCallback.vts
 
 $(vts_spec_file1): $(LOCAL_PATH)/hal_conventional/CameraHalV2.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
@@ -108,4 +110,13 @@ $(vts_spec_file6): $(LOCAL_PATH)/hal_conventional/WifiHalV1.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6)
+$(vts_spec_file7): $(LOCAL_PATH)/hal_hidl/Nfc.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+$(vts_spec_file8): $(LOCAL_PATH)/hal_hidl/NfcClientCallback.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8)
+
