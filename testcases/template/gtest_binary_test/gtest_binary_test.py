@@ -40,7 +40,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
     '''
 
     # @Override
-    def CreateTestCaseFromBinary(self, path, tag=''):
+    def CreateTestCase(self, path, tag=''):
         '''Create a list of GtestTestCase objects from a binary path.
 
         Args:
