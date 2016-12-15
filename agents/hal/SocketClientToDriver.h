@@ -18,6 +18,7 @@
 #define __VTS_FUZZER_TCP_CLIENT_H_
 
 #include <string>
+#include <vector>
 
 #include <VtsDriverCommUtil.h>
 
@@ -51,7 +52,7 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   int32_t Status(int32_t type);
 
   // Sends a EXECUTE request.
-  char* ExecuteShellCommand(
+  vector<string>* ExecuteShellCommand(
       const ::google::protobuf::RepeatedPtrField<::std::string> shell_command);
 };
 
