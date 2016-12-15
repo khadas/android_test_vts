@@ -30,8 +30,8 @@ LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
   libvts_multidevice_proto \
-  libvts_drivercomm \
   libprotobuf-cpp-full \
+  libvts_drivercomm \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \
@@ -59,8 +59,8 @@ LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
   libvts_multidevice_proto \
-  libvts_drivercomm \
   libprotobuf-cpp-full \
+  libvts_drivercomm \
 
 LOCAL_C_INCLUDES += \
   test/vts/proto \
