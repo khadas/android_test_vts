@@ -16,9 +16,6 @@
 
 #include "shell_driver_test_client.h"
 
-#include "shell_driver.h"
-#include "shell_msg_protocol.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -26,6 +23,18 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+
+#include <sstream>
+#include <iostream>
+
+#include "shell_driver.h"
+#include "shell_msg_protocol.h"
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
+
+using namespace std;
+
+namespace android {
+namespace vts {
 
 
 static int kMaxRetry = 3;
@@ -53,17 +62,17 @@ char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
   int conn_success;
   int retry_count = 0;
 
-  conn_success = connect(socket_fd, (struct sockaddr *)&address,
+  conn_success = connect(socket_fd, (struct sockaddr*) &address,
                          sizeof(struct sockaddr_un));
   for (retry_count = 0; retry_count < kMaxRetry && conn_success != 0;
-       retry_count++) {  // retry if server not ready
+      retry_count++) {  // retry if server not ready
     printf("Client: connection failed, retrying...\n");
     retry_count++;
     if (usleep(50 * pow(retry_count, 3)) != 0) {
       fprintf(stderr, "shell driver unit test: sleep intrupted.");
     }
 
-    conn_success = connect(socket_fd, (struct sockaddr *)&address,
+    conn_success = connect(socket_fd, (struct sockaddr*) &address,
                            sizeof(struct sockaddr_un));
   }
 
@@ -72,18 +81,47 @@ char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket) {
     return NULL;
   }
 
-  // write the cmd using our length protocol
-  int res_cmd_write = write_with_length(socket_fd, cmd);
-  if (res_cmd_write != 0) {
+  VtsDriverControlCommandMessage cmd_msg;
+
+  string cmd_str(cmd);
+  cmd_msg.add_shell_command(cmd_str);
+
+  int success;
+
+  success = write_pb_msg(socket_fd, (google::protobuf::Message*) &cmd_msg);
+  if (success != 0) {
     fprintf(stderr, "Client: write command failed.\n");
     return NULL;
   }
 
   // read driver output
-  char* output = read_with_length(socket_fd);
-  printf("Client receiving output: %s", output);
+  VtsDriverControlResponseMessage out_msg;
+
+  success = read_pb_msg(socket_fd, (google::protobuf::Message*) &out_msg);
+  if (success != 0) {
+    fprintf(stderr, "Client: write command failed.\n");
+    return NULL;
+  }
+
+  printf("Client receiving output:\n");
+
+  // TODO(yuexima) use vector for output messages
+  stringstream ss;
+  for (int i = 0; i < out_msg.stdout_size(); i++) {
+    string out_str = out_msg.stdout(i);
+    cout << "[Shell driver] output for command " << i
+        << ": " << out_str << endl;
+    ss << out_str;
+  }
 
   close(socket_fd);
 
-  return output;
+  string res_str = ss.str();
+  char* res = (char*) malloc(res_str.length() + 1);
+  strcpy(res, res_str.c_str());
+
+  return res;
 }
+
+}  // namespace vts
+}  // namespace android

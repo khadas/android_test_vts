@@ -17,12 +17,17 @@
 #ifndef __VTS_DRIVERS_SHELL_DRIVER_TEST_CLIENT_H_
 #define __VTS_DRIVERS_SHELL_DRIVER_TEST_CLIENT_H_
 
+namespace android {
+namespace vts {
+
 /*
  * send a command to the driver on specified UNIX domain socket and print out
  * the outputs from driver.
  */
 extern char* vts_shell_driver_test_client_start(char* cmd, char* addr_socket);
 
+}  // namespace vts
+}  // namespace android
 
 #endif  // __VTS_DRIVERS_SHELL_DRIVER_TEST_CLIENT_H_
 
