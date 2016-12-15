@@ -13,8 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Target-Side Tests">
-    <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="Run VTS Host-Driven Tests">
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-case-path" value="test/vts/testcases/host/sample/SampleLightTest" />
+        <option name="test-config-path" value="test/vts/testcases/host/sample/SampleLightTest.config" />
+    </test>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-case-path" value="test/vts/testcases/host/sample/SampleCameraTest" />
+        <option name="test-config-path" value="test/vts/testcases/host/sample/SampleCameraTest.config" />
+    </test>
 </configuration>
