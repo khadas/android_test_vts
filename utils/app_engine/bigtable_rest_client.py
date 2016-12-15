@@ -22,7 +22,7 @@ import json
 
 import requests
 
-_DEFAULT_BASE_URL="http://10.128.0.6:8080"
+_DEFAULT_BASE_URL="http://146.148.105.120:8080"
 _PROJECT_ID='google.com:android-vts-internal'
 _INSTANCE_ID='vts-dev'
 _COLUMN_FAMILY_ID='cf1'
