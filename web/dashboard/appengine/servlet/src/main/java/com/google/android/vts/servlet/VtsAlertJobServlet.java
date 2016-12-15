@@ -15,6 +15,7 @@
  */
 
 package com.google.android.vts.servlet;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -25,6 +26,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.android.vts.proto.VtsReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
@@ -117,7 +119,7 @@ public class VtsAlertJobServlet extends HttpServlet {
         scan.setStartRow(Long.toString(startTime).getBytes());
         Table table = BigtableHelper.getTable(TableName.valueOf(tableName));
         ResultScanner scanner = table.getScanner(scan);
-        List<String> sortedBuildIdTimeStampList = new ArrayList<>();
+        List<String> testRunKeyList = new ArrayList<>();
         Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<>();
 
         boolean anyFailed = false;
@@ -130,18 +132,27 @@ public class VtsAlertJobServlet extends HttpServlet {
             // filter empty build IDs and add only numbers
             if (buildId.length() == 0) continue;
 
+            // filter empty device info lists
+            if (testReportMessage.getDeviceInfoList().size() == 0) continue;
+
+            String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
+                                      .getBuildId().toStringUtf8();
+
             String key;
             try {
+                // filter non-integer build IDs
                 Integer.parseInt(buildId);
+                Integer.parseInt(firstDeviceBuildId);
                 key = testReportMessage.getBuildInfo().getId().toStringUtf8()
                   + "." + String.valueOf(testReportMessage.getStartTimestamp());
-                sortedBuildIdTimeStampList.add(key);
+                testRunKeyList.add(0, key);
                 // update map based on time stamp.
                 buildIdTimeStampMap.put(key, testReportMessage);
             } catch (NumberFormatException e) {
                 /* skip a non-post-submit build */
                 continue;
             }
+
             for (TestCaseReportMessage testCaseReportMessage :
                  testReportMessage.getTestCaseList()) {
                 if (testCaseReportMessage.getTestResult() ==
@@ -151,11 +162,10 @@ public class VtsAlertJobServlet extends HttpServlet {
             }
         }
         scanner.close();
-        if (sortedBuildIdTimeStampList.size() == 0) return prevStatus;
-        Collections.sort(sortedBuildIdTimeStampList, Collections.reverseOrder());
+        if (testRunKeyList.size() == 0) return prevStatus;
 
         boolean latestFailing = false;
-        TestReportMessage latestTest = buildIdTimeStampMap.get(sortedBuildIdTimeStampList.get(0));
+        TestReportMessage latestTest = buildIdTimeStampMap.get(testRunKeyList.get(0));
         for (TestCaseReportMessage testCaseReportMessage : latestTest.getTestCaseList()) {
             if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_FAIL) {
                 latestFailing = true;
@@ -163,12 +173,17 @@ public class VtsAlertJobServlet extends HttpServlet {
         }
 
         String test = latestTest.getTest().toStringUtf8();
-        String buildId = latestTest.getBuildInfo().getId().toStringUtf8();
+        List<String> buildIdList = new ArrayList<>();
+        for (AndroidDeviceInfoMessage device : latestTest.getDeviceInfoList()) {
+            buildIdList.add(device.getBuildId().toStringUtf8());
+        }
+        String buildId = StringUtils.join(buildIdList, ",");
 
         if (latestFailing) {
             String subject = "New test failure in " + test + " @ " + buildId;
-            String body = "Hello,<br><br>Test cases are failing in " + test + " for build ID: "
-                          + buildId + ".<br><br>For details, visit the"
+            String body = "Hello,<br><br>Test cases are failing in " + test
+                          + " for device build ID(s): " + buildId
+                          + ".<br><br>For details, visit the"
                           + " <a href='https://android-vts-internal.googleplex.com/'>"
                           + "VTS dashboard.</a>";
             try {
@@ -181,7 +196,7 @@ public class VtsAlertJobServlet extends HttpServlet {
             // Transient fail case (i.e. pass, pass, fail, pass, pass)
             String subject = "Transient test failure in " + test + " @ " + buildId;
             String body = "Hello,<br><br>Some test cases failed in " + test + " but tests all "
-                          + "are passing in the latest build: "
+                          + "are passing in the latest device build(s): "
                           + buildId + ".<br><br>For details, visit the"
                           + " <a href='https://android-vts-internal.googleplex.com/'>"
                           + "VTS dashboard.</a>";
@@ -193,9 +208,10 @@ public class VtsAlertJobServlet extends HttpServlet {
         } else if (prevStatus == TestStatus.TEST_FAIL) {
             // Test failure fixed
             String subject = "All test cases passing in " + test + " @ " + buildId;
-            String body = "Hello,<br><br>All test cases passed in " + test + " for build ID: "
-                          + buildId + "!<br><br>For details, visit the"
-                          + " <a href='https://android-vts-internal.googleplex.com/'>"
+            String body = "Hello,<br><br>All test cases passed in " + test
+                          + " for device build ID(s): " + buildId
+                          + "!<br><br>For details, visit the "
+                          + "<a href='https://android-vts-internal.googleplex.com/'>"
                           + "VTS dashboard.</a>";
             try {
                 messages.add(composeEmail(latestTest.getSubscriberEmailList(), subject, body));
