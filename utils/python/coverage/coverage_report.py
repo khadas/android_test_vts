@@ -154,3 +154,31 @@ def GenerateCoverageReport(src_file_name, src_file_content, gcno_file_content,
     src_lines_counts = GenerateLineCoverageVector(
         src_file_name, len(src_lines), gcno_file_content, gcda_file_content)
     return GenerateCoverageHTML(src_file_content, src_lines_counts)
+
+
+def GetCoverageStats(src_lines_counts):
+    """Returns the coverage stats.
+
+    Args:
+        src_lines_counts: A list of integers (or None) representing the number
+                          of times the i-th line was executed.
+                          None indicates a line that is not executable.
+
+    Returns:
+        integer, the number of lines instrumented for coverage measurement
+        integer, the number of executed or covered lines
+    """
+    total = 0
+    covered = 0
+    if not src_lines_counts or not isinstance(src_lines_counts, list):
+        logging.error("GetCoverageStats: input invalid.")
+        return total, covered
+
+    for line in src_lines_counts:
+        if line is None:
+            continue
+        total += 1
+        if line > 0:
+            covered += 1
+    return total, covered
+
