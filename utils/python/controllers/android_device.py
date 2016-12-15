@@ -118,7 +118,7 @@ def _startServicesOnAds(ads):
     for ad in ads:
         running_ads.append(ad)
         try:
-            ad.start_services()
+            ad.startServices()
         except:
             ad.log.exception("Failed to start some services, abort!")
             destroy(running_ads)

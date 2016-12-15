@@ -61,9 +61,9 @@ class CallbackRequestHandler(socketserver.StreamRequestHandler):
             callback_args = []
             for arg in request_message.arg:
                 if arg.type == IfaceSpecMsg.TYPE_SCALAR:
-                    callback_args.append(float(arg.scalar_type))
-                elif value.type == IfaceSpecMsg.TYPE_STRING:
-                    callback_args.append(str(arg.scalar_type))
+                    callback_args.append(getattr(arg.scalar_value, arg.scalar_type))
+                elif arg.type == IfaceSpecMsg.TYPE_PREDEFINED:
+                    callback_args.append("not-supported")
                 else:
                     raise VtsCallbackServerError(
                         "Got unsupported callback arg type %s" % arg.type)
