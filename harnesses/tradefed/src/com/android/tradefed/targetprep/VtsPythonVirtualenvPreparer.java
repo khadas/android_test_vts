@@ -100,9 +100,15 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
                         BASE_TIMEOUT * 5, mPip, "install", dep);
                 if (result.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Installing %s failed", dep);
-                    throw new TargetSetupError(String.format(
-                        "Failed to install dependencies with pip. Result %s. stdout: %s, stderr: %s",
-                        result.getStatus(), result.getStdout(), result.getStderr()));
+                    CLog.i("Attempting to upgrade %s", dep);
+                    result = mRunUtil.runTimedCmd(
+                            BASE_TIMEOUT * 5, mPip, "install", "--upgrade", dep);
+                    if (result.getStatus() != CommandStatus.SUCCESS) {
+                        throw new TargetSetupError(String.format(
+                            "Failed to install dependencies with pip. "
+                                    + "Result %s. stdout: %s, stderr: %s",
+                            result.getStatus(), result.getStdout(), result.getStderr()));
+                    }
                 }
                 hasDependencies = true;
             }
