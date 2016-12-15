@@ -62,8 +62,9 @@ class CheckSetupCleanup(object):
 
     def Execute(self):
         """Execute the check, setup, and cleanup.
-           Will execute setup and cleanup only if the boolean switches for them
-           are True. It will NOT execute cleanup if check function passes.
+
+        Will execute setup and cleanup only if the boolean switches for them
+        are True. It will NOT execute cleanup if check function passes.
 
            Return:
                tuple(bool, string), a tuple of True and empty string if success,
@@ -74,7 +75,7 @@ class CheckSetupCleanup(object):
             self.note = "Error: Environment definition context not set"
             return False
 
-        if not self.InternalCall(self.ValidateInput):
+        if not self.InternalCall(self.ValidateInputs):
             return False
 
         check_result = False
@@ -101,8 +102,9 @@ class CheckSetupCleanup(object):
         return "{}\nat: {}".format(self.note, self)
 
     def InternalCall(self, method):
-        """Base definition's internal method to call sub class inherited
-           methods, check results and put note if not set
+        """Internal method to call sub class inherited methods.
+
+        It call the function, check results, and put failure note if not set
         """
         self.note = None
         success = method()
@@ -111,7 +113,7 @@ class CheckSetupCleanup(object):
                          "failed.") % method.__name__
         return success
 
-    def ValidateInput(self):
+    def ValidateInputs(self):
         """Validate input parameters. Can be override by sub-class
 
         Return:
@@ -121,9 +123,11 @@ class CheckSetupCleanup(object):
         return True
 
     def ToListLike(self, obj):
-        """Convert single item to list of single item. If input is already
-           a list like object, the same object will be returned.
-           This method is for the convenience of writing child class.
+        """Convert single item to list of single item.
+
+        If input is already a list like object, the same object will
+        be returned.
+        This method is for the convenience of writing child class.
 
         Arguments:
             obj: any object
@@ -136,10 +140,10 @@ class CheckSetupCleanup(object):
     def IsListLike(self, obj):
         """Checks whether a object is list-like.
 
-           This method is for the convenience of writing child class.
-           This method will check for existence of __iter__ and __getitem__
-           in attributes of the object.
-           String is not considered list-like, tuple is.
+        This method is for the convenience of writing child class.
+        It will check for existence of __iter__ and __getitem__
+        in attributes of the object.
+        String is not considered list-like, tuple is.
 
         Arguments:
             obj: any object
@@ -149,13 +153,13 @@ class CheckSetupCleanup(object):
     def NormalizeInputLists(self, *inputs):
         """Normalize inputs to lists of same length.
 
-           This method is for the convenience of writing child class.
-           If there are lists in inputs, they should all be of same length;
-           otherwise, None is returned.
-           If there are lists and single items in inputs, single items are
-           duplicated to a list of other list's length.
-           If there are only single items in inputs, they all get converted to
-           single item lists.
+        This method is for the convenience of writing child class.
+        If there are lists in inputs, they should all be of same length;
+        otherwise, None is returned.
+        If there are lists and single items in inputs, single items are
+        duplicated to a list of other list's length.
+        If there are only single items in inputs, they all get converted to
+        single item lists.
 
         Arguments:
             inputs: any inputs
@@ -184,21 +188,24 @@ class CheckSetupCleanup(object):
 
     def Check(self):
         """Check function for the class.
-           Used to check environment. Can be override by sub-class
+
+        Used to check environment. Can be override by sub-class
         """
         self.note = "Check step undefined."
         return False
 
     def Setup(self):
         """Check function for the class.
-           Used to setup environment if check fail. Can be override by sub-class
+
+        Used to setup environment if check fail. Can be override by sub-class
         """
         self.note = "Setup step undefined."
         return False
 
     def Cleanup(self):
         """Check function for the class.
-           Used to cleanup setup if check fail. Can be override by sub-class
+
+        Used to cleanup setup if check fail. Can be override by sub-class
         """
         self.note = "Cleanup step undefined."
         return False

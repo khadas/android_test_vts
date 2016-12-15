@@ -15,18 +15,24 @@
 # limitations under the License.
 #
 
+import re
+import os
 import logging
 
 from vts.testcases.kernel.ltp import ltp_enums
+from vts.testcases.kernel.ltp import ltp_configs
 
 
 class TestCase(object):
     """Stores name, path, and param information for each test case.
 
+    All class initiation inputs are assumed to be already validated by
+    test case parser.
+
     Attributes:
         testsuite: string, name of testsuite to which the testcase belongs
         testname: string, name of the test case
-        path: string, test binary path
+        command: string, the command to run the test case
         _args: list of string, test case command line arguments
         requirement_state: RequirementState, enum representing requirement
                             check results
@@ -34,11 +40,10 @@ class TestCase(object):
               such as what environment requirement did not satisfy.
     """
 
-    def __init__(self, testsuite, testname, path, args):
+    def __init__(self, testsuite, testname, command):
         self.testsuite = testsuite
         self.testname = testname
-        self.path = path
-        self._args = args
+        self._command = command
         self.requirement_state = ltp_enums.RequirementState.UNCHECKED
         self.note = None
 
@@ -82,34 +87,49 @@ class TestCase(object):
         """Set the test case's name."""
         self._testname = testname
 
-    @property
-    def path(self):
-        """Get the test binary's file name."""
-        return self._path
+    def InternalAddLtpPathToCommand(self, command):
+        """Internal function to change binary in commands to their full path"""
+        tokens = command.strip().split()
 
-    @path.setter
-    def path(self, path):
-        """Set the test testbinary's name."""
-        self._path = path
+        # If not ltp executables:
+        if (tokens[0] in ltp_configs.EXTERNAL_BINS or tokens[0].find('=') > 0):
+            return command
+        else:  # Is Ltp executable
+            tokens[0] = os.path.join(ltp_configs.LTPBINPATH, tokens[0])
+            return ' '.join(tokens)
 
-    def GetArgs(self, replace_string_from=None, replace_string_to=None):
-        """Get the case arguments in string format.
+    def GetCommand(self):
+        """Get test case's command.
 
-        if replacement string is provided, arguments will be
-        filtered with the replacement string
-
-        Args:
-            replace_string_from: string, replacement string source, if any
-            replace_string_to: string, replacement string destination, if any
-
-        Returns:
-            string, arguments formated in space separated string
+        Get the test case's command where ltp test binary names have been
+        replaced with their full paths
         """
-        if replace_string_from is None or replace_string_to is None:
-            return ' '.join(self._args)
-        else:
-            return ' '.join([p.replace(replace_string_from, replace_string_to)
-                             for p in self._args])
+        return '&&'.join((self.InternalAddLtpPathToCommand(command)
+                          for command in self._command.split('&&')))
+
+    def InternalGetExecutableNames(self):
+        """Get a generator of all required executable file names"""
+        executables = (command.strip().split()[0]
+                       for command in self._command.split('&&'))
+
+        # In some test definitions there were command starting with
+        # > TDsrc='mktemp ...'. We use regex to remove quotes
+        pattern = re.compile('[\'|\"]')
+        return (pattern.sub('', executable.split('=')[1])
+                if executable.find('=') > 0 else executable
+                for executable in executables)
+
+    def GetRequiredExecutablePaths(self):
+        """Get required executables' paths.
+
+        Get a generator of all executables' paths that will be needed
+        by its command. For LTP's executables, absolute path will be
+        returned. For binaries in system's PATH, only the name will be
+        returned.
+        """
+        return (os.path.join(ltp_configs.LTPBINPATH, executable)
+                if executable not in ltp_configs.EXTERNAL_BINS else executable
+                for executable in self.InternalGetExecutableNames())
 
     @property
     def fullname(self):

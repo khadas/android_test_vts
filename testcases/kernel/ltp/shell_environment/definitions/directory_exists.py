@@ -20,8 +20,7 @@ from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions imp
 
 
 class DirectoryExists(check_setup_cleanup.CheckSetupCleanup):
-    """Class for check existence of directories, make directories if not,
-       and delete afterwards.
+    """Class for check existence of, make, and afterwards delete directories.
 
     Attributes:
         to_check: bool, whether or not to check the defined environment
@@ -41,13 +40,16 @@ class DirectoryExists(check_setup_cleanup.CheckSetupCleanup):
                  to_setup=False,
                  to_cleanup=False):
         self._paths = paths
+        self._failed_paths = paths
         self.to_check = to_check
         self.to_setup = to_setup
         self.to_cleanup = to_cleanup
 
-    def ValidateInput(self):
-        """Validate input paths is not null or empty list
-        or list containing empty string. If input is a single path, it will
+    def ValidateInputs(self):
+        """Validate input paths.
+
+        Check input path is not null or empty list or list containing
+        empty string. If input is a single path, it will
         be converted to a single item list containing that path.
         """
         if not self._paths:

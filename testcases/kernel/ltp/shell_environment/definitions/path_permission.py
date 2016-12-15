@@ -46,8 +46,10 @@ class PathPermission(check_setup_cleanup.CheckSetupCleanup):
         self.to_setup = to_setup
         self.to_cleanup = to_cleanup
 
-    def ValidateInput(self):
-        """Validate input lists is not null or empty list
+    def ValidateInputs(self):
+        """Validate inputs.
+
+        Check whether input lists is not null or empty list
         or list containing empty string, and two lists containing same number
         of items. If inputs are two single item, they will
         be converted to single item lists.
@@ -56,6 +58,9 @@ class PathPermission(check_setup_cleanup.CheckSetupCleanup):
         if not normalized:
             return False
         self._paths, self._permissions = normalized
+        self._failed_paths = zip(self._paths,
+                                 self._permissions,
+                                 self._permissions)
 
         return True
 
