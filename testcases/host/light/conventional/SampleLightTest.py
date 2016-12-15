@@ -28,7 +28,7 @@ class SampleLightTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
         self.dut.hal.InitConventionalHal(target_type="light",
-                                         target_basepaths=["/system/lib64/hw"],
+                                         target_basepaths=["/data/local/tmp/64/hw"],
                                          target_version=1.0,
                                          bits=64)
         self.dut.hal.light.OpenConventionalHal("backlight")
