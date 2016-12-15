@@ -45,6 +45,14 @@ LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)
 
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+vts_framework_file64 := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE_STEM_64)
+
+$(vts_framework_file64): $(call intermediates-dir-for,EXECUTABLES,$(LOCAL_MODULE))/$(LOCAL_MODULE_STEM_64) | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_framework_file64)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := vts_shell_driver_test
