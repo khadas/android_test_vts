@@ -45,6 +45,7 @@ function vts_multidevice_target_setup {
   adb push specification/hal_conventional/GpsHalV1GpsInterface.vts /data/local/tmp/spec/GpsHalV1GpsInterface.vts
   adb push specification/hal_conventional/LightHalV1.vts /data/local/tmp/spec/LightHalV1.vts
   adb push specification/hal_conventional/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
+  adb push specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
 
   # asan
   adb push ../../prebuilts/clang/host/linux-x86/clang-2812033/lib64/clang/3.8/lib/linux/libclang_rt.asan-aarch64-android.so /data/local/tmp/libclang_rt.asan-aarch64-android.so

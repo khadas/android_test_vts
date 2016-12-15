@@ -43,9 +43,10 @@ string ComponentClassToString(int component_class) {
   switch(component_class) {
     case UNKNOWN_CLASS: return "unknown_class";
     case HAL_CONVENTIONAL: return "hal_conventional";
-    case SHAREDLIB: return "sharedlib";
-    case HAL_HIDL: return "hal_hidl";
     case HAL_CONVENTIONAL_SUBMODULE: return "hal_conventional_submodule";
+    case HAL_HIDL: return "hal_hidl";
+    case HAL_HIDL_WRAPPED_CONVENTIONAL: return "hal_hidl_wrapped_conventional";
+    case LIB_SHARED: return "lib_shared";
   }
   cerr << "error: invalid component_class " << component_class << endl;
   exit(-1);
@@ -59,6 +60,11 @@ string ComponentTypeToString(int component_type) {
     case CAMERA: return "camera";
     case GPS: return "gps";
     case LIGHT: return "light";
+    case WIFI: return "wifi";
+    case MOBILE: return "mobile";
+    case BLUETOOTH: return "bluetooth";
+    case NFC: return "nfc";
+    case BIONIC_LIBM: return "bionic_libm";
   }
   cerr << "error: invalid component_type " << component_type << endl;
   exit(-1);
@@ -76,8 +82,8 @@ string GetCppVariableType(const std::string scalar_type_string) {
       || scalar_type_string == "uint64_t"
       || scalar_type_string == "int16_t"
       || scalar_type_string == "uint16_t"
-      || scalar_type_string == "float"
-      || scalar_type_string == "double") {
+      || scalar_type_string == "float_t"
+      || scalar_type_string == "double_t") {
     return scalar_type_string;
   } else if(scalar_type_string == "ufloat") {
     return "unsigned float";
@@ -211,6 +217,10 @@ string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
       return "RandomUint8()";
     } else if (arg.scalar_type() == "int8_t") {
       return "RandomInt8()";
+    } else if (arg.scalar_type() == "float_t") {
+      return "RandomFloat()";
+    } else if (arg.scalar_type() == "double_t") {
+      return "RandomDouble()";
     } else if (arg.scalar_type() == "char_pointer") {
       return "RandomCharPointer()";
     } else if (arg.scalar_type() == "pointer"
