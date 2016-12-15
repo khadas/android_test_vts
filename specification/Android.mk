@@ -27,7 +27,9 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/BluetoothHalV1bt_interface_t.vts \
   lib_bionic/libmV1.vts \
 
-ifeq ($(ENABLE_TREBLE),true)
+VTS_ENABLE_TREBLE:=
+
+ifeq ($(VTS_ENABLE_TREBLE),true)
 vtslib_interfacespec_srcfiles += \
   hal_hidl/Nfc.vts \
   hal_hidl/NfcClientCallback.vts \
@@ -72,7 +74,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   ${vtslib_interfacespec_srcfiles} \
 
-ifeq ($(ENABLE_TREBLE),true)
+ifeq ($(VTS_ENABLE_TREBLE),true)
 LOCAL_SRC_FILES += \
   ../../../external/libnfc-nci/hidl/INfc.hal \
   ../../../external/libnfc-nci/hidl/INfcClientCallback.hal \
@@ -83,14 +85,14 @@ LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
   system/libhwbinder/include \
 
-ifeq ($(ENABLE_TREBLE),true)
+ifeq ($(VTS_ENABLE_TREBLE),true)
 LOCAL_CFLAGS += -DENABLE_TREBLE
 endif
 
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
 
-ifeq ($(ENABLE_TREBLE),true)
+ifeq ($(VTS_ENABLE_TREBLE),true)
 LOCAL_SHARED_LIBRARIES += \
   libhwbinder \
   libbase \
