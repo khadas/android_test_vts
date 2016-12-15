@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import os
 import copy
 import logging
 import itertools
@@ -140,19 +141,30 @@ class EnvironmentRequirementChecker(object):
         executables = list(
             set(itertools.chain.from_iterable(executables_generators)))
 
-        # Set all executables executable using chmod. If file does not exists
-        # or setting permission failed, chomd will return non-zero exit code
-        # and the executable will be marked as unavailable in
-        # self._executable_available
-        permission_commands = ["chmod 775 %s" % executable
-                               for executable in executables
-                               if executable not in ltp_configs.INTERNAL_BINS]
+        # Set all executables executable permission using chmod.
+        permission_command = "chmod 775 %s" % os.path.join(
+            ltp_configs.LTPBINPATH, '*')
+        permission_result = self.shell.Execute(permission_command)
+        if permission_result[const.EXIT_CODE][0]:
+            logging.error("Permission command '%s' failed.",
+                          permission_command)
 
-        results = map(operator.not_,
-                      self.shell.Execute(permission_commands)[const.EXIT_CODE])
+        # Check existence of all executables used in test definition.
+        # Some executables needed by test cases but not listed in test
+        # definition will not be checked here
+        executable_exists_commands = [
+            "ls %s" % executable for executable in executables
+            if executable not in ltp_configs.INTERNAL_BINS
+        ]
 
-        self._executable_available = dict(zip(executables, results))
+        executable_exists_results = map(
+            operator.not_,
+            self.shell.Execute(executable_exists_commands)[const.EXIT_CODE])
 
+        self._executable_available = dict(
+            zip(executables, executable_exists_results))
+
+        # Check whether all the internal binaries in path needed exist
         bin_path_exist_commands = ["which %s" % bin
                                    for bin in ltp_configs.INTERNAL_BINS]
 
