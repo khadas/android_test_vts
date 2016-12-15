@@ -14,11 +14,26 @@
 # limitations under the License.
 
 LOCAL_PATH := $(call my-dir)
+
 include $(LOCAL_PATH)/list/vts_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_lib_package_list.mk
+include $(LOCAL_PATH)/list/vts_spec_file_list.mk
 include $(LOCAL_PATH)/list/vts_test_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
+
+# Packaging rule for android-vts.zip
+test_suite_name := vts
+test_suite_tradefed := vts-tradefed
+test_suite_readme := test/vts/README.md
+
+include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
+
+.PHONY: vts
+vts: $(compatibility_zip)
+$(call dist-for-goals, vts, $(compatibility_zip))
+
+# Packaging rule for android-vts.zip's testcases dir.
 
 my_modules := \
     $(vts_bin_packages) \
@@ -26,6 +41,9 @@ my_modules := \
     $(vts_test_bin_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
+
+my_modules += \
+    $(vts_spec_file_list) \
 
 my_copy_pairs :=
   $(foreach m,$(my_modules),\
@@ -43,7 +61,4 @@ my_copy_pairs :=
         $(eval my_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/$(my_copy_dest)))\
     ))
 
-.PHONY: vts
-vts: $(call copy-many-files,$(my_copy_pairs))
-	@echo "vts_native_packages $(my_modules)"
-	@echo "vts_native_packages copy_pairs $(my_copy_pairs)"
+$(compatibility_zip): $(call copy-many-files,$(my_copy_pairs))
