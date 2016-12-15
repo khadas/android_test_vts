@@ -24,18 +24,20 @@ table {
 #buttons {
     margin-top: 25px;
 }
-
 #chart_holder {
     padding: 30px 5px;
 }
-
 #pie_chart_div {
     width: 100%;
     height: 450px;
 }
-
 #profiling_container {
     padding: 30px 25px;
+}
+#legend_table_div {
+    display: inline-block;
+    padding: 10px 30px;
+    margin-bottom: 0;
 }
 .btn.coverage-btn {
     border-radius: 50px;
@@ -46,6 +48,15 @@ table {
 }
 i.material-icons.coverage-icon {
     font-size: inherit;
+}
+a.legend-circle {
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border-radius: 15px;
+}
+.legend-header-cell {
+    text-transform: capitalize;
 }
 .TEST_CASE_RESULT {
     border-radius: 50px;

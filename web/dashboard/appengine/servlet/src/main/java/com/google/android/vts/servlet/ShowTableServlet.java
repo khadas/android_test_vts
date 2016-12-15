@@ -76,16 +76,6 @@ public class ShowTableServlet extends HttpServlet {
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
 
-    // test result constants
-    private static final int TEST_RESULT_CASES = 6;
-    private static final int UNKNOWN_RESULT = 0;
-    private static final String[] TEST_RESULT_NAMES =
-        {"Unknown", "Pass", "Fail", "Skip", "Exception", "Timeout"};
-
-    // pie chart table column headers
-    private static final String PIE_CHART_TEST_RESULT_NAME = "Test Result Name";
-    private static final String PIE_CHART_TEST_RESULT_VALUE = "Test Result Value";
-
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
@@ -138,6 +128,12 @@ public class ShowTableServlet extends HttpServlet {
             }
         }
 
+        // Add result names to list
+        List<String> resultNames = new ArrayList<>();
+        for (TestCaseResult r : TestCaseResult.values()) {
+            resultNames.add(r.name());
+        }
+
         if (currentUser != null) {
             response.setContentType("text/plain");
             table = BigtableHelper.getTable(tableName);
@@ -148,9 +144,8 @@ public class ShowTableServlet extends HttpServlet {
             // TestReportMessage corresponding to the top build -- will be used for pie chart.
             TestReportMessage topBuildTestReportMessage = null;
 
-            // Each case corresponds to an array of size 2.
-            // First column represents the result name and second represents the number of results.
-            String[][] pieChartArray = new String[TEST_RESULT_CASES + 1][2];
+            // Stores results for top build
+            int[] topBuildResultCounts = new int[resultNames.size()];
 
             // list to hold a unique combination - build IDs.startTimeStamp
             List<String> testRunKeyList = new ArrayList<>();
@@ -263,24 +258,11 @@ public class ShowTableServlet extends HttpServlet {
 
             if (topBuildTestReportMessage != null) {
                 // create pieChartArray from top build data.
-                // first row is for headers.
-                pieChartArray[0][0] = PIE_CHART_TEST_RESULT_NAME;
-                pieChartArray[0][1] = PIE_CHART_TEST_RESULT_VALUE;
-                for (int i = 1; i < pieChartArray.length; i++) {
-                    pieChartArray[i][0] = TEST_RESULT_NAMES[i - 1];
-                }
 
-                // temporary count array for each test result
-                int[] testResultCount = new int[TEST_RESULT_CASES];
+                // Count array for each test result
                 for (TestCaseReportMessage testCaseReportMessage : topBuildTestReportMessage.
                     getTestCaseList()) {
-                    testResultCount[testCaseReportMessage.getTestResult().getNumber()]++;
-                }
-
-                // update the pie chart array
-                // create pieChartArray from top build data.
-                for (int i = 1; i < pieChartArray.length; i++) {
-                    pieChartArray[i][1] = String.valueOf(testResultCount[i - 1]);
+                    topBuildResultCounts[testCaseReportMessage.getTestResult().getNumber()]++;
                 }
             }
 
@@ -441,10 +423,12 @@ public class ShowTableServlet extends HttpServlet {
                                  new Gson().toJson(profilingPointNameArray));
             request.setAttribute("deviceBuildIdArrayJson",
                                  new Gson().toJson(deviceBuildIdArray));
+            request.setAttribute("resultNames",
+                                 new Gson().toJson(resultNames));
 
             // data for pie chart
-            request.setAttribute("pieChartArrayJson",
-                new Gson().toJson(pieChartArray));
+            request.setAttribute("topBuildResultCounts",
+                new Gson().toJson(topBuildResultCounts));
 
             request.setAttribute("topBuildJson",
                 new Gson().toJson(topBuild));
@@ -463,7 +447,7 @@ public class ShowTableServlet extends HttpServlet {
             try {
                 dispatcher.forward(request, response);
             } catch (ServletException e) {
-                logger.error("Servlet Excpetion caught : " + e.toString());
+                logger.error("Servlet Exception caught : " + e.toString());
             }
         } else {
             response.sendRedirect(userService.createLoginURL(request.getRequestURI()));
