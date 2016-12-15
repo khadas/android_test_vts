@@ -13,12 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Host-Driven Tests">
+<configuration description="Run VTS Host-Driven Fuzz Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="SampleLightTest" />
-    <option name="compatibility:include-filter" value="SampleCameraTest" />
-    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
-    <option name="compatibility:include-filter" value="SampleShellTest" />
+    <option name="compatibility:include-filter" value="SampleLightFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
