@@ -36,7 +36,8 @@ COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      101: "CHECK_DRIVER_SERVICE",
                      102: "LAUNCH_DRIVER_SERVICE",
                      201: "LIST_APIS",
-                     202: "CALL_API"}
+                     202: "CALL_API",
+                     301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND"}
 
 
 class VtsTcpClient(object):
@@ -78,6 +79,7 @@ class VtsTcpClient(object):
                     (ip, command_port), _SOCKET_CONN_TIMEOUT_SECS)
             except socket.error as e:
                 # Wait a bit and retry.
+                logging.exception("Connect failed %s", e)
                 time.sleep(1)
                 if i + 1 == retry:
                     raise errors.VtsTcpClientCreationError(
@@ -169,7 +171,8 @@ class VtsTcpClient(object):
     def ExecuteShellCommand(self, command):
         """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND."""
         self.SendCommand(
-            shell_command=SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND)
+            SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND,
+            shell_command=command)
         resp = self.RecvResponse()
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                      resp)
@@ -243,8 +246,9 @@ class VtsTcpClient(object):
             command_msg.arg = arg
 
         if shell_command is not None:
-            command_msg.shell_command = shell_command
+            command_msg.shell_command.append(shell_command)
 
+        logging.info("command %s" % command_msg)
         message = command_msg.SerializeToString()
         message_len = len(message)
         logging.debug("sending %d bytes", message_len)
