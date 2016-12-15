@@ -59,6 +59,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     static final String BUILD_ID = "build_id";
     static final String BUILD_TARGET = "build_target";
     static final String DATA_FILE_PATH = "data_file_path";
+    static final String LOG_PATH = "log_path";
     static final String NAME = "name";
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
@@ -252,9 +253,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      * This method reads the provided VTS runner test json config, adds or updates some of its
      * fields (e.g., to add build info and device serial IDs), and returns the updated json object.
      *
+     * @param log_path the path of a directory to store the VTS runner logs.
      * @return the updated JSONObject as the new test config.
      */
-    private JSONObject getUpdatedVtsRunnerTestConfig()
+    private JSONObject getUpdatedVtsRunnerTestConfig(String log_path)
         throws IOException, JSONException, RuntimeException {
         JSONObject jsonObject = null;
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
@@ -304,6 +306,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         JSONObject suite = new JSONObject();
         suite.put(NAME, mBuildInfo.getTestTag());
         jsonObject.put(TEST_SUITE, suite);
+
+        jsonObject.put(LOG_PATH, log_path);
         return jsonObject;
     }
 
@@ -321,8 +325,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         JSONObject jsonObject = null;
+        File vtsRunnerLogDir = null;
         try {
-            jsonObject = getUpdatedVtsRunnerTestConfig();
+            vtsRunnerLogDir = FileUtil.createTempDir("vts-runner-log");
+            jsonObject = getUpdatedVtsRunnerTestConfig(vtsRunnerLogDir.getAbsolutePath());
         } catch(IOException e) {
             throw new RuntimeException("Failed to read test config json file");
         } catch(JSONException e) {
@@ -372,7 +378,42 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         if (commandResult.getStdout() != null) {
             parser.processNewLines(commandResult.getStdout().split("\n"));
         }
-     }
+
+        printVtsLogs(vtsRunnerLogDir);
+    }
+
+    /**
+     * The method prints all VTS runner log files
+     *
+     * @param logDir the File instance of the base log dir.
+     */
+    private void printVtsLogs(File logDir) {
+        File[] children;
+        if (logDir == null) {
+            CLog.e("Scan VTS log dir: null\n");
+            return;
+        }
+        CLog.i("Scan VTS log dir %s\n", logDir.getAbsolutePath());
+        children = logDir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (child.isDirectory()) {
+                    printVtsLogs(child);
+                } else {
+                    CLog.i("VTS log file %s\n", child.getAbsolutePath());
+                    try {
+                        if (child.getName().equals("vts_agent.log")) {
+                            CLog.i("Content: %s\n", FileUtil.readStringFromFile(child));
+                        } else {
+                            CLog.i("skip %s\n", child.getName());
+                        }
+                    } catch (IOException e) {
+                        CLog.e("I/O error\n");
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * This method sets the python path. It's based on the based on the
