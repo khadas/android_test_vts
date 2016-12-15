@@ -79,17 +79,17 @@ def runTestClass(test_class):
         The TestResult object that holds the results of the test run.
     """
     test_cls_name = test_class.__name__
-    try:
-        config_path = sys.argv[1]
-    except IndexError:
-        config_path = "%s.config" % test_cls_name
-        if not os.path.isfile(config_path):
-            logging.error(
-                "No config file provided and no default config found.")
+    if len(sys.argv) < 2:
+        logging.warning("Missing a configuration file. Using the default.")
+        test_configs = [config_parser.GetDefaultConfig(test_cls_name)]
+    else:
+        try:
+            config_path = sys.argv[1]
+            test_configs = config_parser.load_test_config_file(config_path)
+        except IndexError:
+            logging.error("No valid config file found.")
             sys.exit(1)
-        logging.warning("Missing required configuration file. Default to %s." %
-                        config_path)
-    test_configs = config_parser.load_test_config_file(config_path)
+
     test_identifiers = [(test_cls_name, None)]
 
     for config in test_configs:
