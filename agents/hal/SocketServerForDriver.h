@@ -19,6 +19,8 @@
 
 #include <VtsDriverCommUtil.h>
 
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+
 namespace android {
 namespace vts {
 
@@ -31,18 +33,15 @@ class SocketServerForDriver : public VtsDriverCommUtil {
  public:
   SocketServerForDriver(int sock, int runner_port)
       : runner_port_(runner_port),
-        VtsDriverCommUtil(sock_) {}
+        VtsDriverCommUtil(sock) {}
 
   // Starts to process requests.
   void Start();
 
   // Sends a RPC call to the runner.
-  void RpcCallToRunner(const char* id);
+  void RpcCallToRunner(const AndroidSystemCallbackRequestMessage& message);
 
  private:
-  // ID of a socket to communicate with a connected driver.
-  int sock_;
-
   // TCP port number of a runner's callback server.
   int runner_port_;
 };
