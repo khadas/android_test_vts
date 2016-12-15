@@ -195,16 +195,33 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
 
   for (auto const& api : message.interface().api()) {
     if (api.return_type_hidl_size() > 0) {
-      cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func("
-             << api.return_type_hidl(0).scalar_type() << " arg) {" << endl;
+      cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func(";
+      if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
+        cpp_ss << api.return_type_hidl(0).scalar_type();
+      } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
+        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+             << api.return_type_hidl(0).type() << endl;
+      }
+      cpp_ss << " arg) {" << endl;
       // TODO: support other non-scalar type and multiple args.
       cpp_ss << "  cout << \"callback " << api.name() << " called\""
              << " << endl;" << endl;
       cpp_ss << "}" << endl;
       cpp_ss << "std::function<"
-              << "void(" << api.return_type_hidl(0).scalar_type() << ")> "
-              << fuzzer_extended_class_name << api.name() << "_cb = "
-              << fuzzer_extended_class_name << api.name() << "_cb_func;" << endl;
+              << "void(";
+      if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
+        cpp_ss << api.return_type_hidl(0).scalar_type();
+      } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
+        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+             << api.return_type_hidl(0).type() << endl;
+      }
+      cpp_ss << ")> "
+             << fuzzer_extended_class_name << api.name() << "_cb = "
+             << fuzzer_extended_class_name << api.name() << "_cb_func;" << endl;
       cpp_ss << endl << endl;
     }
   }
@@ -342,15 +359,30 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           }
         } else {
           if (arg.type() == TYPE_VECTOR) {
-            cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
-                   << "arg" << arg_count << "buffer = ("
-                   << arg.vector_value(0).scalar_type()
-                   << "*) malloc("
-                   << "func_msg->arg(" << arg_count
-                   << ").vector_value(0).value().size()"
-                   << " * sizeof("
-                   << arg.vector_value(0).scalar_type() << "));"
-                   << endl;
+            if (arg.vector_value(0).type() == TYPE_SCALAR) {
+              cpp_ss << "    " << arg.vector_value(0).scalar_type() << "* "
+                     << "arg" << arg_count << "buffer = ("
+                     << arg.vector_value(0).scalar_type()
+                     << "*) malloc("
+                     << "func_msg->arg(" << arg_count
+                     << ").vector_value(0).value().size()"
+                     << " * sizeof("
+                     << arg.vector_value(0).scalar_type() << "));"
+                     << endl;
+            } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
+              cpp_ss << "    " << arg.vector_value(0).struct_type() << "* "
+                     << "arg" << arg_count << "buffer = ("
+                     << arg.vector_value(0).struct_type()
+                     << "*) malloc("
+                     << "func_msg->arg(" << arg_count
+                     << ").vector_value(0).value().size()"
+                     << " * sizeof("
+                     << arg.vector_value(0).struct_type() << "));"
+                     << endl;
+            } else {
+              cerr << __func__ << " " << __LINE__ << " ERROR unsupported vector sub-type "
+                   << arg.vector_value(0).type() << endl;
+            }
           }
 
           if (arg.type() == TYPE_HIDL_CALLBACK) {
@@ -543,21 +575,55 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                << endl;
         int struct_index = 0;
         for (const auto& struct_value : attribute.struct_value()) {
-          if (struct_value.type() == TYPE_VECTOR) {
+          if (struct_value.type() == TYPE_SCALAR) {
+            cpp_ss << "    arg->" << struct_value.name() << " = "
+                   << "var_msg.struct_value(" << struct_index
+                   << ").scalar_value()." << struct_value.scalar_type() << "();"
+                   << endl;
+          } else if (struct_value.type() == TYPE_STRING) {  // convert to hidl_string
+            cpp_ss << "    arg->" << struct_value.name() << ".setToExternal("
+                   << "\"random\", 7);"
+                   << endl;
+          } else if (struct_value.type() == TYPE_VECTOR) {
             cpp_ss << "  arg->" << struct_value.name() << ".resize("
                    << "var_msg.struct_value(" << struct_index
                    << ").vector_value(0).value().size()"
                    << ");" << endl;
-            cpp_ss << "  for (int value_index = 0; value_index < "
-                   << "var_msg.struct_value(" << struct_index
-                   << ").vector_value(0).value().size(); "
-                   << "value_index++) {" << endl;
-            cpp_ss << "    arg->" << struct_value.name() << "[value_index] = "
-                   << "var_msg.struct_value(" << struct_index
-                   << ").vector_value(0).value(value_index)."
-                   << struct_value.vector_value(0).scalar_type() << "();"
-                   << endl;
-            cpp_ss << "  }" << endl;
+            if (struct_value.vector_value(0).type() == TYPE_SCALAR) {
+              cpp_ss << "  for (int value_index = 0; value_index < "
+                     << "var_msg.struct_value(" << struct_index
+                     << ").vector_value(0).value().size(); "
+                     << "value_index++) {" << endl;
+              cpp_ss << "    arg->" << struct_value.name() << "[value_index] = "
+                     << "var_msg.struct_value(" << struct_index
+                     << ").vector_value(0).value(value_index)."
+                     << struct_value.vector_value(0).scalar_type() << "();" << endl;
+              cpp_ss << "  }" << endl;
+            } else if (struct_value.vector_value(0).type() == TYPE_STRUCT) {
+              // Should use a recursion to handle nested data structure.
+              cpp_ss << "  for (int value_index = 0; value_index < "
+                     << "var_msg.struct_value(" << struct_index
+                     << ").vector_value(0).struct_value().size(); "
+                     << "value_index++) {" << endl;
+              for (const auto& sub_struct_value : struct_value.vector_value(0).struct_value()) {
+                if (sub_struct_value.type() == TYPE_SCALAR) {
+                  cpp_ss << "    arg->" << struct_value.name() << "[value_index]."
+                         << sub_struct_value.name() << " = "
+                         << "var_msg.struct_value(" << struct_index
+                         << ").vector_value(0).struct_value(value_index).scalar_type()."
+                         << sub_struct_value.scalar_type() << "();" << endl;
+                } else {
+                  cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+                       << struct_value.vector_value(0).type() << endl;
+                  exit(-1);
+                }
+              }
+              cpp_ss << "  }" << endl;
+            } else {
+              cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+                   << struct_value.vector_value(0).type() << endl;
+              exit(-1);
+            }
           } else {
             cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                  << struct_value.type() << endl;

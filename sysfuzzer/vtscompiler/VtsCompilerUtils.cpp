@@ -156,7 +156,22 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       }
     }
   } else if (arg.type() == TYPE_VECTOR) {
-    return "hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
+    if (arg.vector_value(0).type() == TYPE_SCALAR) {
+      if (arg.vector_value(0).scalar_type().length() == 0) {
+        cerr << __func__ << ":" << __LINE__ << " ERROR scalar_type not set" << endl;
+        exit(-1);
+      }
+      return "hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
+    } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
+      if (arg.vector_value(0).struct_type().length() == 0) {
+        cerr << __func__ << ":" << __LINE__ << " ERROR struct_type not set" << endl;
+        exit(-1);
+      }
+      return "hidl_vec<" + arg.vector_value(0).struct_type() + ">";
+    } else {
+      cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+           << arg.vector_value(0).type() << endl;
+    }
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
     return arg.predefined_type();
   }
