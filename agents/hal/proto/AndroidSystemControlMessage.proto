@@ -1,0 +1,67 @@
+// Copyright 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package android.vts;
+
+
+// Type of a command.
+enum CommandType {
+  UNKNOWN_TYPE = 0;
+  // To check whether fuzzer's binder service is available.
+  CHECK_FUZZER_BINDER_SERVICE = 1;
+  // To start a fuzzer binary service.
+  START_FUZZER_BINDER_SERVICE = 2;
+
+  // To get a list of available HAL modules.
+  GET_HALS = 101;
+  // To select a HAL module.
+  SELECT_HAL = 102;
+
+  // To get a list of available functions.
+  GET_FUNCTIONS = 201;
+  // To call a function.
+  CALL_FUNCTION = 202;
+}
+
+
+// Type of a response.
+enum ResponseCode {
+  UNKNOWN_CODE = 0;
+  // successful
+  SUCCESS = 1;
+  // failed
+  FAIL = 2;
+}
+
+
+// To specify a command.
+message AndroidSystemControlCommandMessage {
+  // Command type.
+  optional CommandType command_type = 1;
+
+  // The name of a target.
+  optional bytes target_name = 1001;
+}
+
+
+// To specify a response.
+message AndroidSystemControlResponseMessage {
+  // Response type.
+  optional ResponseCode response_code = 1;
+
+  // The reason.
+  optional bytes reason = 1001;
+}
