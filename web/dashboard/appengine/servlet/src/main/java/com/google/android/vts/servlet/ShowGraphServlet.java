@@ -16,27 +16,15 @@
 
 package com.google.android.vts.servlet;
 
-import com.google.android.vts.proto.VtsReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
-
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import com.google.gson.Gson;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.client.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.RequestDispatcher;
@@ -78,7 +66,7 @@ public class ShowGraphServlet extends HttpServlet {
         String valuesJson = new Gson().toJson(values);
         request.setAttribute("valuesJson", valuesJson);
 
-        int[] percentiles = {10, 25, 50 ,75, 80, 90, 95, 99};
+        int[] percentiles = {10, 25, 50 , 75, 80, 90, 95, 99};
         double[] percentileResultArray = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
             percentileResultArray[i] =
