@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+    <application>s~google.com:android-vts-staging</application>
+    <!-- switch to below for production push
+         CAUTION only VTS release engineer shall do such production push
+         after running all of its tests and verifying the UI.
+    <application>s~google.com:android-vts-internal</application>
+    -->
+    <version>1</version>
     <threadsafe>true</threadsafe>
     <vm>true</vm>
     <sessions-enabled>true</sessions-enabled>
