@@ -41,10 +41,14 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/64/hal/libqdMetaData.vts.so /data/local/tmp/64/libqdMetaData.vts.so
   adb push images/${DEVICE}/32/hal/libqomx_core.vts.so /data/local/tmp/32/libqomx_core.vts.so
 
-  #adb push images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so /data/local/tmp/32/hal/android.hardware.nfc@1.0.so
-  #adb push images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so /data/local/tmp/64/hal/android.hardware.nfc@1.0.so
+  adb push images/${DEVICE}/32/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/32/android.hardware.tests.libhwbinder@1.0.so
+  adb push images/${DEVICE}/64/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/64/android.hardware.tests.libhwbinder@1.0.so
 
-  # uncomment for hidl
+  adb push images/${DEVICE}/64/libhwbinder_benchmark data/local/tmp/libhwbinder_benchmark
+
+  # uncomment for hidl in non-treble devices
+  # adb push images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so /data/local/tmp/32/hal/android.hardware.nfc@1.0.so
+  # adb push images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so /data/local/tmp/64/hal/android.hardware.nfc@1.0.so
   # adb push images/${DEVICE}/32/libhwbinder.so /data/local/tmp/32/libhwbinder.so
   # adb push images/${DEVICE}/64/libhwbinder.so /data/local/tmp/64/libhwbinder.so
 
