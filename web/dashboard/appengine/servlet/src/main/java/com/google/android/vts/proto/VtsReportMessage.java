@@ -6639,6 +6639,32 @@ public final class VtsReportMessage {
      */
     com.google.android.vts.proto.VtsReportMessage.AndroidBuildInfoOrBuilder getBuildInfoOrBuilder();
 
+    // repeated bytes subscriber_email = 6;
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    java.util.List<com.google.protobuf.ByteString> getSubscriberEmailList();
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    int getSubscriberEmailCount();
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    com.google.protobuf.ByteString getSubscriberEmail(int index);
+
     // repeated .android.vts.TestCaseReportMessage test_case = 11;
     /**
      * <code>repeated .android.vts.TestCaseReportMessage test_case = 11;</code>
@@ -6854,18 +6880,26 @@ public final class VtsReportMessage {
               bitField0_ |= 0x00000008;
               break;
             }
-            case 90: {
+            case 50: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                testCase_ = new java.util.ArrayList<com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage>();
+                subscriberEmail_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
                 mutable_bitField0_ |= 0x00000020;
+              }
+              subscriberEmail_.add(input.readBytes());
+              break;
+            }
+            case 90: {
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+                testCase_ = new java.util.ArrayList<com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage>();
+                mutable_bitField0_ |= 0x00000040;
               }
               testCase_.add(input.readMessage(com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage.PARSER, extensionRegistry));
               break;
             }
             case 170: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
                 profiling_ = new java.util.ArrayList<com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000080;
               }
               profiling_.add(input.readMessage(com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage.PARSER, extensionRegistry));
               break;
@@ -6892,9 +6926,12 @@ public final class VtsReportMessage {
           deviceInfo_ = java.util.Collections.unmodifiableList(deviceInfo_);
         }
         if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-          testCase_ = java.util.Collections.unmodifiableList(testCase_);
+          subscriberEmail_ = java.util.Collections.unmodifiableList(subscriberEmail_);
         }
         if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+          testCase_ = java.util.Collections.unmodifiableList(testCase_);
+        }
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           profiling_ = java.util.Collections.unmodifiableList(profiling_);
         }
         this.unknownFields = unknownFields.build();
@@ -7091,6 +7128,41 @@ public final class VtsReportMessage {
       return buildInfo_;
     }
 
+    // repeated bytes subscriber_email = 6;
+    public static final int SUBSCRIBER_EMAIL_FIELD_NUMBER = 6;
+    private java.util.List<com.google.protobuf.ByteString> subscriberEmail_;
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getSubscriberEmailList() {
+      return subscriberEmail_;
+    }
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    public int getSubscriberEmailCount() {
+      return subscriberEmail_.size();
+    }
+    /**
+     * <code>repeated bytes subscriber_email = 6;</code>
+     *
+     * <pre>
+     * email addresses of subscribers to the test results
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getSubscriberEmail(int index) {
+      return subscriberEmail_.get(index);
+    }
+
     // repeated .android.vts.TestCaseReportMessage test_case = 11;
     public static final int TEST_CASE_FIELD_NUMBER = 11;
     private java.util.List<com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage> testCase_;
@@ -7249,6 +7321,7 @@ public final class VtsReportMessage {
       testType_ = com.google.android.vts.proto.VtsReportMessage.VtsTestType.UNKNOWN_VTS_TESTTYPE;
       deviceInfo_ = java.util.Collections.emptyList();
       buildInfo_ = com.google.android.vts.proto.VtsReportMessage.AndroidBuildInfo.getDefaultInstance();
+      subscriberEmail_ = java.util.Collections.emptyList();
       testCase_ = java.util.Collections.emptyList();
       profiling_ = java.util.Collections.emptyList();
       startTimestamp_ = 0L;
@@ -7280,6 +7353,9 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(5, buildInfo_);
+      }
+      for (int i = 0; i < subscriberEmail_.size(); i++) {
+        output.writeBytes(6, subscriberEmail_.get(i));
       }
       for (int i = 0; i < testCase_.size(); i++) {
         output.writeMessage(11, testCase_.get(i));
@@ -7321,6 +7397,15 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, buildInfo_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < subscriberEmail_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(subscriberEmail_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getSubscriberEmailList().size();
       }
       for (int i = 0; i < testCase_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -7480,22 +7565,24 @@ public final class VtsReportMessage {
           buildInfoBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000010);
+        subscriberEmail_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
         if (testCaseBuilder_ == null) {
           testCase_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000040);
         } else {
           testCaseBuilder_.clear();
         }
         if (profilingBuilder_ == null) {
           profiling_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
         } else {
           profilingBuilder_.clear();
         }
         startTimestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000080);
-        endTimestamp_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000100);
+        endTimestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -7553,29 +7640,34 @@ public final class VtsReportMessage {
         } else {
           result.buildInfo_ = buildInfoBuilder_.build();
         }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          subscriberEmail_ = java.util.Collections.unmodifiableList(subscriberEmail_);
+          bitField0_ = (bitField0_ & ~0x00000020);
+        }
+        result.subscriberEmail_ = subscriberEmail_;
         if (testCaseBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          if (((bitField0_ & 0x00000040) == 0x00000040)) {
             testCase_ = java.util.Collections.unmodifiableList(testCase_);
-            bitField0_ = (bitField0_ & ~0x00000020);
+            bitField0_ = (bitField0_ & ~0x00000040);
           }
           result.testCase_ = testCase_;
         } else {
           result.testCase_ = testCaseBuilder_.build();
         }
         if (profilingBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          if (((bitField0_ & 0x00000080) == 0x00000080)) {
             profiling_ = java.util.Collections.unmodifiableList(profiling_);
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000080);
           }
           result.profiling_ = profiling_;
         } else {
           result.profiling_ = profilingBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000010;
         }
         result.startTimestamp_ = startTimestamp_;
-        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000020;
         }
         result.endTimestamp_ = endTimestamp_;
@@ -7633,11 +7725,21 @@ public final class VtsReportMessage {
         if (other.hasBuildInfo()) {
           mergeBuildInfo(other.getBuildInfo());
         }
+        if (!other.subscriberEmail_.isEmpty()) {
+          if (subscriberEmail_.isEmpty()) {
+            subscriberEmail_ = other.subscriberEmail_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+          } else {
+            ensureSubscriberEmailIsMutable();
+            subscriberEmail_.addAll(other.subscriberEmail_);
+          }
+          onChanged();
+        }
         if (testCaseBuilder_ == null) {
           if (!other.testCase_.isEmpty()) {
             if (testCase_.isEmpty()) {
               testCase_ = other.testCase_;
-              bitField0_ = (bitField0_ & ~0x00000020);
+              bitField0_ = (bitField0_ & ~0x00000040);
             } else {
               ensureTestCaseIsMutable();
               testCase_.addAll(other.testCase_);
@@ -7650,7 +7752,7 @@ public final class VtsReportMessage {
               testCaseBuilder_.dispose();
               testCaseBuilder_ = null;
               testCase_ = other.testCase_;
-              bitField0_ = (bitField0_ & ~0x00000020);
+              bitField0_ = (bitField0_ & ~0x00000040);
               testCaseBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getTestCaseFieldBuilder() : null;
@@ -7663,7 +7765,7 @@ public final class VtsReportMessage {
           if (!other.profiling_.isEmpty()) {
             if (profiling_.isEmpty()) {
               profiling_ = other.profiling_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
             } else {
               ensureProfilingIsMutable();
               profiling_.addAll(other.profiling_);
@@ -7676,7 +7778,7 @@ public final class VtsReportMessage {
               profilingBuilder_.dispose();
               profilingBuilder_ = null;
               profiling_ = other.profiling_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
               profilingBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getProfilingFieldBuilder() : null;
@@ -8339,13 +8441,113 @@ public final class VtsReportMessage {
         return buildInfoBuilder_;
       }
 
+      // repeated bytes subscriber_email = 6;
+      private java.util.List<com.google.protobuf.ByteString> subscriberEmail_ = java.util.Collections.emptyList();
+      private void ensureSubscriberEmailIsMutable() {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
+          subscriberEmail_ = new java.util.ArrayList<com.google.protobuf.ByteString>(subscriberEmail_);
+          bitField0_ |= 0x00000020;
+         }
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getSubscriberEmailList() {
+        return java.util.Collections.unmodifiableList(subscriberEmail_);
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public int getSubscriberEmailCount() {
+        return subscriberEmail_.size();
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getSubscriberEmail(int index) {
+        return subscriberEmail_.get(index);
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public Builder setSubscriberEmail(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSubscriberEmailIsMutable();
+        subscriberEmail_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public Builder addSubscriberEmail(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSubscriberEmailIsMutable();
+        subscriberEmail_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public Builder addAllSubscriberEmail(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureSubscriberEmailIsMutable();
+        super.addAll(values, subscriberEmail_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes subscriber_email = 6;</code>
+       *
+       * <pre>
+       * email addresses of subscribers to the test results
+       * </pre>
+       */
+      public Builder clearSubscriberEmail() {
+        subscriberEmail_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+
       // repeated .android.vts.TestCaseReportMessage test_case = 11;
       private java.util.List<com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage> testCase_ =
         java.util.Collections.emptyList();
       private void ensureTestCaseIsMutable() {
-        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
+        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
           testCase_ = new java.util.ArrayList<com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage>(testCase_);
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000040;
          }
       }
 
@@ -8538,7 +8740,7 @@ public final class VtsReportMessage {
       public Builder clearTestCase() {
         if (testCaseBuilder_ == null) {
           testCase_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000040);
           onChanged();
         } else {
           testCaseBuilder_.clear();
@@ -8643,7 +8845,7 @@ public final class VtsReportMessage {
           testCaseBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage, com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage.Builder, com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessageOrBuilder>(
                   testCase_,
-                  ((bitField0_ & 0x00000020) == 0x00000020),
+                  ((bitField0_ & 0x00000040) == 0x00000040),
                   getParentForChildren(),
                   isClean());
           testCase_ = null;
@@ -8655,9 +8857,9 @@ public final class VtsReportMessage {
       private java.util.List<com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage> profiling_ =
         java.util.Collections.emptyList();
       private void ensureProfilingIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
           profiling_ = new java.util.ArrayList<com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage>(profiling_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000080;
          }
       }
 
@@ -8850,7 +9052,7 @@ public final class VtsReportMessage {
       public Builder clearProfiling() {
         if (profilingBuilder_ == null) {
           profiling_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
           onChanged();
         } else {
           profilingBuilder_.clear();
@@ -8955,7 +9157,7 @@ public final class VtsReportMessage {
           profilingBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage, com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage.Builder, com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessageOrBuilder>(
                   profiling_,
-                  ((bitField0_ & 0x00000040) == 0x00000040),
+                  ((bitField0_ & 0x00000080) == 0x00000080),
                   getParentForChildren(),
                   isClean());
           profiling_ = null;
@@ -8973,7 +9175,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasStartTimestamp() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
        * <code>optional int64 start_timestamp = 101;</code>
@@ -8993,7 +9195,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setStartTimestamp(long value) {
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000100;
         startTimestamp_ = value;
         onChanged();
         return this;
@@ -9006,7 +9208,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearStartTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000100);
         startTimestamp_ = 0L;
         onChanged();
         return this;
@@ -9018,7 +9220,7 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 102;</code>
        */
       public boolean hasEndTimestamp() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
+        return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       /**
        * <code>optional int64 end_timestamp = 102;</code>
@@ -9030,7 +9232,7 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 102;</code>
        */
       public Builder setEndTimestamp(long value) {
-        bitField0_ |= 0x00000100;
+        bitField0_ |= 0x00000200;
         endTimestamp_ = value;
         onChanged();
         return this;
@@ -9039,7 +9241,7 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 102;</code>
        */
       public Builder clearEndTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
         endTimestamp_ = 0L;
         onChanged();
         return this;
@@ -9118,29 +9320,29 @@ public final class VtsReportMessage {
       "\n\004gcda\030\026 \001(\014\022\034\n\024line_coverage_vector\030\027 \003" +
       "(\005\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_" +
       "line_count\030e \001(\005\022\032\n\022covered_line_count\030f" +
-      " \001(\005\"\360\002\n\021TestReportMessage\022\022\n\ntest_suite" +
+      " \001(\005\"\212\003\n\021TestReportMessage\022\022\n\ntest_suite" +
       "\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162" +
       "\030.android.vts.VtsTestType\022:\n\013device_info" +
       "\030\004 \003(\0132%.android.vts.AndroidDeviceInfoMe" +
       "ssage\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts." +
-      "AndroidBuildInfo\0225\n\ttest_case\030\013 \003(\0132\".an" +
-      "droid.vts.TestCaseReportMessage\0226\n\tprofi",
-      "ling\030\025 \003(\0132#.android.vts.ProfilingReport" +
-      "Message\022\027\n\017start_timestamp\030e \001(\003\022\025\n\rend_" +
-      "timestamp\030f \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UN" +
-      "KNOWN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020" +
-      "\001\022\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CAS" +
-      "E_RESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCE" +
-      "PTION\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001" +
-      "\n\013VtsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022" +
-      "\036\n\032VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_H" +
-      "OST_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_",
-      "GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020" +
-      "VtsProfilingType\022\036\n\032UNKNOWN_VTS_PROFILIN" +
-      "G_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP" +
-      "\020\001\022%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020" +
-      "\002B0\n\034com.google.android.vts.protoB\020VtsRe" +
-      "portMessage"
+      "AndroidBuildInfo\022\030\n\020subscriber_email\030\006 \003" +
+      "(\014\0225\n\ttest_case\030\013 \003(\0132\".android.vts.Test",
+      "CaseReportMessage\0226\n\tprofiling\030\025 \003(\0132#.a" +
+      "ndroid.vts.ProfilingReportMessage\022\027\n\017sta" +
+      "rt_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(" +
+      "\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020\000" +
+      "\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE" +
+      "_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020" +
+      "\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TES" +
+      "T_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022" +
+      "\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DR" +
+      "IVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZ",
+      "ZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS" +
+      "_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingTy" +
+      "pe\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VT" +
+      "S_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROF" +
+      "ILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.googl" +
+      "e.android.vts.protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9182,7 +9384,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestReportMessage_descriptor,
-              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "TestCase", "Profiling", "StartTimestamp", "EndTimestamp", });
+              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "TestCase", "Profiling", "StartTimestamp", "EndTimestamp", });
           return null;
         }
       };

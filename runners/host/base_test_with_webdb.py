@@ -59,6 +59,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     USE_GAE_DB = "use_gae_db"
     COVERAGE_SRC_FILES = "coverage_src_files"
     COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
+    STATUS_TABLE = "vts_status_table"
 
     def __init__(self, configs):
         super(BaseTestWithWebDbClass, self).__init__(configs)
@@ -77,6 +78,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = self.__class__.__name__
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
+            self._report_msg.subscriber_email.append("vts-alert@google.com")
 
         self._profiling = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
@@ -101,8 +103,20 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self.SetDeviceInfo(self._report_msg)
             bt_client.PutRow(str(self._report_msg.start_timestamp),
                              "data", self._report_msg.SerializeToString())
-            logging.info("_tearDownClass hook: result proto %s",
+
+            logging.info("_tearDownClass hook: report msg proto %s",
                          self._report_msg)
+
+            bt_client = bigtable_rest_client.HbaseRestClient(self.STATUS_TABLE)
+            bt_client.CreateTable("status")
+
+            bt_client.PutRow("result_%s" % self._report_msg.test,
+                             "upload_timestamp",
+                             str(self._report_msg.start_timestamp))
+
+            logging.info("_tearDownClass hook: status upload time stamp %s",
+                         str(self._report_msg.start_timestamp))
+
             logging.info("_tearDownClass hook: done")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
 

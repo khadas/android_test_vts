@@ -178,6 +178,9 @@ message TestReportMessage {
   // build info
   optional AndroidBuildInfo build_info = 5;
 
+  // email addresses of subscribers to the test results
+  repeated bytes subscriber_email = 6;
+
   // test case reports
   repeated TestCaseReportMessage test_case = 11;
 
@@ -188,4 +191,3 @@ message TestReportMessage {
   optional int64 start_timestamp = 101;
   optional int64 end_timestamp = 102;
 }
-
