@@ -399,9 +399,17 @@ class AndroidDevice(object):
             except adb.AdbError as e:
                 # adb root is not always possible in the lab
                 logging.exception(e)
-            self.adb.wait_for_device()
+            try:
+                self.adb.wait_for_device()
+            except adb.AdbError as e:
+                # adb wait-for-device is not always possible in the lab
+                logging.exception(e)
             self.adb.remount()
-            self.adb.wait_for_device()
+            try:
+                self.adb.wait_for_device()
+            except adb.AdbError as e:
+                # adb wait-for-device is not always possible in the lab
+                logging.exception(e)
 
     def startAdbLogcat(self):
         """Starts a standing adb logcat collection in separate subprocesses and
@@ -456,7 +464,11 @@ class AndroidDevice(object):
 
         This function times out after 15 minutes.
         """
-        self.adb.wait_for_device()
+        try:
+            self.adb.wait_for_device()
+        except adb.AdbError as e:
+            # adb wait-for-device is not always possible in the lab
+            logging.exception(e)
         while True:
             try:
                 out = self.adb.shell("getprop sys.boot_completed")
