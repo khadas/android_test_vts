@@ -244,8 +244,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             logging.info("[Test Case] %s PASS" % testcase_name)
         elif results[const.EXIT_CODE][0] == self._TCONF:
             # Test case is not for the current configuration, SKIP
-            # TODO: emit SKIP message
-            logging.info("[Test Case] %s FAIL" % testcase_name)
+            logging.info("[Test Case] %s SKIP" % testcase_name)
         else:
             # All other cases are treated as FAIL, but this is not expected
             logging.info("[Test Case] %s FAIL" % testcase_name)
