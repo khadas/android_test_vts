@@ -66,8 +66,8 @@ public class ShowGraphServlet extends HttpServlet {
         long startTime;
         long endTime;
         try {
-            startTime = Long.parseLong(request.getParameter("buildIdStartTime"));
-            endTime = Long.parseLong(request.getParameter("buildIdEndTime"));
+            startTime = Long.parseLong(request.getParameter("startTime"));
+            endTime = Long.parseLong(request.getParameter("endTime"));
         } catch (NumberFormatException e){
             long now = System.currentTimeMillis() * 1000000L;
             startTime = now - ONE_DAY;
