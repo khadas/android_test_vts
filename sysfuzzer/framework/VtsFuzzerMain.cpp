@@ -86,6 +86,7 @@ int main(int argc, char* const argv[]) {
     {"spec_dir",     required_argument, NULL, 's'},
     {"service_name", required_argument, NULL, 'n'},
     {"server",       optional_argument, NULL, 'd'},
+    {"agent_port",   optional_argument, NULL, 'p'},
     {NULL,           0,                 NULL, 0}};
   int target_class;
   int target_type;
@@ -94,6 +95,7 @@ int main(int argc, char* const argv[]) {
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
   bool server = false;
   string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
+  int agent_port = -1;
 
   while (true) {
     int optionIndex = 0;
@@ -137,6 +139,9 @@ int main(int argc, char* const argv[]) {
       case 'v':
         target_version = atof(optarg);
         break;
+      case 'p':
+        agent_port = atoi(optarg);
+        break;
       case 'e':
         epoch_count = atoi(optarg);
         if (epoch_count <= 0) {
@@ -162,7 +167,7 @@ int main(int argc, char* const argv[]) {
   }
 
   android::vts::SpecificationBuilder spec_builder(
-      spec_dir_path, epoch_count);
+      spec_dir_path, epoch_count, agent_port);
   if (!server) {
     if (optind != argc - 1) {
       fprintf(stderr, "Must specify output file (see --help).\n");

@@ -33,11 +33,12 @@ namespace android {
 namespace vts {
 
 SpecificationBuilder::SpecificationBuilder(
-    const string dir_path, int epoch_count)
+    const string dir_path, int epoch_count, int agent_port)
     : dir_path_(dir_path),
       epoch_count_(epoch_count),
       if_spec_msg_(NULL),
-      module_name_(NULL) {}
+      module_name_(NULL),
+      agent_port_(agent_port) {}
 
 
 vts::InterfaceSpecificationMessage*
@@ -232,7 +233,7 @@ const string& SpecificationBuilder::CallFunction(
   void* result;
   func_fuzzer->FunctionCallBegin();
   cout << __func__ << " Call Function " << func_msg->name() << endl;
-  if (!func_fuzzer->Fuzz(func_msg, &result)) {
+  if (!func_fuzzer->Fuzz(func_msg, &result, agent_port_)) {
     cout << __func__ << " function not found - todo handle more explicitly" << endl;
     return *(new string("error"));
   }
@@ -317,7 +318,7 @@ bool SpecificationBuilder::Process(
 
     void* result;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
-    func_fuzzer->Fuzz(func_msg, &result);
+    func_fuzzer->Fuzz(func_msg, &result, agent_port_);
     if (func_msg->return_type().aggregate_type().size() > 0) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.

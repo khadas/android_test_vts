@@ -51,6 +51,12 @@ class CodeGenBase {
       std::stringstream& h_ss,
       const string& function_prototype) = 0;
 
+  // Generates C/C++ code for callback functions.
+  virtual void GenerateCppBodyCallbackFunction(
+      std::stringstream& cpp_ss,
+      const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
   // Generates code for the bodies of the C/C++ global functions.
   virtual void GenerateCppBodyGlobalFunctions(
       std::stringstream& cpp_ss,

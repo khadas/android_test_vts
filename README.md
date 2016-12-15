@@ -7,7 +7,7 @@ enhance the robustness, reliability, and compatibility of:
   * the Android system (e.g., HALs and libraries) and
   * low-level system software (e.g., kernel, module, and firmware).
 
-VTS has manily two types of test suites:
+VTS has mainly two types of test suites:
   * automated (e.g., fuzzing) and
   * structural (e.g., gTest) testing.
 

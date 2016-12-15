@@ -29,11 +29,11 @@ class SampleCameraTest(base_test.BaseTestClass):
         self.hal_mirror = mirror.Mirror(["/data/local/tmp/32/hal"])
         self.hal_mirror.InitHal("camera", 2.1, bits=32)
 
-    def testCameraOpenFirst(self):
+    def TestCameraOpenFirst(self):
         """A simple testcase which just calls an open function."""
         self.hal_mirror.camera.common.methods.open()  # note args are skipped
 
-    def testCameraInit(self):
+    def TestCameraInit(self):
         """A simple testcase which just calls an init function."""
         self.hal_mirror.camera.init()  # expect an exception? (can be undefined)
 
@@ -47,8 +47,12 @@ class SampleCameraTest(base_test.BaseTestClass):
           logging.info(self.hal_mirror.camera.get_camera_info(index, arg))
         # uncomment when undefined function is handled gracefully.
         # self.hal_mirror.camera.init()
-        self.hal_mirror.camera.camera_module_callbacks_t()
-        self.hal_mirror.camera.set_callbacks()
+        def camera_device_status_change():
+          logging.info("camera_device_status_change")
+
+        def torch_mode_status_change():
+          logging.info("torch_mode_status_change")
+
         self.hal_mirror.camera.common.methods.open()  # note args are skipped
 
 
