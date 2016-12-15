@@ -19,11 +19,13 @@
         <option name="cleanup" value="true" />
         <option name="push" value="libprotobuf-cpp-full.so->/data/local/tmp/32/libprotobuf-cpp-full.so" />
         <option name="push" value="libprotobuf-cpp-full64.so->/data/local/tmp/64/libprotobuf-cpp-full.so" />
-        <option name="push" value="DATA/nativetest/simpleperf_cpu_hotplug_test/simpleperf_cpu_hotplug_test->/data/local/tmp/32/simpleperf_cpu_hotplug_test" />
-        <option name="push" value="DATA/nativetest64/simpleperf_cpu_hotplug_test/simpleperf_cpu_hotplug_test->/data/local/tmp/64/simpleperf_cpu_hotplug_test" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer"></target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/kernel/cpu_profiling/CpuProfilingTest" />
+        <option name="gtest-binary-paths" value="
+            _32bit:DATA/nativetest/simpleperf_cpu_hotplug_test/simpleperf_cpu_hotplug_test,
+            _64bit:DATA/nativetest64/simpleperf_cpu_hotplug_test/simpleperf_cpu_hotplug_test" />
+        <option name="exclude-filter" value="cpu_offline.offline_while_ioctl_enable" />
     </test>
 </configuration>

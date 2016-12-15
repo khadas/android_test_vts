@@ -385,8 +385,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
-        jsonObject.put(GTEST_BINARY_PATHS, new JSONArray(mGtestBinaryPaths));
-        CLog.i("Added %s to the Json object", GTEST_BINARY_PATHS);
+        if (!mGtestBinaryPaths.isEmpty()) {
+            jsonObject.put(GTEST_BINARY_PATHS, new JSONArray(mGtestBinaryPaths));
+            CLog.i("Added %s to the Json object", GTEST_BINARY_PATHS);
+        }
     }
 
     /**
