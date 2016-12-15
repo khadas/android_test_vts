@@ -136,6 +136,11 @@
       <artifactId>slf4j-api</artifactId>
       <version>${slf4jVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.7</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -183,6 +188,15 @@
         <version>${gcloud.plugin.version}</version>
         <configuration>
           <gcloud_directory>${gcloud.directory}</gcloud_directory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <includePackageNames>com.google.gson</includePackageNames>
+          <excludePackageNames>com.google.gson.internal:com.google.gson.internal.bind</excludePackageNames>
         </configuration>
       </plugin>
 

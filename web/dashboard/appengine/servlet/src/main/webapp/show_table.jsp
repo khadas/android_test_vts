@@ -3,26 +3,17 @@
 
 <html>
 <head>
-      <title>VTS Dashboard</title>
+      <title>VTS Table</title>
 </head>
 <body>
-      <h1>Table : ${table_name}</h1>
-      <h2>Raw Data (Unit : milliseconds) </h2>
+      <h1>Table : ${tableName}</h1>
       <!-- Error in case of profiling data is missing -->
       <h3>${error}</h3>
 
-      <c:forEach items="${map}" var="entry">
-          Test Case Name = ${entry.key} <br>
-          Time Taken = ${entry.value} <br> <br>
+      <h3>List of Test Cases</h3>
+      <c:forEach items="${profilingPointNameArray}" var="profilingPoint">
+            <a href="${pageContext.request.contextPath}/show_graph?profilingPoint=${profilingPoint}">${profilingPoint}</a>
+          <br>
       </c:forEach>
-
-      <c:forEach items="${resultMap}" var="entry">
-          <h3>Test Case Name: ${entry.key}</h3> <br>
-
-            <c:forEach items="${entry.value}" var="item">
-                ${item}<br> <br>
-            </c:forEach>
-      </c:forEach>
-
 </body>
 </html>
