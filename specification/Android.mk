@@ -31,7 +31,7 @@ vtslib_interfacespec_srcfiles := \
   lib_bionic/libcV1.vts \
   lib_bionic/libcutilsV1.vts \
 
-VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
+VTS_ENABLE_TREBLE := false
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 vtslib_interfacespec_srcfiles += \
