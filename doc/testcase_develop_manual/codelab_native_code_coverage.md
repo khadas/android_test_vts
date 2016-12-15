@@ -88,7 +88,7 @@ Then the target config file would look like:
     "log_path": "/tmp/logs",
     "test_paths": ["./"],
     "use_gae_db": true,
-    "coverage_src_files": ["lights.bullhead-vts/lights.c"]]
+    "coverage_src_files": ["lights.vts/lights.c"]]
 }
 ```
 

@@ -39,8 +39,8 @@
         <option name="push" value="DATA/bin/vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
         <option name="push" value="DATA/bin/vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
 
-        <option name="push" value="DATA/lib/hw/lights.bullhead-vts.so->/data/local/tmp/32/hw/lights.bullhead-vts.so" />
-        <option name="push" value="DATA/lib64/hw/lights.bullhead-vts.so->/data/local/tmp/64/hw/lights.bullhead-vts.so" />
+        <option name="push" value="DATA/lib/hw/lights.vts.so->/data/local/tmp/32/hw/lights.vts.so" />
+        <option name="push" value="DATA/lib64/hw/lights.vts.so->/data/local/tmp/64/hw/lights.vts.so" />
         <option name="push" value="spec/test/vts/specification/hal_conventional/LightHalV1.vts->/data/local/tmp/spec/LightHalV1.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
