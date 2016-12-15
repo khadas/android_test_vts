@@ -206,10 +206,6 @@ message ScalarDataValueMessage {
   optional uint32 char_pointer = 212;
   optional uint32 uchar_pointer = 213;
   optional uint32 pointer_pointer = 251;
-
-  // for scalar attributes in a union data structure,
-  // to specify the number of used bits.
-  optional uint32 bits = 1001;
 }
 
 
@@ -263,9 +259,6 @@ message VariableSpecificationMessage {
   // not yet supported:
   //     "template", "typedef", "handle", "binder", "parcelable".
   optional VariableType type = 2;
-
-  // the number of used bits (only for variables of a TYPE_UNION variable).
-  optional int32 used_bits = 11;
 
   // the actual value(s) for an scalar data type.
   // repeated values for a vector.
