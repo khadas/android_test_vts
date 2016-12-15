@@ -39,6 +39,8 @@
         <option name="push" value="vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
 
         <option name="push" value="vts_test_binary_crash_app->/data/local/tmp/64/vts_test_binary_crash_app" />
+        <option name="push" value="64/ltp/testcases/bin/connect01->/data/local/tmp/64/connect01" />
+        <option name="push" value="32/ltp/testcases/bin/connect01->/data/local/tmp/32/connect01" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
