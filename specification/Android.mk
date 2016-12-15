@@ -30,7 +30,7 @@ vtslib_interfacespec_srcfiles := \
   lib_bionic/libmV1.vts \
   lib_bionic/libcutilsV1.vts \
 
-VTS_ENABLE_TREBLE:=
+VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 vtslib_interfacespec_srcfiles += \
@@ -77,15 +77,10 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   ${vtslib_interfacespec_srcfiles} \
 
-ifeq ($(VTS_ENABLE_TREBLE),true)
-LOCAL_SRC_FILES += \
-  ../../../external/libnfc-nci/hidl/INfc.hal \
-  ../../../external/libnfc-nci/hidl/INfcClientCallback.hal \
-
-endif
-
 LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
+  android.hardware.nfc@1.0 \
+  system/core/base/include \
   system/libhwbinder/include \
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
@@ -97,9 +92,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 LOCAL_SHARED_LIBRARIES += \
-  libhwbinder \
-  libbase \
-  libutils \
+  android.hardware.nfc@1.0 \
 
 endif
 
