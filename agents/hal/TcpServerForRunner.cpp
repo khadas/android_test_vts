@@ -51,8 +51,8 @@ const static int kTcpPort = 5001;
 
 // Starts to run a TCP server (foreground).
 int StartTcpServerForRunner(
-    const char* fuzzer_path32, const char* fuzzer_path64,
-    const char* spec_dir_path) {
+    const char* spec_dir_path, const char* fuzzer_path32, const char* fuzzer_path64,
+    const char* shell_path32, const char* shell_path64) {
   int sockfd;
   socklen_t clilen;
   struct sockaddr_in serv_addr;
@@ -93,10 +93,11 @@ int StartTcpServerForRunner(
     if (pid == 0) {  // child
       close(sockfd);
       cout << "[agent] process for a runner - pid = " << getpid() << endl;
-      AgentRequestHandler handler;
+      AgentRequestHandler handler(
+          spec_dir_path, fuzzer_path32, fuzzer_path64,
+          shell_path32, shell_path64);
       handler.SetSockfd(newsockfd);
-      while (handler.ProcessOneCommand(fuzzer_path32, fuzzer_path64,
-                                       spec_dir_path));
+      while (handler.ProcessOneCommand());
       exit(-1);
     } else if (pid < 0) {
       cerr << "can't fork a child process to handle a session." << endl;

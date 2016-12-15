@@ -47,6 +47,23 @@ enum ResponseCode {
 }
 
 
+// VTS driver type.
+enum VtsDriverType {
+  UKNOWN_VTS_DRIVER_TYPE = 0;
+  // for various HALs.
+  VTS_DRIVER_TYPE_HAL_CONVENTIONAL = 1;
+  VTS_DRIVER_TYPE_HAL_LEGACY = 2;
+  VTS_DRIVER_TYPE_HAL_HIDL = 3;
+  VTS_DRIVER_TYPE_HAL_HIDL_WRAPPED_CONVENTIONAL = 4;
+
+  // for shared libraries.
+  VTS_DRIVER_TYPE_LIB_SHARED = 11;
+
+  // for shell.
+  VTS_DRIVER_TYPE_SHELL = 21;
+}
+
+
 // To specify a command.
 message AndroidSystemControlCommandMessage {
   // Command type.
@@ -63,9 +80,12 @@ message AndroidSystemControlCommandMessage {
   optional bytes service_name = 2001;
 
   // for LAUNCH_DRIVER_SERVICE
-  // The name of a target.
-  optional bytes file_path = 3001;
+  optional VtsDriverType driver_type = 3001;
 
+  // The name of a target.
+  optional bytes file_path = 3002;
+
+  // Whether a target driver binary is 64-bits or 32-bits.
   optional int32 bits = 3003;
 
   // target class
