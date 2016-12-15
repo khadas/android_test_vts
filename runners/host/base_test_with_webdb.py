@@ -252,13 +252,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddProfilingDataLabeledVector(self, name, labeled_vector):
+    def AddProfilingDataLabeledVector(self, name, labels, values):
         """Adds the profiling data in order to upload to the web DB.
 
         Args:
             name: string, profiling point name.
-            labeled_vector: a dict where key is label and value is measured
-                            number.
+            labels: a list of labels.
+            values: a list of values.
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
@@ -271,9 +271,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name] = self._report_msg.profiling.add()
         self._profiling[name].name = name
         self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
-        for label in labeled_vector:
+        for label, value in zip(labels, values):
             self._profiling[name].label.append(label)
-            self._profiling[name].value.append(labeled_vector[label])
+            self._profiling[name].value.append(value)
 
     def SetCoverageData(self, raw_coverage_data):
         """Sets the given coverage data to the class-level list attribute.
