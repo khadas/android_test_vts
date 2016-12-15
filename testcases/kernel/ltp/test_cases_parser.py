@@ -142,4 +142,6 @@ class TestCasesParser(object):
                                  "staging" % testcase.fullname)
                     continue
 
+                logging.info("[Parser] Adding test case %s." %
+                             testcase.fullname)
                 yield testcase

@@ -49,7 +49,8 @@
         <option name="dep-module" value="protobuf" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-timeout" value="3000000" />
+        <option name="test-timeout" value="5400000" />
+        <option name="runtime-hint" value="3600000" />
         <option name="test-case-path" value="vts/testcases/kernel/ltp/KernelLtpTest" />
         <option name="test-config-path" value="vts-config/testcases/kernel/ltp/stable/KernelLtpTest.config" />
     </test>
