@@ -68,8 +68,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = self.__class__.__name__
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
-            self._profile_msg = None
-            self._profiling = {}
+
+        self._profile_msg = None
+        self._profiling = {}
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
