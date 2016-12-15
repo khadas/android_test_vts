@@ -46,6 +46,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   cpp_ss << "#include <iostream>" << endl;
   cpp_ss << "#include \"vts_datatype.h\"" << endl;
+  cpp_ss << "#include \"vts_measurement.h\"" << endl;
   for (auto const& header : message.header()) {
     cpp_ss << "#include " << header << endl;
   }
@@ -138,6 +139,18 @@ void CodeGenBase::GenerateOpenNameSpaces(std::stringstream& ss) {
 void CodeGenBase::GenerateCloseNameSpaces(std::stringstream& ss) {
   ss << "}  // namespace vts" << endl;
   ss << "}  // namespace android" << endl;
+}
+
+
+void CodeGenBase::GenerateCodeToStartMeasurement(std::stringstream& ss) {
+  ss << "VtsMeasurement vts_measurement;" << endl;
+  ss << "vts_measurement.Start();" << endl;
+}
+
+
+void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
+  ss << "vector<float>* measured = vts_measurement.Stop();" << endl;
+  ss << "cout << \"time \" << (*measured)[0] << endl;" << endl;
 }
 
 }  // namespace vts

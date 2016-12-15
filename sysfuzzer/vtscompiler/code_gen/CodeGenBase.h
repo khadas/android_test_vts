@@ -63,6 +63,12 @@ class CodeGenBase {
   // Generates code that closes the default namespaces.
   void GenerateCloseNameSpaces(std::stringstream& ss);
 
+  // Generates code that starts the measurement.
+  void GenerateCodeToStartMeasurement(std::stringstream& ss);
+
+  // Generates code that stops the measurement.
+  void GenerateCodeToStopMeasurement(std::stringstream& ss);
+
  private:
   const char* input_vts_file_path_;
   const char* vts_name_;
