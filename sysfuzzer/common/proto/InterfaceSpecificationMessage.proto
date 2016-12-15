@@ -51,8 +51,10 @@ message CallFlowSpecificationMessage {
   optional bool entry = 1 [default = false];
   // true if for an exit event from a function.
   optional bool exit = 2 [default = false];
-  // a list of functions that can be called after this event.
-  optional bytes next = 11;
+  // a list of functions that can be called right after this event.
+  repeated bytes next = 11;
+  // a list of functions that can be called right before this event.
+  repeated bytes prev = 12;
 }
 
 
