@@ -49,18 +49,19 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         '''Prepare class, push binaries, set permission, create test cases.'''
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.IKEY_BINARY_PATHS,
+            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
         ]
         self.getUserParams(req_param_names=required_params)
 
-        self.binary_paths = map(lambda s: '{}'.format(s), self.binary_paths)
-        self.binary_paths = list_utils.ExpandItemDelimiters(
-            self.binary_paths, const.LIST_ITEM_DELIMITER, strip=True)
+        self.binary_test_sources = map(lambda s: '{}'.format(s),
+                                       self.binary_test_sources)
+        self.binary_test_sources = list_utils.ExpandItemDelimiters(
+            self.binary_test_sources, const.LIST_ITEM_DELIMITER, strip=True)
 
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                      self.data_file_path)
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_PATHS,
-                     self.binary_paths)
+        logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
+                     self.binary_test_sources)
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
@@ -81,7 +82,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
-        for b in self.binary_paths:
+        for b in self.binary_test_sources:
             tag = ''
             path = b
             if self.TAG_PATH_DELIMITER in b:
