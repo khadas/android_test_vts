@@ -15,16 +15,50 @@
 # limitations under the License.
 #
 
-import os
-import logging
 import copy
+import logging
+import os
 
+from vts.runners.host import asserts
 from vts.runners.host import const
-from vts.testcases.kernel.ltp import KernelLtpTestCaseRequirements
 from vts.testcases.kernel.ltp.shell_environment import ShellEnvironment
 from vts.testcases.kernel.ltp.shell_environment import CheckDefinition
 
 LTPTMP = "/data/local/tmp/ltp/temp"
+
+REQUIREMENTS_TO_TESTCASE = {"loop_device_support": ["syscalls-mount01",
+                                                    "syscalls-fchmod06",
+                                                    "syscalls-ftruncate04",
+                                                    "syscalls-ftruncate04_64",
+                                                    "syscalls-inotify03",
+                                                    "syscalls-link08",
+                                                    "syscalls-linkat02",
+                                                    "syscalls-mkdir03",
+                                                    "syscalls-mkdirat02",
+                                                    "syscalls-mknod07",
+                                                    "syscalls-mknodat02",
+                                                    "syscalls-mmap16",
+                                                    "syscalls-mount01",
+                                                    "syscalls-mount02",
+                                                    "syscalls-mount03",
+                                                    "syscalls-mount04",
+                                                    "syscalls-mount06",
+                                                    "syscalls-rename11",
+                                                    "syscalls-renameat01",
+                                                    "syscalls-rmdir02",
+                                                    "syscalls-umount01",
+                                                    "syscalls-umount02",
+                                                    "syscalls-umount03",
+                                                    "syscalls-umount2_01",
+                                                    "syscalls-umount2_02",
+                                                    "syscalls-umount2_03",
+                                                    "syscalls-utime06",
+                                                    "syscalls-utimes01",
+                                                    "syscalls-mkfs01", ]}
+
+REQUIREMENT_FOR_ALL = ["ltptmp_dir"]
+
+REQUIREMENT_TO_TESTSUITE = {}
 
 
 class RequirementState(object):
@@ -136,7 +170,7 @@ class TestCase(object):
                              for p in self._args])
 
     def __str__(self):
-        return "{}-{}".format(self.testsuite, self.testname)
+        return "%s-%s" % (self.testsuite, self.testname)
 
 
 class TestCasesParser(object):
@@ -169,9 +203,9 @@ class TestCasesParser(object):
                 args = []
                 if arg:
                     args.extend(arg.split(','))
-                yield TestCase(testsuite, testname,
-                               os.path.join(ltp_dir, 'testcases/bin', testbinary),
-                               args)
+                yield TestCase(
+                    testsuite, testname,
+                    os.path.join(ltp_dir, 'testcases/bin', testbinary), args)
 
 
 class EnvironmentRequirementChecker(object):
@@ -199,11 +233,14 @@ class EnvironmentRequirementChecker(object):
         self._result_cache = {}
 
         self._shell_env = ShellEnvironment(self.shell)
+        loop_device_support = CheckDefinition(self._shell_env.LoopDeviceSupport)
+        ltptmp_dir = CheckDefinition(self._shell_env.DirsAllExistAndPermission,
+                                     True, True, [LTPTMP, "%s/tmp" % LTPTMP],
+                                     [775, 775])
         self._REQUIREMENT_DEFINITIONS = {
-            "loop_device_support": CheckDefinition(self._shell_env.LoopDeviceSupport),
-            "ltptmp_dir": CheckDefinition(self._shell_env.DirsAllExistAndPermission,
-                                         True, True, [LTPTMP, "%s/tmp" % LTPTMP], [775, 775])
-            }
+            "loop_device_support": loop_device_support,
+            "ltptmp_dir": ltptmp_dir
+        }
 
     @property
     def shell(self):
@@ -225,46 +262,43 @@ class EnvironmentRequirementChecker(object):
         Args:
             test_case: TestCase object, the test case to query
         """
-        result = copy.copy(KernelLtpTestCaseRequirements.REQUIREMENT_FOR_ALL)
+        result = copy.copy(REQUIREMENT_FOR_ALL)
 
-        for rule in KernelLtpTestCaseRequirements.REQUIREMENTS_TO_TESTCASE:
-            if str(test_case) in KernelLtpTestCaseRequirements.REQUIREMENTS_TO_TESTCASE[rule]:
+        for rule in REQUIREMENTS_TO_TESTCASE:
+            if str(test_case) in REQUIREMENTS_TO_TESTCASE[rule]:
                 result.append(rule)
 
-        for rule in KernelLtpTestCaseRequirements.REQUIREMENT_TO_TESTSUITE:
-            if test_case.testsuite in KernelLtpTestCaseRequirements.REQUIREMENT_TO_TESTSUITE[rule]:
+        for rule in REQUIREMENT_TO_TESTSUITE:
+            if test_case.testsuite in REQUIREMENT_TO_TESTSUITE[rule]:
                 result.append(rule)
 
         return list(set(result))
 
     def Check(self, test_case):
-        """Check whether a given test case's requirement has been satisfied
+        """Check whether a given test case's requirement has been satisfied.
+        Skip the test if not.
 
         Args:
             test_case: TestCase object, a given test case to check
-
-        Return:
-            True if all passed, False otherwise
         """
-        if test_case.requirement_state is RequirementState.UNSATISFIED:
-            return False
-
-        if self.IsTestBinaryExist(test_case) is False:
-            return False
+        asserts.skipIf(
+            test_case.requirement_state == RequirementState.UNSATISFIED,
+            test_case.note)
+        asserts.skipIf(not self.IsTestBinaryExist(test_case),
+                       test_case.note)
 
         for requirement_name in self.GetRequirements(test_case):
             if requirement_name not in self._result_cache:
-                self._result_cache[requirement_name] = \
-                    self._REQUIREMENT_DEFINITIONS[requirement_name].Execute()
+                req_def = self._REQUIREMENT_DEFINITIONS[requirement_name]
+                self._result_cache[requirement_name] = req_def.Execute()
             result, note = self._result_cache[requirement_name]
-            logging.info("result for {}'s requirement {} is {}".format(test_case, requirement_name, result))
+            logging.info("Result for %s's requirement %s is %s", test_case,
+                         requirement_name, result)
             if result is False:
                 test_case.requirement_state = RequirementState.UNSATISFIED
                 test_case.note = note
-                return False
-
+                asserts.skip(note)
         test_case.requirement_state = RequirementState.SATISFIED
-        return True
 
     def RunCheckTestcasePathExistsAll(self, test_cases):
         """Run a batch job to check the path existance of all given test cases
@@ -272,9 +306,10 @@ class EnvironmentRequirementChecker(object):
         Args:
             test_case: list of TestCase objects.
         """
-        commands = ["ls {}".format(test_case.path) for test_case in test_cases]
+        commands = ["ls %s" % test_case.path for test_case in test_cases]
         command_results = self._shell.Execute(commands)
-        exists_results = [exit_code is 0 for exit_code in command_results[const.EXIT_CODE]]
+        exists_results = [exit_code is 0
+                          for exit_code in command_results[const.EXIT_CODE]]
         for testcase_result in zip(test_cases, exists_results):
             self.SetCheckResultPathExists(*testcase_result)
 
@@ -310,10 +345,11 @@ class EnvironmentRequirementChecker(object):
         Return:
             True if exists, False otherwise
         """
-        if test_case.requirement_state is not RequirementState.UNCHECKED:
-            return test_case.requirement_state is not RequirementState.UNSATISFIED
+        if test_case.requirement_state != RequirementState.UNCHECKED:
+            return test_case.requirement_state != RequirementState.UNSATISFIED
 
-        command_results = self._shell.Execute("ls {}".format(test_case.path))
-        exists = command_results[const.STDOUT][0].find(": No such file or directory") > 0
+        command_results = self._shell.Execute("ls %s" % test_case.path)
+        exists = command_results[const.STDOUT][0].find(
+            ": No such file or directory") > 0
         self.SetCheckResultPathExists(test_case, exists)
         return exists
