@@ -35,6 +35,10 @@ class FuzzerBase {
   // Returns true iff successful.
   bool LoadTargetComponent(const char* target_dll_path);
 
+  // Gets the HIDL service.
+  // Returns true iff successful.
+  virtual bool GetService();
+
   // Open Conventional Hal
   int OpenConventionalHal(const char* module_name = NULL);
 
