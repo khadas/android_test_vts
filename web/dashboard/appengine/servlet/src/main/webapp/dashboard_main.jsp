@@ -5,56 +5,47 @@
 
 
 <html>
+  <link rel="icon" href="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png" sizes="32x32">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700">
+  <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/dashboard_main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
   <head>
     <title>VTS Dashboard</title>
-    <style type="text/css">
-      table {
-      color: #333;
-      font-family: Helvetica, Arial, sans-serif;
-      width: 640px;
-      border-collapse:
-      collapse; border-spacing: 0;
-      }
 
-      td, th {
-      border: 1px solid transparent; /* No more visible border */
-      height: 30px;
-      transition: all 0.3s;  /* Simple transition for hover effect */
-      }
-
-      th {
-      background: #551A8B;  /* Darken header a bit */
-      font-weight: bold;
-      color: white;
-      }
-
-      td {
-      background: #912CEE;
-      text-align: center;
-      }
-
-      /* Cells in even rows (2,4,6...) are one color */
-      tr:nth-child(even) td { background: #EED2EE; }
-      /* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
-      tr:nth-child(odd) td { background: #EAADEA; }
-      tr td:hover { background: #DA70D6; color: #FFF; } /* Hover cell effect! */
-    </style>
+    <nav id="navbar">
+      <div class="nav-wrapper">
+        <div class="col s12">
+          <a href="#!" class="breadcrumb">VTS Dashboard Home</a>
+        </div>
+      </div>
+    </nav>
   </head>
 
   <body>
-    <div style="margin-left:200px">
-    <h3>VTS Dashboard (Internal)</h3>
-    <table id='dashboard_main_table'>
-        <tr>
-           <th>Test Name</th>
-        </tr>
+    <div class="container">
+      <div class="row" id="options">
         <c:forEach items="${tableNames}" var="table">
-                <tr>
-                    <td><a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}">${table}</a></td>
-                </tr>
+          <a href="${pageContext.request.contextPath}/show_table?tableName=result_${table}">
+            <div class="col s12 card hoverable option valign-wrapper waves-effect">
+              <span class="entry valign">
+                ${table}
+              </span>
+            </div>
+          </a>
         </c:forEach>
-     </table>
+      </div>
     </div>
+    <footer class="page-footer">
+      <div class="footer-copyright">
+        <div class="container">
+          © 2016 - The Android Open Source Project
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
 <%-- //[END all]--%>
