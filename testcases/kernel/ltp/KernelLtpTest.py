@@ -120,28 +120,20 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def PreTestSetup(self):
         """Setups that needs to be done before any tests."""
-        find_sh_command = "find %s -name '*.sh' -print0" % ltp_configs.LTPBINPATH
-
-        # Required for executing any shell scripts in Android
-        binsh_sed_pattern = self._shell_env.CreateSedPattern(
-            '#!/bin/sh', '#!/system/bin/sh')
-        # Required for using dd command in Android
-        dd_sed_pattern = self._shell_env.CreateSedPattern('bs=1M', 'bs=1m')
-        # Required for creating pid files since /var is not available in Android
-        pid_sed_pattern = self._shell_env.CreateSedPattern('/var/run',
-                                                           ltp_configs.TMP)
-
-        patterns = (binsh_sed_pattern, dd_sed_pattern, pid_sed_pattern)
-
-        replace_commands = ["{find} | xargs -0 sed -i \'{pattern}\'".format(
-            find=find_sh_command, pattern=pattern) for pattern in patterns]
-
-        results = self.shell.Execute(replace_commands)
+        replacements = {'#!/bin/sh': '#!/system/bin/sh',
+                        '#! /bin/sh': '#!/system/bin/sh',
+                        '#!/bin/bash': '#!/system/bin/sh',
+                        '#! /bin/bash': '#!/system/bin/sh',
+                        'bs=1M': 'bs=1m',
+                        '/var/run': ltp_configs.TMP}
+        sed_command = self._shell_env.CreateSedCommand(ltp_configs.LTPDIR,
+                                                       replacements)
+        results = self.shell.Execute(sed_command)
         asserts.assertFalse(
             any(results[const.EXIT_CODE]),
             "Error: pre-test setup failed. "
             "Commands: {commands}. Results: {results}".format(
-                commands=replace_commands, results=results))
+                commands=sed_command, results=results))
 
         self._report_thread_lock = threading.Lock()
 
