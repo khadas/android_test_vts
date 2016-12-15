@@ -17,35 +17,48 @@
 from vts.runners.host import signals
 
 
-class BaseTestError(Exception):
+class VtsError(Exception):
+    """Raised for general VTS exceptions."""
+
+
+class BaseTestError(VtsError):
     """Raised for exceptions that occured in BaseTestClass."""
 
 
-class USERError(Exception):
+class USERError(VtsError):
     """Raised when a problem is caused by user mistake, e.g. wrong command,
     misformatted config, test info, wrong test paths etc.
     """
 
 
-class ComponentLoadingError(Exception):
+class ComponentLoadingError(VtsError):
     """Raised if it is unable to load a target component on a target device."""
 
 
-class TcpServerCreationError(Exception):
+class TcpServerCreationError(VtsError):
     """Raised when it's unable to start a TCP server."""
 
 
-class TcpServerShutdownError(Exception):
+class TcpServerShutdownError(VtsError):
     """Raised when it's unable to shutdown a TCP server."""
 
 
-class TcpServerConnectionError(Exception):
+class TcpServerConnectionError(VtsError):
     """Raised when it's unable to connect to a TCP Server."""
 
 
-class ConnectionRefusedError(Exception):
+class ConnectionRefusedError(VtsError):
     """Failure due to wrong port number.
 
       Raised when an attempt to connect to a TCP server fails due to incorrect
       port number, such as 21.
     """
+
+
+class VtsTcpClientCreationError(VtsError):
+    """Raised when TcpClient creation failed."""
+
+
+class VtsTcpCommunicationError(VtsError):
+    """Raised when TcpClient communication failed."""
+

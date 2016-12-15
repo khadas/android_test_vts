@@ -119,7 +119,7 @@ void FuzzerCallbackBase::RpcCallToAgent(const char* id, int agent_port) {
     return;
   }
 
-  sprintf(buffer, "callback %s\n", id);
+  sprintf(buffer, "%s\n", id);
   int n;
   n = write(sockfd, buffer, strlen(buffer));
   if (n < 0) {

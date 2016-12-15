@@ -25,7 +25,7 @@ from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 
 _functions = dict()  # Dictionary to hold function pointers
 
-class TCPRequestHandler(SocketServer.BaseRequestHandler):
+class TCPRequestHandler(SocketServer.StreamRequestHandler):
     """The request handler class for our server."""
 
     def handle(self):
@@ -38,21 +38,29 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
 
         """
         # self.request is the TCP socket connected to the client
-        received_data = self.request.recv(1024)
+        header = self.rfile.readline()
+        try:
+            len = int(header.strip("\n"))
+        except ValueError as e:
+            logging.exception(e)
+            return
 
-        logging.info('client address: %s', self.client_address[0])
-        logging.info('received_data: %s', received_data)
-        logging.info('Current Thread: %s', threading.current_thread())
+        received_data = self.rfile.read(len)
 
         request_message = SysMsg_pb2.AndroidSystemCallbackRequestMessage()
         request_message.ParseFromString(received_data)
         response_message = SysMsg_pb2.AndroidSystemCallbackResponseMessage()
+
+        logging.info('client address: %s', self.client_address[0])
+        logging.info('received_data ID: %s', request_message.id)
+        logging.info('Current Thread: %s', threading.current_thread())
 
         if request_message.id in _functions:
             _functions[request_message.id]()  # call the function pointer
             response_message.response_code = SysMsg_pb2.SUCCESS
         else:
             response_message.response_code = SysMsg_pb2.FAIL
+            logging.info("no registered callback handler found")
 
         # send the response back to client
         message = response_message.SerializeToString()
@@ -82,7 +90,7 @@ class VtsTcpServer(object):
 
         Args:
             func_id: Refers to the func_id of function pointers that is maintained in
-                the dictionary.
+                     the dictionary.
             callback_func:  Refers to the callback_func that we need to
                             register.
 
@@ -121,6 +129,7 @@ class VtsTcpServer(object):
             port: The port at which connection will be made. Default value
                   is zero, in which case a free port will be chosen
                   automatically.
+
         Returns:
             IP Address, port number
 
@@ -143,7 +152,6 @@ class VtsTcpServer(object):
             logging.info('TcpServer %s started (%s:%s)',
                          server_thread.name, self._IP_address, self._port_used)
             return self._IP_address, self._port_used
-
         except (RuntimeError, IOError, socket_error) as e:
             logging.exception(e)
             raise TcpServerCreationError('TcpServerCreationError occurred.')

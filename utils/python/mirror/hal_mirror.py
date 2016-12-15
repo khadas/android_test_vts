@@ -37,6 +37,8 @@ COMPONENT_TYPE_DICT = {"audio": 1,
                        "light": 4,
                        "wifi": 5}
 
+VTS_CALLBACK_SERVER_TARGET_SIDE_PORT = 5010
+
 _DEFAULT_TARGET_BASE_PATHS = ["/system/lib64/hw"]
 
 
@@ -49,15 +51,19 @@ class HalMirror(object):
     One can use this class to create and destroy a HAL mirror object.
 
     Attributes:
+        _host_command_port: int, the host-side port for command-response
+                            sessions.
+        _host_callback_port: int, the host-side port for callback sessions.
         _hal_level_mirrors: dict, key is HAL handler name, value is HAL
                             mirror object.
         _host_port: int, the port number on the host side to use.
         _callback_server: the instance of a callback server.
         _callback_port: int, the port number of a host-side callback server.
     """
-    def __init__(self, host_port):
+    def __init__(self, host_command_port, host_callback_port):
         self._hal_level_mirrors = {}
-        self._host_port = host_port
+        self._host_command_port = host_command_port
+        self._host_callback_port = host_callback_port
         self._callback_server = None
         self._callback_port = 0
 
@@ -99,8 +105,7 @@ class HalMirror(object):
                       target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                       handler_name=None,
                       bits=64):
-        """Initiates a handler for a particular legacy HAL that does not use
-        HIDL.
+        """Initiates a handler for a particular legacy HAL.
 
         This will initiate a stub service for a HAL on the target side, create
         the top level mirror object for a HAL, and register it in the manager.
@@ -153,9 +158,13 @@ class HalMirror(object):
             raise error.ComponentLoadingError("Invalid value for bits: %s" % bits)
         client = vts_tcp_client.VtsTcpClient()
         callback_server = vts_tcp_server.VtsTcpServer()
-        _, self._callback_port = callback_server.Start()
-        client.Connect(port=self._host_port,
-                       callback_port=self._callback_port)
+        _, port = callback_server.Start(self._host_callback_port)
+        if port != self._host_callback_port:
+            raise errors.ComponentLoadingError(
+                "Couldn't start a callback TcpServer at port %s" %
+                    self._host_callback_port)
+        client.Connect(command_port=self._host_command_port,
+                       callback_port=self._host_callback_port)
         if not handler_name:
             handler_name = target_type
         service_name = "vts_binder_%s" % handler_name
