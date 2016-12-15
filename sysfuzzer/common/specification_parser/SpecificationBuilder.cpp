@@ -325,12 +325,53 @@ const string& SpecificationBuilder::CallFunction(
   func_fuzzer->FunctionCallEnd(func_msg);
 
   if (if_spec_msg_ && if_spec_msg_->component_class() == HAL_HIDL) {
-    func_msg->mutable_return_type()->set_type(TYPE_STRING);
-    func_msg->mutable_return_type()->mutable_string_value()->set_message(
-        *(string*)result);
-    func_msg->mutable_return_type()->mutable_string_value()->set_length(
-        ((string*)result)->size());
-    free(result);
+    if (func_msg->return_type_hidl().size() == 1 &&
+        func_msg->return_type_hidl(0).type() == TYPE_SCALAR) {
+      auto& scalar_type = func_msg->return_type_hidl(0).scalar_type();
+      VariableSpecificationMessage* return_type =
+          func_msg->mutable_return_type_hidl(0);
+      if (scalar_type == "int64_t") {
+        return_type->mutable_scalar_value()->set_int64_t(*((int*)(&result)));
+      } else if (scalar_type == "uint64_t") {
+        return_type->mutable_scalar_value()->set_uint64_t(*((int*)(&result)));
+      } else if (scalar_type == "int32_t") {
+        return_type->mutable_scalar_value()->set_int32_t(*((int*)(&result)));
+      } else if (scalar_type == "uint32_t") {
+        return_type->mutable_scalar_value()->set_uint32_t(*((int*)(&result)));
+      } else if (scalar_type == "int16_t") {
+        return_type->mutable_scalar_value()->set_int16_t(*((int*)(&result)));
+      } else if (scalar_type == "uint16_t") {
+        return_type->mutable_scalar_value()->set_uint16_t(*((int*)(&result)));
+      } else if (scalar_type == "int8_t") {
+        return_type->mutable_scalar_value()->set_int8_t(*((int*)(&result)));
+      } else if (scalar_type == "uint8_t") {
+        return_type->mutable_scalar_value()->set_uint8_t(*((int*)(&result)));
+      } else if (scalar_type == "float_t") {
+        return_type->mutable_scalar_value()->set_float_t(*((int*)(&result)));
+      } else if (scalar_type == "double_t") {
+        return_type->mutable_scalar_value()->set_double_t(*((int*)(&result)));
+      } else if (scalar_type == "bool_t") {
+        return_type->mutable_scalar_value()->set_bool_t(*((int*)(&result)));
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported scalar type "
+             << scalar_type << endl;
+        return *(new string("unsupported scalar type"));
+      }
+      cout << "result " << endl;
+    } else if (func_msg->return_type_hidl().size() == 1 &&
+               func_msg->return_type_hidl(0).type() == TYPE_ENUM) {
+      VariableSpecificationMessage* return_type =
+          func_msg->mutable_return_type_hidl(0);
+      return_type->mutable_scalar_value()->set_int32_t(*((int*)(&result)));
+      cout << "result " << endl;
+    } else {
+      func_msg->mutable_return_type()->set_type(TYPE_STRING);
+      func_msg->mutable_return_type()->mutable_string_value()->set_message(
+          *(string*)result);
+      func_msg->mutable_return_type()->mutable_string_value()->set_length(
+          ((string*)result)->size());
+      free(result);
+    }
     string* output = new string();
     google::protobuf::TextFormat::PrintToString(*func_msg, output);
     return *output;

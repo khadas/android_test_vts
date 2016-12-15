@@ -48,7 +48,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     cpp_ss << "#include \""
            << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
            << "/types.vts.h\"" << endl;
-    cpp_ss << "#include <hwbinder/HidlSupport.h>" << endl;
+    cpp_ss << "#include <hidl/HidlSupport.h>" << endl;
   }
 
   cpp_ss << "#include <iostream>" << endl;
@@ -241,8 +241,8 @@ void CodeGenBase::GenerateAllHeader(
              << "/Bn" << message.component_name().substr(1) << ".h>" << endl;
       }
     }
-    h_ss << "#include <hwbinder/HidlSupport.h>" << endl;
-    h_ss << "#include <hwbinder/IServiceManager.h>" << endl;
+    h_ss << "#include <hidl/HidlSupport.h>" << endl;
+    h_ss << "#include <hidl/IServiceManager.h>" << endl;
   }
   h_ss << "\n\n" << endl;
   GenerateOpenNameSpaces(h_ss, message);
