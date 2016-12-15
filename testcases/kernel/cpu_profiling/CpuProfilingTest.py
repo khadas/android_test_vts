@@ -19,93 +19,31 @@ import logging
 import os
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
+from vts.testcases.template.gtest import gtest
 from vts.testcases.kernel.cpu_profiling import cpu_profiling_test_config as config
 
-class CpuProfilingTest(base_test_with_webdb.BaseTestWithWebDbClass):
-    """Runs cpu profiling test cases against Android OS kernel.
 
-    Attributes:
-        _dut: AndroidDevice, the device under test as config
-        _shell: ShellMirrorObject, shell mirror
-        _testcases: string list, list of testcases to run
-    """
-    _32BIT = "32"
-    _64BIT = "64"
+class CpuProfilingTest(gtest.Gtest):
+    """Runs cpu profiling test cases against Android OS kernel."""
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
-        required_params = [
-            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            "AndroidDevice",
-        ]
-        self.getUserParams(required_params)
-
+        super(CpuProfilingTest, self).setUpClass()
+        required_params = ["AndroidDevice"]
+        self.getUserParams(req_param_names=required_params)
         self.product_type = self.AndroidDevice[0]['product_type']
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            self.data_file_path)
 
-        self._dut = self.registerController(android_device)[0]
-        self._dut.shell.InvokeTerminal("one")
-        self._shell = self._dut.shell.one
-        self._testcases = [config.CPT_HOTPLUG_TESTSUITE + ':' + test \
-                           for test in config.CPT_HOTPLUG_BASIC_TESTS]
+    def generateAllGtests(self):
+        """Runs all gtests. Skip if device is excluded"""
+        asserts.skipIf(self.product_type in config.CPT_HOTPLUG_EXCLUDE_DEVICES,
+                       "Skip test on device {}.".format(self.product_type))
+        super(CpuProfilingTest, self).generateAllGtests()
 
-    def RunTestcase(self, testcase, test_dir):
-        """Runs the given testcase and asserts the result.
-
-        Args:
-            testcase: string, format testsuite/testname, specifies which
-                test case to run.
-        """
-        if self.product_type in config.CPT_HOTPLUG_EXCLUDE_DEVICES:
-          asserts.skip("Skip test on device {}.".format(self.product_type))
-
-        items = testcase.split(":", 1)
-        testsuite = items[0]
-
-        chmod_cmd = "chmod -R 755 %s" % os.path.join(test_dir, testsuite)
-        cd_cmd = "cd %s" % test_dir
-        test_cmd = "./%s --gtest_filter=%s" % (testsuite, items[1])
-
-        cmd = [
-            chmod_cmd,
-            "%s && %s" % (cd_cmd, test_cmd)
-        ]
-        logging.info("Executing: %s", cmd)
-
-        result = self._shell.Execute(cmd)
-        logging.info("EXIT_CODE: %s:", result[const.EXIT_CODE])
-
-        asserts.assertFalse(
-            any(result[const.EXIT_CODE]),
-            "%s failed." % testcase)
-
-    def TestNBits(self, n_bit):
-        """Runs all 32-bit or all 64-bit tests.
-
-        Args:
-            n_bit: _32BIT or 32 for 32-bit tests;
-                _64BIT or 64 for 64-bit tests;
-        """
-        self.runGeneratedTests(
-            test_func=self.RunTestcase,
-            settings=self._testcases,
-            args=("/data/local/tmp/%s/" % n_bit, ),
-            tag="%s_bit" % n_bit)
-
-    def generate32BitTests(self):
-        """Runs all 32-bit tests."""
-        self.TestNBits(self._32BIT)
-
-    def generate64BitTests(self):
-        """Runs all 64-bit tests."""
-        self.TestNBits(self._64BIT)
 
 if __name__ == "__main__":
     test_runner.main()

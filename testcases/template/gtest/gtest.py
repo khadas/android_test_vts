@@ -25,6 +25,7 @@ from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
+from vts.utils.python.common import list_utils
 
 from vts.testcases.template.gtest import gtest_test_case
 
@@ -39,15 +40,19 @@ class Gtest(base_test_with_webdb.BaseTestWithWebDbClass):
         _dut: AndroidDevice, the device under test as config
         shell: ShellMirrorObject, shell mirror
         test_cases: list of GtestTestCase objects, list of test cases to run
+        tags: all the tags that appeared in gtest binary list
     '''
 
     def setUpClass(self):
-        '''Test class setupCreates a remote shell instance, and copies data files.'''
+        '''Prepare class, push Gtest binary, and create test cases'''
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.IKEY_GTEST_BINARY_PATHS,
         ]
         self.getUserParams(req_param_names=required_params)
+
+        self.gtest_binary_paths = list_utils.ExpandItemDelimiters(
+            self.gtest_binary_paths, const.LIST_ITEM_DELIMITER, strip=True)
 
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                      self.data_file_path)
@@ -59,17 +64,46 @@ class Gtest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.shell = self._dut.shell.one
         self.testcases = []
 
+        self.tags = set()
         # Push gtest binaries to device and create test cases
         for b in self.gtest_binary_paths:
             tag = ''
             path = b
-            if ':' in b:
+            if TAG_PATH_SEPARATOR in b:
                 tag, path = b.split(TAG_PATH_SEPARATOR)
+            self.tags.add(tag)
             src = os.path.join(self.data_file_path, path)
             dst = self.GetDeviceSideBinaryPath(path)
             self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
             testcases = self.RetrieveTestCases(dst, tag)
             self.testcases.extend(testcases)
+
+        self.include_filter = self.ExpandListItemTags(self.include_filter)
+        self.exclude_filter = self.ExpandListItemTags(self.exclude_filter)
+
+    def ExpandListItemTags(self, input_list):
+        '''Expand list items with given tags
+
+        Since gtest binary allows a tag to be added in front of the binary
+        path, test names are generated with tags attached. This function is
+        used to expand the filters correspondingly. If a filter contains
+        a tag, only test name with that tag will be included in output.
+        Otherwise, all known tags will be paired to the test name in output list
+
+        Args:
+            input_list: list of string, the list to expand
+
+        Returns:
+            A list of string
+        '''
+        result = []
+        for item in input_list:
+            if TAG_PATH_SEPARATOR in item:
+                tag, name = item.split(TAG_PATH_SEPARATOR)
+                result.append(gtest_test_case.PutTag(name, tag))
+            for tag in self.tags:
+                result.append(gtest_test_case.PutTag(item, tag))
+        return result
 
     def tearDownClass(self):
         '''Perform clean-up jobs'''
