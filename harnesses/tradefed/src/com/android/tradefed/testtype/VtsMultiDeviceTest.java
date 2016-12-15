@@ -32,8 +32,14 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -245,6 +251,41 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
         String mTestConfigPath) throws RuntimeException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
+
+        // produce aconfig json file which contains:
+        //   device serial number(s)
+        //   device type
+        //   build ID
+        //   build branch
+        //   test suite name
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject();
+            obj.put("data_file_path", mTestCaseDataDir);
+
+            JSONObject device = new JSONObject();
+            device.put("serial", mDevice.getSerialNumber());
+            obj.put("device", device);
+
+            JSONObject build = new JSONObject();
+            build.put("build_id", mBuildInfo.getBuildId());
+            build.put("build_target", mBuildInfo.getBuildTargetName());
+            obj.put("build", build);
+
+            JSONObject suite = new JSONObject();
+            suite.put("name", mBuildInfo.getTestTag());
+            obj.put("test_suite", suite);
+        } catch(JSONException e) {
+            throw new RuntimeException("Failed to build device config json data");
+        }
+
+        String jsonFilePath = mTestConfigPath + ".harness_config.json";
+        try (FileWriter fw = new FileWriter(jsonFilePath)) {
+            fw.write(obj.toString());
+            CLog.i("config json: %s", obj.toString());
+        } catch(IOException e) {
+            throw new RuntimeException("Failed to create device config json file");
+        }
 
         if (mPythonBin == null){
             mPythonBin = getPythonBinary();
