@@ -42,6 +42,11 @@ def main():
     directly. It will discover all the classes that inherit from BaseTestClass
     and excute them. all the test results will be aggregated into one.
 
+    A VTS host-driven test case has three args:
+       1st arg: the path of a test case config file.
+       2nd arg: the serial ID of a target device (device config).
+       3rd arg: the path of a test case data dir.
+
     Returns:
         The TestResult object that holds the results of the test run.
     """
@@ -86,8 +91,14 @@ def runTestClass(test_class):
                         config_path)
     test_configs = config_parser.load_test_config_file(config_path)
     test_identifiers = [(test_cls_name, None)]
+
+    device_serial = sys.argv[2] if len(sys.argv) >= 3 else None
+    logging.info("Given Device Serial: %s", device_serial)
+    data_file_path = sys.argv[3] if len(sys.argv) >= 4 else None
+    logging.info("Data File Path: %s", data_file_path)
+
     for config in test_configs:
-        tr = TestRunner(config, test_identifiers)
+        tr = TestRunner(config, test_identifiers, device_serial, data_file_path)
         tr.parseTestConfig(config)
         try:
             # Create console signal handler to make sure TestRunner is stopped
@@ -124,9 +135,12 @@ class TestRunner(object):
                       this test run.
         self.running: A boolean signifies whether this test run is ongoing or
                       not.
+        self.device_serial: A string keeping the device serial ID.
+        self.data_file_path: A string keeping the path of a dir which stores
+                             the test case data file(s).
     """
 
-    def __init__(self, test_configs, run_list):
+    def __init__(self, test_configs, run_list, device_serial, data_file_path):
         self.test_run_info = {}
         self.test_configs = test_configs
         self.testbed_configs = self.test_configs[keys.ConfigKeys.KEY_TESTBED]
@@ -144,6 +158,8 @@ class TestRunner(object):
         self.run_list = run_list
         self.results = records.TestResult()
         self.running = False
+        self.device_serial = device_serial
+        self.data_file_path = data_file_path
 
     def __enter__(self):
         return self
@@ -269,8 +285,8 @@ class TestRunner(object):
             controller_config = copy.deepcopy(original_config)
             logging.info("controller_config: %s", controller_config)
             if (controller_config == module.ANDROID_DEVICE_PICK_ALL_TOKEN
-                and len(sys.argv) >= 3):
-                controller_config = [{"serial": sys.argv[2]}]
+                and self.device_serial):
+                controller_config = [{"serial": self.device_serial}]
                 logging.info("set controller_config to %s", controller_config)
             objects = create(controller_config)
         except:
