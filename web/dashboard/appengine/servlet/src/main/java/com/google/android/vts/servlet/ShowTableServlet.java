@@ -67,7 +67,21 @@ public class ShowTableServlet extends HttpServlet {
     private static final int MAX_BUILD_IDS_PER_PAGE = 15;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int SUMMARY_ROW_COUNT = 4;
+
+    // test result constants
+    private static final int TEST_RESULT_CASES = 6;
     private static final int UNKNOWN_RESULT = 0;
+    private static final int TEST_CASE_RESULT_PASS = 1;
+    private static final int TEST_CASE_RESULT_FAIL = 2;
+    private static final int TEST_CASE_RESULT_SKIP = 3;
+    private static final int TEST_CASE_RESULT_EXCEPTION = 4;
+    private static final int TEST_CASE_RESULT_TIMEOUT = 5;
+    private static final String[] TEST_RESULT_NAMES =
+        {"Unknown", "Pass", "Fail", "Skip", "Exception", "Timeout"};
+
+    // pie chart table column headers
+    private static final String PIE_CHART_TEST_RESULT_NAME = "Test Result Name";
+    private static final String PIE_CHART_TEST_RESULT_VALUE = "Test Result Value";
 
     /**
      * Returns the table corresponding to the table name.
@@ -122,6 +136,16 @@ public class ShowTableServlet extends HttpServlet {
         if (currentUser != null) {
             response.setContentType("text/plain");
             table = getTable(tableName);
+
+            // this is the tip of the tree and is used for populating pie chart.
+            String topBuild = null;
+
+            // TestReportMessage corresponding to the top build -- will be used for pie chart.
+            TestReportMessage topBuilTestReportMessage = null;
+
+            // Each case corresponds to an array of size 2.
+            // First column represents the result name and second represents the number of results.
+            String[][] pieChartArray = new String[TEST_RESULT_CASES + 1][2];
 
             // list to hold a unique combination - build IDs.startTimeStamp
             List<String> sortedBuildIdTimeStampList = new ArrayList<String>();
@@ -201,11 +225,38 @@ public class ShowTableServlet extends HttpServlet {
                 if (sortedBuildIdTimeStampList.size() % MAX_BUILD_IDS_PER_PAGE == 0) {
                     maxBuildIdPageNo--;
                 }
+                // save top build ID to be used later for pie chart data
+                topBuild = sortedBuildIdTimeStampList.get(0);
+                topBuilTestReportMessage = buildIdTimeStampMap.get(topBuild);
             } else {
                 listStart = 0;
                 listEnd = 0;
             }
 
+            if (topBuilTestReportMessage != null) {
+                // create pieChartArray from top build data.
+                // first row is for headers.
+                pieChartArray[0][0] = PIE_CHART_TEST_RESULT_NAME;
+                pieChartArray[0][1] = PIE_CHART_TEST_RESULT_VALUE;
+                for (int i = 1; i < pieChartArray.length; i++) {
+                    pieChartArray[i][0] = TEST_RESULT_NAMES[i - 1];
+                }
+
+                // temporary count array for each test result
+                int[] testResultCount = new int[TEST_RESULT_CASES];
+                for (TestCaseReportMessage testCaseReportMessage : topBuilTestReportMessage.
+                    getTestCaseList()) {
+                    testResultCount[testCaseReportMessage.getTestResult().getNumber()]++;
+                }
+
+                // update the pie chart array
+                // create pieChartArray from top build data.
+                for (int i = 1; i < pieChartArray.length; i++) {
+                    pieChartArray[i][1] = String.valueOf(testResultCount[i - 1]);
+                }
+            }
+
+            // create a sub list that will be shown on this particular page
             sortedBuildIdTimeStampList = sortedBuildIdTimeStampList.subList(listStart, listEnd);
             List<String> selectedBuildIdTimeStampList = new ArrayList<String>(
                 sortedBuildIdTimeStampList.size());
@@ -230,7 +281,7 @@ public class ShowTableServlet extends HttpServlet {
             }
 
             // first column for summary grid
-            String[] rowNamesSummaryGrid = {"Total", "# Passed", "% Passed", "Coverage %"};
+            String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
             for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
                 summaryGrid[i][0] = rowNamesSummaryGrid[i];
             }
@@ -303,8 +354,7 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-            // rows contains the test case names and the 4 rows from device info, and 3 rows for the
-            // summary.
+            // rows contains the rows from test case names, device info, and from the summary.
             String[][] finalGrid =
                 new String[testCaseNameList.size() + DEVICE_INFO_ROW_COUNT +
                            SUMMARY_ROW_COUNT][selectedBuildIdTimeStampList.size() + 1];
@@ -353,8 +403,8 @@ public class ShowTableServlet extends HttpServlet {
             for (int i = 0; i < summaryGridfloat.length; i++) {
                 for (int j = 1; j < summaryGridfloat[0].length; j++) {
                     summaryGrid[i][j] = String.valueOf(summaryGridfloat[i][j]);
-                    // add %
-                    if (i == summaryGrid.length - 1 && summaryGrid[i][j] != null) {
+                    // add % for second last row
+                    if (i == summaryGrid.length - 2) {
                         summaryGrid[i][j] += " %";
                     }
                 }
@@ -417,6 +467,13 @@ public class ShowTableServlet extends HttpServlet {
                                  new Gson().toJson(buildIDtimeStampArray));
             request.setAttribute("profilingPointNameJson",
                                  new Gson().toJson(profilingPointNameArray));
+
+            // data for pie chart
+            request.setAttribute("pieChartArrayJson",
+                new Gson().toJson(pieChartArray));
+
+            request.setAttribute("topBuildJson",
+                new Gson().toJson(topBuild));
 
             // pass table name back
             request.setAttribute("tableName",
