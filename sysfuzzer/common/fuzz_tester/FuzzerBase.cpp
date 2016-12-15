@@ -346,9 +346,9 @@ void FuzzerBase::FunctionCallBegin() {
   char module_basepath[4096];
   char cwd[4096];
 
-  cout << __func__ << endl;
+  cout << __func__ << ":" << __LINE__ << " begin" << endl;
   if (getcwd(cwd, 4096)) {
-    cout << cwd << endl;
+    cout << __func__ << ":" << __LINE__ << " cwd = " << cwd << endl;
     int n = snprintf(product_path, 4096, "%s/out/target/product", cwd);
     if (n <= 0 || n >= 4096) {
       cerr << "couln't get product_path" << endl;
@@ -372,68 +372,81 @@ void FuzzerBase::FunctionCallBegin() {
         continue;
       }
       if (S_ISDIR(st.st_mode)) {
-        cout << dent->d_name << endl;
+        cout << __func__ << ":" << __LINE__ << " dir " << dent->d_name << endl;
         strcpy(product, dent->d_name);
         dir_count++;
       }
     }
+    cout << __func__ << ":" << __LINE__ << endl;
     closedir(srcdir);
+    cout << __func__ << ":" << __LINE__ << endl;
     if (dir_count != 1) {
       cerr << "more than one product dir found." << endl;
       return;
     }
 
+    cout << __func__ << ":" << __LINE__ << endl;
     n = snprintf(module_basepath, 4096, "%s/%s/obj/SHARED_LIBRARIES",
                  product_path, product);
     if (n <= 0 || n >= 4096) {
       cerr << "couln't get module_basepath" << endl;
       return;
     }
+    cout << __func__ << ":" << __LINE__ << endl;
     srcdir = opendir(module_basepath);
     if (!srcdir) {
       cerr << __func__ << " couln't open " << module_basepath << endl;
       return;
     }
 
-    dir_count = 0;
-    string target = string(component_filename_) + "_intermediates";
-    bool hit = false;
-    while ((dent = readdir(srcdir)) != NULL) {
-      struct stat st;
-      if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
-        continue;
-      }
-      if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
-        cerr << "error " << dent->d_name << endl;
-        continue;
-      }
-      if (S_ISDIR(st.st_mode)) {
-        cout << "module_basepath " << string(dent->d_name) << endl;
-        if (string(dent->d_name) == target) {
-          cout << "hit" << endl;
-          hit = true;
+    cout << __func__ << ":" << __LINE__ << endl;
+    if (component_filename_ != NULL) {
+      dir_count = 0;
+      string target = string(component_filename_) + "_intermediates";
+      bool hit = false;
+      cout << __func__ << ":" << __LINE__ << endl;
+      while ((dent = readdir(srcdir)) != NULL) {
+        cout << __func__ << ":" << __LINE__ << " " << dent->d_name << endl;
+        struct stat st;
+        if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+          continue;
         }
-        dir_count++;
+        if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
+          cerr << "error " << dent->d_name << endl;
+          continue;
+        }
+        if (S_ISDIR(st.st_mode)) {
+          cout << "module_basepath " << string(dent->d_name) << endl;
+          if (string(dent->d_name) == target) {
+            cout << "hit" << endl;
+            hit = true;
+          }
+          dir_count++;
+        }
       }
-    }
-    if (hit) {
-      if (gcov_output_basepath_) {
+      cout << __func__ << ":" << __LINE__ << endl;
+      if (hit) {
+        cout << __func__ << ":" << __LINE__ << endl;
         free(gcov_output_basepath_);
+        gcov_output_basepath_ =
+            (char*)malloc(strlen(module_basepath) + target.length() + 2);
+        if (!gcov_output_basepath_) {
+          cerr << __FUNCTION__ << ": couldn't alloc memory" << endl;
+          return;
+        }
+        sprintf(gcov_output_basepath_, "%s/%s", module_basepath, target.c_str());
+        RemoveDir(gcov_output_basepath_);
       }
-      gcov_output_basepath_ =
-          (char*)malloc(strlen(module_basepath) + target.length() + 2);
-      if (!gcov_output_basepath_) {
-        cerr << __FUNCTION__ << ": couldn't alloc memory" << endl;
-        return;
-      }
-      sprintf(gcov_output_basepath_, "%s/%s", module_basepath, target.c_str());
-      RemoveDir(gcov_output_basepath_);
+    } else {
+      cerr << __func__ << ":" << __LINE__ << " component_filename_ is NULL"
+           << endl;
     }
     // TODO: check how it works when there already is a file.
     closedir(srcdir);
   } else {
     cerr << __FUNCTION__ << ": couldn't get the pwd." << endl;
   }
+  cout << __func__ << ":" << __LINE__ << " end" << endl;
 }
 
 vector<unsigned>* FuzzerBase::FunctionCallEnd() {
