@@ -19,41 +19,44 @@ import logging
 
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
-from vts.utils.python.mirror_objects import mirror
+from vts.utils.python.controllers import android_device
 
 
 class SampleCameraTest(base_test.BaseTestClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
 
     def setUpClass(self):
-        self.hal_mirror = mirror.Mirror(["/data/local/tmp/32/hal"])
-        self.hal_mirror.InitHal("camera", 2.1, bits=32)
+        self.dut = self.registerController(android_device)[0]
+        self.dut.hal.InitConventionalHal(target_type="camera",
+                                         target_version=2.1,
+                                         target_basepaths=["/data/local/tmp/32"],
+                                         bits=32)
 
-    def TestCameraOpenFirst(self):
+    def testCameraOpenFirst(self):
         """A simple testcase which just calls an open function."""
-        self.hal_mirror.camera.common.methods.open()  # note args are skipped
+        self.dut.hal.camera.common.methods.open()  # note args are skipped
 
-    def TestCameraInit(self):
+    def testCameraInit(self):
         """A simple testcase which just calls an init function."""
-        self.hal_mirror.camera.init()  # expect an exception? (can be undefined)
+        self.dut.hal.camera.init()  # expect an exception? (can be undefined)
 
     def testCameraNormal(self):
         """A simple testcase which just emulates a normal usage pattern."""
-        result = self.hal_mirror.camera.get_number_of_cameras()
+        result = self.dut.hal.camera.get_number_of_cameras()
         count = result.return_type.primitive_value[0].int32_t
         logging.info(count)
         for index in range(0, count):
-          arg = self.hal_mirror.camera.camera_info_t(facing=0)
-          logging.info(self.hal_mirror.camera.get_camera_info(index, arg))
+            arg = self.dut.hal.camera.camera_info_t(facing=0)
+            logging.info(self.dut.hal.camera.get_camera_info(index, arg))
         # uncomment when undefined function is handled gracefully.
-        # self.hal_mirror.camera.init()
+        # self.dut.hal.camera.init()
         def camera_device_status_change():
-          logging.info("camera_device_status_change")
+            logging.info("camera_device_status_change")
 
         def torch_mode_status_change():
-          logging.info("torch_mode_status_change")
+            logging.info("torch_mode_status_change")
 
-        self.hal_mirror.camera.common.methods.open()  # note args are skipped
+        self.dut.hal.camera.common.methods.open()  # note args are skipped
 
 
 if __name__ == "__main__":
