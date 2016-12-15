@@ -31,7 +31,6 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
     def setUpClass(self):
         required_params = ["gene_pool_size", "iteartion_count"]
         self.getUserParams(required_params)
-
         self.dut = self.registerController(android_device)[0]
         self.dut.hal.InitConventionalHal(target_type="light",
                                          target_basepaths=["/system/lib64/hw"],
@@ -42,6 +41,7 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
             [self.dut.hal.light.LIGHT_ID_BACKLIGHT,
              self.dut.hal.light.LIGHT_ID_NOTIFICATIONS,
              self.dut.hal.light.LIGHT_ID_ATTENTION])
+
         # TODO: broken on bullhead
         #   self.dut.hal.light.LIGHT_ID_KEYBOARD
         #   self.dut.hal.light.LIGHT_ID_BUTTONS
