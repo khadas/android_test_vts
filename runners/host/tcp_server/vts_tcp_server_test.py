@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import socket
-from tcp_server import ThreadedTCPServer
+from vts_tcp_server import VtsTcpServer
 import unittest
 import logging
 import errno
@@ -35,24 +35,24 @@ class TestMethods(unittest.TestCase):
     correct error when we try to connect to server from a wrong port.
 
     Attributes:
-        _thread_tcp_server: an instance of ThreadedTCPServer that is used to
+        _thread_tcp_server: an instance of VtsTcpServer that is used to
                             start and stop the TCP server.
     """
     _thread_tcp_server = None
 
     def setUp(self):
-        """This function initiates starting the server in ThreadedTCPServer."""
+        """This function initiates starting the server in VtsTcpServer."""
 
-        self._thread_tcp_server = ThreadedTCPServer()
+        self._thread_tcp_server = VtsTcpServer()
         self._thread_tcp_server.Start()  # To start the server
 
     def tearDown(self):
         """To initiate shutdown of the server.
 
-        This function calls the tcp_server.ThreadedTCPServer.Stop which
+        This function calls the tcp_server.VtsTcpServer.Stop which
         shutdowns the server.
         """
-        self._thread_tcp_server.Stop()  # calls tcp_server.ThreadedTCPServer.Stop
+        self._thread_tcp_server.Stop()  # calls tcp_server.VtsTcpServer.Stop
 
     def DoErrorCase(self):
         """Unit test for Error case.
@@ -87,47 +87,47 @@ class TestMethods(unittest.TestCase):
             sock.close()
 
     def ConnectToServer(self, func_id):
-      """This function creates a connection to TCP server and sends/receives
-          message.
+        """This function creates a connection to TCP server and sends/receives
+            message.
 
-      Args:
-          func_id: This is the unique key corresponding to a function and also
-              the data that we send to the server.
+        Args:
+            func_id: This is the unique key corresponding to a function and also
+                the data that we send to the server.
 
-      Returns:
-          received: String corresponding to the message that's received from
-              the server.
+        Returns:
+            received: String corresponding to the message that's received from
+                the server.
 
-      Raises:
-          TcpServerConnectionError: Exception occurred while stopping server.
-      """
-      data = func_id
-      received = ""
+        Raises:
+            TcpServerConnectionError: Exception occurred while stopping server.
+        """
+        data = func_id
+        received = ""
 
-      # Create a socket (SOCK_STREAM means a TCP socket)
-      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-      host = self._thread_tcp_server.GetIPAddress()
-      port = self._thread_tcp_server.GetPortUsed()
-      logging.info('Sending Request to host: %s ,using port: %s ', host, port)
+        # Create a socket (SOCK_STREAM means a TCP socket)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        host = self._thread_tcp_server.GetIPAddress()
+        port = self._thread_tcp_server.GetPortUsed()
+        logging.info('Sending Request to host: %s ,using port: %s ', host, port)
 
-      try:
-          # Connect to server and send data
-          sock.connect((host, port))
-          sock.sendall(data + "\n")
+        try:
+            # Connect to server and send data
+            sock.connect((host, port))
+            sock.sendall(data + "\n")
 
-          # Receive data from the server and shut down
-          received = sock.recv(1024)
-          logging.info('Request sent')
-      except socket_error as e:
-          logging.error(e)
-          raise TcpServerConnectionError('Exception occurred.')
-      finally:
-          sock.close()
-      logging.info('Sent : %s', data)
-      logging.info('Received : %s', received)
+            # Receive data from the server and shut down
+            received = sock.recv(1024)
+            logging.info('Request sent')
+        except socket_error as e:
+            logging.error(e)
+            raise TcpServerConnectionError('Exception occurred.')
+        finally:
+            sock.close()
+        logging.info('Sent : %s', data)
+        logging.info('Received : %s', received)
 
-      return received
+        return received
 
     def test_DoErrorCase(self):
         """ Unit test for error cases."""
@@ -223,4 +223,3 @@ class TestMethods(unittest.TestCase):
 if __name__ == '__main__':
     # Test the code
     unittest.main()
-

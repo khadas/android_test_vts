@@ -22,6 +22,7 @@ from google.protobuf import text_format
 from vts.runners.host import errors
 from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
+from vts.runners.host.tcp_server import vts_tcp_server
 from vts.utils.python.mirror import mirror_object
 
 COMPONENT_CLASS_DICT = {"hal_conventional": 1,
@@ -45,16 +46,20 @@ class HalMirror(object):
     This class holds and manages the life cycle of multiple mirror objects that
     map to different HAL components.
 
-    One can use this class to create and des
+    One can use this class to create and destroy a HAL mirror object.
 
     Attributes:
-        hal_level_mirrors: dict, key is HAL handler name, value is HAL
-                           mirror object.
-        host_port: int, the port number on the host side to use.
+        _hal_level_mirrors: dict, key is HAL handler name, value is HAL
+                            mirror object.
+        _host_port: int, the port number on the host side to use.
+        _callback_server: the instance of a callback server.
+        _callback_port: int, the port number of a host-side callback server.
     """
     def __init__(self, host_port):
         self._hal_level_mirrors = {}
         self._host_port = host_port
+        self._callback_server = None
+        self._callback_port = 0
 
     def __del__(self):
         for hal_mirror_name in self._hal_level_mirrors:
@@ -147,7 +152,10 @@ class HalMirror(object):
         if bits not in [32, 64]:
             raise error.ComponentLoadingError("Invalid value for bits: %s" % bits)
         client = vts_tcp_client.VtsTcpClient()
-        client.Connect(port=self._host_port)
+        callback_server = vts_tcp_server.VtsTcpServer()
+        _, self._callback_port = callback_server.Start()
+        client.Connect(port=self._host_port,
+                       callback_port=self._callback_port)
         if not handler_name:
             handler_name = target_type
         service_name = "vts_binder_%s" % handler_name
@@ -200,7 +208,8 @@ class HalMirror(object):
         text_format.Merge(found_api_spec, if_spec_msg)
 
         # Instantiate a MirrorObject and return it.
-        hal_mirror = mirror_object.MirrorObject(client, if_spec_msg)
+        hal_mirror = mirror_object.MirrorObject(client, if_spec_msg,
+                                                callback_server)
         self._hal_level_mirrors[handler_name] = hal_mirror
 
     def __getattr__(self, name):

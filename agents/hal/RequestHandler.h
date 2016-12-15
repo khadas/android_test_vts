@@ -45,6 +45,9 @@ class AgentRequestHandler {
   AndroidSystemControlResponseMessage* ListHals(
       const ::google::protobuf::RepeatedPtrField< ::std::string>& base_paths);
 
+  // for the SET_HOST_INFO command.
+  AndroidSystemControlResponseMessage* SetHostInfo(const int callback_port);
+
   // for the CHECK_STUB_SERVICE command
   AndroidSystemControlResponseMessage* CheckStubService(
       const string& service_name);
@@ -68,6 +71,8 @@ class AgentRequestHandler {
  protected:
   // the currently opened, connected service name.
   string service_name_;
+  // the port number of a host-side callback server.
+  int callback_port_;
 };
 
 }  // namespace vts
