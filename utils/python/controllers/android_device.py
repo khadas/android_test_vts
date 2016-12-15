@@ -434,6 +434,12 @@ class AndroidDevice(object):
         return cpu_abi
 
     @property
+    def is64Bit(self):
+        """True if device is 64 bit."""
+        out = self.adb.shell('uname -m')
+        return "64" in out
+
+    @property
     def isAdbLogcatOn(self):
         """Whether there is an ongoing adb logcat collection.
         """
