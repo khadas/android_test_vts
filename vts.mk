@@ -4,5 +4,6 @@ PRODUCT_PACKAGES += \
     vtssysfuzzer \
     vtsc \
     libvts_interfacespecification \
+    vts_hal_agent \
 
 -include test/vts/sysfuzzer/libinterfacespecification/vts_specification.mk
