@@ -24,9 +24,10 @@ ifneq ($(filter vts, $(MAKECMDGOALS)),)
 include $(CLEAR_VARS)
 
 VTS_PYTHON_ZIP := $(HOST_OUT)/vts_runner_python/vts_runner_python.zip
+VTS_CAMERAITS_ZIP := $(HOST_OUT)/vts/CameraITS.zip
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 
-.PHONY: $(VTS_PYTHON_ZIP)
+.PHONY: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	$(hide) mkdir -p $(dir $@)
@@ -38,8 +39,17 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
 
+$(VTS_CAMERAITS_ZIP): $(SOONG_ZIP)
+	@echo "build vts CameraITS package: $(VTS_CAMERAITS_ZIP)"
+	$(hide) find cts/apps/CameraITS -name '*.py' -or -name '*.pdf' -or -name '*.png' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C cts/apps/CameraITS -l $@.list
+	@rm -f $@.list
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)/CameraITS
+	$(hide) rm -rf $(VTS_TESTCASES_OUT)/CameraITS/*
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)/CameraITS
+
 .PHONY: vts
-vts: $(VTS_PYTHON_ZIP)
+vts: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP)
 
 endif # vts
 endif # linux
