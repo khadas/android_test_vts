@@ -16,19 +16,7 @@
 #
 
 import os
-
-
-def PutTag(name, tag):
-    '''Put tag on name and return the resulting string.
-
-    Args:
-        name: string, a test name
-        tag: string
-
-    Returns:
-        String, the result string after putting tag on the name
-    '''
-    return '{}{}'.format(name, tag)
+import operator
 
 
 class BinaryTestCase(object):
@@ -39,16 +27,23 @@ class BinaryTestCase(object):
         test_name: string, test case name which does not include test suite
         path: string, absolute test binary path on device
         tag: string, test tag
+        put_tag_func: function that takes a name and tag to output a combination
     '''
 
-    def __init__(self, test_suite, test_name, path, tag=''):
+    def __init__(self,
+                 test_suite,
+                 test_name,
+                 path,
+                 tag='',
+                 put_tag_func=operator.add):
         self.test_suite = test_suite
         self.test_name = test_name
         self.path = path
         self.tag = tag
+        self.put_tag_func = put_tag_func
 
     def __str__(self):
-        return PutTag(self.GetFullName(), self.tag)
+        return self.put_tag_func(self.GetFullName(), self.tag)
 
     def GetFullName(self):
         '''Get a string that represents the test.

@@ -38,12 +38,12 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         shell: ShellMirrorObject, shell mirror
         test_cases: list of BinaryTestCase objects, list of test cases to run
         tags: all the tags that appeared in binary list
-        DEVICE_TEST_DIR: string, temp location for storing binary
-        TAG_PATH_SEPARATOR: string, separator used to separate tag and path
+        DEVICE_TMP_DIR: string, temp location for storing binary
+        TAG_PATH_DELIMITER: string, separator used to separate tag and path
     '''
 
-    DEVICE_TEST_DIR = '/data/local/tmp'
-    TAG_PATH_SEPARATOR = ':'
+    DEVICE_TMP_DIR = '/data/local/tmp'
+    TAG_PATH_DELIMITER = ':'
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
@@ -65,24 +65,10 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
-        self.testcases = []
 
+        self.testcases = []
         self.tags = set()
-        # Push binaries to device and create test cases
-        for b in self.binary_paths:
-            tag = ''
-            path = b
-            if self.TAG_PATH_SEPARATOR in b:
-                tag, path = b.split(self.TAG_PATH_SEPARATOR)
-            self.tags.add(tag)
-            src = os.path.join(self.data_file_path, path)
-            dst = self.GetDeviceSideBinaryPath(path)
-            self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
-            testcase = self.CreateTestCaseFromBinary(dst, tag)
-            if type(testcase) is list:
-                self.testcases.extend(testcase)
-            else:
-                self.testcases.append(testcase)
+        self.CreateTestCases()
 
         cmd = ['chmod 755 %s' % test_case.path for test_case in self.testcases]
         cmd_results = self.shell.Execute(cmd)
@@ -93,6 +79,35 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.include_filter = self.ExpandListItemTags(self.include_filter)
         self.exclude_filter = self.ExpandListItemTags(self.exclude_filter)
 
+    def CreateTestCases(self):
+        '''Push files to device and create test case objects.'''
+        for b in self.binary_paths:
+            tag = ''
+            path = b
+            if self.TAG_PATH_DELIMITER in b:
+                tag, path = b.split(self.TAG_PATH_DELIMITER)
+            self.tags.add(tag)
+            src = os.path.join(self.data_file_path, path)
+            dst = self.GetDeviceSidePath(path, tag)
+            self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
+            testcase = self.CreateTestCaseFromBinary(dst, tag)
+            if type(testcase) is list:
+                self.testcases.extend(testcase)
+            else:
+                self.testcases.append(testcase)
+
+    def PutTag(self, name, tag):
+        '''Put tag on name and return the resulting string.
+
+        Args:
+            name: string, a test name
+            tag: string
+
+        Returns:
+            String, the result string after putting tag on the name
+        '''
+        return '{}{}'.format(name, tag)
+
     def ExpandListItemTags(self, input_list):
         '''Expand list items with tags.
 
@@ -100,7 +115,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         path, test names are generated with tags attached. This function is
         used to expand the filters correspondingly. If a filter contains
         a tag, only test name with that tag will be included in output.
-        Otherwise, all known tags will be paired to the test name in output list
+        Otherwise, all known tags will be paired to the test name in output
+        list.
 
         Args:
             input_list: list of string, the list to expand
@@ -110,30 +126,26 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         '''
         result = []
         for item in input_list:
-            if self.TAG_PATH_SEPARATOR in item:
-                tag, name = item.split(self.TAG_PATH_SEPARATOR)
-                result.append(binary_test_case.PutTag(name, tag))
+            if self.TAG_PATH_DELIMITER in item:
+                tag, name = item.split(self.TAG_PATH_DELIMITER)
+                result.append(self.PutTag(name, tag))
             for tag in self.tags:
-                result.append(binary_test_case.PutTag(item, tag))
+                result.append(self.PutTag(item, tag))
         return result
 
     def tearDownClass(self):
         '''Perform clean-up jobs'''
         # Clean up the pushed binaries
         logging.info('Start class cleaning up jobs.')
-        cmd = ['rm -rf {}'.format(
-            self.GetDeviceSideBinaryPath(
-                path.split(self.TAG_PATH_SEPARATOR)[-1]))
-               for path in self.binary_paths]
-        cmd.append('rm -rf %s' % self.GetDeviceSideBinaryPath(''))
-        command_results = self.shell.Execute(cmd)
+        command_results = self.shell.Execute('rm -rf %s' %
+                                             self.GetDeviceSidePath(''))
 
         if not command_results or any(command_results[const.EXIT_CODE]):
             logging.warning('Failed to clean up test class: %s',
                             command_results)
         logging.info('Finished class cleaning up jobs.')
 
-    def GetDeviceSideBinaryPath(self, path):
+    def GetDeviceSidePath(self, path, tag=''):
         '''Convert host side binary path to device side path.
 
         Args:
@@ -142,8 +154,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Returns:
             string, device side binary absolute path
         '''
-        return os.path.join(self.DEVICE_TEST_DIR, 'binary_test_temp',
-                            self.__class__.__name__, path)
+        return os.path.join(self.DEVICE_TMP_DIR,
+                            'binary_test_temp_%s' % self.__class__.__name__,
+                            tag, ntpath.basename(path))
 
     def CreateTestCaseFromBinary(self, path, tag=''):
         '''Create a list of TestCase objects from a binary path.
@@ -156,7 +169,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             A list of BinaryTestCase objects
         '''
         return binary_test_case.BinaryTestCase('', ntpath.basename(path), path,
-                                               tag)
+                                               tag, self.PutTag)
 
     def VerifyTestResult(self, test_case, command_results):
         '''Parse command result.
@@ -182,7 +195,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.VerifyTestResult(test_case, command_results)
 
-    def generateAllBinaryTests(self):
+    def generateAllTests(self):
         '''Runs all binary tests.'''
         self.runGeneratedTests(
             test_func=self.RunTestCase, settings=self.testcases, name_func=str)
