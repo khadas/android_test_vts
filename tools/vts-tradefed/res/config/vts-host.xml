@@ -16,7 +16,10 @@
 <configuration description="Run VTS Host-Driven Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:exclude-filter" value="VtsHalLightsTestCases" />
-    <option name="compatibility:exclude-filter" value="VtsHalPowerTestCases" />
+    <option name="compatibility:include-filter" value="SampleLightTest" />
+    <option name="compatibility:include-filter" value="SampleLightFuzzTest" />
+    <option name="compatibility:include-filter" value="SampleCameraTest" />
+    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
+    <option name="compatibility:include-filter" value="SampleShellTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
