@@ -19,10 +19,10 @@ import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.tradefed.result.ITestInvocationListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Interprets the output of tests run with Python's unittest framework and translates it into
+ * Interprets the output of tests run with Python's unit test framework and translates it into
  * calls on a series of {@link ITestRunListener}s. Output from these tests follows this
  * EBNF grammar:
  */
@@ -47,14 +47,19 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     String mTestClass;
     TestIdentifier mCurrentTestId;
     String mCurrentTraceback;
-    long mTotalElapsedTime;
+    long mTotalElapsedTime = 0;
 
     // General state
     private Map<TestIdentifier, String> mTestResultCache;
     private int mFailedTestCount = 0;
-    private final Collection<ITestInvocationListener> mListeners;
-    private String mRunName;
+    private final Collection<ITestRunListener> mListeners;
+    private String mRunName = null;
+    private String mCurrentTestName = null;
     private int mTotalTestCount = 0;
+
+    // Variables to keep track of state for unit test
+    private int mNumTestsRun = 0;
+    private int mNumTestsExpected = 1;
 
     // Constant tokens that appear in the result grammar.
     static final String CASE_OK = "ok";
@@ -67,6 +72,7 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     static final String END_PATTERN = "<==========";
     static final String BEGIN_PATTERN = "==========>";
 
+    // Enumeration for parser state.
     static enum ParserState {
         TEST_CASE_ENTRY,
         COMPLETE,
@@ -79,9 +85,10 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         }
     }
 
-    public VtsMultiDeviceTestResultParser(Collection<ITestInvocationListener> listeners,
+    public VtsMultiDeviceTestResultParser(ITestRunListener listener,
         String runName) {
-        mListeners = listeners;
+        mListeners = new ArrayList<ITestRunListener>(1);
+        mListeners.add(listener);
         mRunName = runName;
         mTestResultCache = new HashMap<>();
     }
@@ -97,10 +104,10 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
             try {
                 parseError(BEGIN_PATTERN);
             } catch (PythonUnitTestParseException e) {
-                  e.printStackTrace();
+                e.printStackTrace();
             }
-          } else {
-                mTestClass = toks[toks.length - 2];
+        } else {
+            mTestClass = toks[toks.length - 2];
         }
 
         // parse all lines
@@ -120,13 +127,42 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         if (mCurrentParseState.equals(ParserState.TEST_RUN)) {
             markTestTimeout();
         }
-
-        try {
-            summary(lines);
-        } catch (PythonUnitTestParseException e) {
-            e.printStackTrace();
-        }
+        summary(lines);
         completeTestRun();
+        mNumTestsRun++;
+    }
+
+    /**
+     * Called by parent when adb session is complete.
+     */
+    @Override
+    public void done() {
+        super.done();
+        if (mNumTestsRun < mNumTestsExpected) {
+            handleTestRunFailed(String.format("Test run failed. Expected %d tests, received %d",
+                    mNumTestsExpected, mNumTestsRun));
+        }
+    }
+
+    /**
+     * Process an instrumentation run failure
+     *
+     * @param errorMsg The message to output about the nature of the error
+     */
+    private void handleTestRunFailed(String errorMsg) {
+        errorMsg = (errorMsg == null ? "Unknown error" : errorMsg);
+        CLog.e(String.format("Test run failed: %s", errorMsg));
+
+        Map<String, String> emptyMap = Collections.emptyMap();
+        for (ITestRunListener listener : mListeners) {
+            listener.testFailed(mCurrentTestId, FAIL);
+            listener.testEnded(mCurrentTestId, emptyMap);
+        }
+
+        // Report the test run failed
+        for (ITestRunListener listener : mListeners) {
+            listener.testRunFailed(errorMsg);
+        }
     }
 
     void init(String[] lines) {
@@ -189,7 +225,7 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     }
 
     /**
-     * This function is called whenever the current test doesn't finish as expected and runs out
+     * This method is called whenever the current test doesn't finish as expected and runs out
      * of time.
      */
     private void markTestTimeout() {
@@ -203,42 +239,68 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
     private void registerTest() {
         // process the test case
         String[] toks = mCurrentLine.split(" ");
-        mRunName = toks[toks.length - 1];
-        mCurrentTestId = new TestIdentifier(mTestClass, mRunName);
+        mCurrentTestName = toks[toks.length - 1];
+        mCurrentTestId = new TestIdentifier(mTestClass, mCurrentTestName);
         mTotalTestCount++;
     }
+    /**
+     * Called at the end of the parsing to calculate the {@link #mTotalElapsedTime}
+     *
+     * @param lines The corresponding logs.
+     */
+    void summary(String[] lines) {
+        if (lines == null || lines.length == 0) {
+            mTotalElapsedTime = 0;
+            return;
+        }
 
-    void summary(String[] lines) throws PythonUnitTestParseException {
-        String[] toks = lines[0].split(" ");
-        // set the start time from the first line
-        if (toks.length < 2) {
-            parseError("Incorrect length");
-        }
-        String startTime = toks[2];
+        Date startDate = getDate(lines, true);
+        Date endDate = getDate(lines, false);
 
-        // get end time
-        toks = lines[lines.length - 1].split(" ");
-        if (toks.length < 3) {
-            throw new PythonUnitTestParseException(
-                String.format("Insufficient length of line %d, : %s ",
-                        mLineNum + 1, mCurrentLine));
+        if (startDate == null || endDate == null) {
+            mTotalElapsedTime = 0;
+            return;
         }
-        String endTime = toks[2];
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
-        Date startDate = null, enddate = null;
-        try {
-            startDate = sdf.parse(startTime);
-            enddate = sdf.parse(endTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        mTotalElapsedTime = endDate.getTime() - startDate.getTime();
+    }
+
+    /**
+     * Return the time in milliseconds to calculate the time elapsed in a particular test.
+     *
+     * @param lines The logs that need to be parsed.
+     * @param calculateStartDate flag which is true if we need to calculate start date.
+     * @return {Date} the start and end time corresponding to a test.
+     */
+    private Date getDate(String[] lines, boolean calculateStartDate) {
+        Date date = null;
+        int begin = calculateStartDate ? 0 : lines.length - 1;
+        int diff = calculateStartDate ? 1 : -1;
+
+        for (int index = begin; index >= 0 && index < lines.length; index += diff) {
+            lines[index].trim();
+            String[] toks = lines[index].split(" ");
+
+            // set the start time from the first line
+            // the loop should continue if exception occurs, else it can break
+            if (toks.length < 3) {
+                continue;
+            }
+            String time = toks[2];
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+            try {
+                date = sdf.parse(time);
+            } catch (ParseException e) {
+                continue;
+            }
+            break;
         }
-        mTotalElapsedTime = enddate.getTime() - startDate.getTime();
+        return date;
     }
 
     boolean completeTestRun() {
         for (ITestRunListener listener: mListeners) {
             // do testRunStarted
-            listener.testRunStarted(mRunName, mTotalTestCount);
+            listener.testRunStarted(mCurrentTestName, mTotalTestCount);
 
             // mark each test passed or failed
             for (Entry<TestIdentifier, String> test : mTestResultCache.entrySet()) {
@@ -256,6 +318,12 @@ public class VtsMultiDeviceTestResultParser extends MultiLineReceiver {
         return true;
     }
 
+    /**
+     * This is called whenever the program encounters unexpected tokens in parsing.
+     *
+     * @param expected The string that was expected.
+     * @throws PythonUnitTestParseException
+     */
     private void parseError(String expected)
             throws PythonUnitTestParseException {
         throw new PythonUnitTestParseException(
