@@ -63,7 +63,8 @@ def gen_term_signal_handler(test_runners):
     return termination_sig_handler
 
 
-def load_test_config_file(test_config_path, tb_filters=None):
+def load_test_config_file(test_config_path, tb_filters=None,
+                          baseline_config=None):
     """Processes the test configuration file provided by user.
 
     Loads the configuration file into a json object, unpacks each testbed
@@ -75,12 +76,17 @@ def load_test_config_file(test_config_path, tb_filters=None):
         tb_filters: A list of strings, each is a test bed name. If None, all
                     test beds are picked up. Otherwise only test bed names
                     specified will be picked up.
+        baseline_config: dict, the baseline config to use (used iff
+                         test_config_path does not have device info).
 
     Returns:
         A list of test configuration json objects to be passed to TestRunner.
     """
     try:
         configs = utils.load_config(test_config_path)
+        if baseline_config:
+            configs.update(baseline_config)
+
         if tb_filters:
             tbs = []
             for tb in configs[keys.ConfigKeys.KEY_TESTBED]:
@@ -275,8 +281,9 @@ def _validate_testbed_name(name):
     """
     if not name:
         raise errors.USERError("Test bed names can't be empty.")
-    if not isinstance(name, str):
-        raise errors.USERError("Test bed names have to be string.")
+    if not isinstance(name, str) and not isinstance(name, basestring):
+        raise errors.USERError(
+            "Test bed names have to be string. Found: %s" % type(name))
     for l in name:
         if l not in utils.valid_filename_chars:
             raise errors.USERError(
