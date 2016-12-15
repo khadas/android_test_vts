@@ -122,7 +122,8 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("stderr: %s", results[const.STDERR][1])
         stdout_lines = results[const.STDOUT][1].split("\n")
         logging.info("stdout: %s", stdout_lines)
-        result = {}
+        label_result = []
+        value_result = []
         for line in stdout_lines:
             if self.DELIMITER in line:
                 tokens = []
@@ -136,23 +137,24 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 time_in_ns = tokens[1].split()[0]
                 logging.info(benchmark_name)
                 logging.info(time_in_ns)
-                result[benchmark_name] = int(time_in_ns)
+                label_result.append(benchmark_name)
+                value_result.append(int(time_in_ns))
 
-        logging.info("result for %sbits: %s", bits, result)
+        logging.info("result label for %sbits: %s", bits, label_result)
+        logging.info("result value for %sbits: %s", bits, value_result)
         # To upload to the web DB.
         self.AddProfilingDataLabeledVector(
-            "hwbinder_vector_roundtrip_latency_benchmark_%sbits" % bits, result)
+            "hwbinder_vector_roundtrip_latency_benchmark_%sbits" % bits,
+            label_result, value_result)
 
         # Assertions to check the performance requirements
-        for benchmark_name in result:
-            if benchmark_name in self.THRESHOLD[bits]:
+        for label, value in zip(label_result, value_result):
+            if label in self.THRESHOLD[bits]:
                 asserts.assertLess(
-                    result[benchmark_name],
-                    self.THRESHOLD[bits][benchmark_name],
+                    value,
+                    self.THRESHOLD[bits][label],
                     "%s ns for %s is longer than the threshold %s ns" % (
-                        result[benchmark_name],
-                        benchmark_name,
-                        self.THRESHOLD[bits][benchmark_name]))
+                        value, label, self.THRESHOLD[bits][label]))
 
 if __name__ == "__main__":
     test_runner.main()
