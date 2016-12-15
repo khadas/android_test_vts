@@ -80,6 +80,12 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
         with open(outpath, "w") as fout, open(errpath, "w") as ferr:
             retcode = subprocess.call(
                 cmd, stderr=ferr, stdout=fout, cwd=outdir)
+        if retcode != 0 and retcode != 101:
+            # Dump all logs to host log if the test failed
+            with open(outpath, "r") as fout, open(errpath, "r") as ferr:
+                logging.info(fout.read())
+                logging.error(ferr.read())
+
         asserts.assertTrue(retcode == 0 or retcode == 101,
                            "ITS %s retcode %d" % (testname, retcode))
 
