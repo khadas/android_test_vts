@@ -24,11 +24,9 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
-from vts.testcases.kernel.ltp.test_cases_parser import TestCasesParser
-from vts.testcases.kernel.ltp.environment_requirement_checker \
-    import EnvironmentRequirementChecker
-from vts.testcases.kernel.ltp.ltp_enums import ShellEnvKeys
-from vts.testcases.kernel.ltp.ltp_enums import TestExitCode
+from vts.testcases.kernel.ltp import test_cases_parser
+from vts.testcases.kernel.ltp import environment_requirement_checker
+from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import ltp_configs
 
 
@@ -55,16 +53,18 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
 
-        self._requirement = EnvironmentRequirementChecker(self._shell)
+        self._requirement = \
+            environment_requirement_checker.EnvironmentRequirementChecker(
+                self._shell)
 
-        self._testcases = TestCasesParser(self.data_file_path)
-        self._env = {ShellEnvKeys.TMP: ltp_configs.TMP,
-                     ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
-                     ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
-                     ShellEnvKeys.TMPDIR: ltp_configs.TMPDIR,
-                     ShellEnvKeys.LTP_DEV_FS_TYPE: ltp_configs.LTP_DEV_FS_TYPE,
-                     ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
-                     ShellEnvKeys.PATH: ltp_configs.PATH}
+        self._testcases = test_cases_parser.TestCasesParser(self.data_file_path)
+        self._env = {ltp_enums.ShellEnvKeys.TMP: ltp_configs.TMP,
+                     ltp_enums.ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
+                     ltp_enums.ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
+                     ltp_enums.ShellEnvKeys.TMPDIR: ltp_configs.TMPDIR,
+                     ltp_enums.ShellEnvKeys.LTP_DEV_FS_TYPE: ltp_configs.LTP_DEV_FS_TYPE,
+                     ltp_enums.ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
+                     ltp_enums.ShellEnvKeys.PATH: ltp_configs.PATH}
 
     def PushFiles(self, n_bit):
         """Push the related files to target.
@@ -102,11 +102,11 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         stdout = results[const.STDOUT][0]
         ret_code = results[const.EXIT_CODE][0]
         # Test case is not for the current configuration, SKIP
-        if ret_code == TestExitCode.TCONF:
+        if ret_code == ltp_enums.TestExitCode.TCONF:
             asserts.skipIf('TPASS' not in stdout,
                            "Incompatible test skipped: TCONF")
         else:
-            asserts.assertEqual(ret_code, TestExitCode.TPASS,
+            asserts.assertEqual(ret_code, ltp_enums.TestExitCode.TPASS,
                                 "Got return code %s, test did not pass." %
                                 ret_code)
 
