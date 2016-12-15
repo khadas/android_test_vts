@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "code_gen/HalCodeGen.h"
+#include "code_gen/HalHidlCodeGen.h"
 
 #include <fstream>
 #include <iostream>
@@ -24,6 +24,7 @@
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
+#include "code_gen/HalCodeGen.h"
 
 using namespace std;
 using namespace android;
@@ -31,10 +32,9 @@ using namespace android;
 namespace android {
 namespace vts {
 
-const char* const HalCodeGen::kInstanceVariableName = "device_";
+const char* const HalHidlCodeGen::kInstanceVariableName = "hw_binder_proxy_";
 
-
-void HalCodeGen::GenerateCppBodyCallbackFunction(
+void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
     std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   bool first_callback = true;
@@ -177,7 +177,7 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
   }
 }
 
-void HalCodeGen::GenerateCppBodyFuzzFunction(
+void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   for (auto const& sub_struct : message.sub_struct()) {
@@ -203,22 +203,6 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  }" << endl;
   }
 
-  cpp_ss << "    " << message.original_data_structure_name()
-         << "* local_device = ";
-  cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-         << "*>(" << kInstanceVariableName << ");" << endl;
-
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
-  cpp_ss << "      local_device = reinterpret_cast<"
-         << message.original_data_structure_name() << "*>(hmi_);" << endl;
-  cpp_ss << "    }" << endl;
-  cpp_ss << "    if (local_device == NULL) {" << endl;
-  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-         << endl;
-  cpp_ss << "      return false;" << endl;
-  cpp_ss << "    }" << endl;
-
   for (auto const& api : message.api()) {
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
 
@@ -235,9 +219,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
                << arg_count << "));" << endl;
 
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
-        cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg)
-               << ") malloc(sizeof(" << GetCppVariableType(arg) << "));"
+        cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
+        cpp_ss << "arg" << arg_count << " = (" << GetCppVariableType(arg, &message)
+               << ") malloc(sizeof(" << GetCppVariableType(arg, &message) << "));"
                << endl;
         // TODO: think about how to free the malloced callback data structure.
         // find the spec.
@@ -273,15 +257,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           exit(-1);
         }
       } else {
-        cpp_ss << "    " << GetCppVariableType(arg) << " ";
+        cpp_ss << "    " << GetCppVariableType(arg, &message) << " ";
         cpp_ss << "arg" << arg_count << " = ";
-        if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
-            !strncmp(arg.predefined_type().c_str(),
-                     message.original_data_structure_name().c_str(),
-                     message.original_data_structure_name().length())) {
-          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
-                 << kInstanceVariableName << ")";
-        } else {
+        {
           std::stringstream msg_ss;
           msg_ss << "func_msg->arg(" << arg_count << ")";
           string msg = msg_ss.str();
@@ -293,7 +271,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
                 arg.scalar_type() == "char_pointer" ||
                 arg.scalar_type() == "void_pointer" ||
                 arg.scalar_type() == "function_pointer") {
-              cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+              cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg, &message) << ">";
             }
             cpp_ss << "(" << msg << ".scalar_value()";
 
@@ -325,41 +303,24 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
                  << ".type() == TYPE_STRUCT || " << msg
                  << ".type() == TYPE_SCALAR)? ";
-          cpp_ss << GetCppInstanceType(arg, msg);
-          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+          cpp_ss << GetCppInstanceType(arg, msg, &message);
+          cpp_ss << " : " << GetCppInstanceType(arg, string(), &message) << " )";
           // TODO: use the given message and call a lib function which converts
           // a message to a C/C++ struct.
         }
         cpp_ss << ";" << endl;
       }
-      cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-             << " << endl;" << endl;
       arg_count++;
     }
 
     // actual function call
     GenerateCodeToStartMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
 
-    // checks whether the function is actually defined.
-    cpp_ss << "    if (reinterpret_cast<"
-           << message.original_data_structure_name() << "*>(local_device)->"
-           << api.name() << " == NULL";
-    cpp_ss << ") {" << endl;
-    cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
-    // todo: consider throwing an exception at least a way to tell more
-    // specifically to the caller.
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
-
+    // may need to check whether the function is actually defined.
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
-    if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
-      cpp_ss << "*result = NULL;" << endl;
-    } else {
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
-    }
-    cpp_ss << "local_device->" << api.name() << "(";
+    cpp_ss << "*result = NULL;" << endl;
+    cpp_ss << kInstanceVariableName << "." << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
     for (int index = 0; index < arg_count; index++) {
@@ -369,8 +330,11 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       }
     }
 
-    if (api.has_return_type() && api.return_type().type() != TYPE_VOID) {
-      cpp_ss << "))";
+    if (api.return_type_hidl_size() > 0) {
+      // TODO: support callback as the last arg
+      cpp_ss << ", nullptr)";
+      // TODO: callback shall update *result (barrier here?)
+      //       cpp_ss << "*result = ...";
     }
     cpp_ss << ");" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
@@ -396,7 +360,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
-void HalCodeGen::GenerateCppBodyFuzzFunction(
+void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     std::stringstream& cpp_ss, const StructSpecificationMessage& message,
     const string& fuzzer_extended_class_name,
     const string& original_data_structure_name, const string& parent_path) {
@@ -430,33 +394,12 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
 
-    cpp_ss << "    " << original_data_structure_name << "* local_device = ";
-    cpp_ss << "reinterpret_cast<" << original_data_structure_name << "*>("
-           << kInstanceVariableName << ");" << endl;
-
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
-    cpp_ss << "      local_device = reinterpret_cast<"
-           << original_data_structure_name << "*>(hmi_);" << endl;
-    cpp_ss << "    }" << endl;
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;"
-           << endl;
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
-
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
       cpp_ss << "    " << GetCppVariableType(arg) << " ";
       cpp_ss << "arg" << arg_count << " = ";
-      if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
-          !strncmp(arg.predefined_type().c_str(),
-                   original_data_structure_name.c_str(),
-                   original_data_structure_name.length())) {
-        cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
-               << kInstanceVariableName << ")";
-      } else {
+      {
         std::stringstream msg_ss;
         msg_ss << "func_msg->arg(" << arg_count << ")";
         string msg = msg_ss.str();
@@ -498,57 +441,25 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << ") : ";
         }
 
-        if (is_open) {
-          if (arg_count == 0) {
-            cpp_ss << "hmi_;" << endl;
-          } else if (arg_count == 1) {
-            cpp_ss << "((hmi_) ? const_cast<char*>(hmi_->name) : NULL)" << endl;
-          } else if (arg_count == 2) {
-            cpp_ss << "(struct hw_device_t**) &device_" << endl;
-          } else {
-            cerr << __func__ << " ERROR additional args for open " << arg_count
-                 << endl;
-            exit(-1);
-          }
-        } else {
-          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
-                 << ".type() == TYPE_STRUCT || " << msg
-                 << ".type() == TYPE_SCALAR)? ";
-          cpp_ss << GetCppInstanceType(arg, msg);
-          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
-          // TODO: use the given message and call a lib function which converts
-          // a message to a C/C++ struct.
-        }
+        cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || " << msg
+               << ".type() == TYPE_STRUCT || " << msg
+               << ".type() == TYPE_SCALAR)? ";
+        cpp_ss << GetCppInstanceType(arg, msg);
+        cpp_ss << " : " << GetCppInstanceType(arg, string()) << " )";
+        // TODO: use the given message and call a lib function which converts
+        // a message to a C/C++ struct.
       }
       cpp_ss << ";" << endl;
-      cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-             << " << endl;" << endl
-             << endl;
       arg_count++;
     }
 
     // actual function call
     GenerateCodeToStartMeasurement(cpp_ss);
-    cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
-
-    cpp_ss << "    if (reinterpret_cast<" << original_data_structure_name
-           << "*>(local_device)" << parent_path << message.name() << "->"
-           << api.name() << " == NULL";
-    cpp_ss << ") {" << endl;
-    cpp_ss << "      cerr << \"api not set.\" << endl;" << endl;
-    // todo: consider throwing an exception at least a way to tell more
-    // specifically to the caller.
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
 
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
-    if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
-      cpp_ss << "*result = NULL;" << endl;
-    } else {
-      cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
-    }
-    cpp_ss << "local_device" << parent_path << message.name() << "->"
+    cpp_ss << "*result = NULL;" << endl;
+    cpp_ss << kInstanceVariableName << "." << parent_path << message.name() << "->"
            << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
@@ -558,8 +469,10 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "," << endl;
       }
     }
-    if (api.has_return_type() && api.return_type().type() != TYPE_VOID) {
-      cpp_ss << "))";
+    if (api.return_type_hidl_size() > 0) {
+      cpp_ss << ", nullptr)";
+      // TODO: support callback as the last arg and setup barrier here to
+      // do *result = ...;
     }
     cpp_ss << ");" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
@@ -585,14 +498,14 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
-void HalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
+void HalHidlCodeGen::GenerateHeaderGlobalFunctionDeclarations(
     std::stringstream& h_ss, const string& function_prototype) {
   h_ss << "extern \"C\" {" << endl;
   h_ss << "extern " << function_prototype << ";" << endl;
   h_ss << "}" << endl;
 }
 
-void HalCodeGen::GenerateCppBodyGlobalFunctions(
+void HalHidlCodeGen::GenerateCppBodyGlobalFunctions(
     std::stringstream& cpp_ss, const string& function_prototype,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "extern \"C\" {" << endl;
@@ -603,7 +516,7 @@ void HalCodeGen::GenerateCppBodyGlobalFunctions(
   cpp_ss << "}" << endl;
 }
 
-void HalCodeGen::GenerateSubStructFuzzFunctionCall(
+void HalHidlCodeGen::GenerateSubStructFuzzFunctionCall(
     std::stringstream& cpp_ss, const StructSpecificationMessage& message,
     const string& parent_path) {
   string current_path(parent_path);

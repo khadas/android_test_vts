@@ -46,7 +46,16 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   for (auto const& header : message.header()) {
     cpp_ss << "#include " << header << endl;
   }
-  GenerateOpenNameSpaces(cpp_ss);
+  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
+    cpp_ss << "#include <" << message.component_name() << ".h>" << endl;
+    cpp_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+    for (const auto& import : message.import()) {
+      string mutable_import = import;
+      ReplaceSubString(mutable_import, ".", "/");
+      cpp_ss << "#include <" << mutable_import << ".h>" << endl;
+    }
+  }
+  GenerateOpenNameSpaces(cpp_ss, message);
 
   string component_name = GetComponentName(message);
   if (component_name.empty()) {
@@ -57,6 +66,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL_CONVENTIONAL ||
       message.component_class() == HAL_CONVENTIONAL_SUBMODULE ||
+      message.component_class() == HAL_HIDL ||
       message.component_class() == HAL_LEGACY ||
       message.component_class() == LIB_SHARED) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
@@ -102,8 +112,12 @@ void CodeGenBase::GenerateAllHeader(
   for (auto const& header : message.header()) {
     h_ss << "#include " << header << endl;
   }
+  if (message.component_class() == HAL_HIDL && message.has_component_name()) {
+    h_ss << "#include <" << message.component_name() << ".h>" << endl;
+    h_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+  }
   h_ss << "\n\n" << endl;
-  GenerateOpenNameSpaces(h_ss);
+  GenerateOpenNameSpaces(h_ss, message);
 
   GenerateClassHeader(fuzzer_extended_class_name, h_ss, message);
 
@@ -131,16 +145,19 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << " public:" << endl;
   h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
 
-  if (message.component_class() == HAL_CONVENTIONAL)
-    h_ss << "HAL_CONVENTIONAL";
-  else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-    h_ss << "HAL_CONVENTIONAL_SUBMODULE";
-  } else if (message.component_class() == HAL_LEGACY)
-    h_ss << "HAL_LEGACY";
-  else if (message.component_class() == LIB_SHARED)
-    h_ss << "LIB_SHARED";
+  if (message.component_class() == HAL_CONVENTIONAL) {
+    h_ss << "HAL_CONVENTIONAL)";
+  } else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+    h_ss << "HAL_CONVENTIONAL_SUBMODULE)";
+  } else if (message.component_class() == HAL_HIDL) {
+    h_ss << "HAL_HIDL), hw_binder_proxy_()";
+  } else if (message.component_class() == HAL_LEGACY) {
+    h_ss << "HAL_LEGACY)";
+  } else if (message.component_class() == LIB_SHARED) {
+    h_ss << "LIB_SHARED)";
+  }
 
-  h_ss << ") { }" << endl;
+  h_ss << " { }" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
   h_ss << "            void** result, const string& callback_socket_name);"
@@ -162,6 +179,10 @@ void CodeGenBase::GenerateClassHeader(
     h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
          << endl;
   }
+  if (message.component_class() == HAL_HIDL) {
+    h_ss << " private:" << endl;
+    h_ss << "  Bp" << message.component_name().substr(1) << " hw_binder_proxy_;" << endl;
+  }
   h_ss << "};" << endl;
 }
 
@@ -179,7 +200,15 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
   }
 }
 
-void CodeGenBase::GenerateOpenNameSpaces(std::stringstream& ss) {
+void CodeGenBase::GenerateOpenNameSpaces(
+    std::stringstream& ss, const InterfaceSpecificationMessage& message) {
+  if (message.component_class() == HAL_HIDL && message.has_package()) {
+    ss << "using namespace ";
+    string name = message.package();
+    ReplaceSubString(name, ".", "::");
+    ss << name << ";" << endl;
+  }
+
   ss << "namespace android {" << endl;
   ss << "namespace vts {" << endl;
 }
