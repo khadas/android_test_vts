@@ -40,7 +40,7 @@
         <option name="push" value="DATA/bin/vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
         <option name="push" value="DATA/bin/vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
         <option name="push" value="DATA/bin/vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
-        <option name="push" value="libcutilsV1.vts->/data/local/tmp/spec/libcutilsV1.vts" />
+        <option name="push" value="spec/test/vts/specification/lib_bionic/libcutilsV1.vts->/data/local/tmp/spec/libcutilsV1.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
