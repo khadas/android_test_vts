@@ -162,7 +162,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
   return false;
 }
 
-// Starts to run a TCP server (foreground).
+// Starts to run a UNIX socket server (foreground).
 int StartSocketServer(const string& socket_port_file,
                       android::vts::SpecificationBuilder& spec_builder,
                       const char* lib_path) {
