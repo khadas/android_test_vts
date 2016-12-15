@@ -62,12 +62,12 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
-        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-                           keys.ConfigKeys.KEY_TEST_SUITE,
-                           ltp_enums.ConfigKeys.RUN_STAGING,
-                           ltp_enums.ConfigKeys.RUN_32BIT,
-                           ltp_enums.ConfigKeys.RUN_64BIT,
-                           ltp_enums.ConfigKeys.NUMBER_OF_THREADS]
+        required_params = [
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+            keys.ConfigKeys.KEY_TEST_SUITE, ltp_enums.ConfigKeys.RUN_STAGING,
+            ltp_enums.ConfigKeys.RUN_32BIT, ltp_enums.ConfigKeys.RUN_64BIT,
+            ltp_enums.ConfigKeys.NUMBER_OF_THREADS
+        ]
         self.getUserParams(required_params)
 
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
@@ -417,6 +417,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                        'Target device does not support 64 bit tests.')
 
         self.TestNBits(self._64BIT)
+
 
 if __name__ == "__main__":
     test_runner.main()
