@@ -54,6 +54,10 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
 
   // Sends a GET_STATUS request.
   int32_t Status(int32_t type);
+
+  // Sends a EXECUTE request.
+  char* ExecuteShellCommand(
+      const ::google::protobuf::RepeatedPtrField<::std::string> shell_command);
 };
 
 

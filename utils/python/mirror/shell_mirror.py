@@ -81,8 +81,8 @@ class ShellMirror(object):
             raise errors.ComponentLoadingError(
                 "Failed to launch shell driver service %s" % instance_name)
 
-        shell_mirror_object = shell_mirror_object.ShellMirrorObject(client)
-        self._shell_mirrors[handler_name] = shell_mirror_object
+        mirror_object = shell_mirror_object.ShellMirrorObject(client)
+        self._shell_mirrors[instance_name] = mirror_object
 
     def __getattr__(self, name):
         return self._shell_mirrors[name]

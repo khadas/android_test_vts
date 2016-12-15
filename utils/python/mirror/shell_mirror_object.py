@@ -15,22 +15,6 @@
 # limitations under the License.
 #
 
-import copy
-import logging
-import random
-
-from vts.utils.python.fuzzer import FuzzerUtils
-from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
-from google.protobuf import text_format
-
-# a dict containing the IDs of the registered function pointers.
-_function_pointer_id_dict = {}
-
-
-class MirrorObjectError(Exception):
-    """Raised when there is a general error in manipulating a mirror object."""
-    pass
-
 
 class ShellMirrorObject(object):
     """The class that mirrors a shell on the native side.

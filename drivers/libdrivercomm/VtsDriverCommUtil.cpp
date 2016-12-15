@@ -40,13 +40,13 @@ namespace vts {
 
 
 int VtsDriverCommUtil::Close() {
-  cout << __func__ << endl;
+  cout << getpid() << " " << __func__ << endl;
   int result = 0;
   if (sockfd_ != -1) {
     result = close(sockfd_);
     if(result != 0) {
-      cerr <<  __func__ << ":" << __LINE__ << " ERROR closing socket (errno = "
-          << errno << ")"<< endl;
+      cerr <<  getpid() << " " << __func__ << ":" << __LINE__
+          << " ERROR closing socket (errno = " << errno << ")"<< endl;
     }
 
     sockfd_ = -1;
@@ -64,10 +64,11 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   }
   std::stringstream header;
   header << message.length() << "\n";
-  cout << "[agent->driver] len = " << message.length() << endl;
+  cout << getpid() << " [agent->driver] len = " << message.length() << endl;
   int n = write(sockfd_, header.str().c_str(), header.str().length());
   if (n < 0) {
-    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
+    cerr << getpid() << " " << __func__ << ":" << __LINE__
+        << " ERROR writing to socket" << endl;
     return false;
   }
 
@@ -76,12 +77,12 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   while (bytes_sent < msg_len) {
     n = write(sockfd_, &message.c_str()[bytes_sent], msg_len - bytes_sent);
     if (n <= 0) {
-      cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
+      cerr << getpid() << " " << __func__ << ":" << __LINE__
+          << " ERROR writing to socket" << endl;
       return false;
     }
     bytes_sent += n;
   }
-  cout << getpid() << " " << "sent" << endl;
   return true;
 }
 
@@ -89,7 +90,7 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
 string VtsDriverCommUtil::VtsSocketRecvBytes() {
   cout << getpid() << " " << __func__ << endl;
   if (sockfd_ == -1) {
-    cerr << __func__ << " ERROR sockfd not set" << endl;
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return string();
   }
 
@@ -117,7 +118,7 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   int msg_len = atoi(header_buffer);
   char* msg = (char*) malloc(msg_len + 1);
   if (!msg) {
-    cerr << __func__ << " ERROR malloc failed" << endl;
+    cerr << getpid() << " " << __func__ << " ERROR malloc failed" << endl;
     return string();
   }
 
@@ -125,28 +126,29 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   while (bytes_read < msg_len) {
     int result = read(sockfd_, &msg[bytes_read], msg_len - bytes_read);
     if (result <= 0) {
-      cerr << __func__ << " ERROR read failed" << endl;
+      cerr << getpid() << " " << __func__ << " ERROR read failed" << endl;
       return string();
     }
     bytes_read += result;
   }
   msg[msg_len] = '\0';
-  cout << getpid() << " " << "recv" << endl;
+  cout << getpid() << " " << __func__ << " recv" << endl;
   return string(msg, msg_len);
 }
 
 
 bool VtsDriverCommUtil::VtsSocketSendMessage(
     const google::protobuf::Message& message) {
-  cout << __func__ << endl;
+  cout << getpid() << " " << __func__ << endl;
   if (sockfd_ == -1) {
-    cerr << __func__ << " ERROR sockfd not set" << endl;
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return false;
   }
 
   string message_string;
   if (!message.SerializeToString(&message_string)) {
-    cerr << __func__ << " ERROR can't serialize the message to a string."
+    cerr << getpid() << " " << __func__
+        << " ERROR can't serialize the message to a string."
         << endl;
     return false;
   }
@@ -154,16 +156,16 @@ bool VtsDriverCommUtil::VtsSocketSendMessage(
 }
 
 
-int VtsDriverCommUtil::VtsSocketRecvMessage(
+bool VtsDriverCommUtil::VtsSocketRecvMessage(
     google::protobuf::Message* message) {
-  cout << __func__ << endl;
+  cout << getpid() << " " << __func__ << endl;
   if (sockfd_ == -1) {
-    cerr << __func__ << " ERROR sockfd not set" << endl;
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return false;
   }
 
   string message_string = VtsSocketRecvBytes();
-  if (message_string.length() == 0) return -1;
+  if (message_string.length() == 0) return false;
   return message->ParseFromString(message_string);
 }
 

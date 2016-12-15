@@ -60,7 +60,7 @@ class VtsDriverCommUtil {
       const google::protobuf::Message& message);
 
   // Receives a protobuf message.
-  int VtsSocketRecvMessage(
+  bool VtsSocketRecvMessage(
       google::protobuf::Message* message);
 
  private:

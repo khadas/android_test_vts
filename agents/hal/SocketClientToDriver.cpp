@@ -148,6 +148,32 @@ const char* VtsDriverSocketClient::Call(const string& arg) {
 }
 
 
+char* VtsDriverSocketClient::ExecuteShellCommand(
+    const ::google::protobuf::RepeatedPtrField<::std::string> shell_command) {
+  VtsDriverControlCommandMessage command_message;
+  command_message.set_command_type(EXECUTE_COMMAND);
+  for (const auto& cmd : shell_command) {
+    command_message.add_shell_command(cmd);
+  }
+  if (!VtsSocketSendMessage(command_message)) return NULL;
+
+  VtsDriverControlResponseMessage response_message;
+  if (!VtsSocketRecvMessage(&response_message)) return NULL;
+
+  for (const auto& log_stdout : response_message.stdout()) {
+    char* result =
+        (char*) malloc(strlen(log_stdout.c_str()) + 1);
+    if (!result) {
+      cerr << __func__ << " ERROR result is NULL" << endl;
+      return NULL;
+    }
+    strcpy(result, log_stdout.c_str());
+    return result;
+  }
+  return NULL;
+}
+
+
 int32_t VtsDriverSocketClient::Status(int32_t type) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);
