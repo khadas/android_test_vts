@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.TreeSet;
 import java.util.Set;
+import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
@@ -70,6 +72,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
+    static final String GTEST_BINARY_PATHS = "gtest_binary_paths";
+    static final String TEMPLATE_GTEST_PATH = "vts/testcases/template/gtest/gtest";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -108,6 +112,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
             isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
+
+    @Option(name = "gtest-binary-paths",
+            description = "Gtest binary paths relative to host side path under "
+                    + "vts testcase directory.")
+    private Collection<String> mGtestBinaryPaths = new ArrayList<>();
 
     @Option(name = "collect-tests-only",
             description = "Only invoke the test binary to collect list of applicable test cases. "
@@ -239,7 +248,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         }
 
         if (mTestCasePath == null) {
-            throw new IllegalArgumentException("test-case-path is not set.");
+            if (!mGtestBinaryPaths.isEmpty()) {
+                CLog.i("Using default gtest test case path.");
+                setTestCasePath(TEMPLATE_GTEST_PATH);
+            } else {
+                throw new IllegalArgumentException("test-case-path is not set.");
+            }
         }
 
         setPythonPath();
@@ -292,9 +306,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
      * @param log_path the path of a directory to store the VTS runner logs.
      * @return the updated JSONObject as the new test config.
      */
-    private JSONObject getUpdatedVtsRunnerTestConfig(String log_path)
+    private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
-        JSONObject jsonObject = null;
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
         String content = null;
 
@@ -304,9 +317,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
         CLog.i("Loaded original test config %s", content);
         if (content != null) {
-            jsonObject = new JSONObject(content);
-        } else {
-            jsonObject = new JSONObject();
+            JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
         }
         populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
         CLog.i("Built a Json object using the loaded original test config");
@@ -374,9 +385,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
-        jsonObject.put(LOG_PATH, log_path);
-        CLog.i("Added %s to the Json object", LOG_PATH);
-        return jsonObject;
+        jsonObject.put(GTEST_BINARY_PATHS, new JSONArray(mGtestBinaryPaths));
+        CLog.i("Added %s to the Json object", GTEST_BINARY_PATHS);
     }
 
     /**
@@ -393,11 +403,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     private void doRunTest(ITestRunListener listener) throws RuntimeException, IllegalArgumentException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
-        JSONObject jsonObject = null;
+        JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;
         try {
             vtsRunnerLogDir = FileUtil.createTempDir("vts-runner-log");
-            jsonObject = getUpdatedVtsRunnerTestConfig(vtsRunnerLogDir.getAbsolutePath());
+            updateVtsRunnerTestConfig(jsonObject);
+
+            jsonObject.put(LOG_PATH,  vtsRunnerLogDir.getAbsolutePath());
+            CLog.i("Added %s to the Json object", LOG_PATH);
         } catch(IOException e) {
             throw new RuntimeException("Failed to read test config json file");
         } catch(JSONException e) {
