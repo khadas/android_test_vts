@@ -32,7 +32,9 @@ LOCAL_C_INCLUDES := \
 LOCAL_SHARED_LIBRARIES := \
   libcutils \
   libvts_multidevice_proto \
-  libprotobuf-cpp-full \
+
+LOCAL_STATIC_LIBRARIES := \
+  libprotobuf-cpp-full-ndk \
 
 LOCAL_MULTILIB := both
 
