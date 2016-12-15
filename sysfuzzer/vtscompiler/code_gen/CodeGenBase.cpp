@@ -48,11 +48,22 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   }
   if (message.component_class() == HAL_HIDL && message.has_component_name()) {
     cpp_ss << "#include <" << message.component_name() << ".h>" << endl;
-    cpp_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+    if (!endsWith(message.component_name(), "Callback")) {
+      cpp_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+    } else {
+      cpp_ss << "#include <Bn" << message.component_name().substr(1) << ".h>" << endl;
+    }
     for (const auto& import : message.import()) {
       string mutable_import = import;
       ReplaceSubString(mutable_import, ".", "/");
-      cpp_ss << "#include <" << mutable_import << ".h>" << endl;
+      string base_dirpath = mutable_import.substr(0, mutable_import.find_last_of("/\\") + 1);
+      string base_filename = mutable_import.substr(mutable_import.find_last_of("/\\") + 1);
+      cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
+      if (!endsWith(base_filename, "Callback")) {
+        cpp_ss << "#include <" << base_dirpath << "Bp" << base_filename.substr(1) << ".h>" << endl;
+      } else {
+        cpp_ss << "#include <" << base_dirpath << "Bn" << base_filename.substr(1) << ".h>" << endl;
+      }
     }
   }
   GenerateOpenNameSpaces(cpp_ss, message);
@@ -114,7 +125,11 @@ void CodeGenBase::GenerateAllHeader(
   }
   if (message.component_class() == HAL_HIDL && message.has_component_name()) {
     h_ss << "#include <" << message.component_name() << ".h>" << endl;
-    h_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+    if (!endsWith(message.component_name(), "Callback")) {
+      h_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
+    } else {
+      h_ss << "#include <Bn" << message.component_name().substr(1) << ".h>" << endl;
+    }
   }
   h_ss << "\n\n" << endl;
   GenerateOpenNameSpaces(h_ss, message);
@@ -181,7 +196,7 @@ void CodeGenBase::GenerateClassHeader(
   }
   if (message.component_class() == HAL_HIDL) {
     h_ss << " private:" << endl;
-    h_ss << "  Bp" << message.component_name().substr(1) << " hw_binder_proxy_;" << endl;
+    h_ss << "  sp<" << message.component_name() << "> hw_binder_proxy_;" << endl;
   }
   h_ss << "};" << endl;
 }

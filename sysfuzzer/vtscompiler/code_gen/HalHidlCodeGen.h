@@ -62,6 +62,10 @@ class HalHidlCodeGen : public CodeGenBase {
       std::stringstream& cpp_ss, const StructSpecificationMessage& message,
       const string& parent_path);
 
+  void GenerateCppBodySyncCallbackFunction(
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
 };
