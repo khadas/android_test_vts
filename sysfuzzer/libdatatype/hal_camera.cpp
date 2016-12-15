@@ -22,6 +22,8 @@
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
 
+#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+
 #include "vts_datatype.h"
 
 namespace android {
@@ -130,6 +132,27 @@ camera_info_t* GenerateCameraInfo() {
        *    Always valid.
       size_t conflicting_devices_length;
        */
+}
+
+
+bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
+                                 ArgumentSpecificationMessage* msg) {
+  //msg->mutable_primitive_value()->Clear();
+  //msg->mutable_aggregate_value()->Clear();
+  if (!raw) {
+    return false;
+  }
+  msg->add_primitive_value()->set_int32_t(raw->facing);
+  msg->add_primitive_value()->set_int32_t(raw->orientation);
+  msg->add_primitive_value()->set_uint32_t(raw->device_version);
+  // TODO: update for static_camera_characteristics and others
+  // msg.add_primitive_value()->set_int32_t(raw->static_camera_characteristics);
+  msg->add_primitive_value()->set_int32_t(raw->resource_cost);
+  // TODO: support pointer. conflicting_devices is pointer pointer.
+  // msg.add_primitive_value()->set_pointer(raw->conflicting_devices);
+  // msg.add_primitive_value()->set_int32_t(raw->conflicting_devices_length);
+  msg->add_primitive_value()->set_int32_t(0);
+  return true;
 }
 
 }  // namespace vts

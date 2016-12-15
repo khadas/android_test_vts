@@ -47,9 +47,13 @@ class SampleCameraTestcase(base_test.BaseTestClass):
         logging.info("testCamera start")
         hal_mirror = Mirror.Mirror(["/data/local/tmp/32/hal"])
         hal_mirror.InitHal("camera", 2.1, bits=32)
-        logging.info(hal_mirror.camera.get_number_of_cameras())
-        logging.info(hal_mirror.camera.get_number_of_cameras())
-        #hal_mirror.camera.Open()
+        result = hal_mirror.camera.get_number_of_cameras()
+        count = result.return_type.primitive_value[0].int32_t
+        logging.info(count)
+        for index in range(0, count):
+          arg = hal_mirror.camera.camera_info_t()
+          logging.info(arg)
+          logging.info(hal_mirror.camera.get_camera_info(index, arg))
         logging.info("testCamera end")
 
 

@@ -90,8 +90,8 @@ message FunctionSpecificationMessage {
 message PrimitiveDataValueMessage {
   optional int32 int32_t = 1;
   optional uint32 uint32_t = 2;
-  optional float float = 3;
-  optional double double = 4;
+  optional float float_t = 3;
+  optional double double_t = 4;
   optional bytes bytes = 5;
   optional uint32 pointer = 6;
 

@@ -119,6 +119,33 @@ string GetCppVariableType(ArgumentSpecificationMessage arg) {
 }
 
 
+string GetConversionToProtobufFunctionName(ArgumentSpecificationMessage arg) {
+  if (arg.aggregate_type().size() == 1) {
+    if (!strcmp(arg.aggregate_type(0).c_str(), "camera_info_t*")) {
+      return "ConvertCameraInfoToProtobuf";
+    } else {
+      cerr << __FILE__ << ":" << __LINE__ << " "
+          << "error: unknown instance type " << arg.aggregate_type(0) << endl;
+    }
+  } else if (arg.aggregate_type().size() > 1) {
+    cerr << __FUNCTION__
+        << ": aggregate type with multiple attributes; not supported" << endl;
+    exit(-1);
+  }
+  if (arg.primitive_type().size() > 1) {
+    cerr << __FUNCTION__
+        << ": a structure with multiple attributes; not supported" << endl;
+    exit(-1);
+  } else if (arg.primitive_type().size() == 1) {
+    cerr << __FILE__ << ":" << __LINE__ << " "
+        << "error: unknown data type " << arg.primitive_type(0) << endl;
+    exit(-1);
+  }
+  cerr << __FUNCTION__ << ": error: neither instance nor data type is set" << endl;
+  exit(-1);
+}
+
+
 string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
   if (arg.aggregate_type().size() == 1) {
     if (!strcmp(arg.aggregate_type(0).c_str(), "struct light_state_t*")) {
