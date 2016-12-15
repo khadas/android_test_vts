@@ -1675,6 +1675,24 @@ public final class VtsReportMessage {
      * </pre>
      */
     com.google.protobuf.ByteString getBranch();
+
+    // optional bytes build_summary = 21;
+    /**
+     * <code>optional bytes build_summary = 21;</code>
+     *
+     * <pre>
+     * indicates the latest commit information of each branch (e.g., xml format).
+     * </pre>
+     */
+    boolean hasBuildSummary();
+    /**
+     * <code>optional bytes build_summary = 21;</code>
+     *
+     * <pre>
+     * indicates the latest commit information of each branch (e.g., xml format).
+     * </pre>
+     */
+    com.google.protobuf.ByteString getBuildSummary();
   }
   /**
    * Protobuf type {@code android.vts.AndroidBuildInfo}
@@ -1749,6 +1767,11 @@ public final class VtsReportMessage {
             case 106: {
               bitField0_ |= 0x00000008;
               branch_ = input.readBytes();
+              break;
+            }
+            case 170: {
+              bitField0_ |= 0x00000010;
+              buildSummary_ = input.readBytes();
               break;
             }
           }
@@ -1887,11 +1910,36 @@ public final class VtsReportMessage {
       return branch_;
     }
 
+    // optional bytes build_summary = 21;
+    public static final int BUILD_SUMMARY_FIELD_NUMBER = 21;
+    private com.google.protobuf.ByteString buildSummary_;
+    /**
+     * <code>optional bytes build_summary = 21;</code>
+     *
+     * <pre>
+     * indicates the latest commit information of each branch (e.g., xml format).
+     * </pre>
+     */
+    public boolean hasBuildSummary() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional bytes build_summary = 21;</code>
+     *
+     * <pre>
+     * indicates the latest commit information of each branch (e.g., xml format).
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getBuildSummary() {
+      return buildSummary_;
+    }
+
     private void initFields() {
       id_ = com.google.protobuf.ByteString.EMPTY;
       name_ = com.google.protobuf.ByteString.EMPTY;
       buildType_ = com.google.protobuf.ByteString.EMPTY;
       branch_ = com.google.protobuf.ByteString.EMPTY;
+      buildSummary_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1917,6 +1965,9 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(13, branch_);
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(21, buildSummary_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1941,6 +1992,10 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(13, branch_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(21, buildSummary_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2070,6 +2125,8 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000004);
         branch_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        buildSummary_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -2114,6 +2171,10 @@ public final class VtsReportMessage {
           to_bitField0_ |= 0x00000008;
         }
         result.branch_ = branch_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.buildSummary_ = buildSummary_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2141,6 +2202,9 @@ public final class VtsReportMessage {
         }
         if (other.hasBranch()) {
           setBranch(other.getBranch());
+        }
+        if (other.hasBuildSummary()) {
+          setBuildSummary(other.getBuildSummary());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2373,6 +2437,58 @@ public final class VtsReportMessage {
       public Builder clearBranch() {
         bitField0_ = (bitField0_ & ~0x00000008);
         branch_ = getDefaultInstance().getBranch();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes build_summary = 21;
+      private com.google.protobuf.ByteString buildSummary_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes build_summary = 21;</code>
+       *
+       * <pre>
+       * indicates the latest commit information of each branch (e.g., xml format).
+       * </pre>
+       */
+      public boolean hasBuildSummary() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional bytes build_summary = 21;</code>
+       *
+       * <pre>
+       * indicates the latest commit information of each branch (e.g., xml format).
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getBuildSummary() {
+        return buildSummary_;
+      }
+      /**
+       * <code>optional bytes build_summary = 21;</code>
+       *
+       * <pre>
+       * indicates the latest commit information of each branch (e.g., xml format).
+       * </pre>
+       */
+      public Builder setBuildSummary(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        buildSummary_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes build_summary = 21;</code>
+       *
+       * <pre>
+       * indicates the latest commit information of each branch (e.g., xml format).
+       * </pre>
+       */
+      public Builder clearBuildSummary() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        buildSummary_ = getDefaultInstance().getBuildSummary();
         onChanged();
         return this;
       }
@@ -8775,45 +8891,46 @@ public final class VtsReportMessage {
       "pe\030\001 \001(\014\022\027\n\017product_variant\030\002 \001(\014\022\024\n\014bui" +
       "ld_flavor\030\013 \001(\014\022\020\n\010build_id\030\014 \001(\014\022\016\n\006bra" +
       "nch\030\025 \001(\014\022\023\n\013build_alias\030\026 \001(\014\022\021\n\tapi_le" +
-      "vel\030\037 \001(\014\022\016\n\006serial\030e \001(\014\"P\n\020AndroidBuil" +
+      "vel\030\037 \001(\014\022\016\n\006serial\030e \001(\014\"g\n\020AndroidBuil" +
       "dInfo\022\n\n\002id\030\001 \001(\014\022\014\n\004name\030\013 \001(\014\022\022\n\nbuild" +
-      "_type\030\014 \001(\014\022\016\n\006branch\030\r \001(\014\"\275\001\n\025TestCase" +
-      "ReportMessage\022\014\n\004name\030\001 \001(\014\0220\n\013test_resu" +
-      "lt\030\013 \001(\0162\033.android.vts.TestCaseResult\022\027\n",
-      "\017start_timestamp\030\025 \001(\003\022\025\n\rend_timestamp\030" +
-      "\026 \001(\003\0224\n\010coverage\030\037 \003(\0132\".android.vts.Co" +
-      "verageReportMessage\"\241\001\n\026ProfilingReportM" +
-      "essage\022\014\n\004name\030\001 \001(\014\022+\n\004type\030\002 \001(\0162\035.and" +
-      "roid.vts.VtsProfilingType\022\027\n\017start_times" +
-      "tamp\030\013 \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\022\r\n\005lab" +
-      "el\030\025 \003(\014\022\r\n\005value\030\026 \003(\003\"\315\001\n\025CoverageRepo" +
-      "rtMessage\022\020\n\010dir_path\030\001 \001(\014\022\021\n\tfile_name" +
-      "\030\002 \001(\014\022\014\n\004html\030\003 \001(\014\022\023\n\013source_code\030\013 \001(" +
-      "\014\022\014\n\004gcno\030\025 \001(\014\022\014\n\004gcda\030\026 \001(\014\022\014\n\004data\030\037 ",
-      "\003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_line_count\030e " +
-      "\001(\005\022\032\n\022covered_line_count\030f \001(\005\"\360\002\n\021Test" +
-      "ReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004tes" +
-      "t\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.android.vts" +
-      ".VtsTestType\022:\n\013device_info\030\004 \003(\0132%.andr" +
-      "oid.vts.AndroidDeviceInfoMessage\0221\n\nbuil" +
-      "d_info\030\005 \001(\0132\035.android.vts.AndroidBuildI" +
-      "nfo\0225\n\ttest_case\030\013 \003(\0132\".android.vts.Tes" +
-      "tCaseReportMessage\0226\n\tprofiling\030\025 \003(\0132#." +
-      "android.vts.ProfilingReportMessage\022\027\n\017st",
-      "art_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001" +
-      "(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020" +
-      "\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CAS" +
-      "E_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP" +
-      "\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TE" +
-      "ST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType" +
-      "\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_D" +
-      "RIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FU" +
-      "ZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VT" +
-      "S_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingT",
-      "ype\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034V" +
-      "TS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PRO" +
-      "FILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.goog" +
-      "le.android.vts.protoB\020VtsReportMessage"
+      "_type\030\014 \001(\014\022\016\n\006branch\030\r \001(\014\022\025\n\rbuild_sum" +
+      "mary\030\025 \001(\014\"\275\001\n\025TestCaseReportMessage\022\014\n\004" +
+      "name\030\001 \001(\014\0220\n\013test_result\030\013 \001(\0162\033.androi",
+      "d.vts.TestCaseResult\022\027\n\017start_timestamp\030" +
+      "\025 \001(\003\022\025\n\rend_timestamp\030\026 \001(\003\0224\n\010coverage" +
+      "\030\037 \003(\0132\".android.vts.CoverageReportMessa" +
+      "ge\"\241\001\n\026ProfilingReportMessage\022\014\n\004name\030\001 " +
+      "\001(\014\022+\n\004type\030\002 \001(\0162\035.android.vts.VtsProfi" +
+      "lingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend" +
+      "_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value" +
+      "\030\026 \003(\003\"\315\001\n\025CoverageReportMessage\022\020\n\010dir_" +
+      "path\030\001 \001(\014\022\021\n\tfile_name\030\002 \001(\014\022\014\n\004html\030\003 " +
+      "\001(\014\022\023\n\013source_code\030\013 \001(\014\022\014\n\004gcno\030\025 \001(\014\022\014",
+      "\n\004gcda\030\026 \001(\014\022\014\n\004data\030\037 \003(\014\022\014\n\004gcov\030  \001(\014" +
+      "\022\030\n\020total_line_count\030e \001(\005\022\032\n\022covered_li" +
+      "ne_count\030f \001(\005\"\360\002\n\021TestReportMessage\022\022\n\n" +
+      "test_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_t" +
+      "ype\030\003 \001(\0162\030.android.vts.VtsTestType\022:\n\013d" +
+      "evice_info\030\004 \003(\0132%.android.vts.AndroidDe" +
+      "viceInfoMessage\0221\n\nbuild_info\030\005 \001(\0132\035.an" +
+      "droid.vts.AndroidBuildInfo\0225\n\ttest_case\030" +
+      "\013 \003(\0132\".android.vts.TestCaseReportMessag" +
+      "e\0226\n\tprofiling\030\025 \003(\0132#.android.vts.Profi",
+      "lingReportMessage\022\027\n\017start_timestamp\030e \001" +
+      "(\003\022\025\n\rend_timestamp\030f \001(\003*\263\001\n\016TestCaseRe" +
+      "sult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_CASE_RE" +
+      "SULT_PASS\020\001\022\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031" +
+      "\n\025TEST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST_CASE_R" +
+      "ESULT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RESULT_TI" +
+      "MEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOWN_VTS_T" +
+      "ESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRUCTURAL\020" +
+      "\001\022\033\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TA" +
+      "RGET_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZ",
+      "ZING\020\004*{\n\020VtsProfilingType\022\036\n\032UNKNOWN_VT" +
+      "S_PROFILING_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE" +
+      "_TIMESTAMP\020\001\022%\n!VTS_PROFILING_TYPE_LABEL" +
+      "ED_VECTOR\020\002B0\n\034com.google.android.vts.pr" +
+      "otoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -8831,7 +8948,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_AndroidBuildInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_AndroidBuildInfo_descriptor,
-              new java.lang.String[] { "Id", "Name", "BuildType", "Branch", });
+              new java.lang.String[] { "Id", "Name", "BuildType", "Branch", "BuildSummary", });
           internal_static_android_vts_TestCaseReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_android_vts_TestCaseReportMessage_fieldAccessorTable = new
