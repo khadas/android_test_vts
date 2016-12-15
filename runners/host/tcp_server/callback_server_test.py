@@ -20,10 +20,9 @@ import logging
 import errno
 from socket import error as socket_error
 
-from vts.runners.host.errors import TcpServerConnectionError
-from vts.runners.host.errors import ConnectionRefusedError
+from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
-from vts.runners.host.tcp_server import vts_tcp_server
+from vts.runners.host.tcp_server import callback_server
 
 HOST, PORT = "localhost", 0
 ERROR_PORT = 380  # port at which we test the error case.
@@ -37,26 +36,26 @@ class TestMethods(unittest.TestCase):
     correct error when we try to connect to server from a wrong port.
 
     Attributes:
-        _vts_tcp_server: an instance of VtsTcpServer that is used to
+        _callback_server: an instance of CallbackServer that is used to
                          start and stop the TCP server.
         _counter: This is used to keep track of number of calls made to the
                   callback function.
     """
-    _vts_tcp_server = None
+    _callback_server = None
     _counter = 0
 
     def setUp(self):
-        """This function initiates starting the server in VtsTcpServer."""
-        self._vts_tcp_server = vts_tcp_server.VtsTcpServer()
-        self._vts_tcp_server.Start()
+        """This function initiates starting the server in CallbackServer."""
+        self._callback_server = callback_server.CallbackServer()
+        self._callback_server.Start()
 
     def tearDown(self):
         """To initiate shutdown of the server.
 
-        This function calls the vts_tcp_server.VtsTcpServer.Stop which
+        This function calls the callback_server.CallbackServer.Stop which
         shutdowns the server.
         """
-        self._vts_tcp_server.Stop()  # calls vts_tcp_server.VtsTcpServer.Stop
+        self._callback_server.Stop()
 
     def DoErrorCase(self):
         """Unit test for Error case.
@@ -68,7 +67,7 @@ class TestMethods(unittest.TestCase):
             ConnectionRefusedError: ConnectionRefusedError occurred in
             test_ErrorCase().
         """
-        host = self._vts_tcp_server.GetIPAddress()
+        host = self._callback_server.ip
 
         # Create a socket (SOCK_STREAM means a TCP socket)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -81,7 +80,7 @@ class TestMethods(unittest.TestCase):
             # the error that we get.
             # Test fails if ConnectionRefusedError is not raised at this step.
             if e.errno == errno.ECONNREFUSED:
-                raise ConnectionRefusedError  # Test is a success here
+                raise errors.ConnectionRefusedError  # Test is a success here
             else:
                 raise e  # Test fails, since ConnectionRefusedError was expected
         finally:
@@ -115,8 +114,8 @@ class TestMethods(unittest.TestCase):
         # Create a socket (SOCK_STREAM means a TCP socket)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        host = self._vts_tcp_server.GetIPAddress()
-        port = self._vts_tcp_server.GetPortUsed()
+        host = self._callback_server.ip
+        port = self._callback_server.port
         logging.info('Sending Request to host %s using port %s', host, port)
 
         try:
@@ -124,17 +123,16 @@ class TestMethods(unittest.TestCase):
             sock.connect((host, port))
 
             message = request_message.SerializeToString()
-            logging.info("sending a AndroidSystemCallbackRequestMessage()")
             sock.sendall(str(len(message)) + "\n" + message)
-            logging.info('Sent : %s', request_message)
+            logging.info("Sent: %s", message)
 
             # Receive request_message from the server and shut down
             received_message = sock.recv(1024)
             response_message.ParseFromString(received_message)
-            logging.info('Received : %s', received_message)
+            logging.info('Received: %s', received_message)
         except socket_error as e:
             logging.error(e)
-            raise TcpServerConnectionError('Exception occurred.')
+            raise errors.TcpServerConnectionError('Exception occurred.')
         finally:
             sock.close()
 
@@ -142,7 +140,7 @@ class TestMethods(unittest.TestCase):
 
     def testDoErrorCase(self):
         """Unit test for error cases."""
-        with self.assertRaises(ConnectionRefusedError):
+        with self.assertRaises(errors.ConnectionRefusedError):
             self.DoErrorCase()
 
     def testCallback(self):
@@ -166,8 +164,7 @@ class TestMethods(unittest.TestCase):
             self._counter += 1
 
         # Function should be registered with RegisterCallback
-        self.assertEqual(self._vts_tcp_server.
-                         RegisterCallback(func_id, callback_func), True)
+        self._callback_server.RegisterCallback(func_id, callback_func)
 
         # Capture the previous value of global counter
         prev_value = self._counter
@@ -198,8 +195,7 @@ class TestMethods(unittest.TestCase):
         prev_value = self._counter
 
         # Function should be registered with RegisterCallback
-        self.assertEqual(self._vts_tcp_server.
-                         RegisterCallback(func_id, callback_func), True)
+        self._callback_server.RegisterCallback(func_id, callback_func)
 
         # Connect to server
         response_message = self.ConnectToServer(func_id)
@@ -213,7 +209,7 @@ class TestMethods(unittest.TestCase):
         # Now unregister the function and check again
         # Function should be unregistered with UnegisterCallback
         # and the key should also be present
-        self.assertTrue(self._vts_tcp_server.UnregisterCallback(func_id))
+        self._callback_server.UnregisterCallback(func_id)
 
         # Capture the previous value of global counter
         prev_value = self._counter

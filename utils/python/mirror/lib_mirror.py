@@ -23,7 +23,6 @@ from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
-from vts.runners.host.tcp_server import vts_tcp_server
 from vts.utils.python.mirror import hal_mirror
 from vts.utils.python.mirror import mirror_object
 

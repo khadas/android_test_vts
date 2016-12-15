@@ -61,6 +61,15 @@ class AndroidDeviceError(signals.ControllerError):
 
 
 def create(configs):
+    """Creates AndroidDevice controller objects.
+
+    Args:
+        configs: A list of dicts, each representing a configuration for an
+                 Android device.
+
+    Returns:
+        A list of AndroidDevice objects.
+    """
     if not configs:
         raise AndroidDeviceError(ANDROID_DEVICE_EMPTY_CONFIG_MSG)
     elif configs == ANDROID_DEVICE_PICK_ALL_TOKEN:
@@ -77,19 +86,43 @@ def create(configs):
 
     for ad in ads:
         if ad.serial not in connected_ads:
-            raise AndroidDeviceError(
-                ("Android device %s is specified in config"
-                 " but is not attached.") % ad.serial)
-        ad.startAdbLogcat()
-        ad.startVtsAgent()
+            raise DoesNotExistError(("Android device %s is specified in config"
+                                     " but is not attached.") % ad.serial)
+    _startServicesOnAds(ads)
     return ads
 
 
 def destroy(ads):
+    """Cleans up AndroidDevice objects.
+
+    Args:
+        ads: A list of AndroidDevice objects.
+    """
     for ad in ads:
-        ad.stopVtsAgent()
-        if ad.adb_logcat_process:
-            ad.stopAdbLogcat()
+        try:
+            ad.cleanUp()
+        except:
+            ad.log.exception("Failed to clean up properly.")
+
+
+def _startServicesOnAds(ads):
+    """Starts long running services on multiple AndroidDevice objects.
+
+    If any one AndroidDevice object fails to start services, cleans up all
+    existing AndroidDevice objects and their services.
+
+    Args:
+        ads: A list of AndroidDevice objects whose services to start.
+    """
+    running_ads = []
+    for ad in ads:
+        running_ads.append(ad)
+        try:
+            ad.start_services()
+        except:
+            ad.log.exception("Failed to start some services, abort!")
+            destroy(running_ads)
+            raise
 
 
 def _parse_device_list(device_list_str, key):
@@ -272,10 +305,8 @@ def takeBugReports(ads, test_name, begin_time):
 class AndroidDevice(object):
     """Class representing an android device.
 
-    Each object of this class represents one Android device in ACTS, including
-    handles to adb, fastboot, and sl4a clients. In addition to direct adb
-    commands, this object also uses adb port forwarding to talk to the Android
-    device.
+    Each object of this class represents one Android device. The object holds
+    handles to adb, fastboot, and various RPC clients.
 
     Attributes:
         serial: A string that's the serial number of the Androi device.
@@ -298,6 +329,10 @@ class AndroidDevice(object):
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
                             (to get callbacks from agent).
+        hal: HalMirror, in charge of all communications with the HAL layer.
+        lib: LibMirror, in charge of all communications with static and shared
+             native libs.
+        shell: ShellMirror, in charge of all communications with shell.
     """
 
     def __init__(self, serial="", device_port=5001, device_callback_port=5010):
@@ -320,16 +355,20 @@ class AndroidDevice(object):
         self.adb.tcp_forward(self.host_command_port, self.device_command_port)
         self.adb.reverse_tcp_forward(self.device_callback_port,
                                      self.host_callback_port)
-        self.hal = hal_mirror.HalMirror(self.host_command_port,
-                                        self.host_callback_port)
+        self.hal = None
         self.lib = lib_mirror.LibMirror(self.host_command_port)
         self.shell = shell_mirror.ShellMirror(self.host_command_port)
 
     def __del__(self):
+        self.cleanUp()
+
+    def cleanUp(self):
+        """Cleans up the AndroidDevice object and releases any resources it
+        claimed.
+        """
+        self.stopServices()
         if self.host_command_port:
             self.adb.forward("--remove tcp:%s" % self.host_command_port)
-        if self.adb_logcat_process:
-            self.stopAdbLogcat()
 
     @property
     def isBootloaderMode(self):
@@ -501,6 +540,31 @@ class AndroidDevice(object):
         if has_vts_agent:
             self.startVtsAgent()
 
+    def startServices(self):
+        """Starts long running services on the android device.
+
+        1. Start adb logcat capture.
+        2. Start VtsAgent.
+        3. Create HalMirror
+        """
+        try:
+            self.startAdbLogcat()
+        except:
+            self.log.exception("Failed to start adb logcat!")
+            raise
+        self.startVtsAgent()
+        self.hal = hal_mirror.HalMirror(self.host_command_port,
+                                        self.host_callback_port)
+
+    def stopServices(self):
+        """Stops long running services on the android device.
+        """
+        if self.adb_logcat_process:
+            self.stopAdbLogcat()
+        self.stopVtsAgent()
+        if self.hal:
+            self.hal.CleanUp()
+
     def startVtsAgent(self):
         """Start HAL agent on the AndroidDevice.
 
@@ -514,7 +578,8 @@ class AndroidDevice(object):
 
         cleanup_commands = [
             "rm -f /data/local/tmp/vts_driver_*",
-            "rm -f /data/local/tmp/vts_agent_callback*"]
+            "rm -f /data/local/tmp/vts_agent_callback*"
+        ]
         kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
                          "killall fuzzer64", "killall vts_shell_driver32",
                          "killall vts_shell_driver64"]
@@ -524,14 +589,16 @@ class AndroidDevice(object):
             "chmod 755 %s/32/fuzzer32" % DEFAULT_AGENT_BASE_DIR,
             "chmod 755 %s/64/fuzzer64" % DEFAULT_AGENT_BASE_DIR,
             "chmod 755 %s/32/vts_shell_driver32" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/64/vts_shell_driver64" % DEFAULT_AGENT_BASE_DIR]
+            "chmod 755 %s/64/vts_shell_driver64" % DEFAULT_AGENT_BASE_DIR
+        ]
         cleanup_commands.extend(chmod_commands)
         for cmd in cleanup_commands:
             try:
                 self.adb.shell(cmd)
             except adb.AdbError as e:
                 self.log.warning(
-                        "A command to setup the env to start the VTS Agent failed %s", e)
+                    "A command to setup the env to start the VTS Agent failed %s",
+                    e)
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
         cmd = (
             'adb -s {s} shell LD_LIBRARY_PATH={path}/64 {path}/64/vts_hal_agent'
@@ -541,7 +608,8 @@ class AndroidDevice(object):
                  path=DEFAULT_AGENT_BASE_DIR,
                  log=vts_agent_log_path)
         self.vts_agent_process = utils.start_standing_subprocess(
-            cmd, check_health_delay=1)
+            cmd,
+            check_health_delay=1)
 
     def stopVtsAgent(self):
         """Stop the HAL agent running on the AndroidDevice.
