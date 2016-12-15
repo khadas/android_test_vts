@@ -136,12 +136,11 @@ class TestRunner(object):
         self.running: A boolean signifies whether this test run is ongoing or
                       not.
         self.device_serial: A string keeping the device serial ID.
-        self.data_file_path: A string keeping the path of a dir which stores
-                             the test case data file(s).
     """
 
     def __init__(self, test_configs, run_list, device_serial, data_file_path):
         self.test_run_info = {}
+        self.test_run_info["data_file_path"] = data_file_path
         self.test_configs = test_configs
         self.testbed_configs = self.test_configs[keys.ConfigKeys.KEY_TESTBED]
         self.testbed_name = self.testbed_configs[
@@ -159,7 +158,6 @@ class TestRunner(object):
         self.results = records.TestResult()
         self.running = False
         self.device_serial = device_serial
-        self.data_file_path = data_file_path
 
     def __enter__(self):
         return self
