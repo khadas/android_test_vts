@@ -101,7 +101,7 @@ CommandResult* VtsShellDriver::ExecShellCommandNohup(const string& command) {
   char* stderr_file_name = tempnam(temp_dir, "nohup");
 
   stringstream ss;
-  ss << "nohup " << command << " >" << stdout_file_name << " 2>"
+  ss << "nohup sh -c '" << command << "' >" << stdout_file_name << " 2>"
      << stderr_file_name;
 
   // execute the command.
