@@ -49,7 +49,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     private static final String PATH = "PATH";
     protected static final String PYTHONPATH = "PYTHONPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
-    private static final String[] DEFAULT_DEP_MODULES = {"future", "futures", "enum", "protobuf"};
+    private static final String[] DEFAULT_DEP_MODULES = {
+            "future", "futures", "enum", "protobuf", "requests"};
 
     @Option(name = "venv-dir", description = "path of an existing virtualenv to use")
     private File mVenvDir = null;
