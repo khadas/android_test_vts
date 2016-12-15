@@ -36,10 +36,10 @@ import java.util.List;
 /**
  * Sets up a Python virtualenv on the host and installs packages. To activate it, the working
  * directory is changed to the root of the virtualenv.
- * 
+ *
  * This's a fork of PythonVirtualenvPreparer and is forked in order to simplify the change
- * deployment process and time, which are critical for VTS services. That means changes here
- * will be upstreamed gradually.
+ * deployment process and reduce the deployment time, which are critical for VTS services.
+ * That means changes here will be upstreamed gradually.
  */
 @OptionClass(alias = "python-venv")
 public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
@@ -59,6 +59,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     private List<String> mDepModules = new ArrayList<>();
 
     IRunUtil mRunUtil = new RunUtil();
+    String mPip = PIP;
 
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
@@ -70,7 +71,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
         boolean hasDependencies = false;
         if (mRequirementsFile != null) {
-            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, PIP,
+            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip,
                     "install", "-r", mRequirementsFile.getAbsolutePath());
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.e("Installing dependencies from %s failed",
@@ -82,7 +83,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
                 CLog.i("Attempting installation of %s", dep);
-                CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, PIP,
+                CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip,
                         "install", dep);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Installing %s failed", dep);
@@ -131,5 +132,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         mRunUtil.setWorkingDir(binDir);
         String path = System.getenv(PATH);
         mRunUtil.setEnvVariable(PATH, binDir + ":" + path);
+        File pipFile = new File(binDir, PIP);
+        pipFile.setExecutable(true);
+        mPip = pipFile.getAbsolutePath();
     }
 }
