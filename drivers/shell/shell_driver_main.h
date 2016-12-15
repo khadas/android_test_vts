@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
+#ifndef __VTS_DRIVERS_SHELL_SHELL_DRIVER_MAIN_H_
+#define __VTS_DRIVERS_SHELL_SHELL_DRIVER_MAIN_H_
 
-#include "shell_driver_main.h"
-
-#include "shell_driver.h"
-#include "shell_msg_protocol.h"
-
-using namespace std;
-
-int main() {
-  return android::vts::vts_shell_driver_start(android::vts::kAddressUnixSocketPrefix);
-}
+#endif  // __VTS_DRIVERS_SHELL_SHELL_DRIVER_MAIN_H_
