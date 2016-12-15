@@ -46,6 +46,10 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   // Sends a LIST_FUNCTIONS request.
   const char* GetFunctions();
 
+  // Sends a VTS_DRIVER_COMMAND_READ_SPECIFICATION request.
+  const char* ReadSpecification(
+          const string& component_name);
+
   // Sends a CALL_FUNCTION request.
   const char* Call(const string& arg);
 

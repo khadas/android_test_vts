@@ -129,6 +129,12 @@ message FunctionSpecificationMessage {
   // a specification of the call flows of the function.
   repeated CallFlowSpecificationMessage callflow = 31;
 
+  // whether it is a callback.
+  optional bool is_callback = 41;
+
+  // when it is a callback.
+  optional FunctionPointerSpecificationMessage function_pointer = 42;
+
   // profiling data.
   repeated float profiling_data = 101;
 

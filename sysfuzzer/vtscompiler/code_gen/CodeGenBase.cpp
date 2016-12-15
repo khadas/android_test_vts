@@ -105,6 +105,12 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
         cpp_ss << "#include <" << package_path << "/"
                << GetVersionString(message.component_type_version())
                << "/Bn" << base_filename.substr(1) << ".h>" << endl;
+        if (base_filename.substr(0, 1) == "I") {
+          cpp_ss << "#include \""
+                 << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
+                 << "/" << base_filename.substr(1, base_filename.find_last_of(".h"))
+                 << ".vts.h\"" << endl;
+        }
       }
       cpp_ss << "#include <" << package_path << "/"
              << GetVersionString(message.component_type_version())
@@ -173,7 +179,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     }
 
     cpp_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
-           << message.component_name() << "()";
+           << message.component_name() << "(const string& callback_socket_name)";
     cpp_ss << " {" << endl
            << "  return new Vts" << message.component_name().substr(1) << "();"
            << endl;
@@ -295,7 +301,7 @@ void CodeGenBase::GenerateAllHeader(
     h_ss << endl;
 
     h_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
-       << message.component_name() << "();" << endl;
+       << message.component_name() << "(const string& callback_socket_name);" << endl;
     h_ss << endl;
   }
 
@@ -372,6 +378,11 @@ void CodeGenBase::GenerateClassHeader(
       if (attribute.type() == TYPE_ENUM) {
         h_ss << attribute.name() << " " << "Random" << attribute.name() << "();"
                << endl;
+      } else if (attribute.type() == TYPE_STRUCT) {
+        h_ss << "void " << "MessageTo" << attribute.name()
+             << "(const VariableSpecificationMessage& var_msg, "
+             << attribute.name() << "* arg);"
+             << endl;
       }
     }
   }

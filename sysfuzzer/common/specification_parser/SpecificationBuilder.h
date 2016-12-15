@@ -50,6 +50,9 @@ class SpecificationBuilder {
       const int target_class, const int target_type, const float target_version,
       const string submodule_name = "");
 
+  vts::InterfaceSpecificationMessage*
+      FindInterfaceSpecification(const string& component_name);
+
   // Returns FuzzBase for a given interface specification, and adds all the
   // found functions to the fuzzing job queue.
   FuzzerBase* GetFuzzerBaseAndAddAllFunctionsToQueue(
