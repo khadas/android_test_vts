@@ -490,6 +490,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             }
             try {
                 jsonData = FileUtil.readStringFromFile(testRunSummary);
+                CLog.i("Test Result Summary: %s", jsonData);
                 object = new JSONObject(jsonData);
             } catch (IOException e) {
                 CLog.e("Error occurred in parsing Json file : %s", testRunSummary.toPath());
