@@ -16,9 +16,10 @@
 #
 
 import unittest
-import struct
 import math
 import os
+import struct
+
 from vts.utils.python.coverage import GCNO
 from vts.utils.python.coverage import FunctionSummary
 from vts.utils.python.coverage import BlockSummary
