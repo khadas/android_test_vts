@@ -20,6 +20,7 @@ import logging
 import os
 import socket
 
+from vts.runners.host import errors
 from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
 
@@ -36,10 +37,6 @@ COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      202: "CALL_API"}
 
 
-class VtsTcpError(Exception):
-    pass
-
-
 class VtsTcpClient(object):
     """VTS TCP Client class.
 
@@ -54,14 +51,14 @@ class VtsTcpClient(object):
         self.channel = None
         self._mode = mode
 
-    def Connect(self, ip=TARGET_IP, port=TARGET_PORT,
+    def Connect(self, ip=TARGET_IP, command_port=TARGET_PORT,
                 callback_port=None):
         """Connects to a target device.
 
         Args:
             ip: string, the IP address of a target device.
-            port: int, the TCP port which can be used to connect to
-                  a target device.
+            command_port: int, the TCP port which can be used to connect to
+                          a target device.
             callback_port: int, the TCP port number of a host-side callback
                            server.
 
@@ -72,21 +69,12 @@ class VtsTcpClient(object):
             socket.error when the connection fails.
         """
         try:
-            # TODO: This assumption is incorrect. Need to fix.
-            if not ip:  # adb_forwarding
-                logging.info("ADB port forwarding mode - connecting to tcp:%s",
-                             port)
-                ip = "localhost"
-                self.connection = socket.create_connection(
-                    (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
-            else:  # ssh_tunnel
-                logging.info("SSH tunnel mode - connecting to %s:%s", ip, port)
-                self.connection = socket.create_connection(
-                    (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
+            self.connection = socket.create_connection(
+                (ip, command_port), _SOCKET_CONN_TIMEOUT_SECS)
         except socket.error as e:
             logging.exception(e)
-            # TODO: use a custom exception
-            raise
+            raise errors.VtsTcpClientCreationError(
+                "Couldn't connect to %s:%s" % (ip, command_port))
         self.channel = self.connection.makefile(mode="brw")
 
         if callback_port is not None:
@@ -155,7 +143,8 @@ class VtsTcpClient(object):
         if (resp_code == SysMsg_pb2.SUCCESS):
             result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
             if resp.result == "error":
-                raise VtsTcpError("API call error by the VTS stub.")
+                raise errors.VtsTcpCommunicationError(
+                    "API call error by the VTS stub.")
             try:
                 text_format.Merge(resp.result, result)
             except text_format.ParseError as e:
@@ -163,7 +152,8 @@ class VtsTcpClient(object):
             return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
-        raise VtsTcpError("RPC Error, response code for %s is %s" % (arg, resp_code))
+        raise errors.VtsTcpCommunicationError(
+            "RPC Error, response code for %s is %s" % (arg, resp_code))
 
     def SendCommand(self,
                     command_type,
@@ -185,7 +175,8 @@ class VtsTcpClient(object):
             AndroidSystemControlCommandMessage.
         """
         if not self.channel:
-            raise VtsTcpError("channel is None, unable to send command.")
+            raise errors.VtsTcpCommunicationError(
+                "channel is None, unable to send command.")
 
         command_msg = SysMsg_pb2.AndroidSystemControlCommandMessage()
         command_msg.command_type = command_type
