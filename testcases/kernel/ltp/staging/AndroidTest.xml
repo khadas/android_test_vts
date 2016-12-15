@@ -51,7 +51,11 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-timeout" value="5400000" />
         <option name="runtime-hint" value="3600000" />
+<<<<<<< HEAD
         <option name="test-case-path" value="vts/testcases/kernel/ltp/KernelLtpTest" />
+=======
+        <option name="test-case-path" value="vts/testcases/kernel/ltp/staging/KernelLtpStagingTest" />
+>>>>>>> 0c8654a... use a different class name for ltp staging
         <option name="test-config-path" value="vts-config/testcases/kernel/ltp/staging/KernelLtpStagingTest.config" />
     </test>
 </configuration>
