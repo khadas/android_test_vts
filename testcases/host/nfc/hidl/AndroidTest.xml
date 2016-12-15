@@ -30,8 +30,6 @@
         <option name="push" value="libvts_codecoverage64.so->/data/local/tmp/64/libvts_codecoverage.so" />
         <option name="push" value="libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
         <option name="push" value="libvts_multidevice_proto64.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
-        <option name="push" value="libhwbinder.so->/data/local/tmp/32/libhwbinder.so" />
-        <option name="push" value="libhwbinder64.so->/data/local/tmp/64/libhwbinder.so" />
         <option name="push" value="fuzzer32->/data/local/tmp/32/fuzzer32" />
         <option name="push" value="fuzzer64->/data/local/tmp/64/fuzzer64" />
         <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
@@ -40,6 +38,7 @@
         <option name="push" value="vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
         <option name="push" value="Nfc.vts->/data/local/tmp/spec/Nfc.vts" />
         <option name="push" value="NfcClientCallback.vts->/data/local/tmp/spec/NfcClientCallback.vts" />
+        <option name="push" value="types.vts->/data/local/tmp/spec/types.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
