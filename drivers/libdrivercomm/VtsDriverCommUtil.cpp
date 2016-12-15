@@ -39,12 +39,20 @@ namespace android {
 namespace vts {
 
 
-void VtsDriverCommUtil::Close() {
+int VtsDriverCommUtil::Close() {
   cout << __func__ << endl;
+  int result = 0;
   if (sockfd_ != -1) {
-    close(sockfd_);
+    result = close(sockfd_);
+    if(result != 0) {
+      cerr <<  __func__ << ":" << __LINE__ << " ERROR closing socket (errno = "
+          << errno << ")"<< endl;
+    }
+
+    sockfd_ = -1;
   }
-  sockfd_ = -1;
+
+  return result;
 }
 
 
