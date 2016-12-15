@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -52,11 +54,19 @@ public class DashboardMainServlet extends HttpServlet {
         if (currentUser != null) {
             response.setContentType("text/plain");
             HTableDescriptor[] tables = BigtableHelper.getTables();
-            String[] tableNames = new String[tables.length];
-            for (int i = 0; i < tableNames.length; i++) {
-                tableNames[i] = tables[i].getNameAsString();
+            List<String> tableList = new ArrayList<String>();
+
+            // filter tables not starting with 'result'
+            for (HTableDescriptor table : tables) {
+                String tableName = table.getNameAsString();
+                if (tableName.startsWith("result_")) {
+                    tableList.add(tableName);
+               }
             }
-            request.setAttribute("tableNames", tableNames);
+
+            String[] tableArray = new String[tableList.size()];
+            tableList.toArray(tableArray);
+            request.setAttribute("tableNames", tableArray);
             dispatcher = request.getRequestDispatcher(DASHBOARD_MAIN_JSP);
             try {
                 dispatcher.forward(request, response);

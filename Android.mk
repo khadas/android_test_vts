@@ -40,5 +40,7 @@ vts: $(VTS_PYTHON_ZIP)
 
 $(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
 
+# TODO (sahjain) Include java build script (from buil-python.sh) in .mk file
+
 endif # vts
 endif # linux
