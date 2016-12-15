@@ -96,11 +96,13 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
                 CLog.i("Attempting installation of %s", dep);
-                CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip,
-                        "install", dep);
-                if (c.getStatus() != CommandStatus.SUCCESS) {
+                CommandResult result = mRunUtil.runTimedCmd(
+                        BASE_TIMEOUT * 5, mPip, "install", dep);
+                if (result.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Installing %s failed", dep);
-                    throw new TargetSetupError("Failed to install dependencies with pip");
+                    throw new TargetSetupError(String.format(
+                        "Failed to install dependencies with pip. Result %s. stdout: %s, stderr: %s",
+                        result.getStatus(), result.getStdout(), result.getStderr()));
                 }
                 hasDependencies = true;
             }
