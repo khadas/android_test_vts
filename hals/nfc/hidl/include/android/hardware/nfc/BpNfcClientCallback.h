@@ -13,12 +13,12 @@ namespace hardware {
 namespace nfc {
 
 
-class BpNfcClientCallback : public ::android::hidl::BpInterface<INfcClientCallback> {
+class BpNfcClientCallback : public ::android::hardware::BpInterface<INfcClientCallback> {
 public:
-explicit BpNfcClientCallback(const ::android::sp<::android::hidl::IBinder>& _aidl_impl);
+explicit BpNfcClientCallback(const ::android::sp<::android::hardware::IBinder>& _aidl_impl);
 virtual ~BpNfcClientCallback() = default;
-::android::hidl::binder::Status sendEvent(nfc_event_t event, nfc_status_t event_status) override;
-::android::hidl::binder::Status sendData(const INfcClientCallback::nfc_data_t &data ) override;
+::android::hardware::Status sendEvent(nfc_event_t event, nfc_status_t event_status) override;
+::android::hardware::Status sendData(const INfcClientCallback::nfc_data_t &data ) override;
 
 };  // class BpNfcClientCallback
 

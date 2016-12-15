@@ -30,7 +30,7 @@ struct hidl_string {
 };
 #endif // HIDL_TYPES
 
-class INfcClientCallback : public ::android::hidl::IInterface {
+class INfcClientCallback : public ::android::hardware::IInterface {
 public:
 
 DECLARE_META_INTERFACE(NfcClientCallback);
@@ -58,11 +58,11 @@ hidl_vec<uint8_t> data ;
   using sendData_cb = std::function<void()>;
 
 
-  virtual ::android::hidl::binder::Status sendEvent(nfc_event_t event, nfc_status_t event_status) = 0;
-  virtual ::android::hidl::binder::Status sendData(const INfcClientCallback::nfc_data_t &data ) = 0;
+  virtual ::android::hardware::Status sendEvent(nfc_event_t event, nfc_status_t event_status) = 0;
+  virtual ::android::hardware::Status sendData(const INfcClientCallback::nfc_data_t &data ) = 0;
 
 enum Call {
-  SENDEVENT = ::android::hidl::IBinder::FIRST_CALL_TRANSACTION + 0,
+  SENDEVENT = ::android::hardware::IBinder::FIRST_CALL_TRANSACTION + 0,
 
   SENDDATA, 
 };
