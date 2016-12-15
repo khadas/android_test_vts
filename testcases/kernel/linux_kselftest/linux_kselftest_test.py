@@ -16,6 +16,7 @@
 #
 
 import logging
+import os
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
@@ -77,15 +78,25 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
             testcase: string, format testsuite/testname, specifies which
                 test case to run.
         """
-        cmd = "cd %s && chmod 755 %s && %s" % \
-            (config.KSFT_DIR, testcase, testcase)
+        items = testcase.split("/", 1)
+        testsuite = items[0]
+
+        chmod_cmd = "chmod -R 755 %s" % os.path.join(config.KSFT_DIR, testsuite)
+        cd_cmd = "cd %s" % os.path.join(config.KSFT_DIR, testsuite)
+        test_cmd = "./%s" % items[1]
+
+        cmd = [
+            chmod_cmd,
+            "%s && %s" % (cd_cmd, test_cmd)
+        ]
         logging.info("Executing: %s", cmd)
 
         result = self._shell.Execute(cmd)
         logging.info("EXIT_CODE: %s:", result[const.EXIT_CODE])
 
-        ret_code = result[const.EXIT_CODE][0]
-        asserts.assertEqual(ret_code, config.ExitCode.KSFT_PASS)
+        asserts.assertFalse(
+            any(result[const.EXIT_CODE]),
+            "%s failed." % testcase)
 
     def TestNBits(self, n_bit):
         """Runs all 32-bit or all 64-bit tests.
