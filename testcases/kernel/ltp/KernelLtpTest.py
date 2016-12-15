@@ -31,13 +31,13 @@ from vts.testcases.kernel.ltp import ltp_configs
 
 
 class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
-    """Runs the LTP (Linux Test Project) testcases against Android OS kernel.
+    """Runs the LTP (Linux Test Project) test cases against Android OS kernel.
 
     Attributes:
         _dut: AndroidDevice, the device under test
         _shell: ShellMirrorObject, shell mirror object used to execute commands
         _testcases: TestcasesParser, test case input parser
-        _env: dict<stirng, stirng>, dict of environment variable key value pair
+        _env: dict<stirng, string>, dict of environment variable key value pair
     """
     _32BIT = "32"
     _64BIT = "64"
@@ -64,6 +64,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                      self.exclude_filter)
 
         self._dut = self.registerController(android_device)[0]
+        logging.info("product_type: %s", self._dut.product_type)
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
 
