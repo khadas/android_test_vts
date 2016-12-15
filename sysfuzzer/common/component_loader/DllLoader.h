@@ -40,7 +40,7 @@ class DllLoader {
 
   // Loads a DLL file.
   // Returns a handle (void *) if successful; NULL otherwise.
-  void* Load(const char* file_path);
+  void* Load(const char* file_path, bool is_conventional_hal=true);
 
   // Initializes as a conventional HAL.
   // Returns true if it is a conventional HAL, False otherwise.
