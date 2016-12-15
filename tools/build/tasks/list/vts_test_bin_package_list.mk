@@ -20,3 +20,5 @@ vts_test_bin_packages := \
   28838221_poc \
   30149612_poc \
   simpleperf_cpu_hotplug_test \
+  binderThroughputTest \
+
