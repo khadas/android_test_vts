@@ -1,0 +1,101 @@
+// Copyright 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package android.vts;
+
+
+// To specify test case execution result.
+enum TestCaseResult {
+  UNKNOWN_RESULT = 0;
+  PASS = 1;
+  FAIL = 2;
+  TIMEOUT = 3;
+}
+
+
+// To specify the VTS test type.
+enum VtsTestType {
+  UNKNOWN_VTS_TESTTYPE = 0;
+  VTS_HOST_DRIVEN_STRUCTURAL = 1;
+  VTS_HOST_DRIVEN_FUZZING = 2;
+  VTS_TARGET_SIDE_GTEST = 3;
+  VTS_TARGET_SIDE_FUZZING = 4;
+}
+
+
+// To specify a call flow event.
+message AndroidDeviceInfoMessage {
+  // device name (e.g., bullhead).
+  optional bytes name = 1;
+
+  // build type (e.g., userdebug)
+  optional bytes build_type = 2;
+
+  // branch name (e.g., master or nyc-dev)
+  optional bytes branch = 3;
+
+  // API level
+  optional uint32 api_level = 4;
+}
+
+
+// To specify a test case execution report.
+message TestCaseReportMessage {
+  // the test case name.
+  optional bytes name = 1;
+
+  // the test result.
+  optional TestCaseResult test_result = 11;
+
+  // execution start and end time stamp.
+  optional int64 start_timestamp = 21;
+  optional int64 end_timestamp = 22;
+}
+
+
+// To specify a profiling report.
+message ProfilingReportMessage {
+  // the instrumentation point name.
+  optional bytes name = 1;
+
+  // profiling start and end time stamp (for performance).
+  optional int64 start_timestamp = 11;
+  optional int64 end_timestamp = 12;
+}
+
+
+// To specify a test execution report.
+message TestReportMessage {
+  // the test suite name..
+  optional bytes test_suite = 1;
+
+  // the test name.
+  optional bytes test = 2;
+
+  // the test type
+  optional VtsTestType test_type = 3;
+
+  // test case reports
+  repeated TestCaseReportMessage test_case = 11;
+
+  // profiling reports
+  repeated ProfilingReportMessage profiling = 21;
+
+  // execution start and end time stamp.
+  optional int64 start_timestamp = 101;
+  optional int64 end_timestamp = 102;
+}
+
