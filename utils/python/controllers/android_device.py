@@ -610,9 +610,15 @@ class AndroidDevice(object):
         ).format(s=self.serial,
                  path=DEFAULT_AGENT_BASE_DIR,
                  log=vts_agent_log_path)
-        self.vts_agent_process = utils.start_standing_subprocess(
-            cmd,
-            check_health_delay=1)
+        try:
+            self.vts_agent_process = utils.start_standing_subprocess(
+                cmd, check_health_delay=1)
+        except utils.VTSUtilsError as e:
+            logging.exception(e)
+            with open(vts_agent_log_path, 'r') as log_file:
+                logging.error("VTS agent output:\n")
+                logging.error(log_file.read())
+            raise
 
     def stopVtsAgent(self):
         """Stop the HAL agent running on the AndroidDevice.
