@@ -100,6 +100,8 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     cpp_ss << endl;
     GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
 
+    GenerateCppBodyGetAttributeFunction(cpp_ss, message, fuzzer_extended_class_name);
+
     std::stringstream ss;
     // return type
     ss << "android::vts::FuzzerBase* " << endl;
@@ -183,8 +185,11 @@ void CodeGenBase::GenerateClassHeader(
 
   h_ss << " { }" << endl;
   h_ss << " protected:" << endl;
-  h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result, const string& callback_socket_name);"
+  h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl
+       << "            void** result, const string& callback_socket_name);"
+       << endl;
+  h_ss << "  bool GetAttribute(FunctionSpecificationMessage* func_msg," << endl
+       << "            void** result);"
        << endl;
 
   // produce Fuzz method(s) for sub_struct(s).
@@ -219,6 +224,11 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
   h_ss << "  bool Fuzz_" << parent_path << message.name()
        << "(FunctionSpecificationMessage* func_msg," << endl;
   h_ss << "            void** result, const string& callback_socket_name);"
+       << endl;
+
+  h_ss << "  bool GetAttribute_" << parent_path << message.name()
+       << "(FunctionSpecificationMessage* func_msg," << endl;
+  h_ss << "            void** result);"
        << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {

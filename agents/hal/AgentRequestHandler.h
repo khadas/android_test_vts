@@ -74,6 +74,9 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   // for the CALL_API command
   bool CallApi(const string& call_payload);
 
+  // for the VTS_AGENT_COMMAND_GET_ATTRIBUTE
+  bool GetAttribute(const string& payload);
+
   // for the EXECUTE_SHELL command
   bool ExecuteShellCommand(
       const AndroidSystemControlCommandMessage& command_message);

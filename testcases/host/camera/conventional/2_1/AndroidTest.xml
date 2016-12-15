@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for VTS HAL camera test cases">
+<configuration description="Config for VTS HAL camera V2 test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="push" value="libvts_common.so->/data/local/tmp/32/libvts_common.so" />
@@ -50,7 +50,7 @@
         <option name="dep-module" value="protobuf" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/host/camera/conventional/SampleCameraTest" />
-        <option name="test-config-path" value="vts-config/testcases/host/camera/conventional/SampleCameraTest.config" />
+        <option name="test-case-path" value="vts/testcases/host/camera/conventional/2_1/SampleCameraV2Test" />
+        <option name="test-config-path" value="vts-config/testcases/host/camera/conventional/2_1/SampleCameraV2Test.config" />
     </test>
 </configuration>

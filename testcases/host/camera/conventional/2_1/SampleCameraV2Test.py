@@ -24,8 +24,11 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class SampleCameraV2Test(base_test_with_webdb.BaseTestWithWebDbClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
+    # Camera HAL version value (v2.1).
+    VERSION_2_1 = 0x201
+    VERSION_2_4 = 0x204
     MAX_RETRIES = 3
 
     def setUpClass(self):
@@ -34,23 +37,18 @@ class SampleCameraTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                          target_version=2.1,
                                          target_basepaths=["/system/lib/hw"],
                                          bits=32)
-        self.call_count_camera_device_status_change = 0
-        self.call_count_torch_mode_status_change = 0
 
     def setUpTest(self):
         self.call_count_camera_device_status_change = 0
         self.call_count_torch_mode_status_change = 0
 
-    def TestCameraOpenFirst(self):
-        """A simple testcase which just calls an open function."""
-        self.dut.hal.camera.common.methods.open()  # note args are skipped
-
-    def TestCameraInit(self):
-        """A simple testcase which just calls an init function."""
-        self.dut.hal.camera.init()  # expect an exception? (can be undefined)
-
     def testCameraNormal(self):
         """A simple testcase which just emulates a normal usage pattern."""
+        version = self.dut.hal.camera.common.GetAttributeValue("module_api_version")
+        logging.info("version: %s", hex(version))
+        if version != self.VERSION_2_1 and version != self.VERSION_2_4:
+            asserts.skip("HAL version %s is neither v2.1 nor v2.4" % version)
+
         result = self.dut.hal.camera.get_number_of_cameras()
         count = result.return_type.scalar_value.int32_t
         logging.info("# of found cameras: %s", count)

@@ -375,6 +375,155 @@ const string& SpecificationBuilder::CallFunction(
   return *(new string("void"));
 }
 
+const string& SpecificationBuilder::GetAttribute(
+    FunctionSpecificationMessage* func_msg) {
+  if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
+    return empty_string;
+  }
+  cout << __func__ << " "
+       << "loaded if_spec lib" << endl;
+  cout << __func__ << " " << dll_file_name_ << " " << func_msg->name() << endl;
+
+  FuzzerBase* func_fuzzer;
+  if (func_msg->submodule_name().size() > 0) {
+    string submodule_name = func_msg->submodule_name();
+    cout << __func__ << " submodule name " << submodule_name << endl;
+    vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+    if (submodule_fuzzerbase_map_.find(submodule_name)
+        != submodule_fuzzerbase_map_.end()) {
+      cout << __func__ << " call is for a submodule" << endl;
+      func_fuzzer = submodule_fuzzerbase_map_[submodule_name];
+    } else {
+      cerr << __func__ << " called an API of a non-loaded submodule." << endl;
+      return empty_string;
+    }
+  } else {
+    func_fuzzer = GetFuzzerBase(*if_spec_msg_, dll_file_name_,
+                                func_msg->name().c_str());
+  }
+  cout << __func__ << ":" << __LINE__ << endl;
+  if (!func_fuzzer) {
+    cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
+         << dll_file_name_ << endl;
+    return empty_string;
+  }
+
+  void* result;
+  cout << __func__ << " Get Atrribute " << func_msg->name() << " parent_path("
+       << func_msg->parent_path() << ")" << endl;
+  if (!func_fuzzer->GetAttribute(func_msg, &result)) {
+    cerr << __func__ << " attribute not found - todo handle more explicitly"
+         << endl;
+    return *(new string("error"));
+  }
+  cout << __func__ << ": called" << endl;
+
+  if (if_spec_msg_ && if_spec_msg_->component_class() == HAL_HIDL) {
+    cout << __func__ << ": for a HIDL HAL" << endl;
+    func_msg->mutable_return_type()->set_type(TYPE_STRING);
+    func_msg->mutable_return_type()->mutable_string_value()->set_message(
+        *(string*)result);
+    func_msg->mutable_return_type()->mutable_string_value()->set_length(
+        ((string*)result)->size());
+    free(result);
+    string* output = new string();
+    google::protobuf::TextFormat::PrintToString(*func_msg, output);
+    return *output;
+  } else {
+    cout << __func__ << ": for a non-HIDL HAL" << endl;
+    if (func_msg->return_type().type() == TYPE_PREDEFINED) {
+      // TODO: actually handle this case.
+      if (result != NULL) {
+        // loads that interface spec and enqueues all functions.
+        cout << __func__ << " return type: " << func_msg->return_type().type()
+             << endl;
+      } else {
+        cout << __func__ << " return value = NULL" << endl;
+      }
+      cerr << __func__ << " todo: support aggregate" << endl;
+      string* output = new string();
+      google::protobuf::TextFormat::PrintToString(*func_msg, output);
+      return *output;
+    } else if (func_msg->return_type().type() == TYPE_SCALAR) {
+      // TODO handle when the size > 1.
+      if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int32_t")) {
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_int32_t(
+            *((int*)(&result)));
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      } else if (!strcmp(func_msg->return_type().scalar_type().c_str(), "uint32_t")) {
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_uint32_t(
+            *((int*)(&result)));
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      } else if (!strcmp(func_msg->return_type().scalar_type().c_str(), "int16_t")) {
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_int16_t(
+            *((int*)(&result)));
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      } else if (!strcmp(func_msg->return_type().scalar_type().c_str(), "uint16_t")) {
+        func_msg->mutable_return_type()->mutable_scalar_value()->set_uint16_t(
+            *((int*)(&result)));
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      }
+    } else if (func_msg->return_type().type() == TYPE_SUBMODULE) {
+      cerr << __func__ << "[driver:hal] return type TYPE_SUBMODULE" << endl;
+      if (result != NULL) {
+        // loads that interface spec and enqueues all functions.
+        cout << __func__ << " return type: " << func_msg->return_type().type()
+             << endl;
+      } else {
+        cout << __func__ << " return value = NULL" << endl;
+      }
+      // find a VTS spec for that module
+      string submodule_name = func_msg->return_type().predefined_type().substr(
+          0, func_msg->return_type().predefined_type().size() - 1);
+      vts::InterfaceSpecificationMessage* submodule_iface_spec_msg;
+      if (submodule_if_spec_map_.find(submodule_name)
+          != submodule_if_spec_map_.end()) {
+        cout << __func__ << " submodule InterfaceSpecification already loaded"
+             << endl;
+        submodule_iface_spec_msg = submodule_if_spec_map_[submodule_name];
+        func_msg->set_allocated_return_type_submodule_spec(
+            submodule_iface_spec_msg);
+      } else {
+        submodule_iface_spec_msg =
+            FindInterfaceSpecification(
+                if_spec_msg_->component_class(), if_spec_msg_->component_type(),
+                if_spec_msg_->component_type_version(), submodule_name);
+        if (!submodule_iface_spec_msg) {
+          cerr << __func__ << " submodule InterfaceSpecification not found" << endl;
+        } else {
+          cout << __func__ << " submodule InterfaceSpecification found" << endl;
+          func_msg->set_allocated_return_type_submodule_spec(
+              submodule_iface_spec_msg);
+          FuzzerBase* func_fuzzer = GetFuzzerBaseSubModule(
+              *submodule_iface_spec_msg, result);
+          submodule_if_spec_map_[submodule_name] = submodule_iface_spec_msg;
+          submodule_fuzzerbase_map_[submodule_name] = func_fuzzer;
+        }
+      }
+      string* output = new string();
+      google::protobuf::TextFormat::PrintToString(*func_msg, output);
+      return *output;
+    }
+  }
+  return *(new string("void"));
+}
+
 bool SpecificationBuilder::Process(const char* dll_file_name,
                                    const char* spec_lib_file_path,
                                    int target_class, int target_type,

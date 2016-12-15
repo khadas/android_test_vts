@@ -90,6 +90,48 @@ class MirrorObject(object):
         logging.debug(result)
         return result
 
+    def GetAttributeValue(self, attribute_name):
+        """Retrieves the value of an attribute from a target.
+
+        Args:
+            attribute_name: string, the name of an attribute.
+
+        Returns:
+            FunctionSpecificationMessage which contains the value.
+        """
+        def RemoteCallToGetAttribute(*args, **kwargs):
+            """Makes a remote call and retrieves an attribute."""
+            func_msg = self.GetAttribute(attribute_name)
+            if not func_msg:
+                raise MirrorObjectError("attribute %s unknown", func_msg)
+
+            logging.debug("remote call %s.%s", self._parent_path, attribute_name)
+            logging.info("remote call %s%s", attribute_name, args)
+            if self._parent_path:
+                func_msg.parent_path = self._parent_path
+            try:
+                logging.info("component_class %s",
+                             self._if_spec_msg.component_class)
+                if (self._if_spec_msg.component_class
+                    == IfaceSpecMsg.HAL_CONVENTIONAL_SUBMODULE):
+                    submodule_name = self._if_spec_msg.original_data_structure_name
+                    if submodule_name.endswith("*"):
+                        submodule_name = submodule_name[:-1]
+                    func_msg.submodule_name = submodule_name
+            except AttributeError as e:
+                logging.exception("%s" % e)
+                pass
+            result = self._client.GetAttribute(
+                text_format.MessageToString(func_msg))
+            logging.debug(result)
+            return result
+
+        var_msg = self.GetAttribute(attribute_name)
+        if var_msg:
+            logging.debug("attribute: %s", var_msg)
+            return RemoteCallToGetAttribute()
+        raise MirrorObjectError("unknown attribute name %s" % attribute_name)
+
     def CleanUp(self):
         self._client.Disconnect()
 
@@ -107,6 +149,26 @@ class MirrorObject(object):
             for api in self._if_spec_msg.api:
                 if api.name == api_name:
                     return copy.copy(api)
+        return None
+
+    def GetAttribute(self, attribute_name):
+        """Returns the Message.
+        """
+        logging.debug("GetAttribute %s for %s",
+                      attribute_name, self._if_spec_msg)
+        if self._if_spec_msg.attribute:
+            for attribute in self._if_spec_msg.attribute:
+                if attribute.name == attribute_name:
+                    func_msg = IfaceSpecMsg.FunctionSpecificationMessage()
+                    func_msg.name = attribute.name
+                    func_msg.return_type.type = attribute.type
+                    if func_msg.return_type.type == IfaceSpecMsg.TYPE_SCALAR:
+                        func_msg.return_type.scalar_type = attribute.scalar_type
+                    else:
+                        func_msg.return_type.predefined_type = attribute.predefined_type
+                    logging.info("GetAttribute attribute: %s", attribute)
+                    logging.info("GetAttribute request: %s", func_msg)
+                    return copy.copy(func_msg)
         return None
 
     def GetSubStruct(self, sub_struct_name):
@@ -247,12 +309,16 @@ class MirrorObject(object):
 
             if self._parent_path:
                 func_msg.parent_path = self._parent_path
-            logging.info("component_class %s", self._if_spec_msg.component_class)
-            if self._if_spec_msg.component_class == IfaceSpecMsg.HAL_CONVENTIONAL_SUBMODULE:
-                submodule_name = self._if_spec_msg.original_data_structure_name
-                if submodule_name.endswith("*"):
-                    submodule_name = submodule_name[:-1]
-                func_msg.submodule_name = submodule_name
+
+            if isinstance(self._if_spec_msg, IfaceSpecMsg.InterfaceSpecificationMessage):
+                if self._if_spec_msg.component_class:
+                    logging.info("component_class %s",
+                                 self._if_spec_msg.component_class)
+                    if self._if_spec_msg.component_class == IfaceSpecMsg.HAL_CONVENTIONAL_SUBMODULE:
+                        submodule_name = self._if_spec_msg.original_data_structure_name
+                        if submodule_name.endswith("*"):
+                            submodule_name = submodule_name[:-1]
+                        func_msg.submodule_name = submodule_name
             result = self._client.CallApi(text_format.MessageToString(func_msg))
             logging.debug(result)
             return result

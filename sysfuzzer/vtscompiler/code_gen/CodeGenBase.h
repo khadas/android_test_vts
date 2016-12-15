@@ -44,6 +44,11 @@ class CodeGenBase {
       std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
+  // Generates code for GetAttribute(...) function body.
+  virtual void GenerateCppBodyGetAttributeFunction(
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) = 0;
+
   // Generates header code to declare the C/C++ global functions.
   virtual void GenerateHeaderGlobalFunctionDeclarations(
       std::stringstream& h_ss, const string& function_prototype) = 0;

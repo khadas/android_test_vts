@@ -48,6 +48,8 @@ function vts_multidevice_target_setup {
   adb shell mkdir /data/local/tmp/spec
   adb push specification/hal_conventional/CameraHalV2.vts /data/local/tmp/spec/CameraHalV2.vts
   adb push specification/hal_conventional/CameraHalV2hw_device_t.vts /data/local/tmp/spec/CameraHalV2hw_device_t.vts
+  adb push specification/hal_conventional/CameraHalV3.vts /data/local/tmp/spec/CameraHalV3.vts
+  adb push specification/hal_conventional/CameraHalV3camera3_device_ops_t.vts /data/local/tmp/spec/CameraHalV3camera3_device_ops_t.vts
   adb push specification/hal_conventional/GpsHalV1.vts /data/local/tmp/spec/GpsHalV1.vts
   adb push specification/hal_conventional/GpsHalV1GpsInterface.vts /data/local/tmp/spec/GpsHalV1GpsInterface.vts
   adb push specification/hal_conventional/LightHalV1.vts /data/local/tmp/spec/LightHalV1.vts

@@ -12,6 +12,12 @@ sub_struct: {
   name: "common"
   is_pointer: true
 
+  attribute: {
+    name: "module_api_version"
+    type: TYPE_SCALAR
+    scalar_type: "uint16_t"
+  }
+
   sub_struct: {
     name: "methods"
 
