@@ -16,6 +16,11 @@
 <configuration description="Run VTS Host-Driven Tests">
     <include name="reporters/vts" />
     <template-include name="reporters" default="reporters/empty" />
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <option name="cleanup" value="true" />
+        <option name="push" value="libvts_common.so->/data/local/tmp/libvts_common.so" />
+        <option name="append-bitness" value="false" />
+    </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="test/vts/testcases/host/sample/SampleLightTest" />
         <option name="test-config-path" value="test/vts/testcases/host/sample/SampleLightTest.config" />
