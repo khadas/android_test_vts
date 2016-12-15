@@ -16,5 +16,5 @@
 vts_test_lib_hal_packages := \
   android.hardware.tests.libbinder \
   android.hardware.tests.libhwbinder@1.0 \
-  lights.bullhead-vts \
+  lights.vts \
 
