@@ -262,9 +262,11 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
         String content = FileUtil.readStringFromFile(new File(
             Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+        CLog.i("Loaded original test config %s", content);
         if (content != null && !content.isEmpty()) {
             jsonObject = new JSONObject(content);
         }
+        CLog.i("Built a Json object using the loaded original test config");
 
         JSONArray deviceArray = new JSONArray();
         JSONObject deviceItemObject = new JSONObject();
@@ -295,19 +297,22 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
                    testBedArray.length());
             throw new RuntimeException("Failed to produce VTS runner test config");
         }
-
         jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
+        CLog.i("Added %s to the Json object", DATA_FILE_PATH);
 
         JSONObject build = new JSONObject();
         build.put(BUILD_ID, mBuildInfo.getBuildId());
         build.put(BUILD_TARGET, mBuildInfo.getBuildTargetName());
         jsonObject.put(BUILD, build);
+        CLog.i("Added %s to the Json object", BUILD);
 
         JSONObject suite = new JSONObject();
         suite.put(NAME, mBuildInfo.getTestTag());
         jsonObject.put(TEST_SUITE, suite);
+        CLog.i("Added %s to the Json object", TEST_SUITE);
 
         jsonObject.put(LOG_PATH, log_path);
+        CLog.i("Added %s to the Json object", LOG_PATH);
         return jsonObject;
     }
 
