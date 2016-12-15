@@ -23,7 +23,7 @@ from google.protobuf import text_format
 
 
 class MirrorObject(object):
-  """Actual mirror object.
+    """Actual mirror object.
 
   Args:
     _client: the TCP client instance.
@@ -31,12 +31,12 @@ class MirrorObject(object):
         mirror.
   """
 
-  def __init__(self, client, msg):
-    self._client = client
-    self._if_spec_msg = msg
+    def __init__(self, client, msg):
+        self._client = client
+        self._if_spec_msg = msg
 
-  def GetApi(self, api_name):
-    """Returns the Function Specification Message.
+    def GetApi(self, api_name):
+        """Returns the Function Specification Message.
 
     Args:
       api_name: string, the name of the target function API.
@@ -44,35 +44,38 @@ class MirrorObject(object):
     Returns:
       FunctionSpecificationMessage if found, None otherwise
     """
-    for api in self._if_spec_msg.api:
-      if api.name == api_name:
-        return api
-    return None
+        for api in self._if_spec_msg.api:
+            if api.name == api_name:
+                return api
+        return None
 
-  def __getattr__(self, api_name):
-    """Calls a target component's API.
+    def __getattr__(self, api_name):
+        """Calls a target component's API.
 
     Args:
       api_name: string, the name of an API function to call.
       *args: a list of arguments
       **kwargs: a dict for the arg name and value pairs
     """
-    def RemoteCall(*args, **kwargs):
-      logging.info("remote call %s", api_name)
-      func_msg = self.GetApi(api_name)
-      if not func_msg:
-        logging.fatal("unknown api name %s", api_name)
 
-      logging.info(func_msg)
-      for arg in func_msg.arg:
-        # TODO: use args and kwargs
-        if arg.primitive_type == "pointer":
-          value = arg.values.add();
-          value.pointer = 0
-      logging.info(func_msg)
+        def RemoteCall(*args, **kwargs):
+            logging.info("remote call %s", api_name)
+            func_msg = self.GetApi(api_name)
+            if not func_msg:
+                logging.fatal("unknown api name %s", api_name)
 
-      self._client.SendCommand(AndroidSystemControlMessage_pb2.CALL_FUNCTION,
-                               text_format.MessageToString(func_msg));
-      resp = self._client.RecvResponse()
-      logging.info(resp)
-    return RemoteCall
+            logging.info(func_msg)
+            for arg in func_msg.arg:
+                # TODO: use args and kwargs
+                if arg.primitive_type == "pointer":
+                    value = arg.values.add()
+                    value.pointer = 0
+            logging.info(func_msg)
+
+            self._client.SendCommand(
+                AndroidSystemControlMessage_pb2.CALL_FUNCTION,
+                text_format.MessageToString(func_msg))
+            resp = self._client.RecvResponse()
+            logging.info(resp)
+
+        return RemoteCall

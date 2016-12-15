@@ -34,7 +34,7 @@ COMMAND_TYPE_NAME = {1: "Check binder service",
 
 
 class VtsTcpClient(object):
-  """VTS TCP Client class.
+    """VTS TCP Client class.
 
   Attribute:
     connection: a TCP socket instance.
@@ -42,13 +42,13 @@ class VtsTcpClient(object):
     _mode: the connection mode (adb_forwarding or ssh_tunnel)
   """
 
-  def __init__(self, mode="adb_forwarding"):
-    self.connection = None
-    self.channel = None
-    self._mode = mode
+    def __init__(self, mode="adb_forwarding"):
+        self.connection = None
+        self.channel = None
+        self._mode = mode
 
-  def Connect(self, ip=TARGET_IP, port=TARGET_PORT):
-    """Connects to a target device.
+    def Connect(self, ip=TARGET_IP, port=TARGET_PORT):
+        """Connects to a target device.
 
     Args:
       ip: string, the IP adress of a target device.
@@ -57,75 +57,82 @@ class VtsTcpClient(object):
     Raises:
       Exception when the connection fails.
     """
-    try:
-      if self._mode == "adb_forwarding":
-        os.system("adb forward --remove tcp:%s" % port)
-        os.system("adb forward tcp:%s tcp:%s" % (port, port))
-        ip = "localhost"
-        logging.info("Connecting to %s:%s", ip, port)
-        self.connection = socket.create_connection((ip, port),
-                                                   _SOCKET_CONN_TIMEOUT_SECS)
-      elif self._mode == "ssh_tunnel":
-        logging.info("Connecting to %s:%s", ip, port)
-        self.connection = socket.create_connection((ip, port),
-                                                   _SOCKET_CONN_TIMEOUT_SECS)
-    except socket.error as e:
-      logging.exception(e)
-      # TODO: use a custom exception
-      raise
-    self.channel = self.connection.makefile(mode="brw")
+        try:
+            if self._mode == "adb_forwarding":
+                os.system("adb forward --remove tcp:%s" % port)
+                os.system("adb forward tcp:%s tcp:%s" % (port, port))
+                ip = "localhost"
+                logging.info("Connecting to %s:%s", ip, port)
+                self.connection = socket.create_connection(
+                    (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
+            elif self._mode == "ssh_tunnel":
+                logging.info("Connecting to %s:%s", ip, port)
+                self.connection = socket.create_connection(
+                    (ip, port), _SOCKET_CONN_TIMEOUT_SECS)
+        except socket.error as e:
+            logging.exception(e)
+            # TODO: use a custom exception
+            raise
+        self.channel = self.connection.makefile(mode="brw")
 
-  def Disconnect(self):
-    """Disconnects from the target device."""
-    if self.connection is not None:
-      self.channel = None
-      self.connection.close()
-      self.connection = None
+    def Disconnect(self):
+        """Disconnects from the target device."""
+        if self.connection is not None:
+            self.channel = None
+            self.connection.close()
+            self.connection = None
 
-  def SendCommand(self, command_type, target_name, target_class=None,
-                  target_type=None, target_version=None):
-    """Sends a command.
+    def SendCommand(self,
+                    command_type,
+                    target_name,
+                    target_class=None,
+                    target_type=None,
+                    target_version=None):
+        """Sends a command.
 
     Args:
       command_type: integer, the command type.
       target_name: string, the target name.
     """
-    if not self.channel:
-      Connect()
+        if not self.channel:
+            Connect()
 
-    command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage()
-    command_msg.command_type = command_type
-    logging.info("sending a command (type %s)", COMMAND_TYPE_NAME[command_type])
-    command_msg.target_name = target_name
+        command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage(
+        )
+        command_msg.command_type = command_type
+        logging.info("sending a command (type %s)",
+                     COMMAND_TYPE_NAME[command_type])
+        command_msg.target_name = target_name
 
-    if target_class is not None:
-      command_msg.target_class = target_class
+        if target_class is not None:
+            command_msg.target_class = target_class
 
-    if target_type is not None:
-      command_msg.target_type = target_type
+        if target_type is not None:
+            command_msg.target_type = target_type
 
-    if target_version is not None:
-      command_msg.target_version = int(target_version * 100)
+        if target_version is not None:
+            command_msg.target_version = int(target_version * 100)
 
-    message = command_msg.SerializeToString()
-    message_len = len(message)
-    logging.debug("sending %d bytes", message_len)
-    self.channel.write(str(message_len) + b'\n')
-    self.channel.write(message)
-    self.channel.flush()
+        message = command_msg.SerializeToString()
+        message_len = len(message)
+        logging.debug("sending %d bytes", message_len)
+        self.channel.write(str(message_len) + b'\n')
+        self.channel.write(message)
+        self.channel.flush()
 
-  def RecvResponse(self):
-    """Receives and parses the response, and returns the relevant ResponseMessage."""
-    try:
-      header = self.channel.readline()
-      len = int(header.strip("\n"))
-      data = self.channel.read(len)
-      response_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlResponseMessage()
-      response_msg.ParseFromString(data)
-      logging.info(
-          "Response %s",
-          "succcess" if response_msg.response_code == AndroidSystemControlMessage_pb2.SUCCESS else "fail")
-      return response_msg
-    except socket.timeout as e:
-      logging.exception(e)
-      return None
+    def RecvResponse(self):
+        """Receives and parses the response, and returns the relevant ResponseMessage."""
+        try:
+            header = self.channel.readline()
+            len = int(header.strip("\n"))
+            data = self.channel.read(len)
+            response_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlResponseMessage(
+            )
+            response_msg.ParseFromString(data)
+            logging.info("Response %s", "succcess"
+                         if response_msg.response_code ==
+                         AndroidSystemControlMessage_pb2.SUCCESS else "fail")
+            return response_msg
+        except socket.timeout as e:
+            logging.exception(e)
+            return None

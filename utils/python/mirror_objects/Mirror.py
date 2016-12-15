@@ -19,26 +19,14 @@ from vts.utils.python.mirror_objects import MirrorBase
 
 
 class Mirror(MirrorBase.MirrorBase):
-  """HAL Mirror Object."""
+    """HAL Mirror Object."""
 
-  def __init__(self, target_basepath=None):
-    if target_basepath:
-      self._target_basepath = target_basepath
+    def __init__(self, target_basepath=None):
+        if target_basepath:
+            self._target_basepath = target_basepath
 
-  def InitHal(self, target_type, target_version, target_basepath=None):
-    """Initializes a HAL.
-
-    Args:
-      target_type: string, the target type name (e.g., light, camera).
-      target_version: float, the target component version (e.g., 1.0).
-      target_basepath: string, the base path of where a target file is stored
-          in.
-    """
-    super(Mirror, self).Init("hal", target_type, target_version,
-                             target_basepath)
-
-  def InitLegacyHal(self, target_type, target_version, target_basepath=None):
-    """Initializes a legacy HAL (e.g., wifi).
+    def InitHal(self, target_type, target_version, target_basepath=None):
+        """Initializes a HAL.
 
     Args:
       target_type: string, the target type name (e.g., light, camera).
@@ -46,5 +34,17 @@ class Mirror(MirrorBase.MirrorBase):
       target_basepath: string, the base path of where a target file is stored
           in.
     """
-    super(Mirror, self).Init("legacy_hal", target_type, target_version,
-                             target_basepath)
+        super(Mirror, self).Init("hal", target_type, target_version,
+                                 target_basepath)
+
+    def InitLegacyHal(self, target_type, target_version, target_basepath=None):
+        """Initializes a legacy HAL (e.g., wifi).
+
+    Args:
+      target_type: string, the target type name (e.g., light, camera).
+      target_version: float, the target component version (e.g., 1.0).
+      target_basepath: string, the base path of where a target file is stored
+          in.
+    """
+        super(Mirror, self).Init("legacy_hal", target_type, target_version,
+                                 target_basepath)
