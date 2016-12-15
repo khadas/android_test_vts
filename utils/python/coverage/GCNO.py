@@ -28,6 +28,7 @@ each block.
     summary = parse(fileName)
 """
 
+import logging
 import struct
 import sys
 from vts.utils.python.coverage import ArcSummary
@@ -43,24 +44,6 @@ class FileFormatError(Exception):
     or when the end of file is reached unexpectedly."""
 
     pass
-
-
-def parse(file_name):
-    """Parses the .gcno file specified by the input.
-
-    Reads the .gcno file specified and parses the information describing
-    basic blocks, functions, and arcs.
-
-    Args:
-        file_name: A string file path to a .gcno file
-
-    Returns:
-        A GCNOSummary object containing information about all of the
-        fuctions, blocks, and arcs in the .gcno file.
-    """
-
-    with open(file_name, 'rb') as stream:
-        return Parser(stream).parse()
 
 
 class Parser(object):
@@ -282,6 +265,35 @@ class Parser(object):
             if line:
                 lines.append(line)
         func.blocks[block_number].lines = lines
+
+
+def parse(file_name):
+    """Parses the .gcno file specified by the input.
+
+    Reads the .gcno file specified and parses the information describing
+    basic blocks, functions, and arcs.
+
+    Args:
+        file_name: A string file path to a .gcno file
+
+    Returns:
+        A GCNOSummary object containing information about all of the
+        fuctions, blocks, and arcs in the .gcno file.
+    """
+
+    with open(file_name, 'rb') as stream:
+        return Parser(stream).parse()
+
+
+def GenerateCoverageReport(src_file_content, gcov_file_content, basicblock_id_list):
+    """Returns the produced html file contents."""
+    logging.info("GenerateCoverageReport: src_file_content %s",
+                 src_file_content)
+    logging.info("GenerateCoverageReport: gcov_file_content %s",
+                 gcov_file_content)
+    logging.info("GenerateCoverageReport: basicblock_id_list %s",
+                 basicblock_id_list)
+    return "<table border=0><tr><td>Code coverage will show up at here</table>"
 
 
 if __name__ == '__main__':

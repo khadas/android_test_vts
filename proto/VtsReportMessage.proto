@@ -96,7 +96,7 @@ message TestCaseReportMessage {
   optional int64 start_timestamp = 21;
   optional int64 end_timestamp = 22;
 
-  // coverage reports
+  // coverage report per file
   repeated CoverageReportMessage coverage = 31;
 }
 
@@ -114,15 +114,26 @@ message ProfilingReportMessage {
 
 // To specify a coverage report.
 message CoverageReportMessage {
-  // source or object file name.
-  optional bytes file_name = 1;
+  // the directory path of a source file.
+  optional bytes dir_path = 1;
+
+  // the name of the source file.
+  optional bytes file_name = 2;
+
+  // produced html report.
+  optional bytes html = 3;
+
+  // the source file content.
+  optional bytes source_code = 11;
 
   // gcov produced data files.
-  optional bytes gcno = 11;
-  optional bytes gcda = 12;
+  optional bytes gcno = 21;
+  optional bytes gcda = 22;
 
   // measured coverage data.
-  repeated bytes data = 101;
+  repeated bytes data = 31;
+  // generated gcov data file.
+  optional bytes gcov = 32;
 }
 
 
