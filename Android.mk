@@ -25,6 +25,7 @@ include $(CLEAR_VARS)
 
 VTS_PYTHON_ZIP := $(HOST_OUT)/vts_runner_python/vts_runner_python.zip
 
+.PHONY: $(VTS_PYTHON_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	@mkdir -p $(dir $@)
@@ -36,8 +37,7 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	$(hide) unzip $@ -d $(HOST_OUT)/vts/android-vts/testcases
 	$(hide) touch -f $(HOST_OUT)/vts/android-vts/testcases/vts/__init__.py
 
-.PHONY: vts_runner_python
-vts_runner_python: $(VTS_PYTHON_ZIP)
+.PHONY: vts
 vts: $(VTS_PYTHON_ZIP)
 
 $(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
