@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
+#include "shell_driver_test_client.h"
 
 #include <gtest/gtest.h>
 #include <errno.h>
 #include <limits.h>
 #include <unistd.h>
 
-
 // include code to be tested
-extern "C" {
-#include <shell_driver.h>
-#include <shell_driver_test_client.h>
-}
+#include "shell_driver.h"
 
 
 /*
@@ -77,23 +74,14 @@ static char* test_shell_command_output(char* command, char* addr_socket) {
  * This test tests whether the output of "uname" is "Linux\n"
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_uname) {
-  char* cmd;
-  char* expected;
-  char* expected_windows;
-  char* expected_darwin;
-  char* addr_socket;
+  char cmd[] = "uname";
+  char expected[] = "Linux\n";
+  char addr_socket[] = "test1_1.tmp";
   char* output;
-
-  cmd = strdup("uname");
-  expected = strdup("Linux\n");\
-  addr_socket = strdup("test1_1.tmp");
 
   output = test_shell_command_output(cmd, addr_socket);
   ASSERT_TRUE(!strcmp(output, expected));
 
-  free(cmd);
-  free(expected);
-  free(addr_socket);
   free(output);
 }
 
@@ -101,21 +89,14 @@ TEST(vts_shell_driver_start, vts_shell_driver_unit_test_uname) {
  * This test tests whether the output of "uname" is "Linux\n"
  */
 TEST(vts_shell_driver_start, vts_shell_driver_unit_test_which_ls) {
-  char* cmd;
-  char* expected;
-  char* addr_socket;
+  char cmd[] = "which ls";
+  char expected[] = "/system/bin/ls\n";
+  char addr_socket[] = "test1_2.tmp";
   char* output;
-
-  cmd = strdup("which ls");
-  expected = strdup("/system/bin/ls\n");
-  addr_socket = strdup("test1_2.tmp");
 
   output = test_shell_command_output(cmd, addr_socket);
   ASSERT_TRUE(!strcmp(output, expected));
 
-  free(cmd);
-  free(expected);
-  free(addr_socket);
   free(output);
 }
 

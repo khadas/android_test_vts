@@ -25,7 +25,7 @@
 
 
 int kLengthTextBufferSize = 6;
-char* kAddressUnixSocketPrefix = "./tmp_unix_socket_test/";
+char kAddressUnixSocketPrefix[] = "./tmp_unix_socket_test/";
 
 /*
  * read a line from socket connection into a char buffer up to length of size.
@@ -99,7 +99,7 @@ char* read_with_length(int connection_fd) {
   int msglen = atoi(msg_buf);
 
   // read command from client
-  char* msg = malloc(msglen + 1);
+  char* msg = (char*)malloc(msglen + 1);
 
   int nbytes;
   nbytes = read(connection_fd, msg, msglen);
