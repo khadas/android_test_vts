@@ -81,6 +81,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             isTimeVal = true)
     private static long TEST_TIMEOUT = 1000 * 60 * 5;
 
+    @Option(name = "test-module-name",
+        description = "The name for a test module.")
+    private String mTestModuleName = null;
+
     @Option(name = "test-case-path",
             description = "The path for test case.")
     private String mTestCasePath = null;
@@ -326,11 +330,19 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         if (testBedArray.length() == 0) {
             JSONObject device = new JSONObject();
             String testName;
-            if (mTestConfigPath != null) {
-                testName = new File(mTestConfigPath).getName();
-                testName = testName.replace(CONFIG_FILE_EXTENSION, "");
+            if (mTestModuleName != null) {
+                testName = mTestModuleName;
             } else {
-                testName = new File(mTestCasePath).getName();
+                CLog.w("--test-module-name not set (not recommended); deriving automatically");
+                if (mTestConfigPath != null) {
+                    testName = new File(mTestConfigPath).getName();
+                    testName = testName.replace(CONFIG_FILE_EXTENSION, "");
+                } else if (mTestCasePath != null) {
+                    testName = new File(mTestCasePath).getName();
+                } else {
+                    throw new RuntimeException(
+                        "Failed to derive test module name; use --test-module-name option");
+                }
             }
             CLog.logAndDisplay(LogLevel.INFO, "Setting test name as %s", testName);
             device.put(NAME, testName);
