@@ -42,6 +42,10 @@ class LegacyHalCodeGen : public HalCodeGen {
                                    const InterfaceSpecificationMessage& message,
                                    const string& fuzzer_extended_class_name);
 
+  void GenerateCppBodyGetAttributeFunction(
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
   void GenerateHeaderGlobalFunctionDeclarations(
       std::stringstream& h_ss, const string& function_prototype);
 

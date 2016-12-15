@@ -19,6 +19,8 @@ LOCAL_PATH := $(call my-dir)
 vtslib_interfacespec_srcfiles := \
   hal_conventional/CameraHalV2.vts \
   hal_conventional/CameraHalV2hw_device_t.vts \
+  hal_conventional/CameraHalV3.vts \
+  hal_conventional/CameraHalV3camera3_device_ops_t.vts \
   hal_conventional/GpsHalV1.vts \
   hal_conventional/GpsHalV1GpsInterface.vts \
   hal_conventional/LightHalV1.vts \
@@ -127,6 +129,8 @@ vts_spec_file8 := $(VTS_TESTCASES_OUT)/NfcClientCallback.vts
 vts_spec_file9 := $(VTS_TESTCASES_OUT)/BluetoothHalV1.vts
 vts_spec_file10 := $(VTS_TESTCASES_OUT)/BluetoothHalV1bt_interface_t.vts
 vts_spec_file11 := $(VTS_TESTCASES_OUT)/libcutilsV1.vts
+vts_spec_file12 := $(VTS_TESTCASES_OUT)/CameraHalV3.vts
+vts_spec_file13 := $(VTS_TESTCASES_OUT)/CameraHalV3camera3_device_ops_t.vts
 
 $(vts_spec_file1): $(LOCAL_PATH)/hal_conventional/CameraHalV2.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
@@ -172,6 +176,13 @@ $(vts_spec_file11): $(LOCAL_PATH)/lib_bionic/libcutilsV1.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8) $(vts_spec_file9) $(vts_spec_file10) $(vts_spec_file11)
+$(vts_spec_file12): $(LOCAL_PATH)/hal_conventional/CameraHalV3.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
 
+$(vts_spec_file13): $(LOCAL_PATH)/hal_conventional/CameraHalV3camera3_device_ops_t.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8) $(vts_spec_file9) $(vts_spec_file10) $(vts_spec_file11) $(vts_spec_file12) $(vts_spec_file13)
 

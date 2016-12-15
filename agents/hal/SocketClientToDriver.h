@@ -49,6 +49,9 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   // Sends a CALL_FUNCTION request.
   const char* Call(const string& arg);
 
+  // Sends a GET_ATTRIBUTE request.
+  const char* GetAttribute(const string& arg);
+
   // Sends a GET_STATUS request.
   int32_t Status(int32_t type);
 

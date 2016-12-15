@@ -110,6 +110,24 @@ void LibSharedCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
+void LibSharedCodeGen::GenerateCppBodyGetAttributeFunction(
+    std::stringstream& cpp_ss,
+    const InterfaceSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
+  cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
+  cpp_ss << "    void** result) {" << endl;
+  cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
+  cpp_ss
+      << "  cout << \"Function: \" << __func__ << \" '\" << func_name << \"'\" << endl;"
+      << endl;
+
+  cpp_ss << "  cerr << \"attribute not supported for shared lib yet\" << endl;"
+         << endl;
+  cpp_ss << "  return false;" << endl;
+  cpp_ss << "}" << endl;
+}
+
 void LibSharedCodeGen::GenerateHeaderGlobalFunctionDeclarations(
     std::stringstream& /*h_ss*/, const string& /*function_prototype*/) {}
 

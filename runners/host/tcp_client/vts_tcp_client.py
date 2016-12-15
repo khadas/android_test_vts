@@ -41,6 +41,7 @@ COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      102: "LAUNCH_DRIVER_SERVICE",
                      201: "LIST_APIS",
                      202: "CALL_API",
+                     203: "VTS_AGENT_COMMAND_GET_ATTRIBUTE",
                      301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND"}
 
 
@@ -180,6 +181,36 @@ class VtsTcpClient(object):
                 return mirror_object.MirrorObject(self,
                                            result.return_type_submodule_spec,
                                            None)
+            return result
+        logging.error("NOTICE - Likely a crash discovery!")
+        logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
+        raise errors.VtsTcpCommunicationError(
+            "RPC Error, response code for %s is %s" % (arg, resp_code))
+
+    def GetAttribute(self, arg):
+        """RPC to VTS_AGENT_COMMAND_GET_ATTRIBUTE."""
+        self.SendCommand(SysMsg_pb2.VTS_AGENT_COMMAND_GET_ATTRIBUTE, arg=arg)
+        resp = self.RecvResponse()
+        resp_code = resp.response_code
+        if (resp_code == SysMsg_pb2.SUCCESS):
+            result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
+            if resp.result == "error":
+                raise errors.VtsTcpCommunicationError(
+                    "Get attribute request failed on target.")
+            try:
+                text_format.Merge(resp.result, result)
+            except text_format.ParseError as e:
+                logging.exception(e)
+                logging.error("Paring error\n%s", resp.result)
+            if result.return_type.type == IfaceSpecMsg_pb2.TYPE_SUBMODULE:
+                logging.info("returned a submodule spec")
+                logging.info("spec: %s", result.return_type_submodule_spec)
+                return mirror_object.MirrorObject(self,
+                                           result.return_type_submodule_spec,
+                                           None)
+            elif result.return_type.type == IfaceSpecMsg_pb2.TYPE_SCALAR:
+                return getattr(result.return_type.scalar_value,
+                               result.return_type.scalar_type)
             return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)

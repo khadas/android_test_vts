@@ -41,6 +41,7 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
                   float target_version, const string& module_name);
   int32_t Status(int32_t type);
   const char* Call(const string& arg);
+  const char* GetAttribute(const string& arg);
   const char* GetFunctions();
 
  private:

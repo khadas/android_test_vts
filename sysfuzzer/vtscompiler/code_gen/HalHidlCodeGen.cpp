@@ -571,6 +571,13 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
+void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
+    std::stringstream& /*cpp_ss*/, const InterfaceSpecificationMessage& /*message*/,
+    const string& /*fuzzer_extended_class_name*/) {
+  // TOOD: impl
+  cerr << __func__ << " not supported for HIDL HAL yet" << endl;
+}
+
 void HalHidlCodeGen::GenerateHeaderGlobalFunctionDeclarations(
     std::stringstream& h_ss, const string& function_prototype) {
   h_ss << "extern \"C\" {" << endl;

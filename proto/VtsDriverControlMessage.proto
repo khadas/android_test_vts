@@ -33,6 +33,8 @@ enum VtsDriverCommandType {
   LIST_FUNCTIONS = 102;
   // To call a function.
   CALL_FUNCTION = 103;
+  // To get the value of an attribute.
+  GET_ATTRIBUTE = 104;
 
   // for a shell driver
   // To execute a shell command.
