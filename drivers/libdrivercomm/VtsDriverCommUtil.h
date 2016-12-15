@@ -38,6 +38,9 @@ class VtsDriverCommUtil {
     //    if (sockfd_ != -1) Close();
   }
 
+  // returns true if connection to the server is successful, false otherwise.
+  bool Connect(const string& socket_name);
+
   // sets sockfd_
   void SetSockfd(int sockfd) {
     cout << __func__ << endl;

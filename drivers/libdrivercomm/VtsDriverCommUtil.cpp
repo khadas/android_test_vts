@@ -24,6 +24,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -37,6 +38,35 @@ using namespace std;
 
 namespace android {
 namespace vts {
+
+bool VtsDriverCommUtil::Connect(const string& socket_name) {
+  struct sockaddr_un serv_addr;
+  struct hostent* server;
+
+  sockfd_ = socket(PF_UNIX, SOCK_STREAM, 0);
+  if (sockfd_ < 0) {
+    cerr << __func__ << " ERROR opening socket" << endl;
+    return false;
+  }
+
+  server = gethostbyname("127.0.0.1");
+  if (server == NULL) {
+    cerr << __func__ << " ERROR can't resolve the host name, 127.0.0.1" << endl;
+    return false;
+  }
+
+  bzero((char*) &serv_addr, sizeof(serv_addr));
+  serv_addr.sun_family = AF_UNIX;
+  strcpy(serv_addr.sun_path, socket_name.c_str());
+
+  if (connect(sockfd_, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
+    cerr << __func__ << " ERROR connecting to " << socket_name << " errno = "
+        << errno << " " << strerror(errno) << endl;
+    sockfd_ = -1;
+    return false;
+  }
+  return true;
+}
 
 int VtsDriverCommUtil::Close() {
   cout << getpid() << " " << __func__ << endl;

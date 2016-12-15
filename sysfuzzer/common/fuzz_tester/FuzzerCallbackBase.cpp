@@ -33,7 +33,9 @@
 #include <string>
 #include <vector>
 
+#include <VtsDriverCommUtil.h>
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
 #include "component_loader/DllLoader.h"
 #include "utils/InterfaceSpecUtil.h"
@@ -77,47 +79,15 @@ const char* FuzzerCallbackBase::GetCallbackID(const string& name) {
   return id_map_[name].c_str();
 }
 
-void FuzzerCallbackBase::RpcCallToAgent(const char* id,
-                                        const string& callback_socket_name) {
-  cout << __func__ << ":" << __LINE__ << " id = '" << id << "'" << endl;
-
-  struct sockaddr_un serv_addr;
-  struct hostent* server;
-  char buffer[256];
-
-  int sockfd;
-  sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    cerr << __func__ << " ERROR opening socket" << endl;
-    exit(-1);
-    return;
-  }
-  server = gethostbyname("127.0.0.1");
-  if (server == NULL) {
-    cerr << __func__ << " ERROR can't resolve the host name, localhost" << endl;
-    exit(-1);
-    return;
-  }
-  bzero((char*)&serv_addr, sizeof(serv_addr));
-  serv_addr.sun_family = AF_UNIX;
-  strcpy(serv_addr.sun_path, callback_socket_name.c_str());
-
-  if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-    cerr << __func__ << " ERROR connecting" << endl;
-    exit(-1);
-    return;
-  }
-
-  sprintf(buffer, "%s\n", id);
-  int n;
-  n = write(sockfd, buffer, strlen(buffer));
-  if (n < 0) {
-    cerr << __func__ << " ERROR writing to socket" << endl;
-    exit(-1);
-    return;
-  }
-  close(sockfd);
-  return;
+void FuzzerCallbackBase::RpcCallToAgent(
+    const AndroidSystemCallbackRequestMessage& message,
+    const string& callback_socket_name) {
+  cout << __func__ << ":" << __LINE__ << " id = '" << message.id() << "'"
+      << endl;
+  VtsDriverCommUtil util;
+  if (!util.Connect(callback_socket_name)) exit(-1);
+  util.VtsSocketSendMessage(message);
+  util.Close();
 }
 
 }  // namespace vts
