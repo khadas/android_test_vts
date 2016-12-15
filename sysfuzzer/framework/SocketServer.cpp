@@ -217,6 +217,7 @@ int StartSocketServer(const string& socket_port_file,
     pid_t pid = fork();
     if (pid == 0) {  // child
       close(sockfd);
+      cout << "[driver:hal] process for an agent - pid = " << getpid() << endl;
       VtsDriverHalSocketServer* server =
           new VtsDriverHalSocketServer(spec_builder, lib_path);
       server->SetSockfd(newsockfd);
