@@ -30,6 +30,7 @@ from google.protobuf import text_format
 
 TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
+_DEFAULT_SOCKET_TIMEOUT_SECS = 120
 _SOCKET_CONN_TIMEOUT_SECS = 60
 _SOCKET_CONN_RETRY_NUMBER = 5
 COMMAND_TYPE_NAME = {1: "LIST_HALS",
@@ -78,6 +79,7 @@ class VtsTcpClient(object):
             try:
                 self.connection = socket.create_connection(
                     (ip, command_port), _SOCKET_CONN_TIMEOUT_SECS)
+                self.connection.settimeout(_DEFAULT_SOCKET_TIMEOUT_SECS)
             except socket.error as e:
                 # Wait a bit and retry.
                 logging.exception("Connect failed %s", e)
@@ -176,7 +178,7 @@ class VtsTcpClient(object):
         self.SendCommand(
             SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND,
             shell_command=command)
-        resp = self.RecvResponse()
+        resp = self.RecvResponse(retries=10)
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                      resp)
         if (resp.response_code == SysMsg_pb2.SUCCESS):
@@ -262,19 +264,27 @@ class VtsTcpClient(object):
         self.channel.write(message)
         self.channel.flush()
 
-    def RecvResponse(self):
-        """Receives and parses the response, and returns the relevant ResponseMessage."""
-        try:
-            header = self.channel.readline()
-            len = int(header.strip("\n"))
-            logging.info("resp %d bytes", len)
-            data = self.channel.read(len)
-            response_msg = SysMsg_pb2.AndroidSystemControlResponseMessage()
-            response_msg.ParseFromString(data)
-            logging.debug("Response %s", "success"
-                          if response_msg.response_code == SysMsg_pb2.SUCCESS
-                          else "fail")
-            return response_msg
-        except socket.timeout as e:
-            logging.exception(e)
-            return None
+    def RecvResponse(self, retries=0):
+        """Receives and parses the response, and returns the relevant ResponseMessage.
+
+        Args:
+            retries: an integer indicating the max number of retries in case of
+                     session timeout error.
+        """
+        for index in xrange(1 + retries):
+            try:
+                if index != 0:
+                    logging.info("retrying...")
+                header = self.channel.readline()
+                len = int(header.strip("\n"))
+                logging.info("resp %d bytes", len)
+                data = self.channel.read(len)
+                response_msg = SysMsg_pb2.AndroidSystemControlResponseMessage()
+                response_msg.ParseFromString(data)
+                logging.debug("Response %s", "success"
+                              if response_msg.response_code == SysMsg_pb2.SUCCESS
+                              else "fail")
+                return response_msg
+            except socket.timeout as e:
+                logging.exception(e)
+        return None
