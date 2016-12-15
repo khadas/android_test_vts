@@ -17,8 +17,10 @@
 
 import os
 import logging
+import itertools
 
 from vts.testcases.kernel.ltp import ltp_configs
+from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import test_case
 
 
@@ -29,8 +31,28 @@ class TestCasesParser(object):
         _data_path: string, the vts data path on host side
     """
 
-    def __init__(self, data_path):
+    def __init__(self, data_path, include_filter, exclude_filter):
         self._data_path = data_path
+        self._include_filter = self.ExpandFilters(include_filter)
+        self._exclude_filter = self.ExpandFilters(exclude_filter)
+
+    def ExpandFilters(self, filter):
+        """Expend comma delimited filter list to a full list of test names.
+
+        This is a workaround for developers' convenience to specify multiple
+        test names within one filter command.
+
+        Arguments:
+            filter: list of strings, items in the list that are comma delimited
+                    will be expanded
+
+        Returns:
+            A expanded list of strings contains test names in filter.
+        """
+        expended_list_generator = (
+            item.split(ltp_enums.Delimiters.TESTCASE_FILTER)
+            for item in filter)
+        return list(itertools.chain.from_iterable(expended_list_generator))
 
     def IsTestcaseInList(self, testcase, name_list, n_bit):
         """Check whether a given testcase object is in a disabled test list"""
@@ -51,7 +73,10 @@ class TestCasesParser(object):
             A tuple in format (test suite, test name, test command) if
             definition is valid. None otherwise.
         """
-        items = [item.strip() for item in line.split('\t')]
+        items = [
+            item.strip()
+            for item in line.split(ltp_enums.Delimiters.TESTCASE_DEFINITION)
+        ]
         if not len(items) == 3 or not items:
             return None
         else:
@@ -83,18 +108,38 @@ class TestCasesParser(object):
                 testcase = test_case.TestCase(
                     testsuite=testsuite, testname=testname, command=command)
 
+                # If include filter is set from TradeFed command, then
+                # yield only the included tests, regardless whether the test
+                # is disabled in configuration
+                if self._include_filter:
+                    if self.IsTestcaseInList(testcase, self._include_filter,
+                                             n_bit):
+                        logging.info("[Parser] Adding test case %s. Reason: "
+                                     "include filter" % testcase.fullname)
+                        yield testcase
+                    continue
+
+                # Check exclude filter set from TradeFed command. If a test
+                # case is in both include and exclude filter, it will be
+                # included
+                if self.IsTestcaseInList(testcase, self._exclude_filter,
+                                         n_bit):
+                    logging.info("[Parser] Skipping test case %s. Reason: "
+                                 "exclude filter" % testcase.fullname)
+                    continue
+
                 # For skipping tests that are not designed for Android
                 if self.IsTestcaseInList(testcase, ltp_configs.DISABLED_TESTS,
                                          n_bit):
-                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
-                                 "disabled".format(testsuite, testname))
+                    logging.info("[Parser] Skipping test case %s. Reason: "
+                                 "disabled" % testcase.fullname)
                     continue
 
                 # For failing tests that are being inspected
                 if (not run_staging and self.IsTestcaseInList(
                         testcase, ltp_configs.STAGING_TESTS, n_bit)):
-                    logging.info("[Parser] Skipping test case {}-{}. Reason: "
-                                 "staging".format(testsuite, testname))
+                    logging.info("[Parser] Skipping test case %s. Reason: "
+                                 "staging" % testcase.fullname)
                     continue
 
                 yield testcase

@@ -45,11 +45,23 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
         required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+                           keys.ConfigKeys.KEY_TEST_SUITE,
                            ltp_enums.ConfigKeys.RUN_STAGING]
         self.getUserParams(required_params)
 
-        logging.info("data_file_path: %s", self.data_file_path)
-        logging.info("run_staging: %s", self.run_staging)
+        logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+                     self.data_file_path)
+        logging.info("%s: %s", keys.ConfigKeys.KEY_TEST_SUITE, self.test_suite)
+
+        self.include_filter = self.test_suite[
+            keys.ConfigKeys.KEY_INCLUDE_FILTER]
+        logging.info("%s: %s", keys.ConfigKeys.KEY_INCLUDE_FILTER,
+                     self.include_filter)
+
+        self.exclude_filter = self.test_suite[
+            keys.ConfigKeys.KEY_EXCLUDE_FILTER]
+        logging.info("%s: %s", keys.ConfigKeys.KEY_EXCLUDE_FILTER,
+                     self.exclude_filter)
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
@@ -59,7 +71,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self._shell)
 
         self._testcases = test_cases_parser.TestCasesParser(
-            self.data_file_path)
+            self.data_file_path, self.include_filter, self.exclude_filter)
         self._env = {ltp_enums.ShellEnvKeys.TMP: ltp_configs.TMP,
                      ltp_enums.ShellEnvKeys.TMPBASE: ltp_configs.TMPBASE,
                      ltp_enums.ShellEnvKeys.LTPTMP: ltp_configs.LTPTMP,
