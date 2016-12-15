@@ -62,7 +62,7 @@ public class ShowGraphServlet extends HttpServlet {
             values[i] = mapProfilingNameValues.get(profilingPointName).get(i);
         }
 
-        // pass map to show_graph.jsp through session by converting to JSON
+        // pass map to show_graph.jsp through request by converting to JSON
         String valuesJson = new Gson().toJson(values);
         request.setAttribute("valuesJson", valuesJson);
 
