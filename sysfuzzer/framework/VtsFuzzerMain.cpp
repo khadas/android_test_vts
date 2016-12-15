@@ -19,14 +19,17 @@
  *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib64/hw/lights.angler.so
  *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
  *
- *  $ LD_LIBRARY_PATH=/data/local/tmp ./fuzzer --class=hal --type=light \
+ *  $ LD_LIBRARY_PATH=/data/local/tmp/64 ./fuzzer64 --class=hal --type=light \
  *    --version=1.0 --spec_dir=/data/local/tmp/spec \
- *    /data/local/tmp/hw64/lights.bullhead-vts.so
+ *    /data/local/tmp/64/hal/lights.bullhead-vts.so
+ *  $ LD_LIBRARY_PATH=/data/local/tmp/32 ./fuzzer32 --class=hal --type=light \
+ *    --version=1.0 --spec_dir=/data/local/tmp/spec \
+ *    /data/local/tmp/32/hal/camera.bullhead-vts.so
  *
  * Example usage (for GCE virtual devices):
  *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
  *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so
- *  $ fuzzer --class=hal --type=camera --version=1.0 /system/lib/hw/camera.gce_x86.so
+ *  $ fuzzer --class=hal --type=camera --version=2.1 /system/lib/hw/camera.gce_x86.so
  */
 
 #include <getopt.h>
@@ -75,20 +78,22 @@ static void usage() {
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",        no_argument,       NULL, 'h'},
-    {"class",       required_argument, NULL, 'c'},
-    {"type",        required_argument, NULL, 't'},
-    {"version",     required_argument, NULL, 'v'},
-    {"epoch_count", required_argument, NULL, 'e'},
-    {"spec_dir",    required_argument, NULL, 's'},
-    {"server",      optional_argument, NULL, 'd'},
-    {NULL,          0,                 NULL, 0}};
+    {"help",         no_argument,       NULL, 'h'},
+    {"class",        required_argument, NULL, 'c'},
+    {"type",         required_argument, NULL, 't'},
+    {"version",      required_argument, NULL, 'v'},
+    {"epoch_count",  required_argument, NULL, 'e'},
+    {"spec_dir",     required_argument, NULL, 's'},
+    {"service_name", required_argument, NULL, 'n'},
+    {"server",       optional_argument, NULL, 'd'},
+    {NULL,           0,                 NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
   int epoch_count = kDefaultEpochCount;
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
   bool server = false;
+  string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
 
   while (true) {
     int optionIndex = 0;
@@ -142,6 +147,9 @@ int main(int argc, char* const argv[]) {
       case 's':
         spec_dir_path = string(optarg);
         break;
+      case 'n':
+        service_name = string(optarg);
+        break;
       case 'd':
         server = true;
         break;
@@ -169,7 +177,8 @@ int main(int argc, char* const argv[]) {
       cout << endl << PASSED_MARKER << endl;
     }
   } else {
-    android::vts::StartBinderServer(spec_builder, INTERFACE_SPEC_LIB_FILENAME);
+    android::vts::StartBinderServer(service_name, spec_builder,
+                                    INTERFACE_SPEC_LIB_FILENAME);
   }
 
   return 0;

@@ -22,7 +22,8 @@
 namespace android {
 namespace vts {
 
-extern void StartBinderServer(android::vts::SpecificationBuilder& spec_builder,
+extern void StartBinderServer(const string& service_name,
+                              android::vts::SpecificationBuilder& spec_builder,
                               const char* lib_path);
 
 }  // namespace vts

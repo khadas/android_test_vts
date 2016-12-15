@@ -24,7 +24,7 @@
 namespace android {
 namespace vts {
 
-extern sp<IVtsFuzzer> GetBinderClient();
+extern sp<IVtsFuzzer> GetBinderClient(const string& service_name);
 
 }  // namespace vts
 }  // namespace android

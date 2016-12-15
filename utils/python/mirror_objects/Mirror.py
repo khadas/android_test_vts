@@ -26,18 +26,21 @@ class Mirror(MirrorBase.MirrorBase):
             self._target_basepath = target_basepath
 
     def InitHal(self, target_type, target_version, target_basepath=None,
-                module_name=None):
+                module_name=None, handler_name=None, bits=64):
         """Initializes a HAL.
 
-    Args:
-      target_type: string, the target type name (e.g., light, camera).
-      target_version: float, the target component version (e.g., 1.0).
-      target_basepath: string, the base path of where a target file is stored
-          in.
-      module_name: string, the name of a module to load.
-    """
+        Args:
+            target_type: string, the target type name (e.g., light, camera).
+            target_version: float, the target component version (e.g., 1.0).
+            target_basepath: string, the base path of where a target file is
+                stored in.
+            module_name: string, the name of a module to load.
+            handler_name: string, the name of the handler.
+                by default, target_type is used.
+        """
         super(Mirror, self).Init("hal", target_type, target_version,
-                                 target_basepath, module_name)
+                                 target_basepath, module_name=module_name,
+                                 handler_name=handler_name, bits=bits)
 
     def InitLegacyHal(self, target_type, target_version, target_basepath=None):
         """Initializes a legacy HAL (e.g., wifi).

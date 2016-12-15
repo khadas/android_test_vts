@@ -19,7 +19,6 @@ import copy
 import logging
 import random
 
-from vts.runners.host.proto import AndroidSystemControlMessage_pb2
 from vts.utils.python.fuzzer import FuzzerUtils
 from google.protobuf import text_format
 
@@ -98,7 +97,7 @@ class MirrorObject(object):
             logging.info("remote call %s", api_name)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
-                    logging.info("arg msg value %s %s", arg_msg, value_msg)
+                    logging.debug("arg msg value %s %s", arg_msg, value_msg)
                     if value_msg:
                         for primitive_value in value_msg.primitive_value:
                             pv = arg_msg.primitive_value.add()
@@ -106,7 +105,7 @@ class MirrorObject(object):
                                 pv.uint32_t = primitive_value.uint32_t
                             if primitive_value.HasField("int32_t"):
                                 pv.int32_t = primitive_value.int32_t
-                logging.info("final msg %s", func_msg)
+                logging.debug("final msg %s", func_msg)
             else:
                 # TODO: use kwargs
                 for arg in func_msg.arg:
@@ -114,13 +113,11 @@ class MirrorObject(object):
                     if arg.primitive_type == "pointer":
                         value = arg.primitive_value.add()
                         value.pointer = 0
-                logging.info(func_msg)
+                logging.debug(func_msg)
 
-            self._client.SendCommand(
-                AndroidSystemControlMessage_pb2.CALL_FUNCTION,
-                text_format.MessageToString(func_msg))
-            resp = self._client.RecvResponse()
-            logging.info(resp)
+            result = self._client.CallApi(text_format.MessageToString(func_msg))
+            logging.debug(result)
+            return result
 
         def MessageGenerator(*args, **kwargs):
             """Dynamically generates a custom message instance."""
@@ -171,7 +168,7 @@ class MirrorObject(object):
                         logging.fatal("support %s", type)
                     break
                 count += 1
-            logging.debug("fuzzed %s", arg_msg)
+            logging.info("fuzzed %s", arg_msg)
             return arg_msg
 
         def ConstGenerator():
@@ -202,7 +199,7 @@ class MirrorObject(object):
 
         func_msg = self.GetApi(api_name)
         if func_msg:
-            logging.info("api %s", func_msg)
+            logging.debug("api %s", func_msg)
             return RemoteCall
 
         fuzz = False

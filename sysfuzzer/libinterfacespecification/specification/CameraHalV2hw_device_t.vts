@@ -1,0 +1,316 @@
+component_class: HAL_SUBMODULE
+component_type: CAMERA
+component_type_version: 2.1
+
+original_data_structure_name: "struct camera_device_ops"
+
+
+api: {
+  name: "set_preview_window"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct preview_stream_ops *"
+  }
+}
+
+api: {
+  name: "set_callbacks"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+     primitive_type: "pointer"
+     aggregate_type: "struct camera_device *"
+  }
+  arg: {
+     primitive_type: "function_pointer"
+     aggregate_type: "camera_notify_callback"
+  }
+  arg: {
+     primitive_type: "function_pointer"
+     aggregate_type: "camera_data_callback"
+  }
+  arg: {
+     primitive_type: "function_pointer"
+     aggregate_type: "camera_data_timestamp_callback"
+  }
+  arg: {
+     primitive_type: "function_pointer"
+     aggregate_type: "camera_request_memory"
+  }
+  arg: {
+     primitive_type: "void_pointer"
+  }
+}
+
+api: {
+  name: "enable_msg_type"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32"
+  }
+}
+
+api: {
+  name: "disable_msg_type"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32"
+  }
+}
+
+api: {
+  name: "msg_type_enabled"
+  return_type: {
+    primitive_type: "int32"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32"
+  }
+}
+
+api: {
+  name: "start_preview"
+  return_type: {
+    primitive_type: "int32"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "stop_preview"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "preview_enabled"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "store_meta_data_in_buffers"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32_t"
+  }
+}
+
+api: {
+  name: "start_recording"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "stop_recording"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "recording_enabled"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "release_recording_frame"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "void_pointer"
+  }
+}
+
+api: {
+  name: "auto_focus"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "cancel_auto_focus"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "take_picture"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "cancel_picture"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "set_parameters"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "char_pointer"
+  }
+}
+
+api: {
+  name: "get_parameters"
+  return_type: {
+    primitive_type: "char_pointer"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "put_parameters"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "char_pointer"
+  }
+}
+
+api: {
+  name: "send_command"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "int32_t"
+  }
+}
+
+api: {
+  name: "release"
+  return_type: {
+    primitive_type: "void"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+}
+
+api: {
+  name: "dump"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "pointer"
+    aggregate_type: "struct camera_device *"
+  }
+  arg: {
+    primitive_type: "int32_t"
+    aggregate_type: "filedescriptor"
+  }
+}

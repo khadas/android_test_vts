@@ -152,15 +152,17 @@ bool SpecificationBuilder::LoadTargetComponent(
   dll_file_name_ = (char*) malloc(strlen(dll_file_name) + 1);
   strcpy(dll_file_name_, dll_file_name);
 
-  cout << "ifspec addr load " << if_spec_msg_ << endl;
+  // cout << "ifspec addr load at " << if_spec_msg_ << endl;
   string output;
   if_spec_msg_->SerializeToString(&output);
-  cout << "loaded text " << output.length() << endl;
-  cout << "loaded text " << strlen(output.c_str()) << endl;
-  cout << "loaded text " << output << endl;
+  cout << "loaded ifspec length " << output.length() << endl;
+  // cout << "loaded text " << strlen(output.c_str()) << endl;
+  // cout << "loaded text " << output << endl;
 
   module_name_ = (char*) malloc(strlen(module_name) + 1);
   strcpy(module_name_, module_name);
+  cout << __FUNCTION__ << ":" << __LINE__ << " module_name " << module_name_
+      << endl;
   return true;
 }
 

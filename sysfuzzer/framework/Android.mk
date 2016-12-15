@@ -19,7 +19,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := vtssysfuzzer
-LOCAL_MODULE_STEM := fuzzer
+LOCAL_MODULE_STEM_64 := fuzzer64
+LOCAL_MODULE_STEM_32 := fuzzer32
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
@@ -54,5 +55,7 @@ LOCAL_PROTOC_FLAGS := \
   --proto_path=$(LOCAL_PATH)/../common/proto \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
+
+LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)

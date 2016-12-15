@@ -18,24 +18,21 @@ package android.vts;
 
 //import "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.proto";
 
-
 // Type of a command.
 enum CommandType {
   UNKNOWN_COMMAND_TYPE = 0;
-  // To check whether fuzzer's binder service is available.
-  CHECK_FUZZER_BINDER_SERVICE = 1;
-  // To start a fuzzer binary service.
-  START_FUZZER_BINDER_SERVICE = 2;
-
   // To get a list of available HAL modules.
-  GET_HALS = 101;
-  // To select a HAL module.
-  SELECT_HAL = 102;
+  LIST_HALS = 1;
+
+  // To check whether fuzzer's binder service is available.
+  CHECK_STUB_SERVICE = 101;
+  // To start a fuzzer binary service and select a HAL module.
+  LAUNCH_STUB_SERVICE = 102;
 
   // To get a list of available functions.
-  GET_FUNCTIONS = 201;
+  LIST_APIS = 201;
   // To call a function.
-  CALL_FUNCTION = 202;
+  CALL_API = 202;
 }
 
 
@@ -54,19 +51,35 @@ message AndroidSystemControlCommandMessage {
   // Command type.
   optional CommandType command_type = 1;
 
-  // The name of a target.
-  optional bytes target_name = 1001;
+  // for LIST_HALS
+  repeated bytes paths = 1001;
 
-  // for when command_type == SELECT_HAL
+  // for CHECK_STUB_SERVICE
+  // the binder service name
+  optional bytes service_name = 2001;
+
+  // for LAUNCH_STUB_SERVICE
+  // The name of a target.
+  optional bytes file_path = 3001;
+
+  optional int32 bits = 3003;
+
   // target class
-  optional int32 target_class = 2001;
+  optional int32 target_class = 3004;
   // target type
-  optional int32 target_type = 2002;
+  optional int32 target_type = 3005;
   // target version (should be divided by 100) - float has a compatibility issue
   // between C/C++ and python protoc.
-  optional int32 target_version = 2003;
+  optional int32 target_version = 3006;
+
   // the name of a HAL module to open.
-  optional bytes module_name = 3000;
+  optional bytes module_name = 3007;
+
+  // for LIST_APIS
+  // none
+
+  // for CALL_API
+  optional bytes arg = 4001;
 }
 
 
@@ -77,4 +90,14 @@ message AndroidSystemControlResponseMessage {
 
   // The reason.
   optional bytes reason = 1001;
+
+  // for the found componet files.
+  repeated bytes file_names = 1002;
+
+  // for the found api spec.
+  optional bytes spec = 1003;
+
+  // for the api call result including result value, profiling data, and
+  // coverage measurement data.
+  optional bytes result = 1004;
 }

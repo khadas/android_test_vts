@@ -1,0 +1,65 @@
+component_class: HAL
+component_type: CAMERA
+component_type_version: 2.1
+
+original_data_structure_name: "camera_module_t"
+
+header: "<hardware/hardware.h>"
+header: "<hardware/camera_common.h>"
+
+sub_struct: {
+  name: "common"
+
+  api: {
+    name: "open"
+    return_type: {
+      primitive_type: "int32_t"
+    }
+    arg: {
+      aggregate_type: "hw_module_t*"
+      is_const: true
+    }
+    arg: {
+      primitive_type: "char*"
+    }
+    arg: {
+      aggregate_type: "hw_device_t**"
+      is_output: true
+    }
+    callflow: {
+      entry: true
+    }
+  }
+}
+
+api: {
+  name: "get_number_of_cameras"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+}
+
+api: {
+  name: "get_camera_info"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    aggregate_type: "camera_info_t*"
+  }
+}
+
+api: {
+  name: "set_callbacks"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+  arg: {
+    aggregate_type: "camera_module_callbacks_t*"
+    is_const: true
+  }
+}
+

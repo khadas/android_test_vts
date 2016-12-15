@@ -269,20 +269,22 @@ void wfn() {
   cout << "wfn" << endl;
 }
 
+
 void ffn() {
   cout << "ffn" << endl;
 }
 
+
 bool FuzzerBase::LoadTargetComponent(
     const char* target_dll_path, const char* module_name) {
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "LoadTargetCompooent entry" << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " entry" << endl;
   target_dll_path_ = target_dll_path;
   if (!target_loader_.Load(target_dll_path_)) return false;
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "LoadTargetCompooent loaded the target" << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == LEGACY_HAL) return true;
-  cout << __FUNCTION__ << ": loaded a non-legacy HAL file." << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file." << endl;
   device_ = target_loader_.GetHWDevice(module_name);
-  cout << __FUNCTION__ << ": device_ " << device_ << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ <<  " device_ " << device_ << endl;
 #if SANCOV
   cout << __FUNCTION__ << "sancov reset " << target_loader_.SancovResetCoverage() << endl;;
 #endif
@@ -297,9 +299,11 @@ bool FuzzerBase::LoadTargetComponent(
       filename = filename.substr(0, filename.length() - 3 /* for .so */);
       component_filename_ = (char*) malloc(filename.length() + 1);
       strcpy(component_filename_, filename.c_str());
-      cout << "module file name: " << component_filename_ << endl;
+      cout << __FUNCTION__ << ":" << __LINE__
+          << " module file name: " << component_filename_ << endl;
     }
-    cout << "module_name " << target_dll_path_ << endl;
+    cout << __FUNCTION__ << ":" << __LINE__ << " module_name "
+        << target_dll_path_ << endl;
   }
 
 #if USE_GCOV

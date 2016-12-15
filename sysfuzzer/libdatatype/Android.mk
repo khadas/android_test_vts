@@ -25,12 +25,14 @@ LOCAL_SRC_FILES := \
   vts_datatype.cpp \
   hal_light.cpp \
   hal_gps.cpp \
+  hal_camera.cpp \
 
 LOCAL_C_INCLUDES := \
   bionic \
   libcore \
   external/protobuf/src \
   test/vts/sysfuzzer/common/proto \
+  system/media/camera/include \
 
 LOCAL_SHARED_LIBRARIES := \
   libcutils \

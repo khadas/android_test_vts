@@ -209,10 +209,11 @@ class VtsFuzzerServer : public BnVtsFuzzer {
 };
 
 
-void StartBinderServer(android::vts::SpecificationBuilder& spec_builder,
+void StartBinderServer(const string& service_name,
+                       android::vts::SpecificationBuilder& spec_builder,
                        const char* lib_path) {
   defaultServiceManager()->addService(
-      String16(VTS_FUZZER_BINDER_SERVICE_NAME),
+      String16(service_name.c_str()),
       new VtsFuzzerServer(spec_builder, lib_path));
   android::ProcessState::self()->startThreadPool();
   IPCThreadState::self()->joinThreadPool();
