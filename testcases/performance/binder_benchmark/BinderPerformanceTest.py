@@ -42,6 +42,7 @@ class BinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         "BM_sendVec_binder/32k": 800000,
         "BM_sendVec_binder/64k": 1000000,
         }
+    LABEL_PREFIX = "BM_sendVec_binder/"
 
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
@@ -122,7 +123,8 @@ class BinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 time_in_ns = tokens[1].split()[0]
                 logging.info(benchmark_name)
                 logging.info(time_in_ns)
-                label_result.append(benchmark_name)
+                label_result.append(
+                    benchmark_name.replace(self.LABEL_PREFIX, ""))
                 value_result.append(int(time_in_ns))
 
         logging.info("result label for %sbits: %s", bits, label_result)
