@@ -19,6 +19,14 @@
             histogramData[i][0] = '';
             histogramData[i][1] = valuesArray[i];
         }
+        var min = Math.min.apply(null, valuesArray),
+            max = Math.max.apply(null, valuesArray);
+
+        var histogramTicks = new Array(10);
+        var delta = (max - min)/10;
+        for (var i = 0; i <= 10; i++) {
+            histogramTicks[i] = Math.round(min + delta * i);
+        }
 
         var data = google.visualization.arrayToDataTable(histogramData, true);
         var options = {
@@ -28,15 +36,15 @@
 
           chartArea: { width: 401 },
           hAxis: {
-            ticks: [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
+            ticks: histogramTicks
           },
           bar: { gap: 0 },
 
           histogram: {
             bucketSize: 0.02,
             maxNumBuckets: 200,
-            minValue: -1,
-            maxValue: 1
+            minValue: min,
+            maxValue: max
           }
         };
         var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
@@ -59,14 +67,14 @@
     <div style="margin-left:200px">
       <table border="1" cellpadding="5" cellspacing="5">
           <tr>
-            <th>99</th>
-            <th>95</th>
-            <th>90</th>
-            <th>80</th>
-            <th>75</th>
-            <th>50</th>
-            <th>25</th>
             <th>10</th>
+            <th>25</th>
+            <th>50</th>
+            <th>75</th>
+            <th>80</th>
+            <th>90</th>
+            <th>95</th>
+            <th>99</th>
           </tr>
           <tr>
           <c:forEach items="${percentileResultArray}" var="value">
