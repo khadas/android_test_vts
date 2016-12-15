@@ -53,7 +53,15 @@ import java.util.Set;
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
     IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
+    static final String ANDROIDDEVICE = "AndroidDevice";
+    static final String BUILD = "build";
+    static final String BUILD_ID = "build_id";
+    static final String BUILD_TARGET = "build_target";
+    static final String DATA_FILE_PATH = "data_file_path";
+    static final String NAME = "name";
     static final String PYTHONPATH = "PYTHONPATH";
+    static final String SERIAL = "serial";
+    static final String TEST_SUITE = "test_suite";
     static final String VTS = "vts";
     static final float DEFAULT_TARGET_VERSION = -1;
 
@@ -240,6 +248,52 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     }
 
     /**
+     * This method reads the provided VTS runner test json config, adds or updates some of its
+     * fields (e.g., to add build info and device serial IDs), and returns the updated json object.
+     *
+     * @return the updated JSONObject as the new test config.
+     */
+    private JSONObject getUpdatedVtsRunnerTestConfig() throws IOException, JSONException {
+        JSONObject jsonObject = null;
+        String content = FileUtil.readStringFromFile(new File(mTestConfigPath));
+        if (content != null && !content.isEmpty()) {
+            jsonObject = new JSONObject(content);
+        }
+
+        JSONArray deviceArray = new JSONArray();
+        JSONObject deviceItemObject = new JSONObject();
+        deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
+        deviceArray.put(deviceItemObject);
+
+        JSONArray testBedArray = (JSONArray) jsonObject.get("test_bed");
+        if (testBedArray.length() == 0) {
+            JSONObject device = new JSONObject();
+            device.put(NAME, "VTS-Test-Unspecified");
+            device.put(ANDROIDDEVICE, deviceArray);
+            testBedArray.put(device);
+        } else if (testBedArray.length() == 1) {
+            JSONObject device = (JSONObject) testBedArray.get(0);
+            device.put(ANDROIDDEVICE, deviceArray);
+        } else {
+            CLog.e("Multi-device not yet supported: %d devices requested",
+                   testBedArray.length());
+            throw new RuntimeException("Failed to produce VTS runner test config");
+        }
+
+        jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
+
+        JSONObject build = new JSONObject();
+        build.put(BUILD_ID, mBuildInfo.getBuildId());
+        build.put(BUILD_TARGET, mBuildInfo.getBuildTargetName());
+        jsonObject.put(BUILD, build);
+
+        JSONObject suite = new JSONObject();
+        suite.put(NAME, mBuildInfo.getTestTag());
+        jsonObject.put(TEST_SUITE, suite);
+        return jsonObject;
+    }
+
+    /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
      *
@@ -248,46 +302,28 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      * @param mTestCasePath
      * @param mTestConfigPath
      */
-
     private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
         String mTestConfigPath) throws RuntimeException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
-        // produce aconfig json file which contains:
-        //   device serial number(s)
-        //   device type
-        //   build ID
-        //   build branch
-        //   test suite name
-        JSONObject obj = null;
+        JSONObject jsonObject = null;
         try {
-            obj = new JSONObject();
-            obj.put("data_file_path", mTestCaseDataDir);
-
-            JSONObject device = new JSONObject();
-            device.put("serial", mDevice.getSerialNumber());
-            obj.put("device", device);
-
-            JSONObject build = new JSONObject();
-            build.put("build_id", mBuildInfo.getBuildId());
-            build.put("build_target", mBuildInfo.getBuildTargetName());
-            obj.put("build", build);
-
-            JSONObject suite = new JSONObject();
-            suite.put("name", mBuildInfo.getTestTag());
-            obj.put("test_suite", suite);
+            jsonObject = getUpdatedVtsRunnerTestConfig();
+        } catch(IOException e) {
+            throw new RuntimeException("Failed to read test config json file");
         } catch(JSONException e) {
-            throw new RuntimeException("Failed to build device config json data");
+            throw new RuntimeException("Failed to build updated test config json data");
         }
-        CLog.i("config json: %s", obj.toString());
+        CLog.i("config json: %s", jsonObject.toString());
 
+        String jsonFilePath = null;
         try {
             File tmpFile = FileUtil.createTempFile(
                 mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json");
-            String jsonFilePath = tmpFile.getAbsolutePath();
+            jsonFilePath = tmpFile.getAbsolutePath();
             CLog.i("config json file path: %s", jsonFilePath);
             FileWriter fw = new FileWriter(jsonFilePath);
-            fw.write(obj.toString());
+            fw.write(jsonObject.toString());
             fw.close();
         } catch(IOException e) {
             throw new RuntimeException("Failed to create device config json file");
@@ -297,8 +333,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             mPythonBin = getPythonBinary();
         }
         String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath, mTestConfigPath,
-                               mDevice.getSerialNumber(), mTestCaseDataDir};
+        String[] testModule = {mTestCasePath, jsonFilePath};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
@@ -310,7 +345,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             CLog.e("Python path: %s", mPythonPath);
             CLog.e("Stderr: %s", commandResult.getStderr());
             CLog.e("Stdout: %s", commandResult.getStdout());
-            throw new RuntimeException("Failed to run python unit test");
+            throw new RuntimeException("Failed to run VTS test");
         }
         if (commandResult != null){
             CLog.i("Standard output is: %s", commandResult.getStdout());
