@@ -134,6 +134,13 @@ message CoverageReportMessage {
   repeated bytes data = 31;
   // generated gcov data file.
   optional bytes gcov = 32;
+
+  // the number of source code lines that are instrumented for code coverage
+  // measurement.
+  optional int32 total_line_count = 101;
+
+  // the number of source code lines that are executed.
+  optional int32 covered_line_count = 102;
 }
 
 
