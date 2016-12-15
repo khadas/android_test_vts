@@ -127,6 +127,7 @@ class VtsTcpClient(object):
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
         logging.info("bits: %s", bits)
+        logging.info("driver_type: %s", driver_type)
         self.SendCommand(SysMsg_pb2.LAUNCH_DRIVER_SERVICE,
                          driver_type=driver_type,
                          service_name=service_name,
