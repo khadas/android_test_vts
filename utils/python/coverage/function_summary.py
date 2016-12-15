@@ -48,7 +48,49 @@ class FunctionSummary(object):
         self.src_file_name = src_file_name
         self.first_line_number = first_line_number
 
-    def ToString(self):
+    def Resolve(self):
+        """Resolves the block and arc counts.
+
+        Using the edges that were resolved by the GCDA file,
+        counts are resolved in the unresolved arcs. Then, block
+        counts are resolved by summing the counts along arcs entering
+        the block.
+
+        Returns:
+            True if the counts could be resolved and False otherwise.
+        """
+
+        unresolved_arcs = []
+        for block in self.blocks:
+            for arc in block.exit_arcs:
+                if not arc.resolved:
+                    unresolved_arcs.append(arc)
+
+        index = 0
+        prev_length = len(unresolved_arcs) + 1
+        # Resolve the arc counts
+        while len(unresolved_arcs) > 0:
+            index = index % len(unresolved_arcs)
+            if index == 0 and len(unresolved_arcs) == prev_length:
+                return False
+            else:
+                prev_length = len(unresolved_arcs)
+            arc = unresolved_arcs[index]
+            if arc.Resolve():
+                unresolved_arcs.remove(arc)
+            else:
+                index = index + 1
+
+        # Resolve the block counts
+        for block in self.blocks:
+            if len(block.entry_arcs):
+                block.count = sum(arc.count for arc in block.entry_arcs)
+            else:
+                block.count = sum(arc.count for arc in block.exit_arcs)
+
+        return True
+
+    def __str__(self):
         """Serializes the function summary as a string.
 
         Returns:
@@ -57,5 +99,5 @@ class FunctionSummary(object):
         output = ('Function:  %s : %s\r\n\tFirst Line Number:%i\r\n' %
                   (self.src_file_name, self.name, self.first_line_number))
         for b in self.blocks:
-            output += b.ToString()
+            output += str(b)
         return output

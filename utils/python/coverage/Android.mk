@@ -12,9 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-the_py_script = gcno_test.py
-PRIVATE_PY_SCRIPT := $(the_py_script)
+PARSER := parser_test.py
+
+GCNO_PARSER := gcno_parser_test.py
+
+GCDA_PARSER := gcda_parser_test.py
+
+ARC_SUMMARY := arc_summary_test.py
+
+FUNCTION_SUMMARY := function_summary_test.py
 
 default:
-	@echo "Running unit test for : $(PRIVATE_PY_SCRIPT)"
-	python $(PRIVATE_PY_SCRIPT)
+	@echo "Running unit test for : $(PARSER)"
+	python $(PARSER)
+
+	@echo "Running unit test for : $(GCNO_PARSER)"
+	python $(GCNO_PARSER)
+
+	@echo "Running unit test for : $(GCDA_PARSER)"
+	python $(GCDA_PARSER)
+
+	@echo "Running unit test for : $(ARC_SUMMARY)"
+	python $(ARC_SUMMARY)
+
+	@echo "Running unit test for : $(FUNCTION_SUMMARY)"
+	python $(FUNCTION_SUMMARY)

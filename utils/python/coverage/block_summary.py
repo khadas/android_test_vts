@@ -45,15 +45,22 @@ class BlockSummary(object):
         self.flag = flag
         self.entry_arcs = []
         self.exit_arcs = []
+        self.count = 0
         self.lines = []
 
-    def ToString(self):
+    def __str__(self):
         """Serializes the block summary as a string.
 
         Returns:
             String representation of the block.
         """
-        output = '\tBlock: %i' % self.index
+        output = '\tBlock: %i, Count: %i' % (self.index, self.count)
         if len(self.lines):
             output += ', Lines: ' + ', '.join(str(line) for line in self.lines)
+        if len(self.entry_arcs):
+            output += ('\r\n\t\t' + str(self.index) + '  <--  ' + ', '.join(
+                str(a.src_block.index) for a in self.entry_arcs))
+        if len(self.exit_arcs):
+            output += ('\r\n\t\t' + str(self.index) + '  -->  ' + ', '.join(
+                str(a.dst_block.index) for a in self.exit_arcs))
         return output + '\r\n'
