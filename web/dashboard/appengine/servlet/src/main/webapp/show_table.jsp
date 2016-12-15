@@ -52,9 +52,15 @@
 
           var table = new google.visualization.Table(
               document.getElementById('profiling_table_div'));
-          table.draw(data,
-                    {showRowNumber: false, alternatingRowStyle : true,
-                     width: '100%'});
+
+          var options = {
+              showRowNumber: false,
+              alternatingRowStyle : true,
+              width: '100%',
+              sortColumn: 0,
+              sortAscending: true
+          };
+          table.draw(data, options);
 
           google.visualization.events.addListener(table, 'select', selectHandler);
 
