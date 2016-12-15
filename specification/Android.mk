@@ -23,6 +23,8 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/GpsHalV1GpsInterface.vts \
   hal_conventional/LightHalV1.vts \
   hal_conventional/WifiHalV1.vts \
+  hal_hidl/Nfc.vts \
+  hal_hidl/NfcClientCallback.vts \
   lib_bionic/libmV1.vts \
 
 vtslib_interfacespec_includes := \
@@ -60,9 +62,23 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libvts_interfacespecification
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := ${vtslib_interfacespec_srcfiles}
-LOCAL_C_INCLUDES := ${vtslib_interfacespec_includes}
-LOCAL_SHARED_LIBRARIES := ${vtslib_interfacespec_shared_libraries}
+LOCAL_SRC_FILES := \
+  ${vtslib_interfacespec_srcfiles} \
+  ../../../external/libnfc-nci/hidl/INfc.hidl \
+  ../../../external/libnfc-nci/hidl/INfcClientCallback.hidl \
+
+LOCAL_C_INCLUDES := \
+  ${vtslib_interfacespec_includes} \
+  system/libhwbinder/include \
+
+LOCAL_CFLAGS += -DENABLE_TREBLE
+
+LOCAL_SHARED_LIBRARIES := \
+  ${vtslib_interfacespec_shared_libraries} \
+  libhwbinder \
+  libbase \
+  libutils \
+
 LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
@@ -119,4 +135,3 @@ $(vts_spec_file8): $(LOCAL_PATH)/hal_hidl/NfcClientCallback.vts | $(ACP)
 	$(hide) $(ACP) -fp $< $@
 
 vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8)
-
