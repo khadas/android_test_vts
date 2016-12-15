@@ -25,7 +25,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
-from vts.testcases.kernel.ltp import KernelLtpTestCase
+from vts.testcases.kernel.ltp import KernelLtpTestHelper
 
 
 class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
@@ -65,16 +65,17 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._shell = self._dut.shell.one
         self._ltp_dir = "/data/local/tmp/ltp"
 
-        self._requirement = KernelLtpTestCase.EnvironmentRequirementChecker(self._shell)
+        self._requirement = KernelLtpTestHelper.EnvironmentRequirementChecker(
+            self._shell)
 
-        self._testcases = KernelLtpTestCase.TestCasesParser(self.data_file_path)
-        self._env = {self._KEY_ENV_TMPDIR: KernelLtpTestCase.LTPTMP,
-                     self._KEY_ENV_TMP: "%s/tmp" % KernelLtpTestCase.LTPTMP,
+        self._testcases = KernelLtpTestHelper.TestCasesParser(
+            self.data_file_path)
+        self._env = {self._KEY_ENV_TMPDIR: KernelLtpTestHelper.LTPTMP,
+                     self._KEY_ENV_TMP: "%s/tmp" % KernelLtpTestHelper.LTPTMP,
                      self._KEY_ENV_LTP_DEV_FS_TYPE: "ext4",
                      self._KEY_ENV_LTPROOT: self._ltp_dir,
                      self._KEY_ENV_PATH:
                      "/system/bin:%s/testcases/bin" % self._ltp_dir, }
-
 
     def PushFiles(self, n_bit):
         """Push the related files to target.
@@ -101,39 +102,24 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def Verify(self, results):
         """Verifies the test result of each test case."""
+        asserts.assertFalse(len(results) == 0,
+                            "No response received. Socket timeout")
 
-        if len(results) == 0:
-            # TIMEOUT
-            asserts.fail("No response received. Socket timeout")
-
-        logging.info("stdout: %s" % str(results[const.STDOUT]))
-        logging.info("stderr: %s" % str(results[const.STDERR]))
-        logging.info("exit_code: %s" %
-                     str(results[const.EXIT_CODE]))
+        logging.info("stdout: %s", results[const.STDOUT])
+        logging.info("stderr: %s", results[const.STDERR])
+        logging.info("exit_code: %s", results[const.EXIT_CODE])
 
         # For LTP test cases, we run one shell command for each test case
         # So the result should also contains only one execution output
-        if results[const.EXIT_CODE][0] not in (self._TPASS, self._TCONF) or \
-                   "TFAIL" in results[const.STDOUT][0]:
-            # If return code is other than 0 or 32,
-            # or the output contains 'TFAIL', then test FAIL
-            asserts.fail("Test received TFAIL/TBOK or return code is neither "
-                          "TPASS nor TCONF.")
-        elif results[const.EXIT_CODE][0] == self._TPASS:
-            # If output exit_code is _TPASS, then test PASS
-            return
-        elif results[const.EXIT_CODE][0] == self._TCONF and \
-            "TPASS" in results[const.STDOUT][0]:
-            # If output exit_code is _TCONF or but the stdout
-            # contains TPASS, this means part of the test passed
-            # but others were skipped. We consider it a PASS
-            return
-        elif results[const.EXIT_CODE][0] == self._TCONF:
-            # Test case is not for the current configuration, SKIP
-            asserts.skip("Incompatible test skipped: TCONF")
+        stdout = results[const.STDOUT][0]
+        ret_code = results[const.EXIT_CODE][0]
+        # Test case is not for the current configuration, SKIP
+        if ret_code == self._TCONF:
+            asserts.skipIf('TPASS' not in stdout,
+                           "Incompatible test skipped: TCONF")
         else:
-            # All other cases are treated as FAIL, but this is not expected
-            asserts.fail("Unexpected unknown failure.")
+            asserts.assertEqual(ret_code, self._TPASS,
+                               "Got return code %s, test did not pass." % ret_code)
 
     def TestNBits(self, n_bit):
         """Runs all 32-bit or 64-bit LTP test cases.
@@ -152,9 +138,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.runGeneratedTests(test_func=self.RunLtpOnce,
                                settings=test_cases,
-                               args=(n_bit,),
+                               args=(n_bit, ),
                                name_func=self.GetTestName)
-
 
     def GetTestName(self, test_case, n_bit):
         "Generate the vts test name of a ltp test"
@@ -162,25 +147,17 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def RunLtpOnce(self, test_case, n_bit):
         "Run one LTP test case"
-
-        if not self._requirement.Check(test_case):
-            logging.info("Test case environment requirements not satisfied: %s" % test_case.note)
-            asserts.skip("Test case environment requirement not satisfied. Test case skipped.")
-
+        self._requirement.Check(test_case)
         testcase_name = self.GetTestName(test_case, n_bit)
-
-        logging.info("executing a test binary: [%s]" % test_case.path)
-        logging.info("execution envp: [%s]" % self.GetEnvp())
-        logging.info("execution params: [%s]" % \
-                     test_case.GetArgs("$LTPROOT", self._ltp_dir))
-
+        exe_params = test_case.GetArgs("$LTPROOT", self._ltp_dir)
+        logging.info("executing a test binary: [%s]", test_case.path)
+        logging.info("execution envp: [%s]", self.GetEnvp())
+        logging.info("execution params: [%s]", exe_params)
         self._dut.shell.InvokeTerminal(testcase_name)
         shell = getattr(self._dut.shell, testcase_name)
-
-        results = shell.Execute("env %s %s %s" % (
-            self.GetEnvp(), test_case.path, test_case.GetArgs("$LTPROOT",
-                                                    self._ltp_dir)))
-
+        cmd = "env %s %s %s" % (self.GetEnvp(), test_case.path, exe_params)
+        logging.debug("Executing %s", cmd)
+        results = shell.Execute(cmd)
         self.Verify(results)
 
     def test32Bits(self):
