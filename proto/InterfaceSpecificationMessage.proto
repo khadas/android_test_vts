@@ -247,6 +247,9 @@ message VariableSpecificationMessage {
   //     "template", "typedef", "handle", "binder", "parcelable".
   optional VariableType type = 2;
 
+  // the number of used bits (only for variables of a TYPE_UNION variable).
+  optional int32 used_bits = 11;
+
   // the actual value(s) for an scalar data type.
   // repeated values for a vector.
   optional ScalarDataValueMessage scalar_value = 101;
