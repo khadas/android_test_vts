@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "code_gen/LegacyHalCodeGen.h"
+#include "code_gen/driver/LegacyHalCodeGen.h"
 
 #include <fstream>
 #include <iostream>
