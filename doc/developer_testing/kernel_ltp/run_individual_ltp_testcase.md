@@ -8,7 +8,9 @@ __Note: the following instructions will be simplified after vts supports tradefe
 
 ## 3. Setup basic environment setup such as a temp directory for LTP
 'adb shell rm -rf /data/local/tmp/ltp/tmp'
+
 'adb shell mkdir /data/local/tmp/ltp/tmp'
+
 'adb shell chmod 775 /data/local/tmp/ltp/tmp'
 
 ## 4. Run individual LTP test case with arguments
