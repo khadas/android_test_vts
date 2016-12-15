@@ -25,7 +25,7 @@ include $(CLEAR_VARS)
 
 VTS_PYTHON_ZIP := $(HOST_OUT)/vts_runner_python/vts_runner_python.zip
 
-$(VTS_PYTHON_ZIP): test/vts/setup.py
+$(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	@mkdir -p $(dir $@)
 	@rm -f $@.list
