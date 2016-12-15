@@ -97,34 +97,37 @@ class AndroidBuildClient(object):
             version=self.API_VERSION,
             http=http_auth)
 
-    def DownloadManifest(self, build_target, build_id, local_dest,
+    def DownloadManifest(self, branch, build_target, build_id,
                        attempt_id=None):
         """Get Android build manifest XML file.
 
         Args:
-          build_target: Target name, e.g. "gce_x86-userdebug"
-          build_id: Build id, a string, e.g. "2263051", "P2804227"
-          local_dest: A local path where the artifact should be stored.
-                      e.g. "/tmp/manifest_2263051.xml"
-          attempt_id: String, attempt id, will default to DEFAULT_ATTEMPT_ID.
+            branch: Branch from which the code was built, e.g. "master"
+            build_target: Target name, e.g. "gce_x86-userdebug"
+            build_id: Build id, a string, e.g. "2263051", "P2804227"
+            attempt_id: String, attempt id, will default to DEFAULT_ATTEMPT_ID.
+
+
+        Returns:
+            Contents of the requested XML file as a string.
         """
         attempt_id = attempt_id or self.DEFAULT_ATTEMPT_ID
-        resource_id = "manifest_%s.xml" % buildId
+        resource_id = "manifest_%s.xml" % build_id
         api = self.service.buildartifact().get_media(
             buildId=build_id,
             target=build_target, attemptId=attempt_id,
             resourceId=resource_id)
         logger.info("Downloading manifest: target: %s, build_id: %s, "
-                    "resource_id: %s, dest: %s", build_target, build_id,
-                    resource_id, local_dest)
+                    "resource_id: %s", build_target, build_id, resource_id)
         try:
-            with io.FileIO(local_dest, mode="wb") as fh:
+            with io.BytesIO() as mem_buffer:
                 downloader = apiclient.http.MediaIoBaseDownload(
-                    fh, api, chunksize=self.DEFAULT_CHUNK_SIZE)
+                    mem_buffer, api, chunksize=self.DEFAULT_CHUNK_SIZE)
                 done = False
                 while not done:
                     _, done = downloader.next_chunk()
-            logger.info("Downloaded artifact: %s", local_dest)
+                logger.info("Downloaded artifact %s" % resource_id)
+                return mem_buffer.getvalue()
         except OSError as e:
             logger.error("Downloading artifact failed: %s", str(e))
             raise DriverError(str(e))
