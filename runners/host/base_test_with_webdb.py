@@ -290,7 +290,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             coverage = self._current_test_report_msg.coverage.add()
 
             coverage.file_name = src_file_name
-            abs_path = os.path.join(self.data_file_path, src_file_name)
+            coverage_path = os.path.join(self.data_file_path, "coverage")
+            abs_path = os.path.join(coverage_path, src_file_name)
             src_file_content = None
             if not os.path.exists(abs_path):
                 logging.error("couldn't find src file %s", abs_path)
@@ -312,7 +313,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                               src_file_name)
                 return False
 
-            abs_path = os.path.join(self.data_file_path, gcno_file_name)
+            abs_path = os.path.join(coverage_path, gcno_file_name)
             gcno_file_content = None
             if not os.path.exists(abs_path):
                 logging.error("couldn't find gcno file %s", abs_path)
