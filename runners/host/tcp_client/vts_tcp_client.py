@@ -20,6 +20,7 @@ import logging
 import os
 import socket
 import time
+import types
 
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
@@ -248,7 +249,10 @@ class VtsTcpClient(object):
             command_msg.arg = arg
 
         if shell_command is not None:
-            command_msg.shell_command.append(shell_command)
+            if isinstance(shell_command, types.ListType):
+                command_msg.shell_command.extend(shell_command)
+            else:
+                command_msg.shell_command.append(shell_command)
 
         logging.info("command %s" % command_msg)
         message = command_msg.SerializeToString()
