@@ -183,7 +183,7 @@ camera_info_t* GenerateCameraInfo() {
 
 
 camera_info_t* GenerateCameraInfoUsingMessage(
-    const ArgumentSpecificationMessage& msg) {
+    const VariableSpecificationMessage& msg) {
   cout << __func__ << endl;
   // TODO: acutally use msg.
   camera_info_t* caminfo = (camera_info_t*) malloc(sizeof(camera_info_t));
@@ -201,30 +201,48 @@ camera_info_t* GenerateCameraInfoUsingMessage(
 
 
 bool ConvertCameraInfoToProtobuf(
-    camera_info_t* raw, ArgumentSpecificationMessage* msg) {
+    camera_info_t* raw, VariableSpecificationMessage* msg) {
   cout << __func__ << ":" << __LINE__ << endl;
 
-  if (msg->primitive_value_size() > 0) msg->clear_primitive_value();
-  if (msg->aggregate_value_size() > 0) msg->clear_aggregate_value();
+  if (msg->struct_value_size() > 0) msg->clear_struct_value();
 
-  if (!raw) {
-    return false;
-  }
+  if (!raw) return false;
 
   cout << __func__ << ":" << __LINE__ << endl;
   // TODO: use primitive_name and put in the expected order.
-  msg->add_primitive_value()->set_int32_t(raw->facing);
-  msg->add_primitive_value()->set_int32_t(raw->orientation);
-  cout << __func__ << ":" << __LINE__ << endl;
-  msg->add_primitive_value()->set_uint32_t(raw->device_version);
+  msg->set_type(TYPE_STRUCT);
+
+  VariableSpecificationMessage* sub_msg;
+
+  sub_msg = msg->add_struct_value();
+  sub_msg->set_type(TYPE_SCALAR);
+  sub_msg->set_scalar_type("int32_t");
+  sub_msg->mutable_scalar_value()->set_int32_t(raw->facing);
+
+  sub_msg = msg->add_struct_value();
+  sub_msg->set_type(TYPE_SCALAR);
+  sub_msg->set_scalar_type("int32_t");
+  sub_msg->mutable_scalar_value()->set_int32_t(raw->orientation);
+
+  sub_msg = msg->add_struct_value();
+  sub_msg->set_type(TYPE_SCALAR);
+  sub_msg->set_scalar_type("uint32_t");
+  sub_msg->mutable_scalar_value()->set_uint32_t(raw->device_version);
+
   // TODO: update for static_camera_characteristics and others
   // msg.add_primitive_value()->set_int32_t(raw->static_camera_characteristics);
-  msg->add_primitive_value()->set_int32_t(raw->resource_cost);
+  sub_msg = msg->add_struct_value();
+  sub_msg->set_type(TYPE_SCALAR);
+  sub_msg->set_scalar_type("int32_t");
+  sub_msg->mutable_scalar_value()->set_int32_t(raw->resource_cost);
+
   // TODO: support pointer. conflicting_devices is pointer pointer.
   // msg.add_primitive_value()->set_pointer(raw->conflicting_devices);
   // msg.add_primitive_value()->set_int32_t(raw->conflicting_devices_length);
-  msg->add_primitive_value()->set_int32_t(0);
-  cout << __func__ << ":" << __LINE__ << endl;
+  sub_msg = msg->add_struct_value();
+  sub_msg->set_type(TYPE_SCALAR);
+  sub_msg->set_scalar_type("int32_t");
+  sub_msg->mutable_scalar_value()->set_int32_t(0);
   return true;
 }
 

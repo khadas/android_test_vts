@@ -1,4 +1,4 @@
-component_class: HAL_SUBMODULE
+component_class: HAL_CONVENTIONAL_SUBMODULE
 component_type: GPS
 component_type_version: 1.0
 
@@ -10,11 +10,13 @@ header: "<hardware/gps.h>"
 api: {
   name: "init"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "function_pointer"
-    aggregate_type: "GpsCallbacks*"
+    type: TYPE_PREDEFINED
+    scalar_type: "pointer"
+    predefined_type: "GpsCallbacks*"
   }
   callflow: {
     entry: true
@@ -25,7 +27,8 @@ api: {
 api: {
   name: "start"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   callflow: {
     next: "stop"
@@ -35,7 +38,8 @@ api: {
 api: {
   name: "stop"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   callflow: {
     next: "cleanup"
@@ -45,7 +49,7 @@ api: {
 api: {
   name: "cleanup"
   return_type: {
-    primitive_type: "void"
+    type: TYPE_VOID
   }
   callflow: {
     exit: true
@@ -56,84 +60,101 @@ api: {
 api: {
   name: "inject_time"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "int64_t"
-    aggregate_type: "GpsUtcTime"
+    type: TYPE_PREDEFINED
+    scalar_type: "int64_t"
+    predefined_type: "GpsUtcTime"
   }
   arg: {
-    primitive_type: "int64_t"
-    aggregate_type: "GpsUtcTime"
+    type: TYPE_PREDEFINED
+    scalar_type: "int64_t"
+    predefined_type: "GpsUtcTime"
   }
   arg: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
 }
 
 api: {
   name: "inject_location"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "double_t"
-    aggregate_type: "vts_gps_latitude"
+    type: TYPE_PREDEFINED
+    scalar_type: "double_t"
+    predefined_type: "vts_gps_latitude"
   }
   arg: {
-    primitive_type: "double_t"
-    aggregate_type: "vts_gps_longitude"
+    type: TYPE_PREDEFINED
+    scalar_type: "double_t"
+    predefined_type: "vts_gps_longitude"
   }
   arg: {
-    primitive_type: "float_t"
-    aggregate_type: "vts_gps_accuracy"
+    type: TYPE_PREDEFINED
+    scalar_type: "float_t"
+    predefined_type: "vts_gps_accuracy"
   }
 }
 
 api: {
   name: "delete_aiding_data"
   return_type: {
-    primitive_type: "void"
+    type: TYPE_VOID
   }
   arg: {
-    primitive_type: "uint16_t"
-    aggregate_type: "vts_gps_flags_uint16"
+    type: TYPE_PREDEFINED
+    scalar_type: "uint16_t"
+    predefined_type: "vts_gps_flags_uint16"
   }
 }
 
 api: {
   name: "set_position_mode"
   return_type: {
-    primitive_type: "int32_t"
+    type: TYPE_SCALAR
+    scalar_type: "int32_t"
   }
   arg: {
-    primitive_type: "uint32_t"
-    aggregate_type: "GpsPositionMode"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    predefined_type: "GpsPositionMode"
   }
   arg: {
-    primitive_type: "uint32_t"
-    aggregate_type: "GpsPositionRecurrence"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    predefined_type: "GpsPositionRecurrence"
   }
   arg: {
-    primitive_type: "uint32_t"
-    aggregate_type: "min_interval"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    predefined_type: "min_interval"
   }
   arg: {
-    primitive_type: "uint32_t"
-    aggregate_type: "preferred_accuracy"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    predefined_type: "preferred_accuracy"
   }
   arg: {
-    primitive_type: "uint32_t"
-    aggregate_type: "preferred_time"
+    type: TYPE_SCALAR
+    scalar_type: "uint32_t"
+    predefined_type: "preferred_time"
   }
 }
 
 api: {
   name: "get_extension"
   return_type: {
-    primitive_type: "void_pointer"
+    type: TYPE_SCALAR
+    scalar_type: "void_pointer"
   }
   arg: {
-    primitive_type: "char_pointer"
+    type: TYPE_SCALAR
+    scalar_type: "char_pointer"
   }
 }
