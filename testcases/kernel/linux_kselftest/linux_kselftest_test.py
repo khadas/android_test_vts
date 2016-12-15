@@ -73,9 +73,13 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
             testcase: string, format testsuit/testname, specifies which
                 test case to run.
         """
-        result = self._shell.Execute("%s/%s" % (config.KSFT_DIR, testcase))
+        cmd = "cd %s && chmod 755 %s && %s" % \
+            (config.KSFT_DIR, testcase, testcase)
+        logging.info("Executing: %s", cmd)
 
-        logging.info("exit_code: %s:", result[const.EXIT_CODE])
+        result = self._shell.Execute(cmd)
+        logging.info("EXIT_CODE: %s:", result[const.EXIT_CODE])
+
         ret_code = result[const.EXIT_CODE][0]
         asserts.assertEqual(ret_code, config.ExitCode.KSFT_PASS)
 
