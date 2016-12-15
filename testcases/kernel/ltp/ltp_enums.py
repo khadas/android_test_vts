@@ -21,14 +21,11 @@ class RequirementState(object):
 
     Attributes:
         UNCHECKED: test case requirement has not been checked
-        PATHEXISTS: the path of the test case has been verified exist, but
-                    all the other requirements have not been checked
         SATISFIED: all the requirements are satisfied
         UNSATISFIED: some of the requirements are not satisfied. Test case will
                      not be executed
     """
     UNCHECKED = 0
-    PATHEXISTS = 1
     SATISFIED = 2
     UNSATISFIED = 3
 

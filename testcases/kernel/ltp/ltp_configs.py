@@ -30,11 +30,24 @@ TMPBASE = os.path.join(TMP, "tmpbase")
 LTPTMP = os.path.join(TMP, "ltptemp")
 # Directory for environment variable 'TMPDIR' needed by some test cases
 TMPDIR = os.path.join(TMP, "tmpdir")
+# Path where ltp test binary exists
+LTPBINPATH = os.path.join(LTPDIR, "testcases/bin")
 # Add LTP's binary path to PATH
-PATH = "/system/bin:%s" % os.path.join(LTPDIR, "testcases/bin")
+PATH = "/system/bin:%s" % LTPBINPATH
 
 # File system type for loop device
 LTP_DEV_FS_TYPE = "ext4"
+
+# Binaries required by LTP test cases that should exist in PATH
+EXTERNAL_BINS = [
+    'export',
+    'cd',
+    'mktemp',
+    'cp',
+    'chmod',
+    'chown',
+    'ls',
+]
 
 # Requirement to testcase dictionary.
 REQUIREMENTS_TO_TESTCASE = {

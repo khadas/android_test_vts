@@ -50,6 +50,7 @@ class ShellEnvironment(object):
         self._shell = shell
 
     def ExecuteDefinitions(self, definitions):
+        """Execute a given list of environment check definitions"""
         if not isinstance(definitions, types.ListType):
             definitions = [definitions]
 
