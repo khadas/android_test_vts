@@ -29,3 +29,23 @@ class USERError(Exception):
 
 class ComponentLoadingError(Exception):
     """Raised if it is unable to load a target component on a target device."""
+
+
+class TcpServerCreationError(Exception):
+    """Raised when it's unable to start a TCP server."""
+
+
+class TcpServerShutdownError(Exception):
+    """Raised when it's unable to shutdown a TCP server."""
+
+
+class TcpServerConnectionError(Exception):
+    """Raised when it's unable to connect to a TCP Server."""
+
+
+class ConnectionRefusedError(Exception):
+    """Failure due to wrong port number.
+
+      Raised when an attempt to connect to a TCP server fails due to incorrect
+      port number, such as 21.
+    """
