@@ -33,8 +33,13 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                  bits=64)
 
     def testBase(self):
-        """A simple testcase which just calls functions."""
+        """A simple testcase which just calls a function."""
         # TODO: extend to make realistic testcases
+        result = self.dut.hal.nfc.open()
+        logging.info("result: %s", result.return_type.string_value.message)
+
+    def TestNormla(self):
+        """A simple testcase which just calls functions."""
         result = self.dut.hal.nfc.open()
         logging.info("result: %s", result.return_type.string_value.message)
         result = self.dut.hal.nfc.core_initialized(0)

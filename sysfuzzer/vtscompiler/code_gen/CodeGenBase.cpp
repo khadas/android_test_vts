@@ -18,6 +18,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -38,7 +40,16 @@ CodeGenBase::~CodeGenBase() {}
 void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
                               std::stringstream& h_ss,
                               const InterfaceSpecificationMessage& message) {
-  cpp_ss << "#include \"" << string(input_vts_file_path_) << ".h\"" << endl;
+  string input_vfs_file_path(input_vts_file_path_);
+
+  cpp_ss << "#include \"" << input_vfs_file_path << ".h\"" << endl;
+
+  if (message.component_class() == HAL_HIDL) {
+    cpp_ss << "#include \""
+           << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
+           << "/types.vts.h\"" << endl;
+    cpp_ss << "#include <hwbinder/HidlSupport.h>" << endl;
+  }
 
   cpp_ss << "#include <iostream>" << endl;
   cpp_ss << "#include \"vts_datatype.h\"" << endl;
@@ -47,27 +58,57 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     cpp_ss << "#include " << header << endl;
   }
   if (message.component_class() == HAL_HIDL && message.has_component_name()) {
-    cpp_ss << "#include <" << message.component_name() << ".h>" << endl;
-    if (!endsWith(message.component_name(), "Callback")) {
-      cpp_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
-    } else {
-      cpp_ss << "#include <Bn" << message.component_name().substr(1) << ".h>" << endl;
+    string package_path = message.package();
+    ReplaceSubString(package_path, ".", "/");
+    cpp_ss << "#include <" << package_path << "/"
+           << GetVersionString(message.component_type_version())
+           << "/" << message.component_name() << ".h>" << endl;
+    cpp_ss << "#include <" << package_path << "/"
+           << GetVersionString(message.component_type_version())
+           << "/types.h>" << endl;
+    if (message.component_name() != "types") {
+      if (!endsWith(message.component_name(), "Callback")) {
+        cpp_ss << "#include <" << package_path << "/"
+               << GetVersionString(message.component_type_version())
+               << "/Bp" << message.component_name().substr(1) << ".h>" << endl;
+      } else {
+        cpp_ss << "#include <" << package_path << "/"
+               << GetVersionString(message.component_type_version())
+               << "/Bn" << message.component_name().substr(1) << ".h>" << endl;
+      }
     }
     for (const auto& import : message.import()) {
       string mutable_import = import;
       ReplaceSubString(mutable_import, ".", "/");
-      string base_dirpath = mutable_import.substr(0, mutable_import.find_last_of("/\\") + 1);
-      string base_filename = mutable_import.substr(mutable_import.find_last_of("/\\") + 1);
+      string base_dirpath = mutable_import.substr(
+          0, mutable_import.find_last_of("/\\") + 1);
+      string base_filename = mutable_import.substr(
+          mutable_import.find_last_of("/\\") + 1);
       // TODO: consider restoring this when hidl packaging is fully defined.
       // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
-      cpp_ss << "#include <" << base_filename << ".h>" << endl;
+      cpp_ss << "#include <" << package_path << "/"
+             << GetVersionString(message.component_type_version())
+             << "/" << base_filename << ".h>" << endl;
       if (!endsWith(base_filename, "Callback")) {
         // TODO: ditto
         // cpp_ss << "#include <" << base_dirpath << ...
-        cpp_ss << "#include <" << "Bp" << base_filename.substr(1) << ".h>" << endl;
-        cpp_ss << "#include <" << base_filename.substr(1) << ".h>" << endl;
+        if (base_filename != "types") {
+          cpp_ss << "#include <" << package_path << "/"
+                 << GetVersionString(message.component_type_version())
+                 << "/Bp" << base_filename.substr(1) << ".h>" << endl;
+          cpp_ss << "#include <" << package_path << "/"
+                 << GetVersionString(message.component_type_version())
+                 << "/" << base_filename.substr(1) << ".h>" << endl;
+        }
       }
-      cpp_ss << "#include <" << "Bn" << base_filename.substr(1) << ".h>" << endl;
+      if (base_filename != "types") {
+        cpp_ss << "#include <" << package_path << "/"
+               << GetVersionString(message.component_type_version())
+               << "/Bn" << base_filename.substr(1) << ".h>" << endl;
+      }
+      cpp_ss << "#include <" << package_path << "/"
+             << GetVersionString(message.component_type_version())
+             << "/types.h>" << endl;
     }
   }
   GenerateOpenNameSpaces(cpp_ss, message);
@@ -97,6 +138,9 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   cpp_ss << endl;
   GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+  GenerateCppBodyGetAttributeFunction(
+      cpp_ss, message, fuzzer_extended_class_name);
+
   if (message.component_class() == HAL_HIDL &&
       endsWith(message.component_name(), "Callback")) {
     cpp_ss << endl;
@@ -108,10 +152,10 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
         if (arg_count > 0) cpp_ss << "," << endl;
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
-            cpp_ss << "    const " << message.component_name() << "::"
+            cpp_ss << "    const " /*<<  message.component_name() << "::" */
                    << arg.predefined_type() << "&";
           } else {
-            cpp_ss << "    " << message.component_name() << "::"
+            cpp_ss << "    " /* << message.component_name() << "::" */
                    << arg.predefined_type();
           }
           cpp_ss << " arg" << arg_count;;
@@ -128,8 +172,6 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
       cpp_ss << endl;
     }
 
-    GenerateCppBodyGetAttributeFunction(cpp_ss, message, fuzzer_extended_class_name);
-
     cpp_ss << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
            << message.component_name() << "()";
     cpp_ss << " {" << endl
@@ -137,16 +179,19 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
            << endl;
     cpp_ss << "}" << endl << endl;
   } else {
-    std::stringstream ss;
-    // return type
-    ss << "android::vts::FuzzerBase* " << endl;
-    // function name
-    string function_name_prefix = GetFunctionNamePrefix(message);
-    ss << function_name_prefix << "(" << endl;
-    ss << ")";
+    if (message.component_class() == HAL_HIDL &&
+        message.component_name() != "types") {
+      std::stringstream ss;
+      // return type
+      ss << "android::vts::FuzzerBase* " << endl;
+      // function name
+      string function_name_prefix = GetFunctionNamePrefix(message);
+      ss << function_name_prefix << "(" << endl;
+      ss << ")";
 
-    GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(),
-                                   fuzzer_extended_class_name);
+      GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(),
+                                     fuzzer_extended_class_name);
+    }
   }
 
   GenerateCloseNameSpaces(cpp_ss);
@@ -169,13 +214,27 @@ void CodeGenBase::GenerateAllHeader(
     h_ss << "#include " << header << endl;
   }
   if (message.component_class() == HAL_HIDL && message.has_component_name()) {
-    h_ss << "#include <" << message.component_name() << ".h>" << endl;
-    if (!endsWith(message.component_name(), "Callback")) {
-      h_ss << "#include <Bp" << message.component_name().substr(1) << ".h>" << endl;
-    } else {
-      h_ss << "#include <Bn" << message.component_name().substr(1) << ".h>" << endl;
+    string package_path = message.package();
+    ReplaceSubString(package_path, ".", "/");
+
+    h_ss << "#include <" << package_path << "/"
+         << GetVersionString(message.component_type_version())
+         << "/" << message.component_name() << ".h>" << endl;
+    h_ss << "#include <" << package_path << "/"
+         << GetVersionString(message.component_type_version())
+         << "/types.h>" << endl;
+    if (message.component_name() != "types") {
+      if (!endsWith(message.component_name(), "Callback")) {
+        h_ss << "#include <" << package_path << "/"
+             << GetVersionString(message.component_type_version())
+             << "/Bp" << message.component_name().substr(1) << ".h>" << endl;
+      } else {
+        h_ss << "#include <" << package_path << "/"
+             << GetVersionString(message.component_type_version())
+             << "/Bn" << message.component_name().substr(1) << ".h>" << endl;
+      }
     }
-    h_ss << "#include <hwbinder/Hidl.h>" << endl;
+    h_ss << "#include <hwbinder/HidlSupport.h>" << endl;
     h_ss << "#include <hwbinder/IServiceManager.h>" << endl;
   }
   h_ss << "\n\n" << endl;
@@ -193,7 +252,10 @@ void CodeGenBase::GenerateAllHeader(
   ss << function_name_prefix << "(" << endl;
   ss << ")";
 
-  GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
+  if (message.component_class() == HAL_HIDL &&
+      message.component_name() != "types") {
+    GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
+  }
 
   if (message.component_class() == HAL_HIDL &&
       endsWith(message.component_name(), "Callback")) {
@@ -213,10 +275,10 @@ void CodeGenBase::GenerateAllHeader(
         if (arg_count > 0) h_ss << ", ";
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
-            h_ss << "    const " << message.component_name() << "::"
+            h_ss << "    const " /*<< message.component_name() << "::" */
                  << arg.predefined_type() << "&";
           } else {
-            h_ss << "    " << message.component_name() << "::"
+            h_ss << "    " /*<< message.component_name() << "::"*/
                  << arg.predefined_type();
           }
           h_ss << " arg" << arg_count;;
@@ -244,56 +306,75 @@ void CodeGenBase::GenerateAllHeader(
 void CodeGenBase::GenerateClassHeader(
     const string& fuzzer_extended_class_name, std::stringstream& h_ss,
     const InterfaceSpecificationMessage& message) {
-  h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
-       << endl;
-  h_ss << " public:" << endl;
-  h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
-
-  if (message.component_class() == HAL_CONVENTIONAL) {
-    h_ss << "HAL_CONVENTIONAL)";
-  } else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-    h_ss << "HAL_CONVENTIONAL_SUBMODULE)";
-  } else if (message.component_class() == HAL_HIDL) {
-    h_ss << "HAL_HIDL), hw_binder_proxy_()";
-  } else if (message.component_class() == HAL_LEGACY) {
-    h_ss << "HAL_LEGACY)";
-  } else if (message.component_class() == LIB_SHARED) {
-    h_ss << "LIB_SHARED)";
-  }
-
-  h_ss << " { }" << endl;
-  h_ss << " protected:" << endl;
-  h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl
-       << "            void** result, const string& callback_socket_name);"
-       << endl;
-  h_ss << "  bool GetAttribute(FunctionSpecificationMessage* func_msg," << endl
-       << "            void** result);"
-       << endl;
-
-  // produce Fuzz method(s) for sub_struct(s).
-  for (auto const& sub_struct : message.sub_struct()) {
-    GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
-  }
-
-  if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-    string component_name = GetComponentName(message);
-    h_ss << "  void SetSubModule(" << component_name << "* submodule) {"
+  if (message.component_class() != HAL_HIDL ||
+      message.component_name() != "types") {
+    h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
          << endl;
-    h_ss << "    submodule_ = submodule;" << endl;
-    h_ss << "  }" << endl;
-    h_ss << endl;
-    h_ss << " private:" << endl;
-    h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
+    h_ss << " public:" << endl;
+    h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
+
+    if (message.component_class() == HAL_CONVENTIONAL) {
+      h_ss << "HAL_CONVENTIONAL)";
+    } else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+      h_ss << "HAL_CONVENTIONAL_SUBMODULE)";
+    } else if (message.component_class() == HAL_HIDL) {
+      if (message.component_name() != "types") {
+        h_ss << "HAL_HIDL), hw_binder_proxy_()";
+      } else {
+        h_ss << "HAL_HIDL)";
+      }
+    } else if (message.component_class() == HAL_LEGACY) {
+      h_ss << "HAL_LEGACY)";
+    } else if (message.component_class() == LIB_SHARED) {
+      h_ss << "LIB_SHARED)";
+    }
+
+    h_ss << " { }" << endl;
+    h_ss << " protected:" << endl;
+    h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl
+         << "            void** result, const string& callback_socket_name);"
          << endl;
-  }
-  if (message.component_class() == HAL_HIDL) {
-    h_ss << "  bool GetService();" << endl
-         << endl
-         << " private:" << endl
-         << "  sp<" << message.component_name() << "> hw_binder_proxy_;"
+    h_ss << "  bool GetAttribute(FunctionSpecificationMessage* func_msg," << endl
+         << "            void** result);"
          << endl;
+
+    // produce Fuzz method(s) for sub_struct(s).
+    for (auto const& sub_struct : message.sub_struct()) {
+      GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
+    }
+
+    if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+      string component_name = GetComponentName(message);
+      h_ss << "  void SetSubModule(" << component_name << "* submodule) {"
+           << endl;
+      h_ss << "    submodule_ = submodule;" << endl;
+      h_ss << "  }" << endl;
+      h_ss << endl;
+      h_ss << " private:" << endl;
+      h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
+           << endl;
+    }
+
+    if (message.component_class() == HAL_HIDL
+        && message.component_name() != "types") {
+      h_ss << "  bool GetService();" << endl
+           << endl
+           << " private:" << endl
+           << "  sp<" << message.component_name() << "> hw_binder_proxy_;"
+           << endl;
+    }
+    h_ss << "};" << endl;
   }
-  h_ss << "};" << endl;
+
+  if (message.component_class() == HAL_HIDL &&
+      message.component_name() == "types") {
+    for (const auto& attribute : message.attribute()) {
+      if (attribute.type() == TYPE_ENUM) {
+        h_ss << attribute.name() << " " << "Random" << attribute.name() << "();"
+               << endl;
+      }
+    }
+  }
 }
 
 void CodeGenBase::GenerateFuzzFunctionForSubStruct(
@@ -322,7 +403,9 @@ void CodeGenBase::GenerateOpenNameSpaces(
     ss << "using namespace ";
     string name = message.package();
     ReplaceSubString(name, ".", "::");
-    ss << name << ";" << endl;
+    ss << name << "::"
+       << GetVersionString(message.component_type_version(), true)
+       << ";" << endl;
   }
 
   ss << "namespace android {" << endl;
