@@ -648,7 +648,9 @@ class AndroidDevice(object):
                     "A command to setup the env to start the VTS Agent failed %s",
                     e)
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
-        for bitness in ['64', '32']:
+
+        bits = ['64', '32'] if self.is64Bit else ['32']
+        for bitness in bits:
             cmd = (
                 'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                 '{path}/{bitness}/vts_hal_agent{bitness}'
