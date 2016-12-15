@@ -139,13 +139,9 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
         return arg.predefined_type();
       } else {
         if (!endsWith(message->component_name(), "Callback")) {
-          return //"Bp" + message->component_name().substr(1) + "::"
-              //+
-              arg.predefined_type();
+          return arg.predefined_type();
         } else {
-          return //"Bn" + message->component_name().substr(1) + "::"
-              //+
-              arg.predefined_type();
+          return arg.predefined_type();
         }
       }
     }
@@ -156,9 +152,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       if (!message || message->component_class() != HAL_HIDL) {
         return arg.predefined_type();
       } else {
-        return //message->component_name() + "::"
-            //+
-            arg.predefined_type();
+        return arg.predefined_type();
       }
     }
   } else if (arg.type() == TYPE_VECTOR) {
