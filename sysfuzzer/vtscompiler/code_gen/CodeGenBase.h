@@ -69,6 +69,24 @@ class CodeGenBase {
   // Generates code that stops the measurement.
   void GenerateCodeToStopMeasurement(std::stringstream& ss);
 
+  // Generates all header.
+  void GenerateAllHeader(
+      const string& fuzzer_extended_class_name,
+      std::stringstream& h_ss, const InterfaceSpecificationMessage& message);
+
+  // Generate header code for a specific class.
+  void GenerateClassHeader(
+      const string& fuzzer_extended_class_name,
+      std::stringstream& h_ss,
+      const InterfaceSpecificationMessage& message);
+
+  string GetComponentName(
+      const InterfaceSpecificationMessage& message);
+
+  void GenerateFuzzFunctionForSubStruct(
+      std::stringstream& h_ss,
+      const StructSpecificationMessage& message, const string& parent_path);
+
  private:
   const char* input_vts_file_path_;
   const char* vts_name_;

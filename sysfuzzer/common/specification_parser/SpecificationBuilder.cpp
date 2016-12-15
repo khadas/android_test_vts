@@ -101,6 +101,12 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
   }
   cout << __func__ << ":" << __LINE__ << " " << "loaded target comp" << endl;
 
+  return fuzzer;
+  /*
+   * TODO: now always return the fuzzer. this change is due to the difficulty
+   * in checking nested apis although that's possible. need to check whether
+   * Fuzz() found the function, while still distinguishing the difference
+   * between that and defined but non-set api.
   if (!strcmp(target_func_name, "#Open")) return fuzzer;
 
   for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
@@ -110,6 +116,7 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     }
   }
   return NULL;
+  */
 }
 
 
@@ -203,8 +210,10 @@ const string& SpecificationBuilder::CallFunction(
     cout << __func__ << " opened" << endl;
     // return the return value from open;
     if (func_msg->return_type().primitive_type().size() > 0) {
+      cout << __func__ << " return_type exists" << endl;
       // TODO handle when the size > 1.
       if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
+        cout << __func__ << " return_type is int32_t" << endl;
         func_msg->mutable_return_type()->mutable_primitive_value()->Add()->set_int32_t(0);
         cout << "result " << endl;
         // todo handle more types;
@@ -213,7 +222,10 @@ const string& SpecificationBuilder::CallFunction(
         return *output;
       }
     }
-    return empty_string;
+    cerr << __func__ << " return_type unknown" << endl;
+    string* output = new string();
+    google::protobuf::TextFormat::PrintToString(*func_msg, output);
+    return *output;
   }
   cout << __func__ << ":" << __LINE__ << endl;
 

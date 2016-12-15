@@ -23,6 +23,7 @@
 
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
+#include <hardware/camera.h>
 
 #include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
@@ -40,6 +41,26 @@ static void vts_camera_device_status_change(
 static void vts_torch_mode_status_change(
     const struct camera_module_callbacks*, const char* camera_id,
     int new_status) {}
+
+static void vts_camera_notify_callback(
+    int32_t msg_type, int32_t ext1, int32_t ext2, void *user) {
+}
+
+static void vts_camera_data_callback(int32_t msg_type,
+        const camera_memory_t *data, unsigned int index,
+        camera_frame_metadata_t *metadata, void *user) {
+}
+
+static void vts_camera_data_timestamp_callback(
+    int64_t timestamp, int32_t msg_type,
+    const camera_memory_t *data, unsigned int index, void *user) {
+}
+
+static camera_memory_t* vts_camera_request_memory(
+    int fd, size_t buf_size, unsigned int num_bufs, void *user) {
+  cout << __func__ << endl;
+  return NULL;
+}
 // } Callbacks
 
 
@@ -54,6 +75,26 @@ camera_module_callbacks_t* GenerateCameraModuleCallbacks() {
     callbacks->torch_mode_status_change = vts_torch_mode_status_change;
     return callbacks;
   }
+}
+
+
+camera_notify_callback GenerateCameraNotifyCallback() {
+  return vts_camera_notify_callback;
+}
+
+
+camera_data_callback GenerateCameraDataCallback() {
+  return vts_camera_data_callback;
+}
+
+
+camera_data_timestamp_callback GenerateCameraDataTimestampCallback() {
+  return vts_camera_data_timestamp_callback;
+}
+
+
+camera_request_memory GenerateCameraRequestMemory() {
+  return vts_camera_request_memory;
 }
 
 
