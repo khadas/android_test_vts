@@ -65,12 +65,25 @@ class MirrorObject(object):
                 logging.fatal("unknown api name %s", api_name)
 
             logging.info(func_msg)
-            for arg in func_msg.arg:
-                # TODO: use args and kwargs
-                if arg.primitive_type == "pointer":
-                    value = arg.values.add()
-                    value.pointer = 0
-            logging.info(func_msg)
+            if args:
+              for arg_msg, value_msg in zip(func_msg.arg, args):
+                logging.info("arg msg value %s %s", arg_msg, value_msg)
+                if value_msg:
+                  for primitive_value in value_msg.primitive_value:
+                    pv = arg_msg.primitive_value.add()
+                    if primitive_value.HasField("uint32_t"):
+                      pv.uint32_t = primitive_value.uint32_t
+                    if primitive_value.HasField("int32_t"):
+                      pv.int32_t = primitive_value.int32_t
+              logging.info("final msg %s", func_msg)
+            else:
+              # TODO: use kwargs
+              for arg in func_msg.arg:
+                  # TODO: handle other
+                  if arg.primitive_type == "pointer":
+                      value = arg.primitive_value.add()
+                      value.pointer = 0
+              logging.info(func_msg)
 
             self._client.SendCommand(
                 AndroidSystemControlMessage_pb2.CALL_FUNCTION,

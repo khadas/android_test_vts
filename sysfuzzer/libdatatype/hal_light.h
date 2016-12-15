@@ -19,11 +19,16 @@
 
 #include <hardware/lights.h>
 
+#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+
 namespace android {
 namespace vts {
 
 // Generates light_state_t instance.
 light_state_t* GenerateLightState();
+
+light_state_t* GenerateLightStateUsingMessage(
+    const ArgumentSpecificationMessage& msg);
 
 }  // namespace vts
 }  // namespace android

@@ -50,7 +50,8 @@ void BpVtsFuzzer::Exit() {
 
 
 int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
-                             int target_type, float target_version) {
+                             int target_type, float target_version,
+                             const string& module_name) {
   Parcel data;
   Parcel reply;
 
@@ -59,6 +60,7 @@ int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
   data.writeInt32(target_class);
   data.writeInt32(target_type);
   data.writeFloat(target_version);
+  data.writeCString(module_name.c_str());
 
 #ifdef VTS_FUZZER_BINDER_DEBUG
   aout << "BpVtsFuzzer::Status request parcel:\n";

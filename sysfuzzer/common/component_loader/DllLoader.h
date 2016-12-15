@@ -42,7 +42,7 @@ class DllLoader {
 
   // Finds and returns hw_device_t data structure from the loaded file
   // (i.e., a HAL).
-  struct hw_device_t* GetHWDevice();
+  struct hw_device_t* GetHWDevice(const char* module_name = NULL);
 
   // Finds and returns a requested function defined in the loaded file.
   // Returns NULL if not found.

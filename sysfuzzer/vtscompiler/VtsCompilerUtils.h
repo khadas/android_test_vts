@@ -38,7 +38,8 @@ extern string GetCppVariableType(const string primitive_type_string);
 extern string GetCppVariableType(ArgumentSpecificationMessage arg);
 
 // Get the C/C++ instance type name of an argument.
-extern string GetCppInstanceType(ArgumentSpecificationMessage arg);
+extern string GetCppInstanceType(ArgumentSpecificationMessage arg,
+                                 string msg = string());
 
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);

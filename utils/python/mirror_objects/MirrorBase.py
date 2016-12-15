@@ -52,7 +52,8 @@ class MirrorBase(object):
 
     _target_basepath = "/system/lib64/hw"
 
-    def Init(self, target_class, target_type, target_version, target_basepath):
+    def Init(self, target_class, target_type, target_version, target_basepath,
+             module_name=None):
         """Initializes the connection and then calls 'Build' to init attributes.
 
     Args:
@@ -61,6 +62,7 @@ class MirrorBase(object):
       target_version: float, the target component version (e.g., 1.0).
       target_basepath: string, the base path of where a target file is stored
           in.
+      module_name: string, the name of a module to load.
 
     Raises:
       ComponentLoadingError when loading fails.
@@ -102,7 +104,7 @@ class MirrorBase(object):
                 # TODO: check more exactly (e.g., multiple hits).
                 self._client.SendCommand(
                     AndroidSystemControlMessage_pb2.SELECT_HAL, filename,
-                    target_class_id, target_type_id, target_version)
+                    target_class_id, target_type_id, target_version, module_name)
                 resp = self._client.RecvResponse()
                 logging.debug(resp)
 

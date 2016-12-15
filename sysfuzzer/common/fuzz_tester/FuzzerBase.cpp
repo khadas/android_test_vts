@@ -37,14 +37,17 @@ FuzzerBase::FuzzerBase(int target_class)
 FuzzerBase::~FuzzerBase() {}
 
 
-bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
+bool FuzzerBase::LoadTargetComponent(
+    const char* target_dll_path, const char* module_name) {
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "LoadTargetCompooent entry" << endl;
   target_dll_path_ = target_dll_path;
   if (!target_loader_.Load(target_dll_path_)) return false;
-  if (target_class_ != LEGACY_HAL) {
-    return (device_ = target_loader_.GetHWDevice()) != NULL;
-  } else {
-    return true;
-  }
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "LoadTargetCompooent loaded the target" << endl;
+  if (target_class_ == LEGACY_HAL) return true;
+  cout << __FUNCTION__ << ": loaded a non-legacy HAL file." << endl;
+  device_ = target_loader_.GetHWDevice(module_name);
+  cout << __FUNCTION__ << ": device_ " << device_ << endl;
+  return (device_ != NULL);
 }
 
 

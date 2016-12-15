@@ -80,7 +80,7 @@ AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
     }
     cout << "Exec " << cmd << endl;
     system(cmd);
-    cout << "fuzzer done" << endl;
+    cout << "fuzzer exits" << endl;
     free(cmd);
     exit(0);
   } else if (pid > 0){
@@ -118,7 +118,7 @@ AndroidSystemControlResponseMessage* RespondGetHals(const string& base_paths) {
     DIR* dp;
     if (!(dp = opendir(path.c_str()))) {
       cerr << "Error(" << errno << ") opening " << path << endl;
-      return NULL;
+      continue;
     }
     struct dirent* dirp;
     int len;
@@ -139,13 +139,13 @@ AndroidSystemControlResponseMessage* RespondGetHals(const string& base_paths) {
 
 AndroidSystemControlResponseMessage* RespondSelectHal(
     const string& file_name, int target_class, int target_type,
-    float target_version) {
+    float target_version, const string& module_name) {
   // TODO: use an attribute (client) of a newly defined class.
   android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
   if (!client.get()) return NULL;
 
   int32_t result = client->LoadHal(file_name, target_class, target_type,
-                                   target_version);
+                                   target_version, module_name);
   cout << "LoadHal: " << result << endl;
 
   AndroidSystemControlResponseMessage* response_msg =
@@ -177,7 +177,7 @@ AndroidSystemControlResponseMessage* RespondGetFunctions() {
     response_msg->set_reason(result);
   } else {
     response_msg->set_response_code(FAIL);
-    response_msg->set_reason("Failed to load the selected HAL.");
+    response_msg->set_reason("Failed to get the functions.");
   }
   return response_msg;
 }
@@ -198,7 +198,7 @@ AndroidSystemControlResponseMessage* RespondCallFunction(const string& call_payl
     response_msg->set_reason(result);
   } else {
     response_msg->set_response_code(FAIL);
-    response_msg->set_reason("Failed to load the selected HAL.");
+    response_msg->set_reason("Failed to call the api.");
   }
   return response_msg;
 }
@@ -281,7 +281,8 @@ int HandleSession(int fd, const char* fuzzer_path, const char* spec_dir_path) {
           response_msg = RespondSelectHal(command_msg.target_name(),
                                           command_msg.target_class(),
                                           command_msg.target_type(),
-                                          command_msg.target_version() / 100.0);
+                                          command_msg.target_version() / 100.0,
+                                          command_msg.module_name());
           break;
         case GET_FUNCTIONS:
           response_msg = RespondGetFunctions();

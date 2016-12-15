@@ -114,10 +114,14 @@ string GetCppVariableType(ArgumentSpecificationMessage arg) {
 }
 
 
-string GetCppInstanceType(ArgumentSpecificationMessage arg) {
+string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
   if (arg.has_aggregate_type()) {
     if (!strcmp(arg.aggregate_type().c_str(), "struct light_state_t*")) {
-      return "GenerateLightState()";
+      if (msg.length() == 0) {
+        return "GenerateLightState()";
+      } else {
+        return "GenerateLightStateUsingMessage(" + msg + ")";
+      }
     } else if (!strcmp(arg.aggregate_type().c_str(), "GpsCallbacks*")) {
       return "GenerateGpsCallbacks()";
     } else if (!strcmp(arg.aggregate_type().c_str(), "GpsUtcTime")) {
