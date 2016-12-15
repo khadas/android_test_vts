@@ -29,7 +29,8 @@
             }
             data.addRows(rowArray);
 
-            var table = new google.visualization.Table(document.getElementById('profiling_table_div'));
+            var table = new google.visualization.Table(
+                document.getElementById('profiling_table_div'));
             table.draw(data,
                       {showRowNumber: true, alternatingRowStyle : true});
 
@@ -80,10 +81,13 @@
                                 'background-color: #A8A8A8;');
                             data.setValue(row, column, '~');
                             break;
-                        case 4:
-                        case 5: // Case: exception, timeout - black
+                        case 4: // Case: Exception - black
                             data.setProperty(row, column, 'style',
                                 'background-color: #000000;');
+                            break;
+                        case 5: // Case: Timeout - purple
+                            data.setProperty(row, column, 'style',
+                                'background-color: #9900CC;');
                             break;
                     }
                 }
@@ -103,30 +107,31 @@
             var buildIDtimeStampArray = ${buildIDtimeStampArrayJson};
             for (var i = 0; i < buildIDtimeStampArray.length; i++) {
                 // trim the time stamp
-                var colName = buildIDtimeStampArray[i].substring(0, buildIDtimeStampArray[i].lastIndexOf("."));
+                var colName = buildIDtimeStampArray[i].substring(
+                    0, buildIDtimeStampArray[i].lastIndexOf("."));
                 data.addColumn('string', colName);
             }
 
             // add rows
             var finalGrid = ${finalGridJson};
 
-            // bold the first eight rows - first column
-            for (var i = 0; i < 8; i++) {
-                finalGrid[i][0] = finalGrid[i][0].bold();
-            }
+            var summaryRowCount = ${summaryRowCountJson};
+            var deviceInfoRowCount = ${deviceInfoRowCountJson};
 
-            // 'C' stands for code coverage.
-            for (var index = 1; index < finalGrid[0].length; index++) {
-                finalGrid[7][index] = 'Link';
+            // bold the first few rows - first column
+            for (var i = 0; i < summaryRowCount + deviceInfoRowCount; i++) {
+                finalGrid[i][0] = finalGrid[i][0].bold();
             }
 
             // add rows to the data.
             data.addRows(finalGrid);
 
+
             // add colors to the grid data table - iterate rowArray to view saved results.
-            // first eight rows are for the summary grid and the device info grid.
-            for (var testCaseIndex = 8; testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
-                for (var buildIdIndex = 1; buildIdIndex < finalGrid[0].length; buildIdIndex++) {  // build ID
+            for (var testCaseIndex = summaryRowCount + deviceInfoRowCount;
+                 testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
+                for (var buildIdIndex = 1; buildIdIndex < finalGrid[0].length;
+                     buildIdIndex++) {  // build ID
 
                     var result = finalGrid[testCaseIndex][buildIdIndex];
                     switch(result) {
@@ -152,10 +157,15 @@
                             data.setValue(testCaseIndex, buildIdIndex, '~');
                             break;
 
-                        case '4':
-                        case '5': // Case: timeout - black
+                        case '4': // Case: Exception - black
                             data.setProperty(testCaseIndex, buildIdIndex, 'style',
                                 'background-color: #000000;');
+                            data.setValue(testCaseIndex, buildIdIndex, ' ');
+                            break;
+                        case '5': // Case: Timeout - purple
+                            data.setProperty(testCaseIndex, buildIdIndex, 'style',
+                                'background-color: #9900CC;');
+                            data.setValue(testCaseIndex, buildIdIndex, ' ');
                             break;
                     }
                 }
@@ -169,9 +179,20 @@
             google.visualization.events.addListener(table, 'select', selectHandler);
 
             // opens up new page for code coverage
-            // equivalent to setting up hyperlinks for the 8th row to link it to the code coverage page.
+            // equivalent to setting up hyperlinks for the 8th row to link it
+            // to the code coverage page.
             function selectHandler() {
                 var selection = table.getSelection();
+                var summaryRowCount = ${summaryRowCountJson};
+                var deviceInfoRowCount = ${deviceInfoRowCountJson};
+
+                // return if it is not the % coverage row
+                // The click should be made only on the last row to see coverage data.
+                var rowIndex = table.getSelection()[0].row;
+                if (rowIndex != summaryRowCount + deviceInfoRowCount -1) {
+                    return;
+                }
+
                 if (selection.length == 0) return;
                 var cell = event.target; // get selected cell
                 var column = cell.cellIndex - 1;
@@ -227,8 +248,8 @@
             var nextPage = parseInt(pageNumber) + parseInt(inc);
             nextPage = Math.max(nextPage, 0);
             nextPage = Math.min(nextPage, maxPageNumber);
-            var link = "${pageContext.request.contextPath}" + "/show_table?tableName=" + ${tableName} +
-                       "&" + "buildIdPageNo=" + nextPage;
+            var link = "${pageContext.request.contextPath}" + "/show_table?tableName="
+                + ${tableName} + "&" + "buildIdPageNo=" + nextPage;
             window.open(link,"_self");
         }
     </script>
