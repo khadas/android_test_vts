@@ -242,6 +242,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
 
     private void doRunTest(ITestRunListener listener, IRunUtil runUtil, String mTestCasePath,
         String mTestConfigPath) throws RuntimeException {
+        CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         if (mPythonBin == null){
             mPythonBin = getPythonBinary();
@@ -250,6 +251,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         String[] testModule = {mTestCasePath, mTestConfigPath};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
+        cmd.append(mDevice.getSerialNumber());
 
         CommandResult commandResult = runUtil.runTimedCmd(TEST_TIMEOUT, cmd);
 
