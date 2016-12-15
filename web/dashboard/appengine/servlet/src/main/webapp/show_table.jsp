@@ -157,19 +157,27 @@
           // add rows
           var deviceGrid = ${deviceGrid};
           var timeGrid = ${timeGrid};
+          var durationGrid = ${durationGrid};
           var summaryGrid = ${summaryGrid};
           var resultsGrid = ${resultsGrid};
 
           timeGrid = timeGrid.map(function(row) {
               return row.map(function(cell, j) {
                   if (j == 0) return cell;
-                  else return moment(cell/1000).format("M/D/YY H:mmZZ");
+                  var time = moment(cell/1000);
+                  // If today, don't display the date
+                  if (time.isSame(moment(), 'd')) {
+                      return time.format("H:mm:ssZZ");
+                  } else {
+                      return time.format("M/D/YY H:mm:ssZZ");
+                  }
               });
           });
 
           // add rows to the data.
           data.addRows(deviceGrid);
           data.addRows(timeGrid);
+          data.addRows(durationGrid);
           data.addRows(summaryGrid);
           data.addRows(resultsGrid);
 
