@@ -27,8 +27,6 @@ import re
 import shutil
 import argparse
 
-import init_test_case_template as template
-
 VTS_PATH = 'test/vts'
 VTS_TEST_CASE_PATH = os.path.join(VTS_PATH, 'testcases')
 PYTHON_INIT_FILE_NAME = '__init__.py'
@@ -153,11 +151,11 @@ class TestCaseCreator(object):
         with open(target, 'w') as f:
             print 'Creating %s' % target
             f.write(
-                template.LICENSE_STATEMENT_POUND.format(
+                LICENSE_STATEMENT_POUND.format(
                     year=self.current_year))
             f.write('\n')
             f.write(
-                template.ANDROID_MK_TEMPLATE.format(
+                ANDROID_MK_TEMPLATE.format(
                     test_name=self.test_name,
                     config_src_dir=self.test_dir[len(vts_dir) + 1:]))
 
@@ -168,9 +166,9 @@ class TestCaseCreator(object):
                 print 'Creating %s' % target
                 with open(target, 'w') as f:
                     f.write(
-                        template.LICENSE_STATEMENT_POUND.format(
+                        LICENSE_STATEMENT_POUND.format(
                             year=self.current_year))
-                    f.write(template.ANDROID_MK_CALL_SUB)
+                    f.write(ANDROID_MK_CALL_SUB)
             path = os.path.dirname(path)
 
     def CreateAndroidTestXml(self):
@@ -178,11 +176,11 @@ class TestCaseCreator(object):
         target = os.path.join(self.test_dir, ANDROID_TEST_XML_FILE_NAME)
         with open(target, 'w') as f:
             print 'Creating %s' % target
-            f.write(template.XML_HEADER)
+            f.write(XML_HEADER)
             f.write(
-                template.LICENSE_STATEMENT_XML.format(year=self.current_year))
+                LICENSE_STATEMENT_XML.format(year=self.current_year))
             f.write(
-                template.ANDROID_TEST_XML_TEMPLATE.format(
+                ANDROID_TEST_XML_TEMPLATE.format(
                     test_name=self.test_name,
                     test_type=self.test_type,
                     test_path_under_vts=self.test_dir[len(
@@ -194,13 +192,13 @@ class TestCaseCreator(object):
         target = os.path.join(self.test_dir, '%s.py' % self.test_name)
         with open(target, 'w') as f:
             print 'Creating %s' % target
-            f.write(template.PY_HEADER)
+            f.write(PY_HEADER)
             f.write(
-                template.LICENSE_STATEMENT_POUND.format(
+                LICENSE_STATEMENT_POUND.format(
                     year=self.current_year))
             f.write('\n')
             f.write(
-                template.TEST_CASE_PY_TEMPLATE.format(
+                TEST_CASE_PY_TEMPLATE.format(
                     test_name=self.test_name))
 
 
