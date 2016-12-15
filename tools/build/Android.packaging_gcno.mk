@@ -26,5 +26,10 @@ $(vts_framework_lib_gcno_file): $(gcno_obj_file) | $(ACP)
 	$(hide) touch $(gcno_src_file)
 	$(hide) $(ACP) -fp $(gcno_src_file) $@
 
-vts: $(vts_framework_lib_gcno_file)
+vts_framework_lib_src_file := $(VTS_TESTCASES_OUT)/${LOCAL_MODULE}_${VTS_GCOV_SRC_CPP_FILE}
 
+$(vts_framework_lib_src_file): ${VTS_GCOV_SRC_DIR}/${VTS_GCOV_SRC_CPP_FILE} | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_framework_lib_gcno_file) $(vts_framework_lib_src_file)
