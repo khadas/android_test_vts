@@ -260,10 +260,17 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << "  static bool initialized = false;" << endl;
     cpp_ss << "  if (!initialized) {" << endl;
     cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
+    string service_name = message.package().substr(message.package().find_last_of(".") + 1);
+    if (service_name == "nfc") {
+      // TODO(yim): remove this special case after b/32158398 is fixed.
+      service_name = "nfc_nci";
+    }
     cpp_ss << "    hw_binder_proxy_ = " << message.component_name()
            << "::getService(\""
-           << message.package().substr(message.package().find_last_of(".") + 1)
-           << "\");" << endl;
+           << service_name
+           << "\", true);" << endl;
+    cpp_ss << "    cout << \"[agent:hal] hw_binder_proxy_ = \" << "
+           << "hw_binder_proxy_.get() << endl;" << endl;
     cpp_ss << "    initialized = true;" << endl;
     cpp_ss << "  }" << endl;
     cpp_ss << "  return true;" << endl;
@@ -481,7 +488,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       GenerateCodeToStartMeasurement(cpp_ss);
 
       // may need to check whether the function is actually defined.
-      cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
+      cpp_ss << "    cout << \"Call an API\" << endl;" << endl;
+      cpp_ss << "    cout << \"local_device = \" << " << kInstanceVariableName
+             << ".get();" << endl;
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
         cpp_ss << "    *result = NULL;" << endl;
@@ -746,7 +755,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     // actual function call
     GenerateCodeToStartMeasurement(cpp_ss);
 
-    cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
+    cpp_ss << "    cout << \"Call an API.\" << endl;" << endl;
+    cpp_ss << "    cout << \"local_device = \" << " << kInstanceVariableName
+           << ".get();" << endl;
     cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
            << kInstanceVariableName << "->" << parent_path << message.name()
            << "->" << api.name() << "(";
