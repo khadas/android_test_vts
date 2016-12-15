@@ -184,18 +184,20 @@ const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* f
   void* result;
   cout << "Call Function " << func_msg->name() << endl;
   func_fuzzer->Fuzz(*func_msg, &result);
-  if (func_msg->return_type().has_aggregate_type()) {
+  if (func_msg->return_type().aggregate_type().size() > 0) {
+    // TODO: actually handle this case.
     if (result != NULL) {
       // loads that interface spec and enqueues all functions.
       cout << __FUNCTION__ << " return type: "
-          << func_msg->return_type().aggregate_type() << endl;
+          << func_msg->return_type().aggregate_type(0) << endl;
     } else {
       cout << __FUNCTION__ << " return value = NULL" << endl;
     }
     return *(new string("todo: support aggregate"));
-  } else if (func_msg->return_type().has_primitive_type()) {
-    if (!strcmp(func_msg->return_type().primitive_type().c_str(), "int32_t")) {
-      func_msg->mutable_return_type()->mutable_primitive_value()->set_int32_t(
+  } else if (func_msg->return_type().primitive_type().size() > 0) {
+    // TODO handle when the size > 1.
+    if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
+      func_msg->mutable_return_type()->mutable_primitive_value()->Add()->set_int32_t(
           *((int*)(&result)));
       cout << "result " << endl;
       // todo handle more types;
@@ -252,15 +254,16 @@ bool SpecificationBuilder::Process(
     void* result;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
     func_fuzzer->Fuzz(*func_msg, &result);
-    if (func_msg->return_type().has_aggregate_type()) {
+    if (func_msg->return_type().aggregate_type().size() > 0) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.
         cout << __FUNCTION__ << " return type: "
-            << func_msg->return_type().aggregate_type() << endl;
-        string submodule_name = func_msg->return_type().aggregate_type();
+            << func_msg->return_type().aggregate_type(0) << endl;
+        // TODO: handle the case when size > 1
+        string submodule_name = func_msg->return_type().aggregate_type(0);
         while (!submodule_name.empty()
                && (std::isspace(submodule_name.back())
-                   || submodule_name.back() == '*' )) {
+                   || submodule_name.back() == '*')) {
           submodule_name.pop_back();
         }
         vts::InterfaceSpecificationMessage* iface_spec_msg =
