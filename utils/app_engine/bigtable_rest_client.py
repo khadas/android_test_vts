@@ -22,9 +22,10 @@ import json
 
 import requests
 
-_PROJECT_ID = 'google.com:android-vts-internal'
-_INSTANCE_ID = 'vts-dev'
-_COLUMN_FAMILY_ID = 'cf1'
+_DEFAULT_BASE_URL="http://10.128.0.6:8080"
+_PROJECT_ID='google.com:android-vts-internal'
+_INSTANCE_ID='vts-dev'
+_COLUMN_FAMILY_ID='cf1'
 
 
 class HbaseRestClient(object):
@@ -36,7 +37,7 @@ class HbaseRestClient(object):
         table_name: The name of the table
     """
 
-    def __init__(self, base_url, table_name):
+    def __init__(self, table_name, base_url=_DEFAULT_BASE_URL):
         self.base_url = base_url
         self.table_name = table_name
 

@@ -55,9 +55,9 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
     def testGaeBt(self):
         """Accesses a GAE bigtable."""
         logging.info("testGaeBt: start (username: %s)", getpass.getuser())
-        bt_client = bigtable_rest_client.HbaseRestClient(
-            "http://android-vts-internal.googleplex.com", table)
-        # TODO: actually do BT operations
+        bt_client = bigtable_rest_client.HbaseRestClient("my_table")
+        tables = bt_client.GetTables()
+        logging.info("Tables: %s", tables)
         logging.info("testGaeBt: done")
 
     def testTurnOnLightBlackBoxFuzzing(self):
