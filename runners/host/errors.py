@@ -49,4 +49,3 @@ class VtsTcpClientCreationError(VtsError):
 
 class VtsTcpCommunicationError(VtsError):
     """Raised when TcpClient communication failed."""
-

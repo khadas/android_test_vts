@@ -52,6 +52,7 @@ def assertEqual(first, second, msg=None, extras=None):
             my_msg = "%s %s" % (my_msg, msg)
         fail(my_msg, extras=extras)
 
+
 def assertNotEqual(first, second, msg=None, extras=None):
     """Assert that the first and second args are not equal, otherwise fail
     the test.
@@ -116,9 +117,8 @@ def assertRaisesRegex(expected_exception,
         extras: An optional field for extra information to be included in
                 test result.
     """
-    context = _AssertRaisesContext(expected_exception,
-                                   expected_regex,
-                                   extras=extras)
+    context = _AssertRaisesContext(
+        expected_exception, expected_regex, extras=extras)
     return context
 
 
@@ -319,8 +319,8 @@ class _AssertRaisesContext(object):
                 exc_name = self.expected.__name__
             except AttributeError:
                 exc_name = str(self.expected)
-            raise signals.TestFailure("{} not raised".format(exc_name),
-                                      extras=self.extras)
+            raise signals.TestFailure(
+                "{} not raised".format(exc_name), extras=self.extras)
         if not issubclass(exc_type, self.expected):
             # let unexpected exceptions pass through
             return False
