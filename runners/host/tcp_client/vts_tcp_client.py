@@ -31,8 +31,8 @@ TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
 _SOCKET_CONN_TIMEOUT_SECS = 60
 COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      2: "SET_HOST_INFO",
-                     101: "CHECK_STUB_SERVICE",
-                     102: "LAUNCH_STUB_SERVICE",
+                     101: "CHECK_DRIVER_SERVICE",
+                     102: "LAUNCH_DRIVER_SERVICE",
                      201: "LIST_APIS",
                      202: "CALL_API"}
 
@@ -104,20 +104,20 @@ class VtsTcpClient(object):
             return resp.file_names
         return None
 
-    def CheckStubService(self, service_name):
-        """RPC to CHECK_STUB_SERVICE."""
-        self.SendCommand(SysMsg_pb2.CHECK_STUB_SERVICE,
+    def CheckDriverService(self, service_name):
+        """RPC to CHECK_DRIVER_SERVICE."""
+        self.SendCommand(SysMsg_pb2.CHECK_DRIVER_SERVICE,
                          service_name=service_name)
         resp = self.RecvResponse()
         return (resp.response_code == SysMsg_pb2.SUCCESS)
 
-    def LaunchStubService(self, service_name, file_path, bits, target_class,
+    def LaunchDriverService(self, service_name, file_path, bits, target_class,
                           target_type, target_version):
-        """RPC to LAUNCH_STUB_SERVICE."""
+        """RPC to LAUNCH_DRIVER_SERVICE."""
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
         logging.info("bits: %s", bits)
-        self.SendCommand(SysMsg_pb2.LAUNCH_STUB_SERVICE,
+        self.SendCommand(SysMsg_pb2.LAUNCH_DRIVER_SERVICE,
                          service_name=service_name,
                          file_path=file_path,
                          bits=bits,
@@ -144,7 +144,7 @@ class VtsTcpClient(object):
             result = IfaceSpecMsg_pb2.FunctionSpecificationMessage()
             if resp.result == "error":
                 raise errors.VtsTcpCommunicationError(
-                    "API call error by the VTS stub.")
+                    "API call error by the VTS driver.")
             try:
                 text_format.Merge(resp.result, result)
             except text_format.ParseError as e:

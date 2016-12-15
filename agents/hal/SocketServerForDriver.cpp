@@ -29,6 +29,8 @@
 
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
+#include "SocketUtil.h"
+
 using namespace std;
 
 namespace android {
@@ -85,22 +87,7 @@ void RpcCallToRunner(char* id, int runner_port) {
     return;
   }
 
-  std::stringstream callback_header;
-  callback_header << callback_msg_str.length() << "\n";
-  int n = write(sockfd, callback_header.str().c_str(),
-                callback_header.str().length());
-  if (n < 0) {
-    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
-    exit(-1);
-    return;
-  }
-
-  n = write(sockfd, callback_msg_str.c_str(), callback_msg_str.length());
-  if (n < 0) {
-    cerr << __func__ << ":" << __LINE__ << " ERROR writing to socket" << endl;
-    exit(-1);
-    return;
-  }
+  if (!VtsSocketSend(sockfd, callback_msg_str)) return;
   delete callback_msg;
   close(sockfd);
   return;

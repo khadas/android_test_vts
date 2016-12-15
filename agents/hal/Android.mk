@@ -24,9 +24,11 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   HalAgentMain.cpp \
   BinderClient.cpp \
+  TcpClient.cpp \
   TcpServer.cpp \
   RequestHandler.cpp \
   SocketServerForDriver.cpp \
+  SocketUtil.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \

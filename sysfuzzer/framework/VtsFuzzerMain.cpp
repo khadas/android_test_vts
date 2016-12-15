@@ -47,6 +47,7 @@
 #include "specification_parser/SpecificationBuilder.h"
 
 #include "BinderServer.h"
+#include "SocketServer.h"
 
 using namespace std;
 using namespace android;
@@ -78,23 +79,31 @@ static void usage() {
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",         no_argument,       NULL, 'h'},
-    {"class",        required_argument, NULL, 'c'},
-    {"type",         required_argument, NULL, 't'},
-    {"version",      required_argument, NULL, 'v'},
-    {"epoch_count",  required_argument, NULL, 'e'},
-    {"spec_dir",     required_argument, NULL, 's'},
-    {"service_name", required_argument, NULL, 'n'},
-    {"server",       optional_argument, NULL, 'd'},
-    {"agent_port",   optional_argument, NULL, 'p'},
-    {NULL,           0,                 NULL, 0}};
+    {"help",             no_argument,       NULL, 'h'},
+    {"class",            required_argument, NULL, 'c'},
+    {"type",             required_argument, NULL, 't'},
+    {"version",          required_argument, NULL, 'v'},
+    {"epoch_count",      required_argument, NULL, 'e'},
+    {"spec_dir",         required_argument, NULL, 's'},
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+    {"socket_port_file", optional_argument, NULL, 'f'},
+#else  // binder
+    {"service_name",     required_argument, NULL, 'n'},
+#endif
+    {"server",           optional_argument, NULL, 'd'},
+    {"agent_port",       optional_argument, NULL, 'p'},
+    {NULL,               0,                 NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
   int epoch_count = kDefaultEpochCount;
   string spec_dir_path(DEFAULT_SPEC_DIR_PATH);
   bool server = false;
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  string socket_port_file;
+#else  // binder
   string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
+#endif
   int agent_port = -1;
 
   while (true) {
@@ -152,9 +161,15 @@ int main(int argc, char* const argv[]) {
       case 's':
         spec_dir_path = string(optarg);
         break;
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+      case 'f':
+        socket_port_file = string(optarg);
+        break;
+#else  // binder
       case 'n':
         service_name = string(optarg);
         break;
+#endif
       case 'd':
         server = true;
         break;
@@ -182,8 +197,13 @@ int main(int argc, char* const argv[]) {
       cout << endl << PASSED_MARKER << endl;
     }
   } else {
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+    android::vts::StartSocketServer(socket_port_file, spec_builder,
+                                    INTERFACE_SPEC_LIB_FILENAME);
+#else  // binder
     android::vts::StartBinderServer(service_name, spec_builder,
                                     INTERFACE_SPEC_LIB_FILENAME);
+#endif
   }
 
   return 0;

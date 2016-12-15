@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef VTS_AGENT_DRIVER_COMM_BINDER  // binder
+
 #include "BinderServer.h"
 
 #include <stdio.h>
@@ -221,3 +223,5 @@ void StartBinderServer(const string& service_name,
 
 }  // namespace vts
 }  // namespace android
+
+#endif
