@@ -29,6 +29,6 @@ vts_spec_file_list := \
   test/vts/specification/lib_bionic/libcutilsV1.vts \
 
 vts_spec_file_list += \
-  test/vts/specification/hal_hidl/Nfc/Nfc.vts \
-  test/vts/specification/hal_hidl/Nfc/NfcClientCallback.vts \
-  test/vts/specification/hal_hidl/Nfc/types.vts \
+  hardware/interfaces/nfc/1.0/vts/Nfc.vts \
+  hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
+  hardware/interfaces/nfc/1.0/vts/types.vts \

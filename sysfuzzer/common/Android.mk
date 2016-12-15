@@ -34,6 +34,7 @@ LOCAL_SRC_FILES := \
   utils/InterfaceSpecUtil.cpp \
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/include \
   bionic \
   libcore \
   system/extras \
@@ -57,6 +58,9 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MULTILIB := both
 
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+  $(LOCAL_PATH)/include \
+
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -73,6 +77,7 @@ LOCAL_SRC_FILES := \
   utils/InterfaceSpecUtil.cpp
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/include \
   bionic \
   libcore \
   system/extras \
@@ -81,5 +86,8 @@ LOCAL_C_INCLUDES := \
 LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
   libvts_multidevice_proto_host \
+
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+  $(LOCAL_PATH)/include \
 
 include $(BUILD_HOST_SHARED_LIBRARY)
