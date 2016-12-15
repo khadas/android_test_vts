@@ -31,7 +31,7 @@ vtslib_interfacespec_srcfiles := \
   lib_bionic/libcV1.vts \
   lib_bionic/libcutilsV1.vts \
 
-VTS_ENABLE_TREBLE := false
+VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 vtslib_interfacespec_srcfiles += \
@@ -83,8 +83,6 @@ LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
   android.hardware.nfc@1.0 \
   system/core/base/include \
-  system/libhwbinder/include \
-  libhidl \
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 LOCAL_CFLAGS += -DENABLE_TREBLE
