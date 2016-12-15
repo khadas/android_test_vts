@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
     <link type="text/css" href="/css/navbar.css" rel="stylesheet">
     <link type="text/css" href="/css/show_graph.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
     <title>Graph</title>
     <script type="text/javascript">
@@ -39,15 +39,13 @@
           var toDate = new Date(endTime/MICRO_PER_MILLI);
           var from = $("#from").datepicker({
                   showAnim: "slideDown",
-                  defaultDate: fromDate,
-                  changeMonth: true
+                  defaultDate: fromDate
                 }).on("change", function() {
                     to.datepicker("option", "minDate", getDate(this));
                 }),
               to = $("#to").datepicker({
                   showAnim: "slideDown",
-                  defaultDate: toDate,
-                  changeMonth: true
+                  defaultDate: toDate
                 }).on("change", function() {
                     from.datepicker("option", "maxDate", getDate(this));
                 });
