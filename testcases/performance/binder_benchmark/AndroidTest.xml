@@ -25,6 +25,6 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/performance/binder_benchmark/binder_performance_test" />
+        <option name="test-case-path" value="vts/testcases/performance/binder_benchmark/BinderPerformanceTest" />
     </test>
 </configuration>

@@ -23,6 +23,6 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/performance/binder_throughput_test/binder_throughput_test" />
+        <option name="test-case-path" value="vts/testcases/performance/binder_throughput_test/BinderThroughputBenchmark" />
     </test>
 </configuration>

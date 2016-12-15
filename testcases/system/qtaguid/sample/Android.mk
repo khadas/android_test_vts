@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := sample_qtaguid_test
+LOCAL_MODULE := SampleQtaguidTest
 LOCAL_MODULE_CLASS := FAKE
 LOCAL_IS_HOST_MODULE := true
 LOCAL_COMPATIBILITY_SUITE := vts

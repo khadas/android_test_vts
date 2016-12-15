@@ -17,6 +17,6 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="KernelLtpTest" />
-    <option name="compatibility:include-filter" value="linux_kselftest_test" />
+    <option name="compatibility:include-filter" value="LinuxKselftestTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
