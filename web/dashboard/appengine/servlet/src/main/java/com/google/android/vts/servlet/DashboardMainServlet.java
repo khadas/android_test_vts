@@ -60,7 +60,7 @@ public class DashboardMainServlet extends HttpServlet {
             for (HTableDescriptor table : tables) {
                 String tableName = table.getNameAsString();
                 if (tableName.startsWith("result_")) {
-                    tableList.add(tableName);
+                    tableList.add(tableName.substring(7));  // cut the prefix
                }
             }
 
