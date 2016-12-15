@@ -179,10 +179,15 @@ class VtsTcpClient(object):
             if result.return_type.type == IfaceSpecMsg_pb2.TYPE_SUBMODULE:
                 logging.info("returned a submodule spec")
                 logging.info("spec: %s", result.return_type_submodule_spec)
-                return mirror_object.MirrorObject(self,
-                                           result.return_type_submodule_spec,
-                                           None)
-            return result
+                return mirror_object.MirrorObject(
+                     self, result.return_type_submodule_spec, None)
+            if (len(result.return_type_hidl) == 1 and
+                result.return_type_hidl[0].type ==
+                    IfaceSpecMsg_pb2.TYPE_SCALAR):
+                return getattr(result.return_type_hidl[0].scalar_value,
+                               result.return_type_hidl[0].scalar_type)
+            else:
+                return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
         raise errors.VtsTcpCommunicationError(
