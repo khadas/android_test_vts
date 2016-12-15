@@ -22,7 +22,13 @@ else
 vts_framework_lib_file := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE)64.so
 endif
 
-$(vts_framework_lib_file): $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE))/LINKED/$(LOCAL_MODULE).so | $(ACP)
+ifeq ($(strip $(my_module_multilib)), 32)
+shared_lib := $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE),,,true)
+else
+shared_lib := $(call intermediates-dir-for,SHARED_LIBRARIES,$(LOCAL_MODULE))
+endif
+
+$(vts_framework_lib_file): $(shared_lib)/LINKED/$(LOCAL_MODULE).so | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
