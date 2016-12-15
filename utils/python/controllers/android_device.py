@@ -38,8 +38,10 @@ ANDROID_DEVICE_ADB_LOGCAT_PARAM_KEY = "adb_logcat_param"
 ANDROID_DEVICE_EMPTY_CONFIG_MSG = "Configuration is empty, abort!"
 ANDROID_DEVICE_NOT_LIST_CONFIG_MSG = "Configuration should be a list, abort!"
 
+
 class AndroidDeviceError(signals.ControllerError):
     pass
+
 
 def create(configs, logger):
     if not configs:
@@ -57,8 +59,9 @@ def create(configs, logger):
     connected_ads = list_adb_devices()
     for ad in ads:
         if ad.serial not in connected_ads:
-            raise AndroidDeviceError(("Android device %s is specified in config"
-                                     " but is not attached.") % ad.serial)
+            raise AndroidDeviceError(
+                ("Android device %s is specified in config"
+                 " but is not attached.") % ad.serial)
         ad.startAdbLogcat()
         try:
             ad.getSl4aClient()
@@ -72,6 +75,7 @@ def create(configs, logger):
             raise AndroidDeviceError(msg)
     return ads
 
+
 def destroy(ads):
     for ad in ads:
         try:
@@ -80,6 +84,7 @@ def destroy(ads):
             pass
         if ad.adb_logcat_process:
             ad.stopAdbLogcat()
+
 
 def _parse_device_list(device_list_str, key):
     """Parses a byte string representing a list of devices. The string is
@@ -100,6 +105,7 @@ def _parse_device_list(device_list_str, key):
             results.append(tokens[0])
     return results
 
+
 def list_adb_devices():
     """List all android devices connected to the computer that are detected by
     adb.
@@ -110,6 +116,7 @@ def list_adb_devices():
     out = adb.AdbProxy().devices()
     return _parse_device_list(out, "device")
 
+
 def list_fastboot_devices():
     """List all android devices connected to the computer that are in in
     fastboot mode. These are detected by fastboot.
@@ -119,6 +126,7 @@ def list_fastboot_devices():
     """
     out = fastboot.FastbootProxy().devices()
     return _parse_device_list(out, "fastboot")
+
 
 def get_instances(serials, logger=None):
     """Create AndroidDevice instances from a list of serials.
@@ -134,6 +142,7 @@ def get_instances(serials, logger=None):
     for s in serials:
         results.append(AndroidDevice(s, logger=logger))
     return results
+
 
 def get_instances_with_configs(configs, logger=None):
     """Create AndroidDevice instances from a list of json configs.
@@ -154,11 +163,12 @@ def get_instances_with_configs(configs, logger=None):
             serial = c.pop("serial")
         except KeyError:
             raise AndroidDeviceError(('Required value "serial" is missing in '
-                'AndroidDevice config %s.') % c)
+                                      'AndroidDevice config %s.') % c)
         ad = AndroidDevice(serial, logger=logger)
         ad.loadConfig(c)
         results.append(ad)
     return results
+
 
 def get_all_instances(include_fastboot=False, logger=None):
     """Create AndroidDevice instances for all attached android devices.
@@ -175,6 +185,7 @@ def get_all_instances(include_fastboot=False, logger=None):
         serial_list = list_adb_devices() + list_fastboot_devices()
         return get_instances(serial_list, logger=logger)
     return get_instances(list_adb_devices(), logger=logger)
+
 
 def filter_devices(ads, func):
     """Finds the AndroidDevice instances from a list that match certain
@@ -193,6 +204,7 @@ def filter_devices(ads, func):
         if func(ad):
             results.append(ad)
     return results
+
 
 def get_device(ads, **kwargs):
     """Finds a unique AndroidDevice instance from a list that has specific
@@ -213,6 +225,7 @@ def get_device(ads, **kwargs):
         AndroidDeviceError is raised if none or more than one device is
         matched.
     """
+
     def _get_device_filter(ad):
         for k, v in kwargs.items():
             if not hasattr(ad, k):
@@ -220,6 +233,7 @@ def get_device(ads, **kwargs):
             elif getattr(ad, k) != v:
                 return False
         return True
+
     filtered = filter_devices(ads, _get_device_filter)
     if not filtered:
         raise AndroidDeviceError(("Could not find a target device that matches"
@@ -229,6 +243,7 @@ def get_device(ads, **kwargs):
     else:
         serials = [ad.serial for ad in filtered]
         raise AndroidDeviceError("More than one device matched: %s" % serials)
+
 
 def takeBugReports(ads, test_name, begin_time):
     """Takes bug reports on a list of android devices.
@@ -244,10 +259,13 @@ def takeBugReports(ads, test_name, begin_time):
         begin_time: Logline format timestamp taken when the test started.
     """
     begin_time = vts_logger.normalizeLogLineTimestamp(begin_time)
+
     def take_br(test_name, begin_time, ad):
         ad.takeBugReport(test_name, begin_time)
+
     args = [(test_name, begin_time, ad) for ad in ads]
     utils.concurrent_exec(take_br, args)
+
 
 class AndroidDevice:
     """Class representing an android device.
@@ -274,7 +292,10 @@ class AndroidDevice:
                   via fastboot.
     """
 
-    def __init__(self, serial="", host_port=None, device_port=8080,
+    def __init__(self,
+                 serial="",
+                 host_port=None,
+                 device_port=8080,
                  logger=None):
         self.serial = serial
         self.h_port = host_port
@@ -401,7 +422,8 @@ class AndroidDevice:
         for k, v in config.items():
             if hasattr(self, k):
                 raise AndroidDeviceError(("Attempting to set existing "
-                    "attribute %s on %s") % (k, self.serial))
+                                          "attribute %s on %s") %
+                                         (k, self.serial))
             setattr(self, k, v)
 
     def rootAdb(self):
@@ -488,9 +510,9 @@ class AndroidDevice:
                 period.
         """
         if not self.adb_logcat_file_path:
-            raise AndroidDeviceError(("Attempting to cat adb log when none has"
-                                      " been collected on Android device %s."
-                                      ) % self.serial)
+            raise AndroidDeviceError(
+                ("Attempting to cat adb log when none has"
+                 " been collected on Android device %s.") % self.serial)
         end_time = vts_logger.getLogLineTimestamp()
         self.log.debug("Extracting adb log from logcat.")
         adb_excerpt_path = os.path.join(self.log_path, "AdbLogExcerpts")
@@ -518,7 +540,7 @@ class AndroidDevice:
                     if not vts_logger.isValidLogLineTimestamp(line_time):
                         continue
                     if self._is_timestamp_in_range(line_time, begin_time,
-                        end_time):
+                                                   end_time):
                         in_range = True
                         if not line.endswith('\n'):
                             line += '\n'
@@ -533,8 +555,8 @@ class AndroidDevice:
         """
         if self.isAdbLogcatOn:
             raise AndroidDeviceError(("Android device {} already has an adb "
-                                     "logcat thread going on. Cannot start "
-                                     "another one.").format(self.serial))
+                                      "logcat thread going on. Cannot start "
+                                      "another one.").format(self.serial))
         # Disable adb log spam filter.
         self.adb.shell("logpersist.start")
         f_name = "adblog,{},{}.txt".format(self.model, self.serial)
@@ -554,8 +576,8 @@ class AndroidDevice:
         """
         if not self.isAdbLogcatOn:
             raise AndroidDeviceError(("Android device {} does not have an "
-                                      "ongoing adb logcat collection."
-                                      ).format(self.serial))
+                                      "ongoing adb logcat collection.").format(
+                                          self.serial))
         utils.stop_standing_subprocess(self.adb_logcat_process)
         self.adb_logcat_process = None
 
@@ -592,7 +614,7 @@ class AndroidDevice:
         droid = android.Android(port=self.h_port)
         if droid.uid in self._droid_sessions:
             raise android.SL4AException(("SL4A returned an existing uid for a "
-                "new session. Abort."))
+                                         "new session. Abort."))
         self._droid_sessions[droid.uid] = [droid]
         return droid
 
@@ -612,8 +634,9 @@ class AndroidDevice:
         """
         if session_id not in self._droid_sessions:
             raise AndroidDeviceError("Session %d doesn't exist." % session_id)
-        droid = android.Android(cmd='continue', uid=session_id,
-            port=self.h_port)
+        droid = android.Android(cmd='continue',
+                                uid=session_id,
+                                port=self.h_port)
         return droid
 
     def closeOneSl4aSession(self, session_id):
@@ -669,7 +692,7 @@ class AndroidDevice:
             results: results have data flow information
         """
         out = self.adb.shell("iperf3 -c {} {}".format(server_host, extra_args))
-        clean_out = str(out,'utf-8').strip().split('\n')
+        clean_out = str(out, 'utf-8').strip().split('\n')
         if "error" in clean_out[0].lower():
             return False, clean_out
         return True, clean_out

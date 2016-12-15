@@ -13,7 +13,6 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Class for Telnet control of Aeroflex 832X and 833X Series Attenuator Modules
 
@@ -25,13 +24,11 @@ interchangeable HW to be used.
 See http://www.aeroflex.com/ams/weinschel/PDFILES/IM-608-Models-8320-&-8321-preliminary.pdf
 """
 
-
 from vts.utils.python.controllers import attenuator
 from vts.utils.python.controllers.attenuator_lib import _tnhelper
 
 
 class AttenuatorInstrument(attenuator.AttenuatorInstrument):
-
     def __init__(self, num_atten=0):
         super().__init__(num_atten)
 
@@ -60,9 +57,9 @@ class AttenuatorInstrument(attenuator.AttenuatorInstrument):
 
         configstr = self._tnhelper.cmd("RFCONFIG? ATTN 1")
 
-        self.properties = dict(zip(['model', 'max_atten', 'min_step',
-                                    'unknown', 'unknown2', 'cfg_str'],
-                                   configstr.split(", ", 5)))
+        self.properties = dict(zip(
+            ['model', 'max_atten', 'min_step', 'unknown', 'unknown2', 'cfg_str'
+             ], configstr.split(", ", 5)))
 
         self.max_atten = float(self.properties['max_atten'])
 
@@ -108,17 +105,18 @@ class AttenuatorInstrument(attenuator.AttenuatorInstrument):
             will be thrown. Do not count on this check programmatically.
         """
 
-
         if not self.is_open():
             raise attenuator.InvalidOperationError("Connection not open!")
 
         if idx >= self.num_atten:
-            raise IndexError("Attenuator index out of range!", self.num_atten, idx)
+            raise IndexError("Attenuator index out of range!", self.num_atten,
+                             idx)
 
         if value > self.max_atten:
-            raise ValueError("Attenuator value out of range!", self.max_atten, value)
+            raise ValueError("Attenuator value out of range!", self.max_atten,
+                             value)
 
-        self._tnhelper.cmd("ATTN " + str(idx+1) + " " + str(value), False)
+        self._tnhelper.cmd("ATTN " + str(idx + 1) + " " + str(value), False)
 
     def get_atten(self, idx):
         r"""This function returns the current attenuation from an attenuator at a given index in
@@ -145,6 +143,6 @@ class AttenuatorInstrument(attenuator.AttenuatorInstrument):
 #       if idx >= self.num_atten:
 #           raise IndexError("Attenuator index out of range!", self.num_atten, idx)
 
-        atten_val = self._tnhelper.cmd("ATTN? " + str(idx+1))
+        atten_val = self._tnhelper.cmd("ATTN? " + str(idx + 1))
 
         return float(atten_val)

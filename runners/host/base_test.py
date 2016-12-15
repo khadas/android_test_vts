@@ -25,7 +25,6 @@ from vts.runners.host import signals
 from vts.runners.host import test_runner
 from vts.runners.host import utils
 
-
 # Macro strings for test result reporting
 TEST_CASE_TOKEN = "[Test Case]"
 RESULT_LINE_TEMPLATE = TEST_CASE_TOKEN + " %s %s"
@@ -70,8 +69,7 @@ class BaseTestClass(object):
     def __exit__(self, *args):
         self._exec_func(self.cleanUp)
 
-    def getUserParams(self, req_param_names=[], opt_param_names=[],
-                          **kwargs):
+    def getUserParams(self, req_param_names=[], opt_param_names=[], **kwargs):
         """Unpacks user defined parameters in test config into individual
         variables.
 
@@ -98,12 +96,13 @@ class BaseTestClass(object):
         for name in req_param_names:
             if name not in self.user_params:
                 raise BaseTestError(("Missing required user param '%s' in test"
-                    " configuration.") % name)
+                                     " configuration.") % name)
             setattr(self, name, self.user_params[name])
         for name in opt_param_names:
             if name not in self.user_params:
-                self.log.info(("Missing optional user param '%s' in "
-                               "configuration, continue."), name)
+                self.log.info(
+                    ("Missing optional user param '%s' in "
+                     "configuration, continue."), name)
             else:
                 setattr(self, name, self.user_params[name])
 
@@ -308,7 +307,7 @@ class BaseTestClass(object):
         try:
             ret = self._setUpTest(test_name)
             asserts.assertTrue(ret is not False,
-                                "Setup for %s failed." % test_name)
+                               "Setup for %s failed." % test_name)
             try:
                 if args or kwargs:
                     verdict = test_func(*args, **kwargs)
@@ -356,9 +355,13 @@ class BaseTestClass(object):
             if not is_generate_trigger:
                 self.results.addRecord(tr_record)
 
-    def runGeneratedTests(self, test_func, settings,
-                                args=None, kwargs=None,
-                                tag="", name_func=None):
+    def runGeneratedTests(self,
+                          test_func,
+                          settings,
+                          args=None,
+                          kwargs=None,
+                          tag="",
+                          name_func=None):
         """Runs generated test cases.
 
         Generated test cases are not written down as functions, but as a list
@@ -393,14 +396,14 @@ class BaseTestClass(object):
                 try:
                     test_name = name_func(s, *args, **kwargs)
                 except:
-                    self.log.exception(("Failed to get test name from "
-                                        "test_func. Fall back to default %s"),
-                                       test_name)
+                    self.log.exception(
+                        ("Failed to get test name from "
+                         "test_func. Fall back to default %s"), test_name)
             self.results.requested.append(test_name)
             if len(test_name) > utils.MAX_FILENAME_LEN:
                 test_name = test_name[:utils.MAX_FILENAME_LEN]
             previous_success_cnt = len(self.results.passed)
-            self.execOneTest(test_name, test_func, (s,) + args, **kwargs)
+            self.execOneTest(test_name, test_func, (s, ) + args, **kwargs)
             if len(self.results.passed) - previous_success_cnt != 1:
                 failed_settings.append(s)
         return failed_settings
