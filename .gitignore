@@ -92,3 +92,7 @@ ENV/
 *~
 *.swp
 *.swo
+
+# Project settings
+.project
+.pydevproject
