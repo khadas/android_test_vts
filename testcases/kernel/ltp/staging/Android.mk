@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.4
 #
 # Copyright (C) 2016 The Android Open Source Project
 #
@@ -15,13 +14,20 @@
 # limitations under the License.
 #
 
-from vts.runners.host import const
-from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions import check_setup_cleanup
+LOCAL_PATH := $(call my-dir)
 
+include $(CLEAR_VARS)
 
-class LoopDeviceSupport(check_setup_cleanup.CheckSetupCleanup):
-    """Class for checking loopback device support."""
-    note = "Kernel does not have loop device support"
+LOCAL_MODULE := KernelLtpStagingTest
+LOCAL_MODULE_CLASS := FAKE
+LOCAL_IS_HOST_MODULE := true
+LOCAL_COMPATIBILITY_SUITE := vts
 
-    def Check(self):
-        return not self.ExecuteCommand("losetup -f")[const.EXIT_CODE][0]
+include $(BUILD_SYSTEM)/base_rules.mk
+
+$(LOCAL_BUILT_MODULE):
+	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
+	$(hide) touch $@
+
+VTS_CONFIG_SRC_DIR := testcases/kernel/ltp/staging
+include test/vts/tools/build/Android.host_config.mk
