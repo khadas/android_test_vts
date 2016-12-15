@@ -52,10 +52,10 @@ vtslib_interfacespec_shared_libraries := \
   libvts_common \
   libvts_measurement \
   libvts_multidevice_proto \
-  libprotobuf-cpp-full \
 
 vtslib_interfacespec_static_libraries := \
   libelf \
+  libprotobuf-cpp-full-ndk \
 
 include $(CLEAR_VARS)
 
