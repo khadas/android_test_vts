@@ -13,7 +13,10 @@ patching and fast feature launch velocity), we think that it is a right cultural
 
 __Table of Contents__
 
-1.  [Codelab for Host-Driven Tests](codelab_host_driven_test.md) (Recommended)
+1.  Host-Driven Tests
+    * [Codelab for Shell-Based Simple Test](codelab_host_driven_test.md)
+    * [Codelab for VTS Specification File](codelab_vts_spec.md)
+
 2.  Native Code Coverage
     *   [Codelab for Native Code Coverage Measurement](codelab_native_code_coverage.md)
     *   [Native Coverage Information and FAQ](native_coverage_faq.md)
