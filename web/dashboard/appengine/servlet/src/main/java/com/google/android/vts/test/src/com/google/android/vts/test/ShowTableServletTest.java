@@ -32,22 +32,18 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * This class tests the behavior of elements on the home screen of VTS Dashboard.
+ * This class tests the behavior of elements on the ShowTableServlet.java or show_table.jsp.
  */
-public class DashboardMainServletTest extends TestCase {
+public class ShowTableServletTest extends TestCase {
 
     private static final String LOCALHOST_PROPERTY = "LOCALHOST";
     private static final String CONFIG_FILE = "config.properties";
-    private static final String ASSERT_MESSAGE = "Title should start differently.";
-    private static final String HOMEPAGE_TITLE = "VTS Dashboard";
-    private static final String LOGIN_BUTTON_ID = "submit-login";
     private static final String HOMEPAGE_TABLE_ID = "dashboard_main_table";
+    private static final String LOGIN_BUTTON_ID = "submit-login";
+    private static final String PREVIOUS_BUTTON_ID = "previous_button";
     private static WebDriver driver = null;
     private static Properties properties = null;
     private static InputStream input = null;
-
-    // constants for page two - VTS Table
-    private static final String VTS_TABLE_TITLE = "VTS Table";
 
     /**
      * Runs once before running tests.
@@ -78,20 +74,9 @@ public class DashboardMainServletTest extends TestCase {
     }
 
     /**
-     * Tests the title of Home page - VTS Dashboard.
+     * This test checks if the previous button is disabled on the page 0.
      */
-    public void testDashboardMainTitle() {
-        driver.navigate().to(properties.getProperty(LOCALHOST_PROPERTY));
-        driver.navigate().refresh();
-        driver.findElement(By.id(LOGIN_BUTTON_ID)).click();
-        Assert.assertTrue(ASSERT_MESSAGE, driver.getTitle().equals(HOMEPAGE_TITLE));
-    }
-
-    /**
-     * This test clicks each of the links in the table on the home page and confirms that it
-     * navigates to the second page.
-     */
-    public void testDashboardMainTable() {
+    public void testPreviousButtonOnFirstPage() {
         driver.navigate().to(properties.getProperty(LOCALHOST_PROPERTY));
         driver.navigate().refresh();
         driver.findElement(By.id(LOGIN_BUTTON_ID)).click();
@@ -112,9 +97,9 @@ public class DashboardMainServletTest extends TestCase {
 
         for(String link : linkCollection) {
             driver.navigate().to(link);
-            Assert.assertTrue(ASSERT_MESSAGE, driver.getTitle().equals(VTS_TABLE_TITLE));
+            WebElement previousButton = driver.findElement(By.id(PREVIOUS_BUTTON_ID));
+            Assert.assertEquals("true", previousButton.getAttribute("disabled"));
             driver.navigate().back();
         }
     }
-
 }
