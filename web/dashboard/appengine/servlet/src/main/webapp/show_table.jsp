@@ -59,15 +59,22 @@
             // add rows
             var finalGrid = ${finalGridJson};
 
-            // bold the first seven rows - first column
-            for (var i = 0; i < 7; i++) {
+            // bold the first eight rows - first column
+            for (var i = 0; i < 8; i++) {
                 finalGrid[i][0] = finalGrid[i][0].bold();
             }
+
+            // 'C' stands for code coverage.
+            for (var index = 1; index < finalGrid[0].length; index++) {
+                finalGrid[7][index] = 'Link';
+            }
+
+            // add rows to the data.
             data.addRows(finalGrid);
 
             // add colors to the grid data table - iterate rowArray to view saved results.
-            // first seven rows are for the summary grid and the device info grid
-            for (var testCaseIndex = 7; testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
+            // first eight rows are for the summary grid and the device info grid.
+            for (var testCaseIndex = 8; testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
                 for (var buildIdIndex = 1; buildIdIndex < finalGrid[0].length; buildIdIndex++) {  // build ID
 
                     var result = finalGrid[testCaseIndex][buildIdIndex];
@@ -98,6 +105,26 @@
             var table = new google.visualization.Table(document.getElementById('grid_table_div'));
             table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
                               frozenColumns: 1});
+
+            // selection handler for code coverage
+            google.visualization.events.addListener(table, 'select', selectHandler);
+
+            // opens up new page for code coverage
+            // equivalent to setting up hyperlinks for the 8th row to link it to the code coverage page.
+            function selectHandler() {
+                var selection = table.getSelection();
+                if (selection.length == 0) return;
+                var cell = event.target; // get selected cell
+                var column = cell.cellIndex - 1;
+                var buildIDtimeStampArray = ${buildIDtimeStampArrayJson};
+
+                // key is a unique combination of build ID and time stamp
+                var key = buildIDtimeStampArray[column];
+
+                var ctx = "${pageContext.request.contextPath}";
+                var link = ctx + "/show_coverage?key=" + key + "&" + "tableName=" + ${tableName};
+                window.open(link,"_self");
+            }
         }
       </script>
   </head>
