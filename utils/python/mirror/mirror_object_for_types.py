@@ -98,8 +98,7 @@ class MirrorObjectForTypes(object):
                     if attribute.is_const and attribute.name == type_name:
                         return copy.copy(attribute)
                     elif attribute.type == CompSpecMsg.TYPE_ENUM:
-                        for enumerator, value in zip(attribute.enum_value.enumerator,
-                                                     attribute.enum_value.value):
+                        for enumerator in attribute.enum_value.enumerator:
                             if enumerator == type_name:
                                 return copy.copy(attribute)
             if self._if_spec_msg.attribute:
@@ -107,8 +106,7 @@ class MirrorObjectForTypes(object):
                     if attribute.is_const and attribute.name == type_name:
                         return copy.copy(attribute)
                     elif attribute.type == CompSpecMsg.TYPE_ENUM:
-                        for enumerator, value in zip(attribute.enum_value.enumerator,
-                                                     attribute.enum_value.value):
+                        for enumerator in attribute.enum_value.enumerator:
                             if enumerator == type_name:
                                 return copy.copy(attribute)
             return None
@@ -201,10 +199,12 @@ class MirrorObjectForTypes(object):
             elif arg_msg.type == CompSpecMsg.TYPE_STRING:
                 return arg_msg.string_value.message
             elif arg_msg.type == CompSpecMsg.TYPE_ENUM:
-                for enumerator, value in zip(arg_msg.enum_value.enumerator,
-                                             arg_msg.enum_value.value):
+                for enumerator, scalar_value in zip(
+                        arg_msg.enum_value.enumerator,
+                        arg_msg.enum_value.scalar_value):
                     if enumerator == api_name:
-                      return value
+                      return getattr(scalar_value,
+                                     arg_msg.enum_value.scalar_type)
             raise MirrorObjectError("const %s not found" % api_name)
 
         struct_msg = self.GetSubStruct(api_name)
