@@ -2,9 +2,11 @@
 ## 1. Compile VTS and LTP source code
 'make vts -j12'
 
-## 2. Start VTS-Tradefed
+## 2. Start VTS-TradeFed
 'vts-tradefed'
-'>run vts-kernel'
+
+## 3. Run kernel LTP test from VTS-TradeFed console
+'> run vts-kernel'
 
 This will take around 30 minutes to run.
 Results can found at out/host/linux-x86/vts/android-vts/results/
