@@ -157,53 +157,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     logging.warning("data_file_path not set. PATH=%s",
                                     os.environ["PATH"])
                 else:
-                    for src_file in getattr(self, self.COVERAGE_SRC_FILES):
-                        src_file_name = str(src_file)
-                        logging.info("coverage - src file: %s", src_file_name)
-                        coverage = self._current_test_report_msg.coverage.add()
-
-                        coverage.file_name = src_file_name
-                        abs_path = os.path.join(self.data_file_path,
-                                                src_file_name)
-                        src_file_content = None
-                        if not os.path.exists(abs_path):
-                            logging.error("couldn't find src file %s",
-                                          abs_path)
-                            continue
-                        with open(abs_path, "rb") as f:
-                            src_file_content = f.read()
-
-                        if src_file_name.endswith(".c"):
-                            gcov_file_name = src_file_name.replace(".c",
-                                                                   ".gcno")
-                        elif src_file_name.endswith(".cpp"):
-                            gcov_file_name = src_file_name.replace(".cpp",
-                                                                   ".gcno")
-                        elif src_file_name.endswith(".cc"):
-                            gcov_file_name = src_file_name.replace(".cc",
-                                                                   ".gcno")
-                        else:
-                            logging.error("unsupported source file type %s",
-                                          src_file_name)
-                            continue
-
-                        abs_path = os.path.join(self.data_file_path,
-                                                gcov_file_name)
-                        gcov_file_content = None
-                        if not os.path.exists(abs_path):
-                            logging.error("couldn't find gcno file %s",
-                                          abs_path)
-                            continue
-                        with open(abs_path, "rb") as f:
-                            gcov_file_content = f.read()
-
-                        basic_block_id_list = getattr(
-                            self, self.COVERAGE_ATTRIBUTE, [])
-                        if not basic_block_id_list:
-                            logging.error("no basic block info found")
-                        coverage.html = GCNO.GenerateCoverageReport(
-                            src_file_content, gcov_file_content,
-                            basic_block_id_list)
+                    self.ProcessCoverageData()
             else:
                 logging.info("coverage - no coverage src file specified")
         return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
@@ -303,16 +257,71 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddCoverageData(self, coverage_data):
-      """Adds the given coverage to the class-level list attribute.
+    def SetCoverageData(self, raw_coverage_data):
+      """Sets the given coverage data to the class-level list attribute.
 
-      Currently, only basic block ID is supported.
+      In case of gcda, the file is always appended so the last one alone is
+      sufficient for coverage visualization.
 
       Args:
-          coverage_data: a list of strings, each string is for coverage data
-                         (e.g., basic block ID or control flow event ID).
+          raw_coverage_data: a list of NativeCodeCoverageRawDataMessage.
       """
-      logging.info("AddCoverageData %s", coverage_data)
-      coverage_data_list = getattr(self, self.COVERAGE_ATTRIBUTE)
-      if coverage_data not in coverage_data_list:
-          coverage_data_list.append(coverage_data)
+      logging.info("AddCoverageData %s", raw_coverage_data)
+      setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
+
+    def ProcessCoverageData(self):
+        """Process reported coverage data and store the produced html(s).
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        coverage_data_list = getattr(
+            self, self.COVERAGE_ATTRIBUTE, [])
+        if not coverage_data_list:
+            logging.error("no coverage data found")
+            return False
+        for src_file in getattr(self, self.COVERAGE_SRC_FILES):
+            src_file_name = str(src_file)
+            logging.info("coverage - src file: %s", src_file_name)
+            coverage = self._current_test_report_msg.coverage.add()
+
+            coverage.file_name = src_file_name
+            abs_path = os.path.join(self.data_file_path,
+                                    src_file_name)
+            src_file_content = None
+            if not os.path.exists(abs_path):
+                logging.error("couldn't find src file %s", abs_path)
+                return False
+            with open(abs_path, "rb") as f:
+                src_file_content = f.read()
+
+            if src_file_name.endswith(".c"):
+                gcno_file_name = src_file_name.replace(".c", ".gcno")
+                gcda_file_name = src_file_name.replace(".c", ".gcda")
+            elif src_file_name.endswith(".cpp"):
+                gcno_file_name = src_file_name.replace(".cpp", ".gcno")
+                gcda_file_name = src_file_name.replace(".cpp", ".gcda")
+            elif src_file_name.endswith(".cc"):
+                gcno_file_name = src_file_name.replace(".cc", ".gcno")
+                gcda_file_name = src_file_name.replace(".cc", ".gcda")
+            else:
+                logging.error("unsupported source file type %s",
+                              src_file_name)
+                return False
+
+            abs_path = os.path.join(self.data_file_path, gcno_file_name)
+            gcno_file_content = None
+            if not os.path.exists(abs_path):
+                logging.error("couldn't find gcno file %s", abs_path)
+                return False
+            with open(abs_path, "rb") as f:
+                gcno_file_content = f.read()
+
+            if coverage_data_list:
+                for coverage_data in coverage_data_list:
+                    # TODO: consider path and do exact matching
+                    if coverage_data.file_path.contains(gcda_file_name):
+                        coverage.html = GCNO.GenerateCoverageReport(
+                            src_file_name, src_file_content,
+                            gcno_file_content, coverage_data.gcda)
+                        return True
