@@ -25,121 +25,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
-
-class TestCase(object):
-    """Stores name, path, and param information for each test case.
-
-    Attributes:
-        _testsuite: string, name of testsuite to which the testcase belongs
-        _testname: string, name of the test case
-        _testbinary: string, test binary path
-        _args: list of string, test case command line arguments
-    """
-
-    def __init__(self, testsuite, testname, testbinary, args):
-        self._testsuite = testsuite
-        self._testname = testname
-        self._testbinary = testbinary
-        self._args = args
-
-    @property
-    def testsuite(self):
-        """Get the test suite's name."""
-        return self._testsuite
-
-    @property
-    def testname(self):
-        """Get the test case's name."""
-        return self._testname
-
-    @property
-    def testbinary(self):
-        """Get the test binary's file name."""
-        return self._testbinary
-
-    def GetArgs(self, replace_string_from=None, replace_string_to=None):
-        """Get the case arguments in string format.
-
-        if replacement string is provided, arguments will be
-        filtered with the replacement string
-
-        Args:
-            replace_string_from: string, replacement string source, if any
-            replace_string_to: string, replacement string destination, if any
-
-        Returns:
-            string, arguments formated in space separated string
-        """
-        if replace_string_from is None or replace_string_to is None:
-            return ' '.join(self._args)
-        else:
-            return ' '.join([p.replace(replace_string_from, replace_string_to)
-                             for p in self._args])
-
-
-class TestcaseParser(object):
-    """Load a ltp vts testcase definition file and parse it into a generator.
-
-    Attributes:
-        _data_path: string, the vts data path on host side
-    """
-
-    def __init__(self, data_path):
-        self._data_path = data_path
-
-    def _GetTestcaseFilePath(self):
-        """return the test case definition fiile's path."""
-        return os.path.join(self._data_path, '32', 'ltp',
-                            'ltp_vts_testcases.txt')
-
-    def Load(self):
-        """read the definition file and return a TestCase generator."""
-        with open(self._GetTestcaseFilePath(), 'r') as f:
-            for line in f:
-                items = line.split('\t')
-                if not len(items) == 4:
-                    continue
-                testsuite, testname, testbinary, arg = items
-
-                if testname.startswith("DISABLED_"):
-                    continue
-
-                args = []
-                if arg:
-                    args.extend(arg.split(','))
-                yield TestCase(testsuite, testname, testbinary, args)
-
-
-class TempDir(object):
-    """Class used to prepare and clean temporary directory.
-
-    Attributes:
-        _path: string, path to the temp dir
-        _executor: ShellMirrorObject,
-                   shell mirror object used to execute commands
-    """
-
-    def __init__(self, path, executor):
-        self._path = path
-        self._executor = executor
-
-    def Prepare(self):
-        """Prepare a temporary directory."""
-        # TODO: check error
-        self._executor.Execute(["mkdir %s -p" % self._path,
-                                "chmod 775 %s" % self._path,
-                                "mkdir %s/tmp" % self._path,
-                                "chmod 775 %s/tmp" % self._path])
-
-    def Clean(self):
-        """Clean a temporary directory."""
-        # TODO: check error
-        self._executor.Execute("rm -rf %s" % self._path)
-
-    @property
-    def path(self):
-        """Get the temporary directory path."""
-        return self._path
+from vts.testcases.kernel.ltp import KernelLtpTestCase
 
 
 class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
@@ -153,8 +39,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         _dut: AndroidDevice, the device under test
         _shell: ShellMirrorObject, shell mirror object used to execute commands
         _ltp_dir: string, ltp build root directory on target
-        _temp_dir: TempDir, temporary directory manager
-        _testcases: TestcaseParser, test case input parser
+        _testcases: TestcasesParser, test case input parser
         _env: dict<stirng, stirng>, dict of environment variable key value pair
         _KEY_ENV__: constant strings starting with prefix "_KEY_ENV_" are used as dict
                     key in environment variable dictionary
@@ -180,16 +65,16 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._shell = self._dut.shell.one
         self._ltp_dir = "/data/local/tmp/ltp"
 
-        self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._shell)
-        self._temp_dir.Prepare()
+        self._requirement = KernelLtpTestCase.EnvironmentRequirementChecker(self._shell)
 
-        self._testcases = TestcaseParser(self.data_file_path)
-        self._env = {self._KEY_ENV_TMPDIR: self._temp_dir._path,
-                     self._KEY_ENV_TMP: "%s/tmp" % self._temp_dir._path,
+        self._testcases = KernelLtpTestCase.TestCasesParser(self.data_file_path)
+        self._env = {self._KEY_ENV_TMPDIR: KernelLtpTestCase.LTPTMP,
+                     self._KEY_ENV_TMP: "%s/tmp" % KernelLtpTestCase.LTPTMP,
                      self._KEY_ENV_LTP_DEV_FS_TYPE: "ext4",
                      self._KEY_ENV_LTPROOT: self._ltp_dir,
                      self._KEY_ENV_PATH:
                      "/system/bin:%s/testcases/bin" % self._ltp_dir, }
+
 
     def PushFiles(self, n_bit):
         """Push the related files to target.
@@ -212,7 +97,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def tearDownClass(self):
         """Deletes all copied data files."""
         self._shell.Execute("rm -rf %s" % self._ltp_dir)
-        self._temp_dir.Clean()
+        self._requirement.Cleanup()
 
     def Verify(self, results):
         """Verifies the test result of each test case."""
@@ -236,16 +121,16 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                           "TPASS nor TCONF.")
         elif results[const.EXIT_CODE][0] == self._TPASS:
             # If output exit_code is _TPASS, then test PASS
-            pass
+            return
         elif results[const.EXIT_CODE][0] == self._TCONF and \
             "TPASS" in results[const.STDOUT][0]:
             # If output exit_code is _TCONF or but the stdout
             # contains TPASS, this means part of the test passed
             # but others were skipped. We consider it a PASS
-            pass
+            return
         elif results[const.EXIT_CODE][0] == self._TCONF:
             # Test case is not for the current configuration, SKIP
-            raise asserts.skip("Incompatible test skipped: TCONF")
+            asserts.skip("Incompatible test skipped: TCONF")
         else:
             # All other cases are treated as FAIL, but this is not expected
             asserts.fail("Unexpected unknown failure.")
@@ -260,27 +145,34 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.PushFiles(n_bit)
         logging.info("[Test Case] test%iBits SKIP" % n_bit)
 
+        test_cases = list(self._testcases.Load(self._ltp_dir))
+        logging.info("Checking binary exists for all test cases.")
+        self._requirement.RunCheckTestcasePathExistsAll(test_cases)
+        self._requirement.RunChmodTestcasesAll(test_cases)
+        logging.info("Start running individual tests.")
+
         self.runGeneratedTests(test_func=self.RunLtpOnce,
-                               settings=self._testcases.Load(),
+                               settings=test_cases,
                                args=(n_bit,),
                                name_func=self.GetTestName)
 
         logging.info("[Test Case] test%iBits" % n_bit)
-        raise asserts.skip("Finished generating {} bit tests.".format(n_bit))
+        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
     def GetTestName(self, test_case, n_bit):
         "Generate the vts test name of a ltp test"
-        return "%s-%s_%ibit" % (test_case._testsuite,
-                                test_case._testname, n_bit)
+        return "{}_{}bit".format(test_case, n_bit)
 
     def RunLtpOnce(self, test_case, n_bit):
         "Run one LTP test case"
+
+        if not self._requirement.Check(test_case):
+            logging.info("Test case environment requirements not satisfied: %s" % test_case.note)
+            asserts.skip("Test case environment requirement not satisfied. Test case skipped.")
+
         testcase_name = self.GetTestName(test_case, n_bit)
 
-        path = os.path.join(self._ltp_dir, "testcases/bin",
-                            test_case._testbinary)
-
-        logging.info("executing a test binary: [%s]" % path)
+        logging.info("executing a test binary: [%s]" % test_case.path)
         logging.info("execution envp: [%s]" % self.GetEnvp())
         logging.info("execution params: [%s]" % \
                      test_case.GetArgs("$LTPROOT", self._ltp_dir))
@@ -288,10 +180,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.shell.InvokeTerminal(testcase_name)
         shell = getattr(self._dut.shell, testcase_name)
 
-        shell.Execute("chmod 775 " + path)
-
         results = shell.Execute("env %s %s %s" % (
-            self.GetEnvp(), path, test_case.GetArgs("$LTPROOT",
+            self.GetEnvp(), test_case.path, test_case.GetArgs("$LTPROOT",
                                                     self._ltp_dir)))
 
         self.Verify(results)
