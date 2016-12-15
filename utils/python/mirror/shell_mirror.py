@@ -34,6 +34,7 @@ class ShellMirror(object):
                             sessions.
         _shell_mirrors: dict, key is instance name, value is mirror object.
     """
+
     def __init__(self, host_command_port):
         self._shell_mirrors = {}
         self._host_command_port = host_command_port
