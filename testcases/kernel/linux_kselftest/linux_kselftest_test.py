@@ -32,24 +32,28 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
     Attributes:
         _dut: AndroidDevice, the device under test as config
         _shell: ShellMirrorObject, shell mirror
-        _testcases: TestCaseParser, test case input parser
+        _testcases: string list, list of testcases to run
     """
     _32BIT = "32"
     _64BIT = "64"
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
-        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.KEY_TEST_SUITE]
+        required_params = [
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+            config.ConfigKeys.RUN_STAGING
+        ]
         self.getUserParams(required_params)
 
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             self.data_file_path)
-        logging.info("%s: %s", keys.ConfigKeys.KEY_TEST_SUITE, self.test_suite)
 
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
+        self._testcases = config.KSFT_CASES_STABLE
+        if self.run_staging:
+            self._testcases += config.KSFT_CASES_STAGING
 
     def tearDownClass(self):
         """Deletes all copied data."""
@@ -70,7 +74,7 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """Runs the given testcase and asserts the result.
 
         Args:
-            testcase: string, format testsuit/testname, specifies which
+            testcase: string, format testsuite/testname, specifies which
                 test case to run.
         """
         cmd = "cd %s && chmod 755 %s && %s" % \
@@ -95,7 +99,7 @@ class LinuxKselftestTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.runGeneratedTests(
             test_func=self.RunTestcase,
-            settings=config.KSFT_CASES,
+            settings=self._testcases,
             name_func=
                 lambda name: "%s_%sbit" % (name.replace('/','_'), n_bit))
         logging.info("[Test Case] test%sBits", n_bit)
