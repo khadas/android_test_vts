@@ -21,7 +21,6 @@
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
 
 namespace android {
@@ -46,8 +45,8 @@ class FuzzerBase {
   // Actual implementation of routines to test a specific function using the
   // provided function interface specification message.
   // Returns true iff the testing is conducted completely.
-  virtual bool Fuzz(vts::FunctionSpecificationMessage* func_msg,
-                    void** result, const string& callback_socket_name) {
+  virtual bool Fuzz(vts::FunctionSpecificationMessage* func_msg, void** result,
+                    const string& callback_socket_name) {
     return false;
   };
 
@@ -65,7 +64,8 @@ class FuzzerBase {
   // DLL Loader class.
   DllLoader target_loader_;
 
-  // a pointer to the HAL_MODULE_INFO_SYM data structure of the loaded component.
+  // a pointer to the HAL_MODULE_INFO_SYM data structure of the loaded
+  // component.
   struct hw_module_t* hmi_;
 
  private:

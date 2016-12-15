@@ -1,7 +1,7 @@
 #include "gcda_parser.h"
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "gcov_basic_io.h"
 
@@ -11,23 +11,20 @@ namespace android {
 namespace vts {
 
 static const tag_format_t tag_table[] = {
-  {0, "NOP", NULL},
-  {0, "UNKNOWN", NULL},
-  {0, "COUNTERS", tag_counters},
-  {GCOV_TAG_FUNCTION, "FUNCTION", tag_function},
-  {GCOV_TAG_BLOCKS, "BLOCKS", tag_blocks},
-  {GCOV_TAG_ARCS, "ARCS", tag_arcs},
-  {GCOV_TAG_LINES, "LINES", tag_lines},
-  {0, NULL, NULL}
-};
-
+    {0, "NOP", NULL},
+    {0, "UNKNOWN", NULL},
+    {0, "COUNTERS", tag_counters},
+    {GCOV_TAG_FUNCTION, "FUNCTION", tag_function},
+    {GCOV_TAG_BLOCKS, "BLOCKS", tag_blocks},
+    {GCOV_TAG_ARCS, "ARCS", tag_arcs},
+    {GCOV_TAG_LINES, "LINES", tag_lines},
+    {0, NULL, NULL}};
 
 void tag_counters(const char* filename, unsigned tag, unsigned length,
                   vector<unsigned>* result) {
-  unsigned n_counts = GCOV_TAG_COUNTER_NUM (length);
+  unsigned n_counts = GCOV_TAG_COUNTER_NUM(length);
   printf("%s: %d counts\n", __FUNCTION__, n_counts);
 }
-
 
 void tag_function(const char* filename, unsigned tag, unsigned length,
                   vector<unsigned>* result) {
@@ -41,13 +38,11 @@ void tag_function(const char* filename, unsigned tag, unsigned length,
   }
 }
 
-
 void tag_blocks(const char* filename, unsigned tag, unsigned length,
                 vector<unsigned>* result) {
   unsigned n_blocks = GCOV_TAG_BLOCKS_NUM(length);
   printf("%s: %u blocks\n", __FUNCTION__, n_blocks);
 }
-
 
 void tag_arcs(const char* filename, unsigned tag, unsigned length,
               vector<unsigned>* result) {
@@ -55,12 +50,10 @@ void tag_arcs(const char* filename, unsigned tag, unsigned length,
   printf("%s: %u arcs\n", __FUNCTION__, n_arcs);
 }
 
-
 void tag_lines(const char* filename, unsigned tag, unsigned length,
                vector<unsigned>* result) {
   printf("%s\n", __FUNCTION__);
 }
-
 
 vector<unsigned>* parse_gcda_file(const char* filename) {
   unsigned tags[4];
@@ -75,16 +68,16 @@ vector<unsigned>* parse_gcda_file(const char* filename) {
 
   /* magic */
   {
-    unsigned magic = gcov_read_unsigned ();
+    unsigned magic = gcov_read_unsigned();
     unsigned version;
     const char* type = NULL;
     int endianness = 0;
     char m[4], v[4];
 
-    if ((endianness = gcov_magic (magic, GCOV_DATA_MAGIC))) {
+    if ((endianness = gcov_magic(magic, GCOV_DATA_MAGIC))) {
       type = "data";
     } else {
-      printf ("%s:not a gcov file\n", filename);
+      printf("%s:not a gcov file\n", filename);
       gcov_close();
       return result;
     }
@@ -93,7 +86,7 @@ vector<unsigned>* parse_gcda_file(const char* filename) {
     GCOV_UNSIGNED2STRING(m, magic);
     if (version != GCOV_VERSION) {
       char e[4];
-      GCOV_UNSIGNED2STRING (e, GCOV_VERSION);
+      GCOV_UNSIGNED2STRING(e, GCOV_VERSION);
     }
   }
 
@@ -109,15 +102,14 @@ vector<unsigned>* parse_gcda_file(const char* filename) {
     unsigned mask;
 
     tag = gcov_read_unsigned();
-    if (!tag)
-      break;
+    if (!tag) break;
 
     length = gcov_read_unsigned();
     base = gcov_position();
     mask = GCOV_TAG_MASK(tag) >> 1;
     for (tag_depth = 4; mask; mask >>= 8) {
       if ((mask & 0xff) != 0xff) {
-        printf ("%s:tag `%08x' is invalid\n", filename, tag);
+        printf("%s:tag `%08x' is invalid\n", filename, tag);
         break;
       }
       tag_depth--;
@@ -129,25 +121,24 @@ vector<unsigned>* parse_gcda_file(const char* filename) {
         break;
       }
     }
-    if (!found) format = &tag_table[GCOV_TAG_IS_COUNTER (tag) ? 2 : 1];
+    if (!found) format = &tag_table[GCOV_TAG_IS_COUNTER(tag) ? 2 : 1];
 
     if (tag) {
       if (depth && depth < tag_depth) {
-        if (!GCOV_TAG_IS_SUBTAG (tags[depth - 1], tag))
-          printf ("%s:tag `%08x' is incorrectly nested\n",
-                  filename, tag);
+        if (!GCOV_TAG_IS_SUBTAG(tags[depth - 1], tag))
+          printf("%s:tag `%08x' is incorrectly nested\n", filename, tag);
       }
       depth = tag_depth;
       tags[depth - 1] = tag;
     }
     if (format->proc) {
-      (*format->proc) (filename, tag, length, result);
+      (*format->proc)(filename, tag, length, result);
     }
-    gcov_sync (base, length);
-    if ((error = gcov_is_error ())) {
-      printf(error < 0 ? "%s:counter overflow at %lu\n" :
-             "%s:read error at %lu\n", filename,
-             (long unsigned) gcov_position());
+    gcov_sync(base, length);
+    if ((error = gcov_is_error())) {
+      printf(
+          error < 0 ? "%s:counter overflow at %lu\n" : "%s:read error at %lu\n",
+          filename, (long unsigned)gcov_position());
       break;
     }
   }
@@ -157,4 +148,3 @@ vector<unsigned>* parse_gcda_file(const char* filename) {
 
 }  // namespace vts
 }  // namespace android
-

@@ -27,13 +27,11 @@ using namespace std;
 namespace android {
 namespace vts {
 
-string GetFunctionNamePrefix(
-    const InterfaceSpecificationMessage& message) {
+string GetFunctionNamePrefix(const InterfaceSpecificationMessage& message) {
   stringstream prefix_ss;
   prefix_ss << VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX
-      << message.component_class() << "_"
-      << message.component_type() << "_"
-      << int(message.component_type_version()) << "_";
+            << message.component_class() << "_" << message.component_type()
+            << "_" << int(message.component_type_version()) << "_";
   return prefix_ss.str();
 }
 

@@ -31,12 +31,11 @@ using namespace std;
 namespace android {
 namespace vts {
 
-
 light_state_t* GenerateLightState() {
   if (RandomBool()) {
     return NULL;
   } else {
-    light_state_t* state = (light_state_t*) malloc(sizeof(light_state_t));
+    light_state_t* state = (light_state_t*)malloc(sizeof(light_state_t));
 
     state->color = RandomUint32();
     state->flashMode = RandomInt32();
@@ -56,11 +55,10 @@ light_state_t* GenerateLightState() {
   }
 }
 
-
 light_state_t* GenerateLightStateUsingMessage(
     const VariableSpecificationMessage& msg) {
   cout << __func__ << " entry" << endl;
-  light_state_t* state = (light_state_t*) malloc(sizeof(light_state_t));
+  light_state_t* state = (light_state_t*)malloc(sizeof(light_state_t));
 
   // TODO: use a dict in the proto and handle when the key is missing (i.e.,
   // randomly generate that).

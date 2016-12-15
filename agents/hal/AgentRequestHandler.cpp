@@ -24,23 +24,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <utils/RefBase.h>
 
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "BinderClientToDriver.h"
-#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 #include "SocketClientToDriver.h"
 #include "SocketServerForDriver.h"
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
 using namespace google::protobuf;
@@ -48,9 +48,7 @@ using namespace google::protobuf;
 namespace android {
 namespace vts {
 
-
-bool AgentRequestHandler::ListHals(
-    const RepeatedPtrField<string>& base_paths) {
+bool AgentRequestHandler::ListHals(const RepeatedPtrField<string>& base_paths) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage response_msg;
   ResponseCode result = FAIL;
@@ -80,9 +78,7 @@ bool AgentRequestHandler::ListHals(
   return VtsSocketSendMessage(response_msg);
 }
 
-
-bool AgentRequestHandler::SetHostInfo(
-    const int callback_port) {
+bool AgentRequestHandler::SetHostInfo(const int callback_port) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   callback_port_ = callback_port;
   AndroidSystemControlResponseMessage response_msg;
@@ -90,9 +86,8 @@ bool AgentRequestHandler::SetHostInfo(
   return VtsSocketSendMessage(response_msg);
 }
 
-
-bool AgentRequestHandler::CheckDriverService(
-    const string& service_name, bool* live) {
+bool AgentRequestHandler::CheckDriverService(const string& service_name,
+                                             bool* live) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage response_msg;
 
@@ -118,7 +113,6 @@ bool AgentRequestHandler::CheckDriverService(
 static const char kUnixSocketNamePrefixForCallbackServer[] =
     "/data/local/tmp/vts_agent_callback";
 
-
 bool AgentRequestHandler::LaunchDriverService(
     int driver_type, const string& service_name, const string& file_path,
     int target_class, int target_type, float target_version,
@@ -135,8 +129,7 @@ bool AgentRequestHandler::LaunchDriverService(
   struct stat file_stat;
   if (stat(socket_port_flie_path.c_str(), &file_stat) == 0  // file exists
       && remove(socket_port_flie_path.c_str()) == -1) {
-    cerr << __func__ << " " << socket_port_flie_path << " delete error"
-        << endl;
+    cerr << __func__ << " " << socket_port_flie_path << " delete error" << endl;
     response_msg.set_reason("service file already exists.");
   } else {
     pid_t pid = fork();
@@ -163,36 +156,38 @@ bool AgentRequestHandler::LaunchDriverService(
 
         if (driver_hal_spec_dir_path_.length() < 1) {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-          asprintf(
-              &cmd,
-              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --server_socket_path=%s "
-              "--callback_socket_name=%s",
-              ld_dir_path.c_str(), driver_binary_path.c_str(),
-              socket_port_flie_path.c_str(), callback_socket_name.c_str());
+          asprintf(&cmd,
+                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server "
+                   "--server_socket_path=%s "
+                   "--callback_socket_name=%s",
+                   ld_dir_path.c_str(), driver_binary_path.c_str(),
+                   socket_port_flie_path.c_str(), callback_socket_name.c_str());
 #else  // binder
-          asprintf(
-              &cmd,
-              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-              "--callback_socket_name=%s",
-              ld_dir_path.c_str(), driver_binary_path.c_str(), service_name.c_str(),
-              callback_socket_name.c_str());
+          asprintf(&cmd,
+                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server "
+                   "--service_name=%s "
+                   "--callback_socket_name=%s",
+                   ld_dir_path.c_str(), driver_binary_path.c_str(),
+                   service_name.c_str(), callback_socket_name.c_str());
 #endif
         } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-          asprintf(
-              &cmd,
-              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --server_socket_path=%s "
-              "--spec_dir=%s --callback_socket_name=%s",
-              ld_dir_path.c_str(), driver_binary_path.c_str(),
-              socket_port_flie_path.c_str(), driver_hal_spec_dir_path_.c_str(),
-              callback_socket_name.c_str());
+          asprintf(&cmd,
+                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server "
+                   "--server_socket_path=%s "
+                   "--spec_dir=%s --callback_socket_name=%s",
+                   ld_dir_path.c_str(), driver_binary_path.c_str(),
+                   socket_port_flie_path.c_str(),
+                   driver_hal_spec_dir_path_.c_str(),
+                   callback_socket_name.c_str());
 #else  // binder
-          asprintf(
-              &cmd,
-              "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-              "--spec_dir=%s --callback_socket_name=%s",
-              ld_dir_path.c_str(), driver_binary_path.c_str(), service_name.c_str(),
-              driver_hal_spec_dir_path_.c_str(), callback_socket_name.c_str());
+          asprintf(&cmd,
+                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server "
+                   "--service_name=%s "
+                   "--spec_dir=%s --callback_socket_name=%s",
+                   ld_dir_path.c_str(), driver_binary_path.c_str(),
+                   service_name.c_str(), driver_hal_spec_dir_path_.c_str(),
+                   callback_socket_name.c_str());
 #endif
         }
       } else if (driver_type == VTS_DRIVER_TYPE_SHELL) {
@@ -225,7 +220,7 @@ bool AgentRequestHandler::LaunchDriverService(
         free(cmd);
       }
       exit(0);
-    } else if (pid > 0){
+    } else if (pid > 0) {
       for (int attempt = 0; attempt < 10; attempt++) {
         sleep(1);
         if (IsDriverRunning(service_name, 10)) {
@@ -234,7 +229,7 @@ bool AgentRequestHandler::LaunchDriverService(
         }
       }
       if (result) {
-        // TODO: use an attribute (client) of a newly defined class.
+// TODO: use an attribute (client) of a newly defined class.
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
         VtsDriverSocketClient* client =
             android::vts::GetDriverSocketClient(service_name);
@@ -252,8 +247,8 @@ bool AgentRequestHandler::LaunchDriverService(
         int32_t result;
         if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
           cout << "[agent->driver]: LoadHal " << module_name << endl;
-          result = client->LoadHal(
-              file_path, target_class, target_type, target_version, module_name);
+          result = client->LoadHal(file_path, target_class, target_type,
+                                   target_version, module_name);
           cout << "[driver->agent]: LoadHal returns " << result << endl;
           if (result == VTS_DRIVER_RESPONSE_SUCCESS) {
             response_msg.set_response_code(SUCCESS);
@@ -285,16 +280,15 @@ bool AgentRequestHandler::LaunchDriverService(
   return VtsSocketSendMessage(response_msg);
 }
 
-
 bool AgentRequestHandler::ListApis() {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
-  // TODO: use an attribute (client) of a newly defined class.
+// TODO: use an attribute (client) of a newly defined class.
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
 #else  // binder
-  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient(
-      service_name_);
+  android::sp<android::vts::IVtsFuzzer> client =
+      android::vts::GetBinderClient(service_name_);
   if (!client.get()) {
 #endif
     return false;
@@ -312,22 +306,20 @@ bool AgentRequestHandler::ListApis() {
   }
   bool succ = VtsSocketSendMessage(response_msg);
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-  free((void*) result);
+  free((void*)result);
 #endif
   return succ;
 }
 
-
-bool AgentRequestHandler::CallApi(
-    const string& call_payload) {
+bool AgentRequestHandler::CallApi(const string& call_payload) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
 #else  // binder
   // TODO: use an attribute (client) of a newly defined class.
-  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient(
-      service_name_);
+  android::sp<android::vts::IVtsFuzzer> client =
+      android::vts::GetBinderClient(service_name_);
   if (!client.get()) {
 #endif
     return false;
@@ -347,11 +339,10 @@ bool AgentRequestHandler::CallApi(
   }
   bool succ = VtsSocketSendMessage(response_msg);
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-  free((void*) result);
+  free((void*)result);
 #endif
   return succ;
 }
-
 
 bool AgentRequestHandler::DefaultResponse() {
   cout << "[agent] " << __FUNCTION__ << endl;
@@ -360,7 +351,6 @@ bool AgentRequestHandler::DefaultResponse() {
   response_msg.set_reason("an example reason here");
   return VtsSocketSendMessage(response_msg);
 }
-
 
 bool AgentRequestHandler::ExecuteShellCommand(
     const AndroidSystemControlCommandMessage& command_message) {
@@ -376,8 +366,7 @@ bool AgentRequestHandler::ExecuteShellCommand(
   }
 
   // TODO: support stdout and stderr
-  char* result = client->ExecuteShellCommand(
-      command_message.shell_command());
+  char* result = client->ExecuteShellCommand(command_message.shell_command());
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
@@ -393,13 +382,12 @@ bool AgentRequestHandler::ExecuteShellCommand(
   return succ;
 }
 
-
 bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
 
-  cout << getpid() << " " << __func__ << " command_type = "
-      << command_msg.command_type() << endl;
+  cout << getpid() << " " << __func__
+       << " command_type = " << command_msg.command_type() << endl;
   switch (command_msg.command_type()) {
     case LIST_HALS:
       return ListHals(command_msg.paths());
@@ -409,14 +397,10 @@ bool AgentRequestHandler::ProcessOneCommand() {
       return CheckDriverService(command_msg.service_name(), NULL);
     case LAUNCH_DRIVER_SERVICE:
       return LaunchDriverService(
-          command_msg.driver_type(),
-          command_msg.service_name(),
-          command_msg.file_path(),
-          command_msg.target_class(),
-          command_msg.target_type(),
-          command_msg.target_version() / 100.0,
-          command_msg.module_name(),
-          command_msg.bits());
+          command_msg.driver_type(), command_msg.service_name(),
+          command_msg.file_path(), command_msg.target_class(),
+          command_msg.target_type(), command_msg.target_version() / 100.0,
+          command_msg.module_name(), command_msg.bits());
     case LIST_APIS:
       return ListApis();
     case CALL_API:
@@ -427,11 +411,10 @@ bool AgentRequestHandler::ProcessOneCommand() {
       return true;
     default:
       cerr << __func__ << " ERROR unknown command "
-          << command_msg.command_type() << endl;
+           << command_msg.command_type() << endl;
       return DefaultResponse();
   }
 }
-
 
 }  // namespace vts
 }  // namespace android

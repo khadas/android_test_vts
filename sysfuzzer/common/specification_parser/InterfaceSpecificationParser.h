@@ -26,7 +26,6 @@ using namespace std;
 namespace android {
 namespace vts {
 
-
 // Main class to parse an interface specification from a file.
 class InterfaceSpecificationParser {
  public:
@@ -34,8 +33,8 @@ class InterfaceSpecificationParser {
 
   // Parses the given proto text file (1st arg). The parsed result is stored in
   // the 2nd arg. Returns true iff successful.
-  static bool parse(
-      const char* file_path, InterfaceSpecificationMessage* is_message);
+  static bool parse(const char* file_path,
+                    InterfaceSpecificationMessage* is_message);
 };
 
 }  // namespace vts

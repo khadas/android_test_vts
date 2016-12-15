@@ -20,8 +20,8 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/text_format.h>
@@ -32,7 +32,6 @@ using namespace std;
 
 namespace android {
 namespace vts {
-
 
 bool InterfaceSpecificationParser::parse(
     const char* file_path, InterfaceSpecificationMessage* is_message) {
@@ -49,8 +48,8 @@ bool InterfaceSpecificationParser::parse(
   const string data = str_stream.str();
 
   if (!google::protobuf::TextFormat::MergeFromString(data, is_message)) {
-    cerr << __FUNCTION__ << ": Can't parse a given proto file "
-        << file_path << "." << endl;
+    cerr << __FUNCTION__ << ": Can't parse a given proto file " << file_path
+         << "." << endl;
     cerr << data << endl;
     return false;
   }

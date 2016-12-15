@@ -29,8 +29,7 @@ namespace vts {
 // Socket client instance for an agent to control a driver.
 class VtsDriverSocketClient : public VtsDriverCommUtil {
  public:
-  explicit VtsDriverSocketClient()
-      : VtsDriverCommUtil() {}
+  explicit VtsDriverSocketClient() : VtsDriverCommUtil() {}
 
   // returns true if connection to the server is successful, false otherwise.
   bool Connect(const string& socket_name);
@@ -42,9 +41,8 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   bool Exit();
 
   // Sends a LOAD_HAL request.
-  int32_t LoadHal(
-      const string& file_path, int target_class, int target_type,
-      float target_version, const string& module_name);
+  int32_t LoadHal(const string& file_path, int target_class, int target_type,
+                  float target_version, const string& module_name);
 
   // Sends a LIST_FUNCTIONS request.
   const char* GetFunctions();
@@ -59,7 +57,6 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   char* ExecuteShellCommand(
       const ::google::protobuf::RepeatedPtrField<::std::string> shell_command);
 };
-
 
 // returns the socket port file's path for the given service_name.
 extern string GetSocketPortFilePath(const string& service_name);

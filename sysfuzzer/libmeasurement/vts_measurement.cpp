@@ -45,22 +45,21 @@ __attribute__((weak)) void __sanitizer_print_stack_trace();
 __attribute__((weak)) void __sanitizer_reset_coverage();
 __attribute__((weak)) size_t __sanitizer_get_total_unique_caller_callee_pairs();
 __attribute__((weak)) size_t __sanitizer_get_total_unique_coverage();
-__attribute__((weak))
-void __sanitizer_set_death_callback(void (*callback)(void));
+__attribute__((weak)) void __sanitizer_set_death_callback(
+    void (*callback)(void));
 __attribute__((weak)) size_t __sanitizer_get_number_of_counters();
-__attribute__((weak))
-uintptr_t __sanitizer_update_counter_bitset_and_clear_counters(uint8_t *bitset);
+__attribute__((weak)) uintptr_t
+__sanitizer_update_counter_bitset_and_clear_counters(uint8_t* bitset);
 }
 
-#define CHECK_WEAK_API_FUNCTION(fn)                                            \
-  do {                                                                         \
-    if (!fn)                                                                   \
-      MissingWeakApiFunction(#fn);                                             \
+#define CHECK_WEAK_API_FUNCTION(fn)       \
+  do {                                    \
+    if (!fn) MissingWeakApiFunction(#fn); \
   } while (false)
 
-static void MissingWeakApiFunction(const char *FnName) {
+static void MissingWeakApiFunction(const char* FnName) {
   cerr << "ERROR: " << FnName << " is not defined. Exiting.\n"
-      << "Did you use -fsanitize-coverage=... to build your code?" << endl;
+       << "Did you use -fsanitize-coverage=... to build your code?" << endl;
   exit(1);
 }
 #endif
@@ -82,7 +81,6 @@ void VtsMeasurement::Start() {
   clock_gettime(CLOCK_REALTIME, &ts_);
 #endif
 }
-
 
 vector<float>* VtsMeasurement::Stop() {
 #if USE_CTIME

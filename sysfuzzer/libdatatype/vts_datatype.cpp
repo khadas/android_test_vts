@@ -16,56 +16,37 @@
 
 #include "vts_datatype.h"
 
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 
 namespace android {
 namespace vts {
 
+void RandomNumberGeneratorReset() { srand(time(NULL)); }
 
-void RandomNumberGeneratorReset() {
-  srand(time(NULL));
-}
+uint32_t RandomUint32() { return (unsigned int)rand(); }
 
-
-uint32_t RandomUint32() {
-  return (unsigned int) rand();
-}
-
-
-int32_t RandomInt32() {
-  return rand();
-}
-
+int32_t RandomInt32() { return rand(); }
 
 int64_t RandomInt64() {
   int64_t num = rand();
   return (num << 32) | rand();
 }
 
-
-float RandomFloat() {
-  return (float) rand() / (float)(RAND_MAX / 1000000000.0);
-}
-
+float RandomFloat() { return (float)rand() / (float)(RAND_MAX / 1000000000.0); }
 
 double RandomDouble() {
-  return (double) rand() / (double)(RAND_MAX / 1000000000.0);
+  return (double)rand() / (double)(RAND_MAX / 1000000000.0);
 }
 
-
-bool RandomBool() {
-  return (abs(rand()) % 2) == 1;
-}
-
+bool RandomBool() { return (abs(rand()) % 2) == 1; }
 
 char* RandomCharPointer() {
   int len = RandomUint32() % MAX_CHAR_POINTER_LENGTH;
-  char* buf = (char*) malloc(len);
+  char* buf = (char*)malloc(len);
   buf[len - 1] = '\0';
   return buf;
 }
-
 
 void* RandomVoidPointer() {
   int len = RandomUint32() % MAX_CHAR_POINTER_LENGTH;

@@ -39,8 +39,7 @@ class HalSubmoduleCodeGen : public HalCodeGen {
 
  protected:
   void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss,
-      const string& function_prototype);
+      std::stringstream& h_ss, const string& function_prototype);
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;

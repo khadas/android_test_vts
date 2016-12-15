@@ -16,10 +16,10 @@
 
 #include <errno.h>
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <dirent.h>
 
@@ -43,8 +43,8 @@
 #include "AgentRequestHandler.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
-#include "SocketClientToDriver.h"
 #include "BinderClientToDriver.h"
+#include "SocketClientToDriver.h"
 
 #define LOCALHOST_IP "127.0.0.1"
 
@@ -63,18 +63,17 @@ bool VtsDriverSocketClient::Connect(const string& socket_name) {
     return false;
   }
 
-  bzero((char*) &serv_addr, sizeof(serv_addr));
+  bzero((char*)&serv_addr, sizeof(serv_addr));
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_name.c_str());
 
-  if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
+  if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
     cerr << __func__ << " ERROR connecting" << endl;
     return false;
   }
   SetSockfd(sockfd);
   return true;
 }
-
 
 bool VtsDriverSocketClient::Exit() {
   VtsDriverControlCommandMessage command_message;
@@ -86,10 +85,10 @@ bool VtsDriverSocketClient::Exit() {
   return true;
 }
 
-
-int32_t VtsDriverSocketClient::LoadHal(
-    const string& file_path, int target_class, int target_type,
-    float target_version, const string& module_name) {
+int32_t VtsDriverSocketClient::LoadHal(const string& file_path,
+                                       int target_class, int target_type,
+                                       float target_version,
+                                       const string& module_name) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(LOAD_HAL);
   command_message.set_file_path(file_path);
@@ -102,10 +101,9 @@ int32_t VtsDriverSocketClient::LoadHal(
   VtsDriverControlResponseMessage response_message;
   if (!VtsSocketRecvMessage(&response_message)) return -1;
   cout << __func__ << " response code: " << response_message.response_code()
-      << endl;
+       << endl;
   return response_message.response_code();
 }
-
 
 const char* VtsDriverSocketClient::GetFunctions() {
   cout << "[agent->driver] LIST_FUNCTIONS" << endl;
@@ -118,7 +116,7 @@ const char* VtsDriverSocketClient::GetFunctions() {
   if (!VtsSocketRecvMessage(&response_message)) return NULL;
 
   char* result =
-      (char*) malloc(strlen(response_message.return_message().c_str()) + 1);
+      (char*)malloc(strlen(response_message.return_message().c_str()) + 1);
   if (!result) {
     cerr << __func__ << " ERROR result is NULL" << endl;
     return NULL;
@@ -126,7 +124,6 @@ const char* VtsDriverSocketClient::GetFunctions() {
   strcpy(result, response_message.return_message().c_str());
   return result;
 }
-
 
 const char* VtsDriverSocketClient::Call(const string& arg) {
   VtsDriverControlCommandMessage command_message;
@@ -138,7 +135,7 @@ const char* VtsDriverSocketClient::Call(const string& arg) {
   if (!VtsSocketRecvMessage(&response_message)) return NULL;
 
   char* result =
-      (char*) malloc(strlen(response_message.return_message().c_str()) + 1);
+      (char*)malloc(strlen(response_message.return_message().c_str()) + 1);
   if (!result) {
     cerr << __func__ << " ERROR result is NULL" << endl;
     return NULL;
@@ -146,7 +143,6 @@ const char* VtsDriverSocketClient::Call(const string& arg) {
   strcpy(result, response_message.return_message().c_str());
   return result;
 }
-
 
 char* VtsDriverSocketClient::ExecuteShellCommand(
     const ::google::protobuf::RepeatedPtrField<::std::string> shell_command) {
@@ -161,8 +157,7 @@ char* VtsDriverSocketClient::ExecuteShellCommand(
   if (!VtsSocketRecvMessage(&response_message)) return NULL;
 
   for (const auto& log_stdout : response_message.stdout()) {
-    char* result =
-        (char*) malloc(strlen(log_stdout.c_str()) + 1);
+    char* result = (char*)malloc(strlen(log_stdout.c_str()) + 1);
     if (!result) {
       cerr << __func__ << " ERROR result is NULL" << endl;
       return NULL;
@@ -172,7 +167,6 @@ char* VtsDriverSocketClient::ExecuteShellCommand(
   }
   return NULL;
 }
-
 
 int32_t VtsDriverSocketClient::Status(int32_t type) {
   VtsDriverControlCommandMessage command_message;
@@ -185,7 +179,6 @@ int32_t VtsDriverSocketClient::Status(int32_t type) {
   return response_message.return_value();
 }
 
-
 string GetSocketPortFilePath(const string& service_name) {
   string result("/data/local/tmp/");
   result += service_name;
@@ -193,7 +186,6 @@ string GetSocketPortFilePath(const string& service_name) {
   // result += std::to_string(count++);
   return result;
 }
-
 
 bool IsDriverRunning(const string& service_name, int retry_count) {
   for (int retry = 0; retry < retry_count; retry++) {
@@ -205,10 +197,10 @@ bool IsDriverRunning(const string& service_name, int retry_count) {
     }
     sleep(1);
   }
-  cout << __func__ << " " << "couldn't connect to " << service_name << endl;
+  cout << __func__ << " "
+       << "couldn't connect to " << service_name << endl;
   return false;
 }
-
 
 VtsDriverSocketClient* GetDriverSocketClient(const string& service_name) {
   string socket_port_file_path = GetSocketPortFilePath(service_name);

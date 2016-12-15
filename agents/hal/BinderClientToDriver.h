@@ -29,5 +29,4 @@ extern sp<IVtsFuzzer> GetBinderClient(const string& service_name);
 }  // namespace vts
 }  // namespace android
 
-
 #endif

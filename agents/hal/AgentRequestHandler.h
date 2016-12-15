@@ -26,7 +26,6 @@
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
 using namespace google::protobuf;
 
@@ -36,10 +35,8 @@ namespace vts {
 // Class which contains actual methods to handle the runner requests.
 class AgentRequestHandler : public VtsDriverCommUtil {
  public:
-  AgentRequestHandler(const char* spec_dir_path,
-                      const char* hal_path32,
-                      const char* hal_path64,
-                      const char* shell_path32,
+  AgentRequestHandler(const char* spec_dir_path, const char* hal_path32,
+                      const char* hal_path64, const char* shell_path32,
                       const char* shell_path64)
       : service_name_(),
         driver_client_(NULL),
@@ -54,7 +51,6 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   bool ProcessOneCommand();
 
  protected:
-
   // for the LIST_HAL command
   bool ListHals(
       const ::google::protobuf::RepeatedPtrField<::std::string>& base_paths);
@@ -63,14 +59,13 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   bool SetHostInfo(const int callback_port);
 
   // for the CHECK_DRIVER_SERVICE command
-  bool CheckDriverService(
-      const string& service_name, bool* live);
+  bool CheckDriverService(const string& service_name, bool* live);
 
   // for the LAUNCH_DRIVER_SERVICE command
-  bool LaunchDriverService(
-      int driver_type, const string& service_name, const string& file_path,
-      int target_class, int target_type, float target_version,
-      const string& module_name, int bits);
+  bool LaunchDriverService(int driver_type, const string& service_name,
+                           const string& file_path, int target_class,
+                           int target_type, float target_version,
+                           const string& module_name, int bits);
 
   // for the LIST_APIS command
   bool ListApis();

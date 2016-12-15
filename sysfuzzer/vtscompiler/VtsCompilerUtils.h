@@ -18,9 +18,7 @@
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
-
 
 namespace android {
 namespace vts {
@@ -42,7 +40,8 @@ extern string GetCppInstanceType(VariableSpecificationMessage arg,
                                  string msg = string());
 
 // Returns the name of a function which can convert the given arg to a protobuf.
-extern string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg);
+extern string GetConversionToProtobufFunctionName(
+    VariableSpecificationMessage arg);
 
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);

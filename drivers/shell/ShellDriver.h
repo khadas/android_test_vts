@@ -30,9 +30,7 @@ namespace vts {
 
 class VtsShellDriver {
  public:
-  VtsShellDriver() {
-    socket_address_.clear();
-  }
+  VtsShellDriver() { socket_address_.clear(); }
 
   explicit VtsShellDriver(const char* socket_address)
       : socket_address_(socket_address) {}

@@ -16,14 +16,14 @@
 
 #include "hal_camera.h"
 
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 #include <iostream>
 
-#include <hardware/hardware.h>
-#include <hardware/camera_common.h>
 #include <hardware/camera.h>
+#include <hardware/camera_common.h>
+#include <hardware/hardware.h>
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
@@ -38,31 +38,32 @@ namespace vts {
 static void vts_camera_device_status_change(
     const struct camera_module_callbacks*, int camera_id, int new_status) {}
 
-static void vts_torch_mode_status_change(
-    const struct camera_module_callbacks*, const char* camera_id,
-    int new_status) {}
+static void vts_torch_mode_status_change(const struct camera_module_callbacks*,
+                                         const char* camera_id,
+                                         int new_status) {}
 
-static void vts_camera_notify_callback(
-    int32_t msg_type, int32_t ext1, int32_t ext2, void *user) {
-}
+static void vts_camera_notify_callback(int32_t msg_type, int32_t ext1,
+                                       int32_t ext2, void* user) {}
 
 static void vts_camera_data_callback(int32_t msg_type,
-        const camera_memory_t *data, unsigned int index,
-        camera_frame_metadata_t *metadata, void *user) {
+                                     const camera_memory_t* data,
+                                     unsigned int index,
+                                     camera_frame_metadata_t* metadata,
+                                     void* user) {}
+
+static void vts_camera_data_timestamp_callback(int64_t timestamp,
+                                               int32_t msg_type,
+                                               const camera_memory_t* data,
+                                               unsigned int index, void* user) {
 }
 
-static void vts_camera_data_timestamp_callback(
-    int64_t timestamp, int32_t msg_type,
-    const camera_memory_t *data, unsigned int index, void *user) {
-}
-
-static camera_memory_t* vts_camera_request_memory(
-    int fd, size_t buf_size, unsigned int num_bufs, void *user) {
+static camera_memory_t* vts_camera_request_memory(int fd, size_t buf_size,
+                                                  unsigned int num_bufs,
+                                                  void* user) {
   cout << __func__ << endl;
   return NULL;
 }
 // } Callbacks
-
 
 camera_module_callbacks_t* GenerateCameraModuleCallbacks() {
   cout << __func__ << endl;
@@ -70,43 +71,39 @@ camera_module_callbacks_t* GenerateCameraModuleCallbacks() {
     return NULL;
   } else {
     camera_module_callbacks_t* callbacks =
-        (camera_module_callbacks_t*) malloc(sizeof(camera_module_callbacks_t));
+        (camera_module_callbacks_t*)malloc(sizeof(camera_module_callbacks_t));
     callbacks->camera_device_status_change = vts_camera_device_status_change;
     callbacks->torch_mode_status_change = vts_torch_mode_status_change;
     return callbacks;
   }
 }
 
-
 camera_notify_callback GenerateCameraNotifyCallback() {
   return vts_camera_notify_callback;
 }
-
 
 camera_data_callback GenerateCameraDataCallback() {
   return vts_camera_data_callback;
 }
 
-
 camera_data_timestamp_callback GenerateCameraDataTimestampCallback() {
   return vts_camera_data_timestamp_callback;
 }
 
-
 camera_request_memory GenerateCameraRequestMemory() {
   return vts_camera_request_memory;
 }
-
 
 camera_info_t* GenerateCameraInfo() {
   cout << __func__ << endl;
   if (RandomBool()) {
     return NULL;
   } else {
-    camera_info_t* caminfo = (camera_info_t*) malloc(sizeof(camera_info_t));
+    camera_info_t* caminfo = (camera_info_t*)malloc(sizeof(camera_info_t));
     caminfo->facing = RandomBool() ? CAMERA_FACING_BACK : CAMERA_FACING_FRONT;
     // support CAMERA_FACING_EXTERNAL if CAMERA_MODULE_API_VERSION_2_4 or above
-    caminfo->orientation = RandomBool() ? (RandomBool() ? 0 : 90) : (RandomBool() ? 180 : 270);
+    caminfo->orientation =
+        RandomBool() ? (RandomBool() ? 0 : 90) : (RandomBool() ? 180 : 270);
     caminfo->device_version = CAMERA_MODULE_API_VERSION_2_1;
     caminfo->static_camera_characteristics = NULL;
     caminfo->resource_cost = 50;  // between 50 and 100.
@@ -115,81 +112,84 @@ camera_info_t* GenerateCameraInfo() {
 
     return caminfo;
   }
-      /**
-       * The camera's fixed characteristics, which include all static camera metadata
-       * specified in system/media/camera/docs/docs.html. This should be a sorted metadata
-       * buffer, and may not be modified or freed by the caller. The pointer should remain
-       * valid for the lifetime of the camera module, and values in it may not
-       * change after it is returned by get_camera_info().
-       *
-       * Version information (based on camera_module_t.common.module_api_version):
-       *
-       *  CAMERA_MODULE_API_VERSION_1_0:
-       *
-       *    Not valid. Extra characteristics are not available. Do not read this
-       *    field.
-       *
-       *  CAMERA_MODULE_API_VERSION_2_0 or higher:
-       *
-       *    Valid if device_version >= CAMERA_DEVICE_API_VERSION_2_0. Do not read
-       *    otherwise.
-       *
-      const camera_metadata_t *static_camera_characteristics;
-       */
+  /**
+   * The camera's fixed characteristics, which include all static camera
+  metadata
+   * specified in system/media/camera/docs/docs.html. This should be a sorted
+  metadata
+   * buffer, and may not be modified or freed by the caller. The pointer should
+  remain
+   * valid for the lifetime of the camera module, and values in it may not
+   * change after it is returned by get_camera_info().
+   *
+   * Version information (based on camera_module_t.common.module_api_version):
+   *
+   *  CAMERA_MODULE_API_VERSION_1_0:
+   *
+   *    Not valid. Extra characteristics are not available. Do not read this
+   *    field.
+   *
+   *  CAMERA_MODULE_API_VERSION_2_0 or higher:
+   *
+   *    Valid if device_version >= CAMERA_DEVICE_API_VERSION_2_0. Do not read
+   *    otherwise.
+   *
+  const camera_metadata_t *static_camera_characteristics;
+   */
 
-      /**
-       * An array of camera device IDs represented as NULL-terminated strings
-       * indicating other devices that cannot be simultaneously opened while this
-       * camera device is in use.
-       *
-       * This field is intended to be used to indicate that this camera device
-       * is a composite of several other camera devices, or otherwise has
-       * hardware dependencies that prohibit simultaneous usage. If there are no
-       * dependencies, a NULL may be returned in this field to indicate this.
-       *
-       * The camera service will never simultaneously open any of the devices
-       * in this list while this camera device is open.
-       *
-       * The strings pointed to in this field will not be cleaned up by the camera
-       * service, and must remain while this device is plugged in.
-       *
-       * Version information (based on camera_module_t.common.module_api_version):
-       *
-       *  CAMERA_MODULE_API_VERSION_2_3 or lower:
-       *
-       *    Not valid.  Can be assumed to be NULL.  Do not read this field.
-       *
-       *  CAMERA_MODULE_API_VERSION_2_4 or higher:
-       *
-       *    Always valid.
-      char** conflicting_devices;
-       */
+  /**
+   * An array of camera device IDs represented as NULL-terminated strings
+   * indicating other devices that cannot be simultaneously opened while this
+   * camera device is in use.
+   *
+   * This field is intended to be used to indicate that this camera device
+   * is a composite of several other camera devices, or otherwise has
+   * hardware dependencies that prohibit simultaneous usage. If there are no
+   * dependencies, a NULL may be returned in this field to indicate this.
+   *
+   * The camera service will never simultaneously open any of the devices
+   * in this list while this camera device is open.
+   *
+   * The strings pointed to in this field will not be cleaned up by the camera
+   * service, and must remain while this device is plugged in.
+   *
+   * Version information (based on camera_module_t.common.module_api_version):
+   *
+   *  CAMERA_MODULE_API_VERSION_2_3 or lower:
+   *
+   *    Not valid.  Can be assumed to be NULL.  Do not read this field.
+   *
+   *  CAMERA_MODULE_API_VERSION_2_4 or higher:
+   *
+   *    Always valid.
+  char** conflicting_devices;
+   */
 
-      /**
-       * The length of the array given in the conflicting_devices field.
-       *
-       * Version information (based on camera_module_t.common.module_api_version):
-       *
-       *  CAMERA_MODULE_API_VERSION_2_3 or lower:
-       *
-       *    Not valid.  Can be assumed to be 0.  Do not read this field.
-       *
-       *  CAMERA_MODULE_API_VERSION_2_4 or higher:
-       *
-       *    Always valid.
-      size_t conflicting_devices_length;
-       */
+  /**
+   * The length of the array given in the conflicting_devices field.
+   *
+   * Version information (based on camera_module_t.common.module_api_version):
+   *
+   *  CAMERA_MODULE_API_VERSION_2_3 or lower:
+   *
+   *    Not valid.  Can be assumed to be 0.  Do not read this field.
+   *
+   *  CAMERA_MODULE_API_VERSION_2_4 or higher:
+   *
+   *    Always valid.
+  size_t conflicting_devices_length;
+   */
 }
-
 
 camera_info_t* GenerateCameraInfoUsingMessage(
     const VariableSpecificationMessage& msg) {
   cout << __func__ << endl;
   // TODO: acutally use msg.
-  camera_info_t* caminfo = (camera_info_t*) malloc(sizeof(camera_info_t));
+  camera_info_t* caminfo = (camera_info_t*)malloc(sizeof(camera_info_t));
   caminfo->facing = RandomBool() ? CAMERA_FACING_BACK : CAMERA_FACING_FRONT;
   // support CAMERA_FACING_EXTERNAL if CAMERA_MODULE_API_VERSION_2_4 or above
-  caminfo->orientation = RandomBool() ? (RandomBool() ? 0 : 90) : (RandomBool() ? 180 : 270);
+  caminfo->orientation =
+      RandomBool() ? (RandomBool() ? 0 : 90) : (RandomBool() ? 180 : 270);
   caminfo->device_version = CAMERA_MODULE_API_VERSION_2_1;
   caminfo->static_camera_characteristics = NULL;
   caminfo->resource_cost = 50;  // between 50 and 100.
@@ -199,9 +199,8 @@ camera_info_t* GenerateCameraInfoUsingMessage(
   return caminfo;
 }
 
-
-bool ConvertCameraInfoToProtobuf(
-    camera_info_t* raw, VariableSpecificationMessage* msg) {
+bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
+                                 VariableSpecificationMessage* msg) {
   cout << __func__ << ":" << __LINE__ << endl;
 
   if (msg->struct_value_size() > 0) msg->clear_struct_value();

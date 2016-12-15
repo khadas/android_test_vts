@@ -27,7 +27,6 @@
 
 using namespace std;
 
-
 namespace android {
 namespace vts {
 
@@ -43,7 +42,7 @@ class VtsMeasurement {
   vector<float>* Stop();
 
  private:
-  // data structure to keep the start time.
+// data structure to keep the start time.
 #if USE_CTIME
   struct timeval tv_;
 #else

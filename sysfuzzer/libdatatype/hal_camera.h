@@ -17,9 +17,9 @@
 #ifndef __vts_libdatatype_hal_camera_h__
 #define __vts_libdatatype_hal_camera_h__
 
-#include <hardware/hardware.h>
-#include <hardware/camera_common.h>
 #include <hardware/camera.h>
+#include <hardware/camera_common.h>
+#include <hardware/hardware.h>
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
