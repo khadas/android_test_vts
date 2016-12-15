@@ -16,8 +16,8 @@
 
 /*
  * Example usage (for angler 64-bit devices):
- *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib64/hw/lights.angler.so
- *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
+ *  $ fuzzer --class=hal_conventional --type=light --version=1.0 /system/lib64/hw/lights.angler.so
+ *  $ fuzzer --class=hal_conventional --type=gps --version=1.0 /system/lib64/hw/gps.msm8994.so
  *
  *  $ LD_LIBRARY_PATH=/data/local/tmp/64 ./fuzzer64 --class=hal --type=light \
  *    --version=1.0 --spec_dir=/data/local/tmp/spec \
@@ -27,9 +27,9 @@
  *    /data/local/tmp/32/hal/camera.bullhead-vts.so
  *
  * Example usage (for GCE virtual devices):
- *  $ fuzzer --class=hal --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
- *  $ fuzzer --class=hal --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so
- *  $ fuzzer --class=hal --type=camera --version=2.1 /system/lib/hw/camera.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=light --version=1.0 /system/lib/hw/lights.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=gps --version=1.0 /system/lib/hw/gps.gce_x86.so
+ *  $ fuzzer --class=hal_conventional --type=camera --version=2.1 /system/lib/hw/camera.gce_x86.so
  */
 
 #include <getopt.h>
@@ -112,8 +112,8 @@ int main(int argc, char* const argv[]) {
         string target_class_str = string(optarg);
         transform(target_class_str.begin(), target_class_str.end(),
                   target_class_str.begin(), ::tolower);
-        if (!strcmp(target_class_str.c_str(), "hal")) {
-          target_class = vts::HAL;
+        if (!strcmp(target_class_str.c_str(), "hal_conventional")) {
+          target_class = vts::HAL_CONVENTIONAL;
         } else {
           target_class = 0;
         }
