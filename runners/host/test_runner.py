@@ -23,13 +23,82 @@ import inspect
 import logging
 import os
 import pkgutil
+import signal
 import sys
 
+from vts.runners.host import base_test
+from vts.runners.host import config_parser
 from vts.runners.host import keys
 from vts.runners.host import logger
 from vts.runners.host import records
 from vts.runners.host import signals
 from vts.runners.host import utils
+
+
+def main():
+    """Execute the test class in a test module.
+
+    This is to be used in a test script's main so the script can be executed
+    directly. It will discover all the classes that inherit from BaseTestClass
+    and excute them. all the test results will be aggregated into one.
+
+    Returns:
+        The TestResult object that holds the results of the test run.
+    """
+    test_classes = []
+    main_module_members = sys.modules["__main__"]
+    for _, module_member in main_module_members.__dict__.items():
+        if inspect.isclass(module_member):
+            if issubclass(module_member, base_test.BaseTestClass):
+                test_classes.append(module_member)
+    # TODO(angli): Need to handle the case where more than one test class is in
+    # a test script. The challenge is to handle multiple configs and how to do
+    # default config in this case.
+    if len(test_classes) != 1:
+        logging.error("Expected 1 test class per file, found %s.",
+                      len(test_classes))
+        sys.exit(1)
+    test_result = runTestClass(test_classes[0])
+    return test_result
+
+
+def runTestClass(test_class):
+    """Execute one test class.
+
+    This will create a TestRunner, execute one test run with one test class.
+
+    Args:
+        test_class: The test class to instantiate and execute.
+
+    Returns:
+        The TestResult object that holds the results of the test run.
+    """
+    test_cls_name = test_class.__name__
+    try:
+        config_path = sys.argv[1]
+    except IndexError:
+        config_path = "%s.config" % test_cls_name
+        if not os.path.isfile(config_path):
+            logging.error(
+                "No config file provided and no default config found.")
+            sys.exit(1)
+        logging.warning("Missing required configuration file. Default to %s." %
+                        config_path)
+    test_configs = config_parser.load_test_config_file(config_path)
+    test_identifiers = [(test_cls_name, None)]
+    for config in test_configs:
+        tr = TestRunner(config, test_identifiers)
+        tr.parseTestConfig(config)
+        try:
+            # Create console signal handler to make sure TestRunner is stopped
+            # in the event of termination.
+            handler = config_parser.gen_term_signal_handler([tr])
+            signal.signal(signal.SIGTERM, handler)
+            signal.signal(signal.SIGINT, handler)
+            tr.runTestClass(test_class, None)
+        finally:
+            tr.stop()
+            return tr.results
 
 
 class TestRunner(object):
@@ -46,13 +115,10 @@ class TestRunner(object):
         self.id: A string that is the unique identifier of this test run.
         self.log_path: A string representing the path of the dir under which
                        all logs from this test run should be written.
-        self.log: The logger object used throughout this test run.
         self.controller_registry: A dictionary that holds the controller
                                   objects used in a test run.
         self.controller_destructors: A dictionary that holds the controller
                                      distructors. Keys are controllers' names.
-        self.test_classes: A dictionary where we can look up the test classes
-                           by name to instantiate.
         self.run_list: A list of tuples specifying what tests to run.
         self.results: The test result object used to record the results of
                       this test run.
@@ -63,23 +129,27 @@ class TestRunner(object):
     def __init__(self, test_configs, run_list):
         self.test_run_info = {}
         self.test_configs = test_configs
-        self.testbed_configs = self.test_configs[keys.Config.KEY_TESTBED.value]
+        self.testbed_configs = self.test_configs[keys.ConfigKeys.KEY_TESTBED]
         self.testbed_name = self.testbed_configs[
-            keys.Config.KEY_TESTBED_NAME.value]
+            keys.ConfigKeys.KEY_TESTBED_NAME]
         start_time = logger.getLogFileTimestamp()
         self.id = "{}@{}".format(self.testbed_name, start_time)
         # log_path should be set before parsing configs.
-        l_path = os.path.join(
-            self.test_configs[keys.Config.KEP_LOG_PATH.value],
-            self.testbed_name, start_time)
+        l_path = os.path.join(self.test_configs[keys.ConfigKeys.KEP_LOG_PATH],
+                              self.testbed_name, start_time)
         self.log_path = os.path.abspath(l_path)
-        logger.initiateTestLogger(self.log_path, self.id, self.testbed_name)
-        self.log = logging.getLogger()
+        logger.setupTestLogger(self.log_path, self.testbed_name)
         self.controller_registry = {}
         self.controller_destructors = {}
         self.run_list = run_list
         self.results = records.TestResult()
         self.running = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.stop()
 
     def importTestModules(self, test_paths):
         """Imports test classes from test scripts.
@@ -122,7 +192,7 @@ class TestRunner(object):
                         # This exception is logged here to help with debugging
                         # under py2, because "raise X from Y" syntax is only
                         # supported under py3.
-                        self.log.exception(msg)
+                        logging.exception(msg)
                         raise USERError(msg)
                 continue
             for member_name in dir(module):
@@ -195,9 +265,9 @@ class TestRunner(object):
             # in case the controller module modifies the config internally.
             original_config = self.testbed_configs[module_config_name]
             controller_config = copy.deepcopy(original_config)
-            objects = create(controller_config, self.log)
+            objects = create(controller_config)
         except:
-            self.log.exception(
+            logging.exception(
                 ("Failed to initialize objects for controller "
                  "%s, abort!"), module_config_name)
             raise
@@ -205,8 +275,8 @@ class TestRunner(object):
             raise ControllerError(("Controller module %s did not return a list"
                                    " of objects, abort.") % module_ref_name)
         self.controller_registry[module_ref_name] = objects
-        self.log.debug("Found %d objects for controller %s", len(objects),
-                       module_config_name)
+        logging.debug("Found %d objects for controller %s", len(objects),
+                      module_config_name)
         destroy_func = module.destroy
         self.controller_destructors[module_ref_name] = destroy_func
         return objects
@@ -218,10 +288,10 @@ class TestRunner(object):
         """
         for name, destroy in self.controller_destructors.items():
             try:
-                self.log.debug("Destroying %s.", name)
+                logging.debug("Destroying %s.", name)
                 destroy(self.controller_registry[name])
             except:
-                self.log.exception("Exception occurred destroying %s.", name)
+                logging.exception("Exception occurred destroying %s.", name)
         self.controller_registry = {}
         self.controller_destructors = {}
 
@@ -233,18 +303,18 @@ class TestRunner(object):
             test_configs: A json object representing the test configurations.
         """
         self.test_run_info[
-            keys.Config.IKEY_TESTBED_NAME.value] = self.testbed_name
+            keys.ConfigKeys.IKEY_TESTBED_NAME] = self.testbed_name
         # Unpack other params.
         self.test_run_info["registerController"] = self.registerController
-        self.test_run_info[keys.Config.IKEY_LOG_PATH.value] = self.log_path
+        self.test_run_info[keys.ConfigKeys.IKEY_LOG_PATH] = self.log_path
         user_param_pairs = []
         for item in test_configs.items():
-            if item[0] not in keys.Config.RESERVED_KEYS.value:
+            if item[0] not in keys.ConfigKeys.RESERVED_KEYS:
                 user_param_pairs.append(item)
-        self.test_run_info[keys.Config.IKEY_USER_PARAM.value] = dict(
-            user_param_pairs)
+        self.test_run_info[keys.ConfigKeys.IKEY_USER_PARAM] = copy.deepcopy(
+            dict(user_param_pairs))
 
-    def runTestClass(self, test_cls_name, test_cases=None):
+    def runTestClass(self, test_cls, test_cases=None):
         """Instantiates and executes a test class.
 
         If test_cases is None, the test cases listed by self.tests will be
@@ -252,19 +322,13 @@ class TestRunner(object):
         test class will be executed.
 
         Args:
-            test_cls_name: Name of the test class to execute.
+            test_cls: The test class to be instantiated and executed.
             test_cases: List of test case names to execute within the class.
 
         Returns:
             A tuple, with the number of cases passed at index 0, and the total
             number of test cases at index 1.
         """
-        try:
-            test_cls = self.test_classes[test_cls_name]
-        except KeyError:
-            raise USERError(("Unable to locate class %s in any of the test "
-                             "paths specified.") % test_cls_name)
-
         with test_cls(self.test_run_info) as test_cls_instance:
             try:
                 cls_result = test_cls_instance.run(test_cases)
@@ -282,28 +346,38 @@ class TestRunner(object):
 
         A call to TestRunner.stop should eventually happen to conclude the life
         cycle of a TestRunner.
+
+        Args:
+            test_classes: A dictionary where the key is test class name, and
+                          the values are actual test classes.
         """
         if not self.running:
             self.running = True
         # Initialize controller objects and pack appropriate objects/params
         # to be passed to test class.
         self.parseTestConfig(self.test_configs)
-        t_configs = self.test_configs[keys.Config.KEY_TEST_PATHS.value]
-        self.test_classes = self.importTestModules(t_configs)
-        self.log.debug("Executing run list %s.", self.run_list)
+        t_configs = self.test_configs[keys.ConfigKeys.KEY_TEST_PATHS]
+        test_classes = self.importTestModules(t_configs)
+        logging.debug("Executing run list %s.", self.run_list)
         try:
             for test_cls_name, test_case_names in self.run_list:
                 if not self.running:
                     break
                 if test_case_names:
-                    self.log.debug("Executing test cases %s in test class %s.",
-                                   test_case_names, test_cls_name)
+                    logging.debug("Executing test cases %s in test class %s.",
+                                  test_case_names, test_cls_name)
                 else:
-                    self.log.debug("Executing test class %s", test_cls_name)
+                    logging.debug("Executing test class %s", test_cls_name)
                 try:
-                    self.runTestClass(test_cls_name, test_case_names)
+                    test_cls = test_classes[test_cls_name]
+                except KeyError:
+                    raise USERError(
+                        ("Unable to locate class %s in any of the test "
+                         "paths specified.") % test_cls_name)
+                try:
+                    self.runTestClass(test_cls, test_case_names)
                 except signals.TestAbortAll as e:
-                    self.log.warning(
+                    logging.warning(
                         ("Abort all subsequent test classes. Reason: "
                          "%s"), e)
                     raise
@@ -320,8 +394,8 @@ class TestRunner(object):
             msg = "\nSummary for test run %s: %s\n" % (self.id,
                                                        self.results.summary())
             self._writeResultsJsonString()
-            self.log.info(msg.strip())
-            logger.killTestLogger(self.log)
+            logging.info(msg.strip())
+            logger.killTestLogger(logging.getLogger)
             self.running = False
 
     def _writeResultsJsonString(self):

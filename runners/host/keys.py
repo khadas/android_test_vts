@@ -14,13 +14,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import enum
 """This module has the global key values that are used across framework
 modules.
 """
 
 
-class Config(enum.Enum):
+class ConfigKeys(object):
     """Enum values for test config related lookups.
     """
     # Keys used to look up values from test config files.
