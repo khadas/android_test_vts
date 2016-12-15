@@ -40,8 +40,10 @@
             function selectHandler(e) {
                 var ctx = "${pageContext.request.contextPath}";
                 var link = ctx + "/show_graph?profilingPoint=" +
-                    data.getValue(table.getSelection()[0].row, 0) + "&" +
-                    "tableName=" + ${tableName};
+                    data.getValue(table.getSelection()[0].row, 0) +
+                    "&tableName=" + ${tableName} +
+                    "&buildIdStartTime=" + ${buildIdStartTime} +
+                    "&buildIdEndTime=" + ${buildIdEndTime};
                 window.open(link,"_self");
             }
         }
@@ -231,7 +233,6 @@
 
                 var link = ctx + "/show_coverage?key=" + key + "&tableName="
                      + ${tableName};
-                console.log(link);
                 window.open(link,"_self");
             }
         }

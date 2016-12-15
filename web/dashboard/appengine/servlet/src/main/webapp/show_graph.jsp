@@ -5,11 +5,58 @@
 <head>
     <title>Graph</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script type="text/javascript">
         google.charts.load("current", {packages:["corechart", "table", "line"]});
         google.charts.setOnLoadCallback(drawProfilingChart);
         google.charts.setOnLoadCallback(drawPerformanceChart);
         google.charts.setOnLoadCallback(drawPercentileTable);
+
+        ONE_DAY = 86400000000000;
+        NANO_PER_MILLI = 1000000;
+
+        $(function() {
+            var startTime = ${startTime};
+            var endTime = ${endTime};
+            if (!startTime || !endTime) {
+                var now = (new Date()).getTime()*NANO_PER_MILLI;
+                startTime = now - ONE_DAY;
+                endTime = now;
+            }
+            var fromDate = new Date(startTime/NANO_PER_MILLI);
+            var toDate = new Date(endTime/NANO_PER_MILLI);
+            var from = $("#from").datepicker({
+                    showAnim: "slideDown",
+                    defaultDate: fromDate,
+                    changeMonth: true
+                  }).on("change", function() {
+                      to.datepicker("option", "minDate", getDate(this));
+                  }),
+                to = $("#to").datepicker({
+                    showAnim: "slideDown",
+                    defaultDate: toDate,
+                    changeMonth: true
+                  }).on("change", function() {
+                      from.datepicker("option", "maxDate", getDate(this));
+                  });
+
+            function getDate(element) {
+              var date;
+              try {
+                date = $.datepicker.parseDate("mm/dd/yy", element.value);
+              } catch( error ) {
+                date = null;
+              }
+              return date;
+            }
+
+            from.datepicker("setDate", fromDate);
+            from.datepicker("option", "maxDate", toDate);
+            to.datepicker("setDate", toDate);
+            to.datepicker("option", "minDate", fromDate);
+        });
 
         function drawProfilingChart() {
 
@@ -64,19 +111,19 @@
         function drawPerformanceChart() {
             var lineGraphValues = ${lineGraphValuesJson};
             var labelsList = ${labelsListJson};
-            lablist = labelsList;
+            var profilingBuildIds = ${profilingBuildIdsJson};
+            if (!labelsList || labelsList.length < 1) {
+                return;
+            }
             labelsList.forEach(function (label, i) {
                 lineGraphValues[i].unshift(label);
             });
-            if (labelsList.length < 1) {
-                return;
-            }
 
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Label');
-            for (var i = 0; i < lineGraphValues[0].length - 1; i++) {
-                data.addColumn('number', i);
-            }
+            profilingBuildIds.forEach(function(build) {
+                data.addColumn('number', build);
+            });
             data.addRows(lineGraphValues);
 
             var options = {
@@ -128,9 +175,15 @@
 </head>
 
 <body>
-    <div style="margin-left:200px">
+    <div style="width: 80%; margin-left:10%">
       <h2>Profiling Point Name : ${profilingPointName}</h2>
-      <button id="b">Click to Download Raw Data </button>
+      <div style="display:inline-block; margin-bottom: 30px">
+          <input type="text" id="from" name="from">
+          <label for="to"> - </label>
+          <input type="text" id="to" name="to">
+          <button id="load" style="margin-left:5px">Load</button>
+      </div>
+      <button id="b" style="float:right">Download Raw Data</button>
       <!-- Error in case of profiling data is missing -->
       <h3>${error}</h3>
     </div>
@@ -159,8 +212,23 @@
           }
           window.open('data:text/csv;charset=utf-8,' + escape(myCsv));
       }
-      var button = document.getElementById('b');
-      button.addEventListener('click', exportToCsv);
+      var button = document.getElementById("b");
+      button.addEventListener("click", exportToCsv);
+
+      function load() {
+          var fromDate = $("#from").datepicker("getDate").getTime();
+          var toDate = $("#to").datepicker("getDate").getTime();
+          var startTime = fromDate * NANO_PER_MILLI;
+          var endTime = (toDate - 1) * NANO_PER_MILLI + ONE_DAY;  // end of day
+          var ctx = "${pageContext.request.contextPath}";
+          var link = ctx + "/show_graph?profilingPoint=${profilingPointName}" +
+              "&tableName=" + ${tableName} +
+              "&buildIdStartTime=" + startTime +
+              "&buildIdEndTime=" + endTime;
+          window.open(link,"_self");
+      }
+      button = document.getElementById("load");
+      button.addEventListener("click", load);
 
     </script>
 
