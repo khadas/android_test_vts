@@ -156,7 +156,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
             + arg.predefined_type();
       }
     }
-  } else if (arg.type() == TYPE_VECTOR_VARIABLE) {
+  } else if (arg.type() == TYPE_VECTOR) {
     return "const hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
     return arg.predefined_type();
@@ -296,7 +296,7 @@ string GetCppInstanceType(
     if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
       return message->component_name() + "::" + arg.predefined_type() +  "()";
     }
-  } else if (arg.type() == TYPE_VECTOR_VARIABLE) {  // only for HAL_HIDL
+  } else if (arg.type() == TYPE_VECTOR) {  // only for HAL_HIDL
     // TODO: generate code that initializes a local hidl_vec.
     return "";
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
