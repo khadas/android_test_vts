@@ -30,24 +30,32 @@ class KernelLtpTest(base_test.BaseTestClass):
         self.dut = self.registerController(android_device)[0]
         self.dut.shell.InvokeTerminal("my_shell1")
 
-    def testCrashTestcases(self):
+    def testCrashTestcases32Bits(self):
         """A simple testcase which just emulates a normal usage pattern."""
-        # TODO: enable 64-bit test cases.
         test_binaries = ["/data/local/tmp/32/crash01_32",
                          "/data/local/tmp/32/crash02_32"]
-        test_commands = ["chmod 755 " + b for b in test_binaries]
-        test_commands.extend(test_binaries)
+        for binary in test_binaries:
+            self.dut.shell.my_shell1.Execute("chmod 755 " + binary)
+            logging.info("executing a command '%s'" % binary)
+            stdouts = self.dut.shell.my_shell1.Execute("env TMPDIR=/data/local/tmp " + binary)
+            all_stdout = "\n".join(stdouts)
+            logging.info("stdout: %s" % all_stdout)
+            asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
+                               "command [%s] failed" % binary)
 
-        logging.info("executing the following %i commands:" % len(test_commands))
-        for cmd in test_commands:
-            logging.info(cmd)
-
-        stdouts = self.dut.shell.my_shell1.Execute(test_commands)
-        for cmd, stdout in zip(test_commands, tuple(stdouts)):
-            logging.info("stdout for [%s]: %s" % (cmd, stdout))
-            if not cmd.startswith("chmod"):
-                asserts.assertTrue("TPASS" in stdout and "TFAIL" not in stdout,
-                                   "command [%s] failed" % cmd)
+    def testCrashTestcases64Bits(self):
+        """A simple testcase which just emulates a normal usage pattern."""
+        test_binaries = ["/data/local/tmp/64/crash01_64",
+                         "/data/local/tmp/64/crash02_64"]
+        for binary in test_binaries:
+            self.dut.shell.my_shell1.Execute("chmod 755 " + binary)
+            logging.info("executing a command '%s'" % binary)
+            stdouts = self.dut.shell.my_shell1.Execute(
+                "env TMPDIR=/data/local/tmp LD_LIBRARY_PATH=/data/local/tmp/64/ " + binary)
+            all_stdout = "\n".join(stdouts)
+            logging.info("stdout: %s" % all_stdout)
+            asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
+                               "command [%s] failed" % binary)
 
 
 if __name__ == "__main__":
