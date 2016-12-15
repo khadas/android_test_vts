@@ -117,14 +117,18 @@ public class VtsAlertJobServlet extends HttpServlet {
             List<Message> messages) throws IOException {
         Scan scan = new Scan();
         scan.setStartRow(Long.toString(startTime).getBytes());
-        Table table = BigtableHelper.getTable(TableName.valueOf(tableName));
+        TableName tableNameObject = TableName.valueOf(tableName);
+        Table table = BigtableHelper.getTable(tableNameObject);
+        if (!BigtableHelper.getConnection().getAdmin().tableExists(tableNameObject)){
+            return prevStatus;
+        }
         ResultScanner scanner = table.getScanner(scan);
         List<String> testRunKeyList = new ArrayList<>();
         Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<>();
 
         boolean anyFailed = false;
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
-        byte[] value = result.getValue(RESULTS_FAMILY, DATA_QUALIFIER);
+            byte[] value = result.getValue(RESULTS_FAMILY, DATA_QUALIFIER);
             TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage
                                                       .parseFrom(value);
             String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
