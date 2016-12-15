@@ -115,7 +115,8 @@ string GetCppVariableType(const std::string scalar_type_string) {
   exit(-1);
 }
 
-string GetCppVariableType(VariableSpecificationMessage arg) {
+string GetCppVariableType(const VariableSpecificationMessage& arg,
+                          const InterfaceSpecificationMessage* message) {
   if (arg.type() == TYPE_VOID) {
     return "void";
   }
@@ -123,7 +124,33 @@ string GetCppVariableType(VariableSpecificationMessage arg) {
     return arg.predefined_type();
   } else if (arg.type() == TYPE_SCALAR) {
     return GetCppVariableType(arg.scalar_type());
+  } else if (arg.type() == TYPE_ENUM) {
+    cout << __func__ << ":" << __LINE__ << " "
+         << arg.has_enum_value() << " " << arg.has_predefined_type() << endl;
+    if (!arg.has_enum_value() && arg.has_predefined_type()) {
+      if (!message || message->component_class() != HAL_HIDL) {
+        return arg.predefined_type();
+      } else {
+        return "Bp" + message->component_name().substr(1) + "::"
+            + arg.predefined_type();
+      }
+    }
+  } else if (arg.type() == TYPE_STRUCT) {
+    cout << __func__ << ":" << __LINE__ << " "
+         << arg.struct_value_size() << " " << arg.has_predefined_type() << endl;
+    if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
+      if (!message || message->component_class() != HAL_HIDL) {
+        return arg.predefined_type();
+      } else {
+        return "Bp" + message->component_name().substr(1) + "::"
+            + arg.predefined_type();
+      }
+    }
+  } else if (arg.type() == TYPE_HIDL_CALLBACK) {
+    return arg.predefined_type();
   }
+  cerr << __func__ << ":" << __LINE__ << " "
+       << ": type " << arg.type() << " not supported" << endl;
   cerr << __func__ << ":" << __LINE__ << " "
        << ": type " << arg.type() << " not supported" << endl;
   string* output = new string();
@@ -148,7 +175,10 @@ string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg) {
   exit(-1);
 }
 
-string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
+string GetCppInstanceType(
+    const VariableSpecificationMessage& arg,
+    const string& msg,
+    const InterfaceSpecificationMessage* message) {
   if (arg.type() == TYPE_PREDEFINED) {
     if (arg.predefined_type() == "struct light_state_t*") {
       if (msg.length() == 0) {
@@ -201,7 +231,7 @@ string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
     } else if (arg.predefined_type() == "struct preview_stream_ops*") {
       return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
     } else {
-      cerr << __FILE__ << ":" << __LINE__ << " "
+      cerr << __func__ << ":" << __LINE__ << " "
            << "error: unknown instance type " << arg.predefined_type() << endl;
     }
   } else if (arg.type() == TYPE_SCALAR) {
@@ -234,7 +264,31 @@ string GetCppInstanceType(VariableSpecificationMessage arg, string msg) {
     cerr << __FILE__ << ":" << __LINE__ << " "
          << "error: unsupported scalar data type " << arg.scalar_type() << endl;
     exit(-1);
+  } else if (arg.type() == TYPE_ENUM) {
+    if (!arg.has_enum_value() && arg.has_predefined_type()) {
+      if (!message || message->component_class() != HAL_HIDL) {
+        return "(" + arg.predefined_type() +  ") RandomUint32()";
+      } else {
+        for (const auto& attribute : message->attribute()) {
+          if (attribute.type() == TYPE_ENUM &&
+              attribute.name() == arg.predefined_type()) {
+            // TODO: pick at runtime
+            return message->component_name() + "::"
+                + arg.predefined_type() + "::"
+                + attribute.enum_value().enumerator(0);
+          }
+        }
+      }
+    }
+  } else if (arg.type() == TYPE_STRUCT) {
+    if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
+      return message->component_name() + "::" + arg.predefined_type() +  "()";
+    }
+  } else if (arg.type() == TYPE_HIDL_CALLBACK) {
+    return "Bp" + arg.predefined_type().substr(1) + "()";
   }
+  cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
+  cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
   cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
   exit(-1);
 }
@@ -253,6 +307,18 @@ int vts_fs_mkdirs(char* file_path, mode_t mode) {
     *p = '/';
   }
   return 0;
+}
+
+
+void ReplaceSubString(string& original, const string& from, const string& to) {
+  size_t index = 0;
+  int from_len = from.length();
+  while (true) {
+    index = original.find(from, index);
+    if (index == std::string::npos) break;
+    original.replace(index, from_len, to);
+    index += from_len;
+  }
 }
 
 }  // namespace vts
