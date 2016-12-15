@@ -27,7 +27,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "test/vts/runners/host/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
 using namespace std;
 

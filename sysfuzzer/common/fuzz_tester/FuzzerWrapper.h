@@ -20,7 +20,7 @@
 #include "component_loader/DllLoader.h"
 #include "fuzz_tester/FuzzerBase.h"
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 
 using namespace std;

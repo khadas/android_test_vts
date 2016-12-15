@@ -25,7 +25,7 @@
 #include <hardware/camera_common.h>
 #include <hardware/camera.h>
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "vts_datatype.h"
 

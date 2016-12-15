@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include "test/vts/runners/host/proto/AndroidSystemControlMessage.pb.h"
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
 using namespace google::protobuf;
