@@ -65,6 +65,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
     static final String VTS = "vts";
+    static final String INCLUDE_FILTER = "include_filter";
+    static final String EXCLUDE_FILTER = "exclude_filter";
     static final float DEFAULT_TARGET_VERSION = -1;
 
     private ITestDevice mDevice = null;
@@ -308,6 +310,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
 
         JSONObject suite = new JSONObject();
         suite.put(NAME, mBuildInfo.getTestTag());
+        suite.put(INCLUDE_FILTER, new JSONArray(mIncludeFilters));
+        CLog.i("Added include filter to test suite: %s", mIncludeFilters);
+        suite.put(EXCLUDE_FILTER, new JSONArray(mExcludeFilters));
+        CLog.i("Added exclude filter to test suite: %s", mExcludeFilters);
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
