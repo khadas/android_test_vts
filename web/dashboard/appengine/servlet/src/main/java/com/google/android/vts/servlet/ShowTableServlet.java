@@ -27,13 +27,15 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -67,15 +68,11 @@ public class ShowTableServlet extends HttpServlet {
     private static final int MAX_BUILD_IDS_PER_PAGE = 15;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int SUMMARY_ROW_COUNT = 4;
+    private static final long ONE_DAY = 86400000000000L;  // units microseconds
 
     // test result constants
     private static final int TEST_RESULT_CASES = 6;
     private static final int UNKNOWN_RESULT = 0;
-    private static final int TEST_CASE_RESULT_PASS = 1;
-    private static final int TEST_CASE_RESULT_FAIL = 2;
-    private static final int TEST_CASE_RESULT_SKIP = 3;
-    private static final int TEST_CASE_RESULT_EXCEPTION = 4;
-    private static final int TEST_CASE_RESULT_TIMEOUT = 5;
     private static final String[] TEST_RESULT_NAMES =
         {"Unknown", "Pass", "Fail", "Skip", "Exception", "Timeout"};
 
@@ -91,27 +88,76 @@ public class ShowTableServlet extends HttpServlet {
      * @throws IOException
      */
     public Table getTable(TableName tableName) throws IOException {
-        long result;
         Table table = null;
 
         try {
             table = BigtableHelper.getConnection().getTable(tableName);
         } catch (IOException e) {
             logger.error("Exception occurred in com.google.android.vts.servlet.DashboardServletTable."
-              + "getTable()", e);
+              + "getTable()" + e.toString());
             return null;
         }
         return table;
+    }
+
+
+    /**
+     * Returns true if there are data points newer than lowerBound in the table.
+     * @param table An instance of org.apache.hadoop.hbase.client.Table
+     * @param lowerBound The (exclusive) lower time bound, long, microseconds.
+     * @return boolean True if there are newer data points.
+     * @throws IOException
+     */
+    public boolean hasNewer(Table table, long lowerBound) throws IOException {
+        FilterList filters = new FilterList();
+        filters.addFilter(new PageFilter(1));
+        filters.addFilter(new KeyOnlyFilter());
+        Scan scan = new Scan();
+        scan.setStartRow(Long.toString(lowerBound).getBytes());
+        scan.setFilter(filters);
+        ResultScanner scanner = table.getScanner(scan);
+        int count = 0;
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            count++;
+        }
+        scanner.close();
+        return count > 0;
+    }
+
+
+    /**
+     * Returns true if there are data points older than upperBound in the table.
+     * @param table An instance of org.apache.hadoop.hbase.client.Table
+     * @param upperBound The (exclusive) upper time bound, long, microseconds.
+     * @return boolean True if there are older data points.
+     * @throws IOException
+     */
+    public boolean hasOlder(Table table, long upperBound) throws IOException {
+        FilterList filters = new FilterList();
+        filters.addFilter(new PageFilter(1));
+        filters.addFilter(new KeyOnlyFilter());
+        Scan scan = new Scan();
+        scan.setStopRow(Long.toString(upperBound - 1).getBytes());
+        scan.setFilter(filters);
+        ResultScanner scanner = table.getScanner(scan);
+        int count = 0;
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            count++;
+        }
+        scanner.close();
+        return count > 0;
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
-        int buildIdPageNo;
+        Long buildIdStartTime = null;  // time in microseconds
+        Long buildIdEndTime = null;  // time in microseconds
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
+        boolean showMostRecent = true;  // determines whether selected subset of data is most recent
 
         // message to display if profiling point data is not available
         String profilingDataAlert = "";
@@ -123,11 +169,34 @@ public class ShowTableServlet extends HttpServlet {
         }
         tableName = TableName.valueOf(request.getParameter("tableName"));
 
-        buildIdPageNo = 0;
-        if (request.getParameter("buildIdPageNo") != null) {
+        if (request.getParameter("buildIdStartTime") != null) {
+            String time = request.getParameter("buildIdStartTime");
             try {
-                buildIdPageNo = Integer.parseInt(request.getParameter("buildIdPageNo"));
-            } catch (Exception e) {
+                buildIdStartTime = Long.parseLong(time);
+            } catch (NumberFormatException e) {
+                buildIdStartTime = null;
+            }
+        }
+        if (request.getParameter("buildIdEndTime") != null) {
+            String time = request.getParameter("buildIdEndTime");
+            try {
+                buildIdEndTime = Long.parseLong(time);
+            } catch (NumberFormatException e) {
+                buildIdEndTime = null;
+            }
+        }
+        if (buildIdStartTime != null) {
+            if (buildIdEndTime == null) {
+                buildIdEndTime = buildIdStartTime + ONE_DAY;
+                showMostRecent = false;
+            }
+        } else {
+            if (buildIdEndTime != null) {
+                buildIdStartTime = buildIdEndTime - ONE_DAY;
+            } else {  //both null -- i.e. init
+                long now = System.currentTimeMillis() * 1000000L;
+                buildIdStartTime = now - ONE_DAY;
+                buildIdEndTime = now;
             }
         }
 
@@ -139,7 +208,7 @@ public class ShowTableServlet extends HttpServlet {
             String topBuild = null;
 
             // TestReportMessage corresponding to the top build -- will be used for pie chart.
-            TestReportMessage topBuilTestReportMessage = null;
+            TestReportMessage topBuildTestReportMessage = null;
 
             // Each case corresponds to an array of size 2.
             // First column represents the result name and second represents the number of results.
@@ -152,72 +221,105 @@ public class ShowTableServlet extends HttpServlet {
             List<String> testCaseNameList = new ArrayList<String>();
 
             // set to hold all the test case execution results
-            Map<String, Integer> testCaseResultMap = new HashMap();
+            Map<String, Integer> testCaseResultMap = new HashMap<String, Integer>();
 
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<String>();
 
             // Map to hold TestReportMessage based on build ID and start time stamp.
             // This will be used to obtain the corresponding device info later.
-            Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap();
+            Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<String, TestReportMessage>();
 
-            ResultScanner scanner = table.getScanner(new Scan());
-            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
-                for (KeyValue keyValue : result.list()) {
-                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(keyValue.getValue());
+            while (true) {
+                // Scan until there is a full page of data or until there is no
+                // more older data.
+                Scan scan = new Scan();
+                scan.setStartRow(Long.toString(buildIdStartTime).getBytes());
+                scan.setStopRow(Long.toString(buildIdEndTime).getBytes());
+                ResultScanner scanner = table.getScanner(scan);
+                for (Result result = scanner.next(); result != null; result = scanner.next()) {
+                    for (Cell cell : result.rawCells()) {
+                        TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                            parseFrom(cell.getValueArray());
+                        String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                    String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
-                    // filter empty build IDs and add only numbers
-                    if (buildId.length() > 0) {
+                        // filter empty build IDs and add only numbers
+                        if (buildId.length() == 0) continue;
+
+                        String key;
                         try {
                             Integer.parseInt(buildId);
-                            String key = testReportMessage.getBuildInfo().getId().toStringUtf8()
-                                + "." + String.valueOf(testReportMessage.getStartTimestamp());
+                            key = testReportMessage.getBuildInfo().getId().toStringUtf8()
+                              + "." + String.valueOf(testReportMessage.getStartTimestamp());
                             sortedBuildIdTimeStampList.add(key);
                             // update map based on time stamp.
                             buildIdTimeStampMap.put(key, testReportMessage);
                         } catch (NumberFormatException e) {
                             /* skip a non-post-submit build */
+                            continue;
+                        }
+
+                        // update map of profiling point names
+                        for (ProfilingReportMessage profilingReportMessage :
+                            testReportMessage.getProfilingList()) {
+
+                            String profilingPointName = profilingReportMessage
+                                .getName().toStringUtf8();
+                            profilingPointNameSet.add(profilingPointName);
+                        }
+
+                        // update TestCaseReportMessage list
+                        for (TestCaseReportMessage testCaseReportMessage :
+                             testReportMessage.getTestCaseList()) {
+                            String testCaseName = new String(
+                                testCaseReportMessage.getName().toStringUtf8());
+                            if (!testCaseNameList.contains(testCaseName)) {
+                                testCaseNameList.add(testCaseName);
+                            }
+                            testCaseResultMap.put(
+                                key + "." + testCaseReportMessage.getName().toStringUtf8(),
+                                testCaseReportMessage.getTestResult().getNumber());
                         }
                     }
-
-
-                    // update map of profiling point names
-                    for (ProfilingReportMessage profilingReportMessage :
-                        testReportMessage.getProfilingList()) {
-
-                        String profilingPointName = profilingReportMessage.getName().toStringUtf8();
-                        profilingPointNameSet.add(profilingPointName);
-                    }
+                }
+                scanner.close();
+                if (sortedBuildIdTimeStampList.size() < MAX_BUILD_IDS_PER_PAGE
+                    && hasOlder(table, buildIdStartTime)) {
+                    // Look further back in time a day
+                    buildIdEndTime = buildIdStartTime;
+                    buildIdStartTime -= ONE_DAY;
+                } else {
+                    // Full page or no more data.
+                    break;
                 }
             }
 
             Collections.sort(sortedBuildIdTimeStampList, Collections.reverseOrder());
-            int maxBuildIdPageNo = sortedBuildIdTimeStampList.size() / MAX_BUILD_IDS_PER_PAGE;
-
-            int listStart = buildIdPageNo * MAX_BUILD_IDS_PER_PAGE;  // inclusive
-            int listEnd = (buildIdPageNo + 1) * MAX_BUILD_IDS_PER_PAGE;  // exclusive
-
-            if (sortedBuildIdTimeStampList.size() != 0) {
-                if (listStart >= sortedBuildIdTimeStampList.size()) {
-                    listStart = sortedBuildIdTimeStampList.size() - 1;
+            if (sortedBuildIdTimeStampList.size() > MAX_BUILD_IDS_PER_PAGE) {
+                int startIndex;
+                int endIndex;
+                if (showMostRecent) {
+                    startIndex = 0;
+                    endIndex = MAX_BUILD_IDS_PER_PAGE;
+                } else {
+                    endIndex = sortedBuildIdTimeStampList.size() - 1;
+                    startIndex = endIndex - MAX_BUILD_IDS_PER_PAGE + 1;
                 }
-                if (listEnd >= sortedBuildIdTimeStampList.size()) {
-                    listEnd = sortedBuildIdTimeStampList.size() - 1;
-                }
-                if (sortedBuildIdTimeStampList.size() % MAX_BUILD_IDS_PER_PAGE == 0) {
-                    maxBuildIdPageNo--;
-                }
-                // save top build ID to be used later for pie chart data
+                sortedBuildIdTimeStampList = sortedBuildIdTimeStampList
+                                                .subList(startIndex, endIndex);
+            }
+            if (sortedBuildIdTimeStampList.size() > 0) {
+                buildIdStartTime = buildIdTimeStampMap
+                    .get(sortedBuildIdTimeStampList
+                        .get(sortedBuildIdTimeStampList.size()-1))
+                    .getStartTimestamp() * 1000;
                 topBuild = sortedBuildIdTimeStampList.get(0);
-                topBuilTestReportMessage = buildIdTimeStampMap.get(topBuild);
-            } else {
-                listStart = 0;
-                listEnd = 0;
+                topBuildTestReportMessage = buildIdTimeStampMap.get(topBuild);
+                buildIdEndTime = topBuildTestReportMessage
+                    .getStartTimestamp() * 1000;
             }
 
-            if (topBuilTestReportMessage != null) {
+            if (topBuildTestReportMessage != null) {
                 // create pieChartArray from top build data.
                 // first row is for headers.
                 pieChartArray[0][0] = PIE_CHART_TEST_RESULT_NAME;
@@ -228,7 +330,7 @@ public class ShowTableServlet extends HttpServlet {
 
                 // temporary count array for each test result
                 int[] testResultCount = new int[TEST_RESULT_CASES];
-                for (TestCaseReportMessage testCaseReportMessage : topBuilTestReportMessage.
+                for (TestCaseReportMessage testCaseReportMessage : topBuildTestReportMessage.
                     getTestCaseList()) {
                     testResultCount[testCaseReportMessage.getTestResult().getNumber()]++;
                 }
@@ -240,23 +342,15 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-            // create a sub list that will be shown on this particular page
-            sortedBuildIdTimeStampList = sortedBuildIdTimeStampList.subList(listStart, listEnd);
-            List<String> selectedBuildIdTimeStampList = new ArrayList<String>(
-                sortedBuildIdTimeStampList.size());
-            for (Object intElem : sortedBuildIdTimeStampList) {
-                selectedBuildIdTimeStampList.add(intElem.toString());
-            }
-
 
             // the device grid on the table has four rows - Build Alias, Product Variant,
             // Build Flavor and device build ID, and columns equal to the size of selectedBuildIdList.
             String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][
-                selectedBuildIdTimeStampList.size() + 1];
+                sortedBuildIdTimeStampList.size() + 1];
 
             // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
             String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][
-                selectedBuildIdTimeStampList.size() + 1];
+                sortedBuildIdTimeStampList.size() + 1];
 
             // first column for device grid
             String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "Device Build ID"};
@@ -270,8 +364,8 @@ public class ShowTableServlet extends HttpServlet {
                 summaryGrid[i][0] = rowNamesSummaryGrid[i];
             }
 
-            for (int j = 0; j < selectedBuildIdTimeStampList.size(); j++) {
-                String key = selectedBuildIdTimeStampList.get(j);
+            for (int j = 0; j < sortedBuildIdTimeStampList.size(); j++) {
+                String key = sortedBuildIdTimeStampList.get(j);
                 List<AndroidDeviceInfoMessage> list =
                     buildIdTimeStampMap.get(key).getDeviceInfoList();
                 String buildAlias = "", productVariant = "", buildFlavor = "", deviceBuildID = "";
@@ -296,58 +390,17 @@ public class ShowTableServlet extends HttpServlet {
                 deviceGrid[3][j + 1] = deviceBuildID;
             }
 
-            // build the testCaseNameList that contains unique names for test cases.
-            scanner = table.getScanner(new Scan());
-            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
-                for (KeyValue keyValue : result.list()) {
-                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(keyValue.getValue());
-                    String key = testReportMessage.getBuildInfo().getId().toStringUtf8() + "." +
-                        String.valueOf(testReportMessage.getStartTimestamp());
-                    if (!selectedBuildIdTimeStampList.contains(key)) continue;
-
-                    // update TestCaseReportMessage list
-                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
-                        getTestCaseList()) {
-                        String testCaseName = new String(
-                            testCaseReportMessage.getName().toStringUtf8());
-                        if (!testCaseNameList.contains(testCaseName)) {
-                            testCaseNameList.add(testCaseName);
-                        }
-                    }
-                }
-            }
-
-            // build the map for grid table.
-            scanner = table.getScanner(new Scan());
-            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
-                for (KeyValue keyValue : result.list()) {
-                    TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(keyValue.getValue());
-
-                    String key = testReportMessage.getBuildInfo().getId().toStringUtf8() + "." +
-                                 String.valueOf(testReportMessage.getStartTimestamp());
-                    if (!selectedBuildIdTimeStampList.contains(key)) continue;
-
-                    for (TestCaseReportMessage testCaseReportMessage : testReportMessage.
-                        getTestCaseList()) {
-                        testCaseResultMap.put(
-                            key + "." + testCaseReportMessage.getName().toStringUtf8(),
-                            testCaseReportMessage.getTestResult().getNumber());
-                    }
-                }
-            }
 
             // rows contains the rows from test case names, device info, and from the summary.
             String[][] finalGrid =
                 new String[testCaseNameList.size() + DEVICE_INFO_ROW_COUNT +
-                           SUMMARY_ROW_COUNT][selectedBuildIdTimeStampList.size() + 1];
+                           SUMMARY_ROW_COUNT][sortedBuildIdTimeStampList.size() + 1];
             for (int i = 0; i < DEVICE_INFO_ROW_COUNT; i++) {
                 finalGrid[i] = deviceGrid[i];
             }
 
             // summary grid containing Integer -- this will be copied to original summary grid
-            float[][] summaryGridfloat = new float[3][selectedBuildIdTimeStampList.size() + 1];
+            float[][] summaryGridfloat = new float[3][sortedBuildIdTimeStampList.size() + 1];
 
             // fill the remaining grid
             for (int i = DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i < finalGrid.length; i++) {
@@ -359,7 +412,7 @@ public class ShowTableServlet extends HttpServlet {
                         finalGrid[i][j] = testName;
                         continue;
                     }
-                    String key = selectedBuildIdTimeStampList.get(j - 1) + "." + testName;
+                    String key = sortedBuildIdTimeStampList.get(j - 1) + "." + testName;
                     summaryGridfloat[0][j]++;
                     Integer value = testCaseResultMap.get(key);
                     if (value != null) {
@@ -396,8 +449,8 @@ public class ShowTableServlet extends HttpServlet {
 
             // last row of summary grid
             // calculate coverage % for each column
-            for (int j = 0; j < selectedBuildIdTimeStampList.size(); j++) {
-                String key = selectedBuildIdTimeStampList.get(j);
+            for (int j = 0; j < sortedBuildIdTimeStampList.size(); j++) {
+                String key = sortedBuildIdTimeStampList.get(j);
                 TestReportMessage testReportMessage = buildIdTimeStampMap.get(key);
 
                 for (TestCaseReportMessage testCaseReportMessage
@@ -430,11 +483,14 @@ public class ShowTableServlet extends HttpServlet {
                 toArray(new String[profilingPointNameSet.size()]);
 
             String[] buildIDtimeStampArray =
-                selectedBuildIdTimeStampList.toArray(
-                    new String[selectedBuildIdTimeStampList.size()]);
+                sortedBuildIdTimeStampList.toArray(
+                    new String[sortedBuildIdTimeStampList.size()]);
             if (profilingPointNameArray.length == 0) {
                 profilingDataAlert = PROFILING_DATA_ALERT;
             }
+
+            boolean hasNewer = hasNewer(table, buildIdEndTime);
+            boolean hasOlder = hasOlder(table, buildIdStartTime);
 
             request.setAttribute("tableName", table.getName());
 
@@ -461,26 +517,27 @@ public class ShowTableServlet extends HttpServlet {
             request.setAttribute("tableName",
                                  new Gson().toJson(request.getParameter("tableName")));
 
-            // pass the buildIdPageNo -- pass the updated buildIdPageNo, since buildIdPageNo
-            // can be modified.
-            request.setAttribute("buildIdPageNo",
-                                  new Gson().toJson(buildIdPageNo));
+            request.setAttribute("buildIdStartTime",
+                                  new Gson().toJson(buildIdStartTime));
 
-            request.setAttribute("maxBuildIdPageNo",
-                                  new Gson().toJson(maxBuildIdPageNo));
+            request.setAttribute("buildIdEndTime",
+                                  new Gson().toJson(buildIdEndTime));
 
-            // pass the number of summary rows and device info rows
             request.setAttribute("summaryRowCountJson",
                 new Gson().toJson(SUMMARY_ROW_COUNT));
 
             request.setAttribute("deviceInfoRowCountJson",
                 new Gson().toJson(DEVICE_INFO_ROW_COUNT));
 
+            request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
+
+            request.setAttribute("hasOlder", new Gson().toJson(hasOlder));
+
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {
                 dispatcher.forward(request, response);
             } catch (ServletException e) {
-                logger.error("Servlet Excpetion caught : ", e);
+                logger.error("Servlet Excpetion caught : " + e.toString());
             }
         } else {
             response.sendRedirect(userService.createLoginURL(request.getRequestURI()));

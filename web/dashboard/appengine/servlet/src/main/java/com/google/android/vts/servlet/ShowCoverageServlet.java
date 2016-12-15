@@ -18,14 +18,12 @@ package com.google.android.vts.servlet;
 
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage;
-import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -40,7 +38,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,7 +59,6 @@ public class ShowCoverageServlet extends HttpServlet {
      * @throws IOException
      */
     private Table getTable(TableName tableName) throws IOException {
-        long result;
         Table table = null;
 
         try {
@@ -87,18 +83,26 @@ public class ShowCoverageServlet extends HttpServlet {
         // key is a unique combination of build Id and timestamp that helps identify the
         // corresponding build id.
         String key = request.getParameter("key");
+        String[] parts = key.split("\\.");
+        Scan scan = new Scan();
+        if (parts.length > 1) {
+            try {
+                long time = Long.parseLong(parts[1]);
+                scan.setStartRow(parts[1].getBytes());
+                scan.setStopRow(Long.toString((time + 1)).getBytes());
+            } catch (NumberFormatException e) { }  // Use unbounded scan
+        }
+
         TestReportMessage testReportMessage = null;
-        HttpSession session = request.getSession();
 
         if (currentUser != null) {
             table = getTable(tableName);
-
-            ResultScanner scanner = table.getScanner(new Scan());
+            ResultScanner scanner = table.getScanner(scan);
             outerloop:
-            for (Result result = scanner.next(); (result != null); result = scanner.next()) {
-                for (KeyValue keyValue : result.list()) {
+            for (Result result = scanner.next(); result != null; result = scanner.next()) {
+                for (Cell keyValue : result.rawCells()) {
                     TestReportMessage currentTestReportMessage = VtsReportMessage.TestReportMessage.
-                        parseFrom(keyValue.getValue());
+                        parseFrom(keyValue.getValueArray());
                     String buildId = currentTestReportMessage.getBuildInfo().getId().toStringUtf8();
 
                     // filter empty build IDs and add only numbers
@@ -118,12 +122,11 @@ public class ShowCoverageServlet extends HttpServlet {
                     }
                 }
             }
+            scanner.close();
 
             int rowCount = 0;
             for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
-                for (CoverageReportMessage coverageReportMessage : testCaseReportMessage.getCoverageList()) {
-                    rowCount++;
-                }
+                rowCount += testCaseReportMessage.getCoverageList().size();
             }
 
             String[][] coverageGrid = new String[rowCount][COVERAGE_GRID_COLUMNS];

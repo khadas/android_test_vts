@@ -228,7 +228,10 @@
                 var key = buildIDtimeStampArray[column];
 
                 var ctx = "${pageContext.request.contextPath}";
-                var link = ctx + "/show_coverage?key=" + key + "&" + "tableName=" + ${tableName};
+
+                var link = ctx + "/show_coverage?key=" + key + "&tableName="
+                     + ${tableName};
+                console.log(link);
                 window.open(link,"_self");
             }
         }
@@ -255,18 +258,16 @@
 
         <!-- Grid tables-->
         <div style="margin-top:10px">
-            <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
-            <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
+            <input id="newer_button" type="button" value="<<Newer" onclick="prev();" />
+            <input id="older_button" type="button" value="Older>>" onclick="next();" />
         </div>
         <div id="grid_table_div"></div>
     </div>
 
     <script type="text/javascript">
         // disable buttons on load
-        var pageNumber = ${buildIdPageNo};
-        var maxPageNumber = ${maxBuildIdPageNo};
-        document.getElementById("previous_button").disabled = (pageNumber == 0) ? true : false;
-        document.getElementById("next_button").disabled = (pageNumber == maxPageNumber) ? true : false;
+        document.getElementById("newer_button").disabled = !Boolean(${hasNewer});
+        document.getElementById("older_button").disabled = !Boolean(${hasOlder});
 
         // hide the table if if error message is empty.
         var errorMessage = ${errorJson};
@@ -274,15 +275,18 @@
             document.getElementById('profiling_table_div').style.display = "none";
         }
 
-        // for navigating grid table thorugh previous and next buttons
-        function navigate(inc) {
-            var pageNumber = ${buildIdPageNo};
-            var maxPageNumber = ${maxBuildIdPageNo};
-            var nextPage = parseInt(pageNumber) + parseInt(inc);
-            nextPage = Math.max(nextPage, 0);
-            nextPage = Math.min(nextPage, maxPageNumber);
+        // for navigating grid table through previous and next buttons
+        function next() {
+            var endTime = ${buildIdStartTime};
             var link = "${pageContext.request.contextPath}" + "/show_table?tableName="
-                + ${tableName} + "&" + "buildIdPageNo=" + nextPage;
+                + ${tableName} + "&buildIdEndTime=" + endTime;
+            window.open(link,"_self");
+        }
+
+        function prev() {
+            var startTime = ${buildIdEndTime};
+            var link = "${pageContext.request.contextPath}" + "/show_table?tableName="
+                + ${tableName} + "&buildIdStartTime=" + startTime;
             window.open(link,"_self");
         }
     </script>

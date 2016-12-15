@@ -20,7 +20,6 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "dashboard_main", urlPatterns = {"/"})
 public class DashboardMainServlet extends HttpServlet {
 
-    private static final TableName TABLE = TableName.valueOf("vts-tests");
     private static final String DASHBOARD_MAIN_JSP = "/dashboard_main.jsp";
     private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
 
