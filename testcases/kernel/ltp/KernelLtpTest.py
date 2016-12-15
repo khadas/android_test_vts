@@ -146,8 +146,9 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """
 
         self.shell.Execute("mkdir %s -p" % ltp_configs.LTPDIR)
-        self._dut.adb.push("%s/%s/ltp/. %s" %
-                           (self.data_file_path, n_bit, ltp_configs.LTPDIR))
+        src = os.path.join(self.data_file_path, n_bit, 'ltp', '.')
+        self._dut.adb.push(src, ltp_configs.LTPDIR)
+        logging.info('finished pushing files from %s to %s', src, ltp_configs.LTPDIR)
 
     def GetEnvp(self):
         """Generate the environment variable required to run the tests."""
