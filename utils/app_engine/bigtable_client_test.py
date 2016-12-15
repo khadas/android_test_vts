@@ -20,6 +20,7 @@ import logging
 from vts.utils.app_engine import bigtable_client
 from grpc.framework.interfaces.face.face import AbortionError
 
+
 class TestMethods(unittest.TestCase):
     """This class defines unit test methods for the vts_gae.Connect.
 
