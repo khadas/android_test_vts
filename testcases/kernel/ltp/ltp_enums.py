@@ -77,3 +77,4 @@ class Requirements(object):
     """Enum for all ltp requirements"""
     LOOP_DEVICE_SUPPORT = 1
     LTP_TMP_DIR = 2
+    BIN_IN_PATH_LDD = 3

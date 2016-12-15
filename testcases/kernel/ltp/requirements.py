@@ -20,6 +20,7 @@ from vts.testcases.kernel.ltp import ltp_configs
 from vts.testcases.kernel.ltp.shell_environment.definitions import directory_exists
 from vts.testcases.kernel.ltp.shell_environment.definitions import loop_device_support
 from vts.testcases.kernel.ltp.shell_environment.definitions import path_permission
+from vts.testcases.kernel.ltp.shell_environment.definitions import bin_in_path
 
 
 def GetRequrementDefinitions():
@@ -45,5 +46,7 @@ def GetRequrementDefinitions():
                     to_check=False,
                     to_setup=True,
                     to_cleanup=False)
-        ]
+        ],
+        ltp_enums.Requirements.BIN_IN_PATH_LDD:
+            bin_in_path.BinInPath(paths='ldd'),
     }
