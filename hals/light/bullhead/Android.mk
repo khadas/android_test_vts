@@ -51,6 +51,8 @@ LOCAL_MULTILIB := both
 
 LOCAL_COMPATIBILITY_SUITE := vts
 
+VTS_GCNO_MODULE := $(LOCAL_MODULE)
+
 include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/../../../tools/build/Android.packaging_sharedlib.mk
 
