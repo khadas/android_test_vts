@@ -19,6 +19,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := vts_hal_agent
+LOCAL_MODULE_STEM_64 := vts_hal_agent64
+LOCAL_MODULE_STEM_32 := vts_hal_agent32
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
@@ -49,6 +51,8 @@ LOCAL_C_INCLUDES += \
   test/vts/agents/hal/proto \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
+
+LOCAL_MULTILIB := both
 
 LOCAL_COMPATIBILITY_SUITE := vts
 
