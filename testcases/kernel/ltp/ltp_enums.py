@@ -49,6 +49,11 @@ class ShellEnvKeys(object):
     PATH = 'PATH'
 
 
+class Delimiters(object):
+    TESTCASE_FILTER = ','
+    TESTCASE_DEFINITION = '\t'
+
+
 class TestExitCode(object):
     """Exit return codes of LTP test case binary
 
