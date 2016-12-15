@@ -175,7 +175,6 @@ class KernelLtpTest(base_test.BaseTestClass):
         self._shell = self._dut.shell.one
         self._ltp_dir = "/data/local/tmp/ltp"
 
-        self.data_file_path = '/usr/local/google/home/yuexima/android/master/out/host/linux-x86/vts/android-vts/testcases'
         self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._shell)
 
         self._testcases = TestcaseParser(self.data_file_path)
@@ -225,7 +224,7 @@ class KernelLtpTest(base_test.BaseTestClass):
         # For LTP test cases, we run one shell command for each test case
         # So the result should also contains only one execution output
         if results[const.EXIT_CODE][0] not in (self._TPASS, self._TCONF) or \
-            "TFAIL" in results[const.STDOUT][0]:
+                   "TFAIL" in results[const.STDOUT][0]:
             # If return code is other than 0 or 32,
             # or the output contains 'TFAIL', then test FAIL
             logging.info("[Test Case] %s FAIL" % testcase_name)
