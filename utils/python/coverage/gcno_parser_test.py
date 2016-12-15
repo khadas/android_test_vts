@@ -36,7 +36,7 @@ class GCNOParserTest(unittest.TestCase):
 
     def setUp(self):
         """Creates a stream for each test.
-      """
+        """
         self.stream = MockStream()
 
     def testReadFunction(self):
