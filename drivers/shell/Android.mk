@@ -42,6 +42,8 @@ LOCAL_CFLAGS := $(common_c_flags)
 
 LOCAL_MULTILIB := both
 
+LOCAL_COMPATIBILITY_SUITE := vts
+
 include $(BUILD_EXECUTABLE)
 
 ifneq ($(TARGET_ARCH),x86)
