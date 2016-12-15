@@ -359,13 +359,24 @@ class MirrorObject(object):
                                     "unsupported type %s for str" % arg_msg)
                         elif isinstance(value_msg, list):
                             if arg_msg.type == CompSpecMsg.TYPE_VECTOR:
-                                arg_msg.vector_value[0].scalar_type
-                                for value in value_msg:
-                                    scalar_value = arg_msg.vector_value[0].value.add()
-                                    setattr(
-                                        scalar_value,
-                                        arg_msg.vector_value[0].scalar_type,
-                                        value)
+                                if arg_msg.vector_value[0].type == CompSpecMsg.TYPE_SCALAR:
+                                    first_item = True
+                                    scalar_type = arg_msg.vector_value[0].scalar_type
+                                    for value in value_msg:
+                                        if first_item:
+                                            scalar_value = arg_msg.vector_value[0]
+                                            first_item = False
+                                        else:
+                                            scalar_value = arg_msg.vector_value.add()
+                                        scalar_value.type == CompSpecMsg.TYPE_SCALAR
+                                        scalar_value.scalar_type = scalar_type
+                                        setattr(
+                                            scalar_value.scalar_value,
+                                            scalar_type,
+                                            value)
+                                else:
+                                    raise MirrorObjectError(
+                                        "unsupported type %s" % arg_msg.type)
                             else:
                                 raise MirrorObjectError(
                                     "unsupported type %s" % arg_msg.type)

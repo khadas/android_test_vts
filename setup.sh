@@ -42,10 +42,8 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/obj/EXECUTABLES/libhwbinder_benchmark_intermediates/LINKED/libhwbinder_benchmark64 /data/local/tmp/64/
 
   # uncomment for hidl in non-treble devices
-  # adb push images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so
-  # /data/local/tmp/32/hw/android.hardware.nfc@1.0.so
-  # adb push images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so
-  # /data/local/tmp/64/hw/android.hardware.nfc@1.0.so
+  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc@1.0.so /data/local/tmp/32/hw/android.hardware.nfc@1.0.so
+  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc@1.0.so /data/local/tmp/64/hw/android.hardware.nfc@1.0.so
   # adb push images/${DEVICE}/32/libhwbinder.so /data/local/tmp/32/libhwbinder.so
   # adb push images/${DEVICE}/64/libhwbinder.so /data/local/tmp/64/libhwbinder.so
 

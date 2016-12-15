@@ -247,7 +247,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     }
   }
 
-  if (message.component_name() != "types") {
+  if (message.component_name() != "types" &&
+      !endsWith(message.component_name(), "Callback")) {
     for (auto const& sub_struct : message.interface().sub_struct()) {
       GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
                                   message.original_data_structure_name(),
@@ -255,10 +256,6 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     }
 
     cpp_ss << "bool " << fuzzer_extended_class_name << "::GetService() {" << endl;
-    cpp_ss << "  android::hardware::hidl_version version = make_hidl_version("
-           << (int)message.component_type_version() << ","
-           << (int)((message.component_type_version() -
-              (int)message.component_type_version()) * 10) << ");" << endl;
 
     cpp_ss << "  static bool initialized = false;" << endl;
     cpp_ss << "  if (!initialized) {" << endl;
@@ -545,7 +542,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     // TODO: if there were pointers, free them.
     cpp_ss << "  return false;" << endl;
     cpp_ss << "}" << endl;
-  } else {
+  } else if (message.component_name() == "types") {
     for (int attr_idx = 0;
          attr_idx < message.attribute_size() + message.interface().attribute_size();
          attr_idx++) {
@@ -785,7 +782,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
     std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
-  if (message.component_name() != "types") {
+  if (message.component_name() != "types" &&
+      !endsWith(message.component_name(), "Callback")) {
     cpp_ss << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << endl;
     cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
     cpp_ss << "    void** result) {" << endl;

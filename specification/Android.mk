@@ -100,7 +100,8 @@ LOCAL_SHARED_LIBRARIES += \
 
 endif
 
-LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
+LOCAL_STATIC_LIBRARIES := \
+  ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
