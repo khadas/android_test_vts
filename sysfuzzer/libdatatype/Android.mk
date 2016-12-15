@@ -44,3 +44,4 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
 
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk
