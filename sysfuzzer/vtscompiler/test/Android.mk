@@ -26,7 +26,7 @@ include $(BUILD_SYSTEM)/base_rules.mk
 the_py_script := $(LOCAL_PATH)/test_vtsc.py
 $(LOCAL_BUILT_MODULE): PRIVATE_PY_SCRIPT := $(the_py_script)
 $(LOCAL_BUILT_MODULE): PRIVATE_OUT_DIR := $(LOCAL_PATH)/test_out
-$(LOCAL_BUILT_MODULE): PRIVATE_CANONICAL_DIR := test/vts/sysfuzzer/vtscompiler/test/data
+$(LOCAL_BUILT_MODULE): PRIVATE_CANONICAL_DIR := test/vts/sysfuzzer/vtscompiler/test/golden
 $(LOCAL_BUILT_MODULE): PRIVATE_HIDL_EXEC := $(HOST_OUT_EXECUTABLES)/vtsc
 $(LOCAL_BUILT_MODULE): $(the_py_script) $(HOST_OUT_EXECUTABLES)/vtsc
 	@echo "host Test: $(PRIVATE_MODULE)"
