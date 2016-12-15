@@ -20,17 +20,17 @@ import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.RunUtil;
+import com.android.tradefed.result.ITestInvocationListener;
+import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.ArrayUtil;
+import com.android.tradefed.util.IRunUtil;
+import com.android.tradefed.util.RunUtil;
 
 /**
- * A Test that runs a vts multi device test package (part of Vendor Test Suite, VTS) on given device.
- * @author Sahil Jain
+ * A Test that runs a vts multi device test package (part of Vendor Test Suite,
+ * VTS) on given device.
  */
 
 @OptionClass(alias = "vtsmultidevicetest")
@@ -41,23 +41,26 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
 
     private ITestDevice mDevice = null;
 
-    @Option(name = "test-timeout", description = "maximum amount of time tests are allowed to run",
+    @Option(name = "test-timeout", description = "maximum amount of time"
+        + "(im milliseconds) tests are allowed to run",
         isTimeVal = true)
     public static long TEST_TIMEOUT = 1000 * 60 * 5;
 
     @Option(name = "test-case-path",
-        description="The path for test case.")
+        description = "The path for test case.")
     private String mTestCasePath = null;
 
     @Option(name = "test-config-path",
-        description="The path for test case config file.")
+        description = "The path for test case config file.")
     private String mTestConfigPath = null;
 
     // This variable is set in order to include the directory that contains the
-    // python test cases. This is set before calling the method {@link #doRunTest(IRunUtil, String, String)}.
+    // python test cases. This is set before calling the method.
+    // {@link #doRunTest(IRunUtil, String, String)}.
     public String mPythonPath = null;
 
-    @Option(name = "python-binary", description = "python binary to use (optional)")
+    @Option(name = "python-binary", description = "python binary to use "
+        + "(optional)")
     private String mPythonBin = null;
 
     private IRunUtil mRunUtil = null;
@@ -103,10 +106,12 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("deprecation")
     @Override
-    public void run(ITestInvocationListener listener) throws DeviceNotAvailableException {
+    public void run(ITestInvocationListener listener)
+        throws IllegalArgumentException, DeviceNotAvailableException {
         if (mDevice == null) {
-            throw new IllegalArgumentException("Device has not been set");
+            throw new DeviceNotAvailableException("Device has not been set");
         }
 
         if (mTestCasePath == null) {
@@ -131,38 +136,47 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
     }
 
     /**
-     * This method prepares a command for the test and runs the python file as given in the
-     * arguments.
+     * This method prepares a command for the test and runs the python file as
+     * given in the arguments.
      *
      * @param runUtil
      * @param mTestCasePath
      * @param mTestConfigPath
      */
 
-    private void doRunTest(IRunUtil runUtil, String mTestCasePath, String mTestConfigPath) {
+    private boolean doRunTest(IRunUtil runUtil, String mTestCasePath,
+        String mTestConfigPath) throws RuntimeException {
+
+        if (mPythonBin == null){
+            mPythonBin = getPythonBinary();
+        }
         String[] baseOpts = {mPythonBin, "-m"};
         String[] testModule = {mTestCasePath, mTestConfigPath};
-        String[] cmd ;
+        String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
-        CommandResult c = runUtil.runTimedCmd(TEST_TIMEOUT, cmd);
+        CommandResult commandResult = runUtil.runTimedCmd(TEST_TIMEOUT, cmd);
 
-        if (c != null && c.getStatus() != CommandStatus.SUCCESS) {
+        if (commandResult != null && commandResult.getStatus() !=
+              CommandStatus.SUCCESS) {
             CLog.e("Python process failed");
             CLog.e("Python path: %s", mPythonPath);
-            CLog.e("Stderr: %s", c.getStderr());
-            CLog.e("Stdout: %s", c.getStdout());
+            CLog.e("Stderr: %s", commandResult.getStderr());
+            CLog.e("Stdout: %s", commandResult.getStdout());
             throw new RuntimeException("Failed to run python unit test");
         }
-        if (c != null){
-            CLog.i("Standard output is: %s", c.getStdout());
-            CLog.i("Parsing test result: %s", c.getStderr());
+        if (commandResult != null){
+            CLog.i("Standard output is: %s", commandResult.getStdout());
+            CLog.i("Parsing test result: %s", commandResult.getStderr());
         }
+
+        return commandResult.getStatus() == CommandStatus.SUCCESS ?
+            true : false;
      }
 
     /**
-     * This method sets the python path. It's based on the based on the assumption that the
-     * environment variable $ANDROID_BUILD_TOP is set.
+     * This method sets the python path. It's based on the based on the
+     * assumption that the environment variable $ANDROID_BUILD_TOP is set.
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
@@ -178,7 +192,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
         CommandResult c = runUtil.runTimedCmd(1000, "which", "python");
         String pythonBin = c.getStdout().trim();
         if (pythonBin.length() == 0) {
-            throw new RuntimeException("Could not find python binary on host machine");
+            throw new RuntimeException("Could not find python binary on host "
+                + "machine");
         }
         return pythonBin;
     }
