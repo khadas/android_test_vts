@@ -316,13 +316,13 @@ def _assert_subprocess_running(proc):
         proc: A subprocess returned by subprocess.Popen.
 
     Raises:
-        ActsUtilsError is raised if the subprocess has stopped.
+        VTSUtilsError is raised if the subprocess has stopped.
     """
     ret = proc.poll()
     if ret is not None:
         out, err = proc.communicate()
-        raise ActsUtilsError("Process %d has terminated. ret: %d, stderr: %s,"
-                             " stdout: %s" % (proc.pid, ret, err, out))
+        raise VTSUtilsError("Process %d has terminated. ret: %d, stderr: %s,"
+                            " stdout: %s" % (proc.pid, ret, err, out))
 
 
 def start_standing_subprocess(cmd, check_health_delay=0):
@@ -361,7 +361,7 @@ def stop_standing_subprocess(proc, kill_signal=signal.SIGTERM):
     """Stops a subprocess started by start_standing_subprocess.
 
     Before killing the process, we check if the process is running, if it has
-    terminated, ActsUtilsError is raised.
+    terminated, VTSUtilsError is raised.
 
     Catches and ignores the PermissionError which only happens on Macs.
 
