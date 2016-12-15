@@ -50,7 +50,7 @@
         <option name="dep-module" value="protobuf" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-case-path" value="vts/testcases/host/shell/binary_crash_test/ShellBinaryCrashTest" />
-        <option name="test-config-path" value="vts-config/testcases/host/shell/binary_crash_test/ShellBinaryCrashTest.config" />
+        <option name="test-case-path" value="vts/testcases/host/shell_binary_crash_test/ShellBinaryCrashTest" />
+        <option name="test-config-path" value="vts-config/testcases/host/shell_binary_crash_test/ShellBinaryCrashTest.config" />
     </test>
 </configuration>
