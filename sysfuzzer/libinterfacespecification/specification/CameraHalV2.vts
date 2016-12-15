@@ -49,6 +49,69 @@ api: {
   }
   arg: {
     aggregate_type: "camera_info_t*"
+    is_output: true
+    is_input: false
+  }
+}
+
+
+aggregate_type_name: "const"
+aggregate_type_definition: {
+  primitive_type: "int32_t"
+  primitive_name: "CAMERA_FACING_BACK"
+  primitive_value: {
+    int32_t: 0
+  }
+
+  primitive_type: "int32_t"
+  primitive_name: "CAMERA_FACING_FRONT"
+  primitive_value: {
+    int32_t: 1
+  }
+}
+
+
+aggregate_type_name: "camera_info_t"
+aggregate_type_definition: {
+  primitive_type: "int32_t"
+  primitive_name: "facing"
+  primitive_value: {
+    int32_t: 0
+  }
+
+  primitive_type: "int32_t"
+  primitive_name: "orientation"
+  primitive_value: {
+    int32_t: 0
+  }
+
+  primitive_type: "uint32_t"
+  primitive_name: "device_version"
+  primitive_value: {
+    uint32_t: 772
+  }
+
+  aggregate_type: "camera_metadata_t"
+  aggregate_name: "static_camera_characteristics"
+  aggregate_value: {
+    int32_t: 0
+  }
+
+  primitive_type: "int32_t"
+  primitive_name: "resource_cost"
+  primitive_value: {
+    int32_t: 50
+  }
+
+  primitive_type: "pointer_pointer"
+  primitive_name: "conflicting_devices"
+  primitive_value: {
+  }
+
+  primitive_type: "int32_t"
+  primitive_name: "conflicting_devices_length"
+  primitive_value: {
+    int32_t: 0
   }
 }
 
@@ -63,3 +126,9 @@ api: {
   }
 }
 
+api: {
+  name: "init"
+  return_type: {
+    primitive_type: "int32_t"
+  }
+}

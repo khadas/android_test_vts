@@ -32,7 +32,8 @@ class SampleLightTestcase(base_test.BaseTestClass):
         logging.info("testLight start")
         hal_mirror = Mirror.Mirror(["/system/lib64/hw", "/system/lib/hw"])
         # TODO: support ability to test non-instrumented hals.
-        hal_mirror.InitHal("light", 1.0, module_name="backlight")
+        hal_mirror.InitHal("light", 1.0)
+        hal_mirror.light.Open("backlight")
         arg = hal_mirror.light.light_state_t(
             color=0xffffff00,
             flashMode=hal_mirror.light.LIGHT_FLASH_HARDWARE,
@@ -46,14 +47,15 @@ class SampleLightTestcase(base_test.BaseTestClass):
         """A simple testcase which just calls a function."""
         logging.info("testLight start")
         hal_mirror = Mirror.Mirror(["/data/local/tmp/64/hal"])
-        hal_mirror.InitHal("light", 1.0, module_name="backlight")
+        hal_mirror.InitHal("light", 1.0)
+        hal_mirror.light.Open("backlight")
         arg = hal_mirror.light.light_state_t(
             color=0xffffff00,
             flashMode=hal_mirror.light.LIGHT_FLASH_HARDWARE,
             flashOnMs=100,
             flashOffMs=200,
             brightnessMode=hal_mirror.light.BRIGHTNESS_MODE_USER)
-        hal_mirror.light.set_light(None, arg)
+        logging.info("%s" % hal_mirror.light.set_light(None, arg))
         logging.info("testLight end")
 
 

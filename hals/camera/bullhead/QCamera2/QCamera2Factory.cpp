@@ -309,8 +309,9 @@ int QCamera2Factory::cameraDeviceOpen(int camera_id,
                     struct hw_device_t **hw_device)
 {
     int rc = NO_ERROR;
-    if (camera_id < 0 || camera_id >= mNumOfCameras)
+    if (camera_id < 0 || camera_id >= mNumOfCameras) {
         return -ENODEV;
+    }
 
     if ( NULL == mHalDescriptors ) {
         ALOGE("%s : Hal descriptor table is not initialized!", __func__);
@@ -375,6 +376,15 @@ int QCamera2Factory::camera_device_open(
         ALOGE("Invalid camera id");
         return BAD_VALUE;
     }
+
+    if (!gQCamera2Factory) {
+        gQCamera2Factory = new QCamera2Factory();
+        if (!gQCamera2Factory) {
+            ALOGE("%s: Failed to allocate Camera2Factory object", __func__);
+            return NO_MEMORY;
+        }
+    }
+
     return gQCamera2Factory->cameraDeviceOpen(atoi(id), hw_device);
 }
 

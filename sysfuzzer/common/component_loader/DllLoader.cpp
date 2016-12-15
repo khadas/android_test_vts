@@ -62,42 +62,52 @@ void* DllLoader::Load(const char* file_path) {
 }
 
 
-struct hw_device_t* DllLoader::GetHWDevice(const char* module_name) {
+struct hw_module_t* DllLoader::InitConventionalHal() {
   if (!handle_) {
     cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
     return NULL;
   }
-  if (module_name) {
-    cout << __FUNCTION__ << ":" << __LINE__
-        << " module_name" << module_name << endl;
-  }
-  struct hw_module_t* hmi = (struct hw_module_t*) dlsym(
-      handle_, HAL_MODULE_INFO_SYM_AS_STR);
-  if (!hmi) {
+  hmi_ = (struct hw_module_t*) dlsym(handle_, HAL_MODULE_INFO_SYM_AS_STR);
+  if (!hmi_) {
     cerr << __FUNCTION__ << ": " << HAL_MODULE_INFO_SYM_AS_STR
         << " not found" << endl;
     return NULL;
   }
   cout << __FUNCTION__ << ":" << __LINE__ << endl;
-  hmi->dso = handle_;
+  hmi_->dso = handle_;
   device_ = NULL;
-  cout << __FUNCTION__ << ": version " << hmi->module_api_version << endl;
+  cout << __FUNCTION__ << ": version " << hmi_->module_api_version << endl;
+  return hmi_;
+}
 
+
+struct hw_device_t* DllLoader::OpenConventionalHal(const char* module_name) {
+  cout << __func__ << " module_name " << module_name << endl;
+  if (!handle_) {
+    cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
+    return NULL;
+  }
+  if (!hmi_) {
+    cerr << __FUNCTION__ << ": hmi_ is NULL" << endl;
+    return NULL;
+  }
+
+  device_ = NULL;
   int ret;
-  if (!module_name || strlen(module_name) == 0) {
-    cout << __FUNCTION__ << ":" << __LINE__ << ": (default) " << hmi->name << endl;
-    ret = hmi->methods->open(hmi, hmi->name,
-                             (struct hw_device_t**) &device_);
-  } else {
+  if (module_name && strlen(module_name) > 0) {
     cout << __FUNCTION__ << ":" << __LINE__ << ": module_name |"
         << module_name << "|" << endl;
-    ret = hmi->methods->open(
-        hmi, module_name, (struct hw_device_t**) &device_);
+    ret = hmi_->methods->open(
+        hmi_, module_name, (struct hw_device_t**) &device_);
+  } else {
+    cout << __FUNCTION__ << ":" << __LINE__ << ": (default) "
+        << hmi_->name << endl;
+    ret = hmi_->methods->open(hmi_, hmi_->name, (struct hw_device_t**) &device_);
   }
   if (ret != 0) {
     cout << "returns " << ret << " " << strerror(errno) << endl;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " device_ " << device_ << endl;
   return device_;
 }
 

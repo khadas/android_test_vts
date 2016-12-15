@@ -20,6 +20,7 @@ import logging
 import random
 
 from vts.utils.python.fuzzer import FuzzerUtils
+from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
 from google.protobuf import text_format
 
 
@@ -35,6 +36,27 @@ class MirrorObject(object):
     def __init__(self, client, msg):
         self._client = client
         self._if_spec_msg = msg
+
+    def Open(self, module_name=None):
+        """Opens the target HAL component (only for conventional HAL).
+
+        Args:
+            module_name: string, the name of a module to load.
+        """
+        func_msg = InterfaceSpecificationMessage_pb2.FunctionSpecificationMessage()
+        func_msg.name = "#Open"
+        logging.info("remote call %s", func_msg.name)
+        if module_name:
+            arg = func_msg.arg.add()
+            arg.primitive_type.append("string")
+            value = arg.primitive_value.add()
+            value.bytes = module_name
+            func_msg.return_type.primitive_type.append("int32_t")
+        logging.info("final msg %s", func_msg)
+
+        result = self._client.CallApi(text_format.MessageToString(func_msg))
+        logging.info(result)
+        return result
 
     def GetApi(self, api_name):
         """Returns the Function Specification Message.
