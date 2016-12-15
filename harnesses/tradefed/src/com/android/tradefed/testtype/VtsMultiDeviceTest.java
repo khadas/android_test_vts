@@ -74,6 +74,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String BINARY_TEST_SOURCES = "binary_test_sources";
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
+    static final String BINARY_TEST_LD_LIBRARY_PATHs = "binary_test_ld_library_paths";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -118,16 +119,25 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
     @Option(name = "binary-test-sources",
             description = "Binary test source paths relative to vts testcase directory on host."
-                    + "Tags can be added to the front of each directory using ':' as delimiter. "
+                    + "Tags can be added to the front of each directory using '::' as delimiter. "
                     + "Multiple directories can be separated by ','.")
     private Collection<String> mBinaryTestSources = new ArrayList<>();
 
     @Option(name = "binary-test-working-directories", description = "Working directories for binary "
-            + "test. Tags can be added to the front of each directory using ':' as delimiter. "
+            + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
             + "Multiple directories can be separated by ','. However, each tag should only has "
             + "one working directory. By default, tag name is used as working directory name under "
             + "/data/local/tmp")
     private Collection<String> mBinaryTestWorkingDirectories = new ArrayList<>();
+
+    @Option(name = "binary-test-ld-library-paths", description = "LD_LIBRARY_PATH for binary "
+            + "tests. Tags can be added to the front of each instance using '::' as delimiter. "
+            + "Multiple directories can be added under a same tag using ':' as delimiter. "
+            + "Multiple instances of ld-library-paths rule can be separated by ','. "
+            + "There can be multiple instances of ld-library-paths for a same tag, which will "
+            + "later automatically be combined using ':' as delimiter. Paths without a tag "
+            + "will only used for binaries without tag.")
+    private Collection<String> mBinaryTestLdLibraryPaths = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -416,6 +426,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             jsonObject.put(BINARY_TEST_WORKING_DIRECTORIES,
                     new JSONArray(mBinaryTestWorkingDirectories));
             CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORIES);
+        }
+        if (!mBinaryTestLdLibraryPaths.isEmpty()) {
+            jsonObject.put(BINARY_TEST_LD_LIBRARY_PATHs,
+                    new JSONArray(mBinaryTestLdLibraryPaths));
+            CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHs);
         }
     }
 

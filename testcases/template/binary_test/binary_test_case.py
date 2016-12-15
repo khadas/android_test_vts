@@ -36,12 +36,16 @@ class BinaryTestCase(object):
                  test_name,
                  path,
                  tag='',
-                 put_tag_func=operator.add):
+                 put_tag_func=operator.add,
+                 working_directory=None,
+                 ld_library_path=None):
         self.test_suite = test_suite
         self.test_name = test_name
         self.path = path
         self.tag = tag
         self.put_tag_func = put_tag_func
+        self.working_directory = working_directory
+        self.ld_library_path = ld_library_path
 
     def __str__(self):
         return self.put_tag_func(self.GetFullName(), self.tag)
@@ -63,7 +67,11 @@ class BinaryTestCase(object):
         Returns:
             String, a command to run the test.
         '''
-        return 'cd {} && {}'.format(ntpath.dirname(self.path), self.path)
+        return 'cd {working_directory} && {env}{path}'.format(
+            working_directory=self.working_directory,
+            env='' if self.ld_library_path is None else
+            'env LD_LIBRARY_PATH=%s ' % self.ld_library_path,
+            path=self.path)
 
     @property
     def test_suite(self):
@@ -104,3 +112,26 @@ class BinaryTestCase(object):
     def tag(self, tag):
         '''Set tag'''
         self._tag = tag
+
+    @property
+    def working_directory(self):
+        '''Get working_directory'''
+        if self._working_directory is None:
+            return ntpath.dirname(self.path)
+        else:
+            return self._working_directory
+
+    @working_directory.setter
+    def working_directory(self, working_directory):
+        '''Set working_directory'''
+        self._working_directory = working_directory
+
+    @property
+    def ld_library_path(self):
+        '''Get ld_library_path'''
+        return self._ld_library_path
+
+    @ld_library_path.setter
+    def ld_library_path(self, ld_library_path):
+        '''Set ld_library_path'''
+        self._ld_library_path = ld_library_path
