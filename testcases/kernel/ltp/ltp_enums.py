@@ -33,14 +33,6 @@ class RequirementState(object):
     UNSATISFIED = 3
 
 
-class ConfigKeys(object):
-    """Enum for LTP test config related lookups.
-
-    Attributes:
-    """
-    DISABLED_TESTS = "disabled_tests"
-
-
 class ShellEnvKeys(object):
     """Shell env keys to run LTP (Linux Test Project) testcases.
 
@@ -70,3 +62,8 @@ class TestExitCode(object):
     TCONF = 32
     TBROK = 2
     SEGFAULT = 139
+
+class Requirements(object):
+    """Enum for all ltp requirements"""
+    LOOP_DEVICE_SUPPORT = 1
+    LTP_TMP_DIR = 2

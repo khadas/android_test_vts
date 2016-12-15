@@ -20,10 +20,10 @@ import logging
 
 from vts.runners.host import asserts
 from vts.runners.host import const
-from vts.testcases.kernel.ltp.shell_environment import ShellEnvironment
-from vts.testcases.kernel.ltp.shell_environment import CheckDefinition
+from vts.testcases.kernel.ltp.shell_environment import shell_environment
 from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import ltp_configs
+from vts.testcases.kernel.ltp import requirements
 
 
 class EnvironmentRequirementChecker(object):
@@ -35,8 +35,8 @@ class EnvironmentRequirementChecker(object):
     are cached in a dictionary for multiple use.
 
     Attributes:
-        _REQUIREMENT_DEFINITIONS: dictionary {string, method}, a map between requirement
-                                  name and the actual check method inside class
+        _REQUIREMENT_DEFINITIONS: dictionary {string, obj}, a map between requirement
+                                  name and the actual definition class object
         _result_cache: dictionary {requirement_check_method_name: (bool, string)}
                        a map between check method name and cached result
                        tuples (boolean, note)
@@ -49,21 +49,8 @@ class EnvironmentRequirementChecker(object):
     def __init__(self, shell):
         self.shell = shell
         self._result_cache = {}
-        self._shell_env = ShellEnvironment(self.shell)
-
-        loop_device_support = CheckDefinition(self._shell_env.LoopDeviceSupport)
-        ltptmp_dir = CheckDefinition(self._shell_env.DirsAllExistAndPermission,
-                                     True, True, [ltp_configs.TMP,
-                                                  ltp_configs.TMPBASE,
-                                                  ltp_configs.LTPTMP,
-                                                  ltp_configs.TMPDIR,
-                                                  ],
-                                     [775, 775, 775, 775])
-
-        self._REQUIREMENT_DEFINITIONS = {
-            "loop_device_support": loop_device_support,
-            "ltptmp_dir": ltptmp_dir
-        }
+        self._shell_env = shell_environment.ShellEnvironment(self.shell)
+        self._REQUIREMENT_DEFINITIONS = requirements.GetRequrementDefinitions()
 
     @property
     def shell(self):
@@ -110,13 +97,15 @@ class EnvironmentRequirementChecker(object):
         asserts.skipIf(not self.IsTestBinaryExist(test_case),
                        test_case.note)
 
-        for requirement_name in self.GetRequirements(test_case):
-            if requirement_name not in self._result_cache:
-                req_def = self._REQUIREMENT_DEFINITIONS[requirement_name]
-                self._result_cache[requirement_name] = req_def.Execute()
-            result, note = self._result_cache[requirement_name]
+        for requirement in self.GetRequirements(test_case):
+            if requirement not in self._result_cache:
+                definitions = self._REQUIREMENT_DEFINITIONS[requirement]
+                self._result_cache[requirement] = \
+                    self._shell_env.ExecuteDefinitions(definitions)
+
+            result, note = self._result_cache[requirement]
             logging.info("Result for %s's requirement %s is %s", test_case,
-                         requirement_name, result)
+                         requirement, result)
             if result is False:
                 test_case.requirement_state = \
                     ltp_enums.RequirementState.UNSATISFIED

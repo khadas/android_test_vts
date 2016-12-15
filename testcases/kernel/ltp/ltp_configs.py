@@ -17,6 +17,8 @@
 
 import os
 
+from vts.testcases.kernel.ltp import ltp_enums
+
 # Environment paths for ltp test cases
 # string, ltp build root directory on target
 LTPDIR = "/data/local/tmp/ltp"
@@ -37,7 +39,7 @@ LTP_DEV_FS_TYPE = "ext4"
 
 
 REQUIREMENTS_TO_TESTCASE = {
-    "loop_device_support": [
+    ltp_enums.Requirements.LOOP_DEVICE_SUPPORT: [
         "syscalls-mount01",
         "syscalls-fchmod06",
         "syscalls-ftruncate04",
@@ -70,7 +72,7 @@ REQUIREMENTS_TO_TESTCASE = {
         ],
     }
 
-REQUIREMENT_FOR_ALL = ["ltptmp_dir"]
+REQUIREMENT_FOR_ALL = [ltp_enums.Requirements.LTP_TMP_DIR]
 
 REQUIREMENT_TO_TESTSUITE = {}
 
