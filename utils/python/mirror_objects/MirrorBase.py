@@ -18,6 +18,7 @@
 import logging
 import os
 
+from vts.runners.host import errors
 from vts.runners.host.proto import AndroidSystemControlMessage_pb2
 from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
 from vts.runners.host.tcp_client import TcpClient
@@ -29,12 +30,14 @@ from google.protobuf import text_format
 COMPONENT_CLASS_DICT = {"hal": 1,
                        "sharedlib": 2,
                        "hal_hidl": 3,
-                       "hal_submodule": 4}
+                       "hal_submodule": 4,
+                       "legacy_hal": 5}
 
 COMPONENT_TYPE_DICT = {"audio": 1,
                        "camera": 2,
                        "gps": 3,
-                       "light": 4}
+                       "light": 4,
+                       "wifi": 5}
 
 
 class MirrorBase(object):
@@ -59,6 +62,9 @@ class MirrorBase(object):
       target_version: float, the target component version (e.g., 1.0).
       target_basepath: string, the base path of where a target file is stored
           in.
+
+    Raises:
+      ComponentLoadingError when loading fails.
     """
     if not target_basepath:
       target_basepath = self._target_basepath
@@ -101,18 +107,18 @@ class MirrorBase(object):
         resp = self._client.RecvResponse()
         logging.debug(resp)
 
-        if resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS:
-          self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
-                                   "get_functions");
-          resp = self._client.RecvResponse()
-          logging.debug(resp)
-          if resp.reason:
-            logging.info("len %d", len(resp.reason))
-            self._if_spec_msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
-            text_format.Merge(resp.reason, self._if_spec_msg)
-            logging.debug(self._if_spec_msg)
+        if resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
+          raise errors.ComponentLoadingError("Target file path %s" % filename)
 
-            self.Build(target_type, self._if_spec_msg)
+        self._client.SendCommand(AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
+                                 "get_functions");
+        resp = self._client.RecvResponse()
+        logging.debug(resp)
+        if resp.reason:
+          logging.debug("len %d", len(resp.reason))
+          self._if_spec_msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
+          text_format.Merge(resp.reason, self._if_spec_msg)
+          self.Build(target_type, self._if_spec_msg)
         break
 
   def Build(self, target_type, if_spec_msg=None):
@@ -126,5 +132,6 @@ class MirrorBase(object):
     if not if_spec_msg:
       if_spec_msg = self._if_spec_msg
 
+    logging.info(if_spec_msg)
     mirror_object = MirrorObject.MirrorObject(self._client, if_spec_msg)
     self.__setattr__(target_type, mirror_object)

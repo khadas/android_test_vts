@@ -5,8 +5,7 @@ echo $BASE_DIR
 
 . ${BASE_DIR}/build/envsetup.sh
 cd ${BASE_DIR}; lunch angler-userdebug
-cd ${BASE_DIR}; make -j 32
-cd ${BASE_DIR}; make vts -j 32
+cd ${BASE_DIR}; make -j 32 && make vts -j 32
 
 cp ${BASE_DIR}/out/target/product/angler/system/bin/fuzzer test/vts/images/angler/ -f
 cp ${BASE_DIR}/out/target/product/angler/system/bin/vts_hal_agent test/vts/images/angler/ -f

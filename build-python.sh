@@ -7,7 +7,7 @@
 #   $ sudo pip install enum
 #   $ sudo pip install concurrent
 
-protoc -I=runners/host/proto --python_out=runners/host/proto proto/AndroidSystemControlMessage.proto
-protoc -I=runners/host/proto --python_out=runners/host/proto proto/InterfaceSpecificationMessage.proto
-
 python -m compileall .
+
+protoc -I=runners/host/proto --python_out=runners/host/proto runners/host/proto/AndroidSystemControlMessage.proto
+protoc -I=runners/host/proto --python_out=runners/host/proto runners/host/proto/InterfaceSpecificationMessage.proto
