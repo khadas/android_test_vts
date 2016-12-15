@@ -56,19 +56,19 @@ public class VtsFuzzTest implements IDeviceTest, IRemoteTest {
     private String mTargetComponentPath = null;
 
     @Option(name = "target-class",
-        description="The target component class.")
+            description="The target component class.")
     private String mTargetClass = null;
 
     @Option(name = "target-type",
-        description="The target component type.")
+            description="The target component type.")
     private String mTargetType = null;
 
     @Option(name = "target-version",
-        description="The target component version.")
+            description="The target component version.")
     private float mTargetVersion = DEFAULT_TARGET_VERSION;
 
     @Option(name = "epoch-count",
-        description="The epoch count.")
+            description="The epoch count.")
     private int mEpochCount = DEFAULT_EPOCH_COUNT;
 
     @Option(name = "test-timeout", description =
@@ -197,17 +197,17 @@ public class VtsFuzzTest implements IDeviceTest, IRemoteTest {
         String flags;
 
         if (mTargetClass == null) {
-          throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_CLASS + " must be set.");
+            throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_CLASS + " must be set.");
         }
         flags = String.format("%s=%s", VTS_FUZZ_TEST_FLAG_CLASS, mTargetClass);
 
         if (mTargetType == null) {
-          throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_TYPE + " must be set.");
+            throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_TYPE + " must be set.");
         }
         flags = String.format("%s %s=%s", flags, VTS_FUZZ_TEST_FLAG_TYPE, mTargetType);
 
         if (mTargetVersion == DEFAULT_TARGET_VERSION) {
-          throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_VERSION + " must be set.");
+            throw new IllegalArgumentException(VTS_FUZZ_TEST_FLAG_VERSION + " must be set.");
         }
         flags = String.format("%s %s=%s", flags, VTS_FUZZ_TEST_FLAG_VERSION, mTargetVersion);
 
@@ -285,14 +285,14 @@ public class VtsFuzzTest implements IDeviceTest, IRemoteTest {
 
         if (!mDevice.doesFileExist(mFuzzerBinaryPath)) {
             Log.w(LOG_TAG, String.format("Could not find fuzzer binary file %s in %s!",
-                mFuzzerBinaryPath, mDevice.getSerialNumber()));
+                    mFuzzerBinaryPath, mDevice.getSerialNumber()));
             return;
         }
 
         IShellOutputReceiver resultParser = createResultParser(mTargetComponentPath, listener);
         String flags = getAllVtsFuzzTestFlags();
         Log.i(LOG_TAG, String.format("Running fuzzer '%s %s' on %s",
-            mFuzzerBinaryPath, flags, mDevice.getSerialNumber()));
+                mFuzzerBinaryPath, flags, mDevice.getSerialNumber()));
         runTest(mDevice, resultParser, mFuzzerBinaryPath, flags);
     }
 }
