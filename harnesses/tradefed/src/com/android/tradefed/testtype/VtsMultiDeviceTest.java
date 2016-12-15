@@ -29,6 +29,7 @@ import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
+import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 
@@ -278,11 +279,16 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
         } catch(JSONException e) {
             throw new RuntimeException("Failed to build device config json data");
         }
+        CLog.i("config json: %s", obj.toString());
 
-        String jsonFilePath = mTestConfigPath + ".harness_config.json";
-        try (FileWriter fw = new FileWriter(jsonFilePath)) {
+        try {
+            File tmpFile = FileUtil.createTempFile(
+                mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json");
+            String jsonFilePath = tmpFile.getAbsolutePath();
+            CLog.i("config json file path: %s", jsonFilePath);
+            FileWriter fw = new FileWriter(jsonFilePath);
             fw.write(obj.toString());
-            CLog.i("config json: %s", obj.toString());
+            fw.close();
         } catch(IOException e) {
             throw new RuntimeException("Failed to create device config json file");
         }
