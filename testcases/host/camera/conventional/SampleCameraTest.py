@@ -29,7 +29,7 @@ class SampleCameraTest(base_test.BaseTestClass):
         self.dut = self.registerController(android_device)[0]
         self.dut.hal.InitConventionalHal(target_type="camera",
                                          target_version=2.1,
-                                         target_basepaths=["/data/local/tmp/32/hal"],
+                                         target_basepaths=["/system/lib/hw"],
                                          bits=32)
 
     def TestCameraOpenFirst(self):
