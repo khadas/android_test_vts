@@ -41,9 +41,7 @@ LOCAL_SHARED_LIBRARIES := \
   libcutils \
   libvts_common \
   libvts_multidevice_proto \
-
-LOCAL_STATIC_LIBRARIES := \
-  libprotobuf-cpp-full-ndk \
+  libprotobuf-cpp-full \
 
 LOCAL_MULTILIB := both
 
