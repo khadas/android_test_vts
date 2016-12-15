@@ -143,7 +143,18 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
       endsWith(message.component_name(), "Callback")) {
     cpp_ss << endl;
     for (const auto& api : message.interface().api()) {
-      cpp_ss << "Status Vts" << message.component_name().substr(1) << "::"
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        cpp_ss << "Return<void> ";
+
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+        cpp_ss << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
+      } else {
+        cpp_ss << "Status " << endl;
+      }
+
+      cpp_ss << "Vts" << message.component_name().substr(1) << "::"
              << api.name() << "(" << endl;
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
@@ -262,7 +273,19 @@ void CodeGenBase::GenerateAllHeader(
            << " = default;" << endl;
     h_ss << endl;
     for (const auto& api : message.interface().api()) {
-      h_ss << "  virtual Status " << api.name() << "(" << endl;
+      h_ss << "  virtual ";
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        h_ss << "Return<void> ";
+
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
+                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+        h_ss << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
+      } else {
+        h_ss << "Status " << endl;
+      }
+
+      h_ss << api.name() << "(" << endl;
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
         if (arg_count > 0) h_ss << ", ";
