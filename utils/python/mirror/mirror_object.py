@@ -20,7 +20,7 @@ import logging
 import random
 
 from vts.utils.python.fuzzer import FuzzerUtils
-from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
+from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from google.protobuf import text_format
 
 # a dict containing the IDs of the registered function pointers.

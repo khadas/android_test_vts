@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "component_loader/DllLoader.h"
 #include "utils/InterfaceSpecUtil.h"

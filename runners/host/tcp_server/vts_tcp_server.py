@@ -21,7 +21,7 @@ from socket import error as socket_error
 
 from vts.runners.host.errors import TcpServerCreationError
 from vts.runners.host.errors import TcpServerShutdownError
-from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
+from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 
 _functions = dict()  # Dictionary to hold function pointers
 

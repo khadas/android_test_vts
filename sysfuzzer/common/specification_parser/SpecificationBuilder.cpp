@@ -26,7 +26,7 @@
 #include "fuzz_tester/FuzzerWrapper.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 #include <google/protobuf/text_format.h>
 
 namespace android {

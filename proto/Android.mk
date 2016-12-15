@@ -24,12 +24,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   AndroidSystemControlMessage.proto \
   InterfaceSpecificationMessage.proto \
-#  $(call all-proto-files-under, ./)
-
-#LOCAL_SHARED_LIBRARIES := \
-
-#LOCAL_C_INCLUDES += \
-  external/protobuf/src \
+  # $(call all-proto-files-under, ./)
 
 LOCAL_C_INCLUDES := \
   external/protobuf/src \

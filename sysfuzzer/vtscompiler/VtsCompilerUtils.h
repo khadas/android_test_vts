@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 
 using namespace std;

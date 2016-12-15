@@ -20,7 +20,7 @@ import logging
 from google.protobuf import text_format
 
 from vts.runners.host import errors
-from vts.runners.host.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
+from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.runners.host.tcp_server import vts_tcp_server
 from vts.utils.python.mirror import mirror_object
