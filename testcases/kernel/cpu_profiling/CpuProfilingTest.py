@@ -18,7 +18,6 @@
 import logging
 import os
 
-from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
@@ -40,8 +39,10 @@ class CpuProfilingTest(gtest_binary_test.GtestBinaryTest):
 
     def generateAllGtests(self):
         """Runs all gtests. Skip if device is excluded"""
-        asserts.skipIf(self.product_type in config.CPT_HOTPLUG_EXCLUDE_DEVICES,
-                       "Skip test on device {}.".format(self.product_type))
+        if self.product_type in config.CPT_HOTPLUG_EXCLUDE_DEVICES:
+            logging.info("Skip test on device {}.".format(self.product_type))
+            return
+
         super(CpuProfilingTest, self).generateAllGtests()
 
 
