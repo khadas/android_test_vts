@@ -24,7 +24,7 @@ enum ComponentClass {
   HAL_CONVENTIONAL = 1;
   // For a submodule of a shared library HAL .
   HAL_CONVENTIONAL_SUBMODULE = 2;
-  // For the legacy HAL.
+  // For a legacy HAL.
   HAL_LEGACY = 3;
   // For a HAL which uses HIDL (HAL Interface Definition Language).
   HAL_HIDL = 4;
@@ -33,6 +33,11 @@ enum ComponentClass {
 
   // For a shared library which is not a HAL (e.g., standard library).
   LIB_SHARED = 11;
+
+  // For an OS kernel.
+  KERNEL = 21;
+  // For an OS kernel module.
+  KERNEL_MODULE = 22;
 }
 
 
@@ -64,6 +69,9 @@ enum ComponentType {
 
   // for VNDK's libcutils
   VNDK_LIBCUTILS = 1101;
+
+  // for OS kernel's system call.
+  SYSCALL = 2001;
 }
 
 
@@ -83,6 +91,14 @@ enum VariableType {
   TYPE_VOID = 9;
   TYPE_HIDL_CALLBACK = 10;
   TYPE_SUBMODULE = 11;
+}
+
+
+// Type of a target processor architecture.
+enum TargetArch {
+  UNKNOWN_TARGET_ARCH = 0;
+  TARGET_ARCH_ARM = 1;
+  TARGET_ARCH_ARM64 = 2;
 }
 
 
@@ -150,6 +166,9 @@ message FunctionSpecificationMessage {
   // not a user-provided variable. used by the frameworks to tell the sub
   // struct hierarchy.
   optional bytes parent_path = 301;
+
+  // to specify a syscall number.
+  optional uint32 syscall_number = 401;
 }
 
 
@@ -326,6 +345,9 @@ message InterfaceSpecificationMessage {
   optional float component_type_version = 3 [default = 1.0];
   // The name of a target component (used for HIDL HALs).
   optional bytes component_name = 4;
+
+  // for the target processor architecture.
+  optional TargetArch target_arch = 5;
 
   // The package path of a target component (e.g., android.hardware.name).
   // name implies the component_type field.
