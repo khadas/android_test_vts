@@ -95,6 +95,13 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
   // TODO: don't load multiple times. reuse FuzzerBase*.
   cout << __func__ << ":" << __LINE__ << " "
        << "got fuzzer" << endl;
+  if (iface_spec_msg.component_class() == HAL_HIDL) {
+      // TODO: generate vts driver + hidl proxy as a shared lib
+      // which is not part of the libvts_specification.so
+      cout << __func__ << ":" << __LINE__ << " "
+           << "there's no component file to load for HIDL HAL." << endl;
+      return fuzzer;
+  }
   if (!fuzzer->LoadTargetComponent(dll_file_name)) {
     cerr << __FUNCTION__ << ": couldn't load target component file, "
          << dll_file_name << endl;
