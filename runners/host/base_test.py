@@ -94,7 +94,7 @@ class BaseTestClass(object):
             setattr(self, k, v)
         for name in req_param_names:
             if name not in self.user_params:
-                raise BaseTestError(("Missing required user param '%s' in test"
+                raise errors.BaseTestError(("Missing required user param '%s' in test"
                                      " configuration.") % name)
             setattr(self, name, self.user_params[name])
         for name in opt_param_names:

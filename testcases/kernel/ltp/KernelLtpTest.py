@@ -143,7 +143,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
         self.PushFiles(n_bit)
-        logging.info("[Test Case] test%iBits SKIP" % n_bit)
 
         test_cases = list(self._testcases.Load(self._ltp_dir))
         logging.info("Checking binary exists for all test cases.")
@@ -156,8 +155,6 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                args=(n_bit,),
                                name_func=self.GetTestName)
 
-        logging.info("[Test Case] test%iBits" % n_bit)
-        asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
     def GetTestName(self, test_case, n_bit):
         "Generate the vts test name of a ltp test"
