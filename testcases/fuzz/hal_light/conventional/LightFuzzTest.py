@@ -15,20 +15,16 @@
 # limitations under the License.
 #
 
-import getpass
 import logging
 import random
-import time
 
-from vts.runners.host import base_test
+from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.fuzzer import GenePool
 
-from vts.utils.app_engine import bigtable_rest_client
 
-
-class SampleLightFuzzTest(base_test.BaseTestClass):
+class LightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A sample fuzz testcase for the legacy lights HAL."""
 
     def setUpClass(self):
@@ -51,14 +47,6 @@ class SampleLightFuzzTest(base_test.BaseTestClass):
         #   self.dut.hal.light.LIGHT_ID_BATTERY
         #   self.dut.hal.light.LIGHT_ID_BLUETOOTH
         #   self.dut.hal.light.LIGHT_ID_WIFI
-
-    def testGaeBt(self):
-        """Accesses a GAE bigtable."""
-        logging.info("testGaeBt: start (username: %s)", getpass.getuser())
-        bt_client = bigtable_rest_client.HbaseRestClient("my_table")
-        tables = bt_client.GetTables()
-        logging.info("Tables: %s", tables)
-        logging.info("testGaeBt: done")
 
     def testTurnOnLightBlackBoxFuzzing(self):
         """A fuzz testcase which calls a function using different values."""

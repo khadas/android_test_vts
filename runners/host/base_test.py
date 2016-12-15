@@ -121,6 +121,13 @@ class BaseTestClass(object):
 
         Implementation is optional.
         """
+        pass
+
+    def _tearDownClass(self):
+        """Proxy function to guarantee the base implementation of tearDownClass
+        is called.
+        """
+        return self.tearDownClass()
 
     def tearDownClass(self):
         """Teardown function that will be called after all the selected test
@@ -128,6 +135,7 @@ class BaseTestClass(object):
 
         Implementation is optional.
         """
+        pass
 
     def _setUpTest(self, test_name):
         """Proxy function to guarantee the base implementation of setUpTest is
@@ -512,7 +520,7 @@ class BaseTestClass(object):
         except Exception as e:
             logging.exception("Failed to setup %s.", self.TAG)
             self.results.failClass(self.TAG, e)
-            self._exec_func(self.tearDownClass)
+            self._exec_func(self._tearDownClass)
             return self.results
         # Run tests in order.
         try:
@@ -527,7 +535,7 @@ class BaseTestClass(object):
             setattr(e, "results", self.results)
             raise e
         finally:
-            self._exec_func(self.tearDownClass)
+            self._exec_func(self._tearDownClass)
             logging.info("Summary for test class %s: %s", self.TAG,
                          self.results.summary())
 

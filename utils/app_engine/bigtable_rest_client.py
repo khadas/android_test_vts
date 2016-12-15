@@ -25,7 +25,7 @@ import requests
 _DEFAULT_BASE_URL="http://146.148.105.120:8080"
 _PROJECT_ID='google.com:android-vts-internal'
 _INSTANCE_ID='vts-dev'
-_COLUMN_FAMILY_ID='cf1'
+_DEFAULT_COLUMN_FAMILY_ID='cf_data'
 
 
 class HbaseRestClient(object):
@@ -34,12 +34,14 @@ class HbaseRestClient(object):
     Attributes:
         base_url: The hostname and port of the Hbase REST server.
                   e.g 'http://130.211.170.242:8080'
-        table_name: The name of the table
+        table_name: The name of the table.
+        column_family: The selected column family.
     """
 
     def __init__(self, table_name, base_url=_DEFAULT_BASE_URL):
         self.base_url = base_url
         self.table_name = table_name
+        self.column_family = None
 
     def PutRow(self, row_key, column, value):
         """Puts a value into an HBase cell via REST.
@@ -53,9 +55,14 @@ class HbaseRestClient(object):
             column: The fully qualified column (e.g. my_column_family:content)
             value: A string representing the sequence of bytes we want to
                    put into the cell
+
+        Returns:
+            True if successful, False otherwise
         """
+        if not self.column_family:
+            return False
         row_key_encoded = base64.b64encode(row_key)
-        column_encoded = base64.b64encode(column)
+        column_encoded = base64.b64encode(self.column_family + ":" + column)
         value_encoded = base64.b64encode(value)
 
         cell = OrderedDict([
@@ -73,6 +80,8 @@ class HbaseRestClient(object):
             })
         if r.status_code != 200:
             logging.error("got status code %d when putting", r.status_code)
+            return False
+        return True
 
     def GetRow(self, row_key):
         """Returns a value from the first column in a row.
@@ -100,24 +109,24 @@ class HbaseRestClient(object):
         """
         requests.delete(self.base_url + "/" + self.table_name + "/" + row_key)
 
-    def CreateTable(self, table_name, column_family):
+    def CreateTable(self, column_family):
         """Creates a table with a single column family.
 
         It's safe to call if the table already exists, it will just fail
         silently.
 
         Args:
-            table_name: The name of the
             column_family: The column family to create the table with.
         """
-        json_output = {"name": table_name,
+        json_output = {"name": self.table_name,
                        "ColumnSchema": [{"name": column_family}]}
-        requests.post(self.base_url + '/' + table_name + '/schema',
+        requests.post(self.base_url + '/' + self.table_name + '/schema',
                       data=json.dumps(json_output),
                       headers={
                           "Content-Type": "application/json",
                           "Accept": "application/json"
                       })
+        self.column_family = column_family
 
     def GetTables(self):
         """Returns a list of the tables in Hbase.
