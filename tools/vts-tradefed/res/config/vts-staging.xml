@@ -19,7 +19,7 @@
     <option name="compatibility:include-filter" value="LightFuzzTest" />
     <option name="compatibility:include-filter" value="sample_qtaguid_test" />
     <option name="compatibility:include-filter" value="KernelLtpStagingTest" />
-    <option name="compatibility:include-filter" value="linux_kselftest_test" />
+    <option name="compatibility:include-filter" value="linux_kselftest_test_staging" />
     <option name="compatibility:include-filter" value="security_poc_kernel_test" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
