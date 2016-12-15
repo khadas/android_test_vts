@@ -199,11 +199,17 @@ def load_config(file_full_path):
         A JSON object.
     """
     if not os.path.isfile(file_full_path):
-        file_full_path = "testcases/" + file_full_path
-        if not os.path.isfile(file_full_path):
-            file_full_path = "android-vts/" + file_full_path
-            if not os.path.isfile(file_full_path):
-                logging.error("config not found - cwd: %s", os.getcwd())
+        logging.warning('cwd: %s', os.getcwd())
+        pypath = os.environ['PYTHONPATH']
+        if pypath:
+            for base_path in pypath.split(':'):
+                logging.info('checking %s', base_path)
+                new_path = os.path.join(base_path, file_full_path)
+                if os.path.isfile(new_path):
+                    logging.info('found')
+                    file_full_path = new_path
+                    break
+
     with open(file_full_path, 'r') as f:
         conf = json.load(f)
         return conf
