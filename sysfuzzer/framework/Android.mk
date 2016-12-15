@@ -52,11 +52,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_STATIC_LIBRARIES := \
   libelf \
 
-#LOCAL_PROTOC_FLAGS := \
-#  --proto_path=$(LOCAL_PATH)/../common/proto \
-
-#LOCAL_PROTOC_OPTIMIZE_TYPE := full
-
 LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)
