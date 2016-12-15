@@ -16,10 +16,12 @@
 #
 
 import logging
+import os
 import sys
 
 from logger import Log
 from proto import AndroidSystemControlMessage_pb2
+from proto import InterfaceSpecificationMessage_pb2
 from tcp_client import TcpClient
 
 
@@ -39,14 +41,35 @@ def main(args):
   while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
     client.SendCommand(AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
                        "--server --class=hal --type=light --version=1.0 "
-                       "/system/lib64/hw/lights.angler.so")
+                       "none")
     resp = client.RecvResponse()
     logging.info(resp)
 
   client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
-                     "Give me the list of HALs")
+                     "/system/lib/hw/")  # /system/lib64/hw/lights.angler.so
   resp = client.RecvResponse()
   logging.info(resp)
+
+  for filename in resp.reason.strip().split(" "):
+    if "light" in filename:
+      client.SendCommand(AndroidSystemControlMessage_pb2.SELECT_HAL,
+                         os.path.join("/system/lib/hw/", filename),
+                         1,  # HAL
+                         4,  # LIGHT
+                         1.0)
+      resp = client.RecvResponse()
+      logging.info(resp)
+
+      if resp.response_code == AndroidSystemControlMessage_pb2.SUCCESS:
+        client.SendCommand(AndroidSystemControlMessage_pb2.GET_FUNCTIONS,
+                           "get_functions");
+        resp = client.RecvResponse()
+        logging.info(resp)
+        if resp.reason:
+          msg = InterfaceSpecificationMessage_pb2.InterfaceSpecificationMessage()
+          msg.ParseFromString(resp.reason)
+          logging.info(msg)
+      break
 
 
 if __name__ == "__main__":

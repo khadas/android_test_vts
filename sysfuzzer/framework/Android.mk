@@ -45,9 +45,13 @@ LOCAL_SHARED_LIBRARIES := \
   libdl \
   libandroid_runtime \
   libvts_common \
+  libprotobuf-cpp-full \
 
 LOCAL_STATIC_LIBRARIES := \
   libelf \
+
+LOCAL_PROTOC_FLAGS := \
+  --proto_path=$(LOCAL_PATH)/../common/proto \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
