@@ -155,8 +155,16 @@ public class VtsFilePusher extends FilePusher {
             }
 
             Class cls = this.getClass();
+
+            if (!src.exists()) {
+                Log.w(cls.getSimpleName(), String.format(
+                        "Skipping push spec in push group whose source does not exist: %s",
+                        pushspec));
+                continue;
+            }
+
             Log.d(cls.getSimpleName(),
-                    String.format("Trying to push file from local to remote: ", pushspec));
+                    String.format("Trying to push file from local to remote: %s", pushspec));
 
             if ((src.isDirectory() && !device.pushDir(src, pair[1])) ||
                     (!device.pushFile(src, pair[1]))) {
