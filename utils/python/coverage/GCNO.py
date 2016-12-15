@@ -31,6 +31,7 @@ each block.
 import logging
 import struct
 import sys
+import math
 from vts.utils.python.coverage import ArcSummary
 from vts.utils.python.coverage import BlockSummary
 from vts.utils.python.coverage import FunctionSummary
@@ -55,6 +56,7 @@ class Parser(object):
         stream: File stream object for a GCNO file
         format: Character denoting the endianness of the file
         summary: The GCNOSummary object describing the GCNO file
+        version: The (integer) version of the GCNO file
     """
 
     NOTE_MAGIC = 0x67636e6f
@@ -62,6 +64,8 @@ class Parser(object):
     TAG_BLOCKS = 0x01410000
     TAG_ARCS = 0x01430000
     TAG_LINES = 0x01450000
+    BYTES_IN_WORD = 4
+    HEADER_LENGTH = 3  #  number of words in a section header
 
     def __init__(self, stream):
         """Inits the parser with the input stream and default values.
@@ -77,7 +81,8 @@ class Parser(object):
         self.summary = GCNOSummary.GCNOSummary()
 
         magic = self.ReadInt()
-        self.ReadInt()  #   version information
+        self.version = ''.join(
+            struct.unpack(self.format + 'ssss', self.stream.read(4)))
         self.ReadInt()  #   stamp
 
         if magic != self.NOTE_MAGIC:
@@ -185,7 +190,8 @@ class Parser(object):
         """
         ident = self.ReadInt()
         self.ReadInt()  #  line number checksum
-        self.ReadInt()  #  configuration checksum
+        if int(self.version[1]) > 4:
+            self.ReadInt()  #  configuration checksum
         name = self.ReadString()
         source_file_name = self.ReadString()
         first_line_number = self.ReadInt()
@@ -260,7 +266,8 @@ class Parser(object):
         self.ReadInt()  #  dummy value
         lines = []
         src = self.ReadString()  #  source file name
-        for i in range(length - len(src)):
+        src_length = int(math.ceil(len(src)*1.0/self.BYTES_IN_WORD)) + 1
+        for i in range(length - src_length - self.HEADER_LENGTH):
             line = self.ReadInt()
             if line:
                 lines.append(line)

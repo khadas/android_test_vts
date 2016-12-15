@@ -36,12 +36,59 @@ class MockStream(object):
         cursor: the index into the content such that everything before it
                 has been read already.
     """
+    BYTES_PER_WORD = 4
+
+    @classmethod
+    def concat_int(cls, stream, integer):
+        """Returns the stream with a binary formatted integer concatenated.
+
+        Args:
+            stream: the stream to which the integer will be concatenated.
+            integer: the integer to be concatenated to the content stream.
+            format: the string format decorator to apply to the integer.
+
+        Returns:
+            The content with the binary-formatted integer concatenated.
+        """
+        new_content = stream.content + struct.pack(stream.format +
+            'I', integer)
+        s = MockStream(stream.format)
+        s.content = new_content
+        s.cursor = stream.cursor
+        return s
+
+    @classmethod
+    def concat_string(cls, stream, string):
+        """Returns the stream with a binary formatted string concatenated.
+
+        Preceeds the string with an integer representing the number of
+        words in the string. Pads the string so that it is word-aligned.
+
+        Args:
+            stream: the stream to which the string will be concatenated.
+            string: the string to be concatenated to the content stream.
+            format: the string format decorator to apply to the integer.
+
+        Returns:
+            The content with the formatted binary string concatenated.
+        """
+        byte_count = len(string)
+        word_count = int(math.ceil(byte_count * 1.0 /
+            MockStream.BYTES_PER_WORD))
+        padding = '\x00' * (MockStream.BYTES_PER_WORD * word_count - byte_count)
+        new_content = stream.content + struct.pack(stream.format + 'I',
+            word_count) + bytes(string + padding)
+        s = MockStream(stream.format)
+        s.content = new_content
+        s.cursor = stream.cursor
+        return s
 
     def __init__(self, format='<'):
-        self.content = struct.pack(format + 'III', GCNO.Parser.NOTE_MAGIC, 0,
-                                   0)
-        self.cursor = 0
         self.format = format
+        version = struct.unpack(format + 'I', '*802')[0]
+        self.content = struct.pack(format + 'III', GCNO.Parser.NOTE_MAGIC,
+            version, 0)
+        self.cursor = 0
 
     def read(self, n_bytes):
         """Reads the specified number of bytes from the content stream.
@@ -56,29 +103,6 @@ class MockStream(object):
         content = self.content[self.cursor:self.cursor + n_bytes]
         self.cursor += n_bytes
         return content
-
-    def concat_int(self, integer):
-        """Concatenates an integer in binary format to the content stream.
-
-        Args:
-            integer: the integer to be concatenated to the content stream.
-        """
-        self.content += struct.pack(self.format + 'I', integer)
-
-    def concat_string(self, string):
-        """Concatenates a string in binary format to the content stream.
-
-        Preceeds the string with an integer representing the number of
-        words in the string. Pads the string so that it is word-aligned.
-
-        Args:
-            string: the string to be concatenated to the content stream.
-        """
-        byte_count = len(string)
-        word_count = int(math.ceil(byte_count / 4.0))
-        padding = '\x00' * (4 * word_count - byte_count)
-        self.content += struct.pack('<I', word_count) + bytes(string + padding)
-
 
 class GCNOTest(unittest.TestCase):
     """Tests for GCNO parser of vts.utils.python.coverage.
@@ -120,7 +144,7 @@ class GCNOTest(unittest.TestCase):
         Tests the normal case--when the value is actually an integer.
         """
         integer = 2016
-        self.stream.concat_int(integer)
+        self.stream = MockStream.concat_int(self.stream, integer)
         parser = GCNO.Parser(self.stream)
         self.assertEqual(parser.ReadInt(), integer)
 
@@ -136,7 +160,7 @@ class GCNOTest(unittest.TestCase):
         Tests the normal case--when the string is correctly formatted.
         """
         test_string = "This is a test."
-        self.stream.concat_string(test_string)
+        self.stream = MockStream.concat_string(self.stream, test_string)
         parser = GCNO.Parser(self.stream)
         self.assertEqual(parser.ReadString(), test_string)
 
@@ -163,15 +187,15 @@ class GCNOTest(unittest.TestCase):
         and first line number are all read correctly.
         """
         ident = 102010
-        self.stream.concat_int(ident)
-        self.stream.concat_int(0)
-        self.stream.concat_int(0)
+        self.stream = MockStream.concat_int(self.stream, ident)
+        self.stream = MockStream.concat_int(self.stream, 0)
+        self.stream = MockStream.concat_int(self.stream, 0)
         name = "TestFunction"
         src_file_name = "TestSouceFile.c"
         first_line_number = 102
-        self.stream.concat_string(name)
-        self.stream.concat_string(src_file_name)
-        self.stream.concat_int(first_line_number)
+        self.stream = MockStream.concat_string(self.stream, name)
+        self.stream = MockStream.concat_string(self.stream, src_file_name)
+        self.stream = MockStream.concat_int(self.stream, first_line_number)
         parser = GCNO.Parser(self.stream)
         summary = parser.ReadFunction()
         self.assertEqual(name, summary.name)
@@ -187,7 +211,7 @@ class GCNOTest(unittest.TestCase):
         n_blocks = 10
         func = FunctionSummary.FunctionSummary(0, "func", "src.c", 1)
         for i in range(n_blocks):
-            self.stream.concat_int(3 * i)
+            self.stream = MockStream.concat_int(self.stream, 3 * i)
         parser = GCNO.Parser(self.stream)
         parser.ReadBlocks(n_blocks, func)
         self.assertEqual(len(func.blocks), n_blocks)
@@ -208,10 +232,10 @@ class GCNOTest(unittest.TestCase):
                        for i in range(n_blocks)]
         src_block_index = 0
         skip = 2
-        self.stream.concat_int(src_block_index)
+        self.stream = MockStream.concat_int(self.stream, src_block_index)
         for i in range(src_block_index + 1, n_blocks, skip):
-            self.stream.concat_int(i)
-            self.stream.concat_int(0)  #  no flag applied to the arc
+            self.stream = MockStream.concat_int(self.stream, i)
+            self.stream = MockStream.concat_int(self.stream, 0)  #  no flag applied to the arc
         parser = GCNO.Parser(self.stream)
         n_arcs = len(range(src_block_index + 1, n_blocks, skip))
         parser.ReadArcs(n_arcs * 2 + 1, func)
@@ -234,19 +258,22 @@ class GCNOTest(unittest.TestCase):
         func = FunctionSummary.FunctionSummary(0, "func", "src.c", 1)
         func.blocks = [BlockSummary.BlockSummary(i, 3 * i)
                        for i in range(n_blocks)]
-        self.stream.concat_int(0)  #  source block index
+        self.stream = MockStream.concat_int(self.stream, 0)  #  source block index
 
-        self.stream.concat_int(1)  #  normal arc
-        self.stream.concat_int(0)
+        self.stream = MockStream.concat_int(self.stream, 1)  #  normal arc
+        self.stream = MockStream.concat_int(self.stream, 0)
 
-        self.stream.concat_int(2)  #  on-tree arc
-        self.stream.concat_int(ArcSummary.ArcSummary.GCOV_ARC_ON_TREE)
+        self.stream = MockStream.concat_int(self.stream, 2)  #  on-tree arc
+        self.stream = MockStream.concat_int(self.stream,
+            ArcSummary.ArcSummary.GCOV_ARC_ON_TREE)
 
-        self.stream.concat_int(3)  #  fake arc
-        self.stream.concat_int(ArcSummary.ArcSummary.GCOV_ARC_FAKE)
+        self.stream = MockStream.concat_int(self.stream, 3)  #  fake arc
+        self.stream = MockStream.concat_int(self.stream,
+            ArcSummary.ArcSummary.GCOV_ARC_FAKE)
 
-        self.stream.concat_int(4)  #  fallthrough arc
-        self.stream.concat_int(ArcSummary.ArcSummary.GCOV_ARC_FALLTHROUGH)
+        self.stream = MockStream.concat_int(self.stream, 4)  #  fallthrough arc
+        self.stream = MockStream.concat_int(self.stream,
+            ArcSummary.ArcSummary.GCOV_ARC_FALLTHROUGH)
 
         parser = GCNO.Parser(self.stream)
         parser.ReadArcs(4 * 2 + 1, func)
@@ -273,19 +300,21 @@ class GCNOTest(unittest.TestCase):
         Blocks must have correct references to the lines contained
         in the block.
         """
-        self.stream.concat_int(2)  #  block number
-        self.stream.concat_int(0)  #  dummy
+        self.stream = MockStream.concat_int(self.stream, 2)  #  block number
+        self.stream = MockStream.concat_int(self.stream, 0)  #  dummy
         name = "src.c"
-        self.stream.concat_string(name)
-        for i in range(1, 6):
-            self.stream.concat_int(i)
+        name_length = int(math.ceil(1.0*len(name)/MockStream.BYTES_PER_WORD)) + 1
+        self.stream = MockStream.concat_string(self.stream, name)
+        n_arcs = 5
+        for i in range(1, n_arcs+1):
+            self.stream = MockStream.concat_int(self.stream, i)
 
         n_blocks = 5
         func = FunctionSummary.FunctionSummary(0, "func", name, 1)
         func.blocks = [BlockSummary.BlockSummary(i, 3 * i)
                        for i in range(n_blocks)]
         parser = GCNO.Parser(self.stream)
-        parser.ReadLines(5 + len(name), func)
+        parser.ReadLines(n_arcs + name_length + 3, func)
         self.assertEqual(len(func.blocks[2].lines), 5)
         self.assertEqual(func.blocks[2].lines, range(1, 6))
 
