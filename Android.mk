@@ -22,16 +22,16 @@ ifeq ($(HOST_OS),linux)
 
 include $(CLEAR_VARS)
 
-VTS_PYTHON_TGZ := $(HOST_OUT)/vts/android-vts/python/vts.tar.gz
+VTS_PYTHON_ZIP := $(HOST_OUT)/vts/android-vts/python/vts.zip
 
-$(VTS_PYTHON_TGZ): test/vts/setup.py
-	@echo "build vts python package: $(VTS_PYTHON_TGZ)"
+$(VTS_PYTHON_ZIP): test/vts/setup.py
+	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	@mkdir -p $(HOST_OUT)/vts
 	@mkdir -p $(HOST_OUT)/vts/android-vts
 	@mkdir -p $(dir $@)
-	$(hide) cd test/vts; python setup.py sdist --formats=gztar
-	$(hide) cp -f test/vts/dist/vts-0.1.tar.gz $@
+	$(hide) cd test/vts; python setup.py sdist --formats=zip
+	$(hide) cp -f test/vts/dist/vts-0.1.zip $@
 
-vts: $(VTS_PYTHON_TGZ)
+vts: $(VTS_PYTHON_ZIP)
 
 endif # linux
