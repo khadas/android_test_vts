@@ -35,8 +35,6 @@ src_dest_gcno_tuples := $(join $(gcno_target_files), $(addprefix :,\
 src_dest_src_tuples := $(join $(src_files), $(addprefix :, \
 	$(vts_framework_lib_src_files)))
 
-ifneq (,$(filter $(LOCAL_NATIVE_COVERAGE),true always))
 $(gcno_target_files): $(obj_target_files)
 vts: $(call copy-many-files, $(src_dest_src_tuples)) \
 	$(call copy-many-files, $(src_dest_gcno_tuples))
-endif
