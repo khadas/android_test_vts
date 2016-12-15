@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import logging
 import sys
 
 from logger import Log
@@ -23,6 +24,8 @@ from tcp_client import TcpClient
 
 
 def main(args):
+  Log.SetupLogger()
+
   client = TcpClient.VtsTcpClient()
 
   client.Connect()
@@ -31,19 +34,19 @@ def main(args):
   client.SendCommand(AndroidSystemControlMessage_pb2.CHECK_FUZZER_BINDER_SERVICE,
                      "Is fuzzer running?")
   resp = client.RecvResponse()
-  Log.info(resp)
+  logging.info(resp)
 
   while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
     client.SendCommand(AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
                        "--server --class=hal --type=light --version=1.0 "
                        "/system/lib64/hw/lights.angler.so")
     resp = client.RecvResponse()
-    Log.info(resp)
+    logging.info(resp)
 
   client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
                      "Give me the list of HALs")
   resp = client.RecvResponse()
-  Log.info(resp)
+  logging.info(resp)
 
 
 if __name__ == "__main__":

@@ -19,50 +19,13 @@ import logging
 import sys
 
 _FORMAT = "%(asctime)-15s: %(message)s"
-_TAG = "VtsHostRunner"
-
-vts_logger = None
 
 
-def _GetLogger():
-  """Returns the VTS logger."""
-  global vts_logger
-  if vts_logger:
-    return vts_logger
-
+def SetupLogger():
+  """Setup the logging module for VTS's host-side runner."""
   try:
     logging.basicConfig(format=_FORMAT, level=logging.INFO)
-    vts_logger = logging.getLogger(_TAG)
   except AttributeError as e:
     print(e)
     print("Your python version is %s" % sys.version)
     raise
-  return vts_logger
-
-
-def info(format, *args):
-  """Handles the given info log message.
-
-  Args:
-    format: the string, either format or the complete message to log.
-    args: optional - a list of arguments used to replace the % specifiers
-        in the given format string.
-  """
-  logger = _GetLogger()
-  if args:
-    format = format % args
-  logger.info(format)
-
-
-def error(format, *args):
-  """Handles the given error log message.
-
-  Args:
-    format: the string, either format or the complete message to log.
-    args: optional - a list of arguments used to replace the % specifiers
-        in the given format string.
-  """
-  logger = _GetLogger()
-  if args:
-    format = format % args
-  logger.error(format)
