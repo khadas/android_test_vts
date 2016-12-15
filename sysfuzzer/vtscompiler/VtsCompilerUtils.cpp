@@ -42,7 +42,6 @@ bool endsWith(const string& s, const string& suffix) {
   return s.size() >= suffix.size() && s.rfind(suffix) == (s.size() - suffix.size());
 }
 
-
 string ComponentClassToString(int component_class) {
   switch (component_class) {
     case UNKNOWN_CLASS:
@@ -395,5 +394,6 @@ string GetVersionString(float version, bool for_macro) {
   }
   return out.str();
 }
+
 }  // namespace vts
 }  // namespace android

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
+#ifndef __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__
+#define __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__
 
 #include <fstream>
 #include <iostream>
@@ -24,17 +24,16 @@
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
-#include "code_gen/CodeGenBase.h"
-#include "code_gen/HalCodeGen.h"
+#include "code_gen/driver/HalCodeGen.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
-class LegacyHalCodeGen : public HalCodeGen {
+class LibSharedCodeGen : public HalCodeGen {
  public:
-  LegacyHalCodeGen(const char* input_vts_file_path, const string& vts_name)
+  LibSharedCodeGen(const char* input_vts_file_path, const string& vts_name)
       : HalCodeGen(input_vts_file_path, vts_name) {}
 
  protected:
@@ -43,7 +42,8 @@ class LegacyHalCodeGen : public HalCodeGen {
                                    const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      std::stringstream& cpp_ss,
+      const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(
@@ -56,4 +56,4 @@ class LegacyHalCodeGen : public HalCodeGen {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
+#endif  // __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__

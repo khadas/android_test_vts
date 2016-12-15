@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "code_gen/LibSharedCodeGen.h"
+#include "code_gen/driver/LibSharedCodeGen.h"
 
 #include <fstream>
 #include <iostream>

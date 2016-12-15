@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
+#ifndef __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
+#define __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
 
 #include <fstream>
 #include <iostream>
@@ -24,38 +24,32 @@
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
-#include "code_gen/CodeGenBase.h"
+#include "code_gen/driver/DriverCodeGenBase.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
-
-class HalCodeGen : public CodeGenBase {
+class HalHidlCodeGen : public DriverCodeGenBase {
  public:
-  HalCodeGen(const char* input_vts_file_path, const string& vts_name)
-      : CodeGenBase(input_vts_file_path, vts_name) {}
+  HalHidlCodeGen(const char* input_vts_file_path, const string& vts_name)
+      : DriverCodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+                                   const ComponentSpecificationMessage& message,
+                                   const string& fuzzer_extended_class_name);
 
-  void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
-      const string& fuzzer_extended_class_name,
-      const string& original_data_structure_name,
-      const string& parent_path);
-
-  void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+                                   const StructSpecificationMessage& message,
+                                   const string& fuzzer_extended_class_name,
+                                   const string& original_data_structure_name,
+                                   const string& parent_path);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
-      const string& fuzzer_extended_class_name,
-      const string& original_data_structure_name, const string& parent_path);
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyCallbackFunction(
       std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
@@ -72,9 +66,9 @@ class HalCodeGen : public CodeGenBase {
       std::stringstream& cpp_ss, const StructSpecificationMessage& message,
       const string& parent_path);
 
-  void GenerateSubStructGetAttributeFunctionCall(
-      std::stringstream& cpp_ss, const StructSpecificationMessage& message,
-      const string& parent_path);
+  void GenerateCppBodySyncCallbackFunction(
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
 
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
@@ -83,4 +77,4 @@ class HalCodeGen : public CodeGenBase {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_HALCODEGEN_H__
+#endif  // __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
