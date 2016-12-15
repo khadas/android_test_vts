@@ -114,6 +114,22 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
     def _tearDownClass(self):
         if getattr(self, self.USE_GAE_DB, False):
+            # Handle case when runner fails, tests aren't executed
+            if (self.results.executed and
+                self.results.executed[-1].test_name == "setup_class"):
+                # Test failed during setup, all tests were not executed
+                start_index = 0
+            else:
+                # Runner was aborted. Remaining tests weren't executed
+                start_index = len(self.results.executed)
+
+            for test in self.results.requested[start_index:]:
+                msg = self._report_msg.test_case.add()
+                msg.name = test
+                msg.start_timestamp = self.GetTimestamp()
+                msg.end_timestamp = msg.start_timestamp
+                msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
+
             self._report_msg.end_timestamp = self.GetTimestamp()
 
             logging.info("_tearDownClass hook: start (username: %s)",
