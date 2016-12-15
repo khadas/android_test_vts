@@ -105,7 +105,7 @@ CommandResult* VtsShellDriver::ExecShellCommandNohup(const string& command) {
      << stderr_file_name;
 
   // execute the command.
-  int exit_code = system(ss.str().c_str());
+  int exit_code = system(ss.str().c_str()) / 256;
 
   result->exit_code = exit_code;
   result->stdout = ReadFile(stdout_file_name);
