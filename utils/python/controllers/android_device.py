@@ -396,19 +396,12 @@ class AndroidDevice(object):
         if not self.isAdbRoot:
             try:
                 self.adb.root()
-            except adb.AdbError as e:
-                # adb root is not always possible in the lab
-                logging.exception(e)
-            try:
+                self.adb.wait_for_device()
+                self.adb.remount()
                 self.adb.wait_for_device()
             except adb.AdbError as e:
                 # adb wait-for-device is not always possible in the lab
-                logging.exception(e)
-            self.adb.remount()
-            try:
-                self.adb.wait_for_device()
-            except adb.AdbError as e:
-                # adb wait-for-device is not always possible in the lab
+                # continue with an assumption it's done by the harness.
                 logging.exception(e)
 
     def startAdbLogcat(self):
