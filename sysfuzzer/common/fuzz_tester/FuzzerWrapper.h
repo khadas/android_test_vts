@@ -20,7 +20,7 @@
 #include "component_loader/DllLoader.h"
 #include "fuzz_tester/FuzzerBase.h"
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ class FuzzerWrapper {
   // Returns the pointer to a FuzzerBase class of the loaded component where
   // the class is designed to do the testing using the given interface
   // specification message.
-  FuzzerBase* GetFuzzer(const vts::InterfaceSpecificationMessage& message);
+  FuzzerBase* GetFuzzer(const vts::ComponentSpecificationMessage& message);
 
  private:
   // loaded file path.

@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ class InterfaceSpecificationParser {
   // Parses the given proto text file (1st arg). The parsed result is stored in
   // the 2nd arg. Returns true iff successful.
   static bool parse(const char* file_path,
-                    InterfaceSpecificationMessage* is_message);
+                    ComponentSpecificationMessage* is_message);
 };
 
 }  // namespace vts

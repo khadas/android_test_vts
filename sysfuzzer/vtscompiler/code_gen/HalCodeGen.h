@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "code_gen/CodeGenBase.h"
 
@@ -39,7 +39,7 @@ class HalCodeGen : public CodeGenBase {
 
  protected:
   void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyFuzzFunction(
@@ -49,7 +49,7 @@ class HalCodeGen : public CodeGenBase {
       const string& parent_path);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyGetAttributeFunction(
@@ -58,7 +58,7 @@ class HalCodeGen : public CodeGenBase {
       const string& original_data_structure_name, const string& parent_path);
 
   void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(

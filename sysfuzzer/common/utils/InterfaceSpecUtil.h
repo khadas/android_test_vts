@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #define VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX "vts_func_"
 
@@ -29,7 +29,7 @@ namespace android {
 namespace vts {
 
 // Returns the function name prefix of a given interface specification.
-string GetFunctionNamePrefix(const InterfaceSpecificationMessage& message);
+string GetFunctionNamePrefix(const ComponentSpecificationMessage& message);
 
 }  // namespace vts
 }  // namespace android

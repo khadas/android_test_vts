@@ -21,7 +21,7 @@
 #include <queue>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "fuzz_tester/FuzzerWrapper.h"
 
@@ -46,17 +46,17 @@ class SpecificationBuilder {
 
   // scans the dir and returns an interface specification for a requested
   // component.
-  vts::InterfaceSpecificationMessage* FindInterfaceSpecification(
+  vts::ComponentSpecificationMessage* FindComponentSpecification(
       const int target_class, const int target_type, const float target_version,
       const string submodule_name = "");
 
-  vts::InterfaceSpecificationMessage*
-      FindInterfaceSpecification(const string& component_name);
+  vts::ComponentSpecificationMessage*
+      FindComponentSpecification(const string& component_name);
 
   // Returns FuzzBase for a given interface specification, and adds all the
   // found functions to the fuzzing job queue.
   FuzzerBase* GetFuzzerBaseAndAddAllFunctionsToQueue(
-      const vts::InterfaceSpecificationMessage& iface_spec_msg,
+      const vts::ComponentSpecificationMessage& iface_spec_msg,
       const char* dll_file_name);
 
   const string& CallFunction(FunctionSpecificationMessage* func_msg);
@@ -76,15 +76,15 @@ class SpecificationBuilder {
                            const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
-      const InterfaceSpecificationMessage& iface_spec_msg,
+      const ComponentSpecificationMessage& iface_spec_msg,
       const char* dll_file_name, const char* target_func_name);
 
   FuzzerBase* GetFuzzerBaseSubModule(
-      const vts::InterfaceSpecificationMessage& iface_spec_msg,
+      const vts::ComponentSpecificationMessage& iface_spec_msg,
       void* object_pointer);
 
   // Returns the loaded interface specification message.
-  InterfaceSpecificationMessage* GetInterfaceSpecification() const;
+  ComponentSpecificationMessage* GetComponentSpecification() const;
 
  private:
   // A FuzzerWrapper instance.
@@ -96,7 +96,7 @@ class SpecificationBuilder {
   // fuzzing job queue.
   queue<pair<FunctionSpecificationMessage*, FuzzerBase*>> job_queue_;
   // Loaded interface specification message.
-  InterfaceSpecificationMessage* if_spec_msg_;
+  ComponentSpecificationMessage* if_spec_msg_;
   // TODO: use unique_ptr
   char* spec_lib_file_path_;
   char* dll_file_name_;
@@ -104,7 +104,7 @@ class SpecificationBuilder {
   // the server socket port # of the agent.
   const string& callback_socket_name_;
   // map for submodule interface specification messages.
-  map<string, InterfaceSpecificationMessage*> submodule_if_spec_map_;
+  map<string, ComponentSpecificationMessage*> submodule_if_spec_map_;
   map<string, FuzzerBase*> submodule_fuzzerbase_map_;
 };
 

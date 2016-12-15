@@ -21,7 +21,7 @@ from google.protobuf import text_format
 
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
-from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import hal_mirror
 from vts.utils.python.mirror import mirror_object
@@ -176,7 +176,7 @@ class LibMirror(object):
                                                service_name)
         logging.debug("Found %d APIs for %s:\n%s", len(found_api_spec),
                       service_name, found_api_spec)
-        if_spec_msg = IfaceSpecMsg.InterfaceSpecificationMessage()
+        if_spec_msg = CompSpecMsg.ComponentSpecificationMessage()
         text_format.Merge(found_api_spec, if_spec_msg)
 
         # Instantiate a MirrorObject and return it.

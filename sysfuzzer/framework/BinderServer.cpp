@@ -40,7 +40,7 @@
 #include "specification_parser/SpecificationBuilder.h"
 
 #include <google/protobuf/text_format.h>
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -175,8 +175,8 @@ class VtsFuzzerServer : public BnVtsFuzzer {
 
   const char* GetFunctions() {
     printf("Get functions*");
-    vts::InterfaceSpecificationMessage* spec =
-        spec_builder_.GetInterfaceSpecification();
+    vts::ComponentSpecificationMessage* spec =
+        spec_builder_.GetComponentSpecification();
     if (!spec) {
       return NULL;
     }

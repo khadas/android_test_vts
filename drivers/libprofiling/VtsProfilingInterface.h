@@ -19,7 +19,7 @@
 
 #include <android-base/macros.h>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -42,7 +42,7 @@ class VtsProfilingInterface {
   virtual ~VtsProfilingInterface();
 
   // returns true if the given message is added to the tracing queue.
-  bool AddTraceEvent(const InterfaceSpecificationMessage& message);
+  bool AddTraceEvent(const FunctionSpecificationMessage& message);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VtsProfilingInterface);

@@ -41,7 +41,6 @@
 #include "SocketServerForDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
 using namespace google::protobuf;

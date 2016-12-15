@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "component_loader/DllLoader.h"
 #include "utils/InterfaceSpecUtil.h"
@@ -338,7 +338,7 @@ int FuzzerBase::OpenConventionalHal(const char* module_name) {
   return 0;
 }
 
-bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
+bool FuzzerBase::Fuzz(vts::ComponentSpecificationMessage* message,
                       void** result) {
   cout << __func__ << " Fuzzing target component: "
        << "class " << message->component_class() << " type "
@@ -347,7 +347,8 @@ bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
 
   string function_name_prefix = GetFunctionNamePrefix(*message);
   function_name_prefix_ = function_name_prefix.c_str();
-  for (vts::FunctionSpecificationMessage func_msg : *message->mutable_api()) {
+  for (vts::FunctionSpecificationMessage func_msg :
+       *message->mutable_interface()->mutable_api()) {
     Fuzz(&func_msg, result, "");
   }
   return true;

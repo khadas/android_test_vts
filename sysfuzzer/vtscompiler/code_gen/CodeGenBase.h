@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -36,17 +36,17 @@ class CodeGenBase {
 
   // Generate both a C/C++ file and its header file.
   void GenerateAll(std::stringstream& cpp_ss, std::stringstream& h_ss,
-                   const InterfaceSpecificationMessage& message);
+                   const ComponentSpecificationMessage& message);
 
  protected:
   // Generates code for Fuzz(...) function body.
   virtual void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates code for GetAttribute(...) function body.
   virtual void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates header code to declare the C/C++ global functions.
@@ -55,7 +55,7 @@ class CodeGenBase {
 
   // Generates C/C++ code for callback functions.
   virtual void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   // Generates code for the bodies of the C/C++ global functions.
@@ -65,7 +65,7 @@ class CodeGenBase {
 
   // Generates code that opens the default namespaces.
   void GenerateOpenNameSpaces(
-      std::stringstream& ss, const InterfaceSpecificationMessage& message);
+      std::stringstream& ss, const ComponentSpecificationMessage& message);
 
   // Generates code that closes the default namespaces.
   void GenerateCloseNameSpaces(std::stringstream& ss);
@@ -79,14 +79,14 @@ class CodeGenBase {
   // Generates all header.
   void GenerateAllHeader(const string& fuzzer_extended_class_name,
                          std::stringstream& h_ss,
-                         const InterfaceSpecificationMessage& message);
+                         const ComponentSpecificationMessage& message);
 
   // Generate header code for a specific class.
   void GenerateClassHeader(const string& fuzzer_extended_class_name,
                            std::stringstream& h_ss,
-                           const InterfaceSpecificationMessage& message);
+                           const ComponentSpecificationMessage& message);
 
-  string GetComponentName(const InterfaceSpecificationMessage& message);
+  string GetComponentName(const ComponentSpecificationMessage& message);
 
   void GenerateFuzzFunctionForSubStruct(
       std::stringstream& h_ss, const StructSpecificationMessage& message,
