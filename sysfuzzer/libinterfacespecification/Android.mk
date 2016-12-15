@@ -18,6 +18,7 @@ LOCAL_PATH := $(call my-dir)
 
 vtslib_interfacespec_srcfiles := \
   specification/CameraHalV2.vts \
+  specification/CameraHalV2hw_device_t.vts \
   specification/GpsHalV1.vts \
   specification/GpsHalV1GpsInterface.vts \
   specification/LightHalV1.vts \

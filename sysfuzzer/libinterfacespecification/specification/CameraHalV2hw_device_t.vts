@@ -4,6 +4,9 @@ component_type_version: 2.1
 
 original_data_structure_name: "struct camera_device_ops"
 
+header: "<hardware/hardware.h>"
+header: "<hardware/camera_common.h>"
+header: "<hardware/camera.h>"
 
 api: {
   name: "set_preview_window"
@@ -12,11 +15,11 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct preview_stream_ops *"
+    aggregate_type: "struct preview_stream_ops*"
   }
 }
 
@@ -27,7 +30,7 @@ api: {
   }
   arg: {
      primitive_type: "pointer"
-     aggregate_type: "struct camera_device *"
+     aggregate_type: "struct camera_device*"
   }
   arg: {
      primitive_type: "function_pointer"
@@ -57,10 +60,10 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
-    primitive_type: "int32"
+    primitive_type: "int32_t"
   }
 }
 
@@ -71,35 +74,35 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
-    primitive_type: "int32"
+    primitive_type: "int32_t"
   }
 }
 
 api: {
   name: "msg_type_enabled"
   return_type: {
-    primitive_type: "int32"
+    primitive_type: "int32_t"
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
-    primitive_type: "int32"
+    primitive_type: "int32_t"
   }
 }
 
 api: {
   name: "start_preview"
   return_type: {
-    primitive_type: "int32"
+    primitive_type: "int32_t"
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -110,7 +113,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -121,7 +124,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -132,7 +135,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "int32_t"
@@ -146,7 +149,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -157,7 +160,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -168,7 +171,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -179,7 +182,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "void_pointer"
@@ -193,7 +196,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -204,7 +207,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -215,7 +218,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -226,7 +229,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -237,7 +240,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "char_pointer"
@@ -251,7 +254,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -262,7 +265,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "char_pointer"
@@ -276,7 +279,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "int32_t"
@@ -296,7 +299,7 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
 }
 
@@ -307,10 +310,9 @@ api: {
   }
   arg: {
     primitive_type: "pointer"
-    aggregate_type: "struct camera_device *"
+    aggregate_type: "struct camera_device*"
   }
   arg: {
     primitive_type: "int32_t"
-    aggregate_type: "filedescriptor"
   }
 }

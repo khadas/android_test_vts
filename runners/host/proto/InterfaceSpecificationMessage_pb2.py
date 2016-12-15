@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='InterfaceSpecificationMessage.proto',
   package='android.vts',
-  serialized_pb='\n#InterfaceSpecificationMessage.proto\x12\x0b\x61ndroid.vts\"e\n\x1c\x43\x61llFlowSpecificationMessage\x12\x14\n\x05\x65ntry\x18\x01 \x01(\x08:\x05\x66\x61lse\x12\x13\n\x04\x65xit\x18\x02 \x01(\x08:\x05\x66\x61lse\x12\x0c\n\x04next\x18\x0b \x03(\x0c\x12\x0c\n\x04prev\x18\x0c \x03(\x0c\"\xd6\x02\n\x1c\x46unctionSpecificationMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12>\n\x0breturn_type\x18\x0b \x01(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x43\n\x10return_type_hidl\x18\x0c \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x36\n\x03\x61rg\x18\x15 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12;\n\x08\x63\x61llflow\x18\x1f \x03(\x0b\x32).android.vts.CallFlowSpecificationMessage\x12\x16\n\x0eprofiling_data\x18\x65 \x03(\x02\x12\x16\n\rcoverage_data\x18\xc9\x01 \x03(\r\"\x86\x02\n\x19PrimitiveDataValueMessage\x12\x0f\n\x07int32_t\x18\x01 \x01(\x05\x12\x10\n\x08uint32_t\x18\x02 \x01(\r\x12\x0f\n\x07\x66loat_t\x18\x03 \x01(\x02\x12\x10\n\x08\x64ouble_t\x18\x04 \x01(\x01\x12\r\n\x05\x62ytes\x18\x05 \x01(\x0c\x12\x0f\n\x07pointer\x18\x06 \x01(\r\x12\x0e\n\x06int8_t\x18\x07 \x01(\x05\x12\x0f\n\x07uint8_t\x18\x08 \x01(\r\x12\x0c\n\x04\x63har\x18\t \x01(\x05\x12\x0f\n\x07int16_t\x18\n \x01(\x05\x12\x10\n\x08uint16_t\x18\x0b \x01(\r\x12\x0f\n\x07int64_t\x18\x0c \x01(\x03\x12\x10\n\x08uint64_t\x18\r \x01(\x04\x12\x0e\n\x06string\x18\x0e \x01(\x0c\"\xce\x02\n\x1c\x41rgumentSpecificationMessage\x12\x16\n\x0eprimitive_type\x18\x01 \x03(\x0c\x12\x16\n\x0e\x61ggregate_type\x18\x02 \x03(\x0c\x12\x16\n\x08is_input\x18\x0b \x01(\x08:\x04true\x12\x18\n\tis_output\x18\x0c \x01(\x08:\x05\x66\x61lse\x12\x17\n\x08is_const\x18\r \x01(\x08:\x05\x66\x61lse\x12?\n\x0fprimitive_value\x18\x15 \x03(\x0b\x32&.android.vts.PrimitiveDataValueMessage\x12\x42\n\x0f\x61ggregate_value\x18\x16 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x16\n\x0eprimitive_name\x18\x1f \x03(\x0c\x12\x16\n\x0e\x61ggregate_name\x18  \x03(\x0c\"c\n\x1aStructSpecificationMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x37\n\x03\x61pi\x18\xe9\x07 \x03(\x0b\x32).android.vts.FunctionSpecificationMessage\"\xc8\x03\n\x1dInterfaceSpecificationMessage\x12\x34\n\x0f\x63omponent_class\x18\x01 \x01(\x0e\x32\x1b.android.vts.ComponentClass\x12\x32\n\x0e\x63omponent_type\x18\x02 \x01(\x0e\x32\x1a.android.vts.ComponentType\x12!\n\x16\x63omponent_type_version\x18\x03 \x01(\x02:\x01\x31\x12%\n\x1coriginal_data_structure_name\x18\xe9\x07 \x01(\x0c\x12\x0f\n\x06header\x18\xea\x07 \x03(\x0c\x12\x37\n\x03\x61pi\x18\xd1\x0f \x03(\x0b\x32).android.vts.FunctionSpecificationMessage\x12\x1c\n\x13\x61ggregate_type_name\x18\xb9\x17 \x03(\x0c\x12M\n\x19\x61ggregate_type_definition\x18\xba\x17 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12<\n\nsub_struct\x18\xa1\x1f \x03(\x0b\x32\'.android.vts.StructSpecificationMessage*l\n\x0e\x43omponentClass\x12\x11\n\rUNKNOWN_CLASS\x10\x00\x12\x07\n\x03HAL\x10\x01\x12\r\n\tSHAREDLIB\x10\x02\x12\x0c\n\x08HAL_HIDL\x10\x03\x12\x11\n\rHAL_SUBMODULE\x10\x04\x12\x0e\n\nLEGACY_HAL\x10\x05*V\n\rComponentType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\t\n\x05\x41UDIO\x10\x01\x12\n\n\x06\x43\x41MERA\x10\x02\x12\x07\n\x03GPS\x10\x03\x12\t\n\x05LIGHT\x10\x04\x12\x08\n\x04WIFI\x10\x05')
+  serialized_pb='\n#InterfaceSpecificationMessage.proto\x12\x0b\x61ndroid.vts\"e\n\x1c\x43\x61llFlowSpecificationMessage\x12\x14\n\x05\x65ntry\x18\x01 \x01(\x08:\x05\x66\x61lse\x12\x13\n\x04\x65xit\x18\x02 \x01(\x08:\x05\x66\x61lse\x12\x0c\n\x04next\x18\x0b \x03(\x0c\x12\x0c\n\x04prev\x18\x0c \x03(\x0c\"\xec\x02\n\x1c\x46unctionSpecificationMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12>\n\x0breturn_type\x18\x0b \x01(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x43\n\x10return_type_hidl\x18\x0c \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x36\n\x03\x61rg\x18\x15 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12;\n\x08\x63\x61llflow\x18\x1f \x03(\x0b\x32).android.vts.CallFlowSpecificationMessage\x12\x16\n\x0eprofiling_data\x18\x65 \x03(\x02\x12\x16\n\rcoverage_data\x18\xc9\x01 \x03(\r\x12\x14\n\x0bparent_path\x18\xad\x02 \x01(\x0c\"\x86\x02\n\x19PrimitiveDataValueMessage\x12\x0f\n\x07int32_t\x18\x01 \x01(\x05\x12\x10\n\x08uint32_t\x18\x02 \x01(\r\x12\x0f\n\x07\x66loat_t\x18\x03 \x01(\x02\x12\x10\n\x08\x64ouble_t\x18\x04 \x01(\x01\x12\r\n\x05\x62ytes\x18\x05 \x01(\x0c\x12\x0f\n\x07pointer\x18\x06 \x01(\r\x12\x0e\n\x06int8_t\x18\x07 \x01(\x05\x12\x0f\n\x07uint8_t\x18\x08 \x01(\r\x12\x0c\n\x04\x63har\x18\t \x01(\x05\x12\x0f\n\x07int16_t\x18\n \x01(\x05\x12\x10\n\x08uint16_t\x18\x0b \x01(\r\x12\x0f\n\x07int64_t\x18\x0c \x01(\x03\x12\x10\n\x08uint64_t\x18\r \x01(\x04\x12\x0e\n\x06string\x18\x0e \x01(\x0c\"\xce\x02\n\x1c\x41rgumentSpecificationMessage\x12\x16\n\x0eprimitive_type\x18\x01 \x03(\x0c\x12\x16\n\x0e\x61ggregate_type\x18\x02 \x03(\x0c\x12\x16\n\x08is_input\x18\x0b \x01(\x08:\x04true\x12\x18\n\tis_output\x18\x0c \x01(\x08:\x05\x66\x61lse\x12\x17\n\x08is_const\x18\r \x01(\x08:\x05\x66\x61lse\x12?\n\x0fprimitive_value\x18\x15 \x03(\x0b\x32&.android.vts.PrimitiveDataValueMessage\x12\x42\n\x0f\x61ggregate_value\x18\x16 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12\x16\n\x0eprimitive_name\x18\x1f \x03(\x0c\x12\x16\n\x0e\x61ggregate_name\x18  \x03(\x0c\"\xbc\x01\n\x1aStructSpecificationMessage\x12\x0c\n\x04name\x18\x01 \x01(\x0c\x12\x19\n\nis_pointer\x18\x02 \x01(\x08:\x05\x66\x61lse\x12\x37\n\x03\x61pi\x18\xe9\x07 \x03(\x0b\x32).android.vts.FunctionSpecificationMessage\x12<\n\nsub_struct\x18\xd1\x0f \x03(\x0b\x32\'.android.vts.StructSpecificationMessage\"\xc8\x03\n\x1dInterfaceSpecificationMessage\x12\x34\n\x0f\x63omponent_class\x18\x01 \x01(\x0e\x32\x1b.android.vts.ComponentClass\x12\x32\n\x0e\x63omponent_type\x18\x02 \x01(\x0e\x32\x1a.android.vts.ComponentType\x12!\n\x16\x63omponent_type_version\x18\x03 \x01(\x02:\x01\x31\x12%\n\x1coriginal_data_structure_name\x18\xe9\x07 \x01(\x0c\x12\x0f\n\x06header\x18\xea\x07 \x03(\x0c\x12\x37\n\x03\x61pi\x18\xd1\x0f \x03(\x0b\x32).android.vts.FunctionSpecificationMessage\x12\x1c\n\x13\x61ggregate_type_name\x18\xb9\x17 \x03(\x0c\x12M\n\x19\x61ggregate_type_definition\x18\xba\x17 \x03(\x0b\x32).android.vts.ArgumentSpecificationMessage\x12<\n\nsub_struct\x18\xa1\x1f \x03(\x0b\x32\'.android.vts.StructSpecificationMessage*l\n\x0e\x43omponentClass\x12\x11\n\rUNKNOWN_CLASS\x10\x00\x12\x07\n\x03HAL\x10\x01\x12\r\n\tSHAREDLIB\x10\x02\x12\x0c\n\x08HAL_HIDL\x10\x03\x12\x11\n\rHAL_SUBMODULE\x10\x04\x12\x0e\n\nLEGACY_HAL\x10\x05*V\n\rComponentType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\t\n\x05\x41UDIO\x10\x01\x12\n\n\x06\x43\x41MERA\x10\x02\x12\x07\n\x03GPS\x10\x03\x12\t\n\x05LIGHT\x10\x04\x12\x08\n\x04WIFI\x10\x05')
 
 _COMPONENTCLASS = _descriptor.EnumDescriptor(
   name='ComponentClass',
@@ -49,8 +49,8 @@ _COMPONENTCLASS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1662,
-  serialized_end=1770,
+  serialized_start=1774,
+  serialized_end=1882,
 )
 
 ComponentClass = enum_type_wrapper.EnumTypeWrapper(_COMPONENTCLASS)
@@ -87,8 +87,8 @@ _COMPONENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1772,
-  serialized_end=1858,
+  serialized_start=1884,
+  serialized_end=1970,
 )
 
 ComponentType = enum_type_wrapper.EnumTypeWrapper(_COMPONENTTYPE)
@@ -212,6 +212,13 @@ _FUNCTIONSPECIFICATIONMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='parent_path', full_name='android.vts.FunctionSpecificationMessage.parent_path', index=7,
+      number=301, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -222,7 +229,7 @@ _FUNCTIONSPECIFICATIONMESSAGE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=156,
-  serialized_end=498,
+  serialized_end=520,
 )
 
 
@@ -340,8 +347,8 @@ _PRIMITIVEDATAVALUEMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=501,
-  serialized_end=763,
+  serialized_start=523,
+  serialized_end=785,
 )
 
 
@@ -424,8 +431,8 @@ _ARGUMENTSPECIFICATIONMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=766,
-  serialized_end=1100,
+  serialized_start=788,
+  serialized_end=1122,
 )
 
 
@@ -444,8 +451,22 @@ _STRUCTSPECIFICATIONMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='api', full_name='android.vts.StructSpecificationMessage.api', index=1,
+      name='is_pointer', full_name='android.vts.StructSpecificationMessage.is_pointer', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='api', full_name='android.vts.StructSpecificationMessage.api', index=2,
       number=1001, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='sub_struct', full_name='android.vts.StructSpecificationMessage.sub_struct', index=3,
+      number=2001, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -459,8 +480,8 @@ _STRUCTSPECIFICATIONMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1102,
-  serialized_end=1201,
+  serialized_start=1125,
+  serialized_end=1313,
 )
 
 
@@ -543,8 +564,8 @@ _INTERFACESPECIFICATIONMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1204,
-  serialized_end=1660,
+  serialized_start=1316,
+  serialized_end=1772,
 )
 
 _FUNCTIONSPECIFICATIONMESSAGE.fields_by_name['return_type'].message_type = _ARGUMENTSPECIFICATIONMESSAGE
@@ -554,6 +575,7 @@ _FUNCTIONSPECIFICATIONMESSAGE.fields_by_name['callflow'].message_type = _CALLFLO
 _ARGUMENTSPECIFICATIONMESSAGE.fields_by_name['primitive_value'].message_type = _PRIMITIVEDATAVALUEMESSAGE
 _ARGUMENTSPECIFICATIONMESSAGE.fields_by_name['aggregate_value'].message_type = _ARGUMENTSPECIFICATIONMESSAGE
 _STRUCTSPECIFICATIONMESSAGE.fields_by_name['api'].message_type = _FUNCTIONSPECIFICATIONMESSAGE
+_STRUCTSPECIFICATIONMESSAGE.fields_by_name['sub_struct'].message_type = _STRUCTSPECIFICATIONMESSAGE
 _INTERFACESPECIFICATIONMESSAGE.fields_by_name['component_class'].enum_type = _COMPONENTCLASS
 _INTERFACESPECIFICATIONMESSAGE.fields_by_name['component_type'].enum_type = _COMPONENTTYPE
 _INTERFACESPECIFICATIONMESSAGE.fields_by_name['api'].message_type = _FUNCTIONSPECIFICATIONMESSAGE

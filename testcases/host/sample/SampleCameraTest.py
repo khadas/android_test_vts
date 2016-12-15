@@ -28,12 +28,28 @@ class SampleCameraTest(base_test.BaseTestClass):
     def setUpClass(self):
         self.hal_mirror = mirror.Mirror(["/data/local/tmp/32/hal"])
         self.hal_mirror.InitHal("camera", 2.1, bits=32)
-        self.hal_mirror.camera.init()
-        self.hal_mirror.camera.Open()  # should not crash b/29053974
+
+    def testCameraOpenFirst(self):
+        """A simple testcase which just calls an open function."""
+        self.hal_mirror.camera.common.methods.open()  # should not crash b/29053974
+
+    def testCameraInit(self):
+        """A simple testcase which just calls an init function."""
+        self.hal_mirror.camera.init()  # expect an exception? (can be undefined)
 
     def testCameraNormal(self):
-        """A simple testcase which just calls a function."""
-        logging.info(self.hal_mirror.camera.get_number_of_cameras())
+        """A simple testcase which just emulates a normal usage pattern."""
+        result = self.hal_mirror.camera.get_number_of_cameras()
+        count = result.return_type.primitive_value[0].int32_t
+        logging.info(count)
+        for index in range(0, count):
+          arg = self.hal_mirror.camera.camera_info_t(facing=0)
+          logging.info(self.hal_mirror.camera.get_camera_info(index, arg))
+        # uncomment when undefined function is handled gracefully.
+        # self.hal_mirror.camera.init()
+        self.hal_mirror.camera.camera_module_callbacks_t()
+        self.hal_mirror.camera.set_callbacks()
+        self.hal_mirror.camera.common.methods.open()
 
 
 if __name__ == "__main__":

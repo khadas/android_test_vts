@@ -32,6 +32,7 @@ extern int32_t RandomInt32();
 extern int64_t RandomInt64();
 extern bool RandomBool();
 extern char* RandomCharPointer();
+extern void* RandomVoidPointer();
 
 }  // namespace vts
 }  // namespace android

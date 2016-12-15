@@ -52,16 +52,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   }
   GenerateOpenNameSpaces(cpp_ss);
 
-  string component_name = message.original_data_structure_name();
-  while (!component_name.empty()
-         && (std::isspace(component_name.back())
-             || component_name.back() == '*' )) {
-    component_name.pop_back();
-  }
-  const auto pos = component_name.find_last_of(" ");
-  if (pos != std::string::npos) {
-    component_name = component_name.substr(pos + 1);
-  }
+  string component_name = GetComponentName(message);
 
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL
@@ -70,6 +61,29 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
+  GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
+  cpp_ss << endl << endl;
+
+  cpp_ss << endl;
+  GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+
+  std::stringstream ss;
+  // return type
+  ss << "android::vts::FuzzerBase* " << endl;
+  // function name
+  string function_name_prefix = GetFunctionNamePrefix(message);
+  ss << function_name_prefix << "(" << endl;
+  ss << ")";
+
+  GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(), fuzzer_extended_class_name);
+
+  GenerateCloseNameSpaces(cpp_ss);
+}
+
+
+void CodeGenBase::GenerateAllHeader(
+    const string& fuzzer_extended_class_name,
+    std::stringstream& h_ss, const InterfaceSpecificationMessage& message) {
   h_ss << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << "#define __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << endl;
@@ -81,6 +95,30 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   }
   h_ss << "\n\n" << endl;
   GenerateOpenNameSpaces(h_ss);
+
+  GenerateClassHeader(fuzzer_extended_class_name, h_ss, message);
+
+  string function_name_prefix = GetFunctionNamePrefix(message);
+
+  std::stringstream ss;
+  // return type
+  h_ss << endl;
+  ss << "android::vts::FuzzerBase* " << endl;
+  // function name
+  ss << function_name_prefix << "(" << endl;
+  ss << ")";
+
+  GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
+
+  GenerateCloseNameSpaces(h_ss);
+  h_ss << "#endif" << endl;
+}
+
+
+void CodeGenBase::GenerateClassHeader(
+    const string& fuzzer_extended_class_name,
+    std::stringstream& h_ss,
+    const InterfaceSpecificationMessage& message) {
   h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
       << endl;
   h_ss << " public:" << endl;
@@ -94,7 +132,14 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
   h_ss << "            void** result);" << endl;
+
+  // produce Fuzz method(s) for sub_struct(s).
+  for (auto const& sub_struct : message.sub_struct()) {
+    GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
+  }
+
   if (message.component_class() == HAL_SUBMODULE) {
+    string component_name = GetComponentName(message);
     h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
     h_ss << "    submodule_ = submodule;" << endl;
     h_ss << "  }" << endl;
@@ -104,29 +149,20 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
         << endl;
   }
   h_ss << "};" << endl;
+}
 
-  string function_name_prefix = GetFunctionNamePrefix(message);
 
-  cpp_ss << endl;
-  GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+void CodeGenBase::GenerateFuzzFunctionForSubStruct(
+    std::stringstream& h_ss,
+    const StructSpecificationMessage& message, const string& parent_path) {
+  h_ss << "  bool Fuzz_" << parent_path << message.name()
+      << "(FunctionSpecificationMessage* func_msg," << endl;
+  h_ss << "            void** result);" << endl;
 
-  std::stringstream ss;
-  // return type
-  h_ss << endl;
-  ss << "android::vts::FuzzerBase* " << endl;
-  // function name
-  ss << function_name_prefix << "(" << endl;
-  ss << ")";
-
-  GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
-
-  GenerateCloseNameSpaces(cpp_ss);
-  cpp_ss << endl << endl;
-
-  GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(), fuzzer_extended_class_name);
-
-  GenerateCloseNameSpaces(h_ss);
-  h_ss << "#endif" << endl;
+  for (auto const& sub_struct : message.sub_struct()) {
+    GenerateFuzzFunctionForSubStruct(
+        h_ss, sub_struct, parent_path + message.name() + "_");
+  }
 }
 
 
@@ -153,5 +189,20 @@ void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
   ss << "    cout << \"time \" << (*measured)[0] << endl;" << endl;
 }
 
+
+string CodeGenBase::GetComponentName(
+    const InterfaceSpecificationMessage& message) {
+  string component_name = message.original_data_structure_name();
+  while (!component_name.empty()
+         && (std::isspace(component_name.back())
+             || component_name.back() == '*' )) {
+    component_name.pop_back();
+  }
+  const auto pos = component_name.find_last_of(" ");
+  if (pos != std::string::npos) {
+    component_name = component_name.substr(pos + 1);
+  }
+  return component_name;
+}
 }  // namespace vts
 }  // namespace android

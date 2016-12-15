@@ -123,6 +123,8 @@ string GetConversionToProtobufFunctionName(ArgumentSpecificationMessage arg) {
   if (arg.aggregate_type().size() == 1) {
     if (!strcmp(arg.aggregate_type(0).c_str(), "camera_info_t*")) {
       return "ConvertCameraInfoToProtobuf";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "hw_device_t**")) {
+        return "";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
           << "error: unknown instance type " << arg.aggregate_type(0) << endl;
@@ -170,6 +172,12 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
       return "GenerateGpsPositionMode()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsPositionRecurrence")) {
       return "GenerateGpsPositionRecurrence()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "hw_module_t*")) {
+      return "(hw_module_t*) malloc(sizeof(hw_module_t))";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "hw_module_t**")) {
+      return "(hw_module_t**) malloc(sizeof(hw_module_t*))";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "hw_device_t**")) {
+      return "(hw_device_t**) malloc(sizeof(hw_device_t*))";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_info_t*")) {
       if (msg.length() == 0) {
         return "GenerateCameraInfo()";
@@ -178,8 +186,20 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
       }
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_module_callbacks_t*")) {
       return "GenerateCameraModuleCallbacks()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_notify_callback")) {
+      return "GenerateCameraNotifyCallback()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_data_callback")) {
+      return "GenerateCameraDataCallback()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_data_timestamp_callback")) {
+      return "GenerateCameraDataTimestampCallback()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_request_memory")) {
+      return "GenerateCameraRequestMemory()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "wifi_handle*")) {
       return "(wifi_handle*) malloc(sizeof(wifi_handle))";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "struct camera_device*")) {
+      return "(struct camera_device*) malloc(sizeof(struct camera_device))";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "struct preview_stream_ops*")) {
+      return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
           << "error: unknown instance type " << arg.aggregate_type(0) << endl;
@@ -200,6 +220,8 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
       return "RandomInt32()";
     } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
       return "RandomCharPointer()";
+    } else if (!strcmp(arg.primitive_type(0).c_str(), "void_pointer")) {
+      return "RandomVoidPointer()";
     }
     cerr << __FILE__ << ":" << __LINE__ << " "
         << "error: unknown data type " << arg.primitive_type(0) << endl;
