@@ -62,7 +62,7 @@
               var ctx = "${pageContext.request.contextPath}";
               var link = ctx + "/show_graph?profilingPoint=" +
                   data.getValue(table.getSelection()[0].row, 0) +
-                  "&tableName=${tableName}" +
+                  "&testName=${testName}" +
                   "&buildIdStartTime=" + ${buildIdStartTime} +
                   "&buildIdEndTime=" + ${buildIdEndTime};
               window.open(link,"_self");
@@ -256,7 +256,7 @@
               var ctx = "${pageContext.request.contextPath}";
 
               var link = ctx + "/show_coverage?key=" + key +
-                "&tableName=${tableName}" +
+                "&testName=${testName}" +
                 "&buildIdStartTime=${buildIdStartTime}" +
                 "&buildIdEndTime=${buildIdEndTime}";
               window.open(link,"_self");
@@ -268,7 +268,7 @@
       <div class="nav-wrapper">
         <div class="col s12">
           <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="#!" class="breadcrumb">${tableName}</a>
+          <a href="#!" class="breadcrumb">${testName}</a>
         </div>
       </div>
     </nav>
@@ -334,14 +334,14 @@
         function next() {
             var endTime = ${buildIdStartTime};
             var link = "${pageContext.request.contextPath}" +
-              "/show_table?tableName=${tableName}" + "&buildIdEndTime=" + endTime;
+              "/show_table?testName=${testName}" + "&buildIdEndTime=" + endTime;
             window.open(link,"_self");
         }
 
         function prev() {
             var startTime = ${buildIdEndTime};
             var link = "${pageContext.request.contextPath}" +
-              "/show_table?tableName=${tableName}&buildIdStartTime=" + startTime;
+              "/show_table?testName=${testName}&buildIdStartTime=" + startTime;
             window.open(link,"_self");
         }
     </script>

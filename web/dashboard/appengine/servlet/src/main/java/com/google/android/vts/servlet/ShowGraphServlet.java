@@ -20,12 +20,12 @@ import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +49,12 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "show_graph", urlPatterns = {"/show_graph"})
 public class ShowGraphServlet extends HttpServlet {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
+    private static final byte[] FAMILY = Bytes.toBytes("test");
+    private static final byte[] QUALIFIER = Bytes.toBytes("data");
+    private static final String TABLE_PREFIX = "result_";
     private static final long ONE_DAY = 86400000000000L;  // units microseconds
+    private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -70,7 +73,7 @@ public class ShowGraphServlet extends HttpServlet {
             startTime = now - ONE_DAY;
             endTime = now;
         }
-        tableName = TableName.valueOf(request.getParameter("tableName"));
+        tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
         table = BigtableHelper.getTable(tableName);
 
         // This list holds the values for all profiling points.
@@ -93,40 +96,39 @@ public class ShowGraphServlet extends HttpServlet {
         scan.setStopRow(Long.toString(endTime).getBytes());
         ResultScanner scanner = table.getScanner(scan);
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
-            for (Cell cell : result.rawCells()) {
-                TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
-                    parseFrom(cell.getValueArray());
+            byte[] value = result.getValue(FAMILY, QUALIFIER);
+            TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                parseFrom(value);
 
-                // update map of profiling point names
-                for (ProfilingReportMessage profilingReportMessage :
-                    testReportMessage.getProfilingList()) {
-                    if (!profilingPointName.equals(profilingReportMessage.getName().toStringUtf8())) {
-                        continue;
-                    }
-                    switch(profilingReportMessage.getType()) {
-                        case UNKNOWN_VTS_PROFILING_TYPE:
-                        case VTS_PROFILING_TYPE_TIMESTAMP :
-                            double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
-                                profilingReportMessage.getStartTimestamp())) / 1000;
-                            if (timeTaken < 0) {
-                                logger.info("Inappropriate value for time taken");
-                                continue;
-                            }
-                            profilingPointValuesList.add(timeTaken);
-                            break;
+            // update map of profiling point names
+            for (ProfilingReportMessage profilingReportMessage :
+                testReportMessage.getProfilingList()) {
+                if (!profilingPointName.equals(profilingReportMessage.getName().toStringUtf8())) {
+                    continue;
+                }
+                switch(profilingReportMessage.getType()) {
+                    case UNKNOWN_VTS_PROFILING_TYPE:
+                    case VTS_PROFILING_TYPE_TIMESTAMP :
+                        double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
+                            profilingReportMessage.getStartTimestamp())) / 1000;
+                        if (timeTaken < 0) {
+                            logger.info("Inappropriate value for time taken");
+                            continue;
+                        }
+                        profilingPointValuesList.add(timeTaken);
+                        break;
 
-                        case VTS_PROFILING_TYPE_LABELED_VECTOR :
-                            if (profilingReportMessage.getLabelList().size() != 0 &&
-                                profilingReportMessage.getLabelList().size() ==
-                                profilingReportMessage.getValueList().size()) {
-                                profilingVectors.add(profilingReportMessage);
-                                profilingBuildIds.add(testReportMessage.getBuildInfo()
-                                    .getId().toStringUtf8());
-                            }
-                            break;
-                        default :
-                            break;
-                    }
+                    case VTS_PROFILING_TYPE_LABELED_VECTOR :
+                        if (profilingReportMessage.getLabelList().size() != 0 &&
+                            profilingReportMessage.getLabelList().size() ==
+                            profilingReportMessage.getValueList().size()) {
+                            profilingVectors.add(profilingReportMessage);
+                            profilingBuildIds.add(testReportMessage.getBuildInfo()
+                                .getId().toStringUtf8());
+                        }
+                        break;
+                    default :
+                        break;
                 }
             }
         }
@@ -185,7 +187,7 @@ public class ShowGraphServlet extends HttpServlet {
         request.setAttribute("labelsListJson", new Gson().toJson(labels));
         request.setAttribute("profilingBuildIdsJson", new Gson().toJson(profilingBuildIds));
 
-        request.setAttribute("tableName", request.getParameter("tableName"));
+        request.setAttribute("testName", request.getParameter("testName"));
         request.setAttribute("startTime", new Gson().toJson(startTime));
         request.setAttribute("endTime", new Gson().toJson(endTime));
 

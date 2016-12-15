@@ -59,9 +59,10 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "vts_alert_job", urlPatterns = {"/cron/vts_alert_job"})
 public class VtsAlertJobServlet extends HttpServlet {
 
-    private static final String FAMILY = "status";
-    private static final String DATA_QUALIFIER = "data";
-    private static final String TIME_QUALIFIER = "upload_timestamp";
+    private static final byte[] RESULTS_FAMILY = Bytes.toBytes("test");
+    private static final byte[] STATUS_FAMILY = Bytes.toBytes("status");
+    private static final byte[] DATA_QUALIFIER = Bytes.toBytes("data");
+    private static final byte[] TIME_QUALIFIER = Bytes.toBytes("upload_timestamp");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String VTS_EMAIL_ADDRESS = "vts-alert@android-vts-internal.appspotmail.com";
     private static final String VTS_EMAIL_NAME = "VTS Alert Bot";
@@ -122,32 +123,31 @@ public class VtsAlertJobServlet extends HttpServlet {
 
         boolean anyFailed = false;
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
-            for (Cell cell : result.rawCells()) {
-                TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage
-                                                          .parseFrom(cell.getValueArray());
-                String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
+        byte[] value = result.getValue(RESULTS_FAMILY, DATA_QUALIFIER);
+            TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage
+                                                      .parseFrom(value);
+            String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
 
-                // filter empty build IDs and add only numbers
-                if (buildId.length() == 0) continue;
+            // filter empty build IDs and add only numbers
+            if (buildId.length() == 0) continue;
 
-                String key;
-                try {
-                    Integer.parseInt(buildId);
-                    key = testReportMessage.getBuildInfo().getId().toStringUtf8()
-                      + "." + String.valueOf(testReportMessage.getStartTimestamp());
-                    sortedBuildIdTimeStampList.add(key);
-                    // update map based on time stamp.
-                    buildIdTimeStampMap.put(key, testReportMessage);
-                } catch (NumberFormatException e) {
-                    /* skip a non-post-submit build */
-                    continue;
-                }
-                for (TestCaseReportMessage testCaseReportMessage :
-                     testReportMessage.getTestCaseList()) {
-                    if (testCaseReportMessage.getTestResult() ==
-                        TestCaseResult.TEST_CASE_RESULT_FAIL) {
-                         anyFailed = true;
-                    }
+            String key;
+            try {
+                Integer.parseInt(buildId);
+                key = testReportMessage.getBuildInfo().getId().toStringUtf8()
+                  + "." + String.valueOf(testReportMessage.getStartTimestamp());
+                sortedBuildIdTimeStampList.add(key);
+                // update map based on time stamp.
+                buildIdTimeStampMap.put(key, testReportMessage);
+            } catch (NumberFormatException e) {
+                /* skip a non-post-submit build */
+                continue;
+            }
+            for (TestCaseReportMessage testCaseReportMessage :
+                 testReportMessage.getTestCaseList()) {
+                if (testCaseReportMessage.getTestResult() ==
+                    TestCaseResult.TEST_CASE_RESULT_FAIL) {
+                     anyFailed = true;
                 }
             }
         }
@@ -214,13 +214,13 @@ public class VtsAlertJobServlet extends HttpServlet {
         ResultScanner scanner = table.getScanner(scan);
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             String testName = Bytes.toString(result.getRow());
-            byte[] value = result.getValue(Bytes.toBytes(FAMILY), Bytes.toBytes(DATA_QUALIFIER));
+            byte[] value = result.getValue(STATUS_FAMILY, DATA_QUALIFIER);
 
             // Get the time stamp for the last upload.
             long lastUploadTimestamp;
             try {
                 lastUploadTimestamp = Long.parseLong(Bytes.toString(
-                    result.getValue(Bytes.toBytes(FAMILY), Bytes.toBytes(TIME_QUALIFIER))));
+                    result.getValue(STATUS_FAMILY, TIME_QUALIFIER)));
             } catch (NumberFormatException e) {
                 // If no upload timestamp, skip this row.
                 logger.warn("Error parsing upload timestamp: ", e);
@@ -259,15 +259,15 @@ public class VtsAlertJobServlet extends HttpServlet {
 
             // Create row insertion operation.
             Put put = new Put(Bytes.toBytes(testName));
-            put.addColumn(Bytes.toBytes(FAMILY), Bytes.toBytes(DATA_QUALIFIER),
+            put.addColumn(STATUS_FAMILY, DATA_QUALIFIER,
                           builder.build().toByteArray());
 
             // To preserve ACID properties, only perform the PUT if the value stored in the DB
             // for the row/col/qualifier is the same as at the time of the READ.
             // Note: if value is null, this method checks for cell non-existence.
             boolean success = table.checkAndPut(
-                                  Bytes.toBytes(testName), Bytes.toBytes(FAMILY),
-                                  Bytes.toBytes(DATA_QUALIFIER),
+                                  Bytes.toBytes(testName), STATUS_FAMILY,
+                                  DATA_QUALIFIER,
                                   value, put);
 
             // Send emails if the PUT operation succeeds (i.e. another job did not already

@@ -52,19 +52,19 @@ public class DashboardMainServlet extends HttpServlet {
         if (currentUser != null) {
             response.setContentType("text/plain");
             HTableDescriptor[] tables = BigtableHelper.getTables();
-            List<String> tableList = new ArrayList<>();
+            List<String> testList = new ArrayList<>();
 
             // filter tables not starting with 'result'
             for (HTableDescriptor table : tables) {
                 String tableName = table.getNameAsString();
                 if (tableName.startsWith("result_")) {
-                    tableList.add(tableName.substring(7));  // cut the prefix
-               }
+                    testList.add(tableName.substring(7));  // cut the prefix
+                }
             }
 
-            String[] tableArray = new String[tableList.size()];
-            tableList.toArray(tableArray);
-            request.setAttribute("tableNames", tableArray);
+            String[] testArray = new String[testList.size()];
+            testList.toArray(testArray);
+            request.setAttribute("testNames", testArray);
             dispatcher = request.getRequestDispatcher(DASHBOARD_MAIN_JSP);
             try {
                 dispatcher.forward(request, response);
