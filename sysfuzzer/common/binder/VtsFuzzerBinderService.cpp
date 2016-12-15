@@ -107,11 +107,10 @@ int32_t BpVtsFuzzer::Status(int32_t type) {
 }
 
 
-int32_t BpVtsFuzzer::Call(int32_t arg1, int32_t arg2) {
+const char* BpVtsFuzzer::Call(const string& call_payload) {
   Parcel data, reply;
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
-  data.writeInt32(arg1);
-  data.writeInt32(arg2);
+  data.writeCString(call_payload.c_str());
 #ifdef VTS_FUZZER_BINDER_DEBUG
   data.print(PLOG);
   endl(PLOG);
@@ -123,8 +122,13 @@ int32_t BpVtsFuzzer::Call(int32_t arg1, int32_t arg2) {
   endl(PLOG);
 #endif
 
-  int32_t res;
-  status_t status = reply.readInt32(&res);
+  const char* res = reply.readCString();
+  if (res == NULL) {
+    printf("reply == NULL\n");
+    return res;
+  }
+
+  printf("len(reply) = %d\n", strlen(res));
   return res;
 }
 
@@ -146,13 +150,11 @@ const char* BpVtsFuzzer::GetFunctions() {
   const char* res = reply.readCString();
   if (res == NULL) {
     printf("reply == NULL\n");
-    return NULL;
+    return res;
   }
 
   printf("len(reply) = %d\n", strlen(res));
-  char* result = (char*) malloc(strlen(res) + 1);
-  strcpy(result, res);
-  return (const char*) result;
+  return res;
 }
 
 }  // namespace vts

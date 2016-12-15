@@ -16,6 +16,7 @@
 
 #include "BinderServer.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <string>
@@ -24,6 +25,7 @@
 #include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderServer"
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include <binder/TextOutput.h>
 #include <binder/IInterface.h>
@@ -35,6 +37,7 @@
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/SpecificationBuilder.h"
 
+#include <google/protobuf/text_format.h>
 #include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
 
 
@@ -102,12 +105,11 @@ status_t BnVtsFuzzer::onTransact(
       break;
     }
     case CALL: {
-      int32_t arg1 = data.readInt32();
-      int32_t arg2 = data.readInt32();
-      int32_t result = Call(arg1, arg2);
+      const char* arg = data.readCString();
+      const char* result = Call(arg);
 
-      ALOGD("BnVtsFuzzer::%s call(%i, %i) = %i",
-            __FUNCTION__, arg1, arg2, result);
+      ALOGD("BnVtsFuzzer::%s call(%s) = %i",
+            __FUNCTION__, arg, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -116,13 +118,12 @@ status_t BnVtsFuzzer::onTransact(
       reply->print(PLOG);
       endl(PLOG);
 #endif
-      reply->writeInt32(result);
+      reply->writeCString(result);
       break;
     }
     case GET_FUNCTIONS: {
       const char* result = GetFunctions();
 
-      ALOGD("BnVtsFuzzer::%s %s", __FUNCTION__, result);
       if (reply == NULL) {
         ALOGE("reply == NULL");
         abort();
@@ -171,28 +172,29 @@ class VtsFuzzerServer : public BnVtsFuzzer {
     return 0;
   }
 
-  int32_t Call(int32_t arg1, int32_t arg2) {
-    printf("VtsFuzzerServer::Call(%i, %i)\n", arg1, arg2);
-    return arg1 + arg2;
+  const char* Call(const string& arg) {
+    printf("VtsFuzzerServer::Call(%s)\n", arg.c_str());
+    FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
+    google::protobuf::TextFormat::MergeFromString(arg, func_msg);
+    printf("call!!!\n");
+    spec_builder_.CallFunction(func_msg);
+    return arg.c_str();
   }
 
   const char* GetFunctions() {
-    printf("Get functions");
+    printf("Get functions*");
     vts::InterfaceSpecificationMessage* spec =
         spec_builder_.GetInterfaceSpecification();
     if (!spec) {
       return NULL;
     }
-    string output;
-    if (spec->SerializeToString(&output)) {
-      const char* output_buf = output.c_str();
-      char* copy = (char*) malloc(strlen(output_buf) + 1);
-      strcpy(copy, output_buf);
-      printf("serialized if spec msg len %d\n", strlen(output_buf));
-      printf("serialized if spec msg %s\n", output_buf);
-      return copy;
+    string* output = new string();
+    printf("getfunctions serial1\n");
+    if (google::protobuf::TextFormat::PrintToString(*spec, output)) {
+      printf("getfunctions length %d\n", output->length());
+      return output->c_str();
     } else {
-      printf("can't serialize the interface spec msg to a string.\n");
+      printf("can't serialize the interface spec message to a string.\n");
       return NULL;
     }
   }
