@@ -64,8 +64,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
   ${vtslib_interfacespec_srcfiles} \
-  ../../../external/libnfc-nci/hidl/INfc.hidl \
-  ../../../external/libnfc-nci/hidl/INfcClientCallback.hidl \
+  ../../../external/libnfc-nci/hidl/INfc.hal \
+  ../../../external/libnfc-nci/hidl/INfcClientCallback.hal \
 
 LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
