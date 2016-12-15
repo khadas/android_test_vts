@@ -50,6 +50,12 @@ class FuzzerWrapper {
 
   // DLL Loader class.
   DllLoader dll_loader_;
+
+  // loaded function name;
+  char* function_name_prefix_chars_;
+
+  // loaded FuzzerBase;
+  FuzzerBase* fuzzer_base_;
 };
 
 }  // namespace vts

@@ -53,7 +53,7 @@ class MirrorBase(object):
     _target_basepath = ["/system/lib64/hw"]
 
     def Init(self, target_class, target_type, target_version, target_basepath,
-             module_name=None, handler_name=None, bits=64):
+             handler_name=None, bits=64):
         """Initializes the connection and then calls 'Build' to init attributes.
 
         Args:
@@ -62,7 +62,6 @@ class MirrorBase(object):
             target_version: float, the target component version (e.g., 1.0).
             target_basepath: string, the base path of where a target file is
                 stored in.
-            module_name: string, the name of a module to load.
             handler_name: string, the name of the handler.
                 by default, target_type is used.
 
@@ -105,8 +104,7 @@ class MirrorBase(object):
             launched = self._client.LaunchStubService(
                 service_name=handler_name, file_path=found_target_filename,
                 bits=bits, target_class=target_class_id,
-                target_type=target_type_id, target_version=target_version,
-                module_name=module_name)
+                target_type=target_type_id, target_version=target_version)
             if not launched:
                 raise errors.ComponentLoadingError(
                     "Target file path %s" % filename)

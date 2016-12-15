@@ -26,12 +26,30 @@ from vts.utils.python.mirror_objects import Mirror
 class SampleCameraTestcase(base_test.BaseTestClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
 
-    def testCamera(self):
+    def testCameraOpenFirst(self):
         """A simple testcase which just calls a function."""
         logging.info("testCamera start")
         hal_mirror = Mirror.Mirror(["/data/local/tmp/32/hal"])
         hal_mirror.InitHal("camera", 2.1, bits=32)
-        hal_mirror.camera.get_number_of_cameras()
+        hal_mirror.camera.Open()  # should not crash b/29053974
+        logging.info("testCamera end")
+
+    def testCameraInit(self):
+        """A simple testcase which just calls a function."""
+        logging.info("testCamera start")
+        hal_mirror = Mirror.Mirror(["/data/local/tmp/32/hal"])
+        hal_mirror.InitHal("camera", 2.1, bits=32)
+        hal_mirror.camera.init()  # expect an exception? (can be undefined)
+        logging.info("testCamera end")
+
+    def testCameraNormal(self):
+        """A simple testcase which just calls a function."""
+        logging.info("testCamera start")
+        hal_mirror = Mirror.Mirror(["/data/local/tmp/32/hal"])
+        hal_mirror.InitHal("camera", 2.1, bits=32)
+        logging.info(hal_mirror.camera.get_number_of_cameras())
+        logging.info(hal_mirror.camera.get_number_of_cameras())
+        #hal_mirror.camera.Open()
         logging.info("testCamera end")
 
 
@@ -41,7 +59,7 @@ def main(args):
     Log.SetupLogger()
     # TODO: use the test runner instead.
     testcase = SampleCameraTestcase({})
-    testcase.testCamera()
+    testcase.testCameraNormal()
 
 
 if __name__ == "__main__":

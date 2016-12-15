@@ -143,14 +143,14 @@ void CodeGenBase::GenerateCloseNameSpaces(std::stringstream& ss) {
 
 
 void CodeGenBase::GenerateCodeToStartMeasurement(std::stringstream& ss) {
-  ss << "VtsMeasurement vts_measurement;" << endl;
-  ss << "vts_measurement.Start();" << endl;
+  ss << "    VtsMeasurement vts_measurement;" << endl;
+  ss << "    vts_measurement.Start();" << endl;
 }
 
 
 void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
-  ss << "vector<float>* measured = vts_measurement.Stop();" << endl;
-  ss << "cout << \"time \" << (*measured)[0] << endl;" << endl;
+  ss << "    vector<float>* measured = vts_measurement.Stop();" << endl;
+  ss << "    cout << \"time \" << (*measured)[0] << endl;" << endl;
 }
 
 }  // namespace vts

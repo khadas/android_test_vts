@@ -34,8 +34,10 @@ class FuzzerBase {
 
   // Loads a target component where the argument is the file path.
   // Returns true iff successful.
-  bool LoadTargetComponent(const char* target_dll_path,
-                           const char* module_name = NULL);
+  bool LoadTargetComponent(const char* target_dll_path);
+
+  // Open Conventional Hal
+  int OpenConventionalHal(const char* module_name = NULL);
 
   // Fuzz tests the loaded component using the provided interface specification.
   // Returns true iff the testing is conducted completely.
@@ -63,9 +65,12 @@ class FuzzerBase {
   // DLL Loader class.
   DllLoader target_loader_;
 
+  // a pointer to the HAL_MODULE_INFO_SYM data structure of the loaded component.
+  struct hw_module_t* hmi_;
+
  private:
   // a pointer to the string which contains the loaded component.
-  const char* target_dll_path_;
+  char* target_dll_path_;
 
   // function name prefix.
   const char* function_name_prefix_;

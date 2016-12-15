@@ -42,9 +42,13 @@ class DllLoader {
   // Returns a handle (void *) if successful; NULL otherwise.
   void* Load(const char* file_path);
 
+  // Initializes as a conventional HAL.
+  // Returns true if it is a conventional HAL, False otherwise.
+  struct hw_module_t* InitConventionalHal();
+
   // Finds and returns hw_device_t data structure from the loaded file
   // (i.e., a HAL).
-  struct hw_device_t* GetHWDevice(const char* module_name = NULL);
+  struct hw_device_t* OpenConventionalHal(const char* module_name = NULL);
 
   // Finds and returns a requested function defined in the loaded file.
   // Returns NULL if not found.
@@ -62,6 +66,9 @@ class DllLoader {
  private:
   // pointer to a handle of the loaded DLL file.
   void* handle_;
+
+  // pointer to the loaded hw_module_t structure.
+  struct hw_module_t* hmi_;
 
   // pointer to the HAL data structure found in the loaded file.
   struct hw_device_t *device_;

@@ -52,13 +52,13 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
         #   self.hal_mirror.light.LIGHT_ID_BLUETOOTH
         #   self.hal_mirror.light.LIGHT_ID_WIFI
         logging.info("blackbox fuzzing module name: %s", module_name)
-        self.TestTurnOnLightBlackBoxFuzzing(module_name)
+        #self.TestTurnOnLightBlackBoxFuzzing(module_name)
         logging.info("whitebox fuzzing module name: %s", module_name)
         self.TestTurnOnLightWhiteBoxFuzzing(module_name)
 
     def TestTurnOnLightBlackBoxFuzzing(self, module_name):
         """A fuzz testcase which calls a function using different values."""
-        self.hal_mirror.InitHal("light", 1.0, module_name=module_name)
+        self.hal_mirror.light.Open(module_name)
         genes = GenePool.CreateGenePool(
             self._gene_pool_size,
             self.hal_mirror.light.light_state_t,
@@ -82,7 +82,7 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
 
     def TestTurnOnLightWhiteBoxFuzzing(self, module_name):
         """A fuzz testcase which calls a function using different values."""
-        self.hal_mirror.InitHal("light", 1.0, module_name=module_name)
+        self.hal_mirror.light.Open(module_name)
         genes = GenePool.CreateGenePool(
             self._gene_pool_size,
             self.hal_mirror.light.light_state_t,

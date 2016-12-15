@@ -85,19 +85,23 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     const vts::InterfaceSpecificationMessage& iface_spec_msg,
     const char* dll_file_name,
     const char* target_func_name) {
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "entry" << endl;
+  cout << __func__ << ":" << __LINE__ << " " << "entry" << endl;
   FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
   if (!fuzzer) {
     cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
     return NULL;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "got fuzzer" << endl;
-  if (!fuzzer->LoadTargetComponent(dll_file_name, module_name_)) {
+
+  // TODO: don't load multiple times. reuse FuzzerBase*.
+  cout << __func__ << ":" << __LINE__ << " " << "got fuzzer" << endl;
+  if (!fuzzer->LoadTargetComponent(dll_file_name)) {
     cerr << __FUNCTION__ << ": couldn't load target component file, "
         << dll_file_name << endl;
     return NULL;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << " " << "loaded target comp" << endl;
+  cout << __func__ << ":" << __LINE__ << " " << "loaded target comp" << endl;
+
+  if (!strcmp(target_func_name, "#Open")) return fuzzer;
 
   for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
     cout << "checking " << func_msg.name() << endl;
@@ -175,20 +179,52 @@ const string& SpecificationBuilder::CallFunction(
     return empty_string;
   }
   cout << __FUNCTION__ << ":" << __LINE__ << " " << "loaded if_spec lib" << endl;
+  cout << __func__ << " " << func_msg->name() << endl;
 
   FuzzerBase* func_fuzzer = GetFuzzerBase(
       *if_spec_msg_, dll_file_name_, func_msg->name().c_str());
+  cout << __func__ << ":" << __LINE__ << endl;
   if (!func_fuzzer) {
     cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
         << dll_file_name_ << endl;
     return empty_string;
   }
 
+  if (func_msg->name() == "#Open") {
+    cout << __func__ << ":" << __LINE__ << endl;
+    if (func_msg->arg().size() > 0) {
+      cout << __func__ << " " << func_msg->arg(0).primitive_value(0).bytes().c_str() << endl;
+      func_fuzzer->OpenConventionalHal(
+          func_msg->arg(0).primitive_value(0).bytes().c_str());
+    } else {
+      cout << __func__ << " no arg" << endl;
+      func_fuzzer->OpenConventionalHal();
+    }
+    cout << __func__ << " opened" << endl;
+    // return the return value from open;
+    if (func_msg->return_type().primitive_type().size() > 0) {
+      // TODO handle when the size > 1.
+      if (!strcmp(func_msg->return_type().primitive_type(0).c_str(), "int32_t")) {
+        func_msg->mutable_return_type()->mutable_primitive_value()->Add()->set_int32_t(0);
+        cout << "result " << endl;
+        // todo handle more types;
+        string* output = new string();
+        google::protobuf::TextFormat::PrintToString(*func_msg, output);
+        return *output;
+      }
+    }
+    return empty_string;
+  }
+  cout << __func__ << ":" << __LINE__ << endl;
+
   void* result;
   func_fuzzer->FunctionCallBegin();
-  cout << "Call Function " << func_msg->name() << endl;
-  func_fuzzer->Fuzz(*func_msg, &result);
-  cout << __FUNCTION__ << ": called" << endl;
+  cout << __func__ << " Call Function " << func_msg->name() << endl;
+  if (!func_fuzzer->Fuzz(*func_msg, &result)) {
+    cout << __func__ << " function not found - todo handle more explicitly" << endl;
+    return *(new string("error"));
+  }
+  cout << __func__ << ": called" << endl;
 
   // set coverage data.
   vector<unsigned>* coverage = func_fuzzer->FunctionCallEnd();
@@ -202,12 +238,12 @@ const string& SpecificationBuilder::CallFunction(
     // TODO: actually handle this case.
     if (result != NULL) {
       // loads that interface spec and enqueues all functions.
-      cout << __FUNCTION__ << " return type: "
+      cout << __func__ << " return type: "
           << func_msg->return_type().aggregate_type(0) << endl;
     } else {
-      cout << __FUNCTION__ << " return value = NULL" << endl;
+      cout << __func__ << " return value = NULL" << endl;
     }
-    cerr << __FUNCTION__ << " todo: support aggregate" << endl;
+    cerr << __func__ << " todo: support aggregate" << endl;
     string* output = new string();
     google::protobuf::TextFormat::PrintToString(*func_msg, output);
     return *output;
