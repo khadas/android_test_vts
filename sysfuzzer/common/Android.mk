@@ -59,7 +59,7 @@ LOCAL_MULTILIB := both
 
 LOCAL_COMPATIBILITY_SUITE := vts
 
-include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk
+include test/vts/tools/build/Android.packaging_sharedlib.mk
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)

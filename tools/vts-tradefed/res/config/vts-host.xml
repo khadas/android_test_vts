@@ -20,5 +20,6 @@
     <option name="compatibility:include-filter" value="SampleCameraTest" />
     <!-- staging <option name="compatibility:include-filter" value="NfcHidlBasicTest" /> -->
     <option name="compatibility:include-filter" value="SampleShellTest" />
+    <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
