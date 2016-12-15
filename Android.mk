@@ -19,6 +19,7 @@ LOCAL_PATH := $(call my-dir)
 include $(call all-subdir-makefiles)
 
 ifeq ($(HOST_OS),linux)
+ifneq ($(filter vts, $(MAKECMDGOALS)),)
 
 include $(CLEAR_VARS)
 
@@ -28,14 +29,16 @@ $(VTS_PYTHON_ZIP): test/vts/setup.py
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	@mkdir -p $(dir $@)
 	$(hide) cd test/vts; python setup.py sdist --formats=zip
+	$(hide) unzip test/vts/dist/vts-0.1.zip -d $(HOST_OUT)/vts/android-vts/testcases
+	$(hide) mv -f $(HOST_OUT)/vts/android-vts/testcases/vts-0.1 $(HOST_OUT)/vts/android-vts/testcases/vts
+	$(hide) touch -f $(HOST_OUT)/vts/android-vts/testcases/vts/__init__.py
 	$(hide) cp -f test/vts/dist/vts-0.1.zip $@
 
 .PHONY: vts_runner_python
 vts_runner_python: $(VTS_PYTHON_ZIP)
 vts: $(VTS_PYTHON_ZIP)
 
-ifneq ($(filter vts, $(MAKECMDGOALS)),)
-  $(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
-endif
+$(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
 
+endif # vts
 endif # linux
