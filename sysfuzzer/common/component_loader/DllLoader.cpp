@@ -48,7 +48,8 @@ void* DllLoader::Load(const char* file_path, bool is_conventional_hal) {
   handle_ = dlopen(file_path, RTLD_LAZY);
   if (!handle_) {
     fputs(dlerror(), stderr);
-    cerr << "Can't load a dll " << file_path << endl;
+    cerr << endl
+         << "Can't load a shared library, " << file_path << "." << endl;
     return NULL;
   }
   cout << __func__ << " DLL loaded " << file_path << endl;

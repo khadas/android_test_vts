@@ -146,7 +146,6 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
         cpp_ss << "Return<void> ";
-
       } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
                  api.return_type_hidl(0).type() == TYPE_ENUM) {
         cpp_ss << "Return<" << api.return_type_hidl(0).scalar_type() << "> ";
@@ -176,7 +175,12 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
       }
       cpp_ss << ") {" << endl;
       cpp_ss << "  cout << \"" << api.name() << " called\" << endl;" << endl;
-      cpp_ss << "  return Status::ok();" << endl;
+      if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl(0).type() == TYPE_VOID) {
+        cpp_ss << "  return Void();" << endl;
+      } else {
+        cpp_ss << "  return Status::ok();" << endl;
+      }
       cpp_ss << "}" << endl;
       cpp_ss << endl;
     }
@@ -189,7 +193,8 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     cpp_ss << "}" << endl << endl;
   } else {
     if (message.component_class() != HAL_HIDL ||
-        message.component_name() != "types") {
+        (message.component_name() != "types" &&
+         !endsWith(message.component_name(), "Callback"))) {
       std::stringstream ss;
       // return type
       ss << "android::vts::FuzzerBase* " << endl;
@@ -257,7 +262,8 @@ void CodeGenBase::GenerateAllHeader(
   ss << ")";
 
   if (message.component_class() == HAL_HIDL &&
-      message.component_name() != "types") {
+      message.component_name() != "types" &&
+      !endsWith(message.component_name(), "Callback")) {
     GenerateHeaderGlobalFunctionDeclarations(h_ss, ss.str());
   }
 
@@ -265,15 +271,15 @@ void CodeGenBase::GenerateAllHeader(
       endsWith(message.component_name(), "Callback")) {
     h_ss << endl;
     h_ss << "class Vts" << message.component_name().substr(1) << ": public "
-           << message.component_name() << " {" << endl;
+         << message.component_name() << " {" << endl;
     h_ss << " public:" << endl;
     h_ss << "  Vts" << message.component_name().substr(1) << "() {};" << endl;
     h_ss << endl;
     h_ss << "  virtual ~Vts" << message.component_name().substr(1) << "()"
-           << " = default;" << endl;
+         << " = default;" << endl;
     h_ss << endl;
     for (const auto& api : message.interface().api()) {
-      h_ss << "  virtual ";
+      h_ss << "  ";
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
         h_ss << "Return<void> ";
@@ -288,7 +294,7 @@ void CodeGenBase::GenerateAllHeader(
       h_ss << api.name() << "(" << endl;
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
-        if (arg_count > 0) h_ss << ", ";
+        if (arg_count > 0) h_ss << "," << endl;
         if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
           if (arg.is_const()) {
             h_ss << "    const " /*<< message.component_name() << "::" */
@@ -304,7 +310,7 @@ void CodeGenBase::GenerateAllHeader(
         }
         arg_count++;
       }
-      h_ss << ");" << endl;
+      h_ss << ") override;" << endl;
       h_ss << endl;
     }
     h_ss << "};" << endl;
@@ -323,7 +329,8 @@ void CodeGenBase::GenerateClassHeader(
     const string& fuzzer_extended_class_name, std::stringstream& h_ss,
     const ComponentSpecificationMessage& message) {
   if (message.component_class() != HAL_HIDL ||
-      message.component_name() != "types") {
+      (message.component_name() != "types" &&
+       !endsWith(message.component_name(), "Callback"))) {
     h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
          << endl;
     h_ss << " public:" << endl;
