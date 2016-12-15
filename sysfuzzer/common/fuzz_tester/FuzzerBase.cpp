@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "component_loader/DllLoader.h"
 #include "utils/InterfaceSpecUtil.h"
@@ -337,18 +337,18 @@ int FuzzerBase::OpenConventionalHal(const char* module_name) {
 }
 
 
-bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage& message,
+bool FuzzerBase::Fuzz(vts::InterfaceSpecificationMessage* message,
                       void** result) {
   cout << __func__ << " Fuzzing target component: "
-      << "class " << message.component_class()
-      << " type " << message.component_type()
-      << " version " << message.component_type_version() << endl;
+      << "class " << message->component_class()
+      << " type " << message->component_type()
+      << " version " << message->component_type_version() << endl;
 
-  string function_name_prefix = GetFunctionNamePrefix(message);
+  string function_name_prefix = GetFunctionNamePrefix(*message);
   function_name_prefix_ = function_name_prefix.c_str();
-  /*for (vts::FunctionSpecificationMessage func_msg : *message.mutable_api()) {
-    Fuzz(func_msg, result);
-  }*/
+  for (vts::FunctionSpecificationMessage func_msg : *message->mutable_api()) {
+    Fuzz(&func_msg, result);
+  }
   return true;
 }
 

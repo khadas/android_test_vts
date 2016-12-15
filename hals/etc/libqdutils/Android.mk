@@ -1,7 +1,5 @@
 LOCAL_PATH := $(call my-dir)
 
-ifneq ($(filter msm8916 msm8909,$(TARGET_BOARD_PLATFORM)),)
-
 # include $(LOCAL_PATH)/../common.mk
 #include $(CLEAR_VARS)
 
@@ -45,5 +43,3 @@ LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
 LOCAL_LDFLAGS += --coverage
 
 include $(BUILD_SHARED_LIBRARY)
-
-endif

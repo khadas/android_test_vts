@@ -19,12 +19,16 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include <iostream>
+
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "vts_datatype.h"
+
+using namespace std;
 
 namespace android {
 namespace vts {
@@ -40,6 +44,7 @@ static void vts_torch_mode_status_change(
 
 
 camera_module_callbacks_t* GenerateCameraModuleCallbacks() {
+  cout << __func__ << endl;
   if (RandomBool()) {
     return NULL;
   } else {
@@ -53,6 +58,7 @@ camera_module_callbacks_t* GenerateCameraModuleCallbacks() {
 
 
 camera_info_t* GenerateCameraInfo() {
+  cout << __func__ << endl;
   if (RandomBool()) {
     return NULL;
   } else {
@@ -135,15 +141,40 @@ camera_info_t* GenerateCameraInfo() {
 }
 
 
-bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
-                                 ArgumentSpecificationMessage* msg) {
-  //msg->mutable_primitive_value()->Clear();
-  //msg->mutable_aggregate_value()->Clear();
+camera_info_t* GenerateCameraInfoUsingMessage(
+    const ArgumentSpecificationMessage& msg) {
+  cout << __func__ << endl;
+  // TODO: acutally use msg.
+  camera_info_t* caminfo = (camera_info_t*) malloc(sizeof(camera_info_t));
+  caminfo->facing = RandomBool() ? CAMERA_FACING_BACK : CAMERA_FACING_FRONT;
+  // support CAMERA_FACING_EXTERNAL if CAMERA_MODULE_API_VERSION_2_4 or above
+  caminfo->orientation = RandomBool() ? (RandomBool() ? 0 : 90) : (RandomBool() ? 180 : 270);
+  caminfo->device_version = CAMERA_MODULE_API_VERSION_2_1;
+  caminfo->static_camera_characteristics = NULL;
+  caminfo->resource_cost = 50;  // between 50 and 100.
+  caminfo->conflicting_devices = NULL;
+  caminfo->conflicting_devices_length = 0;
+
+  return caminfo;
+}
+
+
+bool ConvertCameraInfoToProtobuf(
+    camera_info_t* raw, ArgumentSpecificationMessage* msg) {
+  cout << __func__ << ":" << __LINE__ << endl;
+
+  if (msg->primitive_value_size() > 0) msg->clear_primitive_value();
+  if (msg->aggregate_value_size() > 0) msg->clear_aggregate_value();
+
   if (!raw) {
     return false;
   }
+
+  cout << __func__ << ":" << __LINE__ << endl;
+  // TODO: use primitive_name and put in the expected order.
   msg->add_primitive_value()->set_int32_t(raw->facing);
   msg->add_primitive_value()->set_int32_t(raw->orientation);
+  cout << __func__ << ":" << __LINE__ << endl;
   msg->add_primitive_value()->set_uint32_t(raw->device_version);
   // TODO: update for static_camera_characteristics and others
   // msg.add_primitive_value()->set_int32_t(raw->static_camera_characteristics);
@@ -152,6 +183,7 @@ bool ConvertCameraInfoToProtobuf(camera_info_t* raw,
   // msg.add_primitive_value()->set_pointer(raw->conflicting_devices);
   // msg.add_primitive_value()->set_int32_t(raw->conflicting_devices_length);
   msg->add_primitive_value()->set_int32_t(0);
+  cout << __func__ << ":" << __LINE__ << endl;
   return true;
 }
 

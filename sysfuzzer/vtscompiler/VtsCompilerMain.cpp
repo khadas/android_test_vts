@@ -28,7 +28,7 @@
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "utils/InterfaceSpecUtil.h"
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 #include "code_gen/CodeGenBase.h"

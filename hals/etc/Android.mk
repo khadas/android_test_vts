@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
+ifneq ($(filter msm8992 msm8994,$(TARGET_BOARD_PLATFORM)),)
 include $(call all-subdir-makefiles)
+endif
