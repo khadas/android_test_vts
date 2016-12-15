@@ -24,16 +24,26 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
   HalAgentMain.cpp \
   BinderClient.cpp \
+  TcpServer.cpp \
+  proto/AndroidSystemControlMessage.proto \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
   libbinder \
   libvts_common \
+  libc++ \
 
 LOCAL_C_INCLUDES += \
+  bionic \
+  external/libcxx/include \
   frameworks/native/include \
   system/core/include \
   test/vts/sysfuzzer/common \
+  test/vts/agents/hal \
+  test/vts/agents/hal/proto \
+  external/protobuf/src \
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 include $(BUILD_EXECUTABLE)

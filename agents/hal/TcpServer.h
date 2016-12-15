@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-#include <iostream>
+#ifndef __VTS_FUZZER_TCP_SERVER_H__
+#define __VTS_FUZZER_TCP_SERVER_H__
 
-#include "BinderClient.h"
-#include "TcpServer.h"
+namespace android {
+namespace vts {
 
-using namespace std;
+extern int StartTcpServer();
 
+}  // namespace vts
+}  // namespace android
 
-int main(int /*argc*/, char** /*argv*/) {
-  android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
-  if (!client.get()) return -1;
-
-  int v = 10;
-  client->Status(v);
-  const int32_t adder = 5;
-  int32_t sum = client->Call(v, adder);
-  cout << "Addition result: " << v << " + " << adder << " = " << sum << endl;
-  client->Exit();
-
-  android::vts::StartTcpServer();
-
-  return 0;
-}
+#endif
