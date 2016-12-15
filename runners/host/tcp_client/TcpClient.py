@@ -88,10 +88,14 @@ class VtsTcpClient(object):
     self.channel.flush()
 
   def RecvResponse(self):
-    """Receives the response."""
-    # TODO: parse and then return the proto message.
+    """Receives and parses the response, and returns the relevant ResponseMessage."""
     try:
-      return self.channel.readline()
+      header = self.channel.readline()
+      len = int(header.strip("\n"))
+      data = self.channel.read(len)
+      response_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlResponseMessage()
+      response_msg.ParseFromString(data)
+      return response_msg
     except socket.timeout as e:
       Log.error("socket timeout %s", e)
       return None

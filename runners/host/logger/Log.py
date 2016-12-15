@@ -49,7 +49,7 @@ def info(format, *args):
         in the given format string.
   """
   logger = _GetLogger()
-  if args is not ():
+  if args:
     format = format % args
   logger.info(format)
 
@@ -63,6 +63,6 @@ def error(format, *args):
         in the given format string.
   """
   logger = _GetLogger()
-  if args is not ():
+  if args:
     format = format % args
   logger.error(format)

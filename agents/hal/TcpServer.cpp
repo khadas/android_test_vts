@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 
 #include <iostream>
+#include <sstream>
 
 #include "test/vts/agents/hal/proto/AndroidSystemControlMessage.pb.h"
 
@@ -115,24 +116,38 @@ int StartTcpServer() {
        cout << "type " << command_msg.command_type() << endl;
        cout << "target_name " << command_msg.target_name() << endl;
 
+       AndroidSystemControlResponseMessage response_msg;
+
+       response_msg.set_response_code(SUCCESS);
+       response_msg.set_reason("an example reason here");
+       string response_msg_str;
+       if (!response_msg.SerializeToString(&response_msg_str)) {
+         cerr << "can't serialize the response message to a string." << endl;
+         return -1;
+       }
+
+       // Write a response to the client
+       std::stringstream response_header;
+       response_header << response_msg_str.length() << "\n";
+       cout << "sending '" << response_header.str() << "'" << endl;
+       n = write(newsockfd, response_header.str().c_str(),
+                 response_header.str().length());
+       if (n < 0) {
+         cerr << "ERROR writing to socket" << endl;
+         return -1;
+       }
+
+       n = write(newsockfd, response_msg_str.c_str(), response_msg_str.length());
+       cout << "sending '" << response_msg_str << "'" << endl;
+       if (n < 0) {
+         cerr << "ERROR writing to socket" << endl;
+         return -1;
+       }
+
        index = 0;
      } else {
        buffer[index++] = ch;
      }
-   }
-
-   if (n < 0) {
-     cerr << "ERROR reading from socket" << endl;
-     return -1;
-   }
-   printf("Here is the message: %s\n", buffer);
-
-   // Write a response to the client
-   n = write(newsockfd, "I got your message", 18);
-
-   if (n < 0) {
-     cerr << "ERROR writing to socket" << endl;
-     return -1;
    }
 
    return 0;

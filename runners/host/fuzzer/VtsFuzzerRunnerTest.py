@@ -25,7 +25,10 @@ def main(args):
   client = TcpClient.VtsTcpClient()
   client.Connect()
   client.SendCommand(AndroidSystemControlMessage_pb2.CHECK_FUZZER_BINDER_SERVICE,
-                     "hello my name is host.")
+                     "Is fuzzer running?")
+  print(client.RecvResponse())
+  client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
+                     "Give me the list of HALs")
   print(client.RecvResponse())
 
 if __name__ == "__main__":
