@@ -16,15 +16,26 @@
 
 package com.google.android.vts.servlet;
 
+import com.google.android.vts.proto.VtsReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.RequestDispatcher;
@@ -45,21 +56,69 @@ public class ShowGraphServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
 
+    /**
+     * Returns the table corresponding to the table name.
+     * @param tableName Describes the table name which is passed as a parameter from
+     *        dashboard_main.jsp, which represents the table to fetch data from.
+     * @return table An instance of org.apache.hadoop.hbase.client.Table
+     * @throws IOException
+     */
+    private Table getTable(TableName tableName) throws IOException {
+        long result;
+        Table table = null;
+
+        try {
+            table = BigtableHelper.getConnection().getTable(tableName);
+        } catch (IOException e) {
+            logger.error("Exception occurred in com.google.android.vts.servlet.ShowGraphServlet."
+              + "getTable()", e);
+            return null;
+        }
+        return table;
+    }
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
         RequestDispatcher dispatcher = null;
+        Table table = null;
+        TableName tableName = null;
+
         String profilingPointName = request.getParameter("profilingPoint");
-        HttpSession session = request.getSession();
+        tableName = TableName.valueOf(request.getParameter("tableName"));
+        table = getTable(tableName);
 
-        // map to hold the the list of time taken for each test.
-        Map<String, List<Double>> mapProfilingNameValues = ((Map<String, List<Double>>)
-            session.getAttribute("mapProfilingNameValues"));
+        // This list holds the values for all profiling points.
+        List<Double> profilingPointValuesList = new ArrayList<Double>();
 
-        double[] values = new double[mapProfilingNameValues.get(profilingPointName).size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = mapProfilingNameValues.get(profilingPointName).get(i);
+        ResultScanner scanner = table.getScanner(new Scan());
+        for (Result result = scanner.next(); (result != null); result = scanner.next()) {
+            for (KeyValue keyValue : result.list()) {
+                TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
+                    parseFrom(keyValue.getValue());
+
+                // update map of profiling point names
+                for (ProfilingReportMessage profilingReportMessage :
+                    testReportMessage.getProfilingList()) {
+                    if (! profilingPointName.equals(profilingReportMessage.getName().toStringUtf8())) {
+                        continue;
+                    }
+
+                    double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
+                        profilingReportMessage.getStartTimestamp())) / 1000;
+                    if (timeTaken < 0) {
+                        logger.info("Inappropriate value for time taken");
+                        continue;
+                    }
+                    profilingPointValuesList.add(timeTaken);
+                }
+            }
+        }
+
+        double[] values = new double[profilingPointValuesList.size()];
+        for (int i = 0; i < profilingPointValuesList.size(); i++) {
+            values[i] = profilingPointValuesList.get(i).doubleValue();
         }
 
         // pass map to show_graph.jsp through request by converting to JSON
