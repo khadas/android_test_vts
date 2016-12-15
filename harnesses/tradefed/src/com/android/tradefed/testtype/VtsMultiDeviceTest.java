@@ -16,6 +16,7 @@
 
 package com.android.tradefed.testtype;
 
+import com.android.ddmlib.MultiLineReceiver;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -36,7 +37,7 @@ import com.android.tradefed.util.RunUtil;
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
 
-    public static String PYTHONPATH = "PYTHONPATH";
+    static final String PYTHONPATH = "PYTHONPATH";
     static final float DEFAULT_TARGET_VERSION = -1;
 
     private ITestDevice mDevice = null;
@@ -44,7 +45,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
     @Option(name = "test-timeout", description = "maximum amount of time"
         + "(im milliseconds) tests are allowed to run",
         isTimeVal = true)
-    public static long TEST_TIMEOUT = 1000 * 60 * 5;
+    private static long TEST_TIMEOUT = 1000 * 60 * 5;
 
     @Option(name = "test-case-path",
         description = "The path for test case.")
@@ -62,8 +63,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
     @Option(name = "python-binary", description = "python binary to use "
         + "(optional)")
     private String mPythonBin = null;
-
     private IRunUtil mRunUtil = null;
+    private String mRunName = "VtsHostDrivenTest";
 
     /**
      * @return the mRunUtil
@@ -132,19 +133,20 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
             mRunUtil = new RunUtil();
             mRunUtil.setEnvVariable(PYTHONPATH, mPythonPath);
         }
-        doRunTest(mRunUtil, mTestCasePath, mTestConfigPath);
+        doRunTest(listener, mRunUtil, mTestCasePath, mTestConfigPath);
     }
 
     /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
-     *
+     * 
+     * @param listener
      * @param runUtil
      * @param mTestCasePath
      * @param mTestConfigPath
      */
 
-    private boolean doRunTest(IRunUtil runUtil, String mTestCasePath,
+    private void doRunTest(ITestInvocationListener listener, IRunUtil runUtil, String mTestCasePath,
         String mTestConfigPath) throws RuntimeException {
 
         if (mPythonBin == null){
@@ -170,8 +172,12 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
             CLog.i("Parsing test result: %s", commandResult.getStderr());
         }
 
-        return commandResult.getStatus() == CommandStatus.SUCCESS ?
-            true : false;
+        MultiLineReceiver parser = new VtsMultiDeviceTestResultParser(ArrayUtil.list(listener),
+            mRunName);
+
+        if (commandResult.getStdout() != null) {
+            parser.processNewLines(commandResult.getStdout().split("\n"));
+        }
      }
 
     /**
