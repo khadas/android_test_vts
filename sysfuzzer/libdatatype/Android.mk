@@ -43,6 +43,9 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
 
+LOCAL_MULTILIB := both
+
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk
