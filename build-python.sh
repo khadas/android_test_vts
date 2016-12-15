@@ -1,20 +1,16 @@
 #!/bin/bash
 
-# if "from future import standard_library" fails, please install future:
-#   $ sudo apt-get install python-dev
-#   $ sudo apt-get install python-pip
-#   $ sudo apt-get install python-virtualbox
-#   $ sudo pip install future
-#   $ sudo pip install futures
-#   $ sudo pip install enum
-#   $ sudo pip install concurrent
-#   $ sudo pip install protobuf
-# for protoc, please install protoc by:
-#   $ apt-get install protobuf-compiler
+# Modify any import statements (to remove subdir path)
 
-python -m compileall .
-
-# modify any import statements (to remove subdir path)
+## Modify import statement in proto/AndroidSystemControlMessage.proto
+sed -i 's/import "test\/vts\/proto\/InterfaceSpecificationMessage.proto";/import "InterfaceSpecificationMessage.proto";/g' proto/AndroidSystemControlMessage.proto
+## Compile proto/AndroidSystemControlMessage.proto to .py code
 protoc -I=proto --python_out=proto proto/AndroidSystemControlMessage.proto
+## Restore import statement in proto/AndroidSystemControlMessage.proto
+sed -i 's/import "InterfaceSpecificationMessage.proto";/import "test\/vts\/proto\/InterfaceSpecificationMessage.proto";/g' proto/AndroidSystemControlMessage.proto
+
 protoc -I=proto --python_out=proto proto/InterfaceSpecificationMessage.proto
 protoc -I=proto --python_out=proto proto/VtsReportMessage.proto
+
+# Compile all the python source codes
+python -m compileall .
