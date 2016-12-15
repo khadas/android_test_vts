@@ -78,7 +78,7 @@
     color: white;
 }
 
-#profiling-container, #performance-container {
+#profiling-container, #performance-container, #error-container {
     padding-top: 25px;
     padding-bottom: 25px;
 }
