@@ -52,7 +52,7 @@ public class DashboardMainServlet extends HttpServlet {
         if (currentUser != null) {
             response.setContentType("text/plain");
             HTableDescriptor[] tables = BigtableHelper.getTables();
-            List<String> tableList = new ArrayList<String>();
+            List<String> tableList = new ArrayList<>();
 
             // filter tables not starting with 'result'
             for (HTableDescriptor table : tables) {

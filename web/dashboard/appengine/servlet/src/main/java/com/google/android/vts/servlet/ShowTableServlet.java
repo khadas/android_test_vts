@@ -65,7 +65,7 @@ public class ShowTableServlet extends HttpServlet {
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
-    private static final int MAX_BUILD_IDS_PER_PAGE = 15;
+    private static final int MAX_BUILD_IDS_PER_PAGE = 12;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int SUMMARY_ROW_COUNT = 4;
     private static final long ONE_DAY = 86400000000000L;  // units microseconds
@@ -215,20 +215,20 @@ public class ShowTableServlet extends HttpServlet {
             String[][] pieChartArray = new String[TEST_RESULT_CASES + 1][2];
 
             // list to hold a unique combination - build IDs.startTimeStamp
-            List<String> sortedBuildIdTimeStampList = new ArrayList<String>();
+            List<String> sortedBuildIdTimeStampList = new ArrayList<>();
 
             // set to hold all the test case names
-            List<String> testCaseNameList = new ArrayList<String>();
+            List<String> testCaseNameList = new ArrayList<>();
 
             // set to hold all the test case execution results
-            Map<String, Integer> testCaseResultMap = new HashMap<String, Integer>();
+            Map<String, Integer> testCaseResultMap = new HashMap<>();
 
             // set to hold the name of profiling tests to maintain uniqueness
-            Set<String> profilingPointNameSet = new HashSet<String>();
+            Set<String> profilingPointNameSet = new HashSet<>();
 
             // Map to hold TestReportMessage based on build ID and start time stamp.
             // This will be used to obtain the corresponding device info later.
-            Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<String, TestReportMessage>();
+            Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap<>();
 
             while (true) {
                 // Scan until there is a full page of data or until there is no
@@ -512,10 +512,6 @@ public class ShowTableServlet extends HttpServlet {
 
             request.setAttribute("topBuildJson",
                 new Gson().toJson(topBuild));
-
-            // pass table name back
-            request.setAttribute("tableName",
-                                 new Gson().toJson(request.getParameter("tableName")));
 
             request.setAttribute("buildIdStartTime",
                                   new Gson().toJson(buildIdStartTime));

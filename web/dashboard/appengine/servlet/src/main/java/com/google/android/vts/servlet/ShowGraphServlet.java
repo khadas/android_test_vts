@@ -94,19 +94,19 @@ public class ShowGraphServlet extends HttpServlet {
         table = getTable(tableName);
 
         // This list holds the values for all profiling points.
-        List<Double> profilingPointValuesList = new ArrayList<Double>();
+        List<Double> profilingPointValuesList = new ArrayList<>();
 
         // Map for labels and values
-        Map<String, Integer> labelIndexMap = new HashMap<String, Integer>();
+        Map<String, Integer> labelIndexMap = new HashMap<>();
 
         // Set of all labels
-        List<String> labels = new ArrayList<String>();
+        List<String> labels = new ArrayList<>();
 
         // List of all profiling vectors
-        List<ProfilingReportMessage> profilingVectors = new ArrayList<ProfilingReportMessage>();
+        List<ProfilingReportMessage> profilingVectors = new ArrayList<>();
 
         // List of build IDs for each profiling vector
-        List<String> profilingBuildIds = new ArrayList<String>();
+        List<String> profilingBuildIds = new ArrayList<>();
 
         Scan scan = new Scan();
         scan.setStartRow(Long.toString(startTime).getBytes());
@@ -205,7 +205,7 @@ public class ShowGraphServlet extends HttpServlet {
         request.setAttribute("labelsListJson", new Gson().toJson(labels));
         request.setAttribute("profilingBuildIdsJson", new Gson().toJson(profilingBuildIds));
 
-        request.setAttribute("tableName", new Gson().toJson(request.getParameter("tableName")));
+        request.setAttribute("tableName", request.getParameter("tableName"));
         request.setAttribute("startTime", new Gson().toJson(startTime));
         request.setAttribute("endTime", new Gson().toJson(endTime));
 

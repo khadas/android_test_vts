@@ -29,11 +29,12 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
-import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -49,7 +50,6 @@ import javax.servlet.http.HttpServletResponse;
 public class ShowCoverageServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(ShowCoverageServlet.class);
-    private static final int COVERAGE_GRID_COLUMNS = 4;
 
     /**
      * Returns the table corresponding to the table name.
@@ -124,28 +124,24 @@ public class ShowCoverageServlet extends HttpServlet {
             }
             scanner.close();
 
-            int rowCount = 0;
-            for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
-                rowCount += testCaseReportMessage.getCoverageList().size();
-            }
-
-            String[][] coverageGrid = new String[rowCount][COVERAGE_GRID_COLUMNS];
-            int rowIndex = 0;
+            List<List<String>> coverageInfo = new ArrayList<>();
             for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
                 for (CoverageReportMessage coverageReportMessage : testCaseReportMessage.getCoverageList()) {
-                    coverageGrid[rowIndex][0] = testCaseReportMessage.getName().toStringUtf8();
-                    coverageGrid[rowIndex][1] = coverageReportMessage.getDirPath().toStringUtf8();
-                    coverageGrid[rowIndex][2] = coverageReportMessage.getFileName().toStringUtf8();
-                    coverageGrid[rowIndex][3] = coverageReportMessage.getHtml().toStringUtf8();
-                    rowIndex++;
+                    ArrayList<String> entry = new ArrayList<>();
+                    String dirPath = coverageReportMessage.getDirPath().toStringUtf8();
+                    String fileName = coverageReportMessage.getFileName().toStringUtf8();
+                    String path = dirPath + File.separator + fileName;
+                    entry.add(testCaseReportMessage.getName().toStringUtf8());
+                    entry.add(path);
+                    entry.add(coverageReportMessage.getHtml().toStringUtf8());
+                    coverageInfo.add(entry);
                 }
             }
 
-            String[] coverageGridColumns =
-                {"Test Case Report Message", "Directory Path", "File Name", "HTML"};
-
-            request.setAttribute("coverageGridJson", new Gson().toJson(coverageGrid));
-            request.setAttribute("coverageGridColumnsJson", new Gson().toJson(coverageGridColumns));
+            request.setAttribute("tableName", table.getName());
+            request.setAttribute("coverageInfo", coverageInfo);
+            request.setAttribute("buildIdStartTime", request.getParameter("buildIdStartTime"));
+            request.setAttribute("buildIdEndTime", request.getParameter("buildIdEndTime"));
             response.setContentType("text/plain");
             dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
 
