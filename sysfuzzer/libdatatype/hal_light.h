@@ -28,7 +28,7 @@ namespace vts {
 light_state_t* GenerateLightState();
 
 light_state_t* GenerateLightStateUsingMessage(
-    const ArgumentSpecificationMessage& msg);
+    const VariableSpecificationMessage& msg);
 
 }  // namespace vts
 }  // namespace android

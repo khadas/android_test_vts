@@ -28,7 +28,7 @@ from vts.utils.python.mirror import mirror_object
 COMPONENT_CLASS_DICT = {"hal_conventional": 1,
                         "sharedlib": 2,
                         "hal_hidl": 3,
-                        "hal_submodule": 4,
+                        "hal_conventional_submodule": 4,
                         "hal_legacy": 5}
 
 COMPONENT_TYPE_DICT = {"audio": 1,

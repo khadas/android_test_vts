@@ -50,107 +50,143 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
     std::stringstream& cpp_ss,
     const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
+  bool first_callback = true;
 
-  if (message.aggregate_type_name_size()
-      != message.aggregate_type_definition_size()) {
-    cerr << "ERROR aggregate type's name and definition is not the equal" << endl;
-    exit(-1);
-  }
-
-  for (int i = 0; i < message.aggregate_type_name_size(); i++) {
-    // auto const& name = ;
-    const ArgumentSpecificationMessage& definition = message.aggregate_type_definition(i);
-    if (definition.is_callback()) {
-      string name = "vts_callback_" + fuzzer_extended_class_name + "_" + message.aggregate_type_name(i);
-      cpp_ss << "static int agent_port_ = -1;" << endl;
-      cpp_ss << endl;
-      cpp_ss << "class " << name << " : public FuzzerCallbackBase {" << endl;
-      cpp_ss << " public:" << endl;
-      cpp_ss << "  " << name << "(int agent_port) {" << endl;
-      cpp_ss << "      agent_port_ = agent_port;" << endl;
-      cpp_ss << "    }" << endl;
-      int primitive_format_index = 0;
-      for (const auto& primitive_type : definition.primitive_type()) {
-        if (primitive_type == "function_pointer") {
-          const string& callback_name = definition.primitive_name(
-              primitive_format_index);
-          // TODO: callback's return value is assumed to be 'void'.
-          cpp_ss << endl;
-          cpp_ss << "  static void " << callback_name << "(";
-          for (int primitive_type_index = 0;
-               primitive_type_index < definition.aggregate_value(
-                   primitive_format_index).primitive_type_size();
-               primitive_type_index++) {
-            const string& var_type = definition.aggregate_value(
-                primitive_format_index).primitive_type(primitive_type_index);
-            if (primitive_type_index != 0) {
-              cpp_ss << ", ";
-            }
-            if (var_type == "pointer") {
-              cpp_ss << definition.aggregate_value(
-                  primitive_format_index).primitive_name(primitive_type_index)
-                      << " ";
-            } else if (var_type == "char_pointer") {
-              cpp_ss << "char* ";
-            } else if (var_type == "int32") {
-              cpp_ss << "int ";
-            }
-            cpp_ss << "arg" << primitive_type_index;
-          }
-          cpp_ss << ") {" << endl;
-#if USE_VAARGS
-          cpp_ss << "    const char fmt[] = \""
-              << definition.primitive_format(primitive_format_index) << "\";"
-              << endl;
-          cpp_ss << "    va_list argp;" << endl;
-          cpp_ss << "    const char* p;" << endl;
-          cpp_ss << "    int i;" << endl;
-          cpp_ss << "    char* s;" << endl;
-          cpp_ss << "    char fmtbuf[256];" << endl;
-          cpp_ss << endl;
-          cpp_ss << "    va_start(argp, fmt);" << endl;
-          cpp_ss << endl;
-          cpp_ss << "    for (p = fmt; *p != '\\0'; p++) {" << endl;
-          cpp_ss << "      if (*p != '%') {" << endl;
-          cpp_ss << "        putchar(*p);" << endl;
-          cpp_ss << "        continue;" << endl;
-          cpp_ss << "      }" << endl;
-          cpp_ss << "      switch (*++p) {" << endl;
-          cpp_ss << "        case 'c':" << endl;
-          cpp_ss << "          i = va_arg(argp, int);" << endl;
-          cpp_ss << "          putchar(i);" << endl;
-          cpp_ss << "          break;" << endl;
-          cpp_ss << "        case 'd':" << endl;
-          cpp_ss << "          i = va_arg(argp, int);" << endl;
-          cpp_ss << "          s = itoa(i, fmtbuf, 10);" << endl;
-          cpp_ss << "          fputs(s, stdout);" << endl;
-          cpp_ss << "          break;" << endl;
-          cpp_ss << "        case 's':" << endl;
-          cpp_ss << "          s = va_arg(argp, char *);" << endl;
-          cpp_ss << "          fputs(s, stdout);" << endl;
-          cpp_ss << "          break;" << endl;
-          //cpp_ss << "        case 'p':
-          cpp_ss << "        case '%':" << endl;
-          cpp_ss << "          putchar('%');" << endl;
-          cpp_ss << "          break;" << endl;
-          cpp_ss << "      }" << endl;
-          cpp_ss << "    }" << endl;
-          cpp_ss << "    va_end(argp);" << endl;
-#endif
-          // TODO: check whether bytes is set and handle properly if not.
-          cpp_ss << "    RpcCallToAgent(GetCallbackID(\"" << callback_name
-              << "\"), agent_port_);" << endl;
-          cpp_ss << "  }" << endl;
-          cpp_ss << endl;
-
-          primitive_format_index++;
-        }
-      }
-      cpp_ss << endl;
-      cpp_ss << " private:" << endl;
-      cpp_ss << "};" << endl;
-      cpp_ss << endl;
+  for (int i = 0; i < message.attribute_size(); i++) {
+    const VariableSpecificationMessage& attribute = message.attribute(i);
+    if (attribute.type() != TYPE_FUNCTION_POINTER
+        || !attribute.is_callback()) {
+      continue;
     }
+    string name = "vts_callback_" + fuzzer_extended_class_name
+        + "_" + attribute.name();
+    if (first_callback) {
+      cpp_ss << "static int agent_port_ = -1;" << endl;
+      first_callback = false;
+    }
+    cpp_ss << endl;
+    cpp_ss << "class " << name << " : public FuzzerCallbackBase {" << endl;
+    cpp_ss << " public:" << endl;
+    cpp_ss << "  " << name << "(int agent_port) {" << endl;
+    cpp_ss << "      agent_port_ = agent_port;" << endl;
+    cpp_ss << "    }" << endl;
+
+    int primitive_format_index = 0;
+    for (const FunctionPointerSpecificationMessage& func_pt_spec
+         : attribute.function_pointer()) {
+      const string& callback_name = func_pt_spec.function_name();
+      // TODO: callback's return value is assumed to be 'void'.
+      cpp_ss << endl;
+      cpp_ss << "  static ";
+      bool has_return_value = false;
+      if (!func_pt_spec.has_return_type()
+          || !func_pt_spec.return_type().has_type()
+          || func_pt_spec.return_type().type() == TYPE_VOID) {
+        cpp_ss << "void" << endl;
+      } else if (func_pt_spec.return_type().type() == TYPE_PREDEFINED){
+        cpp_ss << func_pt_spec.return_type().predefined_type();
+        has_return_value = true;
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unknown type "
+            << func_pt_spec.return_type().type() << endl;
+        exit(-1);
+      }
+      cpp_ss << " " << callback_name << "(";
+      int primitive_type_index;
+      primitive_type_index = 0;
+      for (const auto& arg : func_pt_spec.arg()) {
+        if (primitive_type_index != 0) {
+          cpp_ss << ", ";
+        }
+        if (arg.is_const()) {
+          cpp_ss << "const ";
+        }
+        if (arg.type() == TYPE_SCALAR) {
+          /*
+          if (arg.scalar_type() == "pointer") {
+            cpp_ss << definition.aggregate_value(
+                primitive_format_index).primitive_name(primitive_type_index)
+                    << " ";
+          } */
+          if (arg.scalar_type() == "char_pointer") {
+            cpp_ss << "char* ";
+          } else if (arg.scalar_type() == "int32_t"
+                     || arg.scalar_type() == "uint32_t"
+                     || arg.scalar_type() == "size_t"
+                     || arg.scalar_type() == "int64_t"
+                     || arg.scalar_type() == "uint64_t") {
+            cpp_ss << arg.scalar_type() << " ";
+          } else if (arg.scalar_type() == "void_pointer") {
+            cpp_ss << "void*";
+          } else {
+            cerr << __func__ << " unsupported scalar type " << arg.scalar_type() << endl;
+            exit(-1);
+          }
+        } else if (arg.type() == TYPE_PREDEFINED) {
+          cpp_ss << arg.predefined_type() << " ";
+        } else {
+          cerr << __func__ << " unsupported type" << endl;
+          exit(-1);
+        }
+        cpp_ss << "arg" << primitive_type_index;
+        primitive_type_index++;
+      }
+      cpp_ss << ") {" << endl;
+#if USE_VAARGS
+      cpp_ss << "    const char fmt[] = \""
+          << definition.primitive_format(primitive_format_index) << "\";"
+          << endl;
+      cpp_ss << "    va_list argp;" << endl;
+      cpp_ss << "    const char* p;" << endl;
+      cpp_ss << "    int i;" << endl;
+      cpp_ss << "    char* s;" << endl;
+      cpp_ss << "    char fmtbuf[256];" << endl;
+      cpp_ss << endl;
+      cpp_ss << "    va_start(argp, fmt);" << endl;
+      cpp_ss << endl;
+      cpp_ss << "    for (p = fmt; *p != '\\0'; p++) {" << endl;
+      cpp_ss << "      if (*p != '%') {" << endl;
+      cpp_ss << "        putchar(*p);" << endl;
+      cpp_ss << "        continue;" << endl;
+      cpp_ss << "      }" << endl;
+      cpp_ss << "      switch (*++p) {" << endl;
+      cpp_ss << "        case 'c':" << endl;
+      cpp_ss << "          i = va_arg(argp, int);" << endl;
+      cpp_ss << "          putchar(i);" << endl;
+      cpp_ss << "          break;" << endl;
+      cpp_ss << "        case 'd':" << endl;
+      cpp_ss << "          i = va_arg(argp, int);" << endl;
+      cpp_ss << "          s = itoa(i, fmtbuf, 10);" << endl;
+      cpp_ss << "          fputs(s, stdout);" << endl;
+      cpp_ss << "          break;" << endl;
+      cpp_ss << "        case 's':" << endl;
+      cpp_ss << "          s = va_arg(argp, char *);" << endl;
+      cpp_ss << "          fputs(s, stdout);" << endl;
+      cpp_ss << "          break;" << endl;
+      //cpp_ss << "        case 'p':
+      cpp_ss << "        case '%':" << endl;
+      cpp_ss << "          putchar('%');" << endl;
+      cpp_ss << "          break;" << endl;
+      cpp_ss << "      }" << endl;
+      cpp_ss << "    }" << endl;
+      cpp_ss << "    va_end(argp);" << endl;
+#endif
+      // TODO: check whether bytes is set and handle properly if not.
+      cpp_ss << "    RpcCallToAgent(GetCallbackID(\"" << callback_name
+          << "\"), agent_port_);" << endl;
+      if (has_return_value) {
+        // TODO: consider actual return type.
+        cpp_ss << "    return NULL;";
+      }
+      cpp_ss << "  }" << endl;
+      cpp_ss << endl;
+
+      primitive_format_index++;
+    }
+    cpp_ss << endl;
+    cpp_ss << " private:" << endl;
+    cpp_ss << "};" << endl;
+    cpp_ss << endl;
   }
 }
 
@@ -203,9 +239,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     // args - definition;
     int arg_count = 0;
     for (auto const& arg : api.arg()) {
-      if (arg.is_callback()) {
+      if (arg.is_callback()) {  // arg.type() isn't always TYPE_FUNCTION_POINTER
         string name = "vts_callback_" + fuzzer_extended_class_name + "_"
-            + arg.aggregate_type(arg_count);
+            + arg.predefined_type();  // TODO - check to make sure name is always correct
         if (name.back() == '*') name.pop_back();
         cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
         cpp_ss << name << "(agent_port);" << endl;
@@ -218,22 +254,26 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         // TODO: think about how to free the malloced callback data structure.
         // find the spec.
         bool found = false;
-        for (int aggregate_index = 0;
-             aggregate_index < message.aggregate_type_name_size();
-             aggregate_index++) {
-          const ArgumentSpecificationMessage& definition =
-              message.aggregate_type_definition(aggregate_index);
-          if (definition.is_callback()) {
+        cout << name << endl;
+        for (auto const& attribute : message.attribute()) {
+          if (attribute.type() == TYPE_FUNCTION_POINTER
+              && attribute.is_callback()) {
             string target_name = "vts_callback_" + fuzzer_extended_class_name
-                + "_" + message.aggregate_type_name(aggregate_index);
+                + "_" + attribute.name();
+            cout << "compare" << endl;
+            cout << target_name << endl;
             if (name == target_name) {
-              for (int method_index = 0;
-                   method_index < definition.primitive_type_size();
-                   method_index++) {
-                cpp_ss << "    arg" << arg_count << "->"
-                    << definition.primitive_name(method_index)
+              if (attribute.function_pointer_size() > 1) {
+                for (auto const& func_pt : attribute.function_pointer()) {
+                  cpp_ss << "    arg" << arg_count << "->"
+                      << func_pt.function_name()
+                      << " = arg" << arg_count << "callback->"
+                      << func_pt.function_name() << ";" << endl;
+                }
+              } else {
+                cpp_ss << "    arg" << arg_count
                     << " = arg" << arg_count << "callback->"
-                    << definition.primitive_name(method_index) << ";" << endl;
+                    << attribute.name() << ";" << endl;
               }
               found = true;
               break;
@@ -241,15 +281,16 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           }
         }
         if (!found) {
-          cerr << __func__ << " ERROR callback's definition missing." << endl;
+          cerr << __func__ << " ERROR callback definition missing for "
+              << name << " of " << api.name() << endl;
           exit(-1);
         }
       } else {
         cpp_ss << "    " << GetCppVariableType(arg) << " ";
         cpp_ss << "arg" << arg_count << " = ";
         if (arg_count == 0
-            && arg.aggregate_type().size() == 1
-            && !strncmp(arg.aggregate_type(0).c_str(),
+            && arg.type() == TYPE_PREDEFINED
+            && !strncmp(arg.predefined_type().c_str(),
                         message.original_data_structure_name().c_str(),
                         message.original_data_structure_name().length())) {
           cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
@@ -259,45 +300,44 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           msg_ss << "func_msg->arg(" << arg_count << ")";
           string msg = msg_ss.str();
 
-          if (arg.primitive_type().size() > 0) {
-            cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
-                << msg << ".primitive_type().size() == 1)? ";
-            if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
-                || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
-                || !strcmp(arg.primitive_type(0).c_str(), "void_pointer")
-                || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+          if (arg.type() == TYPE_SCALAR) {
+            cpp_ss << "(" << msg << ".type() == TYPE_SCALAR)? ";
+            if (arg.scalar_type() == "pointer"
+                || arg.scalar_type() == "pointer_pointer"
+                || arg.scalar_type() == "char_pointer"
+                || arg.scalar_type() == "void_pointer"
+                || arg.scalar_type() == "function_pointer") {
               cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
             }
-            cpp_ss << "(" << msg << ".primitive_value(0)";
+            cpp_ss << "(" << msg << ".scalar_value()";
 
-            if (arg.primitive_type(0) == "int32_t"
-                || arg.primitive_type(0) == "uint32_t"
-                || arg.primitive_type(0) == "int64_t"
-                || arg.primitive_type(0) == "uint64_t"
-                || arg.primitive_type(0) == "int16_t"
-                || arg.primitive_type(0) == "uint16_t"
-                || arg.primitive_type(0) == "int8_t"
-                || arg.primitive_type(0) == "uint8_t"
-                || arg.primitive_type(0) == "float_t"
-                || arg.primitive_type(0) == "double_t") {
-              cpp_ss << "." << arg.primitive_type(0) << "() ";
-            } else if (!strcmp(arg.primitive_type(0).c_str(), "pointer")) {
-              cpp_ss << ".pointer() ";
-            } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
-              cpp_ss << ".pointer() ";
-            } else if (!strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
-              cpp_ss << ".pointer() ";
-            } else if (!strcmp(arg.primitive_type(0).c_str(), "void_pointer")) {
+            if (arg.scalar_type() == "int32_t"
+                || arg.scalar_type() == "uint32_t"
+                || arg.scalar_type() == "int64_t"
+                || arg.scalar_type() == "uint64_t"
+                || arg.scalar_type() == "int16_t"
+                || arg.scalar_type() == "uint16_t"
+                || arg.scalar_type() == "int8_t"
+                || arg.scalar_type() == "uint8_t"
+                || arg.scalar_type() == "float_t"
+                || arg.scalar_type() == "double_t") {
+              cpp_ss << "." << arg.scalar_type() << "() ";
+            } else if (arg.scalar_type() == "pointer"
+                       || arg.scalar_type() == "char_pointer"
+                       || arg.scalar_type() == "void_pointer") {
               cpp_ss << ".pointer() ";
             } else {
-              cerr << __func__ << " ERROR unsupported type " << arg.primitive_type(0) << endl;
+              cerr << __func__ << " ERROR unsupported scalar type " << arg.scalar_type() << endl;
               exit(-1);
             }
             cpp_ss << ") : ";
+          } else {
+            cerr << __func__ << " unknown type " << msg << endl;
           }
 
-          cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
-              << msg << ".primitive_value_size() > 0)? ";
+          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || "
+              << msg << ".type() == TYPE_STRUCT || "
+              << msg << ".type() == TYPE_SCALAR)? ";
           cpp_ss << GetCppInstanceType(arg, msg);
           cpp_ss << " : " << GetCppInstanceType(arg) << " )";
           // TODO: use the given message and call a lib function which converts
@@ -314,7 +354,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     GenerateCodeToStartMeasurement(cpp_ss);
     cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
 
-    // checks whether the function is actaully defined.
+    // checks whether the function is actually defined.
     cpp_ss << "    if (reinterpret_cast<" << message.original_data_structure_name()
         << "*>(local_device)->" << api.name() << " == NULL";
     cpp_ss << ") {" << endl;
@@ -326,8 +366,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
-    if (api.return_type().primitive_type().size() == 1
-        && !strcmp(api.return_type().primitive_type(0).c_str(), "void")) {
+    if (!api.has_return_type()
+        || api.return_type().type() == TYPE_VOID) {
       cpp_ss << "*result = NULL;" << endl;
     } else {
       cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
@@ -341,9 +381,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "," << endl;
       }
     }
-    if (api.return_type().primitive_type().size() == 0
-        || (api.return_type().primitive_type().size() == 1
-            && strcmp(api.return_type().primitive_type(0).c_str(), "void"))) {
+
+    if (api.has_return_type()
+        && api.return_type().type() != TYPE_VOID) {
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;
@@ -426,8 +466,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       cpp_ss << "    " << GetCppVariableType(arg) << " ";
       cpp_ss << "arg" << arg_count << " = ";
       if (arg_count == 0
-          && arg.aggregate_type().size() == 1
-          && !strncmp(arg.aggregate_type(0).c_str(),
+          && arg.type() == TYPE_PREDEFINED
+          && !strncmp(arg.predefined_type().c_str(),
                       original_data_structure_name.c_str(),
                       original_data_structure_name.length())) {
         cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
@@ -437,39 +477,39 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         msg_ss << "func_msg->arg(" << arg_count << ")";
         string msg = msg_ss.str();
 
-        if (arg.primitive_type().size() > 0) {
-          cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
-              << msg << ".primitive_type().size() == 1 && "
-              << msg << ".primitive_value().size() == 1)? ";
-          if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "void_pointer")
-              || !strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
+        if (arg.type() == TYPE_SCALAR) {
+          cpp_ss << "(" << msg << ".type() == TYPE_SCALAR && "
+              << msg << ".scalar_value()";
+          if (arg.scalar_type() == "pointer"
+              || arg.scalar_type() == "char_pointer"
+              || arg.scalar_type() == "void_pointer"
+              || arg.scalar_type() == "function_pointer") {
+            cpp_ss << ".has_pointer())? ";
             cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
+          } else {
+            cpp_ss << ".has_" << arg.scalar_type() << "())? ";
           }
-          cpp_ss << "(" << msg << ".primitive_value(0)";
+          cpp_ss << "(" << msg << ".scalar_value()";
 
-          if (arg.primitive_type(0) == "int32_t"
-              || arg.primitive_type(0) == "uint32_t"
-              || arg.primitive_type(0) == "int64_t"
-              || arg.primitive_type(0) == "uint64_t"
-              || arg.primitive_type(0) == "int16_t"
-              || arg.primitive_type(0) == "uint16_t"
-              || arg.primitive_type(0) == "int8_t"
-              || arg.primitive_type(0) == "uint8_t"
-              || arg.primitive_type(0) == "float_t"
-              || arg.primitive_type(0) == "double_t") {
-            cpp_ss << "." << arg.primitive_type(0) << "() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "char_pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "function_pointer")) {
-            cpp_ss << ".pointer() ";
-          } else if (!strcmp(arg.primitive_type(0).c_str(), "void_pointer")) {
+          if (arg.scalar_type() == "int32_t"
+              || arg.scalar_type() == "uint32_t"
+              || arg.scalar_type() == "int64_t"
+              || arg.scalar_type() == "uint64_t"
+              || arg.scalar_type() == "int16_t"
+              || arg.scalar_type() == "uint16_t"
+              || arg.scalar_type() == "int8_t"
+              || arg.scalar_type() == "uint8_t"
+              || arg.scalar_type() == "float_t"
+              || arg.scalar_type() == "double_t") {
+            cpp_ss << "." << arg.scalar_type() << "() ";
+          } else if (arg.scalar_type() == "pointer"
+                     || arg.scalar_type() == "char_pointer"
+                     || arg.scalar_type() == "function_pointer"
+                     || arg.scalar_type() == "void_pointer") {
             cpp_ss << ".pointer() ";
           } else {
-            cerr << __func__ << " ERROR unsupported type " << arg.primitive_type(0) << endl;
+            cerr << __func__ << " ERROR unsupported type "
+                << arg.scalar_type() << endl;
             exit(-1);
           }
           cpp_ss << ") : ";
@@ -487,8 +527,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
             exit(-1);
           }
         } else {
-          cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
-              << msg << ".primitive_value_size() > 0)? ";
+          cpp_ss << "( (" << msg << ".type() == TYPE_PREDEFINED || "
+              << msg << ".type() == TYPE_STRUCT || "
+              << msg << ".type() == TYPE_SCALAR)? ";
           cpp_ss << GetCppInstanceType(arg, msg);
           cpp_ss << " : " << GetCppInstanceType(arg) << " )";
           // TODO: use the given message and call a lib function which converts
@@ -497,7 +538,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       }
       cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-          << " << endl;" << endl;
+          << " << endl;" << endl << endl;
       arg_count++;
     }
 
@@ -517,8 +558,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
     cpp_ss << "    ";
-    if (api.return_type().primitive_type().size() == 1
-        && !strcmp(api.return_type().primitive_type(0).c_str(), "void")) {
+    if (!api.has_return_type()
+        || api.return_type().type() == TYPE_VOID) {
       cpp_ss << "*result = NULL;" << endl;
     } else {
       cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
@@ -533,9 +574,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "," << endl;
       }
     }
-    if (api.return_type().primitive_type().size() == 0
-        || (api.return_type().primitive_type().size() == 1
-            && strcmp(api.return_type().primitive_type(0).c_str(), "void"))) {
+    if (api.has_return_type()
+        && api.return_type().type() != TYPE_VOID) {
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;
