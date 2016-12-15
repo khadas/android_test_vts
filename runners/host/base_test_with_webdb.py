@@ -46,9 +46,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         currentTestName: A string that's the name of the test case currently
                            being executed. If no test is executing, this should
                            be None.
-        _report_msg: TestReportMessage, to store to a GAE-side bigtable.
+        _report_msg: TestReportMessage, to store the test result to a GAE-side bigtable.
         _current_test_report_msg: a proto message keeping the information of a
                                   current test case.
+        _report_msg: TestReportMessage, to store the profiling result to
+                     a GAE-side bigtable.
+        _profiling: a dict containing the current profiling information.
     """
 
     def _setUpClass(self):
@@ -58,11 +61,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._report_msg = ReportMsg.TestReportMessage()
         self._report_msg.test = self.__class__.__name__
         self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
-        self._report_msg.start_timestamp = int(time.time() * 1000000)
+        self._report_msg.start_timestamp = self.GetTimestamp()
+        self._profile_msg = None
+        self._profiling = {}
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
-        self._report_msg.end_timestamp = int(time.time() * 1000000)
+        self._report_msg.end_timestamp = self.GetTimestamp()
 
         logging.info("_tearDownClass hook: start (username: %s)", getpass.getuser())
         bt_client = bigtable_rest_client.HbaseRestClient(
@@ -70,7 +75,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         bt_client.CreateTable("test")
         bt_client.PutRow(str(self._report_msg.start_timestamp),
                          "data", self._report_msg.SerializeToString())
-        logging.info("_tearDownClass hook: proto %s", self._report_msg)
+        logging.info("_tearDownClass hook: result proto %s", self._report_msg)
+        if self._profile_msg:
+            bt_client.CreateTable("profile")
+            bt_client.PutRow(str(self._report_msg.start_timestamp),
+                             "data", self._profile_msg.SerializeToString())
+            logging.info("_tearDownClass hook: profile proto %s", self._profile_msg)
         logging.info("_tearDownClass hook: done")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
 
@@ -84,15 +94,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         self._current_test_report_msg = self._report_msg.test_case.add()
         self._current_test_report_msg.name = test_name
-        self._current_test_report_msg.start_timestamp = int(time.time() * 1000000)
+        self._current_test_report_msg.start_timestamp = self.GetTimestamp()
         return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
 
     def _tearDownTest(self, test_name):
         """Proxy function to guarantee the base implementation of tearDownTest
         is called.
         """
-        self._current_test_report_msg.end_timestamp = int(time.time() * 1000000)
-        self._current_test_report_msg = None
+        self._current_test_report_msg.end_timestamp = self.GetTimestamp()
         return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
 
     def _onFail(self, record):
@@ -138,4 +147,43 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_EXCEPTION
         return super(BaseTestWithWebDbClass, self)._onException(record)
+
+    def GetTimestamp(self):
+        """Returns the current UTC time (unit: microseconds)."""
+        return int(time.time() * 1000000)
+
+    def StartProfiling(self, name):
+        """Starts a profiling operation.
+
+        Args:
+            name: string, the name of a profiling point
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self._profile_msg:
+            self._profile_msg = ReportMsg.TestReportMessage()
+            self._profile_msg.test = self.__class__.__name__
+        if name in self._profiling:
+            logging.error("profiling point %s is already active.", name)
+            return False
+        self._profiling[name] = self._profile_msg.profiling.add()
+        self._profiling[name].name = name
+        self._profiling[name].start_timestamp = self.GetTimestamp()
+        return True
+
+    def StopProfiling(self, name):
+        """Stops a profiling operation.
+
+        Args:
+            name: string, the name of a profiling point
+        """
+        if not self._profile_msg or name not in self._profiling:
+            logging.error("profiling point %s is not active.", name)
+            return False
+        if self._profiling[name].end_timestamp:
+            logging.error("profiling point %s already has data.", name)
+            return False
+        self._profiling[name].end_timestamp = self.GetTimestamp()
+        return True
 
