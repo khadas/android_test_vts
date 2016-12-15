@@ -30,18 +30,33 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
     DELIMITER = "\033[m\033[0;33m"
     SCREEN_COMMANDS = ["\x1b[0;32m", "\x1b[m\x1b[0;36m", "\x1b[m", "\x1b[m"]
     THRESHOLD = {
-        "BM_sendVec/64": 100000,
-        "BM_sendVec/128": 100000,
-        "BM_sendVec/256": 100000,
-        "BM_sendVec/512": 100000,
-        "BM_sendVec/1024": 100000,
-        "BM_sendVec/2k": 100000,
-        "BM_sendVec/4k": 100000,
-        "BM_sendVec/8k": 110000,
-        "BM_sendVec/16k": 120000,
-        "BM_sendVec/32k": 140000,
-        "BM_sendVec/64k": 180000,
+        32: {
+            "BM_sendVec/64": 100000,
+            "BM_sendVec/128": 100000,
+            "BM_sendVec/256": 100000,
+            "BM_sendVec/512": 100000,
+            "BM_sendVec/1024": 100000,
+            "BM_sendVec/2k": 100000,
+            "BM_sendVec/4k": 100000,
+            "BM_sendVec/8k": 110000,
+            "BM_sendVec/16k": 120000,
+            "BM_sendVec/32k": 140000,
+            "BM_sendVec/64k": 170000,
+        },
+        64: {
+            "BM_sendVec/64": 100000,
+            "BM_sendVec/128": 100000,
+            "BM_sendVec/256": 100000,
+            "BM_sendVec/512": 100000,
+            "BM_sendVec/1024": 100000,
+            "BM_sendVec/2k": 100000,
+            "BM_sendVec/4k": 100000,
+            "BM_sendVec/8k": 110000,
+            "BM_sendVec/16k": 120000,
+            "BM_sendVec/32k": 150000,
+            "BM_sendVec/64k": 200000,
         }
+    }
 
     def setUpClass(self):
         self.dut = self.registerController(android_device)[0]
@@ -130,7 +145,7 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         # Assertions to check the performance requirements
         for benchmark_name in result:
-            if benchmark_name in self.THRESHOLD:
+            if benchmark_name in self.THRESHOLD[bits]:
                 asserts.assertLess(
                     result[benchmark_name],
                     self.THRESHOLD[benchmark_name],
