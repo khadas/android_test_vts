@@ -16,7 +16,6 @@
 #
 
 import logging
-import os
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
@@ -25,34 +24,25 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
-from vts.testcases.kernel.ltp import KernelLtpTestHelper
+from vts.testcases.kernel.ltp.test_cases_parser import TestCasesParser
+from vts.testcases.kernel.ltp.environment_requirement_checker \
+    import EnvironmentRequirementChecker
+from vts.testcases.kernel.ltp.ltp_enums import ShellEnvKeys
+from vts.testcases.kernel.ltp.ltp_enums import TestExitCode
+from vts.testcases.kernel.ltp import ltp_configs
 
 
 class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """Runs the LTP (Linux Test Project) testcases against Android OS kernel.
 
     Attributes:
-        _TPASS: int, exit_code for Test pass
-        _TCONF: int, The test case is not for current configuration of kernel
-        _32BIT: int, for 32 bit tests
-        _64BIT: int, for 64 bit tests
         _dut: AndroidDevice, the device under test
         _shell: ShellMirrorObject, shell mirror object used to execute commands
-        _ltp_dir: string, ltp build root directory on target
         _testcases: TestcasesParser, test case input parser
         _env: dict<stirng, stirng>, dict of environment variable key value pair
-        _KEY_ENV__: constant strings starting with prefix "_KEY_ENV_" are used as dict
-                    key in environment variable dictionary
     """
-    _TPASS = 0
-    _TCONF = 32
-    _32BIT = 32
-    _64BIT = 64
-    _KEY_ENV_TMPDIR = 'TMPDIR'
-    _KEY_ENV_TMP = 'TMP'
-    _KEY_ENV_LTP_DEV_FS_TYPE = 'LTP_DEV_FS_TYPE'
-    _KEY_ENV_LTPROOT = 'LTPROOT'
-    _KEY_ENV_PATH = 'PATH'
+    _32BIT = "32"
+    _64BIT = "64"
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
@@ -60,22 +50,20 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.getUserParams(required_params)
 
         logging.info("data_file_path: %s", self.data_file_path)
+
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self._shell = self._dut.shell.one
-        self._ltp_dir = "/data/local/tmp/ltp"
 
-        self._requirement = KernelLtpTestHelper.EnvironmentRequirementChecker(
-            self._shell)
+        self._requirement = EnvironmentRequirementChecker(self._shell)
 
-        self._testcases = KernelLtpTestHelper.TestCasesParser(
-            self.data_file_path)
-        self._env = {self._KEY_ENV_TMPDIR: KernelLtpTestHelper.LTPTMP,
-                     self._KEY_ENV_TMP: "%s/tmp" % KernelLtpTestHelper.LTPTMP,
-                     self._KEY_ENV_LTP_DEV_FS_TYPE: "ext4",
-                     self._KEY_ENV_LTPROOT: self._ltp_dir,
-                     self._KEY_ENV_PATH:
-                     "/system/bin:%s/testcases/bin" % self._ltp_dir, }
+        self._testcases = TestCasesParser(self.data_file_path)
+        self._env = {ShellEnvKeys.TMPDIR: ltp_configs.LTPTMPDIR,
+                     ShellEnvKeys.TMP: ltp_configs.LTPTMP,
+                     ShellEnvKeys.LTP_DEV_FS_TYPE: "ext4",
+                     ShellEnvKeys.LTPROOT: ltp_configs.LTPDIR,
+                     ShellEnvKeys.PATH:
+                     "/system/bin:%s/testcases/bin" % ltp_configs.LTPDIR, }
 
     def PushFiles(self, n_bit):
         """Push the related files to target.
@@ -85,10 +73,9 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
 
-        self._shell.Execute("mkdir %s -p" % self._ltp_dir)
-        self._dut.adb.push("%s/%i/ltp/. %s" %
-                           (self.data_file_path, n_bit, self._ltp_dir))
-        # TODO: libcap
+        self._shell.Execute("mkdir %s -p" % ltp_configs.LTPDIR)
+        self._dut.adb.push("%s/%s/ltp/. %s" %
+                           (self.data_file_path, n_bit, ltp_configs.LTPDIR))
 
     def GetEnvp(self):
         """Generate the environment variable required to run the tests."""
@@ -97,7 +84,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def tearDownClass(self):
         """Deletes all copied data files."""
-        self._shell.Execute("rm -rf %s" % self._ltp_dir)
+        self._shell.Execute("rm -rf %s" % ltp_configs.LTPDIR)
         self._requirement.Cleanup()
 
     def Verify(self, results):
@@ -114,12 +101,13 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         stdout = results[const.STDOUT][0]
         ret_code = results[const.EXIT_CODE][0]
         # Test case is not for the current configuration, SKIP
-        if ret_code == self._TCONF:
+        if ret_code == TestExitCode.TCONF:
             asserts.skipIf('TPASS' not in stdout,
                            "Incompatible test skipped: TCONF")
         else:
-            asserts.assertEqual(ret_code, self._TPASS,
-                               "Got return code %s, test did not pass." % ret_code)
+            asserts.assertEqual(ret_code, TestExitCode.TPASS,
+                                "Got return code %s, test did not pass." %
+                                ret_code)
 
     def TestNBits(self, n_bit):
         """Runs all 32-bit or 64-bit LTP test cases.
@@ -129,9 +117,9 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    _64BIT, or 64, for 64bit test;
         """
         self.PushFiles(n_bit)
-        logging.info("[Test Case] test%iBits SKIP", n_bit)
+        logging.info("[Test Case] test%sBits SKIP", n_bit)
 
-        test_cases = list(self._testcases.Load(self._ltp_dir))
+        test_cases = list(self._testcases.Load(ltp_configs.LTPDIR))
         logging.info("Checking binary exists for all test cases.")
         self._requirement.RunCheckTestcasePathExistsAll(test_cases)
         self._requirement.RunChmodTestcasesAll(test_cases)
@@ -141,7 +129,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                settings=test_cases,
                                args=(n_bit, ),
                                name_func=self.GetTestName)
-        logging.info("[Test Case] test%iBits", n_bit)
+        logging.info("[Test Case] test%sBits", n_bit)
         asserts.skip("Finished generating {} bit tests.".format(n_bit))
 
     def GetTestName(self, test_case, n_bit):
@@ -155,7 +143,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         cmd = "env {envp} {binary} {args}".format(
             envp=self.GetEnvp(),
             binary=test_case.path,
-            args=test_case.GetArgs("$LTPROOT", self._ltp_dir))
+            args=test_case.GetArgs("$LTPROOT", ltp_configs.LTPDIR))
         logging.info("Executing %s", cmd)
         self.Verify(self._shell.Execute(cmd))
 

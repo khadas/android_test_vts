@@ -34,6 +34,7 @@ class CheckDefinition(object):
         to_cleanup: whether to clean up after setup. The default value is True
         args: any additional arguments to pass to the method
     """
+
     def __init__(self, function, to_setup=False, to_cleanup=True, *args):
         self._function = function
         self.to_setup = to_setup
@@ -48,6 +49,7 @@ class CheckDefinition(object):
         return ("Shell Environment Check Definition: function=%s, to_setup=%s"
                 " args=%s") % (self._function, self.to_setup, self.args)
 
+
 class ShellEnvironment(object):
     """Wrapper class for all the environment setup classes.
 
@@ -58,6 +60,7 @@ class ShellEnvironment(object):
         _cleanup_jobs: set of CheckSetupCleanup objects, a set used to store clean
                        up jobs if requested.
     """
+
     def __init__(self, shell):
         self._shell = shell
         # TODO use a queue?
@@ -208,6 +211,7 @@ class LoopDeviceSupportClass(CheckSetupCleanup):
 
     def Check(self):
         return self.ExecuteCommand("losetup -f")
+
 
 class DirExistsClass(CheckSetupCleanup):
     """Class for check, setup, and cleanup a existence of a directory."""
