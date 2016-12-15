@@ -34,4 +34,8 @@ $(VTS_PYTHON_ZIP): test/vts/setup.py
 vts_runner_python: $(VTS_PYTHON_ZIP)
 vts: $(VTS_PYTHON_ZIP)
 
+ifneq ($(filter vts, $(MAKECMDGOALS)),)
+  $(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
+endif
+
 endif # linux
