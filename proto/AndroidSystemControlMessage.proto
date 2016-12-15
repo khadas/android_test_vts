@@ -26,6 +26,8 @@ enum CommandType {
   LIST_HALS = 1;
   // To set the host information (e.g., callback server port).
   SET_HOST_INFO = 2;
+  // To check the health of an agent.
+  PING = 3;
 
   // To check whether fuzzer's binder service is available.
   CHECK_DRIVER_SERVICE = 101;
