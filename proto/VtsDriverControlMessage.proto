@@ -37,6 +37,9 @@ enum VtsDriverCommandType {
   // for a shell driver
   // To execute a shell command.
   EXECUTE_COMMAND = 201;
+
+  // To invoke a system call.
+  INVOKE_SYSCALL = 202;
 }
 
 
