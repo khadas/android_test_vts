@@ -13,7 +13,6 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 """
 Class for Telnet control of Mini-Circuits RCDAT series attenuators
 
@@ -24,7 +23,6 @@ interchangeable HW to be used.
 
 See http://www.minicircuits.com/softwaredownload/Prog_Manual-6-Programmable_Attenuator.pdf
 """
-
 
 from vts.utils.python.controllers import attenuator
 from vts.utils.python.controllers.attenuator_lib import _tnhelper
@@ -70,7 +68,8 @@ class AttenuatorInstrument(attenuator.AttenuatorInstrument):
         if config_str.startswith("MN="):
             config_str = config_str[len("MN="):]
 
-        self.properties = dict(zip(['model', 'max_freq', 'max_atten'], config_str.split("-", 2)))
+        self.properties = dict(zip(
+            ['model', 'max_freq', 'max_atten'], config_str.split("-", 2)))
         self.max_atten = float(self.properties['max_atten'])
 
     def is_open(self):
@@ -119,10 +118,12 @@ class AttenuatorInstrument(attenuator.AttenuatorInstrument):
             raise attenuator.InvalidOperationError("Connection not open!")
 
         if idx >= self.num_atten:
-            raise IndexError("Attenuator index out of range!", self.num_atten, idx)
+            raise IndexError("Attenuator index out of range!", self.num_atten,
+                             idx)
 
         if value > self.max_atten:
-            raise ValueError("Attenuator value out of range!", self.max_atten, value)
+            raise ValueError("Attenuator value out of range!", self.max_atten,
+                             value)
 
         self._tnhelper.cmd("SETATT=" + str(value))
 

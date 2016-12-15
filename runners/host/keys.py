@@ -15,10 +15,11 @@
 #   limitations under the License.
 
 import enum
-
 """This module has the global key values that are used across framework
 modules.
 """
+
+
 class Config(enum.Enum):
     """Enum values for test config related lookups.
     """

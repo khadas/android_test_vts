@@ -32,6 +32,7 @@ log_line_timestamp_len = 18
 
 logline_timestamp_re = re.compile("\d\d-\d\d \d\d:\d\d:\d\d.\d\d\d")
 
+
 def _parse_logline_timestamp(t):
     """Parses a logline timestamp into a tuple.
 
@@ -48,11 +49,13 @@ def _parse_logline_timestamp(t):
     s, ms = s.split('.')
     return (month, day, h, m, s, ms)
 
+
 def isValidLogLineTimestamp(timestamp):
     if len(timestamp) == log_line_timestamp_len:
         if logline_timestamp_re.match(timestamp):
             return True
     return False
+
 
 def logLineTimestampComparator(t1, t2):
     """Comparator for timestamps in logline format.
@@ -73,15 +76,18 @@ def logLineTimestampComparator(t1, t2):
             return 1
     return 0
 
+
 def _get_timestamp(time_format, delta=None):
     t = datetime.datetime.now()
     if delta:
         t = t + datetime.timedelta(seconds=delta)
     return t.strftime(time_format)[:-3]
 
+
 def epochToLogLineTimestamp(epoch_time):
     d = datetime.datetime.fromtimestamp(epoch_time / 1000)
     return d.strftime("%m-%d %H:%M:%S.%f")[:-3]
+
 
 def getLogLineTimestamp(delta=None):
     """Returns a timestamp in the format used by log lines.
@@ -97,6 +103,7 @@ def getLogLineTimestamp(delta=None):
     """
     return _get_timestamp("%m-%d %H:%M:%S.%f", delta)
 
+
 def getLogFileTimestamp(delta=None):
     """Returns a timestamp in the format used for log file names.
 
@@ -110,6 +117,7 @@ def getLogFileTimestamp(delta=None):
         A timestamp in log filen name format with an offset.
     """
     return _get_timestamp("%m-%d-%Y_%H-%M-%S-%f", delta)
+
 
 def _initiateTestLogger(log_path, TAG, prefix=None, filename=None):
     """Returns a logger object used for tests.
@@ -157,6 +165,7 @@ def _initiateTestLogger(log_path, TAG, prefix=None, filename=None):
     logging.log_path = log_path
     return log
 
+
 def killTestLogger(logger):
     """Cleans up a test logger object created by initiateTestLogger.
 
@@ -168,6 +177,7 @@ def killTestLogger(logger):
         if isinstance(h, logging.FileHandler):
             h.close()
 
+
 def createLatestLogAlias(actual_path):
     """Creates a symlink to the latest test run logs.
 
@@ -178,6 +188,7 @@ def createLatestLogAlias(actual_path):
     if os.path.islink(link_path):
         os.remove(link_path)
     os.symlink(actual_path, link_path)
+
 
 def initiateTestLogger(log_path, TAG, prefix=None, filename=None):
     """Returns a logger customized for a test run.
@@ -199,6 +210,7 @@ def initiateTestLogger(log_path, TAG, prefix=None, filename=None):
     createLatestLogAlias(log_path)
     return logger
 
+
 def normalizeLogLineTimestamp(log_line_timestamp):
     """Replace special characters in log line timestamp with normal characters.
 
@@ -214,6 +226,7 @@ def normalizeLogLineTimestamp(log_line_timestamp):
     norm_tp = norm_tp.replace(':', '-')
     return norm_tp
 
+
 class LoggerProxy(object):
     """This class is for situations where a logger may or may not exist.
 
@@ -223,6 +236,7 @@ class LoggerProxy(object):
     an object of this class in the controller classes, instead of the actual
     logger object.
     """
+
     def __init__(self, logger=None):
         self.log = logger
 
@@ -237,4 +251,5 @@ class LoggerProxy(object):
             if self.log:
                 return getattr(self.log, name)(*args)
             print(*args)
+
         return log_call
