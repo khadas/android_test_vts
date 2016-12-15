@@ -86,6 +86,12 @@ api: {
     type: TYPE_SCALAR
     scalar_type: "int32_t"
   }
+  arg: {
+    type: TYPE_VECTOR_VARIABLE
+    vector_value: {
+      scalar_type: "uint8_t"
+    }
+  }
 }
 
 api: {
