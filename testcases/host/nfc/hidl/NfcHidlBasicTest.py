@@ -18,6 +18,8 @@
 import logging
 import time
 
+
+from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
@@ -25,6 +27,8 @@ from vts.utils.python.controllers import android_device
 
 class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A simple testcase for the NFC HIDL HAL."""
+
+    _TREBLE_DEVICE_NAME_SUFFIX = "_treble"
 
     def setUpClass(self):
         """Creates a mirror and turns on the framework-layer NFC service."""
@@ -44,6 +48,9 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def testBase(self):
         """A simple test case which just calls each registered function."""
+        asserts.skipIf(
+            not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
+            "a non-Treble device.")
 
         # TODO: extend to make realistic testcases
         def send_event(nfc_event_t, nfc_status_t):
