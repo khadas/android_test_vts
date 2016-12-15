@@ -5,10 +5,11 @@
       <title>VTS Table</title>
       <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
       <script type="text/javascript">
-        google.charts.load('current', {'packages':['table']});
+        google.charts.load('current', {'packages':['table', 'corechart']});
         google.charts.setOnLoadCallback(drawGridTable);
         google.charts.setOnLoadCallback(drawProfilingTable);
         google.charts.setOnLoadCallback(drawLegendTable);
+        google.charts.setOnLoadCallback(drawPieChart);
 
         // table for profiling data
         function drawProfilingTable() {
@@ -44,6 +45,30 @@
             }
         }
 
+        // to draw pie chart
+        function drawPieChart() {
+            var pieChartArray = ${pieChartArrayJson};
+            if (pieChartArray.length < 1) {
+                return;
+            }
+            for (var i = 1; i < pieChartArray.length; i++) {
+                pieChartArray[i][1] = parseInt(pieChartArray[i][1]);
+            }
+
+            var data = google.visualization.arrayToDataTable(pieChartArray);
+            var topBuild = ${topBuildJson};
+            var colName = topBuild.substring(0, topBuild.lastIndexOf("."));
+            var title = 'Test Result Status for build ID : ' + colName;
+            var options = {
+              title: title,
+              is3D: false,
+              colors: ['#FFFFFF', '#7FFF00', '#ff4d4d', '#A8A8A8', '#000000', '9900CC'],
+              legend: { position: 'labeled' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
+            chart.draw(data, options);
+        }
         // table for legend
         function drawLegendTable() {
             var data = new google.visualization.DataTable();
@@ -210,6 +235,9 @@
   </head>
 
   <body>
+    <!-- pie chart -->
+    <div id = "pie_chart_div" style="width: 800px; height: 400px; float:right; display:inline"></div>
+
     <!-- Home page logo -->
     <div id="home_page_logo_div" style="margin-left:100px; margin-top:50px">
       <a href="${pageContext.request.contextPath}/"><h2>VTS</h2>
@@ -220,13 +248,17 @@
     <!-- Profiling Table -->
     <div id="profiling_table_div" style="margin-left:100px; margin-top:50px"></div>
 
-    <div id = "legend_table_div" style="margin-left:100px; margin-top:10px"></div>
-    <!-- Grid tables-->
-    <div style="margin-left:100px;margin-top:10px">
-        <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
-        <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
+
+    <div style="clear:both; margin-left:100px; overflow: hidden;">
+        <div id = "legend_table_div" style="margin-top:10px"></div>
+
+        <!-- Grid tables-->
+        <div style="margin-top:10px;float:left;">
+            <input id="previous_button" type="button" value="<<Previous" onclick="navigate(-1);" />
+            <input id="next_button" type="button" value="Next>>" onclick="navigate(1);" />
+        </div>
+        <div id="grid_table_div" style:"float:left;"></div>
     </div>
-    <div id="grid_table_div" style="margin-left:100px"></div>
 
     <script type="text/javascript">
         // disable buttons on load
