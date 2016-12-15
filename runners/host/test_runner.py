@@ -92,13 +92,8 @@ def runTestClass(test_class):
     test_configs = config_parser.load_test_config_file(config_path)
     test_identifiers = [(test_cls_name, None)]
 
-    device_serial = sys.argv[2] if len(sys.argv) >= 3 else None
-    logging.info("Given Device Serial: %s", device_serial)
-    data_file_path = sys.argv[3] if len(sys.argv) >= 4 else None
-    logging.info("Data File Path: %s", data_file_path)
-
     for config in test_configs:
-        tr = TestRunner(config, test_identifiers, device_serial, data_file_path)
+        tr = TestRunner(config, test_identifiers)
         tr.parseTestConfig(config)
         try:
             # Create console signal handler to make sure TestRunner is stopped
@@ -135,12 +130,12 @@ class TestRunner(object):
                       this test run.
         self.running: A boolean signifies whether this test run is ongoing or
                       not.
-        self.device_serial: A string keeping the device serial ID.
     """
 
-    def __init__(self, test_configs, run_list, device_serial, data_file_path):
+    def __init__(self, test_configs, run_list):
         self.test_run_info = {}
-        self.test_run_info["data_file_path"] = data_file_path
+        self.test_run_info[keys.ConfigKeys.IKEY_DATA_FILE_PATH] = getattr(
+            test_configs, keys.ConfigKeys.IKEY_DATA_FILE_PATH, "./")
         self.test_configs = test_configs
         self.testbed_configs = self.test_configs[keys.ConfigKeys.KEY_TESTBED]
         self.testbed_name = self.testbed_configs[
@@ -148,7 +143,7 @@ class TestRunner(object):
         start_time = logger.getLogFileTimestamp()
         self.id = "{}@{}".format(self.testbed_name, start_time)
         # log_path should be set before parsing configs.
-        l_path = os.path.join(self.test_configs[keys.ConfigKeys.KEP_LOG_PATH],
+        l_path = os.path.join(self.test_configs[keys.ConfigKeys.KEY_LOG_PATH],
                               self.testbed_name, start_time)
         self.log_path = os.path.abspath(l_path)
         logger.setupTestLogger(self.log_path, self.testbed_name)
@@ -157,7 +152,6 @@ class TestRunner(object):
         self.run_list = run_list
         self.results = records.TestResult()
         self.running = False
-        self.device_serial = device_serial
 
     def __enter__(self):
         return self
@@ -282,10 +276,6 @@ class TestRunner(object):
             original_config = self.testbed_configs[module_config_name]
             controller_config = copy.deepcopy(original_config)
             logging.info("controller_config: %s", controller_config)
-            if (controller_config == module.ANDROID_DEVICE_PICK_ALL_TOKEN
-                and self.device_serial):
-                controller_config = [{"serial": self.device_serial}]
-                logging.info("set controller_config to %s", controller_config)
             objects = create(controller_config)
         except:
             logging.exception(("Failed to initialize objects for controller "
