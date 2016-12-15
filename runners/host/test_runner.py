@@ -247,6 +247,8 @@ class TestRunner(object):
             ControllerError is raised if no corresponding config can be found,
             or if the controller module has already been registered.
         """
+        logging.info("cwd: %s", os.getcwd())
+        logging.info("adb devices: %s", module.list_adb_devices())
         TestRunner.verifyControllerModule(module)
         module_ref_name = module.__name__.split('.')[-1]
         if module_ref_name in self.controller_registry:
