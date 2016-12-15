@@ -22,10 +22,11 @@ import socket
 import time
 import types
 
-from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg_pb2
 from vts.runners.host import const
+from vts.runners.host import errors
+from vts.utils.python.mirror import mirror_object
 
 from google.protobuf import text_format
 
@@ -173,6 +174,12 @@ class VtsTcpClient(object):
             except text_format.ParseError as e:
                 logging.exception(e)
                 logging.error("Paring error\n%s", resp.result)
+            if result.return_type.type == IfaceSpecMsg_pb2.TYPE_SUBMODULE:
+                logging.info("returned a submodule spec")
+                logging.info("spec: %s", result.return_type_submodule_spec)
+                return mirror_object.MirrorObject(self,
+                                           result.return_type_submodule_spec,
+                                           None)
             return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
