@@ -165,7 +165,6 @@ Your config file will overwrite the following default json object defined at
 ```
 ---
 
-
 ## 4. Serving
 
 [Dashboard](https://android-vts-internal.googleplex.com)
@@ -174,3 +173,29 @@ Once a new test case is added to one of the launched test suites,
 it is automatically executed in a test lab (e.g., using some common devices).
 The exact schedule, and the used branches and devices are all customizable.
 Please contact an EngProd representative to your team, or vts-dev@google.com.
+
+## 5. Notifications
+
+For notifications when test cases fail, modify the config file with a list of
+subscriber email addresses. By default, notifications will be sent to vts-alert@,
+so no changes are necessary if you are already in the group. To add other email
+addresses or to disable notifications, add the following options:
+
+To disable notifications:
+```json
+{
+    ...,
+    "notification_subscribers": []
+}
+```
+
+To specify a custom list of subscribers:
+```json
+{
+    ...,
+    "notification_subscribers": ["email1@google.com", "email2@google.com"]
+}
+```
+
+Note that if you override the notification subscribers, then vts-alert@ will no
+longer receive notification emails unless specifically defined in the custom list.
