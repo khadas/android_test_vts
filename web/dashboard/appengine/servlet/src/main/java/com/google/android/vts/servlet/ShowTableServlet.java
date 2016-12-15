@@ -116,8 +116,6 @@ public class ShowTableServlet extends HttpServlet {
         // message to display if profiling point data is not available
         String profilingDataAlert = "";
 
-        // session to save map object so that it can be used later.
-        HttpSession session = request.getSession();
         if (request.getParameter("tableName") == null) {
             request.setAttribute("tableName", TABLE_NAME_ERROR);
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
@@ -159,10 +157,6 @@ public class ShowTableServlet extends HttpServlet {
             // set to hold the name of profiling tests to maintain uniqueness
             Set<String> profilingPointNameSet = new HashSet<String>();
 
-            // map to hold the the list of time taken for each test. This map is saved to session
-            // so that it could be used later.
-            Map<String, List<Double>> mapProfilingNameValues = new HashMap();
-
             // Map to hold TestReportMessage based on build ID and start time stamp.
             // This will be used to obtain the corresponding device info later.
             Map<String, TestReportMessage> buildIdTimeStampMap = new HashMap();
@@ -195,16 +189,6 @@ public class ShowTableServlet extends HttpServlet {
 
                         String profilingPointName = profilingReportMessage.getName().toStringUtf8();
                         profilingPointNameSet.add(profilingPointName);
-                        double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
-                            profilingReportMessage.getStartTimestamp())) / 1000;
-                        if (timeTaken < 0) {
-                            logger.info("Inappropriate value for time taken");
-                            continue;
-                        }
-                        if (!mapProfilingNameValues.containsKey(profilingPointName)) {
-                            mapProfilingNameValues.put(profilingPointName, new ArrayList<Double>());
-                        }
-                        mapProfilingNameValues.get(profilingPointName).add(timeTaken);
                     }
                 }
             }
@@ -452,8 +436,6 @@ public class ShowTableServlet extends HttpServlet {
                 profilingDataAlert = PROFILING_DATA_ALERT;
             }
 
-            // pass values in request
-            session.setAttribute("mapProfilingNameValues", mapProfilingNameValues);
             request.setAttribute("tableName", table.getName());
 
             request.setAttribute("error", profilingDataAlert);
