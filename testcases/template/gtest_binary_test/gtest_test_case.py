@@ -17,6 +17,10 @@
 
 import os
 import ntpath
+import uuid
+import re
+
+from vts.runners.host import utils
 
 
 def PutTag(name, tag):
@@ -40,7 +44,7 @@ class GtestTestCase(object):
         test_name: string, test case name which does not include test suite
         path: string, absolute test binary path on device
         tag: string, test tag
-        output_file_name: string, gtest output xml file name
+        output_file_path: string, gtest output xml file name
     '''
 
     def __init__(self, test_suite, test_name, path, tag=''):
@@ -48,7 +52,8 @@ class GtestTestCase(object):
         self.test_name = test_name
         self.path = path
         self.tag = tag
-        self.output_file_name = None
+        self.output_file_path = 'gtest_output_{name}.xml'.format(
+            name=re.sub(r'\W+', '_', str(self)))
 
     def __str__(self):
         return PutTag(self.GetGtestName(), self.tag)
@@ -61,31 +66,51 @@ class GtestTestCase(object):
         '''
         return '{}{}'.format(self.test_suite, self.test_name)
 
-    def GetGtestOutputFileName(self):
-        '''Get gtest output xml's file name.'''
-        if not self.output_file_name:
-            self.output_file_name = '{path}-{name}.xml'.format(
-                path=self.path.replace(os.path.sep, '_'), name=str(self))
-        return self.output_file_name
-
-    def GetRunCommand(self, output_file_name=None):
-        if output_file_name:
-            self.output_file_name = output_file_name
+    def GetRunCommand(self, output_file_path=None):
+        if output_file_path:
+            self.output_file_path = output_file_path
         return ('{path} --gtest_filter={test} '
-                '--gtest_output=xml:{output_file_name}').format(
+                '--gtest_output=xml:{output_file_path}').format(
                     path=self.path,
                     test=self.GetGtestName(),
-                    output_file_name=self.GetGtestOutputFileName())
+                    output_file_path=self.output_file_path)
 
     @property
-    def output_file_name(self):
-        """Get output_file_name"""
-        return self._output_file_name
+    def output_file_path(self):
+        """Get output_file_path"""
+        return self._output_file_path
 
-    @output_file_name.setter
-    def output_file_name(self, output_file_name):
-        """Set output_file_name"""
-        self._output_file_name = output_file_name
+    @output_file_path.setter
+    def output_file_path(self, output_file_path):
+        """Set output_file_path.
+
+        Lengths of both file name and path will be checked. If longer than
+        maximum allowance, file name will be set to a random name, and
+        directory will be set to relative directory.
+
+        Args:
+            output_file_path: string, intended path of output xml file
+        """
+        output_file_path = os.path.normpath(output_file_path)
+
+        if len(ntpath.basename(output_file_path)) > utils.MAX_FILENAME_LEN:
+            logging.error(
+                'File name of output file "{}" is longer than {}.'.format(
+                    output_file_path), utils.MAX_FILENAME_LEN)
+            output_file_path = os.path.join(
+                ntpath.dirname(output_file_path),
+                '{}.xml'.format(uuid.uuid4()))
+            logging.info('Output file path is set as "%s".', output_file_path)
+
+        if len(output_file_path) > utils.MAX_PATH_LEN:
+            logging.error(
+                'File path of output file "{}" is longer than {}.'.format(
+                    output_file_path), utils.MAX_PATH_LEN)
+            output_file_path = ntpath.basename(output_file_path)
+            logging.info('Output file path is set as "%s".',
+                         os.path.abspath(output_file_path))
+
+        self._output_file_path = output_file_path
 
     @property
     def test_suite(self):

@@ -32,6 +32,9 @@ import traceback
 # File name length is limited to 255 chars on some OS, so we need to make sure
 # the file names we output fits within the limit.
 MAX_FILENAME_LEN = 255
+# Path length is limited to 4096 chars on some OS, so we need to make sure
+# the path we output fits within the limit.
+MAX_PATH_LEN = 4096
 
 
 class VTSUtilsError(Exception):
