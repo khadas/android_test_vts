@@ -27,6 +27,12 @@ const int VtsProfilingInterface::kProfilingPointEntry = 1;
 const int VtsProfilingInterface::kProfilingPointCallback = 2;
 const int VtsProfilingInterface::kProfilingPointExit = 3;
 
+VtsProfilingInterface& VtsProfilingInterface::getInstance()
+{
+    static VtsProfilingInterface instance;
+    return instance;
+}
+
 bool VtsProfilingInterface::AddTraceEvent(
     const FunctionSpecificationMessage& message) {
   return true;
