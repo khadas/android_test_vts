@@ -35,6 +35,8 @@
         <option name="push" value="vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
         <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
+        <option name="push" value="CameraHalV2.vts->/data/local/tmp/spec/CameraHalV2.vts" />
+        <option name="push" value="CameraHalV2hw_device_t.vts->/data/local/tmp/spec/CameraHalV2hw_device_t.vts" />
         <option name="append-bitness" value="false" />
     </target_preparer>
     <!-- TODO: copy camera HAL so files -->
