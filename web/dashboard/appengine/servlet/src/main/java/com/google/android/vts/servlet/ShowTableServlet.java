@@ -18,6 +18,7 @@ package com.google.android.vts.servlet;
 
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
+import com.google.android.vts.proto.VtsReportMessage.CoverageReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;
@@ -152,8 +153,8 @@ public class ShowTableServlet extends HttpServlet {
                     if (buildId.length() > 0) {
                         try {
                             Integer.parseInt(buildId);
-                            String key = testReportMessage.getBuildInfo().getId().toStringUtf8() + "." +
-                                String.valueOf(testReportMessage.getStartTimestamp());
+                            String key = testReportMessage.getBuildInfo().getId().toStringUtf8()
+                                + "." + String.valueOf(testReportMessage.getStartTimestamp());
                             sortedBuildIdTimeStampList.add(key);
                             // update map based on time stamp.
                             buildIdTimeStampMap.put(key, testReportMessage);
@@ -205,7 +206,8 @@ public class ShowTableServlet extends HttpServlet {
             }
 
             sortedBuildIdTimeStampList = sortedBuildIdTimeStampList.subList(listStart, listEnd);
-            List<String> selectedBuildIdTimeStampList = new ArrayList<String>(sortedBuildIdTimeStampList.size());
+            List<String> selectedBuildIdTimeStampList = new ArrayList<String>(
+                sortedBuildIdTimeStampList.size());
             for (Object intElem : sortedBuildIdTimeStampList) {
                 selectedBuildIdTimeStampList.add(intElem.toString());
             }
@@ -213,10 +215,12 @@ public class ShowTableServlet extends HttpServlet {
 
             // the device grid on the table has four rows - Build Alias, Product Variant,
             // Build Flavor and device build ID, and columns equal to the size of selectedBuildIdList.
-            String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][selectedBuildIdTimeStampList.size() + 1];
+            String[][] deviceGrid = new String[DEVICE_INFO_ROW_COUNT][
+                selectedBuildIdTimeStampList.size() + 1];
 
-            // the summary grid has three rows - Total Row, Pass Row and Ratio Row.
-            String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][selectedBuildIdTimeStampList.size() + 1];
+            // the summary grid has four rows - Total Row, Pass Row, Ratio Row, and Coverage %.
+            String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][
+                selectedBuildIdTimeStampList.size() + 1];
 
             // first column for device grid
             String[] rowNamesDeviceGrid = {"Branch", "Build Target", "Device", "Device Build ID"};
@@ -225,7 +229,7 @@ public class ShowTableServlet extends HttpServlet {
             }
 
             // first column for summary grid
-            String[] rowNamesSummaryGrid = {"Total", "# Passed", "% Passed", "Coverage"};
+            String[] rowNamesSummaryGrid = {"Total", "# Passed", "% Passed", "Coverage %"};
             for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
                 summaryGrid[i][0] = rowNamesSummaryGrid[i];
             }
@@ -312,7 +316,8 @@ public class ShowTableServlet extends HttpServlet {
 
             // fill the remaining grid
             for (int i = DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i < finalGrid.length; i++) {
-                String testName = testCaseNameList.get(i - DEVICE_INFO_ROW_COUNT - SUMMARY_ROW_COUNT);
+                String testName = testCaseNameList.get(
+                    i - DEVICE_INFO_ROW_COUNT - SUMMARY_ROW_COUNT);
                 for (int j = 0; j < finalGrid[0].length; j++) {
 
                     if (j == 0) {
@@ -330,8 +335,13 @@ public class ShowTableServlet extends HttpServlet {
                     }
 
                     if (i == finalGrid.length - 1) {
-                        summaryGridfloat[2][j] =
-                            Math.round((100 *summaryGridfloat[1][j]/summaryGridfloat[0][j]) * 100f)/100f;
+                        try {
+                            summaryGridfloat[2][j] =
+                                Math.round((100 * summaryGridfloat[1][j] / summaryGridfloat[0][j])
+                                           * 100f) / 100f;
+                        } catch (ArithmeticException e) {
+                            /* ignore where total test cases is zero*/
+                        }
                     }
                 }
             }
@@ -347,13 +357,35 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
 
-            // last row of summary grid - it should point a link 'C' to coverage page.
-            for (int index = 1; index < summaryGrid[0].length; index++) {
-                summaryGrid[3][index] = "C";
+            // last row of summary grid
+            // calculate coverage % for each column
+            for (int j = 0; j < selectedBuildIdTimeStampList.size(); j++) {
+                String key = selectedBuildIdTimeStampList.get(j);
+                TestReportMessage testReportMessage = buildIdTimeStampMap.get(key);
+
+                for (TestCaseReportMessage testCaseReportMessage
+                     : testReportMessage.getTestCaseList()) {
+                    double totalLineCount = 0, coveredLineCount = 0;
+                    for (CoverageReportMessage coverageReportMessage :
+                        testCaseReportMessage.getCoverageList()) {
+                        totalLineCount += coverageReportMessage.getTotalLineCount();
+                        coveredLineCount += coverageReportMessage.getCoveredLineCount();
+                    }
+                    // j + 1 is the column index
+                    if (totalLineCount != 0) {
+                        summaryGrid[SUMMARY_ROW_COUNT - 1][j + 1] =
+                            String.valueOf(Math.round((100 *coveredLineCount / totalLineCount)
+                                                      * 100d) / 100d)
+                                    + "%";
+                    } else {
+                        summaryGrid[SUMMARY_ROW_COUNT - 1][j + 1] = "NA";
+                    }
+                }
             }
 
             // copy the summary grid
-            for (int i = DEVICE_INFO_ROW_COUNT; i < DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i++) {
+            for (int i = DEVICE_INFO_ROW_COUNT;
+                 i < DEVICE_INFO_ROW_COUNT + SUMMARY_ROW_COUNT; i++) {
                 finalGrid[i] = summaryGrid[i - DEVICE_INFO_ROW_COUNT];
             }
 
@@ -361,7 +393,8 @@ public class ShowTableServlet extends HttpServlet {
                 toArray(new String[profilingPointNameSet.size()]);
 
             String[] buildIDtimeStampArray =
-                selectedBuildIdTimeStampList.toArray(new String[selectedBuildIdTimeStampList.size()]);
+                selectedBuildIdTimeStampList.toArray(
+                    new String[selectedBuildIdTimeStampList.size()]);
             if (profilingPointNameArray.length == 0) {
                 profilingDataAlert = PROFILING_DATA_ALERT;
             }
@@ -393,6 +426,13 @@ public class ShowTableServlet extends HttpServlet {
 
             request.setAttribute("maxBuildIdPageNo",
                                   new Gson().toJson(maxBuildIdPageNo));
+
+            // pass the number of summary rows and device info rows
+            request.setAttribute("summaryRowCountJson",
+                new Gson().toJson(SUMMARY_ROW_COUNT));
+
+            request.setAttribute("deviceInfoRowCountJson",
+                new Gson().toJson(DEVICE_INFO_ROW_COUNT));
 
             dispatcher = request.getRequestDispatcher("/show_table.jsp");
             try {
