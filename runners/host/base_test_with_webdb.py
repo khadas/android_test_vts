@@ -78,9 +78,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
 
-        self._profile_msg = None
         self._profiling = {}
-        self._profiling_labeled_vector = {}
         setattr(self, self.COVERAGE_ATTRIBUTE, [])
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
@@ -105,12 +103,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                              "data", self._report_msg.SerializeToString())
             logging.info("_tearDownClass hook: result proto %s",
                          self._report_msg)
-            if self._profile_msg:
-                bt_client.CreateTable("profile")
-                bt_client.PutRow(str(self._report_msg.start_timestamp),
-                                 "data", self._profile_msg.SerializeToString())
-                logging.info("_tearDownClass hook: profile proto %s",
-                             self._profile_msg)
             logging.info("_tearDownClass hook: done")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
 
@@ -232,13 +224,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.error("'use_gae_db' config is not True.")
             False
 
-        if not self._profile_msg:
-            self._profile_msg = ReportMsg.TestReportMessage()
-            self._profile_msg.test = self.__class__.__name__
         if name in self._profiling:
             logging.error("profiling point %s is already active.", name)
             return False
-        self._profiling[name] = self._profile_msg.profiling.add()
+        self._profiling[name] = self._report_msg.profiling.add()
         self._profiling[name].name = name
         self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_TIMESTAMP
         self._profiling[name].start_timestamp = self.GetTimestamp()
@@ -254,7 +243,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.error("'use_gae_db' config is not True.")
             False
 
-        if not self._profile_msg or name not in self._profiling:
+        if name not in self._profiling:
             logging.error("profiling point %s is not active.", name)
             return False
         if self._profiling[name].end_timestamp:
@@ -271,16 +260,20 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             labeled_vector: a dict where key is label and value is measured
                             number.
         """
-        if not self._profile_msg:
-            self._profile_msg = ReportMsg.TestReportMessage()
-            self._profile_msg.test = self.__class__.__name__
+        if not getattr(self, self.USE_GAE_DB, False):
+            logging.error("'use_gae_db' config is not True.")
+            False
 
-        profiling = self._profile_msg.profiling.add()
-        profiling.name = name
-        profiling.type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
+        if name in self._profiling:
+            logging.error("profiling point %s is already active.", name)
+            return False
+
+        self._profiling[name] = self._report_msg.profiling.add()
+        self._profiling[name].name = name
+        self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
         for label in labeled_vector:
-            profiling.label.append(label)
-            profiling.value.append(labeled_vector[label])
+            self._profiling[name].label.append(label)
+            self._profiling[name].value.append(labeled_vector[label])
 
     def SetCoverageData(self, raw_coverage_data):
         """Sets the given coverage data to the class-level list attribute.
