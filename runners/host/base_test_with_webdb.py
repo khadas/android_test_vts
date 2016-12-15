@@ -33,6 +33,8 @@ from vts.runners.host import utils
 
 from vts.utils.app_engine import bigtable_rest_client
 
+_ANDROID_DEVICE = "AndroidDevice"
+
 
 class BaseTestWithWebDbClass(base_test.BaseTestClass):
     """Base class with Web DB interface for test classes to inherit from.
@@ -90,6 +92,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 if "build_id" in build:
                     self._report_msg.build_info.id = str(build["build_id"])
 
+            self.SetDeviceInfo(self._report_msg)
             bt_client.PutRow(str(self._report_msg.start_timestamp),
                              "data", self._report_msg.SerializeToString())
             logging.info("_tearDownClass hook: result proto %s",
@@ -102,6 +105,29 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                              self._profile_msg)
             logging.info("_tearDownClass hook: done")
         return super(BaseTestWithWebDbClass, self)._tearDownClass()
+
+    def SetDeviceInfo(self, msg):
+        """Sets device info to the given protobuf message, msg."""
+        self.getUserParams(opt_param_names=[_ANDROID_DEVICE])
+        dev_list = getattr(self, _ANDROID_DEVICE, False)
+        if not dev_list or not isinstance(dev_list, list):
+            logging.warn("attribute %s not found (available %s)",
+                         _ANDROID_DEVICE,
+                         self.user_params)
+            return
+
+        for device_spec in dev_list:
+            dev_info = msg.device_info.add()
+            for elem in [keys.ConfigKeys.IKEY_PRODUCT_TYPE,
+                         keys.ConfigKeys.IKEY_PRODUCT_VARIANT,
+                         keys.ConfigKeys.IKEY_BUILD_FLAVOR,
+                         keys.ConfigKeys.IKEY_BUILD_ID,
+                         keys.ConfigKeys.IKEY_BRANCH,
+                         keys.ConfigKeys.IKEY_BUILD_ALIAS,
+                         keys.ConfigKeys.IKEY_API_LEVEL,
+                         keys.ConfigKeys.IKEY_SERIAL]:
+                if elem in device_spec:
+                    setattr(dev_info, elem, str(device_spec[elem]))
 
     def GetFunctionName(self):
         """Returns the caller's function name."""
