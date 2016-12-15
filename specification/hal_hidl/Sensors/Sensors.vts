@@ -1,0 +1,508 @@
+component_class: HAL_HIDL
+component_type_version: 1.0
+component_name: "ISensors"
+
+package: "android.hardware.sensors"
+
+
+interface: {
+  attribute: {
+    name: "SensorType"
+    type: TYPE_ENUM
+    enum_value: {
+      enumerator: "kSensorType_MetaData"
+      value: 0
+      enumerator: "kSensorType_Accelerometer"
+      value: 1
+      enumerator: "kSensorType_GeomagneticField"
+      value: 2
+      enumerator: "kSensorType_Orientation"
+      value: 3
+      enumerator: "kSensorType_Gyroscope"
+      value: 4
+      enumerator: "kSensorType_Light"
+      value: 5
+      enumerator: "kSensorType_Pressure"
+      value: 6
+      enumerator: "kSensorType_Temperature"
+      value: 7
+      enumerator: "kSensorType_Proximity"
+      value: 8
+      enumerator: "kSensorType_Gravity"
+      value: 9
+      enumerator: "kSensorType_LinearAcceleration"
+      value: 10
+      enumerator: "kSensorType_RotationVector"
+      value: 11
+      enumerator: "kSensorType_RelativeHumidity"
+      value: 12
+      enumerator: "kSensorType_AmbientTemperature"
+      value: 13
+      enumerator: "kSensorType_MagneticFieldUncalibrated"
+      value: 14
+      enumerator: "kSensorType_GameRotationVector"
+      value: 15
+      enumerator: "kSensorType_GyroscopeUncalibrated"
+      value: 16
+      enumerator: "kSensorType_SignificantMotion"
+      value: 17
+      enumerator: "kSensorType_StepDetector"
+      value: 18
+      enumerator: "kSensorType_StepCounter"
+      value: 19
+      enumerator: "kSensorType_GeomagneticRotationVector"
+      value: 20
+      enumerator: "kSensorType_HeartRate"
+      value: 21
+      enumerator: "kSensorType_TiltDetector"
+      value: 22
+      enumerator: "kSensorType_WakeGesture"
+      value: 23
+      enumerator: "kSensorType_GlanceGesture"
+      value: 24
+      enumerator: "kSensorType_PickupGesture"
+      value: 25
+      enumerator: "kSensorType_WristTiltGesture"
+      value: 26
+      enumerator: "kSensorType_DeviceOrientation"
+      value: 27
+      enumerator: "kSensorType_Pose_6DOF"
+      value: 28
+      enumerator: "kSensorType_StationaryDetect"
+      value: 29
+      enumerator: "kSensorType_MotionDetect"
+      value: 30
+      enumerator: "kSensorType_HeartBeat"
+      value: 31
+      enumerator: "kSensorType_AdditionalInfo"
+      value: 33
+    }
+  }
+
+  attribute: {
+    name: "Sensor"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "name"
+      type: TYPE_STRING
+    }
+    struct_value: {
+      name: "vendor"
+      type: TYPE_STRING
+    }
+    struct_value: {
+      name: "_version"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "_handle"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "type"
+      type: TYPE_ENUM
+      predefined_type:"SensorType"
+    }
+    struct_value: {
+      name: "maxRange"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "resolution"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "power"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "minDelay"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "fifoReservedEventCount"
+      type: TYPE_SCALAR
+      scalar_type: uint32_t
+    }
+    struct_value: {
+      name: "fifoMaxEventCount"
+      type: TYPE_SCALAR
+      scalar_type: uint32_t
+    }
+    struct_value: {
+      name: "stringType"
+      type: TYPE_STRING
+    }
+    struct_value: {
+      name: "requiredPermission"
+      type: TYPE_STRING
+    }
+    struct_value: {
+      name: "maxDelay"
+      type: TYPE_SCALAR
+      scalar_type: int64_t
+    }
+    struct_value: {
+      name: "flags"
+      type: TYPE_SCALAR
+      scalar_type: uint64_t
+    }
+  }
+
+  attribute: {
+    name: "Vec3"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "x"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "y"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "z"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "status"
+      type: TYPE_SCALAR
+      scalar_type: int8_t
+    }
+  }
+
+  attribute: {
+    name: "Vec4"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "x"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "y"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "z"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "w"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+  }
+
+  attribute: {
+    name: "Uncal"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "x"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "y"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "z"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "x_bias"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "y_bias"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "z_bias"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+  }
+
+  attribute: {
+    name: "HeartRate"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "bpm"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    struct_value: {
+      name: "status"
+      type: TYPE_SCALAR
+      scalar_type: int8_t
+    }
+  }
+
+  attribute: {
+    name: "Meta"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "what"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "sensor"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+  }
+
+  attribute: {
+    name: "DynamicSensor"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "connected"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "_handle"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "sensor"
+      type: TYPE_STRUCT
+      predefined_type: "Sensor"
+    }
+    struct_value: {
+      name: "uuid"
+      type: TYPE_ARRAY
+      vector_value: {
+        size: 16
+        type: TYPE_SCALAR
+        scalar_type: uint8_t
+      }
+    }
+  }
+
+  attribute: {
+    name: "EventPayload"
+    type: TYPE_UNION
+    union_value: {
+      name: "vec3"
+      type: TYPE_STRUCT
+      predefined_type: "Vec3"
+    }
+    union_value: {
+      name: "vec4"
+      type: TYPE_STRUCT
+      predefined_type: "Vec4"
+    }
+    union_value: {
+      name: "uncal"
+      type: TYPE_STRUCT
+      predefined_type: "Uncal"
+    }
+    union_value: {
+      name: "meta"
+      type: TYPE_STRUCT
+      predefined_type: "Meta"
+    }
+    union_value: {
+      name: "scalar"
+      type: TYPE_SCALAR
+      scalar_type: float
+    }
+    union_value: {
+      name: "stepCount"
+      type: TYPE_SCALAR
+      scalar_type: uint64_t
+    }
+    union_value: {
+      name: "heartRate"
+      type: TYPE_STRUCT
+      predefined_type: "HeartRate"
+    }
+    union_value: {
+      name: "pose6DOF"
+      type: TYPE_ARRAY
+      vector_value: {
+        size: 15
+        type: TYPE_SCALAR
+        scalar_type: float
+      }
+    }
+  }
+
+  attribute: {
+    name: "Event"
+    type: TYPE_STRUCT
+    struct_value: {
+      name: "_version"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "sensor"
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    struct_value: {
+      name: "type"
+      type: TYPE_ENUM
+      predefined_type:"SensorType"
+    }
+    struct_value: {
+      name: "timestamp"
+      type: TYPE_SCALAR
+      scalar_type: int64_t
+    }
+    struct_value: {
+      name: "flags"
+      type: TYPE_SCALAR
+      scalar_type: uint32_t
+    }
+    struct_value: {
+      name: "u"
+      type: TYPE_UNION
+      predefined_type: "EventPayload"
+    }
+  }
+
+  api: {
+    name: "get_sensors_list"
+    return_type_hidl: {
+      type: TYPE_VECTOR
+      vector_value: {
+        type: TYPE_STRUCT
+        predefined_type: "Sensor"
+      }
+    }
+  }
+
+  api: {
+    name: "set_operation_mode"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: uint32_t
+    }
+  }
+
+  api: {
+    name: "activate"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+  }
+
+  api: {
+    name: "setDelay"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int64_t
+    }
+  }
+
+  api: {
+    name: "poll"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    return_type_hidl: {
+      type: TYPE_VECTOR
+      vector_value: {
+        type: TYPE_STRUCT
+        predefined_type: "Event"
+      }
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+  }
+
+  api: {
+    name: "batch"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int64_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int64_t
+    }
+  }
+
+  api: {
+    name: "flush"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+  }
+
+  api: {
+    name: "inject_sensor_data"
+    return_type_hidl: {
+      type: TYPE_SCALAR
+      scalar_type: int32_t
+    }
+    arg: {
+      type: TYPE_STRUCT
+      predefined_type: "Event"
+    }
+  }
+
+}

@@ -35,9 +35,9 @@ VTS_ENABLE_TREBLE := false
 
 ifeq ($(VTS_ENABLE_TREBLE),true)
 vtslib_interfacespec_srcfiles += \
-  hal_hidl/Nfc.vts \
-  hal_hidl/NfcClientCallback.vts \
-  hal_hidl/types.vts \
+  hal_hidl/Nfc/Nfc.vts \
+  hal_hidl/Nfc/NfcClientCallback.vts \
+  hal_hidl/Nfc/types.vts \
 
 endif
 
@@ -154,15 +154,15 @@ $(vts_spec_file6): $(LOCAL_PATH)/hal_conventional/WifiHalV1.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-$(vts_spec_file7): $(LOCAL_PATH)/hal_hidl/Nfc.vts | $(ACP)
+$(vts_spec_file7): $(LOCAL_PATH)/hal_hidl/Nfc/Nfc.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-$(vts_spec_file8): $(LOCAL_PATH)/hal_hidl/NfcClientCallback.vts | $(ACP)
+$(vts_spec_file8): $(LOCAL_PATH)/hal_hidl/Nfc/NfcClientCallback.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-$(vts_spec_file9): $(LOCAL_PATH)/hal_hidl/types.vts | $(ACP)
+$(vts_spec_file9): $(LOCAL_PATH)/hal_hidl/Nfc/types.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
