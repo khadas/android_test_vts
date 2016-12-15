@@ -70,8 +70,11 @@ message FunctionSpecificationMessage {
   // the function name.
   optional bytes name = 1;
 
-  // data type of the return value.
+  // data type of the return value (for legacy HALs and shared libraries).
   optional DataType return_type = 11;
+
+  // data type of the return value (for HIDL HALs).
+  repeated ArgumentSpecificationMessage return_type_hidl = 12;
 
   // a list of arguments.
   repeated ArgumentSpecificationMessage arg = 21;
@@ -82,8 +85,8 @@ message FunctionSpecificationMessage {
 
 
 message PrimitiveDataValueMessage {
-  optional int32 int32 = 1;
-  optional uint32 uint32 = 2;
+  optional int32 int32_t = 1;
+  optional uint32 uint32_t = 2;
   optional float float = 3;
   optional double double = 4;
   optional bytes bytes = 5;
