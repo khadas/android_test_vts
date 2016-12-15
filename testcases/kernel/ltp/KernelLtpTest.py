@@ -151,17 +151,13 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def RunLtpOnce(self, test_case, n_bit):
         "Run one LTP test case"
         self._requirement.Check(test_case)
-        testcase_name = self.GetTestName(test_case, n_bit)
-        exe_params = test_case.GetArgs("$LTPROOT", self._ltp_dir)
-        logging.info("executing a test binary: [%s]", test_case.path)
-        logging.info("execution envp: [%s]", self.GetEnvp())
-        logging.info("execution params: [%s]", exe_params)
-        self._dut.shell.InvokeTerminal(testcase_name)
-        shell = getattr(self._dut.shell, testcase_name)
-        cmd = "env %s %s %s" % (self.GetEnvp(), test_case.path, exe_params)
-        logging.debug("Executing %s", cmd)
-        results = shell.Execute(cmd)
-        self.Verify(results)
+
+        cmd = "env {envp} {binary} {args}".format(
+            envp=self.GetEnvp(),
+            binary=test_case.path,
+            args=test_case.GetArgs("$LTPROOT", self._ltp_dir))
+        logging.info("Executing %s", cmd)
+        self.Verify(self._shell.Execute(cmd))
 
     def test32Bits(self):
         """Runs all 32-bit LTP test cases."""
