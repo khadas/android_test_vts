@@ -65,7 +65,7 @@ public class ShowTableServlet extends HttpServlet {
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
-    private static final int MAX_BUILD_IDS_PER_PAGE = 12;
+    private static final int MAX_BUILD_IDS_PER_PAGE = 10;
     private static final int DEVICE_INFO_ROW_COUNT = 4;
     private static final int TIME_INFO_ROW_COUNT = 1;
     private static final int DURATION_INFO_ROW_COUNT = 1;
@@ -219,13 +219,18 @@ public class ShowTableServlet extends HttpServlet {
                 }
             }
             scanner.close();
-            if (tests.size() < MAX_BUILD_IDS_PER_PAGE
+            if (tests.size() < MAX_BUILD_IDS_PER_PAGE && showMostRecent
                 && BigtableHelper.hasOlder(table, startTime)) {
                 // Look further back in time a day
                 endTime = startTime;
                 startTime -= ONE_DAY;
-                showMostRecent = true;
-            } else {
+            } else if (tests.size() < MAX_BUILD_IDS_PER_PAGE && !showMostRecent
+                       && BigtableHelper.hasNewer(table, endTime)) {
+                // Look further forward in time a day
+                startTime = endTime;
+                endTime += ONE_DAY;
+            }
+            else {
                 // Full page or no more data.
                 break;
             }
