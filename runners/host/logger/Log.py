@@ -22,10 +22,10 @@ _FORMAT = "%(asctime)-15s: %(message)s"
 
 
 def SetupLogger():
-  """Setup the logging module for VTS's host-side runner."""
-  try:
-    logging.basicConfig(format=_FORMAT, level=logging.INFO)
-  except AttributeError as e:
-    print(e)
-    print("Your python version is %s" % sys.version)
-    raise
+    """Setup the logging module for VTS's host-side runner."""
+    try:
+        logging.basicConfig(format=_FORMAT, level=logging.INFO)
+    except AttributeError as e:
+        print(e)
+        print("Your python version is %s" % sys.version)
+        raise
