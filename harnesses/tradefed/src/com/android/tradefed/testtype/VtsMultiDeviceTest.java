@@ -29,13 +29,17 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
  * VTS) on given device.
  */
 
 @OptionClass(alias = "vtsmultidevicetest")
-public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
+public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
+    IRuntimeHintProvider, ITestCollector {
 
     static final String PYTHONPATH = "PYTHONPATH";
     static final float DEFAULT_TARGET_VERSION = -1;
@@ -54,6 +58,24 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
     @Option(name = "test-config-path",
         description = "The path for test case config file.")
     private String mTestConfigPath = null;
+
+    @Option(name = "include-filter",
+        description="The positive filter of the test names to run.")
+    private Set<String> mIncludeFilters = new HashSet<>();
+
+    @Option(name = "exclude-filter",
+        description="The negative filter of the test names to run.")
+    private Set<String> mExcludeFilters = new HashSet<>();
+
+    @Option(name = "runtime-hint", description="The hint about the test's runtime.",
+        isTimeVal = true)
+    private long mRuntimeHint = 60000;  // 1 minute
+
+    @Option(name = "collect-tests-only",
+        description = "Only invoke the test binary to collect list of applicable test cases. "
+                + "All test run callbacks will be triggered, but test execution will "
+                + "not be actually carried out.")
+    private boolean mCollectTestsOnly = false;
 
     // This variable is set in order to include the directory that contains the
     // python test cases. This is set before calling the method.
@@ -102,6 +124,66 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest {
 
     public void setTestConfigPath(String path){
         mTestConfigPath = path;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addIncludeFilter(String filter) {
+        mIncludeFilters.add(cleanFilter(filter));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addAllIncludeFilters(Set<String> filters) {
+        for (String filter : filters) {
+            mIncludeFilters.add(cleanFilter(filter));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addExcludeFilter(String filter) {
+        mExcludeFilters.add(cleanFilter(filter));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addAllExcludeFilters(Set<String> filters) {
+        for (String filter : filters) {
+            mExcludeFilters.add(cleanFilter(filter));
+        }
+    }
+
+    /*
+     * Conforms filters using a {@link com.android.ddmlib.testrunner.TestIdentifier} format
+     * to be recognized by the GTest executable.
+     */
+    private String cleanFilter(String filter) {
+        return filter.replace('#', '.');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getRuntimeHint() {
+        return mRuntimeHint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setCollectTestsOnly(boolean shouldCollectTest) {
+        mCollectTestsOnly = shouldCollectTest;
     }
 
     /**
