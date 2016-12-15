@@ -26,7 +26,6 @@ code blocks.
     parse(file_name, file_summary)
 """
 
-import logging
 import struct
 import sys
 
@@ -76,7 +75,6 @@ class GCDAParser(parser.GcovStreamParserUtil):
         Raises:
             parser.FileFormatError: invalid file format or invalid counts.
         """
-
         func = None
 
         while True:

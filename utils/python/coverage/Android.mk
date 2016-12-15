@@ -22,6 +22,8 @@ ARC_SUMMARY := arc_summary_test.py
 
 FUNCTION_SUMMARY := function_summary_test.py
 
+COVERAGE_REPORT := coverage_report_test.py
+
 default:
 	@echo "Running unit test for : $(PARSER)"
 	python $(PARSER)
@@ -37,3 +39,6 @@ default:
 
 	@echo "Running unit test for : $(FUNCTION_SUMMARY)"
 	python $(FUNCTION_SUMMARY)
+
+	@echo "Running unit test for : $(COVERAGE_REPORT)"
+	python $(COVERAGE_REPORT)
