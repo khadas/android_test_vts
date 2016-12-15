@@ -9,7 +9,6 @@ PRODUCT_PACKAGES += \
     vts_hal_agent \
     libvts_profiling \
     lights.bullhead-vts \
-    camera.bullhead-vts
 
 -include test/vts/specification/vts_specification.mk
 

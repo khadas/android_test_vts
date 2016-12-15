@@ -44,13 +44,6 @@ function vts_multidevice_create_image {
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc@1.0.so test/vts/images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc@1.0.so test/vts/images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so
 
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/hw/camera.${DEVICE}-vts.so test/vts/images/${DEVICE}/32/hal/camera.${DEVICE}-vts.so
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libmmcamera_interface.vts.so test/vts/images/${DEVICE}/32/hal/libmmcamera_interface.vts.so
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libmmjpeg_interface.vts.so test/vts/images/${DEVICE}/32/hal/libmmjpeg_interface.vts.so
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libqdMetaData.vts.so test/vts/images/${DEVICE}/32/hal
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/libqdMetaData.vts.so test/vts/images/${DEVICE}/64/hal
-  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libqomx_core.vts.so test/vts/images/${DEVICE}/32/hal
-
   cp ${BASE_DIR}/out/host/linux-x86/vts/android-vts/testcases/android.hardware.tests.libhwbinder@1.064.so test/vts/images/${DEVICE}/64/hal/android.hardware.tests.libhwbinder@1.0.so
   cp ${BASE_DIR}/out/host/linux-x86/vts/android-vts/testcases/android.hardware.tests.libhwbinder@1.0.so test/vts/images/${DEVICE}/32/hal
 

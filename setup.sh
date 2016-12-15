@@ -34,12 +34,6 @@ function vts_multidevice_target_setup {
   echo "install hal packages"
   adb push images/${DEVICE}/32/hal/lights.${DEVICE}-vts.so /data/local/tmp/32/hal/lights.${DEVICE}-vts.so
   adb push images/${DEVICE}/64/hal/lights.${DEVICE}-vts.so /data/local/tmp/64/hal/lights.${DEVICE}-vts.so
-  adb push images/${DEVICE}/32/hal/camera.${DEVICE}-vts.so /data/local/tmp/32/hal/camera.${DEVICE}-vts.so
-  adb push images/${DEVICE}/32/hal/libmmcamera_interface.vts.so /data/local/tmp/32/libmmcamera_interface.vts.so
-  adb push images/${DEVICE}/32/hal/libmmjpeg_interface.vts.so /data/local/tmp/32/libmmjpeg_interface.vts.so
-  adb push images/${DEVICE}/32/hal/libqdMetaData.vts.so /data/local/tmp/32/libqdMetaData.vts.so
-  adb push images/${DEVICE}/64/hal/libqdMetaData.vts.so /data/local/tmp/64/libqdMetaData.vts.so
-  adb push images/${DEVICE}/32/hal/libqomx_core.vts.so /data/local/tmp/32/libqomx_core.vts.so
 
   adb push images/${DEVICE}/32/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/32/android.hardware.tests.libhwbinder@1.0.so
   adb push images/${DEVICE}/64/hal/android.hardware.tests.libhwbinder@1.0.so /data/local/tmp/64/android.hardware.tests.libhwbinder@1.0.so
