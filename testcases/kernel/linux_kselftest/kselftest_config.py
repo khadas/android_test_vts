@@ -27,9 +27,20 @@ class ExitCode(object):
 KSFT_DIR = "/data/local/tmp/linux-kselftest"
 
 KSFT_CASES = [
-    "futex/functional/futex_wait_timeout",
+    "cpu-hotplug/cpu-on-off-test.sh",
     "futex/functional/futex_wait_timeout",
     "futex/functional/futex_wait_wouldblock",
     "futex/functional/futex_requeue_pi_mismatched_ops",
-    "futex/functional/futex_wait_private_mapped_file"
+    "futex/functional/futex_wait_uninitialized_heap",
+    "futex/functional/futex_wait_private_mapped_file",
+    "net/socket",
+    "timers/posix_timers",
+    "timers/nanosleep",
+    "timers/nsleep-lat",
+    "timers/set-timer-lat",
+    "timers/inconsistency-check",
+    "timers/raw_skew",
+    "timers/threadtest",
+    "timers/alarmtimer-suspend",
+    "timers/set-tai"
 ]
