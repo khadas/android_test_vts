@@ -19,11 +19,12 @@ import logging
 import os
 import sys
 
-from logger import Log
-from proto import AndroidSystemControlMessage_pb2
-from proto import InterfaceSpecificationMessage_pb2
+from vts.runners.host.logger import Log
+from vts.runners.host.proto import AndroidSystemControlMessage_pb2
+from vts.runners.host.proto import InterfaceSpecificationMessage_pb2
+from vts.runners.host.tcp_client import TcpClient
+
 from google.protobuf import text_format
-from tcp_client import TcpClient
 from sys import api_version
 
 
