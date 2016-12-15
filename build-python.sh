@@ -15,3 +15,4 @@ python -m compileall .
 # modify any import statements (to remove subdir path)
 protoc -I=proto --python_out=proto proto/AndroidSystemControlMessage.proto
 protoc -I=proto --python_out=proto proto/InterfaceSpecificationMessage.proto
+protoc -I=proto --python_out=proto proto/VtsReportMessage.proto
