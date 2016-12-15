@@ -25,10 +25,10 @@ class FuzzerExtended_INfc : public FuzzerBase {
  public:
     FuzzerExtended_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
  protected:
-    bool Fuzz(FunctionSpecificationMessage* func_msg,
-              void** result, const string& callback_socket_name);
-    bool GetAttribute(FunctionSpecificationMessage* func_msg,
-              void** result);
+    bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
+    bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
     bool GetService(bool get_stub);
 
  private:

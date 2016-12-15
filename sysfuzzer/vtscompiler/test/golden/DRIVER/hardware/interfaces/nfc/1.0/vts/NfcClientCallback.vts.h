@@ -37,7 +37,7 @@ class VtsNfcClientCallback: public INfcClientCallback {
 
 };
 
-VtsNfcClientCallback* VtsFuzzerCreateINfcClientCallback(const string& callback_socket_name);
+sp<INfcClientCallback> VtsFuzzerCreateINfcClientCallback(const string& callback_socket_name);
 
 
 

@@ -9,7 +9,6 @@
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-
 ::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const EnumDataValueMessage& arg) {
     return (::android::hardware::nfc::V1_0::NfcEvent) arg.scalar_value(0).uint32_t();
 }
@@ -24,6 +23,11 @@ namespace vts {
     if (choice == (uint32_t) 6) return ::android::hardware::nfc::V1_0::NfcEvent::ERROR;
     return ::android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
 }
+bool Verify__android__hardware__nfc__V1_0__NfcEvent(::android::hardware::nfc::V1_0::NfcEvent result_value, VariableSpecificationMessage expected_result){
+    if((uint32_t)result_value != expected_result.enum_value().scalar_value(0).uint32_t()) { return false; }
+    return true;
+}
+
 ::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const EnumDataValueMessage& arg) {
     return (::android::hardware::nfc::V1_0::NfcStatus) arg.scalar_value(0).uint32_t();
 }
@@ -36,7 +40,10 @@ namespace vts {
     if (choice == (uint32_t) 4) return ::android::hardware::nfc::V1_0::NfcStatus::REFUSED;
     return ::android::hardware::nfc::V1_0::NfcStatus::OK;
 }
-
+bool Verify__android__hardware__nfc__V1_0__NfcStatus(::android::hardware::nfc::V1_0::NfcStatus result_value, VariableSpecificationMessage expected_result){
+    if((uint32_t)result_value != expected_result.enum_value().scalar_value(0).uint32_t()) { return false; }
+    return true;
+}
 
 }  // namespace vts
 }  // namespace android
