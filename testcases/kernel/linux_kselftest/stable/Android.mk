@@ -20,7 +20,7 @@ include $(call all-subdir-makefiles)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := linux_kselftest_test
+LOCAL_MODULE := LinuxKselftestTest
 LOCAL_MODULE_CLASS := FAKE
 LOCAL_IS_HOST_MODULE := true
 LOCAL_COMPATIBILITY_SUITE := vts

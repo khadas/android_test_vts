@@ -16,6 +16,6 @@
 <configuration description="Run New VTS Tests for Libraries in the Staging environment">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
-    <option name="compatibility:include-filter" value="cpu_profiling_test" />
+    <option name="compatibility:include-filter" value="CpuProfilingTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
