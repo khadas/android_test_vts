@@ -21,6 +21,8 @@ adb push images/${DEVICE}/32/libvts_measurement.so /data/local/tmp/32/libvts_mea
 adb push images/${DEVICE}/64/libvts_measurement.so /data/local/tmp/64/libvts_measurement.so
 adb push images/${DEVICE}/32/libvts_codecoverage.so /data/local/tmp/32/libvts_codecoverage.so
 adb push images/${DEVICE}/64/libvts_codecoverage.so /data/local/tmp/64/libvts_codecoverage.so
+adb push images/${DEVICE}/32/libvts_multidevice_proto.so /data/local/tmp/32/libvts_multidevice_proto.so
+adb push images/${DEVICE}/64/libvts_multidevice_proto.so /data/local/tmp/64/libvts_multidevice_proto.so
 # hal
 adb push images/${DEVICE}/32/hal/lights.${DEVICE}-vts.so /data/local/tmp/32/hal/lights.${DEVICE}-vts.so
 adb push images/${DEVICE}/64/hal/lights.${DEVICE}-vts.so /data/local/tmp/64/hal/lights.${DEVICE}-vts.so

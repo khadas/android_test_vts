@@ -14,33 +14,4 @@
 # limitations under the License.
 #
 
-LOCAL_PATH:= $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libvts_datatype
-LOCAL_MODULE_TAGS := optional
-
-# TODO: uncomment when ready
-#LOCAL_CFLAGS += -Wno-unused-parameter -Werror
-
-LOCAL_SRC_FILES := \
-  vts_datatype.cpp \
-  hal_light.cpp \
-  hal_gps.cpp \
-  hal_camera.cpp \
-
-LOCAL_C_INCLUDES := \
-  bionic \
-  libcore \
-  external/protobuf/src \
-  libvts_common \
-  system/media/camera/include \
-
-LOCAL_SHARED_LIBRARIES := \
-  libcutils \
-  libvts_common \
-  libvts_multidevice_proto \
-  libprotobuf-cpp-full \
-
-include $(BUILD_SHARED_LIBRARY)
+include $(call all-subdir-makefiles)

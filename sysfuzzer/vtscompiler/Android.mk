@@ -41,6 +41,8 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
   libvts_common_host \
+  libvts_multidevice_proto_host \
+  libprotobuf-cpp-full \
 
 LOCAL_CFLAGS := -Wall -Werror
 

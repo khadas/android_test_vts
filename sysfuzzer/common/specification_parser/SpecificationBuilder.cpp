@@ -26,7 +26,7 @@
 #include "fuzz_tester/FuzzerWrapper.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 #include <google/protobuf/text_format.h>
 
 namespace android {
@@ -220,7 +220,7 @@ const string& SpecificationBuilder::CallFunction(
   void* result;
   func_fuzzer->FunctionCallBegin();
   cout << __func__ << " Call Function " << func_msg->name() << endl;
-  if (!func_fuzzer->Fuzz(*func_msg, &result)) {
+  if (!func_fuzzer->Fuzz(func_msg, &result)) {
     cout << __func__ << " function not found - todo handle more explicitly" << endl;
     return *(new string("error"));
   }
@@ -305,7 +305,7 @@ bool SpecificationBuilder::Process(
 
     void* result;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
-    func_fuzzer->Fuzz(*func_msg, &result);
+    func_fuzzer->Fuzz(func_msg, &result);
     if (func_msg->return_type().aggregate_type().size() > 0) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.

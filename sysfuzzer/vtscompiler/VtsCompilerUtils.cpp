@@ -29,7 +29,7 @@
 
 #include "specification_parser/InterfaceSpecificationParser.h"
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 
 using namespace std;
@@ -171,7 +171,11 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsPositionRecurrence")) {
       return "GenerateGpsPositionRecurrence()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_info_t*")) {
-      return "GenerateCameraInfo()";
+      if (msg.length() == 0) {
+        return "GenerateCameraInfo()";
+      } else {
+        return "GenerateCameraInfoUsingMessage(" + msg + ")";
+      }
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_module_callbacks_t*")) {
       return "GenerateCameraModuleCallbacks()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "wifi_handle*")) {

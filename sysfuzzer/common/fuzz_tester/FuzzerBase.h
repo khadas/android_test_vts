@@ -19,7 +19,7 @@
 
 #include "component_loader/DllLoader.h"
 
-#include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 
 
 using namespace std;
@@ -41,12 +41,12 @@ class FuzzerBase {
 
   // Fuzz tests the loaded component using the provided interface specification.
   // Returns true iff the testing is conducted completely.
-  bool Fuzz(vts::InterfaceSpecificationMessage& message, void** result);
+  bool Fuzz(vts::InterfaceSpecificationMessage* message, void** result);
 
   // Actual implementation of routines to test a specific function using the
   // provided function interface specification message.
   // Returns true iff the testing is conducted completely.
-  virtual bool Fuzz(vts::FunctionSpecificationMessage& func_msg,
+  virtual bool Fuzz(vts::FunctionSpecificationMessage* func_msg,
                     void** result) {
     return false;
   };
