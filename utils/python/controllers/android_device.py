@@ -33,6 +33,7 @@ from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import hal_mirror
+from vts.utils.python.mirror import shell_mirror
 from vts.runners.host import errors
 import subprocess
 
@@ -319,6 +320,7 @@ class AndroidDevice(object):
                                      self.host_callback_port)
         self.hal = hal_mirror.HalMirror(self.host_command_port,
                                         self.host_callback_port)
+        self.shell = shell_mirror.ShellMirror(self.host_command_port)
 
     def __del__(self):
         if self.host_command_port:

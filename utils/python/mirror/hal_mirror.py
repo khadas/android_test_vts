@@ -199,8 +199,8 @@ class HalMirror(object):
         launched = client.LaunchDriverService(
             driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
             service_name=service_name,
-            file_path=target_filename,
             bits=bits,
+            file_path=target_filename,
             target_class=target_class_id,
             target_type=target_type_id,
             target_version=target_version)
