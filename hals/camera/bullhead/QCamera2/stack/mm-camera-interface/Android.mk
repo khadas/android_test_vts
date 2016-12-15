@@ -63,6 +63,6 @@ LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
-include $(LOCAL_PATH)/../../../../../../tools/build/Android.packaging_sharedlib_arm.mk
+include test/vts/tools/build/Android.packaging_sharedlib_arm.mk
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

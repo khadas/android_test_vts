@@ -1,5 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
+include $(call all-subdir-makefiles)
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := SampleShellTest
@@ -14,5 +16,4 @@ $(LOCAL_BUILT_MODULE):
 	$(hide) touch $@
 
 VTS_CONFIG_SRC_DIR := testcases/host/shell
-include $(LOCAL_PATH)/../../../tools/build/Android.host_config.mk
-
+include test/vts/tools/build/Android.host_config.mk
