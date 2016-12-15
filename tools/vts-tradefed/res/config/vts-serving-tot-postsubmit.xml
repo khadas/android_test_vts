@@ -35,4 +35,5 @@
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
 
+    <template-include name="reporters" default="basic-reporters" />
 </configuration>
