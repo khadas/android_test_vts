@@ -5,9 +5,10 @@ echo $BASE_DIR
 
 function vts_multidevice_create_image {
   DEVICE=$1
+  BUILD_TARGET=$2
 
   . ${BASE_DIR}/build/envsetup.sh
-  cd ${BASE_DIR}; lunch ${DEVICE}-userdebug
+  cd ${BASE_DIR}; lunch ${BUILD_TARGET}-userdebug
   cd ${BASE_DIR}/test/vts; mma -j 32 && cd ${BASE_DIR}; make vts -j 32
 
   mkdir -p ${BASE_DIR}/test/vts/images
@@ -41,6 +42,8 @@ function vts_multidevice_create_image {
   # HAL
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/hw/lights.${DEVICE}-vts.so test/vts/images/${DEVICE}/32/hal/lights.${DEVICE}-vts.so
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/hw/lights.${DEVICE}-vts.so test/vts/images/${DEVICE}/64/hal/lights.${DEVICE}-vts.so
+  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc@1.0.so test/vts/images/${DEVICE}/32/hal/android.hardware.nfc@1.0.so
+  cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc@1.0.so test/vts/images/${DEVICE}/64/hal/android.hardware.nfc@1.0.so
 
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/hw/camera.${DEVICE}-vts.so test/vts/images/${DEVICE}/32/hal/camera.${DEVICE}-vts.so
   cp ${BASE_DIR}/out/target/product/${DEVICE}/system/lib/libmmcamera_interface.vts.so test/vts/images/${DEVICE}/32/hal/libmmcamera_interface.vts.so

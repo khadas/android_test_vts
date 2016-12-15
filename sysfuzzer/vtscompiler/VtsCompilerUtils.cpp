@@ -139,11 +139,13 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
         return arg.predefined_type();
       } else {
         if (!endsWith(message->component_name(), "Callback")) {
-          return "Bp" + message->component_name().substr(1) + "::"
-              + arg.predefined_type();
+          return //"Bp" + message->component_name().substr(1) + "::"
+              //+
+              arg.predefined_type();
         } else {
-          return "Bn" + message->component_name().substr(1) + "::"
-              + arg.predefined_type();
+          return //"Bn" + message->component_name().substr(1) + "::"
+              //+
+              arg.predefined_type();
         }
       }
     }
@@ -154,12 +156,13 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       if (!message || message->component_class() != HAL_HIDL) {
         return arg.predefined_type();
       } else {
-        return message->component_name() + "::"
-            + arg.predefined_type();
+        return //message->component_name() + "::"
+            //+
+            arg.predefined_type();
       }
     }
   } else if (arg.type() == TYPE_VECTOR) {
-    return "const hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
+    return "hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
     return arg.predefined_type();
   }
@@ -193,131 +196,152 @@ string GetCppInstanceType(
     const VariableSpecificationMessage& arg,
     const string& msg,
     const InterfaceSpecificationMessage* message) {
-  if (arg.type() == TYPE_PREDEFINED) {
-    if (arg.predefined_type() == "struct light_state_t*") {
-      if (msg.length() == 0) {
-        return "GenerateLightState()";
-      } else {
-        return "GenerateLightStateUsingMessage(" + msg + ")";
-      }
-    } else if (arg.predefined_type() == "GpsCallbacks*") {
-      return "GenerateGpsCallbacks()";
-    } else if (arg.predefined_type() == "GpsUtcTime") {
-      return "GenerateGpsUtcTime()";
-    } else if (arg.predefined_type() == "vts_gps_latitude") {
-      return "GenerateLatitude()";
-    } else if (arg.predefined_type() == "vts_gps_longitude") {
-      return "GenerateLongitude()";
-    } else if (arg.predefined_type() == "vts_gps_accuracy") {
-      return "GenerateGpsAccuracy()";
-    } else if (arg.predefined_type() == "vts_gps_flags_uint16") {
-      return "GenerateGpsFlagsUint16()";
-    } else if (arg.predefined_type() == "GpsPositionMode") {
-      return "GenerateGpsPositionMode()";
-    } else if (arg.predefined_type() == "GpsPositionRecurrence") {
-      return "GenerateGpsPositionRecurrence()";
-    } else if (arg.predefined_type() == "hw_module_t*") {
-      return "(hw_module_t*) malloc(sizeof(hw_module_t))";
-    } else if (arg.predefined_type() == "hw_module_t**") {
-      return "(hw_module_t**) malloc(sizeof(hw_module_t*))";
-    } else if (arg.predefined_type() == "hw_device_t**") {
-      return "(hw_device_t**) malloc(sizeof(hw_device_t*))";
-    } else if (arg.predefined_type() == "camera_info_t*") {
-      if (msg.length() == 0) {
-        return "GenerateCameraInfo()";
-      } else {
-        return "GenerateCameraInfoUsingMessage(" + msg + ")";
-      }
-    } else if (arg.predefined_type() == "camera_module_callbacks_t*") {
-      return "GenerateCameraModuleCallbacks()";
-    } else if (arg.predefined_type() == "camera_notify_callback") {
-      return "GenerateCameraNotifyCallback()";
-    } else if (arg.predefined_type() == "camera_data_callback") {
-      return "GenerateCameraDataCallback()";
-    } else if (arg.predefined_type() == "camera_data_timestamp_callback") {
-      return "GenerateCameraDataTimestampCallback()";
-    } else if (arg.predefined_type() == "camera_request_memory") {
-      return "GenerateCameraRequestMemory()";
-    } else if (arg.predefined_type() == "wifi_handle*") {
-      return "(wifi_handle*) malloc(sizeof(wifi_handle))";
-    } else if (arg.predefined_type() == "struct camera_device*") {
-      return "(struct camera_device*) malloc(sizeof(struct camera_device))";
-    } else if (arg.predefined_type() == "struct preview_stream_ops*") {
-      return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
-    } else if (endsWith(arg.predefined_type(), "*")) {
-      // known use cases: bt_callbacks_t
-      return "(" + arg.predefined_type() + ") malloc(sizeof("
-          + arg.predefined_type().substr(0, arg.predefined_type().size() - 1)
-          + "))";
-    } else {
-      cerr << __func__ << ":" << __LINE__ << " "
-           << "error: unknown instance type " << arg.predefined_type() << endl;
-    }
-  } else if (arg.type() == TYPE_SCALAR) {
-    if (arg.scalar_type() == "uint32_t") {
-      return "RandomUint32()";
-    } else if (arg.scalar_type() == "int32_t") {
-      return "RandomInt32()";
-    } else if (arg.scalar_type() == "uint64_t") {
-      return "RandomUint64()";
-    } else if (arg.scalar_type() == "int64_t") {
-      return "RandomInt64()";
-    } else if (arg.scalar_type() == "uint16_t") {
-      return "RandomUint16()";
-    } else if (arg.scalar_type() == "int16_t") {
-      return "RandomInt16()";
-    } else if (arg.scalar_type() == "uint8_t") {
-      return "RandomUint8()";
-    } else if (arg.scalar_type() == "int8_t") {
-      return "RandomInt8()";
-    } else if (arg.scalar_type() == "float_t") {
-      return "RandomFloat()";
-    } else if (arg.scalar_type() == "double_t") {
-      return "RandomDouble()";
-    } else if (arg.scalar_type() == "char_pointer") {
-      return "RandomCharPointer()";
-    } else if (arg.scalar_type() == "uchar_pointer") {
-      return "(unsigned char*) RandomCharPointer()";
-    } else if (arg.scalar_type() == "pointer" ||
-               arg.scalar_type() == "void_pointer") {
-      return "RandomVoidPointer()";
-    }
-    cerr << __FILE__ << ":" << __LINE__ << " "
-         << "error: unsupported scalar data type " << arg.scalar_type() << endl;
-    exit(-1);
-  } else if (arg.type() == TYPE_ENUM) {
-    if (!arg.has_enum_value() && arg.has_predefined_type()) {
-      if (!message || message->component_class() != HAL_HIDL) {
-        return "(" + arg.predefined_type() +  ") RandomUint32()";
-      } else {
-        for (const auto& attribute : message->attribute()) {
-          if (attribute.type() == TYPE_ENUM &&
-              attribute.name() == arg.predefined_type()) {
-            // TODO: pick at runtime
-            return message->component_name() + "::"
-                + arg.predefined_type() + "::"
-                + attribute.enum_value().enumerator(0);
-          }
+  switch(arg.type()) {
+    case TYPE_PREDEFINED: {
+      if (arg.predefined_type() == "struct light_state_t*") {
+        if (msg.length() == 0) {
+          return "GenerateLightState()";
+        } else {
+          return "GenerateLightStateUsingMessage(" + msg + ")";
         }
+      } else if (arg.predefined_type() == "GpsCallbacks*") {
+        return "GenerateGpsCallbacks()";
+      } else if (arg.predefined_type() == "GpsUtcTime") {
+        return "GenerateGpsUtcTime()";
+      } else if (arg.predefined_type() == "vts_gps_latitude") {
+        return "GenerateLatitude()";
+      } else if (arg.predefined_type() == "vts_gps_longitude") {
+        return "GenerateLongitude()";
+      } else if (arg.predefined_type() == "vts_gps_accuracy") {
+        return "GenerateGpsAccuracy()";
+      } else if (arg.predefined_type() == "vts_gps_flags_uint16") {
+        return "GenerateGpsFlagsUint16()";
+      } else if (arg.predefined_type() == "GpsPositionMode") {
+        return "GenerateGpsPositionMode()";
+      } else if (arg.predefined_type() == "GpsPositionRecurrence") {
+        return "GenerateGpsPositionRecurrence()";
+      } else if (arg.predefined_type() == "hw_module_t*") {
+        return "(hw_module_t*) malloc(sizeof(hw_module_t))";
+      } else if (arg.predefined_type() == "hw_module_t**") {
+        return "(hw_module_t**) malloc(sizeof(hw_module_t*))";
+      } else if (arg.predefined_type() == "hw_device_t**") {
+        return "(hw_device_t**) malloc(sizeof(hw_device_t*))";
+      } else if (arg.predefined_type() == "camera_info_t*") {
+        if (msg.length() == 0) {
+          return "GenerateCameraInfo()";
+        } else {
+          return "GenerateCameraInfoUsingMessage(" + msg + ")";
+        }
+      } else if (arg.predefined_type() == "camera_module_callbacks_t*") {
+        return "GenerateCameraModuleCallbacks()";
+      } else if (arg.predefined_type() == "camera_notify_callback") {
+        return "GenerateCameraNotifyCallback()";
+      } else if (arg.predefined_type() == "camera_data_callback") {
+        return "GenerateCameraDataCallback()";
+      } else if (arg.predefined_type() == "camera_data_timestamp_callback") {
+        return "GenerateCameraDataTimestampCallback()";
+      } else if (arg.predefined_type() == "camera_request_memory") {
+        return "GenerateCameraRequestMemory()";
+      } else if (arg.predefined_type() == "wifi_handle*") {
+        return "(wifi_handle*) malloc(sizeof(wifi_handle))";
+      } else if (arg.predefined_type() == "struct camera_device*") {
+        return "(struct camera_device*) malloc(sizeof(struct camera_device))";
+      } else if (arg.predefined_type() == "struct preview_stream_ops*") {
+        return "(preview_stream_ops*) malloc(sizeof(preview_stream_ops))";
+      } else if (endsWith(arg.predefined_type(), "*")) {
+        // known use cases: bt_callbacks_t
+        return "(" + arg.predefined_type() + ") malloc(sizeof("
+            + arg.predefined_type().substr(0, arg.predefined_type().size() - 1)
+            + "))";
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " "
+             << "error: unknown instance type " << arg.predefined_type() << endl;
+      }
+      break;
+    }
+    case TYPE_SCALAR: {
+      if (arg.scalar_type() == "uint32_t") {
+        return "RandomUint32()";
+      } else if (arg.scalar_type() == "int32_t") {
+        return "RandomInt32()";
+      } else if (arg.scalar_type() == "uint64_t") {
+        return "RandomUint64()";
+      } else if (arg.scalar_type() == "int64_t") {
+        return "RandomInt64()";
+      } else if (arg.scalar_type() == "uint16_t") {
+        return "RandomUint16()";
+      } else if (arg.scalar_type() == "int16_t") {
+        return "RandomInt16()";
+      } else if (arg.scalar_type() == "uint8_t") {
+        return "RandomUint8()";
+      } else if (arg.scalar_type() == "int8_t") {
+        return "RandomInt8()";
+      } else if (arg.scalar_type() == "float_t") {
+        return "RandomFloat()";
+      } else if (arg.scalar_type() == "double_t") {
+        return "RandomDouble()";
+      } else if (arg.scalar_type() == "char_pointer") {
+        return "RandomCharPointer()";
+      } else if (arg.scalar_type() == "uchar_pointer") {
+        return "(unsigned char*) RandomCharPointer()";
+      } else if (arg.scalar_type() == "pointer" ||
+                 arg.scalar_type() == "void_pointer") {
+        return "RandomVoidPointer()";
+      }
+      cerr << __FILE__ << ":" << __LINE__ << " "
+           << "error: unsupported scalar data type " << arg.scalar_type() << endl;
+      exit(-1);
+    }
+    case TYPE_ENUM: {
+      if (!arg.has_enum_value() && arg.has_predefined_type()) {
+        if (!message || message->component_class() != HAL_HIDL) {
+          return "(" + arg.predefined_type() +  ") RandomUint32()";
+        } else {
+          return "Random" + arg.predefined_type() + "()";
+          // TODO: generate a function which can dynamically choose the value.
+          /* for (const auto& attribute : message->attribute()) {
+            if (attribute.type() == TYPE_ENUM &&
+                attribute.name() == arg.predefined_type()) {
+              // TODO: pick at runtime
+              return message->component_name() + "::"
+                  + arg.predefined_type() + "::"
+                  + attribute.enum_value().enumerator(0);
+            }
+          } */
+        }
+      } else {
+        cerr << __func__
+             << " ENUM either has enum value or doesn't have predefined type"
+             << endl;
+        exit(-1);
+      }
+      break;
+    }
+    case TYPE_STRUCT: {
+      if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
+        return message->component_name() + "::" + arg.predefined_type() +  "()";
+      }
+      break;
+    }
+    case TYPE_VECTOR: {  // only for HAL_HIDL
+      // TODO: generate code that initializes a local hidl_vec.
+      return "";
+    }
+    case TYPE_HIDL_CALLBACK: {
+      if (message->component_name() != "types") {
+        if (!endsWith(arg.predefined_type(), "Callback")) {
+          return "Bp" + arg.predefined_type().substr(1) + "()";
+        } else {
+          return "Bn" + arg.predefined_type().substr(1) + "()";
+        }
+      } else {
+        return arg.predefined_type() + "()";
       }
     }
-  } else if (arg.type() == TYPE_STRUCT) {
-    if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
-      return message->component_name() + "::" + arg.predefined_type() +  "()";
-    }
-  } else if (arg.type() == TYPE_VECTOR) {  // only for HAL_HIDL
-    // TODO: generate code that initializes a local hidl_vec.
-    return "";
-  } else if (arg.type() == TYPE_HIDL_CALLBACK) {
-    if (!endsWith(arg.predefined_type(), "Callback")) {
-      return "Bp" + arg.predefined_type().substr(1) + "()";
-    } else {
-      return "Bn" + arg.predefined_type().substr(1) + "()";
-    }
+    default:
+      break;
   }
-  cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
-  cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
-  cerr << __FUNCTION__ << ": error: unsupported type " << arg.type() << endl;
+  cerr << __func__ << ": error: unsupported type " << arg.type() << endl;
   exit(-1);
 }
 
@@ -349,5 +373,26 @@ void ReplaceSubString(string& original, const string& from, const string& to) {
   }
 }
 
+string GetVersionString(float version, bool for_macro) {
+  std::ostringstream out;
+  if (for_macro) {
+    out << "V";
+  }
+  out << int(version);
+  if (!for_macro) {
+    out << ".";
+  } else {
+    out << "_";
+  }
+  version -= int(version);
+  bool first = true;
+  while (version > 0.0 || first) {
+    version *= 10;
+    out << int(version);
+    version -= int(version);
+    first = false;
+  }
+  return out.str();
+}
 }  // namespace vts
 }  // namespace android

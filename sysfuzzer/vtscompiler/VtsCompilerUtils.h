@@ -55,5 +55,8 @@ extern int vts_fs_mkdirs(char* file_path, mode_t mode);
 // custom util function to replace all occurrences of a substring.
 void ReplaceSubString(string& original, const string& from, const string& to);
 
+// Get HAL version string to be used to build a relevant dir path.
+string GetVersionString(float version, bool for_macro=false);
+
 }  // namespace vts
 }  // namespace android
