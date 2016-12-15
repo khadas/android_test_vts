@@ -13,5 +13,5 @@ $(LOCAL_BUILT_MODULE):
 	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
 	$(hide) touch $@
 
-VTS_CONFIG_SRC_DIR := testcases/host/light/conventional_fuzz
+VTS_CONFIG_SRC_DIR := testcases/fuzz/hal_light/conventional_standalone
 include $(LOCAL_PATH)/../../../../tools/build/Android.host_config.mk
