@@ -86,7 +86,7 @@ STAGING_TESTS = [
     "syscalls-perf_event_open02",
     # Bug#30688551
     "syscalls-lstat03_64",
-    "syscalls-lstat03"
+    "syscalls-lstat03",
     # Bug#30688061
     "input-input03",
     # Bug#30688056
@@ -98,6 +98,12 @@ STAGING_TESTS = [
     "syscalls-accept4_01",
     # Bug#30689411
     "mm-mmapstress03",
+    # Tests currently only failing on sailfish and marlin,
+    # these will be inspected soon
+    "syscalls-fcntl34",
+    "syscalls-fcntl34_64",
+    "syscalls-open14",
+    "syscalls-openat03",
     # Recently fixed
     "connectors-Connectors",
     "cpuhotplug-cpuhotplug02",
