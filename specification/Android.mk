@@ -28,6 +28,7 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/BluetoothHalV1.vts \
   hal_conventional/BluetoothHalV1bt_interface_t.vts \
   lib_bionic/libmV1.vts \
+  lib_bionic/libcV1.vts \
   lib_bionic/libcutilsV1.vts \
 
 VTS_ENABLE_TREBLE := false
@@ -127,6 +128,7 @@ vts_spec_file11 := $(VTS_TESTCASES_OUT)/BluetoothHalV1bt_interface_t.vts
 vts_spec_file12 := $(VTS_TESTCASES_OUT)/libcutilsV1.vts
 vts_spec_file13 := $(VTS_TESTCASES_OUT)/CameraHalV3.vts
 vts_spec_file14 := $(VTS_TESTCASES_OUT)/CameraHalV3camera3_device_ops_t.vts
+vts_spec_file15 := $(VTS_TESTCASES_OUT)/libcV1.vts
 
 $(vts_spec_file1): $(LOCAL_PATH)/hal_conventional/CameraHalV2.vts | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
@@ -184,5 +186,9 @@ $(vts_spec_file14): $(LOCAL_PATH)/hal_conventional/CameraHalV3camera3_device_ops
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
 	$(hide) $(ACP) -fp $< $@
 
-vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8) $(vts_spec_file9) $(vts_spec_file10) $(vts_spec_file11) $(vts_spec_file12) $(vts_spec_file13) $(vts_spec_file14)
+$(vts_spec_file15): $(LOCAL_PATH)/lib_bionic/libcV1.vts | $(ACP)
+	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	$(hide) $(ACP) -fp $< $@
+
+vts: $(vts_spec_file1) $(vts_spec_file2) $(vts_spec_file3) $(vts_spec_file4) $(vts_spec_file5) $(vts_spec_file6) $(vts_spec_file7) $(vts_spec_file8) $(vts_spec_file9) $(vts_spec_file10) $(vts_spec_file11) $(vts_spec_file12) $(vts_spec_file13) $(vts_spec_file14) $(vts_spec_file15)
 
