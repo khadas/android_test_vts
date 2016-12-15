@@ -16,7 +16,6 @@
 
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
@@ -67,6 +66,7 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     static final String VTS = "vts";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
+    static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
 
     private ITestDevice mDevice = null;
@@ -83,6 +83,10 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
     @Option(name = "test-config-path",
         description = "The path for test case config file.")
     private String mTestConfigPath = null;
+
+    @Option(name = "use-stdout-logs",
+        description = "Flag that determines whether to use std:out to parse output.")
+    private boolean mUseStdoutLogs = true;
 
     @Option(name = "include-filter",
         description = "The positive filter of the test names to run.")
@@ -384,14 +388,68 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
             CLog.i("Parsing test result: %s", commandResult.getStderr());
         }
 
-        MultiLineReceiver parser = new VtsMultiDeviceTestResultParser(listener,
+        VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener,
             mRunName);
 
-        if (commandResult.getStdout() != null) {
+        if (mUseStdoutLogs) {
+            if (commandResult.getStdout() == null) {
+                CLog.e("The std:out is null for CommandResult.");
+                throw new RuntimeException("The std:out is null for CommandResult.");
+            }
             parser.processNewLines(commandResult.getStdout().split("\n"));
+        } else {
+            // parse from test_run_summary.json instead of std:out
+            String jsonData = null;
+            JSONObject object = null;
+            File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
+            if (testRunSummary == null) {
+                throw new RuntimeException("Couldn't locate the file : " +
+                        TEST_RUN_SUMMARY_FILE_NAME);
+            }
+            try {
+                jsonData = FileUtil.readStringFromFile(testRunSummary);
+                object = new JSONObject(jsonData);
+            } catch (IOException e) {
+                CLog.e("Error occurred in parsing Json file : %s", testRunSummary.toPath());
+            } catch (JSONException e) {
+                CLog.e("Error occurred in parsing Json String : %s", jsonData);
+            }
+            if (object == null) {
+                CLog.e("Json object is null.");
+                throw new RuntimeException("Json object is null.");
+            }
+            parser.processJsonFile(object);
         }
-
         printVtsLogs(vtsRunnerLogDir);
+    }
+
+    /**
+     * This method return the file test_run_details.txt which is then used to parse logs.
+     *
+     * @param logDir : The file that needs to be converted
+     * @return the file named test_run_details.txt
+     */
+    private File getFileTestRunSummary(File logDir) {
+        File[] children;
+        if (logDir == null) {
+            throw new IllegalArgumentException("Argument logDir is null.");
+        }
+        children = logDir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (!child.isDirectory()) {
+                    if (child.getName().equals(TEST_RUN_SUMMARY_FILE_NAME)) {
+                        return child;
+                    }
+                } else {
+                    File file = getFileTestRunSummary(child);
+                    if (file != null) {
+                        return file;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
