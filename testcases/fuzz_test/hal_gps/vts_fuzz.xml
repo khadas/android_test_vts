@@ -16,7 +16,7 @@
 <configuration description="Runs VTS fuzz tests for GPS">
     <test class="com.android.tradefed.testtype.VtsFuzzTest">
       <option name="target-component-path" value="/system/lib/hw/gps.gce_x86.so" />
-      <option name="target-class" value="hal" />
+      <option name="target-class" value="hal_conventional" />
       <option name="target-type" value="gps" />
       <option name="target-version" value="1.0" />
       <option name="epoch-count" value="100" />

@@ -1,4 +1,4 @@
-component_class: LEGACY_HAL
+component_class: HAL_LEGACY
 component_type: WIFI
 component_type_version: 1.0
 

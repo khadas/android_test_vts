@@ -1,4 +1,4 @@
-component_class: HAL
+component_class: HAL_CONVENTIONAL
 component_type: GPS
 component_type_version: 1.0
 

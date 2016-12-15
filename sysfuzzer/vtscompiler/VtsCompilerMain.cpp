@@ -67,14 +67,14 @@ void Translate(
 
   unique_ptr<CodeGenBase> code_generator;
   switch (message.component_class()) {
-    case HAL:
+    case HAL_CONVENTIONAL:
       code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
       break;
     case HAL_SUBMODULE:
       code_generator.reset(
           new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
       break;
-    case LEGACY_HAL:
+    case HAL_LEGACY:
       code_generator.reset(new LegacyHalCodeGen(input_vts_file_path, vts_name));
       break;
     default:

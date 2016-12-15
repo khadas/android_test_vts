@@ -290,9 +290,9 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   target_dll_path_ = (char*) malloc(strlen(target_dll_path) + 1);
   strcpy(target_dll_path_, target_dll_path);
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
-  if (target_class_ == LEGACY_HAL) return true;
+  if (target_class_ == HAL_LEGACY) return true;
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file." << endl;
-  if (target_class_ == HAL) {
+  if (target_class_ == HAL_CONVENTIONAL) {
     hmi_ = target_loader_.InitConventionalHal();
     if (!hmi_) {
       free(target_dll_path_);
