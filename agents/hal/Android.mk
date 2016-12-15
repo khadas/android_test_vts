@@ -18,37 +18,22 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vtssysfuzzer
-LOCAL_MODULE_STEM := fuzzer
+LOCAL_MODULE := vts_hal_agent
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-  VtsFuzzerMain.cpp \
-  BinderServer.cpp \
-
-LOCAL_C_INCLUDES := \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/common \
-  bionic \
-  libcore \
-  device/google/gce/include \
-  system/extras \
-  external/protobuf/src \
-  frameworks/native/include \
-  system/core/include \
+  HalAgentMain.cpp \
+  BinderClient.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
   libcutils \
-  liblog \
   libbinder \
-  libdl \
-  libandroid_runtime \
   libvts_common \
 
-LOCAL_STATIC_LIBRARIES := \
-  libelf \
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
+LOCAL_C_INCLUDES += \
+  frameworks/native/include \
+  system/core/include \
+  test/vts/sysfuzzer/common \
 
 include $(BUILD_EXECUTABLE)
