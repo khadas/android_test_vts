@@ -70,12 +70,27 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         self.getUserParams(opt_param_names=[self.USE_GAE_DB,
                                             self.COVERAGE_SRC_FILES,
-                                            keys.ConfigKeys.IKEY_DATA_FILE_PATH])
+                                            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+                                            keys.ConfigKeys.KEY_TESTBED])
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
             self._report_msg = ReportMsg.TestReportMessage()
-            self._report_msg.test = self.__class__.__name__
+            test_module_name = self.__class__.__name__
+            if hasattr(self, keys.ConfigKeys.KEY_TESTBED):
+                testbed_dict = getattr(self, keys.ConfigKeys.KEY_TESTBED, {})
+                if (keys.ConfigKeys.KEY_TESTBED_NAME in testbed_dict and
+                    testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]):
+                    test_module_name = testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]
+                else:
+                    logging.warn("%s field not set in the given %s test config",
+                                 keys.ConfigKeys.KEY_TESTBED_NAME,
+                                 keys.ConfigKeys.KEY_TESTBED)
+            else:
+                logging.warn("%s not defined in the given test config",
+                             keys.ConfigKeys.KEY_TESTBED)
+            logging.info("Test module name: %s", test_module_name)
+            self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
             self._report_msg.subscriber_email.append("vts-alert@google.com")
