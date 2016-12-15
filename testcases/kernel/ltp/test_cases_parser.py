@@ -18,7 +18,7 @@
 import os
 
 from vts.testcases.kernel.ltp import ltp_configs
-from vts.testcases.kernel.ltp.test_case import TestCase
+from vts.testcases.kernel.ltp import test_case
 
 
 class TestCasesParser(object):
@@ -50,7 +50,7 @@ class TestCasesParser(object):
                 if testname.startswith("DISABLED_"):
                     continue
 
-                testcase = TestCase(testsuite, testname,
+                testcase = test_case.TestCase(testsuite, testname,
                                     os.path.join(ltp_dir, 'testcases/bin',
                                                  testbinary), args)
 

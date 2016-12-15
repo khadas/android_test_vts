@@ -22,7 +22,7 @@ from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.testcases.kernel.ltp.shell_environment import ShellEnvironment
 from vts.testcases.kernel.ltp.shell_environment import CheckDefinition
-from vts.testcases.kernel.ltp.ltp_enums import RequirementState
+from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import ltp_configs
 
 
@@ -105,7 +105,7 @@ class EnvironmentRequirementChecker(object):
             test_case: TestCase object, a given test case to check
         """
         asserts.skipIf(
-            test_case.requirement_state == RequirementState.UNSATISFIED,
+            test_case.requirement_state == ltp_enums.RequirementState.UNSATISFIED,
             test_case.note)
         asserts.skipIf(not self.IsTestBinaryExist(test_case),
                        test_case.note)
@@ -118,10 +118,11 @@ class EnvironmentRequirementChecker(object):
             logging.info("Result for %s's requirement %s is %s", test_case,
                          requirement_name, result)
             if result is False:
-                test_case.requirement_state = RequirementState.UNSATISFIED
+                test_case.requirement_state = \
+                    ltp_enums.RequirementState.UNSATISFIED
                 test_case.note = note
                 asserts.skip(note)
-        test_case.requirement_state = RequirementState.SATISFIED
+        test_case.requirement_state = ltp_enums.RequirementState.SATISFIED
 
     def RunCheckTestcasePathExistsAll(self, test_cases):
         """Run a batch job to check the path existance of all given test cases
@@ -155,9 +156,9 @@ class EnvironmentRequirementChecker(object):
             is_exists: bool, the result. True for exists, False otherwise.
         """
         if is_exists:
-            test_case.requirement_state = RequirementState.PATHEXISTS
+            test_case.requirement_state = ltp_enums.RequirementState.PATHEXISTS
         else:
-            test_case.requirement_state = RequirementState.UNSATISFIED
+            test_case.requirement_state = ltp_enums.RequirementState.UNSATISFIED
             test_case.note = "Test binary is not compiled."
 
     def IsTestBinaryExist(self, test_case):
@@ -169,8 +170,9 @@ class EnvironmentRequirementChecker(object):
         Return:
             True if exists, False otherwise
         """
-        if test_case.requirement_state != RequirementState.UNCHECKED:
-            return test_case.requirement_state != RequirementState.UNSATISFIED
+        if test_case.requirement_state != ltp_enums.RequirementState.UNCHECKED:
+            return test_case.requirement_state != \
+                        ltp_enums.RequirementState.UNSATISFIED
 
         command_results = self._shell.Execute("ls %s" % test_case.path)
         exists = command_results[const.STDOUT][0].find(
