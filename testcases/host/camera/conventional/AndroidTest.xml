@@ -45,7 +45,7 @@
         <option name="append-bitness" value="false" />
     </target_preparer>
     <!-- TODO: copy camera HAL so files -->
-    <target_preparer class="com.android.tradefed.targetprep.PythonVirtualenvPreparer">
+    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
         <option name="dep-module" value="future" />
         <option name="dep-module" value="futures" />
         <option name="dep-module" value="enum" />
