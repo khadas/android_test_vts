@@ -1,0 +1,6 @@
+<configuration description="Runs VTS multi device test">
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+     <option name="test-case-path" value="test/vts/testcases/host/sample/SampleLightTest" />
+     <option name="test-config-path" value="test/vts/testcases/host/sample/SampleLightTest.config" />
+    </test>
+</configuration>
