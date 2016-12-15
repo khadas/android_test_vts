@@ -78,6 +78,17 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::ListHals(
 }
 
 
+AndroidSystemControlResponseMessage* AgentRequestHandler::SetHostInfo(
+    const int callback_port) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
+  callback_port_ = callback_port;
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+  response_msg->set_response_code(SUCCESS);
+  return response_msg;
+}
+
+
 AndroidSystemControlResponseMessage* AgentRequestHandler::CheckStubService(
     const string& service_name) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
@@ -216,7 +227,6 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::CallApi(
   if (!client.get()) return NULL;
 
   const char* result = client->Call(call_payload);
-  //if (result) cout << "Call: " << result << endl;
 
   AndroidSystemControlResponseMessage* response_msg =
       new AndroidSystemControlResponseMessage();
@@ -284,21 +294,18 @@ int AgentRequestHandler::StartSession(
       buffer[len] = '\0';
 
       AndroidSystemControlCommandMessage command_msg;
-      //for (int i = 0; i < len; i++) {
-      //  cout << int(buffer[i]) << " ";
-      //}
-      //cout << endl;
       if (!command_msg.ParseFromString(string(buffer))) {
         cerr << "can't parse the cmd" << endl;
         return -1;
       }
-      //cout << "[runner->agent] command type " << command_msg.command_type()
-      //    << endl;
 
       AndroidSystemControlResponseMessage* response_msg = NULL;
       switch (command_msg.command_type()) {
         case LIST_HALS:
           response_msg = ListHals(command_msg.paths());
+          break;
+        case SET_HOST_INFO:
+          response_msg = SetHostInfo(command_msg.callback_port());
           break;
         case CHECK_STUB_SERVICE:
           response_msg = CheckStubService(command_msg.service_name());

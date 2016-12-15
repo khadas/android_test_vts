@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-the_py_script = tcp_server_test.py
+the_py_script = vts_tcp_server_test.py
 PRIVATE_PY_SCRIPT := $(the_py_script)
 
 default:

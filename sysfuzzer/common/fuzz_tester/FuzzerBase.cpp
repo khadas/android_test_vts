@@ -370,7 +370,7 @@ void FuzzerBase::FunctionCallBegin() {
     }
     DIR* srcdir = opendir(product_path);
     if (!srcdir) {
-      cerr << "couln't open " << product_path << endl;
+      cerr << __func__ << " couln't open " << product_path << endl;
       return;
     }
 
@@ -405,7 +405,7 @@ void FuzzerBase::FunctionCallBegin() {
     }
     srcdir = opendir(module_basepath);
     if (!srcdir) {
-      cerr << "couln't open " << module_basepath << endl;
+      cerr << __func__ << " couln't open " << module_basepath << endl;
       return;
     }
 
@@ -463,7 +463,7 @@ vector<unsigned>* FuzzerBase::FunctionCallEnd() {
   }
   DIR* srcdir = opendir(gcov_output_basepath_);
   if (!srcdir) {
-    cerr << "couln't open " << gcov_output_basepath_ << endl;
+    cerr << __func__ << " couln't open " << gcov_output_basepath_ << endl;
     return NULL;
   }
 
