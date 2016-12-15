@@ -516,8 +516,8 @@ class AndroidDevice(object):
             "rm -f /data/local/tmp/vts_driver_*",
             "rm -f /data/local/tmp/vts_agent_callback*"]
         kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
-                         "killall fuzzer64", "vts_shell_driver32",
-                         "vts_shell_driver64"]
+                         "killall fuzzer64", "killall vts_shell_driver32",
+                         "killall vts_shell_driver64"]
         cleanup_commands.extend(kill_commands)
         chmod_commands = [
             "chmod 755 %s/64/vts_hal_agent" % DEFAULT_AGENT_BASE_DIR,
