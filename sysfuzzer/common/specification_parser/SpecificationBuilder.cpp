@@ -81,6 +81,35 @@ SpecificationBuilder::FindInterfaceSpecification(const int target_class,
   return NULL;
 }
 
+vts::InterfaceSpecificationMessage*
+SpecificationBuilder::FindInterfaceSpecification(const string& component_name) {
+  DIR* dir;
+  struct dirent* ent;
+
+  if (!(dir = opendir(dir_path_.c_str()))) {
+    cerr << __FUNCTION__ << ": Can't opendir " << dir_path_ << endl;
+    return NULL;
+  }
+
+  while ((ent = readdir(dir))) {
+    if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
+      cout << __FUNCTION__ << ": Checking a file " << ent->d_name << endl;
+      const string file_path = string(dir_path_) + "/" + string(ent->d_name);
+      vts::InterfaceSpecificationMessage* message =
+          new vts::InterfaceSpecificationMessage();
+      if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
+        if (message->component_name() == component_name) {
+          closedir(dir);
+          return message;
+        }
+      }
+      delete message;
+    }
+  }
+  closedir(dir);
+  return NULL;
+}
+
 FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     const vts::InterfaceSpecificationMessage& iface_spec_msg,
     const char* dll_file_name, const char* target_func_name) {

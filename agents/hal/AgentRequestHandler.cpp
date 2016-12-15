@@ -285,6 +285,38 @@ bool AgentRequestHandler::LaunchDriverService(
   return VtsSocketSendMessage(response_msg);
 }
 
+bool AgentRequestHandler::ReadSpecification(const string& component_name) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
+  android::sp<android::vts::IVtsFuzzer> client =
+      android::vts::GetBinderClient(service_name_);
+  if (!client.get()) {
+#endif
+    return false;
+  }
+
+  const char* result = client->ReadSpecification(component_name);
+
+  AndroidSystemControlResponseMessage response_msg;
+  if (result != NULL && strlen(result) > 0) {
+    cout << "[agent] Call: success" << endl;
+    response_msg.set_response_code(SUCCESS);
+    response_msg.set_result(result);
+  } else {
+    cout << "[agent] Call: fail" << endl;
+    response_msg.set_response_code(FAIL);
+    response_msg.set_reason("Failed to call the api.");
+  }
+  bool succ = VtsSocketSendMessage(response_msg);
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  free((void*)result);
+#endif
+  return succ;
+}
+
 bool AgentRequestHandler::ListApis() {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
 // TODO: use an attribute (client) of a newly defined class.
@@ -475,6 +507,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
           command_msg.file_path(), command_msg.target_class(),
           command_msg.target_type(), command_msg.target_version() / 100.0,
           command_msg.module_name(), command_msg.bits());
+    case VTS_AGENT_COMMAND_READ_SPECIFICATION:
+      return ReadSpecification(command_msg.service_name());
     case LIST_APIS:
       return ListApis();
     case CALL_API:

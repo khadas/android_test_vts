@@ -40,6 +40,7 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
   int32_t LoadHal(const string& path, int target_class, int target_type,
                   float target_version, const string& module_name);
   int32_t Status(int32_t type);
+  const char* ReadSpecification(const string& name);
   const char* Call(const string& arg);
   const char* GetAttribute(const string& arg);
   const char* GetFunctions();

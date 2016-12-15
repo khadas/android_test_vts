@@ -39,6 +39,7 @@ COMMAND_TYPE_NAME = {1: "LIST_HALS",
                      2: "SET_HOST_INFO",
                      101: "CHECK_DRIVER_SERVICE",
                      102: "LAUNCH_DRIVER_SERVICE",
+                     103: "VTS_AGENT_COMMAND_READ_SPECIFICATION",
                      201: "LIST_APIS",
                      202: "CALL_API",
                      203: "VTS_AGENT_COMMAND_GET_ATTRIBUTE",
@@ -244,6 +245,27 @@ class VtsTcpClient(object):
         if resp is not None and resp.response_code == SysMsg_pb2.SUCCESS:
             return True
         return False
+
+    def ReadSpecification(self, interface_name):
+        """RPC to VTS_AGENT_COMMAND_READ_SPECIFICATION."""
+        self.SendCommand(
+            SysMsg_pb2.VTS_AGENT_COMMAND_READ_SPECIFICATION,
+            service_name=interface_name)
+        resp = self.RecvResponse(retries=2)
+        logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_READ_INTERFACE: %s",
+                     resp)
+        logging.info("proto: %s",
+                     resp.result)
+        result = IfaceSpecMsg_pb2.InterfaceSpecificationMessage()
+        if resp.result == "error":
+            raise errors.VtsTcpCommunicationError(
+                "API call error by the VTS driver.")
+        try:
+            text_format.Merge(resp.result, result)
+        except text_format.ParseError as e:
+            logging.exception(e)
+            logging.error("Paring error\n%s", resp.result)
+        return result
 
     def SendCommand(self,
                     command_type,

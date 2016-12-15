@@ -35,6 +35,8 @@ enum VtsDriverCommandType {
   CALL_FUNCTION = 103;
   // To get the value of an attribute.
   GET_ATTRIBUTE = 104;
+  // To read the specification message of a component.
+  VTS_DRIVER_COMMAND_READ_SPECIFICATION = 105;
 
   // for a shell driver
   // To execute a shell command.

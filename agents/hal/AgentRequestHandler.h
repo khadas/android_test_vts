@@ -68,6 +68,9 @@ class AgentRequestHandler : public VtsDriverCommUtil {
                            int target_type, float target_version,
                            const string& module_name, int bits);
 
+  // for the VTS_AGENT_COMMAND_READ_SPECIFICATION`
+  bool ReadSpecification(const string& component_name);
+
   // for the LIST_APIS command
   bool ListApis();
 
