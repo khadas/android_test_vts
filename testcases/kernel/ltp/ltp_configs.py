@@ -180,7 +180,7 @@ STAGING_TESTS = [
 # Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
 DISABLED_TESTS = [
     # The following test case is designed only for i386
-    "f00f"
+    "f00f",
     # The following test cases are uncategorized
     "inotify06",
     "abort01",
