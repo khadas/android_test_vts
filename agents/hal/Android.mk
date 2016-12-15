@@ -48,3 +48,7 @@ LOCAL_C_INCLUDES += \
   external/protobuf/src \
 
 include $(BUILD_EXECUTABLE)
+
+ifneq ($(filter vts, $(MAKECMDGOALS)),)
+  $(call dist-for-goals,vts,vts_hal_agent)
+endif
