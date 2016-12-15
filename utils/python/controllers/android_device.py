@@ -74,6 +74,7 @@ def create(configs):
         # Configs is a list of dicts.
         ads = get_instances_with_configs(configs)
     connected_ads = list_adb_devices()
+
     for ad in ads:
         if ad.serial not in connected_ads:
             raise AndroidDeviceError(
@@ -499,6 +500,7 @@ class AndroidDevice(object):
         This function starts the target side native agent and is persisted
         throughout the test run.
         """
+        self.log.info("start a VTS agent on %s", self.serial)
         if self.vts_agent_process:
             raise AndroidDeviceError("HAL agent is already running on %s." %
                                      self.serial)
@@ -508,11 +510,16 @@ class AndroidDevice(object):
         kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
                          "killall fuzzer64"]
         cleanup_commands.extend(kill_commands)
+        chmod_commands = [
+            "chmod 755 %s/64/vts_hal_agent" % DEFAULT_AGENT_BASE_DIR,
+            "chmod 755 %s/32/fuzzer32" % DEFAULT_AGENT_BASE_DIR,
+            "chmod 755 %s/64/fuzzer64" % DEFAULT_AGENT_BASE_DIR]
+        cleanup_commands.extend(chmod_commands)
         for cmd in cleanup_commands:
             try:
                 self.adb.shell(cmd)
             except adb.AdbError:
-                # Ignore errors from killall in case process was not running.
+                self.log.warning("setup command failed %s", cmd)
                 pass
         vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
         cmd = (
