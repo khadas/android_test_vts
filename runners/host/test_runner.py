@@ -134,12 +134,8 @@ class TestRunner(object):
 
     def __init__(self, test_configs, run_list):
         self.test_run_info = {}
-        logging.info("Initialize TestRunner using %s", test_configs)
         self.test_run_info[keys.ConfigKeys.IKEY_DATA_FILE_PATH] = getattr(
             test_configs, keys.ConfigKeys.IKEY_DATA_FILE_PATH, "./")
-        logging.info("Set self.test_run_info[%s] = %s",
-                     keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-                     self.test_run_info[keys.ConfigKeys.IKEY_DATA_FILE_PATH])
         self.test_configs = test_configs
         self.testbed_configs = self.test_configs[keys.ConfigKeys.KEY_TESTBED]
         self.testbed_name = self.testbed_configs[
