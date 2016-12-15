@@ -29,6 +29,7 @@ VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 .PHONY: $(VTS_PYTHON_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
+	@mkdir -p $(VTS_TESTCASES_OUT)
 	@mkdir -p $(dir $@)
 	@rm -f $@.list
 	$(hide) find test -name '*.py' -or -name '*.config' | sort > $@.list
@@ -97,30 +98,28 @@ vts_test_bin_hal_packages := \
 
 .PHONY: vts
 vts: $(VTS_PYTHON_ZIP) $(vts_apk_packages) $(vts_bin_packages) $(vts_lib_packages) $(vts_test_bin_packages) $(vts_test_lib_hidl_packages) $(vts_test_lib_hal_packages) $(vts_test_bin_hal_packages) | $(ACP)
-	$(hide) mkdir -p $(HOST_OUT)/vts
-	$(hide) mkdir -p $(HOST_OUT)/vts/android-vts
-	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
+	@mkdir -p $(VTS_TESTCASES_OUT)
 	$(call vts-copy-apk,CtsVerifier)  # apks
 	$(call vts-copy-apk,sl4a)
-	$(call vts-copy-bin,vts_hal_agent,vts_hal_agent32,vts_hal_agent64)  # framework bins
-	$(call vts-copy-bin,vtssysfuzzer,fuzzer32,fuzzer64)
-	$(call vts-copy-bin,vts_shell_driver,vts_shell_driver32,vts_shell_driver64)
-	$(call vts-copy-lib,libvts_interfacespecification,libvts_interfacespecification,libvts_interfacespecification64)  # framework libs
-	$(call vts-copy-lib,libvts_drivercomm,libvts_drivercomm,libvts_drivercomm64)
-	$(call vts-copy-lib,libvts_multidevice_proto,libvts_multidevice_proto,libvts_multidevice_proto64)
-	$(call vts-copy-lib,libvts_profiling,libvts_profiling,libvts_profiling64)
-	$(call vts-copy-lib,libvts_datatype,libvts_datatype,libvts_datatype64)
-	$(call vts-copy-lib,libvts_common,libvts_common,libvts_common64)
-	$(call vts-copy-lib,libvts_codecoverage,libvts_codecoverage,libvts_codecoverage64)
-	$(call vts-copy-lib,libvts_measurement,libvts_measurement,libvts_measurement64)
-	$(call vts-copy-bin,libhwbinder_benchmark,libhwbinder_benchmark32,libhwbinder_benchmark64)  # test bins
-	$(call vts-copy-bin,libbinder_benchmark,libbinder_benchmark32,libbinder_benchmark64)
-	$(call vts-copy-bin,28838221_poc,28838221_poc32,28838221_poc64)
-	$(call vts-copy-bin,30149612_poc,30149612_poc32,30149612_poc64)
-	$(call vts-copy-lib,libhwbinder,libhwbinder,libhwbinder64)  # test libs
-	$(call vts-copy-lib,android.hardware.tests.libhwbinder@1.0,android.hardware.tests.libhwbinder@1.0,android.hardware.tests.libhwbinder@1.064)  # HAL libs
-	$(call vts-copy-lib,android.hardware.tests.libbinder,android.hardware.tests.libbinder,android.hardware.tests.libbinder64)
-	$(call vts-copy-lib,lights.bullhead-vts,lights.bullhead-vts,lights.bullhead-vts64)
+	# $(call vts-copy-bin,vts_hal_agent,vts_hal_agent32,vts_hal_agent64)  # framework bins
+	# $(call vts-copy-bin,vtssysfuzzer,fuzzer32,fuzzer64)
+	# $(call vts-copy-bin,vts_shell_driver,vts_shell_driver32,vts_shell_driver64)
+	# $(call vts-copy-lib,libvts_interfacespecification,libvts_interfacespecification,libvts_interfacespecification64)  # framework libs
+	# $(call vts-copy-lib,libvts_drivercomm,libvts_drivercomm,libvts_drivercomm64)
+	# $(call vts-copy-lib,libvts_multidevice_proto,libvts_multidevice_proto,libvts_multidevice_proto64)
+	# $(call vts-copy-lib,libvts_profiling,libvts_profiling,libvts_profiling64)
+	# $(call vts-copy-lib,libvts_datatype,libvts_datatype,libvts_datatype64)
+	# $(call vts-copy-lib,libvts_common,libvts_common,libvts_common64)
+	# $(call vts-copy-lib,libvts_codecoverage,libvts_codecoverage,libvts_codecoverage64)
+	# $(call vts-copy-lib,libvts_measurement,libvts_measurement,libvts_measurement64)
+	# $(call vts-copy-bin,libhwbinder_benchmark,libhwbinder_benchmark32,libhwbinder_benchmark64)  # test bins
+	# $(call vts-copy-bin,libbinder_benchmark,libbinder_benchmark32,libbinder_benchmark64)
+	# $(call vts-copy-bin,28838221_poc,28838221_poc32,28838221_poc64)
+	# $(call vts-copy-bin,30149612_poc,30149612_poc32,30149612_poc64)
+	# $(call vts-copy-lib,libhwbinder,libhwbinder,libhwbinder64)  # test libs
+	# $(call vts-copy-lib,android.hardware.tests.libhwbinder@1.0,android.hardware.tests.libhwbinder@1.0,android.hardware.tests.libhwbinder@1.064)  # HAL libs
+	# $(call vts-copy-lib,android.hardware.tests.libbinder,android.hardware.tests.libbinder,android.hardware.tests.libbinder64)
+	# $(call vts-copy-lib,lights.bullhead-vts,lights.bullhead-vts,lights.bullhead-vts64)
 	# TODO: enable when hidl-power is merged.
 	# $(call vts-copy-lib,android.hardware.power@1.0,android.hardware.power@1.0,android.hardware.power@1.064)
 	# $(call vts-copy-bin,hidl-power.default,hidl-power.default32,hidl-power.default64)  # HAL bins
