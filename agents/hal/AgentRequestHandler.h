@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <VtsDriverCommUtil.h>
+
 #include "SocketClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
@@ -32,45 +34,46 @@ namespace android {
 namespace vts {
 
 // Class which contains actual methods to handle the runner requests.
-class AgentRequestHandler {
+class AgentRequestHandler : public VtsDriverCommUtil {
  public:
   AgentRequestHandler()
       : service_name_(),
-        driver_client_(NULL) {}
+        driver_client_(NULL),
+        VtsDriverCommUtil() {}
 
   // handles a new session.
-  int Start(
-      int fd, const char* fuzzer_path32, const char* fuzzer_path64,
+  bool ProcessOneCommand(
+      const char* fuzzer_path32, const char* fuzzer_path64,
       const char* spec_dir_path);
 
  protected:
 
   // for the LIST_HAL command
-  AndroidSystemControlResponseMessage* ListHals(
+  bool ListHals(
       const ::google::protobuf::RepeatedPtrField< ::std::string>& base_paths);
 
   // for the SET_HOST_INFO command.
-  AndroidSystemControlResponseMessage* SetHostInfo(const int callback_port);
+  bool SetHostInfo(const int callback_port);
 
   // for the CHECK_DRIVER_SERVICE command
-  AndroidSystemControlResponseMessage* CheckDriverService(
-      const string& service_name);
+  bool CheckDriverService(
+      const string& service_name, bool* live);
 
   // for the LAUNCH_DRIVER_SERVICE command
-  AndroidSystemControlResponseMessage* LaunchDriverService(
+  bool LaunchDriverService(
       const char* spec_dir_path, const string& service_name,
       const string& file_path, const char* fuzzer_path,
       int target_class, int target_type,
       float target_version, const string& module_name);
 
   // for the LIST_APIS command
-  AndroidSystemControlResponseMessage* ListApis();
+  bool ListApis();
 
   // for the CALL_API command
-  AndroidSystemControlResponseMessage* CallApi(const string& call_payload);
+  bool CallApi(const string& call_payload);
 
   // Returns a default response message.
-  AndroidSystemControlResponseMessage* DefaultResponse();
+  bool DefaultResponse();
 
  protected:
   // the currently opened, connected service name.
