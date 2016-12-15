@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.4
 #
 # Copyright (C) 2016 The Android Open Source Project
 #
@@ -12,11 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  28838221_poc \
-  30149612_poc \
-  simpleperf_cpu_hotplug_test \
+CPT_HOTPLUG_TESTSUITE = "simpleperf_cpu_hotplug_test"
+
+CPT_HOTPLUG_BASIC_TESTS = [
+    "cpu_offline.offline_while_recording_on_another_cpu",
+    "cpu_offline.offline_while_recording",
+    "cpu_offline.offline_while_user_process_profiling",
+]
+
+# Tests that don't have a fix in kernel yet.
+CPT_HOTPLUG_UNAVAILABLE_TESTS = [
+    "cpu_offline.offline_while_ioctl_enable",
+]
+
+CPT_HOTPLUG_EXCLUDE_DEVICES = [
+# angler doesn't pass tests because of http://b/30971326.
+    "angler",
+]
