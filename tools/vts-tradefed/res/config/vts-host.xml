@@ -15,7 +15,7 @@
 -->
 <configuration description="Run VTS Host-Driven Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleLightTest" />
     <option name="compatibility:include-filter" value="SampleCameraV2Test" />
     <option name="compatibility:include-filter" value="SampleCameraV3Test" />

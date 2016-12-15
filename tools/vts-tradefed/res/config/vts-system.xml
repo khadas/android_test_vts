@@ -15,7 +15,7 @@
 -->
 <configuration description="Run VTS Host-Driven, Systems Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleQtaguidTest" />
     <option name="compatibility:include-filter" value="LibcTest" />
     <template-include name="reporters" default="basic-reporters" />
