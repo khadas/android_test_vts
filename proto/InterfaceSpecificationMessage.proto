@@ -58,6 +58,9 @@ enum ComponentType {
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
+
+  // for VNDK's libcutils
+  VNDK_LIBCUTILS = 1101;
 }
 
 
