@@ -25,6 +25,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <hidl-util/Formatter.h>
+
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "utils/InterfaceSpecUtil.h"
 
@@ -37,6 +39,8 @@
 #include "code_gen/driver/HalHidlCodeGen.h"
 #include "code_gen/driver/LegacyHalCodeGen.h"
 #include "code_gen/driver/LibSharedCodeGen.h"
+#include "code_gen/profiler/ProfilerCodeGenBase.h"
+#include "code_gen/profiler/HalHidlProfilerCodeGen.h"
 
 using namespace std;
 
@@ -69,14 +73,41 @@ void Translate(VtsCompileMode mode,
     cerr << "can't parse " << input_vts_file_path << endl;
   }
 
-  unique_ptr<CodeGenBase> code_generator;
+  string output_header_file_path = string(output_header_dir_path) + "/"
+      + string(input_vts_file_path);
+  output_header_file_path = output_header_file_path + ".h";
+
+  cout << "header: " << output_header_file_path << endl;
+  vts_fs_mkdirs(&output_header_file_path[0], 0777);
+
   if (mode == kProfiler) {
+    unique_ptr<ProfilerCodeGenBase> profiler_generator;
     switch (message.component_class()) {
+      case HAL_HIDL:
+        profiler_generator.reset(
+            new HalHidlProfilerCodeGen(input_vts_file_path, vts_name));
+        break;
       default:
-        cerr << "not yet supported component_class " << message.component_class();
+        cerr << "not yet supported component_class "
+            << message.component_class();
         exit(-1);
     }
+    FILE* header_file = fopen(output_header_file_path.c_str(), "w");
+    if (header_file == NULL) {
+      cerr << "could not open file " << output_header_file_path;
+      exit(-1);
+    }
+    Formatter header_out(header_file);
+
+    FILE* source_file = fopen(output_cpp_file_path, "w");
+    if (source_file == NULL) {
+      cerr << "could not open file " << output_cpp_file_path;
+      exit(-1);
+    }
+    Formatter source_out(source_file);
+    profiler_generator->GenerateAll(header_out, source_out, message);
   } else if (mode == kDriver) {
+    unique_ptr<CodeGenBase> code_generator;
     switch (message.component_class()) {
       case HAL_CONVENTIONAL:
         code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
@@ -86,51 +117,43 @@ void Translate(VtsCompileMode mode,
             new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
         break;
       case HAL_LEGACY:
-        code_generator.reset(new LegacyHalCodeGen(input_vts_file_path, vts_name));
+        code_generator.reset(
+            new LegacyHalCodeGen(input_vts_file_path, vts_name));
         break;
       case LIB_SHARED:
-        code_generator.reset(new LibSharedCodeGen(input_vts_file_path, vts_name));
+        code_generator.reset(
+            new LibSharedCodeGen(input_vts_file_path, vts_name));
         break;
       case HAL_HIDL:
         code_generator.reset(new HalHidlCodeGen(input_vts_file_path, vts_name));
         break;
       default:
-        cerr << "not yet supported component_class " << message.component_class();
+        cerr << "not yet supported component_class "
+             << message.component_class();
         exit(-1);
     }
-  } else {
-    cerr << "unknown compile mode " << mode << endl;
-    exit(-1);
-  }
+    std::stringstream cpp_ss;
+    std::stringstream h_ss;
 
-  std::stringstream cpp_ss;
-  std::stringstream h_ss;
-  code_generator->GenerateAll(cpp_ss, h_ss, message);
+    code_generator->GenerateAll(cpp_ss, h_ss, message);
 
-  // Creates a C/C++ file and its header file.
-  cout << "write to " << output_cpp_file_path << endl;
-  ofstream cpp_out_file(output_cpp_file_path);
-  if (!cpp_out_file.is_open()) {
-    cerr << "Unable to open file" << endl;
-  } else {
-    cpp_out_file << cpp_ss.str();
-    cpp_out_file.close();
-  }
+    // Creates a C/C++ file and its header file.
+    cout << "write to " << output_cpp_file_path << endl;
+    ofstream cpp_out_file(output_cpp_file_path);
+    if (!cpp_out_file.is_open()) {
+      cerr << "Unable to open file" << endl;
+    } else {
+      cpp_out_file << cpp_ss.str();
+      cpp_out_file.close();
+    }
 
-  string output_header_file_path =
-      string(output_header_dir_path) + "/" + string(input_vts_file_path);
-
-  output_header_file_path = output_header_file_path + ".h";
-
-  cout << "header: " << output_header_file_path << endl;
-  vts_fs_mkdirs(&output_header_file_path[0], 0777);
-
-  ofstream header_out_file(output_header_file_path.c_str());
-  if (!header_out_file.is_open()) {
-    cerr << "Unable to open file" << endl;
-  } else {
-    header_out_file << h_ss.str();
-    header_out_file.close();
+    ofstream header_out_file(output_header_file_path.c_str());
+    if (!header_out_file.is_open()) {
+      cerr << "Unable to open file" << endl;
+    } else {
+      header_out_file << h_ss.str();
+      header_out_file.close();
+    }
   }
 }
 
