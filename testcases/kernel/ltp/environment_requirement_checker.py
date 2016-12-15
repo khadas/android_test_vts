@@ -146,7 +146,7 @@ class EnvironmentRequirementChecker(object):
         # self._executable_available
         permission_commands = ["chmod 775 %s" % executable
                                for executable in executables
-                               if executable not in ltp_configs.EXTERNAL_BINS]
+                               if executable not in ltp_configs.INTERNAL_BINS]
 
         results = map(operator.not_,
                       self.shell.Execute(permission_commands)[const.EXIT_CODE])
@@ -154,14 +154,14 @@ class EnvironmentRequirementChecker(object):
         self._executable_available = dict(zip(executables, results))
 
         bin_path_exist_commands = ["which %s" % bin
-                                   for bin in ltp_configs.EXTERNAL_BINS]
+                                   for bin in ltp_configs.INTERNAL_BINS]
 
         bin_path_results = map(
             operator.not_,
             self.shell.Execute(bin_path_exist_commands)[const.EXIT_CODE])
 
         self._executable_available.update(
-            dict(zip(ltp_configs.EXTERNAL_BINS, bin_path_results)))
+            dict(zip(ltp_configs.INTERNAL_BINS, bin_path_results)))
 
     def TestBinaryExists(self, test_case):
         """Check whether the given test case's binary exists.
