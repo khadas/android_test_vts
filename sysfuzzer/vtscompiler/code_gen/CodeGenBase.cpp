@@ -141,7 +141,8 @@ void CodeGenBase::GenerateClassHeader(
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result, int agent_port);" << endl;
+  h_ss << "            void** result, const string& callback_socket_name);"
+      << endl;
 
   // produce Fuzz method(s) for sub_struct(s).
   for (auto const& sub_struct : message.sub_struct()) {
@@ -167,7 +168,8 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
     const StructSpecificationMessage& message, const string& parent_path) {
   h_ss << "  bool Fuzz_" << parent_path << message.name()
       << "(FunctionSpecificationMessage* func_msg," << endl;
-  h_ss << "            void** result, int agent_port);" << endl;
+  h_ss << "            void** result, const string& callback_socket_name);"
+      << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateFuzzFunctionForSubStruct(

@@ -132,6 +132,7 @@ class VtsTcpClient(object):
                          target_type=target_type,
                          target_version=target_version)
         resp = self.RecvResponse()
+        logging.info("resp: %s", resp)
         return (resp.response_code == SysMsg_pb2.SUCCESS)
 
     def ListApis(self):

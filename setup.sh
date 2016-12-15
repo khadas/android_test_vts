@@ -8,6 +8,8 @@ function vts_multidevice_target_setup {
   adb shell mkdir /data/local/tmp/64
   adb push images/${DEVICE}/32/fuzzer32 /data/local/tmp/32/fuzzer32
   adb push images/${DEVICE}/64/fuzzer64 /data/local/tmp/64/fuzzer64
+  adb push images/${DEVICE}/32/vts_shell_driver32 /data/local/tmp/32/vts_shell_driver32
+  adb push images/${DEVICE}/64/vts_shell_driver64 /data/local/tmp/64/vts_shell_driver64
   adb push images/${DEVICE}/64/vts_hal_agent /data/local/tmp/64/vts_hal_agent
 
   adb shell mkdir /data/local/tmp/32/hal
@@ -16,6 +18,8 @@ function vts_multidevice_target_setup {
   adb push images/${DEVICE}/64/libvts_common.so /data/local/tmp/64/libvts_common.so
   adb push images/${DEVICE}/32/libvts_interfacespecification.so /data/local/tmp/32/libvts_interfacespecification.so
   adb push images/${DEVICE}/64/libvts_interfacespecification.so /data/local/tmp/64/libvts_interfacespecification.so
+  adb push images/${DEVICE}/32/libvts_drivercomm.so /data/local/tmp/32/libvts_drivercomm.so
+  adb push images/${DEVICE}/64/libvts_drivercomm.so /data/local/tmp/64/libvts_drivercomm.so
   adb push images/${DEVICE}/32/libvts_datatype.so /data/local/tmp/32/libvts_datatype.so
   adb push images/${DEVICE}/64/libvts_datatype.so /data/local/tmp/64/libvts_datatype.so
   adb push images/${DEVICE}/32/libvts_measurement.so /data/local/tmp/32/libvts_measurement.so
@@ -48,4 +52,5 @@ function vts_multidevice_target_setup {
   adb shell chmod 755 /data/local/tmp/32/fuzzer32
   adb shell chmod 755 /data/local/tmp/64/fuzzer64
   adb shell chmod 755 /data/local/tmp/64/vts_hal_agent
+  adb shell rm -f /data/local/tmp/vts_binder_* /data/local/tmp/vts_agent_callback*
 }

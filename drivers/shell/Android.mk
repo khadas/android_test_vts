@@ -60,5 +60,8 @@ LOCAL_C_INCLUDES += \
   test/vts/proto \
   external/protobuf/src \
 
+LOCAL_MULTILIB := both
+
 LOCAL_CFLAGS := $(common_c_flags)
+
 include $(BUILD_NATIVE_TEST)

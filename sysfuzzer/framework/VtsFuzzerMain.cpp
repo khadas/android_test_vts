@@ -79,20 +79,20 @@ static void usage() {
 // Parses command args and kicks things off.
 int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
-    {"help",             no_argument,       NULL, 'h'},
-    {"class",            required_argument, NULL, 'c'},
-    {"type",             required_argument, NULL, 't'},
-    {"version",          required_argument, NULL, 'v'},
-    {"epoch_count",      required_argument, NULL, 'e'},
-    {"spec_dir",         required_argument, NULL, 's'},
+    {"help",                 no_argument,       NULL, 'h'},
+    {"class",                required_argument, NULL, 'c'},
+    {"type",                 required_argument, NULL, 't'},
+    {"version",              required_argument, NULL, 'v'},
+    {"epoch_count",          required_argument, NULL, 'e'},
+    {"spec_dir",             required_argument, NULL, 's'},
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    {"socket_port_file", optional_argument, NULL, 'f'},
+    {"socket_port_file",     optional_argument, NULL, 'f'},
 #else  // binder
-    {"service_name",     required_argument, NULL, 'n'},
+    {"service_name",         required_argument, NULL, 'n'},
 #endif
-    {"server",           optional_argument, NULL, 'd'},
-    {"agent_port",       optional_argument, NULL, 'p'},
-    {NULL,               0,                 NULL, 0}};
+    {"server",               optional_argument, NULL, 'd'},
+    {"callback_socket_name", optional_argument, NULL, 'p'},
+    {NULL,                   0,                 NULL, 0}};
   int target_class;
   int target_type;
   float target_version = 1.0;
@@ -104,7 +104,7 @@ int main(int argc, char* const argv[]) {
 #else  // binder
   string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
 #endif
-  int agent_port = -1;
+  string callback_socket_name;
 
   while (true) {
     int optionIndex = 0;
@@ -149,7 +149,7 @@ int main(int argc, char* const argv[]) {
         target_version = atof(optarg);
         break;
       case 'p':
-        agent_port = atoi(optarg);
+        callback_socket_name = string(optarg);
         break;
       case 'e':
         epoch_count = atoi(optarg);
@@ -182,7 +182,7 @@ int main(int argc, char* const argv[]) {
   }
 
   android::vts::SpecificationBuilder spec_builder(
-      spec_dir_path, epoch_count, agent_port);
+      spec_dir_path, epoch_count, callback_socket_name);
   if (!server) {
     if (optind != argc - 1) {
       fprintf(stderr, "Must specify output file (see --help).\n");
@@ -205,6 +205,5 @@ int main(int argc, char* const argv[]) {
                                     INTERFACE_SPEC_LIB_FILENAME);
 #endif
   }
-
   return 0;
 }

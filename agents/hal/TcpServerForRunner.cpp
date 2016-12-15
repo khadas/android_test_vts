@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "TcpServerForRunner.h"
+
 #include <errno.h>
 
 #include <unistd.h>
@@ -34,10 +36,10 @@
 #include <iostream>
 #include <sstream>
 
+#include "AgentRequestHandler.h"
+#include "BinderClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
-#include "BinderClient.h"
-#include "RequestHandler.h"
 
 using namespace std;
 
@@ -48,11 +50,13 @@ const static int kTcpPort = 5001;
 
 
 // Starts to run a TCP server (foreground).
-int StartTcpServer(const char* fuzzer_path32, const char* fuzzer_path64,
-                   const char* spec_dir_path) {
+int StartTcpServerForRunner(
+    const char* fuzzer_path32, const char* fuzzer_path64,
+    const char* spec_dir_path) {
   int sockfd, newsockfd;
   socklen_t clilen;
-  struct sockaddr_in serv_addr, cli_addr;
+  struct sockaddr_in serv_addr;
+  struct sockaddr_in cli_addr;
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
@@ -69,7 +73,7 @@ int StartTcpServer(const char* fuzzer_path32, const char* fuzzer_path64,
 
   // Now bind the host address using bind() call.
   if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
-    cerr << "Binding failed." << endl;
+    cerr << __func__ << "Binding failed." << endl;
     return -1;
   }
 
@@ -86,12 +90,14 @@ int StartTcpServer(const char* fuzzer_path32, const char* fuzzer_path64,
       return -1;
     }
 
-    cout << "New session" << endl;
+    cout << "[runner->agent] NEW SESSION" << endl;
+    cout << "[runner->agent] ===========" << endl;
+
     pid_t pid = fork();
     if (pid == 0) {  // child
       AgentRequestHandler handler;
-      exit(handler.StartSession(newsockfd, fuzzer_path32, fuzzer_path64,
-                                spec_dir_path));
+      exit(handler.Start(newsockfd, fuzzer_path32, fuzzer_path64,
+                         spec_dir_path));
     } else if (pid < 0) {
       cerr << "can't fork a child process to handle a session." << endl;
       return -1;

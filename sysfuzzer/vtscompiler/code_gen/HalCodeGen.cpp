@@ -61,14 +61,14 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
     string name = "vts_callback_" + fuzzer_extended_class_name
         + "_" + attribute.name();
     if (first_callback) {
-      cpp_ss << "static int agent_port_ = -1;" << endl;
+      cpp_ss << "static string callback_socket_name_;" << endl;
       first_callback = false;
     }
     cpp_ss << endl;
     cpp_ss << "class " << name << " : public FuzzerCallbackBase {" << endl;
     cpp_ss << " public:" << endl;
-    cpp_ss << "  " << name << "(int agent_port) {" << endl;
-    cpp_ss << "      agent_port_ = agent_port;" << endl;
+    cpp_ss << "  " << name << "(const string& callback_socket_name) {" << endl;
+    cpp_ss << "      callback_socket_name_ = callback_socket_name;" << endl;
     cpp_ss << "    }" << endl;
 
     int primitive_format_index = 0;
@@ -173,7 +173,7 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
 #endif
       // TODO: check whether bytes is set and handle properly if not.
       cpp_ss << "    RpcCallToAgent(GetCallbackID(\"" << callback_name
-          << "\"), agent_port_);" << endl;
+          << "\"), callback_socket_name_);" << endl;
       if (has_return_value) {
         // TODO: consider actual return type.
         cpp_ss << "    return NULL;";
@@ -204,7 +204,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, int agent_port) {" << endl;
+  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
       << endl;
@@ -244,7 +244,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
             + arg.predefined_type();  // TODO - check to make sure name is always correct
         if (name.back() == '*') name.pop_back();
         cpp_ss << "    " << name << "* arg" << arg_count << "callback = new ";
-        cpp_ss << name << "(agent_port);" << endl;
+        cpp_ss << name << "(callback_socket_name);" << endl;
         cpp_ss << "    arg" << arg_count << "callback->Register(func_msg->arg("
             << arg_count << "));" << endl;
 
@@ -431,7 +431,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz_"
       << parent_path_printable + message.name() << "(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, int agent_port) {" << endl;
+  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;" << endl;
 
@@ -639,7 +639,8 @@ void HalCodeGen::GenerateSubStructFuzzFunctionCall(
   replace(current_path_printable.begin(), current_path_printable.end(), '.', '_');
 
   cpp_ss << "    if (func_msg->parent_path() == \"" << current_path << "\") {" << endl;
-  cpp_ss << "      return Fuzz__" << current_path_printable << "(func_msg, result, agent_port);"<< endl;
+  cpp_ss << "      return Fuzz__" << current_path_printable
+      << "(func_msg, result, callback_socket_name);"<< endl;
   cpp_ss << "    }" << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {
