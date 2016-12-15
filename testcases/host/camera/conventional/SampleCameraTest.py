@@ -83,7 +83,7 @@ class SampleCameraTest(base_test.BaseTestClass):
           logging.info("waiting %s %s",
                        call_count_camera_device_status_change,
                        call_count_torch_mode_status_change)
-          time.sleep(1) 
+          time.sleep(1)
 
 
 if __name__ == "__main__":

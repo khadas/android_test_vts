@@ -370,13 +370,16 @@ bool AgentRequestHandler::ExecuteShellCommand(
   }
 
   // TODO: support stdout and stderr
-  char* result = client->ExecuteShellCommand(command_message.shell_command());
+  vector<string>* result = client->ExecuteShellCommand(
+      command_message.shell_command());
 
   AndroidSystemControlResponseMessage response_msg;
-  if (result != NULL && strlen(result) > 0) {
+  if (result != NULL && result->size() > 0) {
     cout << "ExecuteShellCommand: success" << endl;
     response_msg.set_response_code(SUCCESS);
-    response_msg.add_stdout(result);
+    for (string element : *result) {
+      response_msg.add_stdout(element);
+    }
   } else {
     cout << "ExecuteShellCommand: fail" << endl;
     response_msg.set_response_code(FAIL);
