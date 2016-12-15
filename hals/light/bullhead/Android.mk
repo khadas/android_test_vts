@@ -39,13 +39,6 @@ LOCAL_CLANG := true
 LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
 LOCAL_LDFLAGS += --coverage
 
-# enable below for sancov
-#LOCAL_ARM_MODE := arm
-#LOCAL_CLANG := true
-#LOCAL_CFLAGS += -fsanitize=address -fsanitize-coverage=bb -fno-omit-frame-pointer
-#LOCAL_LDFLAGS += -fsanitize=address -fsanitize-coverage=bb
-#LOCAL_ADDRESS_SANITIZER := true
-
 LOCAL_MULTILIB := both
 
 LOCAL_COMPATIBILITY_SUITE := vts
@@ -58,3 +51,32 @@ include test/vts/tools/build/Android.packaging_sharedlib.mk
 VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
 VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
 include test/vts/tools/build/Android.packaging_gcno.mk
+
+# Sancov-enabled target.
+include $(CLEAR_VARS)
+LOCAL_MODULE := lights.vts.sancov
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := lights.c
+LOCAL_MODULE_RELATIVE_PATH := hw
+LOCAL_SHARED_LIBRARIES := \
+    liblog \
+
+LOCAL_ARM_MODE := arm
+LOCAL_CLANG := true
+LOCAL_CFLAGS += \
+    -fsanitize=address \
+    -fsanitize-coverage=edge \
+    -fno-omit-frame-pointer
+
+LOCAL_LDFLAGS += \
+    -fsanitize=address \
+    -fsanitize-coverage=edge \
+
+LOCAL_ADDRESS_SANITIZER := true
+
+LOCAL_MULTILIB := both
+
+LOCAL_COMPATIBILITY_SUITE := vts
+
+include $(BUILD_SHARED_LIBRARY)
+include test/vts/tools/build/Android.packaging_sharedlib.mk
