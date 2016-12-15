@@ -212,6 +212,7 @@ void CodeGenBase::GenerateAllHeader(
   h_ss << "#include <stdio.h>" << endl;
   h_ss << "#include <stdarg.h>" << endl;
   h_ss << "#include <stdlib.h>" << endl;
+  h_ss << "#include <string.h>" << endl;
   h_ss << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << endl;
   h_ss << "#include <utils/Log.h>" << endl;
   h_ss << "#include \"common/fuzz_tester/FuzzerBase.h\"" << endl;
