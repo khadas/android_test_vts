@@ -53,9 +53,12 @@ class EnvironmentRequirementChecker(object):
 
         loop_device_support = CheckDefinition(self._shell_env.LoopDeviceSupport)
         ltptmp_dir = CheckDefinition(self._shell_env.DirsAllExistAndPermission,
-                                     True, True, [ltp_configs.LTPTMPDIR,
-                                                  ltp_configs.LTPTMP],
-                                     [775, 775])
+                                     True, True, [ltp_configs.TMP,
+                                                  ltp_configs.TMPBASE,
+                                                  ltp_configs.LTPTMP,
+                                                  ltp_configs.TMPDIR,
+                                                  ],
+                                     [775, 775, 775, 775])
 
         self._REQUIREMENT_DEFINITIONS = {
             "loop_device_support": loop_device_support,

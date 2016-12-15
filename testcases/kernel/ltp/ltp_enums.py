@@ -47,8 +47,10 @@ class ShellEnvKeys(object):
     Contains constant strings starting with prefix "_KEY_ENV_" are used as dict
         key in environment variable dictionary
     """
-    TMPDIR = 'TMPDIR'
     TMP = 'TMP'
+    TMPBASE = 'TMPBASE'
+    LTPTMP = 'LTPTMP'
+    TMPDIR = 'TMPDIR'
     LTP_DEV_FS_TYPE = 'LTP_DEV_FS_TYPE'
     LTPROOT = 'LTPROOT'
     PATH = 'PATH'

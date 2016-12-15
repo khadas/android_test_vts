@@ -17,11 +17,23 @@
 
 import os
 
-
+# Environment paths for ltp test cases
 # string, ltp build root directory on target
 LTPDIR = "/data/local/tmp/ltp"
-LTPTMPDIR = os.path.join(LTPDIR, "temp")
-LTPTMP = os.path.join(LTPTMPDIR, "tmp")
+# Directory for environment variable 'TMP' needed by some test cases
+TMP = os.path.join(LTPDIR, "tmp")
+# Directory for environment variable 'TMPBASE' needed by some test cases
+TMPBASE = os.path.join(TMP, "tmpbase")
+# Directory for environment variable 'LTPTMP' needed by some test cases
+LTPTMP = os.path.join(TMP, "ltptemp")
+# Directory for environment variable 'TMPDIR' needed by some test cases
+TMPDIR = os.path.join(TMP, "tmpdir")
+# Add LTP's binary path to PATH
+PATH = "/system/bin:%s" % os.path.join(LTPDIR, "testcases/bin")
+
+# File system type for loop device
+LTP_DEV_FS_TYPE = "ext4"
+
 
 
 REQUIREMENTS_TO_TESTCASE = {
