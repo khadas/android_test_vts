@@ -30,6 +30,8 @@ LOCAL_C_INCLUDES := \
   libcore \
 
 LOCAL_SHARED_LIBRARIES := \
+
+LOCAL_STATIC_LIBRARIES := \
   libcutils \
 
 LOCAL_MULTILIB := both

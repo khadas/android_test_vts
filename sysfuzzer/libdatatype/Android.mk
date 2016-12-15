@@ -38,10 +38,12 @@ LOCAL_C_INCLUDES := \
   system/media/camera/include \
 
 LOCAL_SHARED_LIBRARIES := \
-  libcutils \
   libvts_common \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
+
+LOCAL_STATIC_LIBRARIES := \
+  libcutils \
 
 LOCAL_MULTILIB := both
 

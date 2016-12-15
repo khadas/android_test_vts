@@ -31,8 +31,10 @@ LOCAL_C_INCLUDES := \
   test/vts/sysfuzzer/common/proto \
 
 LOCAL_SHARED_LIBRARIES := \
-  libcutils \
   libvts_common \
+
+LOCAL_STATIC_LIBRARIES := \
+  libcutils \
 
 LOCAL_PROTOC_FLAGS := \
   --proto_path=$(LOCAL_PATH)/../common/proto \

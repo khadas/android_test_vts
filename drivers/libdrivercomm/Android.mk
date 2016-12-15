@@ -30,9 +30,11 @@ LOCAL_C_INCLUDES := \
   external/protobuf/src \
 
 LOCAL_SHARED_LIBRARIES := \
-  libcutils \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
+
+LOCAL_STATIC_LIBRARIES := \
+  libcutils \
 
 LOCAL_MULTILIB := both
 
