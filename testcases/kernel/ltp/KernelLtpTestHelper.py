@@ -196,6 +196,7 @@ class TestCasesParser(object):
                 if not len(items) == 4:
                     continue
                 testsuite, testname, testbinary, arg = items
+                arg = arg.strip()
 
                 if testname.startswith("DISABLED_"):
                     continue
