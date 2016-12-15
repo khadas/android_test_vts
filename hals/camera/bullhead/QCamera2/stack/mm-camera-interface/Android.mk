@@ -60,8 +60,6 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 
-LOCAL_COMPATIBILITY_SUITE := vts
-
 include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
 

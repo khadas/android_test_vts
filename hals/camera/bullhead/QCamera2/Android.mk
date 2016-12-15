@@ -90,10 +90,7 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)
 
-LOCAL_COMPATIBILITY_SUITE := vts
-
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
 
 VTS_GCNO_MODULE := $(LOCAL_MODULE)
 VTS_GCOV_SRC_DIR := test/vts/hals/camera/bullhead/QCamera2
