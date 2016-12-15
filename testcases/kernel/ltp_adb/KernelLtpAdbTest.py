@@ -82,14 +82,17 @@ class TestcaseParser(object):
 
     Attributes:
         _data_path: string, the vts data path on host side
+        _nbits: string, '32' or '64' number of bits used to represent an
+                integer in a target library.
     """
 
-    def __init__(self, data_path):
+    def __init__(self, data_path, nbits):
         self._data_path = data_path
+        self._nbits = nbits
 
     def _GetTestcaseFilePath(self):
         """return the test case definition fiile's path."""
-        return os.path.join(self._data_path, '32', 'ltp',
+        return os.path.join(self._data_path, self._nbits, 'ltp',
                             'ltp_vts_testcases.txt')
 
     def Load(self):
@@ -126,9 +129,9 @@ class TempDir(object):
         """Prepare a temporary directory."""
         # TODO: check error
         logging.info("TempDir: Prepare %s", self._path)
-        self._adb.shell("mkdir %s -p" % self._path)
+        self._adb.shell("mkdir -p %s" % self._path)
         self._adb.shell("chmod 775 %s" % self._path)
-        self._adb.shell("mkdir %s/tmp" % self._path)
+        self._adb.shell("mkdir -p %s/tmp" % self._path)
         self._adb.shell("chmod 775 %s/tmp" % self._path)
 
     def Clean(self):
@@ -155,7 +158,6 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
         _adb: AdbProxy instance, to send adb commands
         _ltp_dir: string, ltp build root directory on target
         _temp_dir: TempDir, temporary directory manager
-        _testcases: TestcaseParser, test case input parser
         _env: dict<stirng, stirng>, dict of environment variable key value pair
         _KEY_ENV__: constant strings starting with prefix "_KEY_ENV_" are used as dict
                     key in environment variable dictionary
@@ -183,7 +185,6 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._temp_dir = TempDir("/data/local/tmp/ltp/temp", self._adb)
         self._temp_dir.Prepare()
 
-        self._testcases = TestcaseParser(self.data_file_path)
         self._env = {self._KEY_ENV_TMPDIR: self._temp_dir._path,
                      self._KEY_ENV_TMP: "%s/tmp" % self._temp_dir._path,
                      self._KEY_ENV_LTP_DEV_FS_TYPE: "ext4",
@@ -202,7 +203,6 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._adb.shell("mkdir %s -p" % self._ltp_dir)
         self._dut.adb.push("%s/%i/ltp/. %s" %
                            (self.data_file_path, n_bit, self._ltp_dir))
-        # TODO: libcap
 
     def GetEnvp(self):
         """Generate the environment variable required to run the tests."""
@@ -232,11 +232,12 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
             n_bit: _32BIT, or 32, for 32bit test;
                    _64BIT, or 64, for 64bit test;
         """
+        testcases = TestcaseParser(self.data_file_path, str(n_bit))
         self.PushFiles(n_bit)
         logging.info("[Test Case] test%iBits SKIP" % n_bit)
 
         self.runGeneratedTests(test_func=self.RunLtpOnce,
-                               settings=self._testcases.Load(),
+                               settings=testcases.Load(),
                                args=(n_bit,),
                                name_func=self.GetTestName)
 
@@ -262,9 +263,14 @@ class KernelLtpAdbTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self._adb.shell("chmod 775 " + path)
 
-        results = self._adb.shell("env %s %s %s" % (
-            self.GetEnvp(), path, test_case.GetArgs("$LTPROOT",
-                                                    self._ltp_dir)))
+        cmd = "env %s LD_LIBRARY_PATH=%s:/data/local/tmp/%s/:$LD_LIBRARY_PATH %s %s" % (
+            self.GetEnvp(),
+            self._ltp_dir,
+            n_bit,
+            path,
+            test_case.GetArgs("$LTPROOT", self._ltp_dir))
+        logging.info("cmd: %s", cmd)
+        results = self._adb.shell(cmd)
 
         self.Verify(results)
 
