@@ -118,7 +118,7 @@ class ShellEnvironment(object):
         results = self.shell.Execute('cat %s' % shell_commands.FILE_CPU_PRESENT)
         if (not results or results[const.EXIT_CODE][0] or
                 not results[const.STDOUT][0]):
-            logging.error("Cannot get number of working CPU info. "
+            logging.error("Cannot get number of working CPU info."
                           "\n  Command results: {}".format(results))
             return 1
         else:
