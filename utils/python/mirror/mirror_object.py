@@ -463,7 +463,8 @@ class MirrorObject(object):
                 ret_v = getattr(arg_msg.scalar_value, arg_msg.scalar_type, None)
                 if ret_v is None:
                     raise MirrorObjectError(
-                        "No value found for type %s in %s." % (p_type, value))
+                        "No value found for type %s in %s." %
+                        (arg_msg.scalar_type, api_name))
                 return ret_v
             elif arg_msg.type == IfaceSpecMsg.TYPE_STRING:
                 return arg_msg.string_value.message
