@@ -49,7 +49,7 @@ attribute: {
   type: TYPE_STRUCT
   struct_value: {
     name: "data"
-    type: TYPE_VECTOR_VARIABLE
+    type: TYPE_VECTOR
     vector_value: {
       scalar_type: "uint8_t"
     }
@@ -87,7 +87,7 @@ api: {
     scalar_type: "int32_t"
   }
   arg: {
-    type: TYPE_VECTOR_VARIABLE
+    type: TYPE_VECTOR
     vector_value: {
       scalar_type: "uint8_t"
     }
