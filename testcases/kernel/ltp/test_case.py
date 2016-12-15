@@ -122,14 +122,15 @@ class TestCase(object):
     def GetRequiredExecutablePaths(self):
         """Get required executables' paths.
 
-        Get a generator of all executables' paths that will be needed
-        by its command. For LTP's executables, absolute path will be
-        returned. For binaries in system's PATH, only the name will be
-        returned.
+        Returns:
+            A list of all executables' paths that will be needed
+            by its command. For LTP's executables, absolute path will be
+            returned. For binaries in system's PATH, only the name will be
+            returned.
         """
-        return (os.path.join(ltp_configs.LTPBINPATH, executable)
+        return [os.path.join(ltp_configs.LTPBINPATH, executable)
                 if executable not in ltp_configs.EXTERNAL_BINS else executable
-                for executable in self.InternalGetExecutableNames())
+                for executable in self.InternalGetExecutableNames()]
 
     @property
     def fullname(self):
