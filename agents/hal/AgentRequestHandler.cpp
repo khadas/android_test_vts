@@ -354,6 +354,36 @@ bool AgentRequestHandler::DefaultResponse() {
 }
 
 
+bool AgentRequestHandler::ExecuteShellCommand(
+    const AndroidSystemControlCommandMessage& command_message) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
+  cerr << __func__ << " binder not supported." << endl;
+  {
+#endif
+    return false;
+  }
+
+  // TODO: support stdout and stderr
+  char* result = client->ExecuteShellCommand(command_message);
+
+  AndroidSystemControlResponseMessage response_msg;
+  if (result != NULL && strlen(result) > 0) {
+    cout << "ExecuteShellCommand: success" << endl;
+    response_msg.set_response_code(SUCCESS);
+  } else {
+    cout << "ExecuteShellCommand: fail" << endl;
+    response_msg.set_response_code(FAIL);
+    response_msg.set_reason("Failed to call the api.");
+  }
+  bool succ = VtsSocketSendMessage(response_msg);
+  return succ;
+}
+
+
 bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
@@ -379,6 +409,9 @@ bool AgentRequestHandler::ProcessOneCommand() {
       return ListApis();
     case CALL_API:
       return CallApi(command_msg.arg());
+    // for shell driver
+    case VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND:
+      return ExecuteShellCommand(command_msg);
     default:
       cerr << __func__ << " ERROR unknown command "
           << command_msg.command_type() << endl;

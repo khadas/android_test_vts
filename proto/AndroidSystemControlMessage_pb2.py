@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='AndroidSystemControlMessage.proto',
   package='android.vts',
-  serialized_pb='\n!AndroidSystemControlMessage.proto\x12\x0b\x61ndroid.vts\"\xd2\x02\n\"AndroidSystemControlCommandMessage\x12.\n\x0c\x63ommand_type\x18\x01 \x01(\x0e\x32\x18.android.vts.CommandType\x12\x0e\n\x05paths\x18\xe9\x07 \x03(\x0c\x12\x16\n\rcallback_port\x18\xcd\x08 \x01(\x05\x12\x15\n\x0cservice_name\x18\xd1\x0f \x01(\x0c\x12\x30\n\x0b\x64river_type\x18\xb9\x17 \x01(\x0e\x32\x1a.android.vts.VtsDriverType\x12\x12\n\tfile_path\x18\xba\x17 \x01(\x0c\x12\r\n\x04\x62its\x18\xbb\x17 \x01(\x05\x12\x15\n\x0ctarget_class\x18\xbc\x17 \x01(\x05\x12\x14\n\x0btarget_type\x18\xbd\x17 \x01(\x05\x12\x17\n\x0etarget_version\x18\xbe\x17 \x01(\x05\x12\x14\n\x0bmodule_name\x18\xbf\x17 \x01(\x0c\x12\x0c\n\x03\x61rg\x18\xa1\x1f \x01(\x0c\"\x9d\x01\n#AndroidSystemControlResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode\x12\x0f\n\x06reason\x18\xe9\x07 \x01(\x0c\x12\x13\n\nfile_names\x18\xea\x07 \x03(\x0c\x12\r\n\x04spec\x18\xeb\x07 \x01(\x0c\x12\x0f\n\x06result\x18\xec\x07 \x01(\x0c\"1\n#AndroidSystemCallbackRequestMessage\x12\n\n\x02id\x18\x01 \x01(\x0c\"X\n$AndroidSystemCallbackResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode*\x9d\x01\n\x0b\x43ommandType\x12\x18\n\x14UNKNOWN_COMMAND_TYPE\x10\x00\x12\r\n\tLIST_HALS\x10\x01\x12\x11\n\rSET_HOST_INFO\x10\x02\x12\x18\n\x14\x43HECK_DRIVER_SERVICE\x10\x65\x12\x19\n\x15LAUNCH_DRIVER_SERVICE\x10\x66\x12\x0e\n\tLIST_APIS\x10\xc9\x01\x12\r\n\x08\x43\x41LL_API\x10\xca\x01*@\n\x0cResponseCode\x12\x19\n\x15UNKNOWN_RESPONSE_CODE\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04\x46\x41IL\x10\x02*\xfd\x01\n\rVtsDriverType\x12\x1a\n\x16UKNOWN_VTS_DRIVER_TYPE\x10\x00\x12$\n VTS_DRIVER_TYPE_HAL_CONVENTIONAL\x10\x01\x12\x1e\n\x1aVTS_DRIVER_TYPE_HAL_LEGACY\x10\x02\x12\x1c\n\x18VTS_DRIVER_TYPE_HAL_HIDL\x10\x03\x12\x31\n-VTS_DRIVER_TYPE_HAL_HIDL_WRAPPED_CONVENTIONAL\x10\x04\x12\x1e\n\x1aVTS_DRIVER_TYPE_LIB_SHARED\x10\x0b\x12\x19\n\x15VTS_DRIVER_TYPE_SHELL\x10\x15')
+  serialized_pb='\n!AndroidSystemControlMessage.proto\x12\x0b\x61ndroid.vts\"\xea\x02\n\"AndroidSystemControlCommandMessage\x12.\n\x0c\x63ommand_type\x18\x01 \x01(\x0e\x32\x18.android.vts.CommandType\x12\x0e\n\x05paths\x18\xe9\x07 \x03(\x0c\x12\x16\n\rcallback_port\x18\xcd\x08 \x01(\x05\x12\x15\n\x0cservice_name\x18\xd1\x0f \x01(\x0c\x12\x30\n\x0b\x64river_type\x18\xb9\x17 \x01(\x0e\x32\x1a.android.vts.VtsDriverType\x12\x12\n\tfile_path\x18\xba\x17 \x01(\x0c\x12\r\n\x04\x62its\x18\xbb\x17 \x01(\x05\x12\x15\n\x0ctarget_class\x18\xbc\x17 \x01(\x05\x12\x14\n\x0btarget_type\x18\xbd\x17 \x01(\x05\x12\x17\n\x0etarget_version\x18\xbe\x17 \x01(\x05\x12\x14\n\x0bmodule_name\x18\xbf\x17 \x01(\x0c\x12\x0c\n\x03\x61rg\x18\xa1\x1f \x01(\x0c\x12\x16\n\rshell_command\x18\x89\' \x03(\x0c\"\xbf\x01\n#AndroidSystemControlResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode\x12\x0f\n\x06reason\x18\xe9\x07 \x01(\x0c\x12\x13\n\nfile_names\x18\xea\x07 \x03(\x0c\x12\r\n\x04spec\x18\xeb\x07 \x01(\x0c\x12\x0f\n\x06result\x18\xec\x07 \x01(\x0c\x12\x0f\n\x06stdout\x18\xd1\x0f \x03(\x0c\x12\x0f\n\x06stderr\x18\xd2\x0f \x03(\x0c\"1\n#AndroidSystemCallbackRequestMessage\x12\n\n\x02id\x18\x01 \x01(\x0c\"X\n$AndroidSystemCallbackResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode*\xcb\x01\n\x0b\x43ommandType\x12\x18\n\x14UNKNOWN_COMMAND_TYPE\x10\x00\x12\r\n\tLIST_HALS\x10\x01\x12\x11\n\rSET_HOST_INFO\x10\x02\x12\x18\n\x14\x43HECK_DRIVER_SERVICE\x10\x65\x12\x19\n\x15LAUNCH_DRIVER_SERVICE\x10\x66\x12\x0e\n\tLIST_APIS\x10\xc9\x01\x12\r\n\x08\x43\x41LL_API\x10\xca\x01\x12,\n\'VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND\x10\xad\x02*@\n\x0cResponseCode\x12\x19\n\x15UNKNOWN_RESPONSE_CODE\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04\x46\x41IL\x10\x02*\xfd\x01\n\rVtsDriverType\x12\x1a\n\x16UKNOWN_VTS_DRIVER_TYPE\x10\x00\x12$\n VTS_DRIVER_TYPE_HAL_CONVENTIONAL\x10\x01\x12\x1e\n\x1aVTS_DRIVER_TYPE_HAL_LEGACY\x10\x02\x12\x1c\n\x18VTS_DRIVER_TYPE_HAL_HIDL\x10\x03\x12\x31\n-VTS_DRIVER_TYPE_HAL_HIDL_WRAPPED_CONVENTIONAL\x10\x04\x12\x1e\n\x1aVTS_DRIVER_TYPE_LIB_SHARED\x10\x0b\x12\x19\n\x15VTS_DRIVER_TYPE_SHELL\x10\x15')
 
 _COMMANDTYPE = _descriptor.EnumDescriptor(
   name='CommandType',
@@ -50,11 +50,15 @@ _COMMANDTYPE = _descriptor.EnumDescriptor(
       name='CALL_API', index=6, number=202,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND', index=7, number=301,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=693,
-  serialized_end=850,
+  serialized_start=751,
+  serialized_end=954,
 )
 
 CommandType = enum_type_wrapper.EnumTypeWrapper(_COMMANDTYPE)
@@ -79,8 +83,8 @@ _RESPONSECODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=852,
-  serialized_end=916,
+  serialized_start=956,
+  serialized_end=1020,
 )
 
 ResponseCode = enum_type_wrapper.EnumTypeWrapper(_RESPONSECODE)
@@ -121,8 +125,8 @@ _VTSDRIVERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=919,
-  serialized_end=1172,
+  serialized_start=1023,
+  serialized_end=1276,
 )
 
 VtsDriverType = enum_type_wrapper.EnumTypeWrapper(_VTSDRIVERTYPE)
@@ -133,6 +137,7 @@ CHECK_DRIVER_SERVICE = 101
 LAUNCH_DRIVER_SERVICE = 102
 LIST_APIS = 201
 CALL_API = 202
+VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND = 301
 UNKNOWN_RESPONSE_CODE = 0
 SUCCESS = 1
 FAIL = 2
@@ -237,6 +242,13 @@ _ANDROIDSYSTEMCONTROLCOMMANDMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='shell_command', full_name='android.vts.AndroidSystemControlCommandMessage.shell_command', index=12,
+      number=5001, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -247,7 +259,7 @@ _ANDROIDSYSTEMCONTROLCOMMANDMESSAGE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=51,
-  serialized_end=389,
+  serialized_end=413,
 )
 
 
@@ -293,6 +305,20 @@ _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='stdout', full_name='android.vts.AndroidSystemControlResponseMessage.stdout', index=5,
+      number=2001, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='stderr', full_name='android.vts.AndroidSystemControlResponseMessage.stderr', index=6,
+      number=2002, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -302,8 +328,8 @@ _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=392,
-  serialized_end=549,
+  serialized_start=416,
+  serialized_end=607,
 )
 
 
@@ -330,8 +356,8 @@ _ANDROIDSYSTEMCALLBACKREQUESTMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=551,
-  serialized_end=600,
+  serialized_start=609,
+  serialized_end=658,
 )
 
 
@@ -358,8 +384,8 @@ _ANDROIDSYSTEMCALLBACKRESPONSEMESSAGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=602,
-  serialized_end=690,
+  serialized_start=660,
+  serialized_end=748,
 )
 
 _ANDROIDSYSTEMCONTROLCOMMANDMESSAGE.fields_by_name['command_type'].enum_type = _COMMANDTYPE
