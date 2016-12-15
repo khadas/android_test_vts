@@ -44,6 +44,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     DEVICE_TMP_DIR = '/data/local/tmp'
     TAG_DELIMITER = '::'
+    PUSH_DELIMITER = '->'
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
@@ -106,7 +107,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.testcases = []
         self.tags = set()
         self.CreateTestCases()
-        cmd = ['chmod 755 %s' % test_case.path for test_case in self.testcases]
+        cmd = list(
+            set('chmod 755 %s' % test_case.path
+                for test_case in self.testcases))
         cmd_results = self.shell.Execute(cmd)
         if any(cmd_results[const.EXIT_CODE]):
             logging.error('Failed to set permission to some of the binaries:\n'
@@ -117,20 +120,22 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
-        for b in self.binary_test_sources:
-            tag = ''
-            path = b
-            if self.TAG_DELIMITER in b:
-                tag, path = b.split(self.TAG_DELIMITER)
+        for source in self.binary_test_sources:
+            logging.info('Parsing binary test source: %s', source)
+            src, dst, tag = self.ParseTestSource(source)
             self.tags.add(tag)
-            src = os.path.join(self.data_file_path, path)
-            dst = self.GetDeviceSidePath(b)
-            self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
-            testcase = self.CreateTestCaseFromBinary(dst, tag)
-            if type(testcase) is list:
-                self.testcases.extend(testcase)
-            else:
-                self.testcases.append(testcase)
+            if src:
+                logging.info('Pushing from %s to %s.', src, dst)
+                self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
+            if tag is not None:
+                # tag not being None means to create a test case
+                testcase = self.CreateTestCaseFromBinary(dst, tag)
+                logging.info('Creating test case from %s with tag %s: %s', dst,
+                             tag, testcase)
+                if type(testcase) is list:
+                    self.testcases.extend(testcase)
+                else:
+                    self.testcases.append(testcase)
 
     def PutTag(self, name, tag):
         '''Put tag on name and return the resulting string.
@@ -175,17 +180,17 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info('Start class cleaning up jobs.')
         # Delete pushed files
 
-        paths = set(
-            self.GetDeviceSidePath(src) for src in self.binary_test_sources)
-
-        cmd = ['rm -rf %s' % path for path in paths]
+        sources = set(
+            self.ParseTestSource(src) for src in self.binary_test_sources)
+        paths = [dst for src, dst, tag in sources if src and dst]
+        cmd = ['rm -rf %s' % dst for dst in paths]
         cmd_results = self.shell.Execute(cmd)
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning('Failed to clean up test class: %s', cmd_results)
 
         # Delete empty directories in working directories
-        dir_set = set(ntpath.dirname(path) for path in paths)
-        dir_set.add(self.GetDeviceSidePath(''))
+        dir_set = set(ntpath.dirname(dst) for dst in paths)
+        dir_set.add(self.ParseTestSource('')[1])
         dirs = list(dir_set)
         dirs.sort(lambda x, y: cmp(len(y), len(x)))
         cmd = ['rmdir %s' % d for d in dirs]
@@ -195,26 +200,46 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         logging.info('Finished class cleaning up jobs.')
 
-    def GetDeviceSidePath(self, path):
+    def ParseTestSource(self, source):
         '''Convert host side binary path to device side path.
 
         Args:
-            path: string, host side binary relative path. Can contain tag.
+            source: string, binary test source string
 
         Returns:
-            string, device side binary absolute path
+            A tuple of (string, string, string), representing (host side
+            absolute path, device side absolute path, tag). Returned tag
+            will be None if the test source is for pushing file to working
+            directory only.
         '''
         tag = ''
-        if self.TAG_DELIMITER in path:
-            tag, path = path.split(self.TAG_DELIMITER)
+        path = source
+        if self.TAG_DELIMITER in source:
+            tag, path = source.split(self.TAG_DELIMITER)
 
-        if tag in self.working_directories:
-            return os.path.join(self.working_directories[tag],
-                                ntpath.basename(path))
-        else:
-            return os.path.join(self.DEVICE_TMP_DIR, 'binary_test_temp_%s' %
-                                self.__class__.__name__, tag,
-                                ntpath.basename(path))
+        src = path
+        dst = None
+        if self.PUSH_DELIMITER in path:
+            src, dst = path.split(self.PUSH_DELIMITER)
+
+        if src:
+            src = os.path.join(self.data_file_path, src)
+
+        push_only = dst is not None and dst == ''
+
+        if not dst:
+            if tag in self.working_directories:
+                dst = os.path.join(self.working_directories[tag],
+                                   ntpath.basename(src))
+            else:
+                dst = os.path.join(self.DEVICE_TMP_DIR, 'binary_test_temp_%s' %
+                                   self.__class__.__name__, tag,
+                                   ntpath.basename(src))
+
+        if push_only:
+            tag = None
+
+        return tuple(map(str, (src, dst, tag)))
 
     def CreateTestCaseFromBinary(self, path, tag=''):
         '''Create a list of TestCase objects from a binary path.

@@ -119,15 +119,39 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
 
     @Option(name = "binary-test-sources",
             description = "Binary test source paths relative to vts testcase directory on host."
-                    + "Tags can be added to the front of each directory using '::' as delimiter. "
-                    + "Multiple directories can be separated by ','.")
+                    + "Format of tags:"
+                    + "    <source>: source without tag."
+                    + "    <tag>::<source>: source with tag. Can be used to separate 32bit and 64"
+                    + "            bit tests with same file name."
+                    + "    <tag1>::<source1>, <tag1>::<source2>, <tag2>::<source3>: multiple"
+                    + "            sources connected by comma. White spaces in-between"
+                    + "            will be ignored."
+                    + "Format of each source string:"
+                    + "    <source file>: push file and create test case."
+                    + "            Source is relative path of source file under vts's testcases"
+                    + "            folder. Source file will be pushed to working directory"
+                    + "            discarding original directory structure, and test cases will"
+                    + "            be created using the pushed file."
+                    + "    <source file>-><destination file>: push file and create test case."
+                    + "            Destination path is absolute path on device. Test cases will"
+                    + "            be created using the pushed file."
+                    + "    <source file>->: push file only."
+                    + "            Push the source file to its' tag's corresponding"
+                    + "            working directory. Test case will not be created on"
+                    + "            this file. This is equivalent to but simpler than specifying a"
+                    + "            working directory for the tag and use VtsFilePusher to push the"
+                    + "            file to the directory."
+                    + "    -><destination file>: create test case only."
+                    + "            Destination is absolute device side path."
+                    + "    If you wish to push a source file to a specific destination and not"
+                    + "    create a test case from it, please use VtsFilePusher.")
     private Collection<String> mBinaryTestSources = new ArrayList<>();
 
     @Option(name = "binary-test-working-directories", description = "Working directories for binary "
             + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
             + "Multiple directories can be separated by ','. However, each tag should only has "
-            + "one working directory. By default, tag name is used as working directory name under "
-            + "/data/local/tmp")
+            + "one working directory. This option is optional for binary tests. If not specified, "
+            + "different directories will be used for files with different tags.")
     private Collection<String> mBinaryTestWorkingDirectories = new ArrayList<>();
 
     @Option(name = "binary-test-ld-library-paths", description = "LD_LIBRARY_PATH for binary "
@@ -136,7 +160,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             + "Multiple instances of ld-library-paths rule can be separated by ','. "
             + "There can be multiple instances of ld-library-paths for a same tag, which will "
             + "later automatically be combined using ':' as delimiter. Paths without a tag "
-            + "will only used for binaries without tag.")
+            + "will only used for binaries without tag. This option is optional for binary tests.")
     private Collection<String> mBinaryTestLdLibraryPaths = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
