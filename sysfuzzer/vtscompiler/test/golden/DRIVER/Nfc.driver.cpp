@@ -32,16 +32,16 @@ static void FuzzerExtended_INfcwrite_cb_func(int32_t arg) {
 std::function<void(int32_t)> FuzzerExtended_INfcwrite_cb = FuzzerExtended_INfcwrite_cb_func;
 
 
-static void FuzzerExtended_INfccore_initialized_cb_func(int32_t arg) {
-  cout << "callback core_initialized called" << endl;
+static void FuzzerExtended_INfccoreInitialized_cb_func(int32_t arg) {
+  cout << "callback coreInitialized called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfccore_initialized_cb = FuzzerExtended_INfccore_initialized_cb_func;
+std::function<void(int32_t)> FuzzerExtended_INfccoreInitialized_cb = FuzzerExtended_INfccoreInitialized_cb_func;
 
 
-static void FuzzerExtended_INfcpre_discover_cb_func(int32_t arg) {
-  cout << "callback pre_discover called" << endl;
+static void FuzzerExtended_INfcprediscover_cb_func(int32_t arg) {
+  cout << "callback prediscover called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcpre_discover_cb = FuzzerExtended_INfcpre_discover_cb_func;
+std::function<void(int32_t)> FuzzerExtended_INfcprediscover_cb = FuzzerExtended_INfcprediscover_cb_func;
 
 
 static void FuzzerExtended_INfcclose_cb_func(int32_t arg) {
@@ -50,16 +50,16 @@ static void FuzzerExtended_INfcclose_cb_func(int32_t arg) {
 std::function<void(int32_t)> FuzzerExtended_INfcclose_cb = FuzzerExtended_INfcclose_cb_func;
 
 
-static void FuzzerExtended_INfccontrol_granted_cb_func(int32_t arg) {
-  cout << "callback control_granted called" << endl;
+static void FuzzerExtended_INfccontrolGranted_cb_func(int32_t arg) {
+  cout << "callback controlGranted called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfccontrol_granted_cb = FuzzerExtended_INfccontrol_granted_cb_func;
+std::function<void(int32_t)> FuzzerExtended_INfccontrolGranted_cb = FuzzerExtended_INfccontrolGranted_cb_func;
 
 
-static void FuzzerExtended_INfcpower_cycle_cb_func(int32_t arg) {
-  cout << "callback power_cycle called" << endl;
+static void FuzzerExtended_INfcpowerCycle_cb_func(int32_t arg) {
+  cout << "callback powerCycle called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcpower_cycle_cb = FuzzerExtended_INfcpower_cycle_cb_func;
+std::function<void(int32_t)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
 
 
 bool FuzzerExtended_INfc::GetService() {
@@ -90,8 +90,12 @@ bool FuzzerExtended_INfc::Fuzz(
     return true;
   }
   if (!strcmp(func_name, "write")) {
-    nfc_data_t arg0;
-    MessageTonfc_data_t(func_msg->arg(0), &arg0);
+    uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
+    hidl_vec<uint8_t> arg0;
+    for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
+      arg0buffer[vector_index] = func_msg->arg(0).vector_value(vector_index).scalar_value().uint8_t();
+    }
+arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
     cout << "ok. let's call." << endl;
@@ -102,7 +106,7 @@ bool FuzzerExtended_INfc::Fuzz(
     cout << "called" << endl;
     return true;
   }
-  if (!strcmp(func_name, "core_initialized")) {
+  if (!strcmp(func_name, "coreInitialized")) {
     uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
     hidl_vec<uint8_t> arg0;
     for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
@@ -112,18 +116,18 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
     cout << "ok. let's call." << endl;
-    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->core_initialized(
+    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->coreInitialized(
       arg0));
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
     cout << "called" << endl;
     return true;
   }
-  if (!strcmp(func_name, "pre_discover")) {
+  if (!strcmp(func_name, "prediscover")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
     cout << "ok. let's call." << endl;
-    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->pre_discover());
+    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->prediscover());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
     cout << "called" << endl;
@@ -139,21 +143,21 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
     cout << "called" << endl;
     return true;
   }
-  if (!strcmp(func_name, "control_granted")) {
+  if (!strcmp(func_name, "controlGranted")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
     cout << "ok. let's call." << endl;
-    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->control_granted());
+    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->controlGranted());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
     cout << "called" << endl;
     return true;
   }
-  if (!strcmp(func_name, "power_cycle")) {
+  if (!strcmp(func_name, "powerCycle")) {
     VtsMeasurement vts_measurement;
     vts_measurement.Start();
     cout << "ok. let's call." << endl;
-    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->power_cycle());
+    *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->powerCycle());
     vector<float>* measured = vts_measurement.Stop();
     cout << "time " << (*measured)[0] << endl;
     cout << "called" << endl;
@@ -169,7 +173,7 @@ bool FuzzerExtended_INfc::GetAttribute(
 }
 extern "C" {
 android::vts::FuzzerBase* 
-vts_func_4_8_1_(
+vts_func_4_0_1_(
 ) {
   return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_INfc();
 }

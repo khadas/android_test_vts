@@ -30,11 +30,11 @@ class VtsNfcClientCallback: public INfcClientCallback {
   virtual ~VtsNfcClientCallback() = default;
 
   Return<void> sendEvent(
-    nfc_event_t arg0,
-    nfc_status_t arg1) override;
+    NfcEvent arg0,
+    NfcStatus arg1) override;
 
   Return<void> sendData(
-    const nfc_data_t& arg0) override;
+    const hidl_vec<uint8_t>& arg0) override;
 
 };
 
