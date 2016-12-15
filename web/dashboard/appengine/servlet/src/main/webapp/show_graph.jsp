@@ -6,65 +6,101 @@
     <title>Graph</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        google.charts.load("current", {packages:["corechart", "table"]});
-        google.charts.setOnLoadCallback(drawChart);
+        google.charts.load("current", {packages:["corechart", "table", "line"]});
+        google.charts.setOnLoadCallback(drawProfilingChart);
+        google.charts.setOnLoadCallback(drawPerformanceChart);
         google.charts.setOnLoadCallback(drawPercentileTable);
 
-        function drawChart() {
+        function drawProfilingChart() {
 
-          // retrieve values from Servlet through JSON passed through sessionScope
-          var valuesArray = ${valuesJson};
-          var histogramData = new Array(valuesArray.length);
-          for (var i = 0; i < histogramData.length; i++) {
-              histogramData[i] = new Array(2);
-              histogramData[i][0] = '';
-              histogramData[i][1] = valuesArray[i];
-          }
-          var min = Math.min.apply(null, valuesArray),
-              max = Math.max.apply(null, valuesArray);
-
-          var histogramTicks = new Array(10);
-          var delta = (max - min)/10;
-          for (var i = 0; i <= 10; i++) {
-              histogramTicks[i] = Math.round(min + delta * i);
-          }
-
-          var data = google.visualization.arrayToDataTable(histogramData, true);
-
-          var options = {
-            title: 'Approximating Normal Distribution',
-            legend: { position: 'none' },
-            colors: ['#4285F4'],
-            vAxis:{
-              title:"Frequency"
-            },
-            chartArea: { width: 401 },
-            hAxis: {
-              ticks: histogramTicks,
-              title:"Time Taken (milliseconds)"
-            },
-            bar: { gap: 0 },
-
-            histogram: {
-              bucketSize: 0.02,
-              maxNumBuckets: 200,
-              minValue: min,
-              maxValue: max
+            var showProfilingGraph = ${showProfilingGraph};
+            if (!showProfilingGraph) {
+                document.getElementById('profiling_chart_div').style.display = 'none';
+                return;
             }
-          };
-          var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
-          chart.draw(data, options);
+
+            var valuesArray = ${performanceValuesJson};
+            var histogramData = new Array(valuesArray.length);
+            for (var i = 0; i < histogramData.length; i++) {
+                histogramData[i] = new Array(2);
+                histogramData[i][0] = '';
+                histogramData[i][1] = valuesArray[i];
+            }
+            var min = Math.min.apply(null, valuesArray),
+                max = Math.max.apply(null, valuesArray);
+
+            var histogramTicks = new Array(10);
+            var delta = (max - min)/10;
+            for (var i = 0; i <= 10; i++) {
+                histogramTicks[i] = Math.round(min + delta * i);
+            }
+
+            var data = google.visualization.arrayToDataTable(histogramData, true);
+
+            var options = {
+              title: 'Approximating Normal Distribution',
+              legend: { position: 'none' },
+              colors: ['#4285F4'],
+              vAxis:{
+                title:"Frequency"
+              },
+              hAxis: {
+                ticks: histogramTicks,
+                title:"Time Taken (milliseconds)"
+              },
+              bar: { gap: 0 },
+
+              histogram: {
+                bucketSize: 0.02,
+                maxNumBuckets: 200,
+                minValue: min,
+                maxValue: max
+              }
+            };
+            var chart = new google.visualization.Histogram(document.getElementById('profiling_chart_div'));
+            chart.draw(data, options);
         }
 
-        function saveTextAsFile() {
-            var textToSave = ${valuesJson};
-            var filename = ${profilingPointName};
-            var blob = new Blob([textToSave], {type: "text/plain;charset=utf-8"});
-            saveAs(blob, filename+".txt");
+        function drawPerformanceChart() {
+            var lineGraphValues = ${lineGraphValuesJson};
+            var labelsList = ${labelsListJson};
+            lablist = labelsList;
+            labelsList.forEach(function (label, i) {
+                lineGraphValues[i].unshift(label);
+            });
+            if (labelsList.length < 1) {
+                return;
+            }
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Label');
+            for (var i = 0; i < lineGraphValues[0].length - 1; i++) {
+                data.addColumn('number', i);
+            }
+            data.addRows(lineGraphValues);
+
+            var options = {
+              chart: {title: 'Performance'},
+              legend: { position: 'none' },
+              axes: {
+                x: {
+                  Labels: {label: 'Labels'}
+                },
+                y: {
+                  Values: {label: 'Values'}
+                }
+              }
+            };
+            var chart = new google.charts.Line(document.getElementById('performance_chart_div'));
+            chart.draw(data, options);
         }
 
         // table for profiling data
         function drawPercentileTable() {
+            var showPercentileTable = ${showPercentileTable};
+            if (!showPercentileTable) {
+                return;
+            }
 
             var data = new google.visualization.DataTable();
 
@@ -85,7 +121,8 @@
 
             var table = new google.visualization.Table(document.getElementById('percentile_table_div'));
             table.draw(data,
-                      {alternatingRowStyle : true});
+                      {title: 'Percentile Values',
+                       alternatingRowStyle : true});
         }
     </script>
 </head>
@@ -98,17 +135,28 @@
       <h3>${error}</h3>
     </div>
 
-    <!-- Normal Distribution chart for profiling values. -->
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    <!-- Profiling chart for profiling values. -->
+    <div id="profiling_chart_div" style="width: 80%; height: 500px;"></div>
 
-    <div style="margin-left:200px; margin-top:5px"><h4>Percentile Chart</h4></div>
     <!-- Percentile table -->
-    <div id="percentile_table_div" style="margin-left:200px; margin-top:5px"></div>
+    <div id="percentile_table_div" style="margin-left:10%; margin-top:-40px; margin-bottom:125px"></div>
+
+    <!-- Performance chart for label vs values. -->
+    <div id="performance_chart_div" style="width:80%; margin-left: 10%;height: 500px;"></div>
 
     <script type="text/javascript">
       function exportToCsv() {
-          var valuesArray = ${valuesJson};
-          var myCsv = valuesArray.join();
+          var valuesArray = ${lineGraphValuesJson};
+          var performanceValuesArray = ${performanceValuesJson};
+          var labelArray = ${labelsListJson};
+          var myCsv;
+
+          if (valuesArray.length > 0) {
+              myCsv = valuesArray.join();
+          } else {
+              myCsv = performanceValuesArray.join();
+              myCsv += '\n' + labelArray.join();
+          }
           window.open('data:text/csv;charset=utf-8,' + escape(myCsv));
       }
       var button = document.getElementById('b');
