@@ -77,15 +77,15 @@ api: {
     primitive_type: "int32_t"
   }
   arg: {
-    primitive_type: "double"
+    primitive_type: "double_t"
     aggregate_type: "vts_gps_latitude"
   }
   arg: {
-    primitive_type: "double"
+    primitive_type: "double_t"
     aggregate_type: "vts_gps_longitude"
   }
   arg: {
-    primitive_type: "float"
+    primitive_type: "float_t"
     aggregate_type: "vts_gps_accuracy"
   }
 }

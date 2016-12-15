@@ -92,7 +92,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
-  h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg," << endl;
+  h_ss << "  bool Fuzz(FunctionSpecificationMessage& func_msg," << endl;
   h_ss << "            void** result);" << endl;
   if (message.component_class() == HAL_SUBMODULE) {
     h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;

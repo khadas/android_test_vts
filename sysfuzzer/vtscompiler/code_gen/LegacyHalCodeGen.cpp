@@ -39,7 +39,7 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
     const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
-  cpp_ss << "    const FunctionSpecificationMessage& func_msg," << endl;
+  cpp_ss << "    FunctionSpecificationMessage& func_msg," << endl;
   cpp_ss << "    void** result) {" << endl;
   cpp_ss << "  const char* func_name = func_msg.name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
