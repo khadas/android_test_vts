@@ -335,9 +335,9 @@ class AndroidDevice(object):
         shell: ShellMirror, in charge of all communications with shell.
     """
 
-    def __init__(self, serial="", device_port=5001, device_callback_port=5010):
+    def __init__(self, serial="", device_callback_port=5010):
         self.serial = serial
-        self.device_command_port = device_port
+        self.device_command_port = None
         self.device_callback_port = device_callback_port
         self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
                                               {"serial": self.serial})
@@ -352,12 +352,11 @@ class AndroidDevice(object):
             self.rootAdb()
         self.host_command_port = adb.get_available_host_port()
         self.host_callback_port = adb.get_available_host_port()
-        self.adb.tcp_forward(self.host_command_port, self.device_command_port)
         self.adb.reverse_tcp_forward(self.device_callback_port,
                                      self.host_callback_port)
         self.hal = None
-        self.lib = lib_mirror.LibMirror(self.host_command_port)
-        self.shell = shell_mirror.ShellMirror(self.host_command_port)
+        self.lib = None
+        self.shell = None
 
     def __del__(self):
         self.cleanUp()
@@ -553,8 +552,14 @@ class AndroidDevice(object):
             self.log.exception("Failed to start adb logcat!")
             raise
         self.startVtsAgent()
+        self.device_command_port = int(
+            self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
+        logging.info("device_command_port: %s", self.device_command_port)
+        self.adb.tcp_forward(self.host_command_port, self.device_command_port)
         self.hal = hal_mirror.HalMirror(self.host_command_port,
                                         self.host_callback_port)
+        self.lib = lib_mirror.LibMirror(self.host_command_port)
+        self.shell = shell_mirror.ShellMirror(self.host_command_port)
 
     def stopServices(self):
         """Stops long running services on the android device.

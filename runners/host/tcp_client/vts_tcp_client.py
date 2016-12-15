@@ -30,7 +30,7 @@ from vts.runners.host import const
 from google.protobuf import text_format
 
 TARGET_IP = os.environ.get("TARGET_IP", None)
-TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
+TARGET_PORT = os.environ.get("TARGET_PORT", None)
 _DEFAULT_SOCKET_TIMEOUT_SECS = 120
 _SOCKET_CONN_TIMEOUT_SECS = 60
 _SOCKET_CONN_RETRY_NUMBER = 5
@@ -76,6 +76,11 @@ class VtsTcpClient(object):
         Raises:
             socket.error when the connection fails.
         """
+        if not command_port:
+            logging.error("ip %s, command_port %s, callback_port %s invalid",
+                          ip, command_port, callback_port)
+            return False
+
         for i in xrange(retry):
             try:
                 self.connection = socket.create_connection(
