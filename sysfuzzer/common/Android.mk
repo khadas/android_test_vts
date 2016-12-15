@@ -27,6 +27,7 @@ LOCAL_SRC_FILES := \
   binder/VtsFuzzerBinderService.cpp \
   component_loader/DllLoader.cpp \
   fuzz_tester/FuzzerBase.cpp \
+  fuzz_tester/FuzzerCallbackBase.cpp \
   fuzz_tester/FuzzerWrapper.cpp \
   specification_parser/InterfaceSpecificationParser.cpp \
   specification_parser/SpecificationBuilder.cpp \

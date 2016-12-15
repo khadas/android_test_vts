@@ -26,6 +26,7 @@ LOCAL_SRC_FILES := \
   BinderClient.cpp \
   TcpServer.cpp \
   RequestHandler.cpp \
+  SocketServerForDriver.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \

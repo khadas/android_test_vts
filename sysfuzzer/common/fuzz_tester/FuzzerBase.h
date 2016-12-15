@@ -47,7 +47,7 @@ class FuzzerBase {
   // provided function interface specification message.
   // Returns true iff the testing is conducted completely.
   virtual bool Fuzz(vts::FunctionSpecificationMessage* func_msg,
-                    void** result) {
+                    void** result, int agent_port) {
     return false;
   };
 

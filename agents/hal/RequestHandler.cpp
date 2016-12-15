@@ -37,12 +37,14 @@
 #include "test/vts/runners/host/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/runners/host/proto/InterfaceSpecificationMessage.pb.h"
 #include "BinderClient.h"
+#include "SocketServerForDriver.h"
 
 using namespace std;
 using namespace google::protobuf;
 
 namespace android {
 namespace vts {
+
 
 AndroidSystemControlResponseMessage* AgentRequestHandler::ListHals(
     const RepeatedPtrField<string>& base_paths) {
@@ -111,6 +113,11 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchStubService(
       new AndroidSystemControlResponseMessage();
 
   if (pid == 0) {  // child
+    // TODO: check whether the port is available and handle if fails.
+    static int port = 21000;
+    port++;
+    StartSocketServerForDriver(port, -1);
+
     char* cmd;
     string fuzzer_path_string(fuzzer_path);
     size_t offset = fuzzer_path_string.find_last_of("/");
@@ -118,17 +125,20 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchStubService(
     if (!spec_dir_path) {
       asprintf(
           &cmd,
-          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s",
-          ld_dir_path.c_str(), fuzzer_path, service_name.c_str());
+          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+          "--agent_port=%d",
+          ld_dir_path.c_str(), fuzzer_path, service_name.c_str(), port);
     } else {
       asprintf(
           &cmd,
-          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s --spec_dir=%s",
-          ld_dir_path.c_str(), fuzzer_path, service_name.c_str(), spec_dir_path);
+          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+          "--spec_dir=%s --agent_port=%d",
+          ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
+          spec_dir_path, port);
     }
-    cout << "Exec " << cmd << endl;
+    cout << __func__ << "Exec " << cmd << endl;
     system(cmd);
-    cout << "fuzzer exits" << endl;
+    cout << __func__ << "fuzzer exits" << endl;
     free(cmd);
     exit(0);
   } else if (pid > 0){
