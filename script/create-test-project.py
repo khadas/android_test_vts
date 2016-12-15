@@ -266,16 +266,6 @@ include $(call all-subdir-makefiles)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := {test_name}
-LOCAL_MODULE_CLASS := FAKE
-LOCAL_IS_HOST_MODULE := true
-LOCAL_COMPATIBILITY_SUITE := vts
-
-include $(BUILD_SYSTEM)/base_rules.mk
-
-$(LOCAL_BUILT_MODULE):
-\t@echo "VTS host-driven test target: $(LOCAL_MODULE)"
-\t$(hide) touch $@
-
 VTS_CONFIG_SRC_DIR := {config_src_dir}
 include test/vts/tools/build/Android.host_config.mk
 '''
