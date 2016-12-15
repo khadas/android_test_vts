@@ -16,8 +16,8 @@
 
 #include "hal_gps.h"
 
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 #include <hardware/gps.h>
 
@@ -26,29 +26,28 @@
 namespace android {
 namespace vts {
 
-
 // Callbacks {
 static void vts_gps_location_callback(GpsLocation* location) {}
 static void vts_gps_status_callback(GpsStatus* status) {}
 static void vts_gps_sv_status_callback(GpsSvStatus* sv_info) {}
-static void vts_gps_nmea_callback(GpsUtcTime timestamp, const char* nmea, int length) {}
+static void vts_gps_nmea_callback(GpsUtcTime timestamp, const char* nmea,
+                                  int length) {}
 static void vts_gps_set_capabilities(uint32_t capabilities) {}
 static void vts_gps_acquire_wakelock() {}
 static void vts_gps_release_wakelock() {}
 static void vts_gps_request_utc_time() {}
 
-
-static pthread_t vts_gps_create_thread(const char* name, void (*start)(void *), void* arg) {
+static pthread_t vts_gps_create_thread(const char* name, void (*start)(void*),
+                                       void* arg) {
   return NULL;
 }
 // } Callbacks
-
 
 GpsCallbacks* GenerateGpsCallbacks() {
   if (RandomBool()) {
     return NULL;
   } else {
-    GpsCallbacks* cbs = (GpsCallbacks*) malloc(sizeof(GpsCallbacks));
+    GpsCallbacks* cbs = (GpsCallbacks*)malloc(sizeof(GpsCallbacks));
     cbs->size = sizeof(GpsCallbacks);
     cbs->location_cb = vts_gps_location_callback;
     cbs->status_cb = vts_gps_status_callback;
@@ -64,32 +63,18 @@ GpsCallbacks* GenerateGpsCallbacks() {
   }
 }
 
-
 GpsUtcTime /*int64_t*/ GenerateGpsUtcTime() {
   // TOOD: consider returning the current time + a random number.
   return RandomInt64();
 }
 
+double GenerateLatitude() { return 10.0; }
 
-double GenerateLatitude() {
-  return 10.0;
-}
+double GenerateLongitude() { return 20.0; }
 
+float GenerateGpsAccuracy() { return 5.0; }
 
-double GenerateLongitude() {
-  return 20.0;
-}
-
-
-float GenerateGpsAccuracy() {
-  return 5.0;
-}
-
-
-uint16_t GenerateGpsFlagsUint16() {
-  return 1;
-}
-
+uint16_t GenerateGpsFlagsUint16() { return 1; }
 
 GpsPositionMode /*uint32_t*/ GenerateGpsPositionMode() {
   if (RandomBool()) {
@@ -106,7 +91,6 @@ GpsPositionMode /*uint32_t*/ GenerateGpsPositionMode() {
   return RandomUint32();
 }
 
-
 GpsPositionRecurrence /*uint32_t*/ GenerateGpsPositionRecurrence() {
   if (RandomBool()) {
     return RandomUint32();
@@ -118,7 +102,6 @@ GpsPositionRecurrence /*uint32_t*/ GenerateGpsPositionRecurrence() {
     }
   }
 }
-
 
 // TODO: add generators for min_interval, preferred_accuracy, and preferred_time
 // all uint32_t.

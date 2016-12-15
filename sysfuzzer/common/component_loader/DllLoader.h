@@ -31,7 +31,6 @@ typedef FuzzerBase* (*loader_function)();
 typedef void (*writeout_fn)();
 typedef void (*flush_fn)();
 
-
 // Component loader implementation for a DLL file.
 class DllLoader {
  public:
@@ -40,7 +39,7 @@ class DllLoader {
 
   // Loads a DLL file.
   // Returns a handle (void *) if successful; NULL otherwise.
-  void* Load(const char* file_path, bool is_conventional_hal=true);
+  void* Load(const char* file_path, bool is_conventional_hal = true);
 
   // Initializes as a conventional HAL.
   // Returns true if it is a conventional HAL, False otherwise.
@@ -71,7 +70,7 @@ class DllLoader {
   struct hw_module_t* hmi_;
 
   // pointer to the HAL data structure found in the loaded file.
-  struct hw_device_t *device_;
+  struct hw_device_t* device_;
 };
 
 }  // namespace vts

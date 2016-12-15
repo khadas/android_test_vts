@@ -33,15 +33,12 @@ namespace vts {
 
 const char* const LegacyHalCodeGen::kInstanceVariableName = "legacyhal_";
 
-
 void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss,
-    const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
-  cpp_ss << "    void** result, const string& callback_socket_name) {"
-      << endl;
+  cpp_ss << "    void** result, const string& callback_socket_name) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
@@ -55,20 +52,19 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
     for (auto const& arg : api.arg()) {
       cpp_ss << "    " << GetCppVariableType(arg) << " ";
       cpp_ss << "arg" << arg_count << " = ";
-      if (arg_count == 0
-          && arg.type() == TYPE_PREDEFINED
-          && !strncmp(arg.predefined_type().c_str(),
-                      message.original_data_structure_name().c_str(),
-                      message.original_data_structure_name().length())
-          && message.original_data_structure_name().length() > 0) {
+      if (arg_count == 0 && arg.type() == TYPE_PREDEFINED &&
+          !strncmp(arg.predefined_type().c_str(),
+                   message.original_data_structure_name().c_str(),
+                   message.original_data_structure_name().length()) &&
+          message.original_data_structure_name().length() > 0) {
         cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
-            << kInstanceVariableName << ")";
+               << kInstanceVariableName << ")";
       } else {
         cpp_ss << GetCppInstanceType(arg);
       }
       cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
-          << " << endl;" << endl;
+             << " << endl;" << endl;
       arg_count++;
     }
 
@@ -78,16 +74,15 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
     cpp_ss << ");" << endl;
 
     // actual function call
-    if (!api.has_return_type()
-        || api.return_type().type() == TYPE_VOID) {
+    if (!api.has_return_type() || api.return_type().type() == TYPE_VOID) {
       cpp_ss << "*result = NULL;" << endl;
     } else {
       cpp_ss << "*result = const_cast<void*>(reinterpret_cast<const void*>(";
     }
     cpp_ss << "    ";
     cpp_ss << "((func_type_" << api.name() << ") "
-        << "target_loader_.GetLoaderFunction(\"" << api.name() << "\"))(";
-    //cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
+           << "target_loader_.GetLoaderFunction(\"" << api.name() << "\"))(";
+    // cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
     //    << "*>(" << kInstanceVariableName << ")->" << api.name() << "(";
 
     if (arg_count > 0) cpp_ss << endl;
@@ -98,8 +93,7 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "," << endl;
       }
     }
-    if (api.has_return_type()
-        || api.return_type().type() != TYPE_VOID) {
+    if (api.has_return_type() || api.return_type().type() != TYPE_VOID) {
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;
@@ -111,10 +105,8 @@ void LegacyHalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "}" << endl;
 }
 
-
 void LegacyHalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    std::stringstream& /*h_ss*/,
-    const string& /*function_prototype*/) {}
+    std::stringstream& /*h_ss*/, const string& /*function_prototype*/) {}
 
 }  // namespace vts
 }  // namespace android

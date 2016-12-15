@@ -19,15 +19,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <unistd.h>
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
-#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include <VtsDriverCommUtil.h>
+#include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 using namespace std;
 
@@ -41,9 +41,8 @@ int VtsShellDriver::Close() {
   if (!this->socket_address_.empty()) {
     result = unlink(this->socket_address_.c_str());
     if (result != 0) {
-      cerr <<  __func__ << ":" << __LINE__
-          << " ERROR closing socket (errno = "
-          << errno << ")"<< endl;
+      cerr << __func__ << ":" << __LINE__
+           << " ERROR closing socket (errno = " << errno << ")" << endl;
     }
     this->socket_address_.clear();
   }
@@ -51,9 +50,8 @@ int VtsShellDriver::Close() {
   return result;
 }
 
-
-int VtsShellDriver::ExecShellCommand(const string& command,
-                     VtsDriverControlResponseMessage* responseMessage) {
+int VtsShellDriver::ExecShellCommand(
+    const string& command, VtsDriverControlResponseMessage* responseMessage) {
   // TODO(yuexima): handle no output case.
   FILE* output_fp;
 
@@ -75,8 +73,8 @@ int VtsShellDriver::ExecShellCommand(const string& command,
     bytes_read = fread(buff, 1, sizeof(buff) - 1, output_fp);
     // TODO(yuexima) catch stderr
     if (ferror(output_fp)) {
-      cerr <<  __func__ << ":" << __LINE__
-          << "ERROR reading shell output" << endl;
+      cerr << __func__ << ":" << __LINE__ << "ERROR reading shell output"
+           << endl;
       return -1;
     }
 
@@ -95,7 +93,6 @@ int VtsShellDriver::ExecShellCommand(const string& command,
   return 0;
 }
 
-
 int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
   VtsDriverCommUtil driverUtil(connection_fd);
   // TODO(yuexima): handle multiple commands in a while loop
@@ -104,20 +101,20 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
   int numberOfFailure = 0;
 
   if (!driverUtil.VtsSocketRecvMessage(
-       static_cast<google::protobuf::Message*>(&cmd_msg))) {
+          static_cast<google::protobuf::Message*>(&cmd_msg))) {
     return -1;
   }
 
   cout << "[Shell driver] received " << cmd_msg.shell_command_size()
-      << " command(s). Processing... " << endl;
+       << " command(s). Processing... " << endl;
 
   // execute command and write back output
   VtsDriverControlResponseMessage responseMessage;
 
   for (const auto& command : cmd_msg.shell_command()) {
     if (this->ExecShellCommand(command, &responseMessage) != 0) {
-      cerr << "[Shell driver] error during executing command ["
-          << command << "]" << endl;
+      cerr << "[Shell driver] error during executing command [" << command
+           << "]" << endl;
       --numberOfFailure;
     }
   }
@@ -136,7 +133,6 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
 
   return numberOfFailure;
 }
-
 
 int VtsShellDriver::StartListen() {
   if (this->socket_address_.empty()) {
@@ -160,12 +156,10 @@ int VtsShellDriver::StartListen() {
   unlink(this->socket_address_.c_str());
   memset(&address, 0, sizeof(struct sockaddr_un));
   address.sun_family = AF_UNIX;
-  strncpy(address.sun_path,
-          this->socket_address_.c_str(),
+  strncpy(address.sun_path, this->socket_address_.c_str(),
           sizeof(address.sun_path) - 1);
 
-  if (::bind(socket_fd,
-             (struct sockaddr *) &address,
+  if (::bind(socket_fd, (struct sockaddr*)&address,
              sizeof(struct sockaddr_un)) != 0) {
     cerr << "Driver: bind() failed: " << strerror(errno) << endl;
     return 1;
@@ -181,8 +175,8 @@ int VtsShellDriver::StartListen() {
     address_length = sizeof(address);
 
     // TODO(yuexima) exit message to break loop
-    connection_fd = accept(socket_fd,
-                           (struct sockaddr *) &address, &address_length);
+    connection_fd =
+        accept(socket_fd, (struct sockaddr*)&address, &address_length);
     if (connection_fd == -1) {
       cerr << "Driver: accept error: " << strerror(errno) << endl;
       break;
@@ -203,7 +197,7 @@ int VtsShellDriver::StartListen() {
       close(connection_fd);
     } else {
       cerr << "[Driver] create child process failed. Exiting..." << endl;
-      return(errno);
+      return (errno);
     }
   }
 

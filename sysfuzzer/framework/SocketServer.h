@@ -30,18 +30,15 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
  public:
   VtsDriverHalSocketServer(android::vts::SpecificationBuilder& spec_builder,
                            const char* lib_path)
-      : spec_builder_(spec_builder),
-        lib_path_(lib_path),
-        VtsDriverCommUtil() {}
+      : spec_builder_(spec_builder), lib_path_(lib_path), VtsDriverCommUtil() {}
 
   // Start a session to handle a new request.
   bool ProcessOneCommand();
 
  protected:
   void Exit();
-  int32_t LoadHal(const string& path, int target_class,
-                  int target_type, float target_version,
-                  const string& module_name);
+  int32_t LoadHal(const string& path, int target_class, int target_type,
+                  float target_version, const string& module_name);
   int32_t Status(int32_t type);
   const char* Call(const string& arg);
   const char* GetFunctions();
@@ -50,7 +47,6 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
   android::vts::SpecificationBuilder& spec_builder_;
   const char* lib_path_;
 };
-
 
 extern int StartSocketServer(const string& socket_port_file,
                              android::vts::SpecificationBuilder& spec_builder,

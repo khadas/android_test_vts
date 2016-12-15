@@ -24,13 +24,10 @@
 
 #include "fuzz_tester/FuzzerWrapper.h"
 
-
 using namespace std;
-
 
 #define DEFAULT_SPEC_DIR_PATH "/system/etc/"
 #define SPEC_FILE_EXT ".vts"
-
 
 namespace android {
 namespace vts {
@@ -64,19 +61,17 @@ class SpecificationBuilder {
   // a target component, spec_lib_file_path is the path of a specification
   // library file, and the rest three arguments are the basic information of
   // the target component.
-  bool Process(
-      const char* dll_file_name, const char* spec_lib_file_path,
-      int target_class, int target_type, float target_version);
+  bool Process(const char* dll_file_name, const char* spec_lib_file_path,
+               int target_class, int target_type, float target_version);
 
-  bool LoadTargetComponent(
-      const char* dll_file_name, const char* spec_lib_file_path,
-      int target_class, int target_type, float target_version,
-      const char* module_name);
+  bool LoadTargetComponent(const char* dll_file_name,
+                           const char* spec_lib_file_path, int target_class,
+                           int target_type, float target_version,
+                           const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
       const vts::InterfaceSpecificationMessage& iface_spec_msg,
-      const char* dll_file_name,
-      const char* target_func_name);
+      const char* dll_file_name, const char* target_func_name);
 
   // Returns the loaded interface specification message.
   vts::InterfaceSpecificationMessage* GetInterfaceSpecification() const;

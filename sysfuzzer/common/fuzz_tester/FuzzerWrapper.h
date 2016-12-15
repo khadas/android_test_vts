@@ -22,12 +22,10 @@
 
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
-
 using namespace std;
 
 namespace android {
 namespace vts {
-
 
 // Wrapper used to get the pointer to a FuzzerBase class which provides
 // APIs to conduct fuzz testing on a loaded component.

@@ -30,14 +30,10 @@ using namespace std;
 namespace android {
 namespace vts {
 
-CodeGenBase::CodeGenBase(const char* input_vts_file_path,
-                         const char* vts_name)
-    : input_vts_file_path_(input_vts_file_path),
-      vts_name_(vts_name) {}
-
+CodeGenBase::CodeGenBase(const char* input_vts_file_path, const char* vts_name)
+    : input_vts_file_path_(input_vts_file_path), vts_name_(vts_name) {}
 
 CodeGenBase::~CodeGenBase() {}
-
 
 void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
                               std::stringstream& h_ss,
@@ -54,22 +50,24 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   string component_name = GetComponentName(message);
   if (component_name.empty()) {
-    cerr << __func__ << ":" << __LINE__ << " error component_name is empty" << endl;
+    cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
+         << endl;
     exit(-1);
   }
   string fuzzer_extended_class_name;
-  if (message.component_class() == HAL_CONVENTIONAL
-      || message.component_class() == HAL_CONVENTIONAL_SUBMODULE
-      || message.component_class() == HAL_LEGACY
-      || message.component_class() == LIB_SHARED) {
+  if (message.component_class() == HAL_CONVENTIONAL ||
+      message.component_class() == HAL_CONVENTIONAL_SUBMODULE ||
+      message.component_class() == HAL_LEGACY ||
+      message.component_class() == LIB_SHARED) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
   GenerateAllHeader(fuzzer_extended_class_name, h_ss, message);
   cpp_ss << endl << endl;
-  if (message.component_class() == HAL_CONVENTIONAL
-      || message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
-    GenerateCppBodyCallbackFunction(cpp_ss, message, fuzzer_extended_class_name);
+  if (message.component_class() == HAL_CONVENTIONAL ||
+      message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
+    GenerateCppBodyCallbackFunction(cpp_ss, message,
+                                    fuzzer_extended_class_name);
   }
 
   cpp_ss << endl;
@@ -88,10 +86,9 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   GenerateCloseNameSpaces(cpp_ss);
 }
 
-
 void CodeGenBase::GenerateAllHeader(
-    const string& fuzzer_extended_class_name,
-    std::stringstream& h_ss, const InterfaceSpecificationMessage& message) {
+    const string& fuzzer_extended_class_name, std::stringstream& h_ss,
+    const InterfaceSpecificationMessage& message) {
   h_ss << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << "#define __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << endl;
@@ -126,28 +123,28 @@ void CodeGenBase::GenerateAllHeader(
   h_ss << "#endif" << endl;
 }
 
-
 void CodeGenBase::GenerateClassHeader(
-    const string& fuzzer_extended_class_name,
-    std::stringstream& h_ss,
+    const string& fuzzer_extended_class_name, std::stringstream& h_ss,
     const InterfaceSpecificationMessage& message) {
   h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
-      << endl;
+       << endl;
   h_ss << " public:" << endl;
   h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
 
-  if (message.component_class() == HAL_CONVENTIONAL) h_ss << "HAL_CONVENTIONAL";
+  if (message.component_class() == HAL_CONVENTIONAL)
+    h_ss << "HAL_CONVENTIONAL";
   else if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
     h_ss << "HAL_CONVENTIONAL_SUBMODULE";
-  }
-  else if (message.component_class() == HAL_LEGACY) h_ss << "HAL_LEGACY";
-  else if (message.component_class() == LIB_SHARED) h_ss << "LIB_SHARED";
+  } else if (message.component_class() == HAL_LEGACY)
+    h_ss << "HAL_LEGACY";
+  else if (message.component_class() == LIB_SHARED)
+    h_ss << "LIB_SHARED";
 
   h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(FunctionSpecificationMessage* func_msg," << endl;
   h_ss << "            void** result, const string& callback_socket_name);"
-      << endl;
+       << endl;
 
   // produce Fuzz method(s) for sub_struct(s).
   for (auto const& sub_struct : message.sub_struct()) {
@@ -156,56 +153,51 @@ void CodeGenBase::GenerateClassHeader(
 
   if (message.component_class() == HAL_CONVENTIONAL_SUBMODULE) {
     string component_name = GetComponentName(message);
-    h_ss << "  void SetSubModule(" << component_name << "* submodule) {" << endl;
+    h_ss << "  void SetSubModule(" << component_name << "* submodule) {"
+         << endl;
     h_ss << "    submodule_ = submodule;" << endl;
     h_ss << "  }" << endl;
     h_ss << endl;
     h_ss << " private:" << endl;
     h_ss << "  " << message.original_data_structure_name() << "* submodule_;"
-        << endl;
+         << endl;
   }
   h_ss << "};" << endl;
 }
 
-
 void CodeGenBase::GenerateFuzzFunctionForSubStruct(
-    std::stringstream& h_ss,
-    const StructSpecificationMessage& message, const string& parent_path) {
+    std::stringstream& h_ss, const StructSpecificationMessage& message,
+    const string& parent_path) {
   h_ss << "  bool Fuzz_" << parent_path << message.name()
-      << "(FunctionSpecificationMessage* func_msg," << endl;
+       << "(FunctionSpecificationMessage* func_msg," << endl;
   h_ss << "            void** result, const string& callback_socket_name);"
-      << endl;
+       << endl;
 
   for (auto const& sub_struct : message.sub_struct()) {
-    GenerateFuzzFunctionForSubStruct(
-        h_ss, sub_struct, parent_path + message.name() + "_");
+    GenerateFuzzFunctionForSubStruct(h_ss, sub_struct,
+                                     parent_path + message.name() + "_");
   }
 }
-
 
 void CodeGenBase::GenerateOpenNameSpaces(std::stringstream& ss) {
   ss << "namespace android {" << endl;
   ss << "namespace vts {" << endl;
 }
 
-
 void CodeGenBase::GenerateCloseNameSpaces(std::stringstream& ss) {
   ss << "}  // namespace vts" << endl;
   ss << "}  // namespace android" << endl;
 }
-
 
 void CodeGenBase::GenerateCodeToStartMeasurement(std::stringstream& ss) {
   ss << "    VtsMeasurement vts_measurement;" << endl;
   ss << "    vts_measurement.Start();" << endl;
 }
 
-
 void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
   ss << "    vector<float>* measured = vts_measurement.Stop();" << endl;
   ss << "    cout << \"time \" << (*measured)[0] << endl;" << endl;
 }
-
 
 string CodeGenBase::GetComponentName(
     const InterfaceSpecificationMessage& message) {
@@ -214,9 +206,8 @@ string CodeGenBase::GetComponentName(
   }
 
   string component_name = message.original_data_structure_name();
-  while (!component_name.empty()
-         && (std::isspace(component_name.back())
-             || component_name.back() == '*' )) {
+  while (!component_name.empty() && (std::isspace(component_name.back()) ||
+                                     component_name.back() == '*')) {
     component_name.pop_back();
   }
   const auto pos = component_name.find_last_of(" ");
@@ -225,7 +216,6 @@ string CodeGenBase::GetComponentName(
   }
   return component_name;
 }
-
 
 void CodeGenBase::GenerateCppBodyCallbackFunction(
     std::stringstream& /*cpp_ss*/,

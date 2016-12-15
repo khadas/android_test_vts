@@ -35,32 +35,27 @@ class CodeGenBase {
   virtual ~CodeGenBase();
 
   // Generate both a C/C++ file and its header file.
-  void GenerateAll(std::stringstream& cpp_ss,
-                   std::stringstream& h_ss,
+  void GenerateAll(std::stringstream& cpp_ss, std::stringstream& h_ss,
                    const InterfaceSpecificationMessage& message);
 
  protected:
   // Generates code for Fuzz(...) function body.
   virtual void GenerateCppBodyFuzzFunction(
-      std::stringstream& cpp_ss,
-      const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates header code to declare the C/C++ global functions.
   virtual void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss,
-      const string& function_prototype) = 0;
+      std::stringstream& h_ss, const string& function_prototype) = 0;
 
   // Generates C/C++ code for callback functions.
   virtual void GenerateCppBodyCallbackFunction(
-      std::stringstream& cpp_ss,
-      const InterfaceSpecificationMessage& message,
+      std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   // Generates code for the bodies of the C/C++ global functions.
   virtual void GenerateCppBodyGlobalFunctions(
-      std::stringstream& cpp_ss,
-      const string& function_prototype,
+      std::stringstream& cpp_ss, const string& function_prototype,
       const string& fuzzer_extended_class_name) = 0;
 
   // Generates code that opens the default namespaces.
@@ -76,22 +71,20 @@ class CodeGenBase {
   void GenerateCodeToStopMeasurement(std::stringstream& ss);
 
   // Generates all header.
-  void GenerateAllHeader(
-      const string& fuzzer_extended_class_name,
-      std::stringstream& h_ss, const InterfaceSpecificationMessage& message);
+  void GenerateAllHeader(const string& fuzzer_extended_class_name,
+                         std::stringstream& h_ss,
+                         const InterfaceSpecificationMessage& message);
 
   // Generate header code for a specific class.
-  void GenerateClassHeader(
-      const string& fuzzer_extended_class_name,
-      std::stringstream& h_ss,
-      const InterfaceSpecificationMessage& message);
+  void GenerateClassHeader(const string& fuzzer_extended_class_name,
+                           std::stringstream& h_ss,
+                           const InterfaceSpecificationMessage& message);
 
-  string GetComponentName(
-      const InterfaceSpecificationMessage& message);
+  string GetComponentName(const InterfaceSpecificationMessage& message);
 
   void GenerateFuzzFunctionForSubStruct(
-      std::stringstream& h_ss,
-      const StructSpecificationMessage& message, const string& parent_path);
+      std::stringstream& h_ss, const StructSpecificationMessage& message,
+      const string& parent_path);
 
  private:
   const char* input_vts_file_path_;

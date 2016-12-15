@@ -29,15 +29,13 @@ namespace vts {
 
 class VtsDriverCommUtil {
  public:
-  VtsDriverCommUtil()
-      : sockfd_(-1) {}
+  VtsDriverCommUtil() : sockfd_(-1) {}
 
-  explicit VtsDriverCommUtil(int sockfd)
-      : sockfd_(sockfd) {}
+  explicit VtsDriverCommUtil(int sockfd) : sockfd_(sockfd) {}
 
   ~VtsDriverCommUtil() {
     cout << __func__ << endl;
-//    if (sockfd_ != -1) Close();
+    //    if (sockfd_ != -1) Close();
   }
 
   // sets sockfd_
@@ -56,12 +54,10 @@ class VtsDriverCommUtil {
   string VtsSocketRecvBytes();
 
   // Sends a protobuf message.
-  bool VtsSocketSendMessage(
-      const google::protobuf::Message& message);
+  bool VtsSocketSendMessage(const google::protobuf::Message& message);
 
   // Receives a protobuf message.
-  bool VtsSocketRecvMessage(
-      google::protobuf::Message* message);
+  bool VtsSocketRecvMessage(google::protobuf::Message* message);
 
  private:
   // sockfd

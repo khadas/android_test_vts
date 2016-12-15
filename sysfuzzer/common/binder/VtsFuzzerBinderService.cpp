@@ -16,30 +16,28 @@
 
 #include <stdlib.h>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderService"
 #include <utils/Log.h>
 
-#include <binder/TextOutput.h>
-#include <binder/IInterface.h>
 #include <binder/IBinder.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
+#include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/ProcessState.h>
+#include <binder/TextOutput.h>
 
 #include "binder/VtsFuzzerBinderService.h"
 
 using namespace std;
 
-
 namespace android {
 namespace vts {
 
 IMPLEMENT_META_INTERFACE(VtsFuzzer, VTS_FUZZER_BINDER_SERVICE_NAME);
-
 
 void BpVtsFuzzer::Exit() {
   Parcel data;
@@ -49,16 +47,14 @@ void BpVtsFuzzer::Exit() {
   remote()->transact(EXIT, data, &reply, IBinder::FLAG_ONEWAY);
 }
 
-
 int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
                              int target_type, float target_version,
                              const string& module_name) {
   Parcel data;
   Parcel reply;
 
-  printf("agent->driver: LoadHal(%s, %d, %d, %f, %s)\n",
-         path.c_str(), target_class, target_type, target_version,
-         module_name.c_str());
+  printf("agent->driver: LoadHal(%s, %d, %d, %f, %s)\n", path.c_str(),
+         target_class, target_type, target_version, module_name.c_str());
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
   data.writeCString(path.c_str());
   data.writeInt32(target_class);
@@ -87,7 +83,6 @@ int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
   return res;
 }
 
-
 int32_t BpVtsFuzzer::Status(int32_t type) {
   Parcel data;
   Parcel reply;
@@ -114,7 +109,6 @@ int32_t BpVtsFuzzer::Status(int32_t type) {
   return res;
 }
 
-
 const char* BpVtsFuzzer::Call(const string& call_payload) {
   Parcel data, reply;
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
@@ -139,7 +133,6 @@ const char* BpVtsFuzzer::Call(const string& call_payload) {
   printf("len(reply) = %zu\n", strlen(res));
   return res;
 }
-
 
 const char* BpVtsFuzzer::GetFunctions() {
   Parcel data, reply;

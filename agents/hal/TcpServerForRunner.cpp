@@ -18,18 +18,18 @@
 
 #include <errno.h>
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <dirent.h>
 
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 
 #include <utils/RefBase.h>
 
@@ -48,11 +48,11 @@ namespace vts {
 
 const static int kTcpPort = 5001;
 
-
 // Starts to run a TCP server (foreground).
-int StartTcpServerForRunner(
-    const char* spec_dir_path, const char* fuzzer_path32, const char* fuzzer_path64,
-    const char* shell_path32, const char* shell_path64) {
+int StartTcpServerForRunner(const char* spec_dir_path,
+                            const char* fuzzer_path32,
+                            const char* fuzzer_path64, const char* shell_path32,
+                            const char* shell_path64) {
   int sockfd;
   socklen_t clilen;
   struct sockaddr_in serv_addr;
@@ -64,13 +64,13 @@ int StartTcpServerForRunner(
     return -1;
   }
 
-  bzero((char*) &serv_addr, sizeof(serv_addr));
+  bzero((char*)&serv_addr, sizeof(serv_addr));
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
   serv_addr.sin_port = htons(kTcpPort);
 
-  if (::bind(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+  if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
     cerr << __func__ << " binding failed." << endl;
     return -1;
   }
@@ -81,7 +81,7 @@ int StartTcpServerForRunner(
   }
   clilen = sizeof(cli_addr);
   while (true) {
-    int newsockfd = ::accept(sockfd, (struct sockaddr*) &cli_addr, &clilen);
+    int newsockfd = ::accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
     if (newsockfd < 0) {
       cerr << __func__ << " accept failed" << endl;
       return -1;
@@ -93,11 +93,11 @@ int StartTcpServerForRunner(
     if (pid == 0) {  // child
       close(sockfd);
       cout << "[agent] process for a runner - pid = " << getpid() << endl;
-      AgentRequestHandler handler(
-          spec_dir_path, fuzzer_path32, fuzzer_path64,
-          shell_path32, shell_path64);
+      AgentRequestHandler handler(spec_dir_path, fuzzer_path32, fuzzer_path64,
+                                  shell_path32, shell_path64);
       handler.SetSockfd(newsockfd);
-      while (handler.ProcessOneCommand());
+      while (handler.ProcessOneCommand())
+        ;
       exit(-1);
     } else if (pid < 0) {
       cerr << "can't fork a child process to handle a session." << endl;

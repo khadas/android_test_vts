@@ -17,16 +17,16 @@
 #include "fuzz_tester/FuzzerCallbackBase.h"
 
 #include <dirent.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/un.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -45,12 +45,9 @@ namespace vts {
 
 static std::map<string, string> id_map_;
 
-
 FuzzerCallbackBase::FuzzerCallbackBase() {}
 
-
 FuzzerCallbackBase::~FuzzerCallbackBase() {}
-
 
 bool FuzzerCallbackBase::Register(const VariableSpecificationMessage& message) {
   cout << __func__ << " type = " << message.type() << endl;
@@ -65,22 +62,20 @@ bool FuzzerCallbackBase::Register(const VariableSpecificationMessage& message) {
   }
 
   for (const auto& func_pt : message.function_pointer()) {
-    cout << __func__ << " map[" << func_pt.function_name() << "] = "
-        << func_pt.id() << endl;
+    cout << __func__ << " map[" << func_pt.function_name()
+         << "] = " << func_pt.id() << endl;
     id_map_[func_pt.function_name()] = func_pt.id();
   }
   return true;
 }
 
-
 const char* FuzzerCallbackBase::GetCallbackID(const string& name) {
   // TODO: handle when not found.
   cout << __func__ << ":" << __LINE__ << " " << name << endl;
   cout << __func__ << ":" << __LINE__ << " returns '" << id_map_[name].c_str()
-      << "'" << endl;
+       << "'" << endl;
   return id_map_[name].c_str();
 }
-
 
 void FuzzerCallbackBase::RpcCallToAgent(const char* id,
                                         const string& callback_socket_name) {
@@ -103,11 +98,11 @@ void FuzzerCallbackBase::RpcCallToAgent(const char* id,
     exit(-1);
     return;
   }
-  bzero((char*) &serv_addr, sizeof(serv_addr));
+  bzero((char*)&serv_addr, sizeof(serv_addr));
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, callback_socket_name.c_str());
 
-  if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
+  if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
     cerr << __func__ << " ERROR connecting" << endl;
     exit(-1);
     return;

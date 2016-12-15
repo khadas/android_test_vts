@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "utils/InterfaceSpecUtil.h"
@@ -37,25 +37,23 @@
 #include "code_gen/LegacyHalCodeGen.h"
 #include "code_gen/LibSharedCodeGen.h"
 
-
 using namespace std;
-
 
 namespace android {
 namespace vts {
 
-
 // Translates the vts proto file to C/C++ code and header files.
-void Translate(
-    const char* input_vts_file_path,
-    const char* output_header_dir_path,
-    const char* output_cpp_file_path) {
+void Translate(const char* input_vts_file_path,
+               const char* output_header_dir_path,
+               const char* output_cpp_file_path) {
   string output_cpp_file_path_str = string(output_cpp_file_path);
 
   size_t found;
   found = output_cpp_file_path_str.find_last_of("/");
-  const char* vts_name = output_cpp_file_path_str.substr(
-      found + 1, output_cpp_file_path_str.length() - found - 5).c_str();
+  const char* vts_name =
+      output_cpp_file_path_str
+          .substr(found + 1, output_cpp_file_path_str.length() - found - 5)
+          .c_str();
 
   cout << "vts_name: " << vts_name << endl;
 
@@ -100,8 +98,8 @@ void Translate(
     cpp_out_file.close();
   }
 
-  string output_header_file_path = string(output_header_dir_path)
-      + "/" + string(input_vts_file_path);
+  string output_header_file_path =
+      string(output_header_dir_path) + "/" + string(input_vts_file_path);
 
   output_header_file_path = output_header_file_path + ".h";
 
@@ -119,7 +117,6 @@ void Translate(
 
 }  // namespace vts
 }  // namespace android
-
 
 int main(int argc, char* argv[]) {
   cout << "Android VTS Compiler (AVTSC)" << endl;

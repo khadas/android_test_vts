@@ -22,8 +22,8 @@
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 
-#include <binder/IInterface.h>
 #include <binder/IBinder.h>
+#include <binder/IInterface.h>
 #include <binder/ProcessState.h>
 
 // Place to print the parcel contents (aout, alog, or aerr).
@@ -34,7 +34,6 @@
 #define VTS_FUZZER_BINDER_SERVICE_NAME "VtsFuzzer"
 
 using namespace std;
-
 
 namespace android {
 namespace vts {
@@ -54,9 +53,8 @@ class IVtsFuzzer : public IInterface {
   virtual void Exit() = 0;
 
   // Requests to load a HAL.
-  virtual int32_t LoadHal(const string& path, int target_class,
-                          int target_type, float target_version,
-                          const string& module_name) = 0;
+  virtual int32_t LoadHal(const string& path, int target_class, int target_type,
+                          float target_version, const string& module_name) = 0;
 
   // Requests to return the specified status.
   virtual int32_t Status(int32_t type) = 0;
@@ -69,16 +67,14 @@ class IVtsFuzzer : public IInterface {
   DECLARE_META_INTERFACE(VtsFuzzer);
 };
 
-
 // For client
 class BpVtsFuzzer : public BpInterface<IVtsFuzzer> {
  public:
   BpVtsFuzzer(const sp<IBinder>& impl) : BpInterface<IVtsFuzzer>(impl) {}
 
   void Exit();
-  int32_t LoadHal(const string& path, int target_class,
-                  int target_type, float target_version,
-                  const string& module_name);
+  int32_t LoadHal(const string& path, int target_class, int target_type,
+                  float target_version, const string& module_name);
   int32_t Status(int32_t type);
   const char* Call(const string& call_payload);
   const char* GetFunctions();
