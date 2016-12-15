@@ -40,3 +40,4 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk

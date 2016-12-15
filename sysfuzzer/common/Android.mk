@@ -56,7 +56,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MULTILIB := both
 
 include $(BUILD_SHARED_LIBRARY)
-
+include $(LOCAL_PATH)/../../tools/build/Android.packaging_sharedlib.mk
 
 include $(CLEAR_VARS)
 
