@@ -18,10 +18,21 @@
 from vts.utils.python.mirror_objects import MirrorBase
 
 
-class LightsHal(MirrorBase.MirrorBase):
-  """Lights HAL Mirror Object."""
+class Mirror(MirrorBase.MirrorBase):
+  """HAL Mirror Object."""
 
-  _target_class = "hal"
-  _target_type = "light"
-  _target_version = 1.0
-  _target_basepath = "/system/lib/hw"
+  def __ini__(self, target_basepath=None):
+    if target_basepath:
+      self._target_basepath = target_basepath
+
+  def InitHal(self, target_type, target_version, target_basepath=None):
+    """Initializes a HAL.
+
+    Args:
+      target_type: string, the target type name (e.g., light, camera).
+      target_version: float, the target component version (e.g., 1.0).
+      target_basepath: string, the base path of where a target file is stored
+          in.
+    """
+    super(Mirror, self).Init("hal", target_type, target_version,
+                             target_basepath)

@@ -75,9 +75,9 @@ int main(int argc, char* const argv[]) {
     {"class",       required_argument, NULL, 'c'},
     {"type",        required_argument, NULL, 't'},
     {"version",     required_argument, NULL, 'v'},
-    {"epoch_count", optional_argument, NULL, 'e'},
+    {"epoch_count", required_argument, NULL, 'e'},
     {"spec_dir",    required_argument, NULL, 's'},
-    {"server",      no_argument,       NULL, 'd'},
+    {"server",      optional_argument, NULL, 'd'},
     {NULL,          0,                 NULL, 0}};
   int target_class;
   int target_type;

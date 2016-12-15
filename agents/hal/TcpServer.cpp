@@ -67,14 +67,18 @@ AndroidSystemControlResponseMessage* RespondCheckFuzzerBinderService() {
 
 
 AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
-    const string& args) {
+    const string& args, const char* fuzzer_path, const char* spec_dir_path) {
   cout << "starting fuzzer" << endl;
   pid_t pid = fork();
   ResponseCode result = FAIL;
   if (pid == 0) {  // child
-    cout << "Exec fuzzer " << args << endl;
     char* cmd;
-    asprintf(&cmd, "fuzzer %s", args.c_str());
+    if (!spec_dir_path) {
+      asprintf(&cmd, "%s %s", fuzzer_path, args.c_str());
+    } else {
+      asprintf(&cmd, "%s %s --spec_dir=%s", fuzzer_path, args.c_str(), spec_dir_path);
+    }
+    cout << "Exec " << cmd << endl;
     system(cmd);
     cout << "fuzzer done" << endl;
     free(cmd);
@@ -209,7 +213,7 @@ AndroidSystemControlResponseMessage* RespondDefault() {
 
 
 // handles a new session.
-int HandleSession(int fd) {
+int HandleSession(int fd, const char* fuzzer_path, const char* spec_dir_path) {
   // If connection is established then start communicating
   char buffer[4096];
   char ch;
@@ -262,7 +266,7 @@ int HandleSession(int fd) {
           break;
         case START_FUZZER_BINDER_SERVICE:
           response_msg = RespondStartFuzzerBinderService(
-              command_msg.target_name());
+              command_msg.target_name(), fuzzer_path, spec_dir_path);
           break;
         case GET_HALS:
           if (command_msg.target_name().length() > 0) {
@@ -328,7 +332,7 @@ int HandleSession(int fd) {
 
 
 // Starts to run a TCP server (foreground).
-int StartTcpServer() {
+int StartTcpServer(const char* fuzzer_path, const char* spec_dir_path) {
   int sockfd, newsockfd;
   socklen_t clilen;
   struct sockaddr_in serv_addr, cli_addr;
@@ -368,7 +372,7 @@ int StartTcpServer() {
     cout << "New session" << endl;
     pid_t pid = fork();
     if (pid == 0) {  // child
-      exit(HandleSession(newsockfd));
+      exit(HandleSession(newsockfd, fuzzer_path, spec_dir_path));
     } else if (pid < 0){
       cerr << "can't fork a child process to handle a session." << endl;
       return -1;
