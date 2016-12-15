@@ -24,6 +24,7 @@ ifneq ($(filter vts, $(MAKECMDGOALS)),)
 include $(CLEAR_VARS)
 
 VTS_PYTHON_ZIP := $(HOST_OUT)/vts_runner_python/vts_runner_python.zip
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 
 .PHONY: $(VTS_PYTHON_ZIP)
 $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
@@ -33,14 +34,23 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	$(hide) find test -name '*.py' -or -name '*.config' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
 	@rm -f $@.list
-	$(hide) rm -rf $(HOST_OUT)/vts/android-vts/testcases/vts
-	$(hide) unzip $@ -d $(HOST_OUT)/vts/android-vts/testcases
-	$(hide) touch -f $(HOST_OUT)/vts/android-vts/testcases/vts/__init__.py
+	$(hide) rm -rf $(VTS_TESTCASES_OUT)/vts
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
+
+define vts-copy-testcase
+$(hide) $(ACP) -fp out/target/product/$(TARGET_PRODUCT)/data/app/$(1)/$(1).apk $(VTS_TESTCASES_OUT)
+endef
+
+vts_agent_app_packages := \
+    CtsVerifier \
+    sl4a \
 
 .PHONY: vts
-vts: $(VTS_PYTHON_ZIP)
-
-$(call dist-for-goals,vts,$(VTS_PYTHON_ZIP))
+vts: $(VTS_PYTHON_ZIP) $(vts_agent_app_packages) | $(ACP)
+	$(call vts-copy-testcase,CtsVerifier)
+	$(call vts-copy-testcase,sl4a)
 
 endif # vts
 endif # linux
+
