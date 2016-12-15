@@ -18,13 +18,16 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := 30149612_poc
-LOCAL_MODULE_STEM_32 := 30149612_poc32
-LOCAL_MODULE_STEM_64 := 30149612_poc64
-
-LOCAL_SRC_FILES := poc.c
-
-LOCAL_MULTILIB := both
+LOCAL_MODULE := security_poc_kernel_test
+LOCAL_MODULE_CLASS := FAKE
+LOCAL_IS_HOST_MODULE := true
 LOCAL_COMPATIBILITY_SUITE := vts
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SYSTEM)/base_rules.mk
+
+$(LOCAL_BUILT_MODULE):
+	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
+	$(hide) touch $@
+
+VTS_CONFIG_SRC_DIR := testcases/security/poc/security_poc_kernel
+include test/vts/tools/build/Android.host_config.mk
