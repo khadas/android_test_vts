@@ -95,9 +95,7 @@ int VtsShellDriver::ExecShellCommand(
 
 int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
   VtsDriverCommUtil driverUtil(connection_fd);
-  // TODO(yuexima): handle multiple commands in a while loop
   VtsDriverControlCommandMessage cmd_msg;
-  bool success;
   int numberOfFailure = 0;
 
   while (1) {
@@ -105,7 +103,14 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
             static_cast<google::protobuf::Message*>(&cmd_msg))) {
       return -1;
     }
-
+    if (cmd_msg.command_type() == EXIT) {
+      break;
+    }
+    else if (cmd_msg.command_type() != EXECUTE_COMMAND) {
+      cerr << "[Shell driver] unknown command type " << cmd_msg.command_type()
+           << endl;
+      continue;
+    }
     cout << "[Shell driver] received " << cmd_msg.shell_command_size()
          << " command(s). Processing... " << endl;
 
@@ -113,7 +118,7 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
     VtsDriverControlResponseMessage responseMessage;
 
     for (const auto& command : cmd_msg.shell_command()) {
-      if (this->ExecShellCommand(command, &responseMessage) != 0) {
+      if (ExecShellCommand(command, &responseMessage) != 0) {
         cerr << "[Shell driver] error during executing command [" << command
              << "]" << endl;
         --numberOfFailure;
@@ -125,7 +130,6 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
       --numberOfFailure;
     }
     cout << "[Shell driver] finished processing commands." << endl;
-    // TODO: exit when EXIT request is received.
   }
 
   if (driverUtil.Close() != 0) {
@@ -169,7 +173,6 @@ int VtsShellDriver::StartListen() {
 
   if (listen(socket_fd, 5) != 0) {
     cerr << "Driver: listen() failed: " << strerror(errno) << endl;
-
     return errno;
   }
 
@@ -188,7 +191,7 @@ int VtsShellDriver::StartListen() {
     if (child == 0) {
       close(socket_fd);
       // now inside newly created connection handling process
-      if (this->HandleShellCommandConnection(connection_fd) != 0) {
+      if (HandleShellCommandConnection(connection_fd) != 0) {
         cerr << "[Driver] failed to handle connection." << endl;
         close(connection_fd);
         exit(1);
@@ -202,7 +205,6 @@ int VtsShellDriver::StartListen() {
       return (errno);
     }
   }
-
   close(socket_fd);
 
   return 0;

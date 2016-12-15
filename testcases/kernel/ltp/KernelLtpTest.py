@@ -27,35 +27,36 @@ class KernelLtpTest(base_test.BaseTestClass):
     """Runs the LTP (Linux Test Project) testcases against Android OS kernel."""
 
     def setUpClass(self):
+        """Creates a remote shell instance."""
         self.dut = self.registerController(android_device)[0]
-        self.dut.shell.InvokeTerminal("my_shell1")
+        self.dut.shell.InvokeTerminal("one")
+        self.shell = self.dut.shell.one
+
+    def Verify(self, binary, all_stdout):
+        """Verifies the test result of each test case."""
+        logging.info("stdout: %s" % all_stdout)
+        asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
+                           "command [%s] failed" % binary)
 
     def testCrashTestcases32Bits(self):
-        """A simple testcase which just emulates a normal usage pattern."""
-        test_binaries = ["/data/local/tmp/32/crash01_32",
-                         "/data/local/tmp/32/crash02_32"]
-        for binary in test_binaries:
-            self.dut.shell.my_shell1.Execute("chmod 755 " + binary)
+        """Crash01 and Crash02 test cases (32-bit mode)."""
+        for binary in ["/data/local/tmp/32/crash01_32",
+                       "/data/local/tmp/32/crash02_32"]:
+            self.shell.Execute("chmod 755 " + binary)
             logging.info("executing a command '%s'" % binary)
-            stdouts = self.dut.shell.my_shell1.Execute("env TMPDIR=/data/local/tmp " + binary)
-            all_stdout = "\n".join(stdouts)
-            logging.info("stdout: %s" % all_stdout)
-            asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
-                               "command [%s] failed" % binary)
+            stdouts = self.shell.Execute("env TMPDIR=/data/local/tmp " + binary)
+            self.Verify(binary, "\n".join(stdouts))
+
 
     def testCrashTestcases64Bits(self):
-        """A simple testcase which just emulates a normal usage pattern."""
-        test_binaries = ["/data/local/tmp/64/crash01_64",
-                         "/data/local/tmp/64/crash02_64"]
-        for binary in test_binaries:
-            self.dut.shell.my_shell1.Execute("chmod 755 " + binary)
+        """Crash01 and Crash02 test cases (64-bit mode)."""
+        for binary in ["/data/local/tmp/64/crash01_64",
+                       "/data/local/tmp/64/crash02_64"]:
+            self.shell.Execute("chmod 755 " + binary)
             logging.info("executing a command '%s'" % binary)
-            stdouts = self.dut.shell.my_shell1.Execute(
+            stdouts = self.shell.Execute(
                 "env TMPDIR=/data/local/tmp LD_LIBRARY_PATH=/data/local/tmp/64/ " + binary)
-            all_stdout = "\n".join(stdouts)
-            logging.info("stdout: %s" % all_stdout)
-            asserts.assertTrue("TPASS" in all_stdout and "TFAIL" not in all_stdout,
-                               "command [%s] failed" % binary)
+            self.Verify(binary, "\n".join(stdouts))
 
 
 if __name__ == "__main__":
