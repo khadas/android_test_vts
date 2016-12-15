@@ -44,6 +44,16 @@ int64_t RandomInt64() {
 }
 
 
+float RandomFloat() {
+  return (float) rand() / (float)(RAND_MAX / 1000000000.0);
+}
+
+
+double RandomDouble() {
+  return (double) rand() / (double)(RAND_MAX / 1000000000.0);
+}
+
+
 bool RandomBool() {
   return (abs(rand()) % 2) == 1;
 }

@@ -23,6 +23,7 @@ vtslib_interfacespec_srcfiles := \
   hal_conventional/GpsHalV1GpsInterface.vts \
   hal_conventional/LightHalV1.vts \
   hal_conventional/WifiHalV1.vts \
+  lib_bionic/libmV1.vts \
 
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \

@@ -30,6 +30,8 @@ extern void RandomNumberGeneratorReset();
 extern uint32_t RandomUint32();
 extern int32_t RandomInt32();
 extern int64_t RandomInt64();
+extern float RandomFloat();
+extern double RandomDouble();
 extern bool RandomBool();
 extern char* RandomCharPointer();
 extern void* RandomVoidPointer();

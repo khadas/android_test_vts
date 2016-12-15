@@ -1,6 +1,7 @@
 component_class: HAL_LEGACY
 component_type: WIFI
 component_type_version: 1.0
+component_name: "wifi"
 
 header: "<hardware/hardware.h>"
 header: "<hardware_legacy/wifi_hal.h>"

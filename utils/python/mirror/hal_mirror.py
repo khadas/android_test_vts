@@ -27,16 +27,21 @@ from vts.runners.host.tcp_server import vts_tcp_server
 from vts.utils.python.mirror import mirror_object
 
 COMPONENT_CLASS_DICT = {"hal_conventional": 1,
-                        "sharedlib": 2,
-                        "hal_hidl": 3,
-                        "hal_conventional_submodule": 4,
-                        "hal_legacy": 5}
+                        "hal_conventional_submodule": 2,
+                        "hal_legacy": 3,
+                        "hal_hidl": 4,
+                        "hal_hidl_wrapped_conventional": 5,
+                        "lib_shared": 11}
 
 COMPONENT_TYPE_DICT = {"audio": 1,
                        "camera": 2,
                        "gps": 3,
                        "light": 4,
-                       "wifi": 5}
+                       "wifi": 5,
+                       "mobile": 6,
+                       "bluetooth": 7,
+                       "nfc": 8,
+                       "bionic_libm": 1001}
 
 VTS_CALLBACK_SERVER_TARGET_SIDE_PORT = 5010
 
