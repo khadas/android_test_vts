@@ -5,7 +5,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 # Too many clang warnings/errors, see b/23163853.
-LOCAL_CLANG := false
+# LOCAL_CLANG := false
 
 LOCAL_SRC_FILES := \
         util/QCameraCmdThread.cpp \
@@ -38,7 +38,8 @@ LOCAL_SRC_FILES += \
         HAL/QCameraParameters.cpp \
         HAL/QCameraThermalAdapter.cpp
 
-LOCAL_CFLAGS := -Wall -Wextra -Werror
+# removed -Werror
+LOCAL_CFLAGS := -Wall -Wextra
 LOCAL_CFLAGS += -DHAS_MULTIMEDIA_HINTS
 LOCAL_CFLAGS += -DENABLE_MODEL_INFO_EXIF
 
@@ -75,11 +76,16 @@ LOCAL_CFLAGS += -DOPTIMIZE_BUF_COUNT
 endif
 
 LOCAL_SHARED_LIBRARIES := libcamera_client liblog libhardware libutils libcutils libdl libsync
-LOCAL_SHARED_LIBRARIES += libmmcamera_interface libmmjpeg_interface libui libcamera_metadata
-LOCAL_SHARED_LIBRARIES += libqdMetaData
+LOCAL_SHARED_LIBRARIES += libmmcamera_interface.vts libmmjpeg_interface.vts libui libcamera_metadata
+LOCAL_SHARED_LIBRARIES += libqdMetaData.vts
+
+# enable below for gcov
+LOCAL_CLANG := true
+LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
+LOCAL_LDFLAGS += --coverage
 
 LOCAL_MODULE_RELATIVE_PATH := hw
-LOCAL_MODULE := camera.$(TARGET_BOARD_PLATFORM)
+LOCAL_MODULE := camera.bullhead-vts
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := $(BOARD_QTI_CAMERA_32BIT_ONLY)

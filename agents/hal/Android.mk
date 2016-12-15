@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
   HalAgentMain.cpp \
   BinderClient.cpp \
   TcpServer.cpp \
+  RequestHandler.cpp \
   $(call all-proto-files-under, proto) \
 
 LOCAL_PROTOC_FLAGS := \

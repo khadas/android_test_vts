@@ -27,7 +27,7 @@ from vts.utils.python.fuzzer import GenePool
 
 
 class SampleLightFuzzTestcase(base_test.BaseTestClass):
-    """A sample fuzz testcase for the legacy lights HAL."""
+    """Two sample fuzz testcases for the shared library style lights HAL."""
 
     def testAll(self, gene_pool_size, iteartion_count):
         """tests all modules.
@@ -39,7 +39,7 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
         self._gene_pool_size = gene_pool_size
         self._iteartion_count = iteartion_count
 
-        self.hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
+        self.hal_mirror = Mirror.Mirror(["/data/local/tmp/64/hal"])
         self.hal_mirror.InitHal("light", 1.0)
         module_name = random.choice([
             self.hal_mirror.light.LIGHT_ID_BACKLIGHT,
@@ -51,10 +51,12 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
         #   self.hal_mirror.light.LIGHT_ID_BATTERY
         #   self.hal_mirror.light.LIGHT_ID_BLUETOOTH
         #   self.hal_mirror.light.LIGHT_ID_WIFI
-        self.TestTurnOnBackgroundLight(module_name)
-        logging.info("module name: %s", module_name)
+        logging.info("blackbox fuzzing module name: %s", module_name)
+        self.TestTurnOnLightBlackBoxFuzzing(module_name)
+        logging.info("whitebox fuzzing module name: %s", module_name)
+        self.TestTurnOnLightWhiteBoxFuzzing(module_name)
 
-    def TestTurnOnBackgroundLight(self, module_name):
+    def TestTurnOnLightBlackBoxFuzzing(self, module_name):
         """A fuzz testcase which calls a function using different values."""
         self.hal_mirror.InitHal("light", 1.0, module_name=module_name)
         genes = GenePool.CreateGenePool(
@@ -69,12 +71,45 @@ class SampleLightFuzzTestcase(base_test.BaseTestClass):
 
         for iteration in range(self._iteartion_count):
             index = 0
+            logging.info("blackbox iteration %d", iteration)
             for gene in genes:
-                logging.info("Gene %d", index)
+                logging.debug("Gene %d", index)
                 self.hal_mirror.light.set_light(None, gene)
                 index += 1
-            genes = GenePool.Evolve(
+            evolution = GenePool.Evolution()
+            genes = evolution.Evolve(
                 genes, self.hal_mirror.light.light_state_t_fuzz)
+
+    def TestTurnOnLightWhiteBoxFuzzing(self, module_name):
+        """A fuzz testcase which calls a function using different values."""
+        self.hal_mirror.InitHal("light", 1.0, module_name=module_name)
+        genes = GenePool.CreateGenePool(
+            self._gene_pool_size,
+            self.hal_mirror.light.light_state_t,
+            self.hal_mirror.light.light_state_t_fuzz,
+            color=0xffffff00,
+            flashMode=self.hal_mirror.light.LIGHT_FLASH_HARDWARE,
+            flashOnMs=100,
+            flashOffMs=200,
+            brightnessMode=self.hal_mirror.light.BRIGHTNESS_MODE_USER)
+
+        for iteration in range(self._iteartion_count):
+            index = 0
+            logging.info("whitebox iteration %d", iteration)
+            coverages = []
+            for gene in genes:
+                logging.debug("Gene %d", index)
+                result = self.hal_mirror.light.set_light(None, gene)
+                if len(result.coverage_data) > 0:
+                  gene_coverage = []
+                  for coverage_data in result.coverage_data:
+                    gene_coverage.append(coverage_data)
+                  coverages.append(gene_coverage)
+                index += 1
+            evolution = GenePool.Evolution()
+            genes = evolution.Evolve(
+                genes, self.hal_mirror.light.light_state_t_fuzz,
+                coverages=coverages)
 
 
 def main(args):

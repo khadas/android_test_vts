@@ -16,18 +16,14 @@
 
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libvts_interfacespecification
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_SRC_FILES := \
+vtslib_interfacespec_srcfiles := \
+  specification/CameraHalV2.vts \
   specification/GpsHalV1.vts \
   specification/GpsHalV1GpsInterface.vts \
   specification/LightHalV1.vts \
   specification/WifiHalV1.vts \
 
-LOCAL_C_INCLUDES := \
+vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
   test/vts/sysfuzzer \
   test/vts/sysfuzzer/framework \
@@ -38,11 +34,12 @@ LOCAL_C_INCLUDES := \
   libcore \
   device/google/gce/include \
   system/extras \
+  system/media/camera/include \
   external/protobuf/src \
   external/libedit/src \
   $(TARGET_OUT_HEADERS) \
 
-LOCAL_SHARED_LIBRARIES := \
+vtslib_interfacespec_shared_libraries := \
   libcutils \
   liblog \
   libdl \
@@ -51,8 +48,18 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_common \
   libvts_measurement \
 
-LOCAL_STATIC_LIBRARIES := \
+vtslib_interfacespec_static_libraries := \
   libelf \
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libvts_interfacespecification
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := ${vtslib_interfacespec_srcfiles}
+LOCAL_C_INCLUDES := ${vtslib_interfacespec_includes}
+LOCAL_SHARED_LIBRARIES := ${vtslib_interfacespec_shared_libraries}
+LOCAL_STATIC_LIBRARIES := ${vtslib_interfacespec_static_libraries}
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 

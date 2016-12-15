@@ -46,7 +46,7 @@ string ComponentClassToString(int component_class) {
     case HAL_HIDL: return "hal_hidl";
     case HAL_SUBMODULE: return "hal_submodule";
   }
-  cerr << "invalid component_class " << component_class << endl;
+  cerr << "error: invalid component_class " << component_class << endl;
   exit(-1);
 }
 
@@ -59,7 +59,7 @@ string ComponentTypeToString(int component_type) {
     case GPS: return "gps";
     case LIGHT: return "light";
   }
-  cerr << "invalid component_type " << component_type << endl;
+  cerr << "error: invalid component_type " << component_type << endl;
   exit(-1);
 }
 
@@ -98,7 +98,7 @@ string GetCppVariableType(const std::string primitive_type_string) {
   }
 
   cerr << __FILE__ << ":" << __LINE__ << " "
-      << "unknown primitive_type " << primitive_type << endl;
+      << "error: unknown primitive_type " << primitive_type << endl;
   exit(-1);
 }
 
@@ -114,7 +114,7 @@ string GetCppVariableType(ArgumentSpecificationMessage arg) {
         << ": aggregate type with multiple attributes; not supported" << endl;
     exit(-1);
   }
-  cerr << __FUNCTION__ << ": neither instance nor data type is set" << endl;
+  cerr << __FUNCTION__ << ": error: neither instance nor data type is set" << endl;
   exit(-1);
 }
 
@@ -143,11 +143,15 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
       return "GenerateGpsPositionMode()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "GpsPositionRecurrence")) {
       return "GenerateGpsPositionRecurrence()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_info_t*")) {
+      return "GenerateCameraInfo()";
+    } else if (!strcmp(arg.aggregate_type(0).c_str(), "camera_module_callbacks_t*")) {
+      return "GenerateCameraModuleCallbacks()";
     } else if (!strcmp(arg.aggregate_type(0).c_str(), "wifi_handle*")) {
       return "(wifi_handle*) malloc(sizeof(wifi_handle))";
     } else {
       cerr << __FILE__ << ":" << __LINE__ << " "
-          << "unknown instance type " << arg.aggregate_type(0) << endl;
+          << "error: unknown instance type " << arg.aggregate_type(0) << endl;
     }
   } else if (arg.aggregate_type().size() > 1) {
     cerr << __FUNCTION__
@@ -167,10 +171,10 @@ string GetCppInstanceType(ArgumentSpecificationMessage arg, string msg) {
       return "RandomCharPointer()";
     }
     cerr << __FILE__ << ":" << __LINE__ << " "
-        << "unknown data type " << arg.primitive_type(0) << endl;
+        << "error: unknown data type " << arg.primitive_type(0) << endl;
     exit(-1);
   }
-  cerr << __FUNCTION__ << ": neither instance nor data type is set" << endl;
+  cerr << __FUNCTION__ << ": error: neither instance nor data type is set" << endl;
   exit(-1);
 }
 

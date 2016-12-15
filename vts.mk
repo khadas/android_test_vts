@@ -6,5 +6,6 @@ PRODUCT_PACKAGES += \
     libvts_interfacespecification \
     vts_hal_agent \
     lights.bullhead-vts \
+    camera.bullhead-vts
 
 -include test/vts/sysfuzzer/libinterfacespecification/vts_specification.mk

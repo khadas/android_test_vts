@@ -67,8 +67,11 @@ struct hw_device_t* DllLoader::GetHWDevice(const char* module_name) {
     cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
     return NULL;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << endl;
-  struct hw_module_t *hmi = (struct hw_module_t *) dlsym(
+  if (module_name) {
+    cout << __FUNCTION__ << ":" << __LINE__
+        << " module_name" << module_name << endl;
+  }
+  struct hw_module_t* hmi = (struct hw_module_t*) dlsym(
       handle_, HAL_MODULE_INFO_SYM_AS_STR);
   if (!hmi) {
     cerr << __FUNCTION__ << ": " << HAL_MODULE_INFO_SYM_AS_STR
@@ -78,15 +81,18 @@ struct hw_device_t* DllLoader::GetHWDevice(const char* module_name) {
   cout << __FUNCTION__ << ":" << __LINE__ << endl;
   hmi->dso = handle_;
   device_ = NULL;
+  cout << __FUNCTION__ << ": version " << hmi->module_api_version << endl;
+
   int ret;
   if (!module_name || strlen(module_name) == 0) {
-    cout << __FUNCTION__ << ":" << __LINE__ << ": " << hmi->name << endl;
+    cout << __FUNCTION__ << ":" << __LINE__ << ": (default) " << hmi->name << endl;
     ret = hmi->methods->open(hmi, hmi->name,
                              (struct hw_device_t**) &device_);
   } else {
-    cout << __FUNCTION__ << ":" << __LINE__ << ": module_name |" << module_name << "|" << endl;
-    ret = hmi->methods->open(hmi, module_name,
-                             (struct hw_device_t**) &device_);
+    cout << __FUNCTION__ << ":" << __LINE__ << ": module_name |"
+        << module_name << "|" << endl;
+    ret = hmi->methods->open(
+        hmi, module_name, (struct hw_device_t**) &device_);
   }
   if (ret != 0) {
     cout << "returns " << ret << " " << strerror(errno) << endl;
@@ -108,6 +114,7 @@ loader_function DllLoader::GetLoaderFunction(const char* function_name) {
   }
   return func;
 }
+
 
 bool DllLoader::SancovResetCoverage() {
   const char* error;

@@ -118,6 +118,8 @@ message ArgumentSpecificationMessage {
   optional bool is_input = 11 [default = true];
   // true if the argument is an output.
   optional bool is_output = 12 [default = false];
+  // true if the argument is a constant variable.
+  optional bool is_const = 13 [default = false];
 
   // the actual values.
   repeated PrimitiveDataValueMessage primitive_value = 21;
@@ -128,6 +130,16 @@ message ArgumentSpecificationMessage {
   repeated bytes primitive_name = 31;
   // the variable names of defined aggregate type attributes.
   repeated bytes aggregate_name = 32;
+}
+
+
+// TO specify a sub-structure.
+message StructSpecificationMessage {
+  // the sub-structure's variable name in its parent data structure.
+  optional bytes name = 1;
+
+  // a list of functions contained in the struct.
+  repeated FunctionSpecificationMessage api = 1001;
 }
 
 
@@ -151,4 +163,7 @@ message InterfaceSpecificationMessage {
   repeated bytes aggregate_type_name = 3001;
   // The actual definitions of custom-defined aggregate types.
   repeated ArgumentSpecificationMessage aggregate_type_definition = 3002;
+
+  // a list of structures contained in the component.
+  repeated StructSpecificationMessage sub_struct = 4001;
 }

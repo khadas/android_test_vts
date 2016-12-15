@@ -6,6 +6,7 @@
 #   $ sudo pip install futures
 #   $ sudo pip install enum
 #   $ sudo pip install concurrent
+#   $ sudo pip install protobuf
 # for protoc, please install protoc by:
 #   $ apt-get install protobuf-compiler
 

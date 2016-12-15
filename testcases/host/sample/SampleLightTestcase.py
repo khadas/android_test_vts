@@ -30,7 +30,8 @@ class SampleLightTestcase(base_test.BaseTestClass):
     def testTurnOnBackgroundLight(self):
         """A simple testcase which just calls a function."""
         logging.info("testLight start")
-        hal_mirror = Mirror.Mirror("/system/lib64/hw,/system/lib/hw")
+        hal_mirror = Mirror.Mirror(["/system/lib64/hw", "/system/lib/hw"])
+        # TODO: support ability to test non-instrumented hals.
         hal_mirror.InitHal("light", 1.0, module_name="backlight")
         arg = hal_mirror.light.light_state_t(
             color=0xffffff00,
@@ -44,7 +45,7 @@ class SampleLightTestcase(base_test.BaseTestClass):
     def testTurnOnBackgroundLightUsingInstrumentedLib(self):
         """A simple testcase which just calls a function."""
         logging.info("testLight start")
-        hal_mirror = Mirror.Mirror("/data/local/tmp/hal64")
+        hal_mirror = Mirror.Mirror(["/data/local/tmp/64/hal"])
         hal_mirror.InitHal("light", 1.0, module_name="backlight")
         arg = hal_mirror.light.light_state_t(
             color=0xffffff00,
@@ -55,12 +56,14 @@ class SampleLightTestcase(base_test.BaseTestClass):
         hal_mirror.light.set_light(None, arg)
         logging.info("testLight end")
 
+
 def main(args):
     """Main function which calls the framework's Main()."""
     # TODO: call base_test.Main(args) instead.
     Log.SetupLogger()
     # TODO: use the test runner instead.
     testcase = SampleLightTestcase({})
+    testcase.testTurnOnBackgroundLight()
     testcase.testTurnOnBackgroundLightUsingInstrumentedLib()
 
 

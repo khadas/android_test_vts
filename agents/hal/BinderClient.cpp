@@ -34,22 +34,24 @@ namespace android {
 namespace vts {
 
 // Returns a VtsFuzzer binder service's client.
-sp<IVtsFuzzer> GetBinderClient() {
+sp<IVtsFuzzer> GetBinderClient(const string& service_name) {
   android::sp<IServiceManager> manager = defaultServiceManager();
   if (!manager.get()) {
     cerr << "can't get the default service manager." << std::endl;
     return NULL;
   }
 
-  sp<IBinder> binder = manager->getService(String16("VtsFuzzer"));
+  sp<IBinder> binder = manager->getService(String16(service_name.c_str()));
   if (!binder.get()) {
-    cerr << "can't find the VtsFuzzer service." << std::endl;
+    cerr << "can't find the " << service_name << " binder service."
+        << std::endl;
     return NULL;
   }
 
   sp<IVtsFuzzer> fuzzer = interface_cast<IVtsFuzzer>(binder);
   if (!fuzzer.get()) {
-    cerr << "can't cast the obtained VtsFuzzer binder instance" << std::endl;
+    cerr << "can't cast the obtained " << service_name << " binder instance"
+        << std::endl;
     return NULL;
   }
 
