@@ -58,11 +58,15 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
       ReplaceSubString(mutable_import, ".", "/");
       string base_dirpath = mutable_import.substr(0, mutable_import.find_last_of("/\\") + 1);
       string base_filename = mutable_import.substr(mutable_import.find_last_of("/\\") + 1);
-      cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
+      // TODO: consider restoring this when hidl packaging is fully defined.
+      // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
+      cpp_ss << "#include <" << base_filename << ".h>" << endl;
       if (!endsWith(base_filename, "Callback")) {
-        cpp_ss << "#include <" << base_dirpath << "Bp" << base_filename.substr(1) << ".h>" << endl;
+        // TODO: ditto
+        // cpp_ss << "#include <" << base_dirpath << ...
+        cpp_ss << "#include <" << "Bp" << base_filename.substr(1) << ".h>" << endl;
       } else {
-        cpp_ss << "#include <" << base_dirpath << "Bn" << base_filename.substr(1) << ".h>" << endl;
+        cpp_ss << "#include <" << "Bn" << base_filename.substr(1) << ".h>" << endl;
       }
     }
   }
@@ -91,18 +95,21 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
                                     fuzzer_extended_class_name);
   }
 
-  cpp_ss << endl;
-  GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
+  if (message.component_class() != HAL_HIDL ||
+      endsWith(message.component_name(), "Callback")) {
+    cpp_ss << endl;
+    GenerateCppBodyFuzzFunction(cpp_ss, message, fuzzer_extended_class_name);
 
-  std::stringstream ss;
-  // return type
-  ss << "android::vts::FuzzerBase* " << endl;
-  // function name
-  string function_name_prefix = GetFunctionNamePrefix(message);
-  ss << function_name_prefix << "(" << endl;
-  ss << ")";
+    std::stringstream ss;
+    // return type
+    ss << "android::vts::FuzzerBase* " << endl;
+    // function name
+    string function_name_prefix = GetFunctionNamePrefix(message);
+    ss << function_name_prefix << "(" << endl;
+    ss << ")";
 
-  GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(), fuzzer_extended_class_name);
+    GenerateCppBodyGlobalFunctions(cpp_ss, ss.str(), fuzzer_extended_class_name);
+  }
 
   GenerateCloseNameSpaces(cpp_ss);
 }
