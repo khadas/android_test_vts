@@ -16,27 +16,28 @@
 #
 
 
-class GCNOSummary(object):
-    """Summarizes .gcno summary file from GCC output.
+class FileSummary(object):
+    """Summarizes structure and coverage information from GCC output.
+
+    Represents the data in .gcno and .gcda files.
 
     Attributes:
-    functions: list of FunctionSummary objects for each function described
-        in a GCNO file.
+    functions: Dictionary of FunctionSummary objects for each function described
+        in a GCNO file (key: integer ident, value: FunctionSummary object)
     """
 
     def __init__(self):
         """Inits the object with an empty list in its functions attribute.
         """
-        self.functions = []
+        self.functions = {}
 
-    def ToString(self):
+    def __str__(self):
         """Serializes the summary as a string.
 
         Returns:
             String representation of the functions, blocks, arcs, and lines.
         """
-
-        output = 'GCNO Summary:\r\n'
-        for func in self.functions:
-            output += func.ToString()
+        output = 'Coverage Summary:\r\n'
+        for ident in self.functions:
+            output += str(self.functions[ident])
         return output

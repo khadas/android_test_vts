@@ -32,7 +32,7 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 
 from vts.utils.app_engine import bigtable_rest_client
-from vts.utils.python.coverage import GCNO
+from vts.utils.python.coverage import coverage_report
 
 _ANDROID_DEVICE = "AndroidDevice"
 
@@ -324,7 +324,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     # TODO: consider path and do exact matching
                     logging.info("check if %s in %s", gcda_file_name, file_path)
                     if file_path in gcda_file_name:
-                        coverage.html = GCNO.GenerateCoverageReport(
+                        coverage.html = coverage_report.GenerateCoverageReport(
                             src_file_name, src_file_content,
                             gcno_file_content, gcda_dict[file_path])
                         logging.info("HTML Report: %s", coverage.html)
