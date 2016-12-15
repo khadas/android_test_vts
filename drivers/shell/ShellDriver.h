@@ -30,15 +30,18 @@ namespace vts {
 
 class VtsShellDriver {
  public:
-  VtsShellDriver()
-      : socket_address_(NULL) {}
+  VtsShellDriver() {
+    socket_address_.clear();
+  }
 
-  explicit VtsShellDriver(char* socket_address)
+  explicit VtsShellDriver(const char* socket_address)
       : socket_address_(socket_address) {}
 
   ~VtsShellDriver() {
     cout << __func__ << endl;
-    if (this->socket_address_ != NULL) Close();
+    if (!this->socket_address_.empty()) {
+      Close();
+    }
   }
 
   // closes the sockets.
@@ -49,7 +52,7 @@ class VtsShellDriver {
 
  private:
   // socket address
-  char* socket_address_;
+  string socket_address_;
 
   /*
    * execute a given shell command and return the output file descriptor
