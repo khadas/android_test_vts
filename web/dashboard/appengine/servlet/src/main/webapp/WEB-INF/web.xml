@@ -1,7 +1,7 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
 <!-- [START_EXCLUDE] -->
 <!--
-Copyright 2015 Google Inc. All Rights Reserved.
+Copyright 2016 Google Inc. All Rights Reserved.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,8 +17,24 @@ Copyright 2015 Google Inc. All Rights Reserved.
 -->
 <!-- [END_EXCLUDE] -->
 
-  <welcome-file-list>
-    <welcome-file>hello</welcome-file>
-  </welcome-file-list>
+<servlet>
+  <servlet-name>dashboard_main</servlet-name>
+  <servlet-class>com.google.android.vts.servlet.DashboardMainServlet</servlet-class>
+</servlet>
+
+<servlet>
+  <servlet-name>show_table</servlet-name>
+  <servlet-class>com.google.android.vts.servlet.ShowTableServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+  <servlet-name>dashboard_main</servlet-name>
+  <url-pattern>/</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>show_table</servlet-name>
+  <url-pattern>/show_table/*</url-pattern>
+</servlet-mapping>
 
 </web-app>

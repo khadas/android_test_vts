@@ -1,8 +1,0 @@
-# To run locally
-$ cd web/dashboard/appengine/servlet
-$ mvn clean gcloud:run
-
-# To deploy to GAE
-$ mvn clean gcloud:deploy
-
-visit https://android-vts-internal.googleplex.com
