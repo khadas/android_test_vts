@@ -16,5 +16,6 @@
 <configuration description="Run VTS Target-Side Tests">
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
+    <option name="compatibility:exclude-filter" value="SampleLightTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
