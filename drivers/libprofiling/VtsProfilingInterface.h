@@ -37,9 +37,12 @@ class VtsProfilingInterface {
   // for the API exit on the stub side.
   static const int kProfilingPointExit;
 
-  VtsProfilingInterface() {}
+  //Get and create the VtsProfilingInterface singleton.
+  static VtsProfilingInterface& getInstance();
 
-  virtual ~VtsProfilingInterface();
+  VtsProfilingInterface() {};
+
+  virtual ~VtsProfilingInterface() {};
 
   // returns true if the given message is added to the tracing queue.
   bool AddTraceEvent(const FunctionSpecificationMessage& message);
