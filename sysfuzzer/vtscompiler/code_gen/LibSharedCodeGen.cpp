@@ -61,9 +61,17 @@ void LibSharedCodeGen::GenerateCppBodyFuzzFunction(
                << kInstanceVariableName << ")";
       } else if (arg.type() == TYPE_SCALAR) {
         cpp_ss << "(func_msg->arg(" << arg_count << ").type() == TYPE_SCALAR && "
-               << "func_msg->arg(" << arg_count << ").scalar_value().has_" << arg.scalar_type() << "()) ? "
-               << "func_msg->arg(" << arg_count << ").scalar_value()." << arg.scalar_type() << "()"
-               << " : " << GetCppInstanceType(arg);
+               << "func_msg->arg(" << arg_count << ").scalar_value().has_" << arg.scalar_type() << "()) ? ";
+        if (arg.scalar_type() == "char_pointer" ||
+            arg.scalar_type() == "void_pointer") {
+          cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">(";
+        }
+        cpp_ss << "func_msg->arg(" << arg_count << ").scalar_value()." << arg.scalar_type() << "()";
+        if (arg.scalar_type() == "char_pointer" ||
+            arg.scalar_type() == "void_pointer") {
+          cpp_ss << ")";
+        }
+        cpp_ss << " : " << GetCppInstanceType(arg);
       } else {
         cpp_ss << GetCppInstanceType(arg);
       }
