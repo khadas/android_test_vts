@@ -78,7 +78,7 @@ class LibMirror(object):
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
         """
-        self._CreateMirrorObject("hal_legacy",
+        self._CreateMirrorObject("lib_shared",
                                  target_type,
                                  target_version,
                                  target_basepaths,
