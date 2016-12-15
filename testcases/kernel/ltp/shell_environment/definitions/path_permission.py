@@ -16,8 +16,7 @@
 #
 
 from vts.runners.host import const
-from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions \
-    import check_setup_cleanup
+from vts.testcases.kernel.ltp.shell_environment.definitions.base_definitions import check_setup_cleanup
 
 
 class PathPermission(check_setup_cleanup.CheckSetupCleanup):
@@ -35,8 +34,12 @@ class PathPermission(check_setup_cleanup.CheckSetupCleanup):
         _permissions: list of int, desired permissions for each path
     """
 
-    def __init__(self, paths=None, permissions=None,
-                 to_check=True, to_setup=False, to_cleanup=False):
+    def __init__(self,
+                 paths=None,
+                 permissions=None,
+                 to_check=True,
+                 to_setup=False,
+                 to_cleanup=False):
         self._paths = paths
         self._permissions = permissions
         self.to_check = to_check
@@ -61,15 +64,17 @@ class PathPermission(check_setup_cleanup.CheckSetupCleanup):
         results = self.ExecuteShellCommand(commands)[const.STDOUT]
 
         self._failed_paths = [
-            (path, permission, result) for path, permission, result
-            in zip(self._paths, self._permissions, results)
-            if str(permission) != result]
+            (path, permission, result)
+            for path, permission, result in zip(self._paths, self._permissions,
+                                                results)
+            if str(permission) != result
+        ]
 
         if not self._failed_paths:
             return True
 
-        self.note = "Some paths do not have desired permission: %s" % \
-                    self._failed_paths
+        self.note = ("Some paths do not have desired "
+                     "permission: %s") % self._failed_paths
         return False
 
     def Setup(self):
