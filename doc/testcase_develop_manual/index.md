@@ -18,5 +18,8 @@ __Table of Contents__
     * [Codelab for VTS Specification File](codelab_vts_spec.md)
 
 2.  Native Code Coverage
-    *   [Codelab for Native Code Coverage Measurement](codelab_native_code_coverage.md)
-    *   [Native Coverage Information and FAQ](native_coverage_faq.md)
+    * [Codelab for Native Code Coverage Measurement](codelab_native_code_coverage.md)
+    * [Native Coverage Information and FAQ](native_coverage_faq.md)
+
+3. FAQs
+    * [How to directly run a VTS test without using VTS-TradeFed](run_vts_directly.md)
