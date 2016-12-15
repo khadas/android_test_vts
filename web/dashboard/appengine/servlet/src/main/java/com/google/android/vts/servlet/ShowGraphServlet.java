@@ -78,10 +78,11 @@ public class ShowGraphServlet extends HttpServlet {
         String valuesJson = new Gson().toJson(values);
         request.setAttribute("valuesJson", valuesJson);
 
-        int[] percentiles = {99, 95, 90, 80, 75, 50, 25, 10};
+        int[] percentiles = {10, 25, 50 ,75, 80, 90, 95, 99};
         double[] percentileResultArray = new double[percentiles.length];
         for (int i = 0; i < percentiles.length; i++) {
-            percentileResultArray[i] = Math.round(new Percentile().evaluate(values, percentiles[i]));
+            percentileResultArray[i] =
+                Math.round(new Percentile().evaluate(values, percentiles[i]) * 1000d) / 1000d;
         }
 
         if (values.length == 0) {
