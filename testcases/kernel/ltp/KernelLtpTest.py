@@ -65,6 +65,8 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                            keys.ConfigKeys.KEY_TEST_SUITE,
                            ltp_enums.ConfigKeys.RUN_STAGING,
+                           ltp_enums.ConfigKeys.RUN_32BIT,
+                           ltp_enums.ConfigKeys.RUN_64BIT,
                            ltp_enums.ConfigKeys.NUMBER_OF_THREADS]
         self.getUserParams(required_params)
 
@@ -93,7 +95,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self._requirement = env_checker.EnvironmentRequirementChecker(
             self.shell)
-        self.shell_env = shell_environment.ShellEnvironment(self.shell)
+        self._shell_env = shell_environment.ShellEnvironment(self.shell)
 
         self._testcases = test_cases_parser.TestCasesParser(
             self.data_file_path, self.include_filter, self.exclude_filter)
@@ -273,7 +275,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         # Number of thread is set to 0 (automatic)
         if not n_workers:
-            n_workers = self.shell_env.GetDeviceNumberOfPresentCpu()
+            n_workers = self._shell_env.GetDeviceNumberOfPresentCpu()
             logging.info('Number of CPU available on device: %i', n_workers)
 
         # Skip multithread version if only 1 worker available
@@ -403,12 +405,18 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def test32Bits(self):
         """Runs all 32-bit LTP test cases."""
+        asserts.skipIf(not self.run_32bit,
+                       'User specified not to run 32 bit version LTP tests.')
         self.TestNBits(self._32BIT)
 
-#     def test64Bits(self):
-#         # TODO: enable 64 bit tests
-#         """Runs all 64-bit LTP test cases."""
-#         self.TestNBits(self._64BIT)
+    def test64Bits(self):
+        """Runs all 64-bit LTP test cases."""
+        asserts.skipIf(not self.run_64bit,
+                       'User specified not to run 64 bit version LTP tests.')
+        asserts.skipIf(not self._shell_env.IsDeviceArch64Bit(),
+                       'Target device does not support 64 bit tests.')
+
+        self.TestNBits(self._64BIT)
 
 if __name__ == "__main__":
     test_runner.main()

@@ -72,6 +72,47 @@ class ShellEnvironment(object):
         self._thread_lock.release()
         return (True, "")
 
+    def GetDevicePropCpuAbi(self):
+        results = self.shell.Execute('{} | grep {}'.format(
+            shell_commands.CMD_GETPROC, shell_commands.PROC_CPUABI))
+        if (not results or results[const.EXIT_CODE][0] or
+                not results[const.STDOUT][0]):
+            logging.error("Cannot get cpu.abi info from device device."
+                          "\n  Results: {}".format(results))
+            return None
+        else:
+            return results[const.STDOUT][0]
+
+    def IsDeviceArchArm64(self):
+        """"Check whether the device's architecture is arm64"""
+        result = self.GetDevicePropCpuAbi()
+        if not result:
+            return False
+        else:
+            return result.find("arm64") > 0
+
+    def IsDeviceArchX86_64(self):
+        """"Check whether the device's architecture is x86_64"""
+        result = self.GetDevicePropCpuAbi()
+        if not result:
+            return False
+        else:
+            return result.find("x86_64") > 0
+
+    def IsDeviceArchMips64(self):
+        """"Check whether the device's architecture is mips64"""
+        result = self.GetDevicePropCpuAbi()
+        if not result:
+            return False
+        else:
+            return result.find("mips64") > 0
+
+    def IsDeviceArch64Bit(self):
+        """Check whether device cpu is 64 bit."""
+        return (self.IsDeviceArchArm64() or
+                self.IsDeviceArchX86_64() or
+                self.IsDeviceArchMips64())
+
     def GetDeviceNumberOfPresentCpu(self):
         """Get the number of available CPUs on target device"""
         results = self.shell.Execute('cat %s' % shell_commands.FILE_CPU_PRESENT)
@@ -90,6 +131,6 @@ class ShellEnvironment(object):
                 except Exception as e:
                     logging.error(e)
 
-            logging.error("Cannot parse number of working CPU info. "
+            logging.error("Cannot parse number of working CPU info."
                           "\n  CPU info: '{}'".format(cpu_info))
             return 1
