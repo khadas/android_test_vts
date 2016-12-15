@@ -164,10 +164,6 @@ api: {
   }
   arg: {
     type: TYPE_SCALAR
-    scalar_type: "int32_t"
-  }
-  arg: {
-    type: TYPE_SCALAR
     scalar_type: "char_pointer"
     name: "filename"
   }
