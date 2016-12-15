@@ -27,6 +27,7 @@
 #include "specification_parser/InterfaceSpecificationParser.h"
 
 #include "test/vts/sysfuzzer/common/proto/InterfaceSpecificationMessage.pb.h"
+#include <google/protobuf/text_format.h>
 
 namespace android {
 namespace vts {
@@ -35,7 +36,8 @@ SpecificationBuilder::SpecificationBuilder(
     const string dir_path, int epoch_count)
     : dir_path_(dir_path),
       epoch_count_(epoch_count),
-      if_spec_msg_(NULL) {}
+      if_spec_msg_(NULL),
+      module_name_(NULL) {}
 
 
 vts::InterfaceSpecificationMessage*
@@ -83,15 +85,19 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     const vts::InterfaceSpecificationMessage& iface_spec_msg,
     const char* dll_file_name,
     const char* target_func_name) {
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "entry" << endl;
   FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
   if (!fuzzer) {
     cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
     return NULL;
   }
-  if (!fuzzer->LoadTargetComponent(dll_file_name)) {
-    cerr << "couln't load target component file, " << dll_file_name << endl;
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "got fuzzer" << endl;
+  if (!fuzzer->LoadTargetComponent(dll_file_name, module_name_)) {
+    cerr << __FUNCTION__ << ": couldn't load target component file, "
+        << dll_file_name << endl;
     return NULL;
   }
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "loaded target comp" << endl;
 
   for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
     cout << "checking " << func_msg.name() << endl;
@@ -128,7 +134,8 @@ bool SpecificationBuilder::LoadTargetComponent(
     const char* spec_lib_file_path,
     int target_class,
     int target_type,
-    float target_version) {
+    float target_version,
+    const char* module_name) {
   if_spec_msg_ = FindInterfaceSpecification(
       target_class, target_type, target_version);
   if (!if_spec_msg_) {
@@ -151,21 +158,27 @@ bool SpecificationBuilder::LoadTargetComponent(
   cout << "loaded text " << output.length() << endl;
   cout << "loaded text " << strlen(output.c_str()) << endl;
   cout << "loaded text " << output << endl;
+
+  module_name_ = (char*) malloc(strlen(module_name) + 1);
+  strcpy(module_name_, module_name);
   return true;
 }
 
 
-bool SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) {
+const string empty_string = string();
+
+const string& SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) {
   if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
-    return false;
+    return empty_string;
   }
+  cout << __FUNCTION__ << ":" << __LINE__ << " " << "loaded if_spec lib" << endl;
 
   FuzzerBase* func_fuzzer = GetFuzzerBase(
       *if_spec_msg_, dll_file_name_, func_msg->name().c_str());
   if (!func_fuzzer) {
     cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
         << dll_file_name_ << endl;
-    return false;
+    return empty_string;
   }
 
   void* result;
@@ -179,9 +192,20 @@ bool SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) 
     } else {
       cout << __FUNCTION__ << " return value = NULL" << endl;
     }
+    return *(new string("todo: support aggregate"));
+  } else if (func_msg->return_type().has_primitive_type()) {
+    if (!strcmp(func_msg->return_type().primitive_type().c_str(), "int32_t")) {
+      func_msg->mutable_return_type()->mutable_primitive_value()->set_int32_t(
+          *((int*)(&result)));
+      cout << "result " << endl;
+      // todo handle more types;
+      string* output = new string();
+      google::protobuf::TextFormat::PrintToString(func_msg->return_type(),
+                                                  output);
+      return *output;
+    }
   }
-
-  return true;
+  return *(new string("void"));
 }
 
 

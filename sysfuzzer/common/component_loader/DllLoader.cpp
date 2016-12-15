@@ -62,12 +62,12 @@ void* DllLoader::Load(const char* file_path) {
 }
 
 
-struct hw_device_t* DllLoader::GetHWDevice() {
+struct hw_device_t* DllLoader::GetHWDevice(const char* module_name) {
   if (!handle_) {
     cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
     return NULL;
   }
-
+  cout << __FUNCTION__ << ":" << __LINE__ << endl;
   struct hw_module_t *hmi = (struct hw_module_t *) dlsym(
       handle_, HAL_MODULE_INFO_SYM_AS_STR);
   if (!hmi) {
@@ -75,9 +75,23 @@ struct hw_device_t* DllLoader::GetHWDevice() {
         << " not found" << endl;
     return NULL;
   }
+  cout << __FUNCTION__ << ":" << __LINE__ << endl;
   hmi->dso = handle_;
   device_ = NULL;
-  hmi->methods->open(hmi, hmi->name, &device_);
+  int ret;
+  if (!module_name || strlen(module_name) == 0) {
+    cout << __FUNCTION__ << ":" << __LINE__ << ": " << hmi->name << endl;
+    ret = hmi->methods->open(hmi, hmi->name,
+                             (struct hw_device_t**) &device_);
+  } else {
+    cout << __FUNCTION__ << ":" << __LINE__ << ": module_name |" << module_name << "|" << endl;
+    ret = hmi->methods->open(hmi, module_name,
+                             (struct hw_device_t**) &device_);
+  }
+  if (ret != 0) {
+    cout << "returns " << ret << " " << strerror(errno) << endl;
+  }
+  cout << __FUNCTION__ << ":" << __LINE__ << endl;
   return device_;
 }
 

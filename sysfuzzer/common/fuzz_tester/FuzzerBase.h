@@ -34,7 +34,8 @@ class FuzzerBase {
 
   // Loads a target component where the argument is the file path.
   // Returns true iff successful.
-  bool LoadTargetComponent(const char* target_dll_path);
+  bool LoadTargetComponent(const char* target_dll_path,
+                           const char* module_name = NULL);
 
   // Fuzz tests the loaded component using the provided interface specification.
   // Returns true iff the testing is conducted completely.

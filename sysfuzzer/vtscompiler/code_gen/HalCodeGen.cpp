@@ -45,8 +45,6 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "  cout << \"Function: \" << func_name << endl;" << endl;
 
   for (auto const& api : message.api()) {
-    std::stringstream ss;
-
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
 
     // args - definition;
@@ -62,7 +60,14 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
             << kInstanceVariableName << ")";
       } else {
-        cpp_ss << GetCppInstanceType(arg);
+        std::stringstream msg_ss;
+        msg_ss << "func_msg.arg(" << arg_count << ")";
+        string msg = msg_ss.str();
+
+        cpp_ss << "(" << msg << ".primitive_value_size() > 0 ";
+        cpp_ss << "|| " << msg << ".aggregate_value_size() > 0)? ";
+        cpp_ss << GetCppInstanceType(arg, msg);
+        cpp_ss << " : " << GetCppInstanceType(arg);
       }
       cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
@@ -93,7 +98,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       cpp_ss << "))";
     }
     cpp_ss << ");" << endl;
-
+    cpp_ss << "cout << \"called\" << endl;" << endl;
     cpp_ss << "    return true;" << endl;
     cpp_ss << "  }" << endl;
   }

@@ -57,7 +57,7 @@ class SpecificationBuilder {
       const vts::InterfaceSpecificationMessage& iface_spec_msg,
       const char* dll_file_name);
 
-  bool CallFunction(FunctionSpecificationMessage* func_msg);
+  const string& CallFunction(FunctionSpecificationMessage* func_msg);
 
   // Main function for the VTS system fuzzer where dll_file_name is the path of
   // a target component, spec_lib_file_path is the path of a specification
@@ -69,7 +69,8 @@ class SpecificationBuilder {
 
   bool LoadTargetComponent(
       const char* dll_file_name, const char* spec_lib_file_path,
-      int target_class, int target_type, float target_version);
+      int target_class, int target_type, float target_version,
+      const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
       const vts::InterfaceSpecificationMessage& iface_spec_msg,
@@ -93,6 +94,7 @@ class SpecificationBuilder {
   // TODO: use unique_ptr
   char* spec_lib_file_path_;
   char* dll_file_name_;
+  char* module_name_;
 };
 
 }  // namespace vts
