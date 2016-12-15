@@ -53,26 +53,6 @@ public class ShowGraphServlet extends HttpServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final long ONE_DAY = 86400000000000L;  // units microseconds
 
-    /**
-     * Returns the table corresponding to the table name.
-     * @param tableName Describes the table name which is passed as a parameter from
-     *        dashboard_main.jsp, which represents the table to fetch data from.
-     * @return table An instance of org.apache.hadoop.hbase.client.Table
-     * @throws IOException
-     */
-    private Table getTable(TableName tableName) throws IOException {
-        Table table = null;
-
-        try {
-            table = BigtableHelper.getConnection().getTable(tableName);
-        } catch (IOException e) {
-            logger.error("Exception occurred in com.google.android.vts.servlet.ShowGraphServlet."
-              + "getTable()", e);
-            return null;
-        }
-        return table;
-    }
-
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         RequestDispatcher dispatcher = null;
@@ -91,7 +71,7 @@ public class ShowGraphServlet extends HttpServlet {
             endTime = now;
         }
         tableName = TableName.valueOf(request.getParameter("tableName"));
-        table = getTable(tableName);
+        table = BigtableHelper.getTable(tableName);
 
         // This list holds the values for all profiling points.
         List<Double> profilingPointValuesList = new ArrayList<>();
