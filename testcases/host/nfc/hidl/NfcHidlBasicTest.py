@@ -35,6 +35,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     def testBase(self):
         """A simple testcase which just calls functions."""
         # TODO: extend to make realistic testcases
+        self.dut.hal.nfc.open()
         self.dut.hal.nfc.core_initialized(0)
         result = self.dut.hal.nfc.close()
         logging.info("result: %d", result)
