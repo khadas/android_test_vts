@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -133,11 +135,19 @@ public class ShowTableServlet extends HttpServlet {
             resultNames.add(r.name());
         }
 
+        // Define comparator for sorting test report messages in descending order
+        Comparator<TestReportMessage> reportComparator = new Comparator<TestReportMessage>() {
+            @Override
+            public int compare(TestReportMessage report1, TestReportMessage report2) {
+                return new Long(report2.getStartTimestamp()).compareTo(report1.getStartTimestamp());
+            }
+        };
+
         response.setContentType("text/plain");
         table = BigtableHelper.getTable(tableName);
 
         // this is the tip of the tree and is used for populating pie chart.
-        String topBuild = null;
+        String topBuildId = null;
 
         // TestReportMessage corresponding to the top build -- will be used for pie chart.
         TestReportMessage topBuildTestReportMessage = null;
@@ -184,7 +194,6 @@ public class ShowTableServlet extends HttpServlet {
                     Integer.parseInt(buildId);
                     Integer.parseInt(firstDeviceBuildId);
                     tests.add(0, testReportMessage);
-                    topBuild = firstDeviceBuildId;
                 } catch (NumberFormatException e) {
                     /* skip a non-post-submit build */
                     continue;
@@ -221,6 +230,7 @@ public class ShowTableServlet extends HttpServlet {
                 break;
             }
         }
+        Collections.sort(tests, reportComparator);
 
         if (tests.size() > MAX_BUILD_IDS_PER_PAGE) {
             int startIndex;
@@ -243,7 +253,8 @@ public class ShowTableServlet extends HttpServlet {
 
         if (topBuildTestReportMessage != null) {
             // create pieChartArray from top build data.
-
+            topBuildId = topBuildTestReportMessage.getDeviceInfoList().get(0).getBuildId()
+                                                .toStringUtf8();
             // Count array for each test result
             for (TestCaseReportMessage testCaseReportMessage : topBuildTestReportMessage.
                 getTestCaseList()) {
@@ -408,7 +419,7 @@ public class ShowTableServlet extends HttpServlet {
         // data for pie chart
         request.setAttribute("topBuildResultCounts", new Gson().toJson(topBuildResultCounts));
 
-        request.setAttribute("topBuildJson", new Gson().toJson(topBuild));
+        request.setAttribute("topBuildId", topBuildId);
 
         request.setAttribute("startTime", new Gson().toJson(startTime));
 
