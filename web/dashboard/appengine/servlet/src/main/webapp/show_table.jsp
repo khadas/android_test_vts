@@ -14,6 +14,7 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
+    <script src="http://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
@@ -21,11 +22,7 @@
       google.charts.setOnLoadCallback(drawLegendTable);
       google.charts.setOnLoadCallback(drawPieChart);
       google.charts.setOnLoadCallback(function() {
-        $(".google-visualization-table-table")
-          .toggleClass("google-visualization-table-table highlight table");
-        $(".google-visualization-table-tr-head")
-          .toggleClass("google-visualization-table-tr-head table-head");
-        $(".gradient").removeClass("gradient");
+          $(".gradient").removeClass("gradient");
       });
 
       // table for profiling data
@@ -113,7 +110,7 @@
               data.addColumn('string', columns[i]);
           }
 
-          var row = new Array('Color Code', '-', ' ', ' ', '~', ' ', ' ');
+          var row = new Array('Color Code', ' ', ' ', ' ', ' ', ' ', ' ');
           var rows = new  Array(1);
           rows[0] = row;
           data.addRows(rows);
@@ -124,7 +121,7 @@
                   var result = column - 1;
                   switch(result) {
                       case 0 : // case : unknown
-                          data.setValue(row, column, '-');
+                          data.setValue(row, column, ' ');
                           break;
                       case 1 : // Case: pass - green
                           data.setProperty(row, column, 'style',
@@ -137,7 +134,7 @@
                       case 3 : // case : skip : grey
                           data.setProperty(row, column, 'style',
                               'background-color: #A8A8A8;');
-                          data.setValue(row, column, '~');
+                          data.setValue(row, column, ' ');
                           break;
                       case 4: // Case: Exception - black
                           data.setProperty(row, column, 'style',
@@ -168,102 +165,30 @@
           }
 
           // add rows
-          var finalGrid = ${finalGridJson};
+          var deviceGrid = ${deviceGrid};
+          var timeGrid = ${timeGrid};
+          var summaryGrid = ${summaryGrid};
+          var resultsGrid = ${resultsGrid};
 
-          var summaryRowCount = ${summaryRowCountJson};
-          var deviceInfoRowCount = ${deviceInfoRowCountJson};
-
-          // bold the first few rows - first column
-          for (var i = 0; i < summaryRowCount + deviceInfoRowCount; i++) {
-              finalGrid[i][0] = finalGrid[i][0].bold();
-          }
+          timeGrid = timeGrid.map(function(row) {
+              return row.map(function(cell, j) {
+                  if (j == 0) return cell;
+                  else return moment(cell/1000).format("M/D/YY H:mmZZ");
+              });
+          });
 
           // add rows to the data.
-          data.addRows(finalGrid);
-
-
-          // add colors to the grid data table - iterate rowArray to view saved results.
-          for (var testCaseIndex = summaryRowCount + deviceInfoRowCount;
-               testCaseIndex < finalGrid.length; testCaseIndex++) {  // test case name
-              for (var buildIdIndex = 1; buildIdIndex < finalGrid[0].length;
-                   buildIdIndex++) {  // build ID
-
-                  var result = finalGrid[testCaseIndex][buildIdIndex];
-                  switch(result) {
-                      case '0': // case : unknown
-                          data.setValue(testCaseIndex, buildIdIndex, '-');
-                          break;
-
-                      case '1': // Case: pass - green
-                          data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                              'background-color: #7FFF00;');
-                          data.setValue(testCaseIndex, buildIdIndex, '');
-                          break;
-
-                      case '2': // Case : fail - red
-                          data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                              'background-color: #ff4d4d;');
-                          data.setValue(testCaseIndex, buildIdIndex, '');
-                          break;
-
-                      case '3': // Case: skip
-                          data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                              'background-color: #A8A8A8;');
-                          data.setValue(testCaseIndex, buildIdIndex, '~');
-                          break;
-
-                      case '4': // Case: Exception - black
-                          data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                              'background-color: #000000;');
-                          data.setValue(testCaseIndex, buildIdIndex, ' ');
-                          break;
-                      case '5': // Case: Timeout - purple
-                          data.setProperty(testCaseIndex, buildIdIndex, 'style',
-                              'background-color: #9900CC;');
-                          data.setValue(testCaseIndex, buildIdIndex, ' ');
-                          break;
-                  }
-              }
-          }
+          data.addRows(deviceGrid);
+          data.addRows(timeGrid);
+          data.addRows(summaryGrid);
+          data.addRows(resultsGrid);
 
           var table = new google.visualization.Table(document.getElementById('grid_table_div'));
+          var classNames = {
+              headerRow : 'table-header'
+          };
           table.draw(data, {showRowNumber: false, alternatingRowStyle : true, 'allowHtml': true,
-                            frozenColumns: 1});
-
-          // selection handler for code coverage
-          google.visualization.events.addListener(table, 'select', selectHandler);
-
-          // opens up new page for code coverage
-          // equivalent to setting up hyperlinks for the 8th row to link it
-          // to the code coverage page.
-          function selectHandler() {
-              var selection = table.getSelection();
-              var summaryRowCount = ${summaryRowCountJson};
-              var deviceInfoRowCount = ${deviceInfoRowCountJson};
-
-              // return if it is not the % coverage row
-              // The click should be made only on the last row to see coverage data.
-              var rowIndex = table.getSelection()[0].row;
-              if (rowIndex != summaryRowCount + deviceInfoRowCount -1) {
-                  return;
-              }
-
-              if (selection.length == 0) return;
-              var cell = event.target; // get selected cell
-              var column = cell.cellIndex - 1;
-              var testRunKeyArray = ${testRunKeyArrayJson};
-
-              // key is a unique combination of build ID and time stamp
-              var key = testRunKeyArray[column];
-
-              var ctx = "${pageContext.request.contextPath}";
-
-              var link = ctx + "/show_coverage?key=" + key +
-                "&testName=${testName}" +
-                "&startTime=${startTime}" +
-                "&endTime=${endTime}";
-              window.open(link,"_self");
-          }
+                            frozenColumns: 1, cssClassNames: classNames});
       }
     </script>
 

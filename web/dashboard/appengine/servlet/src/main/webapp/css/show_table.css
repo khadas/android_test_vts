@@ -13,16 +13,20 @@
  limitations under the License.
 */
 
-.table {
-    font-size:14px;
+table {
+    font-family: Roboto !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
 }
-
+.table-header {
+    background-color: white;
+}
 #buttons {
-    margin-top:25px;
+    margin-top: 25px;
 }
 
 #chart_holder {
-    padding:30px 5px;
+    padding: 30px 5px;
 }
 
 #pie_chart_div {
@@ -32,4 +36,36 @@
 
 #profiling_container {
     padding: 30px 25px;
+}
+.btn.coverage-btn {
+    border-radius: 50px;
+    height: auto;
+    line-height: inherit;
+    padding: 3px;
+    margin-right: 5px;
+}
+i.material-icons.coverage-icon {
+    font-size: inherit;
+}
+.TEST_CASE_RESULT {
+    border-radius: 50px;
+}
+.TEST_CASE_RESULT_PASS {
+    background-color: #7FFF00;
+}
+.TEST_CASE_RESULT_FAIL {
+    background-color: #ff4d4d;
+}
+.TEST_CASE_RESULT_SKIP {
+    background-color: #A8A8A8;
+}
+.TEST_CASE_RESULT_EXCEPTION {
+    background-color: black;
+}
+.TEST_CASE_RESULT_TIMEOUT {
+    background-color: #9900CC;
+}
+.UNKNOWN_RESULT {
+    background-color: white;
+    border: 1px #A8A8A8 solid;
 }
