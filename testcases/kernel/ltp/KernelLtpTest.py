@@ -19,7 +19,7 @@ import logging
 import os
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test
+from vts.runners.host import base_test_with_webdb
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
@@ -142,7 +142,7 @@ class TempDir(object):
         return self._path
 
 
-class KernelLtpTest(base_test.BaseTestClass):
+class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """Runs the LTP (Linux Test Project) testcases against Android OS kernel.
 
     Attributes:
