@@ -90,7 +90,9 @@ int VtsShellDriver::ExecShellCommand(
     cout << "[Handler] Loop output: " << out << endl << endl;
   }
 
-  return 0;
+  int exit_code = pclose(output_fp) / 256;
+  responseMessage->add_exit_code(exit_code);
+  return exit_code;
 }
 
 int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
@@ -105,8 +107,7 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
     }
     if (cmd_msg.command_type() == EXIT) {
       break;
-    }
-    else if (cmd_msg.command_type() != EXECUTE_COMMAND) {
+    } else if (cmd_msg.command_type() != EXECUTE_COMMAND) {
       cerr << "[Shell driver] unknown command type " << cmd_msg.command_type()
            << endl;
       continue;
@@ -125,6 +126,8 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
       }
     }
 
+    // TODO: other response code conditions
+    responseMessage.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
     if (!driverUtil.VtsSocketSendMessage(responseMessage)) {
       fprintf(stderr, "Driver: write output to socket error.\n");
       --numberOfFailure;

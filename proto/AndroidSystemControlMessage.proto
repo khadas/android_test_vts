@@ -135,6 +135,7 @@ message AndroidSystemControlResponseMessage {
 
   repeated bytes stdout = 2001;
   repeated bytes stderr = 2002;
+  repeated int32 exit_code = 2003;
 }
 
 
