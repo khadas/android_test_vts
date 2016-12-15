@@ -26,10 +26,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <utils/RefBase.h>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -38,6 +40,7 @@
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 #include "BinderClient.h"
 #include "SocketServerForDriver.h"
+#include "TcpClient.h"
 
 using namespace std;
 using namespace google::protobuf;
@@ -89,14 +92,19 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::SetHostInfo(
 }
 
 
-AndroidSystemControlResponseMessage* AgentRequestHandler::CheckStubService(
+AndroidSystemControlResponseMessage* AgentRequestHandler::CheckDriverService(
     const string& service_name) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage* response_msg =
       new AndroidSystemControlResponseMessage();
 
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  int port = GetSocketPortFromFile(service_name, 10);
+  if (port != -1) {
+#else  // binder
   sp<IVtsFuzzer> binder = GetBinderClient(service_name);
   if (binder.get()) {
+#endif
     response_msg->set_response_code(SUCCESS);
     response_msg->set_reason("found the service");
     cout << "set service_name " << service_name << endl;
@@ -109,13 +117,12 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::CheckStubService(
 }
 
 
-AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchStubService(
+AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchDriverService(
     const char* spec_dir_path, const string& service_name,
     const string& file_path, const char* fuzzer_path,
     int target_class, int target_type,
     float target_version, const string& module_name) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
-  pid_t pid = fork();
   ResponseCode result = FAIL;
 
   // TODO: shall check whether there's a service with the same name and return
@@ -123,72 +130,111 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchStubService(
   AndroidSystemControlResponseMessage* response_msg =
       new AndroidSystemControlResponseMessage();
 
-  if (pid == 0) {  // child
-    // TODO: check whether the port is available and handle if fails.
-    static int port = 21000;
-    port++;
-    StartSocketServerForDriver(port, -1);
+  // deletes the service file if exists before starting to launch a driver.
+  string socket_port_flie_path = GetSocketPortFilePath(service_name);
+  struct stat file_stat;
+  if (stat(socket_port_flie_path.c_str(), &file_stat) == 0  // file exists
+      && remove(socket_port_flie_path.c_str()) == -1) {
+    cerr << __func__ << " " << socket_port_flie_path << " delete error"
+        << endl;
+    response_msg->set_reason("service file already exists.");
+  } else {
+    pid_t pid = fork();
+    if (pid == 0) {  // child
+      // TODO: check whether the port is available and handle if fails.
+      static int port = 21000;
+      port++;
+      StartSocketServerForDriver(port, -1);
 
-    char* cmd;
-    string fuzzer_path_string(fuzzer_path);
-    size_t offset = fuzzer_path_string.find_last_of("/");
-    string ld_dir_path = fuzzer_path_string.substr(0, offset);
-    if (!spec_dir_path) {
-      asprintf(
-          &cmd,
-          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-          "--agent_port=%d",
-          ld_dir_path.c_str(), fuzzer_path, service_name.c_str(), port);
-    } else {
-      asprintf(
-          &cmd,
-          "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
-          "--spec_dir=%s --agent_port=%d",
-          ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
-          spec_dir_path, port);
-    }
-    cout << __func__ << "Exec " << cmd << endl;
-    system(cmd);
-    cout << __func__ << "fuzzer exits" << endl;
-    free(cmd);
-    exit(0);
-  } else if (pid > 0){
-    for (int attempt = 0; attempt < 10; attempt++) {
-      sleep(1);
-      AndroidSystemControlResponseMessage* resp =
-          CheckStubService(service_name);
-      if (resp->response_code() == SUCCESS) {
-        result = SUCCESS;
-        break;
-      }
-    }
-    if (result) {
-      // TODO: use an attribute (client) of a newly defined class.
-      android::sp<android::vts::IVtsFuzzer> client =
-          android::vts::GetBinderClient(service_name);
-      if (!client.get()) {
-        response_msg->set_response_code(FAIL);
-        response_msg->set_reason("Failed to start a stub.");
-        return response_msg;  // TODO: kill the stub?
-      }
-      cout << "[agent->stub]: LoadHal " << module_name << endl;
-      int32_t result = client->LoadHal(
-          file_path, target_class, target_type, target_version, module_name);
-      cout << "[stub->agent]: LoadHal returns " << result << endl;
-      if (result == 0) {
-        response_msg->set_response_code(SUCCESS);
-        response_msg->set_reason("Loaded the selected HAL.");
-        cout << "set service_name " << service_name << endl;
-        service_name_ = service_name;
+      string fuzzer_path_string(fuzzer_path);
+      size_t offset = fuzzer_path_string.find_last_of("/");
+      string ld_dir_path = fuzzer_path_string.substr(0, offset);
+
+      char* cmd;
+      if (!spec_dir_path) {
+  #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+        asprintf(
+            &cmd,
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
+            "--agent_port=%d",
+            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(), port);
+  #else  // binder
+        asprintf(
+            &cmd,
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+            "--agent_port=%d",
+            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(), port);
+  #endif
       } else {
-        response_msg->set_response_code(FAIL);
-        response_msg->set_reason("Failed to load the selected HAL.");
+  #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+        asprintf(
+            &cmd,
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --socket_port_file=%s "
+            "--spec_dir=%s --agent_port=%d",
+            ld_dir_path.c_str(), fuzzer_path, socket_port_flie_path.c_str(),
+            spec_dir_path, port);
+  #else  // binder
+        asprintf(
+            &cmd,
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --server --service_name=%s "
+            "--spec_dir=%s --agent_port=%d",
+            ld_dir_path.c_str(), fuzzer_path, service_name.c_str(),
+            spec_dir_path, port);
+  #endif
       }
-      return response_msg;
+      cout << __func__ << "Exec " << cmd << endl;
+      system(cmd);
+      cout << __func__ << "fuzzer exits" << endl;
+      free(cmd);
+      exit(0);
+    } else if (pid > 0){
+      for (int attempt = 0; attempt < 10; attempt++) {
+        sleep(1);
+        AndroidSystemControlResponseMessage* resp =
+            CheckDriverService(service_name);
+        if (resp->response_code() == SUCCESS) {
+          result = SUCCESS;
+          break;
+        }
+      }
+      if (result) {
+        // TODO: use an attribute (client) of a newly defined class.
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+        VtsDriverSocketClient* client =
+            android::vts::GetDriverSocketClient(service_name);
+        if (!client) {
+#else  // binder
+        android::sp<android::vts::IVtsFuzzer> client =
+            android::vts::GetBinderClient(service_name);
+        if (!client.get()) {
+#endif
+          response_msg->set_response_code(FAIL);
+          response_msg->set_reason("Failed to start a driver.");
+          return response_msg;  // TODO: kill the driver?
+        }
+        cout << "[agent->driver]: LoadHal " << module_name << endl;
+        int32_t result = client->LoadHal(
+            file_path, target_class, target_type, target_version, module_name);
+        cout << "[driver->agent]: LoadHal returns " << result << endl;
+        if (result == 0) {
+          response_msg->set_response_code(SUCCESS);
+          response_msg->set_reason("Loaded the selected HAL.");
+          cout << "set service_name " << service_name << endl;
+          service_name_ = service_name;
+        } else {
+          response_msg->set_response_code(FAIL);
+          response_msg->set_reason("Failed to load the selected HAL.");
+        }
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+        driver_client_ = client;
+#endif
+        return response_msg;
+      }
     }
+    response_msg->set_reason(
+        "Failed to fork a child process to start a driver.");
   }
   response_msg->set_response_code(FAIL);
-  response_msg->set_reason("Failed to fork a child process to start a stub.");
   cerr << "can't fork a child process to run the fuzzer." << endl;
   return response_msg;
 }
@@ -197,10 +243,16 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::LaunchStubService(
 AndroidSystemControlResponseMessage* AgentRequestHandler::ListApis() {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
   // TODO: use an attribute (client) of a newly defined class.
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
   android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient(
       service_name_);
-  if (!client.get()) return NULL;
-
+  if (!client.get()) {
+#endif
+    return NULL;
+  }
   const char* result = client->GetFunctions();
   cout << "GetFunctions: len " << strlen(result) << endl;
   // if (result) cout << "GetFunctions: " << result << endl;
@@ -214,6 +266,9 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::ListApis() {
     response_msg->set_response_code(FAIL);
     response_msg->set_reason("Failed to get the functions.");
   }
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  free((void*)result);
+#endif
   return response_msg;
 }
 
@@ -221,10 +276,17 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::ListApis() {
 AndroidSystemControlResponseMessage* AgentRequestHandler::CallApi(
     const string& call_payload) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
   // TODO: use an attribute (client) of a newly defined class.
   android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient(
       service_name_);
-  if (!client.get()) return NULL;
+  if (!client.get()) {
+#endif
+    return NULL;
+  }
 
   const char* result = client->Call(call_payload);
 
@@ -239,6 +301,9 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::CallApi(
     response_msg->set_response_code(FAIL);
     response_msg->set_reason("Failed to call the api.");
   }
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  free((void*)result);
+#endif
   return response_msg;
 }
 
@@ -254,6 +319,7 @@ AndroidSystemControlResponseMessage* AgentRequestHandler::DefaultResponse() {
 }
 
 #define RX_BUF_SIZE (128 * 1024)
+
 
 // handles a new session.
 int AgentRequestHandler::StartSession(
@@ -307,17 +373,17 @@ int AgentRequestHandler::StartSession(
         case SET_HOST_INFO:
           response_msg = SetHostInfo(command_msg.callback_port());
           break;
-        case CHECK_STUB_SERVICE:
-          response_msg = CheckStubService(command_msg.service_name());
+        case CHECK_DRIVER_SERVICE:
+          response_msg = CheckDriverService(command_msg.service_name());
           break;
-        case LAUNCH_STUB_SERVICE:
+        case LAUNCH_DRIVER_SERVICE:
           const char* fuzzer_path;
           if (command_msg.bits() == 32) {
             fuzzer_path = fuzzer_path32;
           } else {
             fuzzer_path = fuzzer_path64;
           }
-          response_msg = LaunchStubService(
+          response_msg = LaunchDriverService(
               spec_dir_path,
               command_msg.service_name(),
               command_msg.file_path(),

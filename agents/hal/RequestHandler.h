@@ -23,6 +23,8 @@
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
+#include "TcpClient.h"
+
 using namespace std;
 using namespace google::protobuf;
 
@@ -32,7 +34,9 @@ namespace vts {
 // Class which contains actual methods to handle the runner requests.
 class AgentRequestHandler {
  public:
-  AgentRequestHandler() : service_name_() {}
+  AgentRequestHandler()
+      : service_name_(),
+        driver_client_(NULL) {}
 
   // handles a new session.
   int StartSession(
@@ -48,12 +52,12 @@ class AgentRequestHandler {
   // for the SET_HOST_INFO command.
   AndroidSystemControlResponseMessage* SetHostInfo(const int callback_port);
 
-  // for the CHECK_STUB_SERVICE command
-  AndroidSystemControlResponseMessage* CheckStubService(
+  // for the CHECK_DRIVER_SERVICE command
+  AndroidSystemControlResponseMessage* CheckDriverService(
       const string& service_name);
 
-  // for the LAUNCH_STUB_SERVICE command
-  AndroidSystemControlResponseMessage* LaunchStubService(
+  // for the LAUNCH_DRIVER_SERVICE command
+  AndroidSystemControlResponseMessage* LaunchDriverService(
       const char* spec_dir_path, const string& service_name,
       const string& file_path, const char* fuzzer_path,
       int target_class, int target_type,
@@ -73,6 +77,8 @@ class AgentRequestHandler {
   string service_name_;
   // the port number of a host-side callback server.
   int callback_port_;
+  // the socket client of a launched or connected driver.
+  VtsDriverSocketClient* driver_client_;
 };
 
 }  // namespace vts

@@ -56,7 +56,7 @@ int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
   Parcel data;
   Parcel reply;
 
-  printf("agent->stub: LoadHal(%s, %d, %d, %f, %s)\n",
+  printf("agent->driver: LoadHal(%s, %d, %d, %f, %s)\n",
          path.c_str(), target_class, target_type, target_version,
          module_name.c_str());
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
@@ -83,7 +83,7 @@ int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
   int32_t res;
   status_t status = reply.readInt32(&res);
 
-  printf("stub->agent: LoadHal returns %d\n", status);
+  printf("driver->agent: LoadHal returns %d\n", status);
   return res;
 }
 

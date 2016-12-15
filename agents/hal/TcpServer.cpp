@@ -92,7 +92,7 @@ int StartTcpServer(const char* fuzzer_path32, const char* fuzzer_path64,
       AgentRequestHandler handler;
       exit(handler.StartSession(newsockfd, fuzzer_path32, fuzzer_path64,
                                 spec_dir_path));
-    } else if (pid < 0){
+    } else if (pid < 0) {
       cerr << "can't fork a child process to handle a session." << endl;
       return -1;
     }

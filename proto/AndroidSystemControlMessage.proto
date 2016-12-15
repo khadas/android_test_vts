@@ -26,9 +26,9 @@ enum CommandType {
   SET_HOST_INFO = 2;
 
   // To check whether fuzzer's binder service is available.
-  CHECK_STUB_SERVICE = 101;
+  CHECK_DRIVER_SERVICE = 101;
   // To start a fuzzer binary service and select a HAL module.
-  LAUNCH_STUB_SERVICE = 102;
+  LAUNCH_DRIVER_SERVICE = 102;
 
   // To get a list of available functions.
   LIST_APIS = 201;
@@ -58,11 +58,11 @@ message AndroidSystemControlCommandMessage {
   // for SET_HOST_INFO
   optional int32 callback_port = 1101;
 
-  // for CHECK_STUB_SERVICE
+  // for CHECK_DRIVER_SERVICE
   // the binder service name
   optional bytes service_name = 2001;
 
-  // for LAUNCH_STUB_SERVICE
+  // for LAUNCH_DRIVER_SERVICE
   // The name of a target.
   optional bytes file_path = 3001;
 
