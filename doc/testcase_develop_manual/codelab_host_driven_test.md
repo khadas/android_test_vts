@@ -54,7 +54,7 @@ Then edit its contents to:
 ```json
 <configuration description="Run VTS CodeLab Tests">
     <include name="everything" />
-    <option name="compatibility:plan" value="vts" />
+    <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="<your project name>" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

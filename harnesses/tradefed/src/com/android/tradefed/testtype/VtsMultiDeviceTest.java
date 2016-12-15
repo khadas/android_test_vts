@@ -551,7 +551,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
         // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
         if (mBuildInfo != null) {
             CompatibilityBuildHelper mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
-            mBuildHelper.init(VTS, null);
 
             File testDir = null;
             try {
