@@ -53,3 +53,6 @@ LOCAL_COMPATIBILITY_SUITE := vts
 
 include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/../../../tools/build/Android.packaging_sharedlib.mk
+
+VTS_GCNO_FILE := lights
+include $(LOCAL_PATH)/../../../tools/build/Android.packaging_gcno.mk
