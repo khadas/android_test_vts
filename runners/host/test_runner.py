@@ -225,9 +225,9 @@ class TestRunner(object):
                      "controller module attribute %s.") % (module.__name__,
                                                            attr))
             if not getattr(module, attr):
-                raise signals.ControllerError(("Controller interface %s in %s "
-                                               "cannot be null.") %
-                                              (attr, module.__name__))
+                raise signals.ControllerError(
+                    ("Controller interface %s in %s "
+                     "cannot be null.") % (attr, module.__name__))
 
     def registerController(self, module):
         """Registers a controller module for a test run.
@@ -250,10 +250,10 @@ class TestRunner(object):
         TestRunner.verifyControllerModule(module)
         module_ref_name = module.__name__.split('.')[-1]
         if module_ref_name in self.controller_registry:
-            raise signals.ControllerError(("Controller module %s has already "
-                                           "been registered. It can not be "
-                                           "registered again.") %
-                                          module_ref_name)
+            raise signals.ControllerError(
+                ("Controller module %s has already "
+                 "been registered. It can not be "
+                 "registered again.") % module_ref_name)
         # Create controller objects.
         create = module.create
         module_config_name = module.VTS_CONTROLLER_CONFIG_NAME
@@ -267,9 +267,8 @@ class TestRunner(object):
             controller_config = copy.deepcopy(original_config)
             objects = create(controller_config)
         except:
-            logging.exception(
-                ("Failed to initialize objects for controller "
-                 "%s, abort!"), module_config_name)
+            logging.exception(("Failed to initialize objects for controller "
+                               "%s, abort!"), module_config_name)
             raise
         if not isinstance(objects, list):
             raise ControllerError(("Controller module %s did not return a list"
@@ -279,11 +278,6 @@ class TestRunner(object):
                       module_config_name)
         destroy_func = module.destroy
         self.controller_destructors[module_ref_name] = destroy_func
-
-        # call the startAgent in android_device.py
-        # TODO: extend below to support agents on multiple target devices.
-        dut = objects[0]
-        dut.startAgent()
         return objects
 
     def unregisterControllers(self):
@@ -295,7 +289,6 @@ class TestRunner(object):
             try:
                 logging.debug("Destroying %s.", name)
                 dut = self.controller_destructors[name][0]
-                dut.stopAgent()
                 destroy(self.controller_registry[name])
             except:
                 logging.exception("Exception occurred destroying %s.", name)

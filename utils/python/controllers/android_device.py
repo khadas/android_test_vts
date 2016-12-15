@@ -78,15 +78,13 @@ def create(configs):
                 ("Android device %s is specified in config"
                  " but is not attached.") % ad.serial)
         ad.startAdbLogcat()
+        ad.startVtsAgent()
     return ads
 
 
 def destroy(ads):
     for ad in ads:
-        try:
-            ad.closeAllSl4aSession()
-        except:
-            pass
+        ad.stopVtsAgent()
         if ad.adb_logcat_process:
             ad.stopAdbLogcat()
 
@@ -282,11 +280,14 @@ class AndroidDevice(object):
                 for adb port forwarding (for command-response sessions).
         device_callback_port: int, the port number used on the Android device
                 for adb port reverse forwarding (for callback sessions).
+        log: A logger project with a device-specific prefix for each line -
+             [AndroidDevice|<serial>]
         log_path: A string that is the path where all logs collected on this
                   android device should be stored.
         adb_logcat_process: A process that collects the adb logcat.
         adb_logcat_file_path: A string that's the full path to the adb logcat
                               file collected, if any.
+        vts_agent_process: A process that runs the HAL agent.
         adb: An AdbProxy object used for interacting with the device via adb.
         fastboot: A FastbootProxy object used for interacting with the device
                   via fastboot.
@@ -294,26 +295,19 @@ class AndroidDevice(object):
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
                             (to get callbacks from agent).
-        background_thread: a thread that runs in background to upload the
-            agent on the device.
-        queue: an instance of queue.Queue that keeps main thread on wait unless
-            the background_thread indicates it to move.
-        base_dir: target-side directory where the VTS binaries are uploaded.
     """
-    background_thread = None
-    background_thread_proceed = False
-    base_dir = None
-    queue = Queue.Queue()
 
     def __init__(self, serial="", device_port=5001, device_callback_port=5010):
         self.serial = serial
         self.device_command_port = device_port
         self.device_callback_port = device_callback_port
-        self.log = logging.getLogger()
-        base_log_path = getattr(self.log, "log_path", "/tmp/logs/")
+        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
+                                              {"serial": self.serial})
+        base_log_path = getattr(logging, "log_path", "/tmp/logs/")
         self.log_path = os.path.join(base_log_path, "AndroidDevice%s" % serial)
         self.adb_logcat_process = None
         self.adb_logcat_file_path = None
+        self.vts_agent_process = None
         self.adb = adb.AdbProxy(serial)
         self.fastboot = fastboot.FastbootProxy(serial)
         if not self.isBootloaderMode:
@@ -321,10 +315,10 @@ class AndroidDevice(object):
         self.host_command_port = adb.get_available_host_port()
         self.host_callback_port = adb.get_available_host_port()
         self.adb.tcp_forward(self.host_command_port, self.device_command_port)
-        self.adb.reverse_tcp_forward(
-            self.device_callback_port, self.host_callback_port)
-        self.hal = hal_mirror.HalMirror(
-            self.host_command_port, self.host_callback_port)
+        self.adb.reverse_tcp_forward(self.device_callback_port,
+                                     self.host_callback_port)
+        self.hal = hal_mirror.HalMirror(self.host_command_port,
+                                        self.host_callback_port)
 
     def __del__(self):
         if self.host_command_port:
@@ -482,107 +476,68 @@ class AndroidDevice(object):
             self.fastboot.reboot()
             return
         has_adb_log = self.isAdbLogcatOn
+        has_vts_agent = True if self.vts_agent_process else False
         if has_adb_log:
             self.stopAdbLogcat()
+        if has_vts_agent:
+            self.stopVtsAgent()
         self.adb.reboot()
         self.waitForBootCompletion()
         self.rootAdb()
         if has_adb_log:
             self.startAdbLogcat()
+        if has_vts_agent:
+            self.startVtsAgent()
 
-    def startAgent(self):
-        """ To start agent.
+    def startVtsAgent(self):
+        """Start HAL agent on the AndroidDevice.
 
         This function starts the target side native agent and is persisted
-        throughout the test run. This process is handled by the VTS runner lib.
+        throughout the test run.
         """
-        # to ensure that only one instance of this agent runs
-        if(self.background_thread is not None):
-            logging.error(
-                "Another instance of background_thread is already "
-                "running.")
-            return
-
-        background_thread = threading.Thread(target=self.runAgent)
-        # Exit the server thread when the main thread terminates
-        background_thread.daemon = True
-        background_thread.start()
-
-        # wait for the flag from child thread
-        self.queue.get(block=True, timeout=None)
-
-        client = vts_tcp_client.VtsTcpClient()
-
-        # Ensure that the connection succeeds before it moves forward.
-        for _ in range(MAX_AGENT_CONNECT_RETRIES):
-            try:
-                time.sleep(THREAD_SLEEP_TIME)  # put current thread on sleep
-                response = client.Connect(
-                    command_port=self.host_command_port,
-                    callback_port=self.host_callback_port)
-
-                if response:
-                    return
-            except socket.error as e:
-                pass
-
-        # Throw error if client is unable to make a connection
-        raise errors.VtsTcpClientCreationError(
-              "Couldn't connect to %s:%s" % (
-                                    vts_tcp_client.TARGET_IP,
-                                    self.host_command_port))
-
-    def runAgent(self):
-        """This functions runs the child thread that runs the agent."""
-
-        # kill the existing instance of agent in DUT
-        commands = ["killall vts_hal_agent > /dev/null 2&>1",
-                    "killall fuzzer32 > /dev/null 2&>1",
-                    "killall fuzzer64 > /dev/null 2&>1"]
-
-        for cmd in commands:
+        if self.vts_agent_process:
+            raise AndroidDeviceError("HAL agent is already running on %s." %
+                                     self.serial)
+        kill_commands = ["killall vts_hal_agent", "killall fuzzer32",
+                         "killall fuzzer64"]
+        for cmd in kill_commands:
             try:
                 self.adb.shell(cmd)
-            except adb.AdbError as e:
-                logging.info('Exception occurred in command: %s', cmd)
+            except adb.AdbError:
+                # Ignore errors from killall in case process was not running.
+                pass
+        vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
+        cmd = (
+            'adb -s {s} shell LD_LIBRARY_PATH={path}/64 {path}/64/vts_hal_agent'
+            ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec >> {log}'
+        ).format(s=self.serial,
+                 path=DEFAULT_AGENT_BASE_DIR,
+                 log=vts_agent_log_path)
+        self.vts_agent_process = utils.start_standing_subprocess(
+            cmd, check_health_delay=1)
 
-        cmd = '{}{}{} {}{} {}{} {}{} {}{}'.format(
-            'LD_LIBRARY_PATH=',
-            DEFAULT_AGENT_BASE_DIR, "/64",
-            DEFAULT_AGENT_BASE_DIR, "/64/vts_hal_agent",
-            DEFAULT_AGENT_BASE_DIR, "/32/fuzzer32",
-            DEFAULT_AGENT_BASE_DIR, "/64/fuzzer64",
-            DEFAULT_AGENT_BASE_DIR, "/spec")
-
-        self.queue.put('flag')
-        self.adb.shell(cmd)
-
-        # This should never happen.
-        logging.exception("Agent Terminated!")
-
-    def stopAgent(self):
-        """Stop the agent running on target.
-
-        This function stops the target side native agent which is persisted
-        throughout the test run. Obtain the process ID for the agent running
-        on DUT and then kill the process. This assumes each target device runs
-        only one VTS agent at a time.
-
+    def stopVtsAgent(self):
+        """Stop the HAL agent running on the AndroidDevice.
         """
-        # TODO: figure out if this function is called from unregisterControllers
-        cmd = 'adb shell pgrep vts_hal_agent'
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        (out, err) = proc.communicate()
-        out = out.strip()
-        processList = out.split('\n')
+        if self.vts_agent_process:
+            utils.stop_standing_subprocess(self.vts_agent_process)
+            self.vts_agent_process = None
 
-        # Return if multiple agents are running on the device
-        if len(processList) > 1:
-            logging.error("Multiple instances of vts_hal_agent running on "
-                "device.")
-            return
 
-        # Kill the processes corresponding to the agent
-        for pid in processList:
-            cmd = '{} {}'.format('adb shell kill -9', pid)
-            subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
+    """A wrapper class that attaches a prefix to all log lines from an
+    AndroidDevice object.
+    """
+
+    def process(self, msg, kwargs):
+        """Process every log message written via the wrapped logger object.
+
+        We are adding the prefix "[AndroidDevice|<serial>]" to all log lines.
+
+        Args:
+            msg: string, the original log message.
+            kwargs: dict, the key value pairs that can be used to modify the
+                    original log message.
+        """
+        msg = "[AndroidDevice|%s] %s" % (self.extra["serial"], msg)
+        return (msg, kwargs)
