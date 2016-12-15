@@ -267,6 +267,11 @@ class TestRunner(object):
             # in case the controller module modifies the config internally.
             original_config = self.testbed_configs[module_config_name]
             controller_config = copy.deepcopy(original_config)
+            logging.info("controller_config: %s", controller_config)
+            if (controller_config == module.ANDROID_DEVICE_PICK_ALL_TOKEN
+                and len(sys.argv) >= 3):
+                controller_config = [{"serial": sys.argv[2]}]
+                logging.info("set controller_config to %s", controller_config)
             objects = create(controller_config)
         except:
             logging.exception(("Failed to initialize objects for controller "
