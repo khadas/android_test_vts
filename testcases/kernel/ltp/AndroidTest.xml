@@ -36,6 +36,7 @@
         <option name="push" value="vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
         <option name="push" value="vts_hal_agent->/data/local/tmp/64/vts_hal_agent" />
 
+        <option name="push" value="libcap.so->/data/local/tmp/64/libcap.so" />
         <option name="push" value="crash01_32->/data/local/tmp/32/crash01_32" />
         <option name="push" value="crash01_64->/data/local/tmp/64/crash01_64" />
         <option name="push" value="crash02_32->/data/local/tmp/32/crash02_32" />
