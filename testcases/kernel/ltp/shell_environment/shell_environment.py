@@ -109,13 +109,13 @@ class ShellEnvironment(object):
 
     def IsDeviceArch64Bit(self):
         """Check whether device cpu is 64 bit."""
-        return (self.IsDeviceArchArm64() or
-                self.IsDeviceArchX86_64() or
+        return (self.IsDeviceArchArm64() or self.IsDeviceArchX86_64() or
                 self.IsDeviceArchMips64())
 
     def GetDeviceNumberOfPresentCpu(self):
         """Get the number of available CPUs on target device"""
-        results = self.shell.Execute('cat %s' % shell_commands.FILE_CPU_PRESENT)
+        results = self.shell.Execute('cat %s' %
+                                     shell_commands.FILE_CPU_PRESENT)
         if (not results or results[const.EXIT_CODE][0] or
                 not results[const.STDOUT][0]):
             logging.error("Cannot get number of working CPU info."
@@ -134,3 +134,35 @@ class ShellEnvironment(object):
             logging.error("Cannot parse number of working CPU info."
                           "\n  CPU info: '{}'".format(cpu_info))
             return 1
+
+    def CreateSedPattern(self, replace_from, replace_to):
+        """Create a shell command to replace strings in given file list
+
+        Args:
+            replace_from: string, the string to search using sed
+            replace_to: string, the replacement string for sed
+
+        Returns:
+            String, a sed pattern starting with 's' and ending with 'g',
+            with a unique separator
+        """
+        separators = '/=+-:#\\'
+        separator_avalibility = [c not in replace_from and c not in replace_to
+                                 for c in separators]
+
+        available_separator = [
+            ch for ch, available in zip(separators, separator_avalibility)
+            if available
+        ]
+
+        if not available_separator:
+            logging.error('no pre-defined separator available for the given'
+                          ' strings')
+            return None
+
+        separator = available_separator[0]
+        return ("s{separator}{replace_from}{separator}"
+                "{replace_to}{separator}g").format(
+                    separator=separator,
+                    replace_from=replace_from,
+                    replace_to=replace_to)
