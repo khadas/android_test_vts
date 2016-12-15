@@ -85,7 +85,7 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             flashOffMs=200,
             brightnessMode=self.dut.hal.light.BRIGHTNESS_MODE_USER)
 
-        last_coverage_data = None
+        last_coverage_data = {}
         for iteration in range(self.iteartion_count):
             index = 0
             logging.info("whitebox iteration %d", iteration)
@@ -99,14 +99,19 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
                     for processed_coverage_data in result.processed_coverage_data:
                         gene_coverage.append(processed_coverage_data)
                     coverages.append(gene_coverage)
-                    last_coverage_data = copy.copy(result.raw_coverage_data)
+                    last_coverage_data = {}
+                    for coverage_msg in result.raw_coverage_data:
+                        logging.info("coverage file_path %s",
+                                     coverage_msg.file_path)
+                        logging.info("coverage gcda len %d bytes",
+                                     len(coverage_msg.gcda))
+                        last_coverage_data[coverage_msg.file_path] = coverage_msg.gcda
                 index += 1
             evolution = GenePool.Evolution()
             genes = evolution.Evolve(genes,
                                      self.dut.hal.light.light_state_t_fuzz,
                                      coverages=coverages)
-        if len(last_coverage_data) > 0:
-            self.SetCoverageData(last_coverage_data)
+        self.SetCoverageData(last_coverage_data)
 
 
 if __name__ == "__main__":
