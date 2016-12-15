@@ -44,7 +44,7 @@ LOCAL_MULTILIB := both
 
 include $(BUILD_EXECUTABLE)
 
-ifeq ($(TARGET_ARCH),arm)
+ifneq ($(TARGET_ARCH),x86)
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 vts_framework_file64 := $(VTS_TESTCASES_OUT)/$(LOCAL_MODULE_STEM_64)
