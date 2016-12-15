@@ -39,7 +39,7 @@ public class VtsMultiDeviceTestTest extends TestCase {
         "test/vts/testcases/host/sample/SampleLightTest";
     private static final String TEST_CONFIG_PATH =
         "test/vts/testcases/host/sample/SampleLightTest.config";
-    private static long TEST_TIMEOUT = 1000 * 60 * 5;
+    private static final long TEST_TIMEOUT = 1000 * 60 * 5;
     private String[] mCommand = null;
 
     /**
