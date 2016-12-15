@@ -25,14 +25,14 @@ from vts.testcases.kernel.ltp.shell_environment import shell_commands
 
 
 class ShellEnvironment(object):
-    """Class for executing environment definition classes and do cleanup jobs.
+    '''Class for executing environment definition classes and do cleanup jobs.
 
     Attributes:
         shell: shell mirror object, shell to execute commands
         _cleanup_jobs: set of CheckSetupCleanup objects, a set used to store
                        clean up jobs if requested.
         _thread_lock: a threading.Lock object
-    """
+    '''
 
     def __init__(self, shell):
         self.shell = shell
@@ -40,17 +40,17 @@ class ShellEnvironment(object):
         self._thread_lock = threading.Lock()
 
     def Cleanup(self):
-        """Final cleanup jobs. Will run all the stored cleanup jobs"""
+        '''Final cleanup jobs. Will run all the stored cleanup jobs'''
         return all([method(*args) for method, args in self._cleanup_jobs])
 
     def AddCleanupJob(self, method, *args):
-        """Add a clean up job for final cleanup"""
+        '''Add a clean up job for final cleanup'''
         if (method, args) not in self._cleanup_jobs:
             self._cleanup_jobs.append((method, args))
 
     @property
     def shell(self):
-        """returns an object that can execute a shell command"""
+        '''returns an object that can execute a shell command'''
         return self._shell
 
     @shell.setter
@@ -58,7 +58,7 @@ class ShellEnvironment(object):
         self._shell = shell
 
     def ExecuteDefinitions(self, definitions):
-        """Execute a given list of environment check definitions"""
+        '''Execute a given list of environment check definitions'''
         self._thread_lock.acquire()
         if not isinstance(definitions, types.ListType):
             definitions = [definitions]
@@ -84,7 +84,7 @@ class ShellEnvironment(object):
             return results[const.STDOUT][0]
 
     def IsDeviceArchArm64(self):
-        """"Check whether the device's architecture is arm64"""
+        '''"Check whether the device's architecture is arm64'''
         result = self.GetDevicePropCpuAbi()
         if not result:
             return False
@@ -92,7 +92,7 @@ class ShellEnvironment(object):
             return result.find("arm64") > 0
 
     def IsDeviceArchX86_64(self):
-        """"Check whether the device's architecture is x86_64"""
+        '''"Check whether the device's architecture is x86_64'''
         result = self.GetDevicePropCpuAbi()
         if not result:
             return False
@@ -100,7 +100,7 @@ class ShellEnvironment(object):
             return result.find("x86_64") > 0
 
     def IsDeviceArchMips64(self):
-        """"Check whether the device's architecture is mips64"""
+        '''"Check whether the device's architecture is mips64'''
         result = self.GetDevicePropCpuAbi()
         if not result:
             return False
@@ -108,12 +108,12 @@ class ShellEnvironment(object):
             return result.find("mips64") > 0
 
     def IsDeviceArch64Bit(self):
-        """Check whether device cpu is 64 bit."""
+        '''Check whether device cpu is 64 bit.'''
         return (self.IsDeviceArchArm64() or self.IsDeviceArchX86_64() or
                 self.IsDeviceArchMips64())
 
     def GetDeviceNumberOfPresentCpu(self):
-        """Get the number of available CPUs on target device"""
+        '''Get the number of available CPUs on target device'''
         results = self.shell.Execute('cat %s' %
                                      shell_commands.FILE_CPU_PRESENT)
         if (not results or results[const.EXIT_CODE][0] or
@@ -135,8 +135,26 @@ class ShellEnvironment(object):
                           "\n  CPU info: '{}'".format(cpu_info))
             return 1
 
+    def CreateSedCommand(self, path, patterns):
+        '''Create a shell command that uses sed to replace strings.
+
+        Args:
+            path: string, the path to execude sed command
+            patterns: dict of {string: string}, a map from source string to
+                      replacement string
+
+        Returns:
+            String, a shell command to replace each string pattern.
+        '''
+        sed_patterns = [self.CreateSedPattern(*pattern)
+                        for pattern in patterns.iteritems()]
+        sed_cmd = 'sed %s' % ' '.join(['-i -e "%s"' % p for p in sed_patterns])
+
+        # This applies sed_cmd to every shell script.
+        return 'find %s -type f | xargs %s' % (path, sed_cmd)
+
     def CreateSedPattern(self, replace_from, replace_to):
-        """Create a shell command to replace strings in given file list
+        '''Create a sed pattern to replace strings in given file list
 
         Args:
             replace_from: string, the string to search using sed
@@ -145,7 +163,7 @@ class ShellEnvironment(object):
         Returns:
             String, a sed pattern starting with 's' and ending with 'g',
             with a unique separator
-        """
+        '''
         separators = '/=+-:#\\'
         separator_avalibility = [c not in replace_from and c not in replace_to
                                  for c in separators]
