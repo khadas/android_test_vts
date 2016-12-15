@@ -62,24 +62,13 @@ message CallFlowSpecificationMessage {
 }
 
 
-// A message for either primitive or aggregate data type.
-message DataType {
-  // Data type to describe the corresponding C/C++ data type.
-  optional bytes primitive_type = 1;
-  // Instance type to describe the semantic information.
-  optional bytes aggregate_type = 2;
-  // Primitive data value.
-  optional PrimitiveDataValueMessage primitive_value = 11;
-}
-
-
 // To specify a function.
 message FunctionSpecificationMessage {
   // the function name.
   optional bytes name = 1;
 
   // data type of the return value (for legacy HALs and shared libraries).
-  optional DataType return_type = 11;
+  optional ArgumentSpecificationMessage return_type = 11;
 
   // data type of the return value (for HIDL HALs).
   repeated ArgumentSpecificationMessage return_type_hidl = 12;
@@ -99,17 +88,27 @@ message PrimitiveDataValueMessage {
   optional double double = 4;
   optional bytes bytes = 5;
   optional uint32 pointer = 6;
+
+  optional int32 int8_t = 7;
+  optional uint32 uint8_t = 8;
+  optional int32 char = 9;
+  optional int32 int16_t = 10;
+  optional uint32 uint16_t = 11;
+  optional int64 int64_t = 12;
+  optional uint64 uint64_t = 13;
+  optional bytes string = 14;
 }
 
 
 // To specify a function argument.
 message ArgumentSpecificationMessage {
   // Data type of the argument to describe the corresponding C/C++ data type.
-  optional bytes primitive_type = 1;
+  // only one is set if the argument is a primitive data.
+  repeated bytes primitive_type = 1;
   // Instance type of the argument to describe the semantic information.
-  optional bytes aggregate_type = 2;
+  repeated bytes aggregate_type = 2;
 
-  // true if the argument is an input.
+  // true if the argument is an input (valid only for the top-level message).
   optional bool is_input = 11 [default = true];
   // true if the argument is an output.
   optional bool is_output = 12 [default = false];
@@ -118,6 +117,11 @@ message ArgumentSpecificationMessage {
   repeated PrimitiveDataValueMessage primitive_value = 21;
   // the actual value(s) for an aggregated data type.
   repeated ArgumentSpecificationMessage aggregate_value = 22;
+
+  // the variable names of defined primitive type attributes.
+  repeated bytes primitive_name = 31;
+  // the variable names of defined aggregate type attributes.
+  repeated bytes aggregate_name = 32;
 }
 
 
@@ -136,4 +140,9 @@ message InterfaceSpecificationMessage {
 
   // a list of functions exposed by the component.
   repeated FunctionSpecificationMessage api = 2001;
+
+  // the names of custom-defined aggregate types.
+  repeated bytes aggregate_type_name = 3001;
+  // The actual definitions of custom-defined aggregate types.
+  repeated ArgumentSpecificationMessage aggregate_type_definition = 3002;
 }

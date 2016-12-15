@@ -49,7 +49,37 @@ class MirrorObject(object):
                 return copy.copy(api)
         return None
 
-    def __getattr__(self, api_name):
+    def GetCustomAggregateType(self, type_name):
+        """Returns the Argument Specification Message.
+
+        Args:
+            type_name: string, the name of the target data type.
+
+        Returns:
+            ArgumentSpecificationMessage if found, None otherwise
+        """
+        for name, definition in zip(self._if_spec_msg.aggregate_type_name,
+                                    self._if_spec_msg.aggregate_type_definition):
+            if name != "const" and name == type_name:
+                return copy.copy(definition)
+        return None
+
+    def GetConstType(self, type_name):
+        """Returns the Argument Specification Message.
+
+        Args:
+            type_name: string, the name of the target const data variable.
+
+        Returns:
+            ArgumentSpecificationMessage if found, None otherwise
+        """
+        for name, definition in zip(self._if_spec_msg.aggregate_type_name,
+                                    self._if_spec_msg.aggregate_type_definition):
+            if name == "const":
+                return copy.copy(definition)
+        return None
+
+    def __getattr__(self, api_name, *args, **kwargs):
         """Calls a target component's API.
 
         Args:
@@ -57,13 +87,13 @@ class MirrorObject(object):
             *args: a list of arguments
             **kwargs: a dict for the arg name and value pairs
         """
-
         def RemoteCall(*args, **kwargs):
-            logging.info("remote call %s", api_name)
+            """Dynamically calls a remote API."""
             func_msg = self.GetApi(api_name)
             if not func_msg:
-                logging.fatal("unknown api name %s", api_name)
-            logging.info(func_msg)
+                logging.fatal("api %s unknown", func_msg)
+
+            logging.info("remote call %s", api_name)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
                     logging.info("arg msg value %s %s", arg_msg, value_msg)
@@ -90,4 +120,66 @@ class MirrorObject(object):
             resp = self._client.RecvResponse()
             logging.info(resp)
 
-        return RemoteCall
+        def MessageGenerator(*args, **kwargs):
+            """Dynamically generates a custom message instance."""
+            arg_msg = self.GetCustomAggregateType(api_name)
+            if not arg_msg:
+                logging.fatal("arg %s unknown", arg_msg)
+
+            for type, name, value in zip(arg_msg.primitive_type,
+                                         arg_msg.primitive_name,
+                                         arg_msg.primitive_value):
+                logging.debug("for %s %s %s", type, name, value)
+                # todo handle args too
+                for given_name, given_value in kwargs.iteritems():
+                    logging.debug("check %s %s", name, given_name)
+                    if given_name == name:
+                        logging.debug("match")
+                        if type == "uint32_t":
+                            value.uint32_t = given_value
+                        elif type == "int32_t":
+                            value.int32_t = given_value
+                        else:
+                            logging.fatal("support %s", type)
+                        continue
+            logging.debug("generated %s", arg_msg)
+            return arg_msg
+
+        def ConstGenerator():
+            """Dynamically generates a const variable's value."""
+            arg_msg = self.GetConstType(api_name)
+            if not arg_msg:
+                logging.fatal("const %s unknown", arg_msg)
+            for type, name, value in zip(arg_msg.primitive_type,
+                                         arg_msg.primitive_name,
+                                         arg_msg.primitive_value):
+                logging.info("for %s %s %s", type, name, value)
+                logging.debug("check %s", api_name)
+                if api_name == name:
+                    logging.debug("match")
+                    if type == "uint32_t":
+                        logging.info("return %s", value)
+                        return value.uint32_t
+                    elif type == "int32_t":
+                        logging.info("return %s", value)
+                        return value.int32_t
+                    else:
+                        logging.fatal("support %s", type)
+                    continue
+            logging.fatal("const %s not found", arg_msg)
+
+        func_msg = self.GetApi(api_name)
+        if func_msg:
+            logging.info("api %s", func_msg)
+            return RemoteCall
+
+        arg_msg = self.GetCustomAggregateType(api_name)
+        if arg_msg:
+            logging.info("arg %s", arg_msg)
+            return MessageGenerator
+
+        arg_msg = self.GetConstType(api_name)
+        if arg_msg:
+            logging.info("const %s *\n%s", api_name, arg_msg)
+            return ConstGenerator()
+        logging.fatal("unknown api name %s", api_name)

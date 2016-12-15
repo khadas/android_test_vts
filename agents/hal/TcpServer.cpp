@@ -381,7 +381,6 @@ int StartTcpServer(const char* fuzzer_path, const char* spec_dir_path) {
       return -1;
     }
   }
-
   return 0;
 }
 
