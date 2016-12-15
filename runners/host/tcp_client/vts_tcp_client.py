@@ -178,10 +178,10 @@ class VtsTcpClient(object):
         self.SendCommand(
             SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND,
             shell_command=command)
-        resp = self.RecvResponse(retries=10)
+        resp = self.RecvResponse(retries=2)
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                      resp)
-        if (resp.response_code == SysMsg_pb2.SUCCESS):
+        if resp is not None and resp.response_code == SysMsg_pb2.SUCCESS:
             return resp.stdout
         return None
 
