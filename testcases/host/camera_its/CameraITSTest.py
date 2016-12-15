@@ -59,6 +59,8 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 if m == "Image":
                     # Image modules are now imported from PIL
                     exec ("from PIL import Image")
+                elif m == "pylab":
+                    exec ("from matplotlib import pylab")
                 else:
                     exec ("import " + m)
             except ImportError:
