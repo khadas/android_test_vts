@@ -138,7 +138,9 @@ bool AgentRequestHandler::LaunchDriverService(
 
       string driver_binary_path;
       char* cmd;
-      if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
+      if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL ||
+          driver_type == VTS_DRIVER_TYPE_HAL_LEGACY ||
+          driver_type == VTS_DRIVER_TYPE_HAL_HIDL) {
         // TODO: check whether the port is available and handle if fails.
         static int port = 0;
         string callback_socket_name(kUnixSocketNamePrefixForCallbackServer);
@@ -245,7 +247,9 @@ bool AgentRequestHandler::LaunchDriverService(
           return VtsSocketSendMessage(response_msg);
         }
         int32_t result;
-        if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL) {
+        if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL ||
+            driver_type == VTS_DRIVER_TYPE_HAL_LEGACY ||
+            driver_type == VTS_DRIVER_TYPE_HAL_HIDL) {
           cout << "[agent->driver]: LoadHal " << module_name << endl;
           result = client->LoadHal(file_path, target_class, target_type,
                                    target_version, module_name);
