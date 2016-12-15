@@ -40,18 +40,37 @@ class ShellBinaryCrashTest(base_test.BaseTestClass):
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 2)
         asserts.assertEqual(results[const.STDOUT][1].strip(), "")
-        # "crash_app: start"
+        # "crash_app: start" is also valid output.
         asserts.assertEqual(results[const.EXIT_CODE][1], 127)
 
-        results = self.dut.shell.my_shell1.Execute("which ls")
-        logging.info(str(results[const.STDOUT]))
-        asserts.assertEqual(len(results[const.STDOUT]), 1)
-        asserts.assertEqual(results[const.STDOUT][0].strip(),
-                            "/system/bin/ls")
-        asserts.assertEqual(results[const.EXIT_CODE][0], 0)
+        self.CheckShellDriver("my_shell1")
+        self.CheckShellDriver("my_shell2")
 
-        self.dut.shell.InvokeTerminal("my_shell2")
-        results = self.dut.shell.my_shell2.Execute("which ls")
+    def testSegmentFaultBinary(self):
+        """Tests whether the agent survives when a binary leads to segfault."""
+        self.dut.shell.InvokeTerminal("my_shell1")
+        target = "/data/local/tmp/32/connect01"
+        results = self.dut.shell.my_shell1.Execute(
+            ["chmod 755 %s" % target,
+             ".%s" % target])
+        logging.info(str(results[const.STDOUT]))
+        asserts.assertEqual(len(results[const.STDOUT]), 2)
+        asserts.assertEqual(results[const.STDOUT][1].strip(), "")
+        # TODO: currently the agent doesn't return the stdout log emitted
+        # before a failure.
+        asserts.assertEqual(results[const.EXIT_CODE][1], 127)
+
+        self.CheckShellDriver("my_shell1")
+        self.CheckShellDriver("my_shell2")
+
+    def CheckShellDriver(self, shell_name):
+        """Checks whether the shell driver sevice is available.
+
+        Args:
+            shell_name: string, the name of a shell service to create.
+        """
+        self.dut.shell.InvokeTerminal(shell_name)
+        results = getattr(self.dut.shell, shell_name).Execute("which ls")
         logging.info(str(results[const.STDOUT]))
         asserts.assertEqual(len(results[const.STDOUT]), 1)
         asserts.assertEqual(results[const.STDOUT][0].strip(),
