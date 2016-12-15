@@ -96,7 +96,7 @@ class MirrorBase(object):
       if target_type in filename:
         # TODO: check more exactly (e.g., multiple hits).
         self._client.SendCommand(AndroidSystemControlMessage_pb2.SELECT_HAL,
-                                 os.path.join(target_basepath, filename),
+                                 filename,
                                  target_class_id, target_type_id, target_version)
         resp = self._client.RecvResponse()
         logging.debug(resp)

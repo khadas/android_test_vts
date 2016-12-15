@@ -21,7 +21,7 @@ from vts.utils.python.mirror_objects import MirrorBase
 class Mirror(MirrorBase.MirrorBase):
   """HAL Mirror Object."""
 
-  def __ini__(self, target_basepath=None):
+  def __init__(self, target_basepath=None):
     if target_basepath:
       self._target_basepath = target_basepath
 

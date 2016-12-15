@@ -105,30 +105,32 @@ AndroidSystemControlResponseMessage* RespondStartFuzzerBinderService(
 }
 
 
-AndroidSystemControlResponseMessage* RespondGetHals(const string& base_path) {
+AndroidSystemControlResponseMessage* RespondGetHals(const string& base_paths) {
   AndroidSystemControlResponseMessage* response_msg =
       new AndroidSystemControlResponseMessage();
-
   ResponseCode result = FAIL;
-
   string files = "";
 
-  DIR *dp;
-  if (!(dp = opendir(base_path.c_str()))) {
-    cerr << "Error(" << errno << ") opening " << TARGET_COMPONENT_DIR_PATH << endl;
-    return NULL;
-  }
+  std::istringstream ss(base_paths);
+  std::string path;
 
-  struct dirent* dirp;
-  int len;
-  while ((dirp = readdir(dp)) != NULL) {
-    len = strlen(dirp->d_name);
-    if (len > 3 && !strcmp(&dirp->d_name[len - 3], ".so")) {
-      files += string(dirp->d_name) + " ";
-      result = SUCCESS;
+  while(std::getline(ss, path, ',')) {
+    DIR* dp;
+    if (!(dp = opendir(path.c_str()))) {
+      cerr << "Error(" << errno << ") opening " << path << endl;
+      return NULL;
     }
+    struct dirent* dirp;
+    int len;
+    while ((dirp = readdir(dp)) != NULL) {
+      len = strlen(dirp->d_name);
+      if (len > 3 && !strcmp(&dirp->d_name[len - 3], ".so")) {
+        files += path + "/" + string(dirp->d_name) + " ";
+        result = SUCCESS;
+      }
+    }
+    closedir(dp);
   }
-  closedir(dp);
 
   response_msg->set_reason(files);
   return response_msg;
