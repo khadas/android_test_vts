@@ -236,7 +236,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
-            False
+            return False
 
         if name in self._profiling:
             logging.error("profiling point %s is already active.", name)
@@ -255,7 +255,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
-            False
+            return False
 
         if name not in self._profiling:
             logging.error("profiling point %s is not active.", name)
@@ -276,7 +276,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
-            False
+            return False
 
         if name in self._profiling:
             logging.error("profiling point %s is already active.", name)
@@ -298,7 +298,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
-            False
+            return False
 
         if name in self._profiling:
             logging.error("profiling point %s is already active.", name)
