@@ -556,8 +556,17 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         cpp_ss << "int choice = rand() / " << attribute.enum_value().enumerator().size() << ";" << endl;
         cpp_ss << "if (choice < 0) choice *= -1;" << endl;
         for (int index = 0; index < attribute.enum_value().enumerator().size(); index++) {
-          cpp_ss << "    if (choice == " << attribute.enum_value().value(index)
-                 << ") return " << attribute.name() << "::"
+          cpp_ss << "    if (choice == ";
+          if (attribute.enum_value().scalar_type() == "int32_t") {
+            cpp_ss << attribute.enum_value().scalar_value(index).int32_t();
+          } else if (attribute.enum_value().scalar_type() == "uint32_t") {
+            cpp_ss << attribute.enum_value().scalar_value(index).uint32_t();
+          } else {
+            cerr << __func__ << ":" << __LINE__ << " ERROR unsupported enum type "
+                 << attribute.enum_value().scalar_type() << endl;
+            exit(-1);
+          }
+          cpp_ss << ") return " << attribute.name() << "::"
                  << attribute.enum_value().enumerator(index)
                  << ";" << endl;
         }

@@ -80,14 +80,22 @@ interface: {
     type: TYPE_ENUM
 
     enum_value: {
+      scalar_type: "int32_t"
+
       enumerator: "LIGHT_FLASH_NONE"
-      value: 0
+      scalar_value: {
+        int32_t: 0
+      }
 
       enumerator: "LIGHT_FLASH_TIMED"
-      value: 1
+      scalar_value: {
+        int32_t: 1
+      }
 
       enumerator: "LIGHT_FLASH_HARDWARE"
-      value: 2
+      scalar_value: {
+        int32_t: 2
+      }
     }
   }
 
@@ -95,11 +103,17 @@ interface: {
     type: TYPE_ENUM
 
     enum_value: {
+      scalar_type: "int32_t"
+
       enumerator: "BRIGHTNESS_MODE_USER"
-      value: 0
+      scalar_value: {
+        int32_t: 0
+      }
 
       enumerator: "BRIGHTNESS_MODE_SENSOR"
-      value: 1
+      scalar_value: {
+        int32_t: 1
+      }
     }
   }
 

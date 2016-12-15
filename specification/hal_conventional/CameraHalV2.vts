@@ -100,11 +100,17 @@ interface: {
   attribute: {
     type: TYPE_ENUM
     enum_value: {
+      scalar_type: "int32_t"
+
       enumerator: "CAMERA_FACING_BACK"
-      value: 0
+      scalar_value: {
+        int32_t: 0
+      }
 
       enumerator: "CAMERA_FACING_FRONT"
-      value: 1
+      scalar_value: {
+        int32_t: 1
+      }
     }
   }
 
