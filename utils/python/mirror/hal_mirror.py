@@ -23,7 +23,7 @@ from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
-from vts.runners.host.tcp_server import vts_tcp_server
+from vts.runners.host.tcp_server import callback_server
 from vts.utils.python.mirror import mirror_object
 
 COMPONENT_CLASS_DICT = {"hal_conventional": 1,
@@ -177,9 +177,9 @@ class HalMirror(object):
             errors.ComponentLoadingError is raised if the callback server fails
             to start.
         """
-        self._callback_server = vts_tcp_server.VtsTcpServer()
-        _, port = self._callback_server.Start(self.host_callback_port)
-        if port != self.host_callback_port:
+        self._callback_server = callback_server.CallbackServer()
+        _, port = self._callback_server.Start(self._host_callback_port)
+        if port != self._host_callback_port:
             raise errors.ComponentLoadingError(
                 "Failed to start a callback TcpServer at port %s" %
                 self._host_callback_port)
@@ -283,7 +283,7 @@ class HalMirror(object):
 
         # Instantiate a MirrorObject and return it.
         hal_mirror = mirror_object.MirrorObject(client, if_spec_msg,
-                                                callback_server)
+                                                self._callback_server)
         self._hal_level_mirrors[handler_name] = hal_mirror
 
     def __getattr__(self, name):

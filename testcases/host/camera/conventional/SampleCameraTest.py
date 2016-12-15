@@ -16,10 +16,14 @@
 #
 
 import logging
+import time
 
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
+
+call_count_camera_device_status_change = 0
+call_count_torch_mode_status_change = 0
 
 
 class SampleCameraTest(base_test.BaseTestClass):
@@ -48,18 +52,38 @@ class SampleCameraTest(base_test.BaseTestClass):
         for index in range(0, count):
             arg = self.dut.hal.camera.camera_info_t(facing=0)
             logging.info(self.dut.hal.camera.get_camera_info(index, arg))
+
+        global call_count_camera_device_status_change
+        global call_count_torch_mode_status_change
+        call_count_camera_device_status_change = 0
+        call_count_torch_mode_status_change = 0
         # uncomment when undefined function is handled gracefully.
         # self.dut.hal.camera.init()
-        def camera_device_status_change():
+        def camera_device_status_change(callbacks, camera_id, new_status):
+            global call_count_camera_device_status_change
+            call_count_camera_device_status_change += 1
             logging.info("camera_device_status_change")
+            logging.info("camera_device_status_change: camera_id = %s", camera_id)
+            logging.info("camera_device_status_change: new_status = %s", new_status)
+            logging.info("camera_device_status_change: callbacks = %s", callbacks)
 
-        def torch_mode_status_change():
+        def torch_mode_status_change(callbacks, camera_id, new_status):
+            global call_count_torch_mode_status_change
+            call_count_torch_mode_status_change += 1
             logging.info("torch_mode_status_change")
+            logging.info("torch_mode_status_change: camera_id = %s", camera_id)
+            logging.info("torch_mode_status_change: new_status = %s", new_status)
+            logging.info("torch_mode_status_change: callbacks = %s", callbacks)
 
         my_callback = self.dut.hal.camera.camera_module_callbacks_t(
             camera_device_status_change, torch_mode_status_change)
         self.dut.hal.camera.set_callbacks(my_callback)
         self.dut.hal.camera.common.methods.open()  # note args are skipped
+        while call_count_torch_mode_status_change < 1:
+          logging.info("waiting %s %s",
+                       call_count_camera_device_status_change,
+                       call_count_torch_mode_status_change)
+          time.sleep(1) 
 
 
 if __name__ == "__main__":
