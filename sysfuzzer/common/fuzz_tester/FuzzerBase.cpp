@@ -469,6 +469,7 @@ bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
 
   int dir_count = 0;
   struct dirent* dent;
+  FILE* gcda_file;
   while ((dent = readdir(srcdir)) != NULL) {
     struct stat st;
     if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
@@ -496,17 +497,33 @@ bool FuzzerBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
           msg->mutable_processed_coverage_data()->Add(data);
         }
 
-        ifstream gcda_file(buffer);
-        if (gcda_file.is_open()) {
+        gcda_file = fopen(buffer, "rb");
+        if (!gcda_file) {
           cerr << "Unable to open a gcda file. " << buffer << endl;
         } else {
-          stringstream str_stream;
-          str_stream << gcda_file.rdbuf();
-          gcda_file.close();
-          NativeCodeCoverageRawDataMessage* raw_msg =
-              msg->mutable_raw_coverage_data()->Add();
-          raw_msg->set_file_path(dent->d_name);
-          raw_msg->set_gcda(str_stream.str());
+          cout << "Opened a gcda file. " << buffer << endl;
+          fseek(gcda_file, 0, SEEK_END);
+          long gcda_file_size = ftell(gcda_file);
+          cout << "File size " << gcda_file_size << " bytes" << endl;
+          fseek(gcda_file, 0, SEEK_SET);
+
+          char* gcda_file_buffer = (char*)malloc(gcda_file_size + 1);
+          if (!gcda_file_buffer) {
+            cerr << "Unable to allocate memory to read a gcda file. " << endl;
+          } else {
+            if (fread(gcda_file_buffer, gcda_file_size, 1, gcda_file) != 1) {
+              cerr << "File read error" << endl;
+            } else {
+              gcda_file_buffer[gcda_file_size] = '\0';
+              NativeCodeCoverageRawDataMessage* raw_msg =
+                  msg->mutable_raw_coverage_data()->Add();
+              raw_msg->set_file_path(dent->d_name);
+              string gcda_file_buffer_string(gcda_file_buffer, gcda_file_size);
+              raw_msg->set_gcda(gcda_file_buffer_string);
+              free(gcda_file_buffer);
+            }
+          }
+          fclose(gcda_file);
         }
 #if USE_GCOV_DEBUG
         if (result) {
