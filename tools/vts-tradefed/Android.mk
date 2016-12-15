@@ -17,6 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, ../../../../cts/common/host-side/tradefed/src)
+LOCAL_SRC_FILES += $(call all-java-files-under, ../../harnesses/tradefed/src)
 
 LOCAL_JAVA_RESOURCE_DIRS := res
 LOCAL_JAVA_RESOURCE_DIRS += ../../../../cts/common/host-side/tradefed/res
