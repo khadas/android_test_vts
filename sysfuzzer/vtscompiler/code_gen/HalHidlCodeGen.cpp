@@ -191,6 +191,8 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
       cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func("
              << api.return_type_hidl(0).scalar_type() << " arg) {" << endl;
       // TODO: support other non-scalar type and multiple args.
+      cpp_ss << "  cout << \"callback " << api.name() << " called\""
+             << " << endl;" << endl;
       cpp_ss << "}" << endl;
       cpp_ss << "std::function<"
               << "void(" << api.return_type_hidl(0).scalar_type() << ")> "
@@ -213,6 +215,24 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                                 message.original_data_structure_name(),
                                 sub_struct.is_pointer() ? "->" : ".");
   }
+  cpp_ss << "bool " << fuzzer_extended_class_name << "::GetService() {" << endl;
+  cpp_ss << "  hidl_version version = make_hidl_version("
+         << (int)message.component_type_version() << ","
+         << (int)((message.component_type_version() -
+            (int)message.component_type_version()) * 10) << ");" << endl;
+  cpp_ss << "  static bool initialized = false;" << endl;
+  cpp_ss << "  if (!initialized) {" << endl;
+  cpp_ss << "    cout << \"[agent:hal] HIDL getService\" << endl;" << endl;
+  cpp_ss << "    status_t status = getService(String16(\""
+         << message.package().substr(message.package().find_last_of(".") + 1)
+         << "\"), version," << endl;
+  cpp_ss << "        &hw_binder_proxy_);" << endl;
+  cpp_ss << "    cout << \"[agent:hal] HIDL getService status \""
+         << " << status << endl;" << endl;
+  cpp_ss << "    initialized = true;" << endl;
+  cpp_ss << "  }" << endl;
+  cpp_ss << "  return true;" << endl;
+  cpp_ss << "}" << endl << endl;
 
   cpp_ss << "bool " << fuzzer_extended_class_name << "::Fuzz(" << endl;
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
@@ -371,9 +391,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 
     // may need to check whether the function is actually defined.
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
-    cpp_ss << "    ";
-    cpp_ss << "*result = NULL;" << endl;
-    cpp_ss << kInstanceVariableName << "->" << api.name() << "(";
+    cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
+           << kInstanceVariableName << "->" << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
     for (int index = 0; index < arg_count; index++) {
@@ -390,7 +409,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       // TODO: callback shall update *result (barrier here?)
       //       cpp_ss << "*result = ...";
     }
-    cpp_ss << ");" << endl;
+    cpp_ss << ").toString8().string())));" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
     cpp_ss << "    cout << \"called\" << endl;" << endl;
 
@@ -511,10 +530,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     GenerateCodeToStartMeasurement(cpp_ss);
 
     cpp_ss << "    cout << \"ok. let's call.\" << endl;" << endl;
-    cpp_ss << "    ";
-    cpp_ss << "*result = NULL;" << endl;
-    cpp_ss << kInstanceVariableName << "->" << parent_path << message.name() << "->"
-           << api.name() << "(";
+    cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<const void*>(new string("
+           << kInstanceVariableName << "->" << parent_path << message.name()
+           << "->" << api.name() << "(";
     if (arg_count > 0) cpp_ss << endl;
 
     for (int index = 0; index < arg_count; index++) {
@@ -529,7 +547,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       // TODO: support callback as the last arg and setup barrier here to
       // do *result = ...;
     }
-    cpp_ss << ");" << endl;
+    cpp_ss << ").toString8().string())));" << endl;
     GenerateCodeToStopMeasurement(cpp_ss);
     cpp_ss << "    cout << \"called\" << endl;" << endl;
 

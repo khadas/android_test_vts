@@ -318,6 +318,11 @@ bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   return true;
 }
 
+bool FuzzerBase::GetService() {
+  cerr << __func__ << " not impl" << endl;
+  return false;
+}
+
 int FuzzerBase::OpenConventionalHal(const char* module_name) {
   cout << __func__ << endl;
   if (module_name) cout << __func__ << " " << module_name << endl;
