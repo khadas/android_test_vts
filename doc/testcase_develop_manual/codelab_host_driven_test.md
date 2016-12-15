@@ -24,7 +24,7 @@ Create your test project using:
 
 `test/vts/script/create-test-project.py --name <your project name> --dir <your project directory>`
 
-Project name is required to be upper camel case (trailing numbers are allowed), and test directory
+Project name is required to be UpperCamel case (trailing numbers are allowed), and test directory
 is a relative directory under `test/vts/testcases`.
 
 For example, to create your test project `HelloAndroid` under directory
@@ -40,9 +40,9 @@ specified project directory using the lower under score version of the project n
 
 In practice, use
 
-- `-dir **host**/<your project name>` if your project is for HAL (Hardware Abstraction Layer) or libraries
+- `-dir host/<your_project_name>` if your project is for HAL (Hardware Abstraction Layer) or libraries
 
-- `-dir **kernel**/<your project name>` if your project is for kernel or kernel modules
+- `-dir kernel/<your_project_name>` if your project is for kernel or kernel modules
 
 ### 1.3. Create a test suite
 
@@ -93,7 +93,7 @@ If your test case can violate some SELinux rules, please run:
 `target$ setenforce 0`
 
 
-## 3. Customize your test configuration
+## 3. Customize your test configuration (Optional)
 
 ### 3.1. AndroidTest.xml file
 
@@ -141,7 +141,7 @@ For example:
 ```
 ---
 
-Then, add the following line to `com.android.tradefed.testtype.VtsMultiDeviceTest` class
+At last, add the following line to `com.android.tradefed.testtype.VtsMultiDeviceTest` class
 in `AndroidTest.xml`:
 
 `<option name="test-config-path" value="vts-config/testcases/<your project directiry>/<your project name>.config" />`
