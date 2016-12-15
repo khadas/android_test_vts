@@ -20,6 +20,7 @@ include $(LOCAL_PATH)/list/vts_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_spec_file_list.mk
 include $(LOCAL_PATH)/list/vts_test_bin_package_list.mk
+include $(LOCAL_PATH)/list/vts_test_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 
@@ -41,6 +42,7 @@ my_modules := \
     $(vts_bin_packages) \
     $(vts_lib_packages) \
     $(vts_test_bin_packages) \
+    $(vts_test_lib_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
 
