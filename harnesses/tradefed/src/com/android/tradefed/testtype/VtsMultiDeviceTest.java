@@ -74,7 +74,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String BINARY_TEST_SOURCES = "binary_test_sources";
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
-    static final String BINARY_TEST_LD_LIBRARY_PATHs = "binary_test_ld_library_paths";
+    static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -456,9 +456,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORIES);
         }
         if (!mBinaryTestLdLibraryPaths.isEmpty()) {
-            jsonObject.put(BINARY_TEST_LD_LIBRARY_PATHs,
+            jsonObject.put(BINARY_TEST_LD_LIBRARY_PATHS,
                     new JSONArray(mBinaryTestLdLibraryPaths));
-            CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHs);
+            CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHS);
         }
     }
 
