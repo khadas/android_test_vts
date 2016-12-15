@@ -32,7 +32,7 @@ using namespace std;
 namespace android {
 namespace vts {
 
-CodeGenBase::CodeGenBase(const char* input_vts_file_path, const char* vts_name)
+CodeGenBase::CodeGenBase(const char* input_vts_file_path, const string& vts_name)
     : input_vts_file_path_(input_vts_file_path), vts_name_(vts_name) {}
 
 CodeGenBase::~CodeGenBase() {}
