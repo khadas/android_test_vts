@@ -326,8 +326,9 @@ public class VtsMultiDeviceTestResultParser {
     /**
      * This method parses the json object and summarizes the test result through listener.
      * @param object
+     * @throws RuntimeException
      */
-    public void processJsonFile(JSONObject object) {
+    public void processJsonFile(JSONObject object) throws RuntimeException{
         long beginTime = -1, endTime = -1;
         JSONArray results = null;
 
