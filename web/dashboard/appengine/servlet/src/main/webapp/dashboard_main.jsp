@@ -6,6 +6,7 @@
 
 <html>
   <head>
+    <title>VTS Dashboard</title>
   </head>
   <body>
   <h3>List of Tables : android-vts-internal</h3>
