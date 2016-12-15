@@ -88,9 +88,13 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
     return NULL;
   }
-  if (!fuzzer->LoadTargetComponent(dll_file_name)) return NULL;
+  if (!fuzzer->LoadTargetComponent(dll_file_name)) {
+    cerr << "couln't load target component file, " << dll_file_name << endl;
+    return NULL;
+  }
 
   for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
+    cout << "checking " << func_msg.name() << endl;
     if (!strcmp(target_func_name, func_msg.name().c_str())) {
       return fuzzer;
     }
@@ -159,7 +163,8 @@ bool SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) 
   FuzzerBase* func_fuzzer = GetFuzzerBase(
       *if_spec_msg_, dll_file_name_, func_msg->name().c_str());
   if (!func_fuzzer) {
-    cerr << "can't find FuzzerBase" << endl;
+    cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
+        << dll_file_name_ << endl;
     return false;
   }
 

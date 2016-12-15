@@ -33,11 +33,13 @@ class VtsTcpClient(object):
   Attribute:
     connection: a TCP socket instance.
     channel: a file to write and read data.
+    _mode: the connection mode (adb_forwarding or ssh_tunnel)
   """
 
-  def __init__(self):
+  def __init__(self, mode="adb_forwarding"):
     self.connection = None
     self.channel = None
+    self._mode = mode
 
   def Connect(self, ip=TARGET_IP, port=TARGET_PORT):
     """Connects to a target device.
@@ -50,9 +52,17 @@ class VtsTcpClient(object):
       Exception when the connection fails.
     """
     try:
-      logging.info("Connecting to %s:%s", ip, port)
-      self.connection = socket.create_connection((ip, port),
-                                                 _SOCKET_CONN_TIMEOUT_SECS)
+      if self._mode == "adb_forwarding":
+        os.system("adb forward --remove tcp:%s" % port)
+        os.system("adb forward tcp:%s tcp:%s" % (port, port))
+        ip = "localhost"
+        logging.info("Connecting to %s:%s", ip, port)
+        self.connection = socket.create_connection((ip, port),
+                                                   _SOCKET_CONN_TIMEOUT_SECS)
+      elif self._mode == "ssh_tunnel":
+        logging.info("Connecting to %s:%s", ip, port)
+        self.connection = socket.create_connection((ip, port),
+                                                   _SOCKET_CONN_TIMEOUT_SECS)
     except socket.error as e:
       logging.exception(e)
       # TODO: use a custom exception
