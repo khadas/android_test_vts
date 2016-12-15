@@ -39,5 +39,8 @@ message TestStatusMessage {
 
   // test status.
   optional TestStatus status = 4;
+
+  // failed tests
+  repeated bytes failed_testcases = 5;
 }
 
