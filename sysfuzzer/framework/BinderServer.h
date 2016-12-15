@@ -17,10 +17,13 @@
 #ifndef __VTS_FUZZER_BINDER_SERVER__
 #define __VTS_FUZZER_BINDER_SERVER__
 
+#include "specification_parser/SpecificationBuilder.h"
+
 namespace android {
 namespace vts {
 
-extern void StartBinderServer();
+extern void StartBinderServer(android::vts::SpecificationBuilder& spec_builder,
+                              const char* lib_path);
 
 }  // namespace vts
 }  // namespace android

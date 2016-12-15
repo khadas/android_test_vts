@@ -25,7 +25,10 @@ LOCAL_SRC_FILES := \
   HalAgentMain.cpp \
   BinderClient.cpp \
   TcpServer.cpp \
-  proto/AndroidSystemControlMessage.proto \
+  $(call all-proto-files-under, proto) \
+
+LOCAL_PROTOC_FLAGS := \
+  --proto_path=$(LOCAL_PATH)/../../sysfuzzer/common/proto \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \

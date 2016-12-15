@@ -34,7 +34,8 @@ namespace vts {
 SpecificationBuilder::SpecificationBuilder(
     const string dir_path, int epoch_count)
     : dir_path_(dir_path),
-      epoch_count_(epoch_count) {}
+      epoch_count_(epoch_count),
+      if_spec_msg_(NULL) {}
 
 
 vts::InterfaceSpecificationMessage*
@@ -98,6 +99,32 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
 }
 
 
+bool SpecificationBuilder::LoadTargetComponent(
+    const char* dll_file_name,
+    const char* spec_lib_file_path,
+    int target_class,
+    int target_type,
+    float target_version) {
+  if_spec_msg_ = FindInterfaceSpecification(
+      target_class, target_type, target_version);
+  if (!if_spec_msg_) {
+    cerr << __FUNCTION__ <<
+        ": no interface specification file found for "
+        << "class " << target_class
+        << " type " << target_type
+        << " version " << target_version << endl;
+    return false;
+  }
+  cout << "ifspec addr load " << if_spec_msg_ << endl;
+  string output;
+  if_spec_msg_->SerializeToString(&output);
+  cout << "loaded text " << output.length() << endl;
+  cout << "loaded text " << strlen(output.c_str()) << endl;
+  cout << "loaded text " << output << endl;
+  return true;
+}
+
+
 bool SpecificationBuilder::Process(
     const char* dll_file_name,
     const char* spec_lib_file_path,
@@ -106,6 +133,8 @@ bool SpecificationBuilder::Process(
     float target_version) {
   vts::InterfaceSpecificationMessage* interface_specification_message =
       FindInterfaceSpecification(target_class, target_type, target_version);
+  cout << "ifspec addr " << interface_specification_message << endl;
+
   if (!interface_specification_message) {
     cerr << __FUNCTION__ <<
         ": no interface specification file found for "
@@ -169,6 +198,13 @@ bool SpecificationBuilder::Process(
   }
 
   return true;
+}
+
+
+vts::InterfaceSpecificationMessage*
+SpecificationBuilder::GetInterfaceSpecification() const {
+  cout << "ifspec addr get " << if_spec_msg_ << endl;
+  return if_spec_msg_;
 }
 
 }  // namespace vts
