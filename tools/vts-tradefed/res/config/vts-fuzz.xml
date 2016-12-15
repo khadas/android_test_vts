@@ -17,6 +17,6 @@
     <include name="everything" />
     <option name="compatibility:plan" value="vts" />
     <option name="compatibility:include-filter" value="SampleLightFuzzTest" />
-    <!-- b/30141062 <option name="compatibility:include-filter" value="LightFuzzTest" /> -->
+    <option name="compatibility:include-filter" value="LightFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
