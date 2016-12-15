@@ -22,7 +22,7 @@
 #include <map>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 
 using namespace std;

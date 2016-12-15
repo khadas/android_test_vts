@@ -31,7 +31,7 @@
 
 #include "specification_parser/InterfaceSpecificationParser.h"
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
 
@@ -123,7 +123,7 @@ string GetCppVariableType(const std::string scalar_type_string) {
 }
 
 string GetCppVariableType(const VariableSpecificationMessage& arg,
-                          const InterfaceSpecificationMessage* message) {
+                          const ComponentSpecificationMessage* message) {
   if (arg.type() == TYPE_VOID) {
     return "void";
   }
@@ -189,7 +189,7 @@ string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg) {
 string GetCppInstanceType(
     const VariableSpecificationMessage& arg,
     const string& msg,
-    const InterfaceSpecificationMessage* message) {
+    const ComponentSpecificationMessage* message) {
   switch(arg.type()) {
     case TYPE_PREDEFINED: {
       if (arg.predefined_type() == "struct light_state_t*") {

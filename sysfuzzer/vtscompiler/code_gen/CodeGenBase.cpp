@@ -39,7 +39,7 @@ CodeGenBase::~CodeGenBase() {}
 
 void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
                               std::stringstream& h_ss,
-                              const InterfaceSpecificationMessage& message) {
+                              const ComponentSpecificationMessage& message) {
   string input_vfs_file_path(input_vts_file_path_);
 
   cpp_ss << "#include \"" << input_vfs_file_path << ".h\"" << endl;
@@ -80,10 +80,11 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
     for (const auto& import : message.import()) {
       string mutable_import = import;
       ReplaceSubString(mutable_import, ".", "/");
+      ReplaceSubString(mutable_import, "@", "/");
       string base_dirpath = mutable_import.substr(
-          0, mutable_import.find_last_of("/\\") + 1);
+          0, mutable_import.find_last_of("::") + 1);
       string base_filename = mutable_import.substr(
-          mutable_import.find_last_of("/\\") + 1);
+          mutable_import.find_last_of("::") + 1);
       // TODO: consider restoring this when hidl packaging is fully defined.
       // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
       cpp_ss << "#include <" << package_path << "/"
@@ -150,7 +151,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   if (message.component_class() == HAL_HIDL &&
       endsWith(message.component_name(), "Callback")) {
     cpp_ss << endl;
-    for (const auto& api : message.api()) {
+    for (const auto& api : message.interface().api()) {
       cpp_ss << "Status Vts" << message.component_name().substr(1) << "::"
              << api.name() << "(" << endl;
       int arg_count = 0;
@@ -205,7 +206,7 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
 void CodeGenBase::GenerateAllHeader(
     const string& fuzzer_extended_class_name, std::stringstream& h_ss,
-    const InterfaceSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message) {
   h_ss << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << "#define __VTS_SPEC_" << vts_name_ << "__" << endl;
   h_ss << endl;
@@ -275,7 +276,7 @@ void CodeGenBase::GenerateAllHeader(
     h_ss << "  virtual ~Vts" << message.component_name().substr(1) << "()"
            << " = default;" << endl;
     h_ss << endl;
-    for (const auto& api : message.api()) {
+    for (const auto& api : message.interface().api()) {
       h_ss << "  virtual Status " << api.name() << "(" << endl;
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
@@ -312,7 +313,7 @@ void CodeGenBase::GenerateAllHeader(
 
 void CodeGenBase::GenerateClassHeader(
     const string& fuzzer_extended_class_name, std::stringstream& h_ss,
-    const InterfaceSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message) {
   if (message.component_class() != HAL_HIDL ||
       message.component_name() != "types") {
     h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
@@ -346,7 +347,7 @@ void CodeGenBase::GenerateClassHeader(
          << endl;
 
     // produce Fuzz method(s) for sub_struct(s).
-    for (auto const& sub_struct : message.sub_struct()) {
+    for (auto const& sub_struct : message.interface().sub_struct()) {
       GenerateFuzzFunctionForSubStruct(h_ss, sub_struct, "_");
     }
 
@@ -375,7 +376,12 @@ void CodeGenBase::GenerateClassHeader(
 
   if (message.component_class() == HAL_HIDL &&
       message.component_name() == "types") {
-    for (const auto& attribute : message.attribute()) {
+    for (int attr_idx = 0;
+         attr_idx < message.attribute_size() + message.interface().attribute_size();
+         attr_idx++) {
+      const auto& attribute = (attr_idx < message.attribute_size()) ?
+          message.attribute(attr_idx) :
+          message.interface().attribute(attr_idx - message.attribute_size());
       if (attribute.type() == TYPE_ENUM) {
         h_ss << attribute.name() << " " << "Random" << attribute.name() << "();"
                << endl;
@@ -409,7 +415,7 @@ void CodeGenBase::GenerateFuzzFunctionForSubStruct(
 }
 
 void CodeGenBase::GenerateOpenNameSpaces(
-    std::stringstream& ss, const InterfaceSpecificationMessage& message) {
+    std::stringstream& ss, const ComponentSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
     ss << "using namespace android::hardware;" << endl;
     ss << "using namespace ";
@@ -440,7 +446,7 @@ void CodeGenBase::GenerateCodeToStopMeasurement(std::stringstream& ss) {
 }
 
 string CodeGenBase::GetComponentName(
-    const InterfaceSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message) {
   if (!message.component_name().empty()) {
     return message.component_name();
   }
@@ -459,7 +465,7 @@ string CodeGenBase::GetComponentName(
 
 void CodeGenBase::GenerateCppBodyCallbackFunction(
     std::stringstream& /*cpp_ss*/,
-    const InterfaceSpecificationMessage& /*message*/,
+    const ComponentSpecificationMessage& /*message*/,
     const string& /*fuzzer_extended_class_name*/) {}
 
 }  // namespace vts

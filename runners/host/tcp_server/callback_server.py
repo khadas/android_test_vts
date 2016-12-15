@@ -21,7 +21,7 @@ import threading
 
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg
-from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 
 _functions = dict()  # Dictionary to hold function pointers
 

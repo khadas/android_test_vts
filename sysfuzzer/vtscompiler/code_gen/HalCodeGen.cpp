@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
 
@@ -35,12 +35,12 @@ const char* const HalCodeGen::kInstanceVariableName = "device_";
 
 
 void HalCodeGen::GenerateCppBodyCallbackFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   bool first_callback = true;
 
-  for (int i = 0; i < message.attribute_size(); i++) {
-    const VariableSpecificationMessage& attribute = message.attribute(i);
+  for (int i = 0; i < message.interface().attribute_size(); i++) {
+    const VariableSpecificationMessage& attribute = message.interface().attribute(i);
     if (attribute.type() != TYPE_FUNCTION_POINTER || !attribute.is_callback()) {
       continue;
     }
@@ -258,9 +258,9 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
 }
 
 void HalCodeGen::GenerateCppBodyFuzzFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
-  for (auto const& sub_struct : message.sub_struct()) {
+  for (auto const& sub_struct : message.interface().sub_struct()) {
     GenerateCppBodyFuzzFunction(cpp_ss, sub_struct, fuzzer_extended_class_name,
                                 message.original_data_structure_name(),
                                 sub_struct.is_pointer() ? "->" : ".");
@@ -275,9 +275,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
       << endl;
 
   // to call another function if it's for a sub_struct
-  if (message.sub_struct().size() > 0) {
+  if (message.interface().sub_struct().size() > 0) {
     cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
-    for (auto const& sub_struct : message.sub_struct()) {
+    for (auto const& sub_struct : message.interface().sub_struct()) {
       GenerateSubStructFuzzFunctionCall(cpp_ss, sub_struct, "");
     }
     cpp_ss << "  }" << endl;
@@ -299,7 +299,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "      return false;" << endl;
   cpp_ss << "    }" << endl;
 
-  for (auto const& api : message.api()) {
+  for (auto const& api : message.interface().api()) {
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
     cpp_ss << "    cout << \"match\" << endl;" << endl;
     // args - definition;
@@ -323,7 +323,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
         // find the spec.
         bool found = false;
         cout << name << endl;
-        for (auto const& attribute : message.attribute()) {
+        for (auto const& attribute : message.interface().attribute()) {
           if (attribute.type() == TYPE_FUNCTION_POINTER &&
               attribute.is_callback()) {
             string target_name = "vts_callback_" + fuzzer_extended_class_name +
@@ -671,9 +671,9 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 }
 
 void HalCodeGen::GenerateCppBodyGetAttributeFunction(
-    std::stringstream& cpp_ss, const InterfaceSpecificationMessage& message,
+    std::stringstream& cpp_ss, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
-  for (auto const& sub_struct : message.sub_struct()) {
+  for (auto const& sub_struct : message.interface().sub_struct()) {
     GenerateCppBodyGetAttributeFunction(
         cpp_ss, sub_struct, fuzzer_extended_class_name,
         message.original_data_structure_name(),
@@ -689,9 +689,9 @@ void HalCodeGen::GenerateCppBodyGetAttributeFunction(
       << endl;
 
   // to call another function if it's for a sub_struct
-  if (message.sub_struct().size() > 0) {
+  if (message.interface().sub_struct().size() > 0) {
     cpp_ss << "  if (func_msg->parent_path().length() > 0) {" << endl;
-    for (auto const& sub_struct : message.sub_struct()) {
+    for (auto const& sub_struct : message.interface().sub_struct()) {
       GenerateSubStructGetAttributeFunctionCall(cpp_ss, sub_struct, "");
     }
     cpp_ss << "  }" << endl;
@@ -713,7 +713,7 @@ void HalCodeGen::GenerateCppBodyGetAttributeFunction(
   cpp_ss << "      return false;" << endl;
   cpp_ss << "    }" << endl;
 
-  for (auto const& attribute : message.attribute()) {
+  for (auto const& attribute : message.interface().attribute()) {
     if (attribute.type() == TYPE_SUBMODULE ||
         attribute.type() == TYPE_SCALAR) {
       cpp_ss << "  if (!strcmp(func_name, \"" << attribute.name() << "\")) {" << endl;

@@ -39,7 +39,6 @@
 #include "AgentRequestHandler.h"
 #include "BinderClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
-#include "test/vts/proto/InterfaceSpecificationMessage.pb.h"
 
 using namespace std;
 
