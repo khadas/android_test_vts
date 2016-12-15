@@ -60,7 +60,7 @@ class AndroidDeviceError(signals.ControllerError):
     pass
 
 
-def create(configs, use_vts_agent=true):
+def create(configs, use_vts_agent=True):
     """Creates AndroidDevice controller objects.
 
     Args:
