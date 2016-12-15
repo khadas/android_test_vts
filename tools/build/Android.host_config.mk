@@ -15,10 +15,15 @@
 #
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+
+vts_config_file_src := test/vts/$(VTS_CONFIG_SRC_DIR)/$(LOCAL_MODULE).config
+
+ifneq (,$(wildcard $(vts_config_file_src)))
 vts_config_file := $(VTS_TESTCASES_OUT)/vts-config/$(VTS_CONFIG_SRC_DIR)/$(LOCAL_MODULE).config
 
-$(vts_config_file): test/vts/$(VTS_CONFIG_SRC_DIR)/$(LOCAL_MODULE).config | $(ACP)
+$(vts_config_file): $(vts_config_file_src) | $(ACP)
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) -fp $< $@
 
 vts: $(vts_config_file)
+endif

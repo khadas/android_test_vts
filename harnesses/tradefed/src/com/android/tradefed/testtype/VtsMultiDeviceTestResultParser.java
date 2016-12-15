@@ -88,7 +88,7 @@ public class VtsMultiDeviceTestResultParser {
         TEST_CASE_ENTRY,
         COMPLETE,
         TEST_RUN
-  }
+    }
 
     private class PythonUnitTestParseException extends Exception {
         public PythonUnitTestParseException(String reason) {
@@ -97,7 +97,7 @@ public class VtsMultiDeviceTestResultParser {
     }
 
     public VtsMultiDeviceTestResultParser(ITestRunListener listener,
-        String runName) {
+            String runName) {
         mListeners = new ArrayList<ITestRunListener>(1);
         mListeners.add(listener);
         mRunName = runName;
@@ -110,7 +110,7 @@ public class VtsMultiDeviceTestResultParser {
         // extract the test class name if pattern matches for the first line
         String[] toks = mCurrentLine.split(" ");
         if (toks.length < 3 || !toks[toks.length - 1].equals(END_PATTERN) || !toks[toks.length - 3].
-            equals(BEGIN_PATTERN)) {
+                equals(BEGIN_PATTERN)) {
             try {
                 parseError(BEGIN_PATTERN);
             } catch (PythonUnitTestParseException e) {
@@ -184,29 +184,29 @@ public class VtsMultiDeviceTestResultParser {
      * @throws PythonUnitTestParseException
      */
     void parse() throws PythonUnitTestParseException {
-      try {
-          switch(mCurrentParseState) {
-              case TEST_CASE_ENTRY:
-                  registerTest();
-                  mCurrentParseState = ParserState.TEST_RUN;
-                  break;
-              case TEST_RUN:
-                  if (testRun()) {
-                      mCurrentParseState = ParserState.COMPLETE;
-                  } else {
-                      // incomplete test due to timeout.
-                      mCurrentParseState = ParserState.TEST_CASE_ENTRY;
-                      parse();
-                  }
-                  break;
-              case COMPLETE:
-                mCurrentParseState = ParserState.TEST_CASE_ENTRY;
-                parse();
-                break;
-              default:
-                  break;
-          }
-      } catch (ArrayIndexOutOfBoundsException e) {
+        try {
+            switch(mCurrentParseState) {
+                case TEST_CASE_ENTRY:
+                    registerTest();
+                    mCurrentParseState = ParserState.TEST_RUN;
+                    break;
+                case TEST_RUN:
+                    if (testRun()) {
+                        mCurrentParseState = ParserState.COMPLETE;
+                    } else {
+                        // incomplete test due to timeout.
+                        mCurrentParseState = ParserState.TEST_CASE_ENTRY;
+                        parse();
+                    }
+                    break;
+                case COMPLETE:
+                    mCurrentParseState = ParserState.TEST_CASE_ENTRY;
+                    parse();
+                    break;
+                default:
+                    break;
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
             CLog.d("Underlying error in testResult: " + e);
             throw new PythonUnitTestParseException("FailMessage");
         }
@@ -311,9 +311,9 @@ public class VtsMultiDeviceTestResultParser {
                 if (test.getValue() == PASS) {
                     listener.testEnded(test.getKey(), Collections.<String, String>emptyMap());
                 } else if (test.getValue() == TIMEOUT) {
-                  listener.testFailed(test.getKey(), test.getValue());
+                    listener.testFailed(test.getKey(), test.getValue());
                 } else if (test.getValue() == SKIP) {
-                  listener.testAssumptionFailure(test.getKey(), test.getValue());
+                    listener.testAssumptionFailure(test.getKey(), test.getValue());
                 } else {
                     listener.testFailed(test.getKey(), test.getValue());
                 }
@@ -345,7 +345,7 @@ public class VtsMultiDeviceTestResultParser {
 
                 // do testRunStarted
                 listener.testRunStarted((String) results.getJSONObject(0).get(TEST_CLASS),
-                    results.length());
+                        results.length());
 
                 for (int index = 0; index < results.length(); index++) {
                     JSONObject  resultObject = results.getJSONObject(index);
@@ -374,10 +374,10 @@ public class VtsMultiDeviceTestResultParser {
                     }
                 }
                 listener.testRunEnded(endTime - beginTime, Collections.<String, String>emptyMap());
-             }
-         } catch (JSONException e) {
-             CLog.e("Exception occurred %s :", e);
-         }
+            }
+        } catch (JSONException e) {
+            CLog.e("Exception occurred %s :", e);
+        }
     }
 
     /**
@@ -389,8 +389,8 @@ public class VtsMultiDeviceTestResultParser {
     private void parseError(String expected)
             throws PythonUnitTestParseException {
         throw new PythonUnitTestParseException(
-            String.format("Expected \"%s\" on line %d, found %s instead",
-                    expected, mLineNum + 1, mCurrentLine));
+                String.format("Expected \"%s\" on line %d, found %s instead",
+                        expected, mLineNum + 1, mCurrentLine));
     }
 
     private void markTestSuccess() {

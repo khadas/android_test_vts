@@ -14,39 +14,14 @@
      limitations under the License.
 -->
 <configuration description="Config for VTS libc basic file and socket IO testing">
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
+        <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
-        <option name="push" value="DATA/lib/libvts_common.so->/data/local/tmp/32/libvts_common.so" />
-        <option name="push" value="DATA/lib64/libvts_common.so->/data/local/tmp/64/libvts_common.so" />
-        <option name="push" value="DATA/lib/libvts_interfacespecification.so->/data/local/tmp/32/libvts_interfacespecification.so" />
-        <option name="push" value="DATA/lib64/libvts_interfacespecification.so->/data/local/tmp/64/libvts_interfacespecification.so" />
-        <option name="push" value="DATA/lib/libvts_drivercomm.so->/data/local/tmp/32/libvts_drivercomm.so" />
-        <option name="push" value="DATA/lib64/libvts_drivercomm.so->/data/local/tmp/64/libvts_drivercomm.so" />
-        <option name="push" value="DATA/lib/libvts_datatype.so->/data/local/tmp/32/libvts_datatype.so" />
-        <option name="push" value="DATA/lib64/libvts_datatype.so->/data/local/tmp/64/libvts_datatype.so" />
-        <option name="push" value="DATA/lib/libvts_measurement.so->/data/local/tmp/32/libvts_measurement.so" />
-        <option name="push" value="DATA/lib64/libvts_measurement.so->/data/local/tmp/64/libvts_measurement.so" />
-        <option name="push" value="DATA/lib/libvts_codecoverage.so->/data/local/tmp/32/libvts_codecoverage.so" />
-        <option name="push" value="DATA/lib64/libvts_codecoverage.so->/data/local/tmp/64/libvts_codecoverage.so" />
-        <option name="push" value="DATA/lib/libvts_multidevice_proto.so->/data/local/tmp/32/libvts_multidevice_proto.so" />
-        <option name="push" value="DATA/lib64/libvts_multidevice_proto.so->/data/local/tmp/64/libvts_multidevice_proto.so" />
-        <option name="push" value="DATA/bin/fuzzer32->/data/local/tmp/32/fuzzer32" />
-        <option name="push" value="DATA/bin/fuzzer64->/data/local/tmp/64/fuzzer64" />
-        <option name="push" value="DATA/bin/vts_shell_driver32->/data/local/tmp/32/vts_shell_driver32" />
-        <option name="push" value="DATA/bin/vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64" />
-        <option name="push" value="DATA/bin/vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32" />
-        <option name="push" value="DATA/bin/vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64" />
         <option name="push" value="spec/test/vts/specification/lib_bionic/libcV1.vts->/data/local/tmp/spec/libcV1.vts" />
-        <option name="append-bitness" value="false" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-        <option name="dep-module" value="future" />
-        <option name="dep-module" value="futures" />
-        <option name="dep-module" value="enum" />
-        <option name="dep-module" value="protobuf" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/system/libc/LibcTest" />
-        <option name="test-config-path" value="vts-config/testcases/system/libc/LibcTest.config" />
     </test>
 </configuration>

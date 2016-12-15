@@ -30,8 +30,9 @@ import com.android.tradefed.util.RunUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.TreeSet;
+import java.util.Collection;
 
 /**
  * Sets up a Python virtualenv on the host and installs packages. To activate it, the working
@@ -48,6 +49,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     private static final String PATH = "PATH";
     protected static final String PYTHONPATH = "PYTHONPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
+    private static final String[] DEFAULT_DEP_MODULES = {"future", "futures", "enum", "protobuf"};
 
     @Option(name = "venv-dir", description = "path of an existing virtualenv to use")
     private File mVenvDir = null;
@@ -56,10 +58,10 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     private File mRequirementsFile = null;
 
     @Option(name = "script-file", description = "scripts which need to be executed in advance")
-    private List<String> mScriptFiles = new ArrayList<>();
+    private Collection<String> mScriptFiles = new TreeSet<>();
 
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
-    private List<String> mDepModules = new ArrayList<>();
+    private Collection<String> mDepModules = new TreeSet<>(Arrays.asList(DEFAULT_DEP_MODULES));
 
     IRunUtil mRunUtil = new RunUtil();
     String mPip = PIP;
@@ -132,7 +134,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         }
         try {
             mVenvDir = FileUtil.createNamedTempDir(
-                buildInfo.getTestTag() + "-virtualenv-" + buildInfo.getDeviceSerial());
+                    buildInfo.getTestTag() + "-virtualenv-" + buildInfo.getDeviceSerial());
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
             activate();
         } catch (IOException e) {
