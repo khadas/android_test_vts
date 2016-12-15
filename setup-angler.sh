@@ -10,6 +10,8 @@ adb push images/angler/libvts_interfacespecification32.so /data/local/tmp/lib/li
 adb push images/angler/libvts_interfacespecification.so /data/local/tmp/libvts_interfacespecification.so
 adb push images/angler/libvts_datatype32.so /data/local/tmp/lib/libvts_datatype.so
 adb push images/angler/libvts_datatype.so /data/local/tmp/libvts_datatype.so
+adb push images/angler/libvts_measurement32.so /data/local/tmp/lib/libvts_measurement.so
+adb push images/angler/libvts_measurement.so /data/local/tmp/libvts_measurement.so
 
 adb shell mkdir /data/local/tmp/spec
 adb push sysfuzzer/libinterfacespecification/specification/CameraHalV1.vts /data/local/tmp/spec/CameraHalV1.vts
