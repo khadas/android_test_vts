@@ -26,6 +26,7 @@ import unittest
 
 from vts.utils.python.common import cmd_utils
 
+
 class VtscTester(unittest.TestCase):
     """Integration test runner for vtsc in generating the driver/profiler code.
 
@@ -47,6 +48,7 @@ class VtscTester(unittest.TestCase):
         _output_dir: root directory that stores all output files.
         _errors: number of errors generates during the test.
     """
+
     def __init__(self, testName, vtsc_path, canonical_dir, output_dir):
         super(VtscTester, self).__init__(testName)
         self._vtsc_path = vtsc_path
@@ -72,18 +74,28 @@ class VtscTester(unittest.TestCase):
     def TestDriver(self):
         """Run tests for DRIVER mode. """
         logging.info("Running TestDriver test case.")
+        #Tests for Hidl Hals.
         for component_name in ["Nfc", "types", "NfcClientCallback"]:
+            self.RunTest("DRIVER", "hardware/interfaces/nfc/1.0/vts/%s.vts" %
+                         component_name, "%s.driver.cpp" % component_name)
+        #Tests for conventional Hals.
+        for component_name in [
+                "BluetoothHalV1", "BluetoothHalV1bt_interface_t", "WifiHalV1"
+        ]:
             self.RunTest("DRIVER",
-                         "hardware/interfaces/nfc/1.0/vts/%s.vts" % component_name,
-                         "%s.driver.cpp" % component_name)
+                         "test/vts/specification/hal_conventional/%s.vts" %
+                         component_name, "%s.driver.cpp" % component_name)
+        #Tests for shared libraries.
+        for component_name in ["libcV1"]:
+            self.RunTest("DRIVER", "test/vts/specification/lib_bionic/%s.vts" %
+                         component_name, "%s.driver.cpp" % component_name)
 
     def TestProfiler(self):
         """Run tests for PROFILER mode. """
         logging.info("Running TestProfiler test case.")
         for component_name in ["Nfc", "types", "NfcClientCallback"]:
-            self.RunTest("PROFILER",
-                         "hardware/interfaces/nfc/1.0/vts/%s.vts" % component_name,
-                         "%s.profiler.cpp" % component_name)
+            self.RunTest("PROFILER", "hardware/interfaces/nfc/1.0/vts/%s.vts" %
+                         component_name, "%s.profiler.cpp" % component_name)
 
     def RunTest(self, mode, vts_file_path, source_file_name):
         """Run vtsc with given mode for the give vts file and compare the
@@ -94,9 +106,11 @@ class VtscTester(unittest.TestCase):
             vts_file_path: path of the input vts file.
             source_file_name: name of the generated source file.
         """
-        vtsc_cmd = [self._vtsc_path, "-m" + mode, vts_file_path,
-                    os.path.join(self._output_dir, mode),
-                    os.path.join(self._output_dir, mode, source_file_name)]
+        vtsc_cmd = [
+            self._vtsc_path, "-m" + mode, vts_file_path,
+            os.path.join(self._output_dir, mode),
+            os.path.join(self._output_dir, mode, source_file_name)
+        ]
         return_code = cmd_utils.RunCommand(vtsc_cmd)
         if (return_code != 0):
             self.Error("Fail to execute command: %s" % vtsc_cmd)
@@ -107,10 +121,10 @@ class VtscTester(unittest.TestCase):
         output_header_file = os.path.join(self._output_dir, mode,
                                           header_file_name)
 
-        canonical_source_file = os.path.join(
-            self._canonical_dir, mode, source_file_name)
-        output_source_file = os.path.join(
-            self._output_dir, mode, source_file_name)
+        canonical_source_file = os.path.join(self._canonical_dir, mode,
+                                             source_file_name)
+        output_source_file = os.path.join(self._output_dir, mode,
+                                          source_file_name)
 
         self.CompareOutputFile(output_header_file, canonical_header_file)
         self.CompareOutputFile(output_source_file, canonical_source_file)
@@ -123,20 +137,23 @@ class VtscTester(unittest.TestCase):
             output_file: name of the output file.
         """
         if not os.path.isfile(canonical_file):
-            self.Error("Generated unexpected file: %s (for %s)" % (output_file, canonical_file))
+            self.Error("Generated unexpected file: %s (for %s)" %
+                       (output_file, canonical_file))
         else:
             if not filecmp.cmp(output_file, canonical_file):
-                self.Error("output file: %s does not match the canonical_file: "
-                           "%s" % (output_file, canonical_file))
+                self.Error(
+                    "output file: %s does not match the canonical_file: "
+                    "%s" % (output_file, canonical_file))
                 self.PrintDiffFiles(output_file, canonical_file)
 
     def PrintDiffFiles(self, output_file, canonical_file):
         with open(output_file, 'r') as file1:
             with open(canonical_file, 'r') as file2:
-                diff = difflib.unified_diff(file1.readlines(),
-                                            file2.readlines(),
-                                            fromfile=output_file,
-                                            tofile=canonical_file)
+                diff = difflib.unified_diff(
+                    file1.readlines(),
+                    file2.readlines(),
+                    fromfile=output_file,
+                    tofile=canonical_file)
         for line in diff:
             logging.error(line)
 
@@ -149,6 +166,7 @@ class VtscTester(unittest.TestCase):
         """Remove the output_dir if it exists."""
         if os.path.exists(self._output_dir):
             shutil.rmtree(self._output_dir)
+
 
 if __name__ == "__main__":
     # Default values of the input parameter, could be overridden by command.
@@ -171,7 +189,7 @@ if __name__ == "__main__":
         elif opt == "-o":
             output_dir = val
         else:
-            print "unhandled option %s" % (opt,)
+            print "unhandled option %s" % (opt, )
             sys.exit(1)
 
     suite = unittest.TestSuite()
