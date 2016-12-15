@@ -123,7 +123,6 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         for source in self.binary_test_sources:
             logging.info('Parsing binary test source: %s', source)
             src, dst, tag = self.ParseTestSource(source)
-            self.tags.add(tag)
             if src:
                 if os.path.isdir(src):
                     src = os.path.join(src, '.')
@@ -131,9 +130,10 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 self._dut.adb.push("{src} {dst}".format(src=src, dst=dst))
             if tag is not None:
                 # tag not being None means to create a test case
+                self.tags.add(tag)
                 testcase = self.CreateTestCase(dst, tag)
                 logging.info('Creating test case from %s with tag %s: %s', dst,
-                             tag, testcase)
+                             tag, map(str, testcase))
                 if not testcase:
                     continue
 
@@ -244,7 +244,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if push_only:
             tag = None
 
-        return tuple(map(str, (src, dst, tag)))
+        return str(src), str(dst), tag
 
     def CreateTestCase(self, path, tag=''):
         '''Create a list of TestCase objects from a binary path.
