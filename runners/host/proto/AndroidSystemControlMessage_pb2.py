@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='AndroidSystemControlMessage.proto',
   package='android.vts',
-  serialized_pb='\n!AndroidSystemControlMessage.proto\x12\x0b\x61ndroid.vts\"\xa0\x02\n\"AndroidSystemControlCommandMessage\x12.\n\x0c\x63ommand_type\x18\x01 \x01(\x0e\x32\x18.android.vts.CommandType\x12\x0e\n\x05paths\x18\xe9\x07 \x03(\x0c\x12\x16\n\rcallback_port\x18\xcd\x08 \x01(\x05\x12\x15\n\x0cservice_name\x18\xd1\x0f \x01(\x0c\x12\x12\n\tfile_path\x18\xb9\x17 \x01(\x0c\x12\r\n\x04\x62its\x18\xbb\x17 \x01(\x05\x12\x15\n\x0ctarget_class\x18\xbc\x17 \x01(\x05\x12\x14\n\x0btarget_type\x18\xbd\x17 \x01(\x05\x12\x17\n\x0etarget_version\x18\xbe\x17 \x01(\x05\x12\x14\n\x0bmodule_name\x18\xbf\x17 \x01(\x0c\x12\x0c\n\x03\x61rg\x18\xa1\x1f \x01(\x0c\"\x9d\x01\n#AndroidSystemControlResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode\x12\x0f\n\x06reason\x18\xe9\x07 \x01(\x0c\x12\x13\n\nfile_names\x18\xea\x07 \x03(\x0c\x12\r\n\x04spec\x18\xeb\x07 \x01(\x0c\x12\x0f\n\x06result\x18\xec\x07 \x01(\x0c*\x99\x01\n\x0b\x43ommandType\x12\x18\n\x14UNKNOWN_COMMAND_TYPE\x10\x00\x12\r\n\tLIST_HALS\x10\x01\x12\x11\n\rSET_HOST_INFO\x10\x02\x12\x16\n\x12\x43HECK_STUB_SERVICE\x10\x65\x12\x17\n\x13LAUNCH_STUB_SERVICE\x10\x66\x12\x0e\n\tLIST_APIS\x10\xc9\x01\x12\r\n\x08\x43\x41LL_API\x10\xca\x01*@\n\x0cResponseCode\x12\x19\n\x15UNKNOWN_RESPONSE_CODE\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04\x46\x41IL\x10\x02')
+  serialized_pb='\n!AndroidSystemControlMessage.proto\x12\x0b\x61ndroid.vts\"\xa0\x02\n\"AndroidSystemControlCommandMessage\x12.\n\x0c\x63ommand_type\x18\x01 \x01(\x0e\x32\x18.android.vts.CommandType\x12\x0e\n\x05paths\x18\xe9\x07 \x03(\x0c\x12\x16\n\rcallback_port\x18\xcd\x08 \x01(\x05\x12\x15\n\x0cservice_name\x18\xd1\x0f \x01(\x0c\x12\x12\n\tfile_path\x18\xb9\x17 \x01(\x0c\x12\r\n\x04\x62its\x18\xbb\x17 \x01(\x05\x12\x15\n\x0ctarget_class\x18\xbc\x17 \x01(\x05\x12\x14\n\x0btarget_type\x18\xbd\x17 \x01(\x05\x12\x17\n\x0etarget_version\x18\xbe\x17 \x01(\x05\x12\x14\n\x0bmodule_name\x18\xbf\x17 \x01(\x0c\x12\x0c\n\x03\x61rg\x18\xa1\x1f \x01(\x0c\"\x9d\x01\n#AndroidSystemControlResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode\x12\x0f\n\x06reason\x18\xe9\x07 \x01(\x0c\x12\x13\n\nfile_names\x18\xea\x07 \x03(\x0c\x12\r\n\x04spec\x18\xeb\x07 \x01(\x0c\x12\x0f\n\x06result\x18\xec\x07 \x01(\x0c\"1\n#AndroidSystemCallbackRequestMessage\x12\n\n\x02id\x18\x01 \x01(\x0c\"X\n$AndroidSystemCallbackResponseMessage\x12\x30\n\rresponse_code\x18\x01 \x01(\x0e\x32\x19.android.vts.ResponseCode*\x99\x01\n\x0b\x43ommandType\x12\x18\n\x14UNKNOWN_COMMAND_TYPE\x10\x00\x12\r\n\tLIST_HALS\x10\x01\x12\x11\n\rSET_HOST_INFO\x10\x02\x12\x16\n\x12\x43HECK_STUB_SERVICE\x10\x65\x12\x17\n\x13LAUNCH_STUB_SERVICE\x10\x66\x12\x0e\n\tLIST_APIS\x10\xc9\x01\x12\r\n\x08\x43\x41LL_API\x10\xca\x01*@\n\x0cResponseCode\x12\x19\n\x15UNKNOWN_RESPONSE_CODE\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x08\n\x04\x46\x41IL\x10\x02')
 
 _COMMANDTYPE = _descriptor.EnumDescriptor(
   name='CommandType',
@@ -53,8 +53,8 @@ _COMMANDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=502,
-  serialized_end=655,
+  serialized_start=643,
+  serialized_end=796,
 )
 
 CommandType = enum_type_wrapper.EnumTypeWrapper(_COMMANDTYPE)
@@ -79,8 +79,8 @@ _RESPONSECODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=657,
-  serialized_end=721,
+  serialized_start=798,
+  serialized_end=862,
 )
 
 ResponseCode = enum_type_wrapper.EnumTypeWrapper(_RESPONSECODE)
@@ -250,10 +250,69 @@ _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE = _descriptor.Descriptor(
   serialized_end=499,
 )
 
+
+_ANDROIDSYSTEMCALLBACKREQUESTMESSAGE = _descriptor.Descriptor(
+  name='AndroidSystemCallbackRequestMessage',
+  full_name='android.vts.AndroidSystemCallbackRequestMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='android.vts.AndroidSystemCallbackRequestMessage.id', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=501,
+  serialized_end=550,
+)
+
+
+_ANDROIDSYSTEMCALLBACKRESPONSEMESSAGE = _descriptor.Descriptor(
+  name='AndroidSystemCallbackResponseMessage',
+  full_name='android.vts.AndroidSystemCallbackResponseMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='response_code', full_name='android.vts.AndroidSystemCallbackResponseMessage.response_code', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=552,
+  serialized_end=640,
+)
+
 _ANDROIDSYSTEMCONTROLCOMMANDMESSAGE.fields_by_name['command_type'].enum_type = _COMMANDTYPE
 _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE.fields_by_name['response_code'].enum_type = _RESPONSECODE
+_ANDROIDSYSTEMCALLBACKRESPONSEMESSAGE.fields_by_name['response_code'].enum_type = _RESPONSECODE
 DESCRIPTOR.message_types_by_name['AndroidSystemControlCommandMessage'] = _ANDROIDSYSTEMCONTROLCOMMANDMESSAGE
 DESCRIPTOR.message_types_by_name['AndroidSystemControlResponseMessage'] = _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE
+DESCRIPTOR.message_types_by_name['AndroidSystemCallbackRequestMessage'] = _ANDROIDSYSTEMCALLBACKREQUESTMESSAGE
+DESCRIPTOR.message_types_by_name['AndroidSystemCallbackResponseMessage'] = _ANDROIDSYSTEMCALLBACKRESPONSEMESSAGE
 
 class AndroidSystemControlCommandMessage(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
@@ -266,6 +325,18 @@ class AndroidSystemControlResponseMessage(_message.Message):
   DESCRIPTOR = _ANDROIDSYSTEMCONTROLRESPONSEMESSAGE
 
   # @@protoc_insertion_point(class_scope:android.vts.AndroidSystemControlResponseMessage)
+
+class AndroidSystemCallbackRequestMessage(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ANDROIDSYSTEMCALLBACKREQUESTMESSAGE
+
+  # @@protoc_insertion_point(class_scope:android.vts.AndroidSystemCallbackRequestMessage)
+
+class AndroidSystemCallbackResponseMessage(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ANDROIDSYSTEMCALLBACKRESPONSEMESSAGE
+
+  # @@protoc_insertion_point(class_scope:android.vts.AndroidSystemCallbackResponseMessage)
 
 
 # @@protoc_insertion_point(module_scope)

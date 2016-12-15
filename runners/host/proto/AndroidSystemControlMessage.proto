@@ -105,3 +105,17 @@ message AndroidSystemControlResponseMessage {
   // coverage measurement data.
   optional bytes result = 1004;
 }
+
+
+// To specify a callback request message for the TCP server.
+message AndroidSystemCallbackRequestMessage {
+  // callback id for the message sent to the TCP Server.
+  optional bytes id = 1;
+}
+
+
+// To specify a callback response message from the TCP server.
+message AndroidSystemCallbackResponseMessage {
+  // Response code in a Callback response from TCP server.
+  optional ResponseCode response_code = 1;
+}

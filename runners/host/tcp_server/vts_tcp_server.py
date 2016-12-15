@@ -18,44 +18,45 @@ import SocketServer
 import logging
 import threading
 from socket import error as socket_error
+
 from vts.runners.host.errors import TcpServerCreationError
 from vts.runners.host.errors import TcpServerShutdownError
+from vts.runners.host.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 
 _functions = dict()  # Dictionary to hold function pointers
 
 class TCPRequestHandler(SocketServer.BaseRequestHandler):
-    """The request handler class for our server.
-
-    Attributes:
-        _error_reponse: The response message sent to client when the function
-            is not registered in the dictionary.
-        _success_response: Message sent when the function is registered with
-            the dictionary.
-    """
-
-    _error_response = "Error: Function not registered."
-    _success_response = "Success"
+    """The request handler class for our server."""
 
     def handle(self):
         """Receives requests from clients.
 
-        This function receives the request from the client and sends the text
-        by converting them to upper case characters.
+        This function receives the request in the form of Serialized String
+        and converts it to the form AndroidSystemCallbackRequestMessage.
+        Then finally returns the serialized string version of object
+        AndroidSystemCallbackResponseMessage to the client.
+
         """
         # self.request is the TCP socket connected to the client
-        data = self.request.recv(1024).strip()
+        received_data = self.request.recv(1024)
 
-        logging.info('client address: ', self.client_address[0])
-        logging.info('data: ', data)
-        logging.info('Current Thread: ', threading.current_thread())
+        logging.info('client address: %s', self.client_address[0])
+        logging.info('received_data: %s', received_data)
+        logging.info('Current Thread: %s', threading.current_thread())
 
-        if data in _functions:
-            _functions[data]()  # call the function pointer
-            response = self._success_response
+        request_message = SysMsg_pb2.AndroidSystemCallbackRequestMessage()
+        request_message.ParseFromString(received_data)
+        response_message = SysMsg_pb2.AndroidSystemCallbackResponseMessage()
+
+        if request_message.id in _functions:
+            _functions[request_message.id]()  # call the function pointer
+            response_message.response_code = SysMsg_pb2.SUCCESS
         else:
-            response = self._error_response
+            response_message.response_code = SysMsg_pb2.FAIL
 
-        self.request.sendall(response)  # send the response back to client
+        # send the response back to client
+        message = response_message.SerializeToString()
+        self.request.sendall(message)
 
 
 class VtsTcpServer(object):
@@ -120,7 +121,6 @@ class VtsTcpServer(object):
             port: The port at which connection will be made. Default value
                   is zero, in which case a free port will be chosen
                   automatically.
-
         Returns:
             IP Address, port number
 
@@ -142,8 +142,8 @@ class VtsTcpServer(object):
             server_thread.start()
             logging.info('TcpServer %s started (%s:%s)',
                          server_thread.name, self._IP_address, self._port_used)
-
             return self._IP_address, self._port_used
+
         except (RuntimeError, IOError, socket_error) as e:
             logging.exception(e)
             raise TcpServerCreationError('TcpServerCreationError occurred.')
