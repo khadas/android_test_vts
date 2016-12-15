@@ -118,13 +118,14 @@ class VtsTcpClient(object):
         resp = self.RecvResponse()
         return (resp.response_code == SysMsg_pb2.SUCCESS)
 
-    def LaunchDriverService(self, service_name, file_path, bits, target_class,
-                          target_type, target_version):
+    def LaunchDriverService(self, driver_type, service_name, file_path, bits,
+                            target_class, target_type, target_version):
         """RPC to LAUNCH_DRIVER_SERVICE."""
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
         logging.info("bits: %s", bits)
         self.SendCommand(SysMsg_pb2.LAUNCH_DRIVER_SERVICE,
+                         driver_type=driver_type,
                          service_name=service_name,
                          file_path=file_path,
                          bits=bits,
@@ -175,6 +176,7 @@ class VtsTcpClient(object):
                     module_name=None,
                     service_name=None,
                     callback_port=None,
+                    driver_type=None,
                     arg=None):
         """Sends a command.
 
@@ -208,6 +210,9 @@ class VtsTcpClient(object):
 
         if service_name is not None:
             command_msg.service_name = service_name
+
+        if driver_type is not None:
+            command_msg.driver_type = driver_type
 
         if paths is not None:
             command_msg.paths.extend(paths)

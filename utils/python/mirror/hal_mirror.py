@@ -20,6 +20,7 @@ import logging
 from google.protobuf import text_format
 
 from vts.runners.host import errors
+from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
 from vts.proto import InterfaceSpecificationMessage_pb2 as IfaceSpecMsg
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.runners.host.tcp_server import vts_tcp_server
@@ -167,7 +168,7 @@ class HalMirror(object):
                        callback_port=self._host_callback_port)
         if not handler_name:
             handler_name = target_type
-        service_name = "vts_binder_%s" % handler_name
+        service_name = "vts_driver_%s" % handler_name
 
         # Get all the HALs available on the target.
         hal_list = client.ListHals(target_basepaths)
@@ -195,12 +196,15 @@ class HalMirror(object):
         logging.info("Init the driver service for %s", target_type)
         target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
-        launched = client.LaunchDriverService(service_name=service_name,
-                                              file_path=target_filename,
-                                              bits=bits,
-                                              target_class=target_class_id,
-                                              target_type=target_type_id,
-                                              target_version=target_version)
+        launched = client.LaunchDriverService(
+            driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
+            service_name=service_name,
+            file_path=target_filename,
+            bits=bits,
+            target_class=target_class_id,
+            target_type=target_type_id,
+            target_version=target_version)
+
         if not launched:
             raise errors.ComponentLoadingError(
                 "Failed to launch driver service %s from file path %s" %

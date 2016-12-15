@@ -20,33 +20,49 @@
 
 #include "TcpServerForRunner.h"
 
-#define DEFAULT_FUZZER_FILE_PATH32 "./fuzzer32"
-#define DEFAULT_FUZZER_FILE_PATH64 "./fuzzer64"
+#define DEFAULT_HAL_DRIVER_FILE_PATH32 "./fuzzer32"
+#define DEFAULT_HAL_DRIVER_FILE_PATH64 "./fuzzer64"
+#define DEFAULT_SHELL_DRIVER_FILE_PATH32 "./vts_shell_driver32"
+#define DEFAULT_SHELL_DRIVER_FILE_PATH64 "./vts_shell_driver64"
 
 
 int main(int argc, char* argv[]) {
-  char* fuzzer_path32;
-  char* fuzzer_path64;
   char* spec_dir_path = NULL;
+  char* hal_path32;
+  char* hal_path64;
+  char* shell_path32;
+  char* shell_path64;
 
   if (argc == 1) {
-      fuzzer_path32 = DEFAULT_FUZZER_FILE_PATH32;
-      fuzzer_path64 = DEFAULT_FUZZER_FILE_PATH64;
+      hal_path32 = DEFAULT_HAL_DRIVER_FILE_PATH32;
+      hal_path64 = DEFAULT_HAL_DRIVER_FILE_PATH64;
+      shell_path32 = DEFAULT_SHELL_DRIVER_FILE_PATH32;
+      shell_path64 = DEFAULT_SHELL_DRIVER_FILE_PATH64;
   } else if (argc == 2) {
-      fuzzer_path32 = DEFAULT_FUZZER_FILE_PATH32;
-      fuzzer_path64 = DEFAULT_FUZZER_FILE_PATH64;
+      hal_path32 = DEFAULT_HAL_DRIVER_FILE_PATH32;
+      hal_path64 = DEFAULT_HAL_DRIVER_FILE_PATH64;
       spec_dir_path = argv[1];
+      shell_path32 = DEFAULT_SHELL_DRIVER_FILE_PATH32;
+      shell_path64 = DEFAULT_SHELL_DRIVER_FILE_PATH64;
   } else if (argc == 3) {
-      fuzzer_path32 = argv[1];
-      fuzzer_path64 = argv[2];
+      hal_path32 = argv[1];
+      hal_path64 = argv[2];
   } else if (argc == 4) {
-      fuzzer_path32 = argv[1];
-      fuzzer_path64 = argv[2];
+      hal_path32 = argv[1];
+      hal_path64 = argv[2];
       spec_dir_path = argv[3];
+  } else if (argc == 6) {
+      hal_path32 = argv[1];
+      hal_path64 = argv[2];
+      spec_dir_path = argv[3];
+      shell_path32 = argv[4];
+      shell_path64 = argv[5];
   } else {
       std::cerr << "usage: vts_hal_agent "
-          << "[[<fuzzer 32-bit binary path> [<fuzzer 64-bit binary path>] "
-          << "[<spec file base dir path>]]" << std::endl;
+          << "[[<hal 32-bit binary path> [<hal 64-bit binary path>] "
+          << "[<spec file base dir path>]]"
+          << "[[<shell 32-bit binary path> [<shell 64-bit binary path>] "
+          << std::endl;
       return -1;
   }
 
@@ -63,7 +79,8 @@ int main(int argc, char* argv[]) {
   chdir(dir_path);
 
   android::vts::StartTcpServerForRunner(
-      (const char*) fuzzer_path32, (const char*) fuzzer_path64,
-      (const char*) spec_dir_path);
+      (const char*) spec_dir_path,
+      (const char*) hal_path32, (const char*) hal_path64,
+      (const char*) shell_path32, (const char*) shell_path64);
   return 0;
 }

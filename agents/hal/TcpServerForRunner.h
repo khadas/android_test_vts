@@ -21,8 +21,8 @@ namespace android {
 namespace vts {
 
 extern int StartTcpServerForRunner(
-    const char* fuzzer_path32, const char* fuzzer_path64,
-    const char* spec_dir_path);
+    const char* spec_dir_path, const char* fuzzer_path32, const char* fuzzer_path64,
+    const char* shell_path32, const char* shell_path64);
 
 }  // namespace vts
 }  // namespace android
