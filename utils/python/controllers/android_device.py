@@ -21,6 +21,9 @@ import logging
 import os
 import time
 import traceback
+import threading
+import socket
+import Queue
 
 from vts.runners.host import logger as vts_logger
 from vts.runners.host import signals
@@ -28,8 +31,10 @@ from vts.runners.host import utils
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
-
+from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import hal_mirror
+from vts.runners.host import errors
+import subprocess
 
 VTS_CONTROLLER_CONFIG_NAME = "AndroidDevice"
 VTS_CONTROLLER_REFERENCE_NAME = "android_devices"
@@ -39,6 +44,14 @@ ANDROID_DEVICE_PICK_ALL_TOKEN = "*"
 ANDROID_DEVICE_ADB_LOGCAT_PARAM_KEY = "adb_logcat_param"
 ANDROID_DEVICE_EMPTY_CONFIG_MSG = "Configuration is empty, abort!"
 ANDROID_DEVICE_NOT_LIST_CONFIG_MSG = "Configuration should be a list, abort!"
+
+# Target-side directory where the VTS binaries are uploaded
+DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
+# Time for which the current is put on sleep when the client is unable to
+# make a connection.
+THREAD_SLEEP_TIME = 1
+# Max number of attempts that the client can make to connect to the agent
+MAX_AGENT_CONNECT_RETRIES = 10
 
 
 class AndroidDeviceError(signals.ControllerError):
@@ -281,7 +294,16 @@ class AndroidDevice(object):
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
                             (to get callbacks from agent).
+        background_thread: a thread that runs in background to upload the
+            agent on the device.
+        queue: an instance of queue.Queue that keeps main thread on wait unless
+            the background_thread indicates it to move.
+        base_dir: target-side directory where the VTS binaries are uploaded.
     """
+    background_thread = None
+    background_thread_proceed = False
+    base_dir = None
+    queue = Queue.Queue()
 
     def __init__(self, serial="", device_port=5001, device_callback_port=5010):
         self.serial = serial
@@ -469,3 +491,100 @@ class AndroidDevice(object):
         self.rootAdb()
         if has_adb_log:
             self.startAdbLogcat()
+
+    def startAgent(self):
+        """ To start agent.
+
+        This function starts the target side native agent and is persisted
+        throughout the test run. This process is handled by the VTS runner lib.
+        """
+        # to ensure that only one instance of this agent runs
+        if(self.background_thread is not None):
+            logging.error(
+                "Another instance of background_thread is already "
+                "running.")
+            return
+
+        background_thread = threading.Thread(target=self.runAgent)
+        # Exit the server thread when the main thread terminates
+        background_thread.daemon = True
+        background_thread.start()
+
+        # wait for the flag from child thread
+        self.queue.get(block=True, timeout=None)
+
+        client = vts_tcp_client.VtsTcpClient()
+
+        # Ensure that the connection succeeds before it moves forward.
+        for _ in range(MAX_AGENT_CONNECT_RETRIES):
+            try:
+                time.sleep(THREAD_SLEEP_TIME)  # put current thread on sleep
+                response = client.Connect(
+                    command_port=self.host_command_port,
+                    callback_port=self.host_callback_port)
+
+                if response:
+                    return
+            except socket.error as e:
+                pass
+
+        # Throw error if client is unable to make a connection
+        raise errors.VtsTcpClientCreationError(
+              "Couldn't connect to %s:%s" % (
+                                    vts_tcp_client.TARGET_IP,
+                                    self.host_command_port))
+
+    def runAgent(self):
+        """This functions runs the child thread that runs the agent."""
+
+        # kill the existing instance of agent in DUT
+        commands = ["killall vts_hal_agent > /dev/null 2&>1",
+                    "killall fuzzer32 > /dev/null 2&>1",
+                    "killall fuzzer64 > /dev/null 2&>1"]
+
+        for cmd in commands:
+            try:
+                self.adb.shell(cmd)
+            except adb.AdbError as e:
+                logging.info('Exception occurred in command: %s', cmd)
+
+        cmd = '{}{}{} {}{} {}{} {}{} {}{}'.format(
+            'LD_LIBRARY_PATH=',
+            DEFAULT_AGENT_BASE_DIR, "/64",
+            DEFAULT_AGENT_BASE_DIR, "/64/vts_hal_agent",
+            DEFAULT_AGENT_BASE_DIR, "/32/fuzzer32",
+            DEFAULT_AGENT_BASE_DIR, "/64/fuzzer64",
+            DEFAULT_AGENT_BASE_DIR, "/spec")
+
+        self.queue.put('flag')
+        self.adb.shell(cmd)
+
+        # This should never happen.
+        logging.exception("Agent Terminated!")
+
+    def stopAgent(self):
+        """Stop the agent running on target.
+
+        This function stops the target side native agent which is persisted
+        throughout the test run. Obtain the process ID for the agent running
+        on DUT and then kill the process. This assumes each target device runs
+        only one VTS agent at a time.
+
+        """
+        # TODO: figure out if this function is called from unregisterControllers
+        cmd = 'adb shell pgrep vts_hal_agent'
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        (out, err) = proc.communicate()
+        out = out.strip()
+        processList = out.split('\n')
+
+        # Return if multiple agents are running on the device
+        if len(processList) > 1:
+            logging.error("Multiple instances of vts_hal_agent running on "
+                "device.")
+            return
+
+        # Kill the processes corresponding to the agent
+        for pid in processList:
+            cmd = '{} {}'.format('adb shell kill -9', pid)
+            subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
