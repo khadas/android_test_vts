@@ -153,8 +153,10 @@ class MirrorObjectForTypes(object):
                                         "support %s" % struct_value.scalar_type)
                             elif struct_value.type == CompSpecMsg.TYPE_VECTOR:
                                 sclar_type = struct_value.vector_value[0].scalar_type
+                                clear
                                 for value in given_value:
-                                    vector_value = struct_value.vector_value[0].value.add()
+                                    vector_value = struct_value.vector_value.add()
+                                    setattr(vector_value, type, CompSpecMsg.TYPE_SCALAR)
                                     setattr(vector_value, sclar_type, value)
                             continue
             elif arg_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
