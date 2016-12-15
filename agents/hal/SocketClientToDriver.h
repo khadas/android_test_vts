@@ -31,9 +31,6 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
  public:
   explicit VtsDriverSocketClient() : VtsDriverCommUtil() {}
 
-  // returns true if connection to the server is successful, false otherwise.
-  bool Connect(const string& socket_name);
-
   // closes the socket.
   void Close();
 

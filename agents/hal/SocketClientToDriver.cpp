@@ -53,27 +53,6 @@ using namespace std;
 namespace android {
 namespace vts {
 
-bool VtsDriverSocketClient::Connect(const string& socket_name) {
-  struct sockaddr_un serv_addr;
-  struct hostent* server;
-
-  int sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    cerr << __func__ << " ERROR opening socket" << endl;
-    return false;
-  }
-
-  bzero((char*)&serv_addr, sizeof(serv_addr));
-  serv_addr.sun_family = AF_UNIX;
-  strcpy(serv_addr.sun_path, socket_name.c_str());
-
-  if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-    cerr << __func__ << " ERROR connecting" << endl;
-    return false;
-  }
-  SetSockfd(sockfd);
-  return true;
-}
 
 bool VtsDriverSocketClient::Exit() {
   VtsDriverControlCommandMessage command_message;

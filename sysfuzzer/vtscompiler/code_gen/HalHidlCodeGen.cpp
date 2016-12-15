@@ -159,8 +159,12 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
       cpp_ss << "    va_end(argp);" << endl;
 #endif
       // TODO: check whether bytes is set and handle properly if not.
-      cpp_ss << "    RpcCallToAgent(GetCallbackID(\"" << callback_name
-             << "\"), callback_socket_name_);" << endl;
+      cpp_ss << "    AndroidSystemCallbackRequestMessage callback_message;"
+             << endl;
+      cpp_ss << "    callback_message.set_id(GetCallbackID(\"" << callback_name
+             << "\"));" << endl;
+      cpp_ss << "    RpcCallToAgent(callback_message, callback_socket_name_);"
+             << endl;
       if (has_return_value) {
         // TODO: consider actual return type.
         cpp_ss << "    return NULL;";

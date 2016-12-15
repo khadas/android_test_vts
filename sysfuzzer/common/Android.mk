@@ -39,6 +39,7 @@ LOCAL_C_INCLUDES := \
   system/extras \
   external/protobuf/src \
   frameworks/native/include \
+  test/vts/drivers/libdrivercomm \
   test/vts/sysfuzzer/libcodecoverage \
   system/core/include \
 
@@ -49,6 +50,7 @@ LOCAL_SHARED_LIBRARIES := \
   liblog \
   libdl \
   libandroid_runtime \
+  libvts_drivercomm \
   libvts_codecoverage \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
