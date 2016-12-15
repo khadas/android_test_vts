@@ -243,6 +243,113 @@ public final class VtsReportMessage {
     // @@protoc_insertion_point(enum_scope:android.vts.VtsTestType)
   }
 
+  /**
+   * Protobuf enum {@code android.vts.VtsProfilingType}
+   */
+  public enum VtsProfilingType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>UNKNOWN_VTS_PROFILING_TYPE = 0;</code>
+     */
+    UNKNOWN_VTS_PROFILING_TYPE(0, 0),
+    /**
+     * <code>VTS_PROFILING_TYPE_TIMESTAMP = 1;</code>
+     *
+     * <pre>
+     * for one sample which measures the time between two profiling points.
+     * </pre>
+     */
+    VTS_PROFILING_TYPE_TIMESTAMP(1, 1),
+    /**
+     * <code>VTS_PROFILING_TYPE_LABELED_VECTOR = 2;</code>
+     *
+     * <pre>
+     * for multiple single-type samples with labels.
+     * </pre>
+     */
+    VTS_PROFILING_TYPE_LABELED_VECTOR(2, 2),
+    ;
+
+    /**
+     * <code>UNKNOWN_VTS_PROFILING_TYPE = 0;</code>
+     */
+    public static final int UNKNOWN_VTS_PROFILING_TYPE_VALUE = 0;
+    /**
+     * <code>VTS_PROFILING_TYPE_TIMESTAMP = 1;</code>
+     *
+     * <pre>
+     * for one sample which measures the time between two profiling points.
+     * </pre>
+     */
+    public static final int VTS_PROFILING_TYPE_TIMESTAMP_VALUE = 1;
+    /**
+     * <code>VTS_PROFILING_TYPE_LABELED_VECTOR = 2;</code>
+     *
+     * <pre>
+     * for multiple single-type samples with labels.
+     * </pre>
+     */
+    public static final int VTS_PROFILING_TYPE_LABELED_VECTOR_VALUE = 2;
+
+
+    public final int getNumber() { return value; }
+
+    public static VtsProfilingType valueOf(int value) {
+      switch (value) {
+        case 0: return UNKNOWN_VTS_PROFILING_TYPE;
+        case 1: return VTS_PROFILING_TYPE_TIMESTAMP;
+        case 2: return VTS_PROFILING_TYPE_LABELED_VECTOR;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<VtsProfilingType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<VtsProfilingType>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<VtsProfilingType>() {
+            public VtsProfilingType findValueByNumber(int number) {
+              return VtsProfilingType.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.google.android.vts.proto.VtsReportMessage.getDescriptor().getEnumTypes().get(2);
+    }
+
+    private static final VtsProfilingType[] VALUES = values();
+
+    public static VtsProfilingType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private VtsProfilingType(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:android.vts.VtsProfilingType)
+  }
+
   public interface AndroidDeviceInfoMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -3531,6 +3638,16 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getName();
 
+    // optional .android.vts.VtsProfilingType type = 2;
+    /**
+     * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+     */
+    com.google.android.vts.proto.VtsReportMessage.VtsProfilingType getType();
+
     // optional int64 start_timestamp = 11;
     /**
      * <code>optional int64 start_timestamp = 11;</code>
@@ -3558,6 +3675,34 @@ public final class VtsReportMessage {
      * <code>optional int64 end_timestamp = 12;</code>
      */
     long getEndTimestamp();
+
+    // repeated bytes label = 21;
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    java.util.List<com.google.protobuf.ByteString> getLabelList();
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    int getLabelCount();
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    com.google.protobuf.ByteString getLabel(int index);
+
+    // repeated int64 value = 22;
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    java.util.List<java.lang.Long> getValueList();
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    int getValueCount();
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    long getValue(int index);
   }
   /**
    * Protobuf type {@code android.vts.ProfilingReportMessage}
@@ -3619,14 +3764,54 @@ public final class VtsReportMessage {
               name_ = input.readBytes();
               break;
             }
+            case 16: {
+              int rawValue = input.readEnum();
+              com.google.android.vts.proto.VtsReportMessage.VtsProfilingType value = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(2, rawValue);
+              } else {
+                bitField0_ |= 0x00000002;
+                type_ = value;
+              }
+              break;
+            }
             case 88: {
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000004;
               startTimestamp_ = input.readInt64();
               break;
             }
             case 96: {
-              bitField0_ |= 0x00000004;
+              bitField0_ |= 0x00000008;
               endTimestamp_ = input.readInt64();
+              break;
+            }
+            case 170: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                label_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              label_.add(input.readBytes());
+              break;
+            }
+            case 176: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                value_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              value_.add(input.readInt64());
+              break;
+            }
+            case 178: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
+                value_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                value_.add(input.readInt64());
+              }
+              input.popLimit(limit);
               break;
             }
           }
@@ -3637,6 +3822,12 @@ public final class VtsReportMessage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          label_ = java.util.Collections.unmodifiableList(label_);
+        }
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+          value_ = java.util.Collections.unmodifiableList(value_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -3693,6 +3884,22 @@ public final class VtsReportMessage {
       return name_;
     }
 
+    // optional .android.vts.VtsProfilingType type = 2;
+    public static final int TYPE_FIELD_NUMBER = 2;
+    private com.google.android.vts.proto.VtsReportMessage.VtsProfilingType type_;
+    /**
+     * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+     */
+    public com.google.android.vts.proto.VtsReportMessage.VtsProfilingType getType() {
+      return type_;
+    }
+
     // optional int64 start_timestamp = 11;
     public static final int START_TIMESTAMP_FIELD_NUMBER = 11;
     private long startTimestamp_;
@@ -3704,7 +3911,7 @@ public final class VtsReportMessage {
      * </pre>
      */
     public boolean hasStartTimestamp() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional int64 start_timestamp = 11;</code>
@@ -3724,7 +3931,7 @@ public final class VtsReportMessage {
      * <code>optional int64 end_timestamp = 12;</code>
      */
     public boolean hasEndTimestamp() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional int64 end_timestamp = 12;</code>
@@ -3733,10 +3940,59 @@ public final class VtsReportMessage {
       return endTimestamp_;
     }
 
+    // repeated bytes label = 21;
+    public static final int LABEL_FIELD_NUMBER = 21;
+    private java.util.List<com.google.protobuf.ByteString> label_;
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getLabelList() {
+      return label_;
+    }
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    public int getLabelCount() {
+      return label_.size();
+    }
+    /**
+     * <code>repeated bytes label = 21;</code>
+     */
+    public com.google.protobuf.ByteString getLabel(int index) {
+      return label_.get(index);
+    }
+
+    // repeated int64 value = 22;
+    public static final int VALUE_FIELD_NUMBER = 22;
+    private java.util.List<java.lang.Long> value_;
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    public java.util.List<java.lang.Long>
+        getValueList() {
+      return value_;
+    }
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    public int getValueCount() {
+      return value_.size();
+    }
+    /**
+     * <code>repeated int64 value = 22;</code>
+     */
+    public long getValue(int index) {
+      return value_.get(index);
+    }
+
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
+      type_ = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
       startTimestamp_ = 0L;
       endTimestamp_ = 0L;
+      label_ = java.util.Collections.emptyList();
+      value_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -3754,10 +4010,19 @@ public final class VtsReportMessage {
         output.writeBytes(1, name_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(11, startTimestamp_);
+        output.writeEnum(2, type_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(11, startTimestamp_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeInt64(12, endTimestamp_);
+      }
+      for (int i = 0; i < label_.size(); i++) {
+        output.writeBytes(21, label_.get(i));
+      }
+      for (int i = 0; i < value_.size(); i++) {
+        output.writeInt64(22, value_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -3774,11 +4039,33 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(11, startTimestamp_);
+          .computeEnumSize(2, type_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(11, startTimestamp_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(12, endTimestamp_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < label_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(label_.get(i));
+        }
+        size += dataSize;
+        size += 2 * getLabelList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < value_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(value_.get(i));
+        }
+        size += dataSize;
+        size += 2 * getValueList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3902,10 +4189,16 @@ public final class VtsReportMessage {
         super.clear();
         name_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        startTimestamp_ = 0L;
+        type_ = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
         bitField0_ = (bitField0_ & ~0x00000002);
-        endTimestamp_ = 0L;
+        startTimestamp_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
+        endTimestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        label_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        value_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -3941,11 +4234,25 @@ public final class VtsReportMessage {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.startTimestamp_ = startTimestamp_;
+        result.type_ = type_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.startTimestamp_ = startTimestamp_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
         result.endTimestamp_ = endTimestamp_;
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          label_ = java.util.Collections.unmodifiableList(label_);
+          bitField0_ = (bitField0_ & ~0x00000010);
+        }
+        result.label_ = label_;
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          value_ = java.util.Collections.unmodifiableList(value_);
+          bitField0_ = (bitField0_ & ~0x00000020);
+        }
+        result.value_ = value_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -3965,11 +4272,34 @@ public final class VtsReportMessage {
         if (other.hasName()) {
           setName(other.getName());
         }
+        if (other.hasType()) {
+          setType(other.getType());
+        }
         if (other.hasStartTimestamp()) {
           setStartTimestamp(other.getStartTimestamp());
         }
         if (other.hasEndTimestamp()) {
           setEndTimestamp(other.getEndTimestamp());
+        }
+        if (!other.label_.isEmpty()) {
+          if (label_.isEmpty()) {
+            label_ = other.label_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureLabelIsMutable();
+            label_.addAll(other.label_);
+          }
+          onChanged();
+        }
+        if (!other.value_.isEmpty()) {
+          if (value_.isEmpty()) {
+            value_ = other.value_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+          } else {
+            ensureValueIsMutable();
+            value_.addAll(other.value_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -4050,6 +4380,42 @@ public final class VtsReportMessage {
         return this;
       }
 
+      // optional .android.vts.VtsProfilingType type = 2;
+      private com.google.android.vts.proto.VtsReportMessage.VtsProfilingType type_ = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
+      /**
+       * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+       */
+      public com.google.android.vts.proto.VtsReportMessage.VtsProfilingType getType() {
+        return type_;
+      }
+      /**
+       * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+       */
+      public Builder setType(com.google.android.vts.proto.VtsReportMessage.VtsProfilingType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.VtsProfilingType type = 2;</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = com.google.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
+        onChanged();
+        return this;
+      }
+
       // optional int64 start_timestamp = 11;
       private long startTimestamp_ ;
       /**
@@ -4060,7 +4426,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasStartTimestamp() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional int64 start_timestamp = 11;</code>
@@ -4080,7 +4446,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder setStartTimestamp(long value) {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         startTimestamp_ = value;
         onChanged();
         return this;
@@ -4093,7 +4459,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearStartTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         startTimestamp_ = 0L;
         onChanged();
         return this;
@@ -4105,7 +4471,7 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 12;</code>
        */
       public boolean hasEndTimestamp() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional int64 end_timestamp = 12;</code>
@@ -4117,7 +4483,7 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 12;</code>
        */
       public Builder setEndTimestamp(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         endTimestamp_ = value;
         onChanged();
         return this;
@@ -4126,8 +4492,146 @@ public final class VtsReportMessage {
        * <code>optional int64 end_timestamp = 12;</code>
        */
       public Builder clearEndTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         endTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // repeated bytes label = 21;
+      private java.util.List<com.google.protobuf.ByteString> label_ = java.util.Collections.emptyList();
+      private void ensureLabelIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          label_ = new java.util.ArrayList<com.google.protobuf.ByteString>(label_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getLabelList() {
+        return java.util.Collections.unmodifiableList(label_);
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public int getLabelCount() {
+        return label_.size();
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public com.google.protobuf.ByteString getLabel(int index) {
+        return label_.get(index);
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public Builder setLabel(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureLabelIsMutable();
+        label_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public Builder addLabel(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureLabelIsMutable();
+        label_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public Builder addAllLabel(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureLabelIsMutable();
+        super.addAll(values, label_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes label = 21;</code>
+       */
+      public Builder clearLabel() {
+        label_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+
+      // repeated int64 value = 22;
+      private java.util.List<java.lang.Long> value_ = java.util.Collections.emptyList();
+      private void ensureValueIsMutable() {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
+          value_ = new java.util.ArrayList<java.lang.Long>(value_);
+          bitField0_ |= 0x00000020;
+         }
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public java.util.List<java.lang.Long>
+          getValueList() {
+        return java.util.Collections.unmodifiableList(value_);
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public int getValueCount() {
+        return value_.size();
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public long getValue(int index) {
+        return value_.get(index);
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public Builder setValue(
+          int index, long value) {
+        ensureValueIsMutable();
+        value_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public Builder addValue(long value) {
+        ensureValueIsMutable();
+        value_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public Builder addAllValue(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureValueIsMutable();
+        super.addAll(values, value_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 value = 22;</code>
+       */
+      public Builder clearValue() {
+        value_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -8278,33 +8782,38 @@ public final class VtsReportMessage {
       "lt\030\013 \001(\0162\033.android.vts.TestCaseResult\022\027\n",
       "\017start_timestamp\030\025 \001(\003\022\025\n\rend_timestamp\030" +
       "\026 \001(\003\0224\n\010coverage\030\037 \003(\0132\".android.vts.Co" +
-      "verageReportMessage\"V\n\026ProfilingReportMe" +
-      "ssage\022\014\n\004name\030\001 \001(\014\022\027\n\017start_timestamp\030\013" +
-      " \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\"\315\001\n\025Coverage" +
-      "ReportMessage\022\020\n\010dir_path\030\001 \001(\014\022\021\n\tfile_" +
-      "name\030\002 \001(\014\022\014\n\004html\030\003 \001(\014\022\023\n\013source_code\030" +
-      "\013 \001(\014\022\014\n\004gcno\030\025 \001(\014\022\014\n\004gcda\030\026 \001(\014\022\014\n\004dat" +
-      "a\030\037 \003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_line_coun" +
-      "t\030e \001(\005\022\032\n\022covered_line_count\030f \001(\005\"\360\002\n\021",
-      "TestReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022\014\n" +
-      "\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.android" +
-      ".vts.VtsTestType\022:\n\013device_info\030\004 \003(\0132%." +
-      "android.vts.AndroidDeviceInfoMessage\0221\n\n" +
-      "build_info\030\005 \001(\0132\035.android.vts.AndroidBu" +
-      "ildInfo\0225\n\ttest_case\030\013 \003(\0132\".android.vts" +
-      ".TestCaseReportMessage\0226\n\tprofiling\030\025 \003(" +
-      "\0132#.android.vts.ProfilingReportMessage\022\027" +
-      "\n\017start_timestamp\030e \001(\003\022\025\n\rend_timestamp" +
-      "\030f \001(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RES",
-      "ULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST" +
-      "_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_" +
-      "SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034" +
-      "\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTest" +
-      "Type\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HO" +
-      "ST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVE" +
-      "N_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033" +
-      "\n\027VTS_TARGET_SIDE_FUZZING\020\004B0\n\034com.googl" +
-      "e.android.vts.protoB\020VtsReportMessage"
+      "verageReportMessage\"\241\001\n\026ProfilingReportM" +
+      "essage\022\014\n\004name\030\001 \001(\014\022+\n\004type\030\002 \001(\0162\035.and" +
+      "roid.vts.VtsProfilingType\022\027\n\017start_times" +
+      "tamp\030\013 \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\022\r\n\005lab" +
+      "el\030\025 \003(\014\022\r\n\005value\030\026 \003(\003\"\315\001\n\025CoverageRepo" +
+      "rtMessage\022\020\n\010dir_path\030\001 \001(\014\022\021\n\tfile_name" +
+      "\030\002 \001(\014\022\014\n\004html\030\003 \001(\014\022\023\n\013source_code\030\013 \001(" +
+      "\014\022\014\n\004gcno\030\025 \001(\014\022\014\n\004gcda\030\026 \001(\014\022\014\n\004data\030\037 ",
+      "\003(\014\022\014\n\004gcov\030  \001(\014\022\030\n\020total_line_count\030e " +
+      "\001(\005\022\032\n\022covered_line_count\030f \001(\005\"\360\002\n\021Test" +
+      "ReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004tes" +
+      "t\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.android.vts" +
+      ".VtsTestType\022:\n\013device_info\030\004 \003(\0132%.andr" +
+      "oid.vts.AndroidDeviceInfoMessage\0221\n\nbuil" +
+      "d_info\030\005 \001(\0132\035.android.vts.AndroidBuildI" +
+      "nfo\0225\n\ttest_case\030\013 \003(\0132\".android.vts.Tes" +
+      "tCaseReportMessage\0226\n\tprofiling\030\025 \003(\0132#." +
+      "android.vts.ProfilingReportMessage\022\027\n\017st",
+      "art_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001" +
+      "(\003*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020" +
+      "\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CAS" +
+      "E_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP" +
+      "\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TE" +
+      "ST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType" +
+      "\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_D" +
+      "RIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FU" +
+      "ZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VT" +
+      "S_TARGET_SIDE_FUZZING\020\004*{\n\020VtsProfilingT",
+      "ype\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034V" +
+      "TS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PRO" +
+      "FILING_TYPE_LABELED_VECTOR\020\002B0\n\034com.goog" +
+      "le.android.vts.protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -8334,7 +8843,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_ProfilingReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_ProfilingReportMessage_descriptor,
-              new java.lang.String[] { "Name", "StartTimestamp", "EndTimestamp", });
+              new java.lang.String[] { "Name", "Type", "StartTimestamp", "EndTimestamp", "Label", "Value", });
           internal_static_android_vts_CoverageReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
