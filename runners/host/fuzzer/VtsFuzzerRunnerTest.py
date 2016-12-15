@@ -17,19 +17,34 @@
 
 import sys
 
-from tcp_client import TcpClient
+from logger import Log
 from proto import AndroidSystemControlMessage_pb2
+from tcp_client import TcpClient
 
 
 def main(args):
   client = TcpClient.VtsTcpClient()
+
   client.Connect()
+
+  # check whether the binder service is running
   client.SendCommand(AndroidSystemControlMessage_pb2.CHECK_FUZZER_BINDER_SERVICE,
                      "Is fuzzer running?")
-  print(client.RecvResponse())
+  resp = client.RecvResponse()
+  Log.info(resp)
+
+  while resp.response_code != AndroidSystemControlMessage_pb2.SUCCESS:
+    client.SendCommand(AndroidSystemControlMessage_pb2.START_FUZZER_BINDER_SERVICE,
+                       "--server --class=hal --type=light --version=1.0 "
+                       "/system/lib64/hw/lights.angler.so")
+    resp = client.RecvResponse()
+    Log.info(resp)
+
   client.SendCommand(AndroidSystemControlMessage_pb2.GET_HALS,
                      "Give me the list of HALs")
-  print(client.RecvResponse())
+  resp = client.RecvResponse()
+  Log.info(resp)
+
 
 if __name__ == "__main__":
   main(sys.argv[1:])
