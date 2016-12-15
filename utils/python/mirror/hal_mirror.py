@@ -132,6 +132,33 @@ class HalMirror(object):
                                  handler_name=handler_name,
                                  bits=bits)
 
+    def InitHidlHal(self,
+                    target_type,
+                    target_version,
+                    target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
+                    handler_name=None,
+                    bits=64):
+        """Initiates a handler for a particular HIDL HAL.
+
+        This will initiate a driver service for a HAL on the target side, create
+        the top level mirror object for a HAL, and register it in the manager.
+
+        Args:
+            target_type: string, the target type name (e.g., light, camera).
+            target_version: float, the target component version (e.g., 1.0).
+            target_basepaths: list of strings, the paths to look for target
+                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
+            handler_name: string, the name of the handler. target_type is used
+                          by default.
+            bits: integer, processor architecture indicator: 32 or 64.
+        """
+        self._CreateMirrorObject("hal_hidl",
+                                 target_type,
+                                 target_version,
+                                 target_basepaths,
+                                 handler_name=handler_name,
+                                 bits=bits)
+
     def RemoveHal(self, handler_name):
         hal_level_mirror = self._hal_level_mirrors[handler_name]
         hal_level_mirror.CleanUp()
@@ -175,34 +202,44 @@ class HalMirror(object):
             handler_name = target_type
         service_name = "vts_driver_%s" % handler_name
 
-        # Get all the HALs available on the target.
-        hal_list = client.ListHals(target_basepaths)
-        if not hal_list:
-            raise errors.ComponentLoadingError(
-                "Could not find any HAL under path %s" % target_basepaths)
-        logging.debug(hal_list)
-
-        # Find the corresponding filename for HAL target type.
         target_filename = None
-        for name in hal_list:
-            if target_type in name:
-                # TODO: check more exactly (e.g., multiple hits).
-                target_filename = name
-        if not target_filename:
-            raise errors.ComponentLoadingError(
-                "No file found for HAL target type %s." % target_type)
+        if target_class == "hal_conventional" or target_class == "hal_legacy":
+            # Get all the HALs available on the target.
+            hal_list = client.ListHals(target_basepaths)
+            if not hal_list:
+                raise errors.ComponentLoadingError(
+                    "Could not find any HAL under path %s" % target_basepaths)
+            logging.debug(hal_list)
 
-        # Check whether the requested binder service is already running.
-        # if client.CheckDriverService(service_name=service_name):
-        #     raise errors.ComponentLoadingError("A driver for %s already exists" %
-        #                                        service_name)
+            # Find the corresponding filename for HAL target type.
+            for name in hal_list:
+                if target_type in name:
+                    # TODO: check more exactly (e.g., multiple hits).
+                    target_filename = name
+            if not target_filename:
+                raise errors.ComponentLoadingError(
+                    "No file found for HAL target type %s." % target_type)
+
+            # Check whether the requested binder service is already running.
+            # if client.CheckDriverService(service_name=service_name):
+            #     raise errors.ComponentLoadingError("A driver for %s already exists" %
+            #                                        service_name)
+        elif target_class == "hal_hidl":
+            # TODO: either user the default hw-binder service or start a new
+            # service (e.g., if an instrumented binary is used).
+            pass
 
         # Launch the corresponding driver of the requested HAL on the target.
         logging.info("Init the driver service for %s", target_type)
         target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
+        driver_type = {
+            "hal_conventional": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
+            "hal_legacy": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_LEGACY,
+            "hal_hidl": ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_HIDL}.get(target_class)
+
         launched = client.LaunchDriverService(
-            driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
+            driver_type=driver_type,
             service_name=service_name,
             bits=bits,
             file_path=target_filename,
