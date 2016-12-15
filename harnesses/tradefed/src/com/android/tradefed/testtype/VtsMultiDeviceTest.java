@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -255,7 +256,9 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      */
     private JSONObject getUpdatedVtsRunnerTestConfig() throws IOException, JSONException {
         JSONObject jsonObject = null;
-        String content = FileUtil.readStringFromFile(new File(mTestConfigPath));
+        CLog.i("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
+        String content = FileUtil.readStringFromFile(new File(
+            Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
         if (content != null && !content.isEmpty()) {
             jsonObject = new JSONObject(content);
         }
