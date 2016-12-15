@@ -14,26 +14,17 @@
 # limitations under the License.
 #
 
+gcno_obj_file := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))/${VTS_GCNO_FILE}.o
 gcno_src_file := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))/${VTS_GCNO_FILE}.gcno
-
-ifneq ("$(wildcard $(gcno_src_file))","")
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 
 vts_framework_lib_gcno_file := $(VTS_TESTCASES_OUT)/${LOCAL_MODULE}_${VTS_GCNO_FILE}.gcno
 
-$(vts_framework_lib_gcno_file): $(gcno_src_file) | $(ACP)
+$(vts_framework_lib_gcno_file): $(gcno_obj_file) | $(ACP)
 	$(hide) mkdir -p $(VTS_TESTCASES_OUT)
-	$(hide) $(ACP) -fp $< $@
+	$(hide) touch $(gcno_src_file)
+	$(hide) $(ACP) -fp $(gcno_src_file) $@
 
 vts: $(vts_framework_lib_gcno_file)
-
-else
-gcno_src_dir := $(call intermediates-dir-for,SHARED_LIBRARIES,$(VTS_GCNO_MODULE))/..
-
-FILES = $(shell ls $(gcno_src_dir) -R)
-
-vts:
-	echo $(FILES)
-endif
 
