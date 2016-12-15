@@ -269,7 +269,8 @@ public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilter
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
-        sb.append(":" + System.getenv("ANDROID_BUILD_TOP") + "/test");
+        sb.append("$" + PYTHONPATH + ":./:" +
+                  System.getenv("ANDROID_BUILD_TOP") + "/test");
         mPythonPath = sb.toString();
     }
 
