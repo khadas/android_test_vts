@@ -193,8 +193,7 @@ class MirrorObject(object):
                         # value_msg.type == "primitive_value"?
                         if isinstance(value_msg, int):
                             arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
-                            arg_msg.scalar_value.int32_t = value_msg
-                            arg_msg.scalar_type = "int32_t"
+                            setattr(arg_msg.scalar_value, arg_msg.scalar_type, value_msg)
                         elif isinstance(value_msg, float):
                             arg_msg.type = IfaceSpecMsg.TYPE_SCALAR
                             arg_msg.scalar_value.float_t = value_msg

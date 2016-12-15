@@ -59,6 +59,11 @@ void LibSharedCodeGen::GenerateCppBodyFuzzFunction(
           message.original_data_structure_name().length() > 0) {
         cpp_ss << "reinterpret_cast<" << GetCppVariableType(arg) << ">("
                << kInstanceVariableName << ")";
+      } else if (arg.type() == TYPE_SCALAR) {
+        cpp_ss << "(func_msg->arg(" << arg_count << ").type() == TYPE_SCALAR && "
+               << "func_msg->arg(" << arg_count << ").scalar_value().has_" << arg.scalar_type() << "()) ? "
+               << "func_msg->arg(" << arg_count << ").scalar_value()." << arg.scalar_type() << "()"
+               << " : " << GetCppInstanceType(arg);
       } else {
         cpp_ss << GetCppInstanceType(arg);
       }
