@@ -171,7 +171,7 @@ class KernelLtpTest(base_test.BaseTestClass):
 
     def setUpTest(self):
         """Creates a remote shell instance, and copies data files."""
-        required_params = [keys.IKEY_DATA_FILE_PATH]
+        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
         self.getUserParams(required_params)
 
         logging.info("data_file_path: %s", self.data_file_path)
