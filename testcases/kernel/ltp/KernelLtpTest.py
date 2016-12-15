@@ -33,6 +33,8 @@ class KernelLtpTest(base_test.BaseTestClass):
     def testCrashTestcases(self):
         """A simple testcase which just emulates a normal usage pattern."""
         # TODO: enable 64-bit test cases.
+        logging.info(self.dut.shell.my_shell1.Execute("ls /data/local/tmp/32 -al"))
+        logging.info(self.dut.shell.my_shell1.Execute("ls /data/local/tmp/64 -al"))
         for test_binary in ["/data/local/tmp/32/crash01_32",
                             "/data/local/tmp/32/crash02_32"]:
             logging.info("***** %s *****", test_binary)
