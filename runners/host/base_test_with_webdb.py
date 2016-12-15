@@ -60,6 +60,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     COVERAGE_SRC_FILES = "coverage_src_files"
     COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
 
+    def __init__(self, configs):
+        super(BaseTestWithWebDbClass, self).__init__(configs)
+
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
