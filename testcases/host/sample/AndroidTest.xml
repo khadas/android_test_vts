@@ -66,6 +66,6 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/sample/SampleLightTest" />
-        <option name="test-config-path" value="SampleLightTest.config" />
+        <option name="test-config-path" value="SampleLightTest.test_config" />
     </test>
 </configuration>
