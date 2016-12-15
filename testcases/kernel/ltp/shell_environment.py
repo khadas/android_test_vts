@@ -18,7 +18,6 @@
 import logging
 
 from vts.runners.host import const
-from twisted.protocols.dict import Definition
 
 
 class CheckDefinition(object):
