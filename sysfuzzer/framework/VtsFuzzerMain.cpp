@@ -38,6 +38,7 @@ using namespace std;
 using namespace android;
 
 #define INTERFACE_SPEC_LIB_FILENAME "libvts_interfacespecification.so"
+#define PASSED_MARKER "[  PASSED  ]"
 
 // the default epoch count where an epoch is the time for a fuzz test run
 // (e.g., a function call).
@@ -149,5 +150,6 @@ int main(int argc, char* const argv[]) {
                               target_class,
                               target_type,
                               target_version) << endl;
+  cout << endl << PASSED_MARKER << endl;
   return 0;
 }
