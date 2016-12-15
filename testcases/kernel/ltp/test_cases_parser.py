@@ -33,9 +33,9 @@ class TestCasesParser(object):
 
     def IsTestcaseInList(self, testcase, name_list, n_bit):
         """Check whether a given testcase object is in a disabled test list"""
-        name_set = (testcase, testcase.testname,
-                    "{test_name}_%{n_bit}bit".format(
-                        test_name=testcase.testname, n_bit=n_bit))
+        name_set = (testcase.fullname, testcase.testname,
+                    "{test_name}_{n_bit}bit".format(
+                        test_name=testcase.fullname, n_bit=n_bit))
         return len(set(name_set).intersection(name_list)) > 0
 
     def Load(self, ltp_dir, n_bit, run_staging=False):

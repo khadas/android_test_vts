@@ -75,7 +75,7 @@ class EnvironmentRequirementChecker(object):
         result = copy.copy(ltp_configs.REQUIREMENT_FOR_ALL)
 
         for rule in ltp_configs.REQUIREMENTS_TO_TESTCASE:
-            if str(test_case) in ltp_configs.REQUIREMENTS_TO_TESTCASE[rule]:
+            if test_case.fullname in ltp_configs.REQUIREMENTS_TO_TESTCASE[rule]:
                 result.append(rule)
 
         for rule in ltp_configs.REQUIREMENT_TO_TESTSUITE:
