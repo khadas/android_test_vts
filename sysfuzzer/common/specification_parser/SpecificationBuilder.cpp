@@ -79,6 +79,26 @@ SpecificationBuilder::FindInterfaceSpecification(
 }
 
 
+FuzzerBase* SpecificationBuilder::GetFuzzerBase(
+    const vts::InterfaceSpecificationMessage& iface_spec_msg,
+    const char* dll_file_name,
+    const char* target_func_name) {
+  FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
+  if (!fuzzer) {
+    cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
+    return NULL;
+  }
+  if (!fuzzer->LoadTargetComponent(dll_file_name)) return NULL;
+
+  for (const vts::FunctionSpecificationMessage& func_msg : iface_spec_msg.api()) {
+    if (!strcmp(target_func_name, func_msg.name().c_str())) {
+      return fuzzer;
+    }
+  }
+  return NULL;
+}
+
+
 FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
     const vts::InterfaceSpecificationMessage& iface_spec_msg,
     const char* dll_file_name) {
@@ -115,12 +135,47 @@ bool SpecificationBuilder::LoadTargetComponent(
         << " version " << target_version << endl;
     return false;
   }
+  spec_lib_file_path_ = (char*) malloc(strlen(spec_lib_file_path) + 1);
+  strcpy(spec_lib_file_path_, spec_lib_file_path);
+
+  dll_file_name_ = (char*) malloc(strlen(dll_file_name) + 1);
+  strcpy(dll_file_name_, dll_file_name);
+
   cout << "ifspec addr load " << if_spec_msg_ << endl;
   string output;
   if_spec_msg_->SerializeToString(&output);
   cout << "loaded text " << output.length() << endl;
   cout << "loaded text " << strlen(output.c_str()) << endl;
   cout << "loaded text " << output << endl;
+  return true;
+}
+
+
+bool SpecificationBuilder::CallFunction(FunctionSpecificationMessage* func_msg) {
+  if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
+    return false;
+  }
+
+  FuzzerBase* func_fuzzer = GetFuzzerBase(
+      *if_spec_msg_, dll_file_name_, func_msg->name().c_str());
+  if (!func_fuzzer) {
+    cerr << "can't find FuzzerBase" << endl;
+    return false;
+  }
+
+  void* result;
+  cout << "Call Function " << func_msg->name() << endl;
+  func_fuzzer->Fuzz(*func_msg, &result);
+  if (func_msg->return_type().has_aggregate_type()) {
+    if (result != NULL) {
+      // loads that interface spec and enqueues all functions.
+      cout << __FUNCTION__ << " return type: "
+          << func_msg->return_type().aggregate_type() << endl;
+    } else {
+      cout << __FUNCTION__ << " return value = NULL" << endl;
+    }
+  }
+
   return true;
 }
 

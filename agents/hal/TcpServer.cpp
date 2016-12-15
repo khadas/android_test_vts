@@ -161,11 +161,12 @@ AndroidSystemControlResponseMessage* RespondGetFunctions() {
   if (!client.get()) return NULL;
 
   const char* result = client->GetFunctions();
-  cout << "GetFunctions: " << result << endl;
+  cout << "GetFunctions: len " << strlen(result) << endl;
+  if (result) cout << "GetFunctions: " << result << endl;
 
   AndroidSystemControlResponseMessage* response_msg =
       new AndroidSystemControlResponseMessage();
-  if (result && strlen(result) > 0) {
+  if (result != NULL && strlen(result) > 0) {
     response_msg->set_response_code(SUCCESS);
     response_msg->set_reason(result);
   } else {
@@ -176,18 +177,24 @@ AndroidSystemControlResponseMessage* RespondGetFunctions() {
 }
 
 
-AndroidSystemControlResponseMessage* RespondCallFunction(const string& file_name) {
+AndroidSystemControlResponseMessage* RespondCallFunction(const string& call_payload) {
   // TODO: use an attribute (client) of a newly defined class.
   android::sp<android::vts::IVtsFuzzer> client = android::vts::GetBinderClient();
   if (!client.get()) return NULL;
 
-  int v = 10;
-  client->Status(v);
-  const int32_t adder = 5;
-  int32_t sum = client->Call(v, adder);
-  cout << "Addition result: " << v << " + " << adder << " = " << sum << endl;
-  client->Exit();
-  return NULL;
+  const char* result = client->Call(call_payload);
+  if (result) cout << "Call: " << result << endl;
+
+  AndroidSystemControlResponseMessage* response_msg =
+      new AndroidSystemControlResponseMessage();
+  if (result != NULL && strlen(result) > 0) {
+    response_msg->set_response_code(SUCCESS);
+    response_msg->set_reason(result);
+  } else {
+    response_msg->set_response_code(FAIL);
+    response_msg->set_reason("Failed to load the selected HAL.");
+  }
+  return response_msg;
 }
 
 
