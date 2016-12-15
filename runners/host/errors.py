@@ -25,3 +25,7 @@ class USERError(Exception):
     """Raised when a problem is caused by user mistake, e.g. wrong command,
     misformatted config, test info, wrong test paths etc.
     """
+
+
+class ComponentLoadingError(Exception):
+    """Raised if it is unable to load a target component on a target device."""

@@ -25,6 +25,12 @@ from vts.runners.host.proto import AndroidSystemControlMessage_pb2
 TARGET_IP = os.environ.get("TARGET_IP", None)
 TARGET_PORT = os.environ.get("TARGET_PORT", 5001)
 _SOCKET_CONN_TIMEOUT_SECS = 60
+COMMAND_TYPE_NAME = {1: "Check binder service",
+                     2: "Start binder service",
+                     101: "Get HALs",
+                     102: "Select a HAL",
+                     201: "Get functions",
+                     202: "Call function"}
 
 
 class VtsTcpClient(object):
@@ -89,6 +95,7 @@ class VtsTcpClient(object):
 
     command_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlCommandMessage()
     command_msg.command_type = command_type
+    logging.info("sending a command (type %s)", COMMAND_TYPE_NAME[command_type])
     command_msg.target_name = target_name
 
     if target_class is not None:
@@ -102,7 +109,7 @@ class VtsTcpClient(object):
 
     message = command_msg.SerializeToString()
     message_len = len(message)
-    logging.info("sending %d bytes", message_len)
+    logging.debug("sending %d bytes", message_len)
     self.channel.write(str(message_len) + b'\n')
     self.channel.write(message)
     self.channel.flush()
@@ -115,6 +122,9 @@ class VtsTcpClient(object):
       data = self.channel.read(len)
       response_msg = AndroidSystemControlMessage_pb2.AndroidSystemControlResponseMessage()
       response_msg.ParseFromString(data)
+      logging.info(
+          "Response %s",
+          "succcess" if response_msg.response_code == AndroidSystemControlMessage_pb2.SUCCESS else "fail")
       return response_msg
     except socket.timeout as e:
       logging.exception(e)

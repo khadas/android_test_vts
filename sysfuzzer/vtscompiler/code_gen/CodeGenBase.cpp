@@ -64,7 +64,8 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
 
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL
-      || message.component_class() == HAL_SUBMODULE) {
+      || message.component_class() == HAL_SUBMODULE
+      || message.component_class() == LEGACY_HAL) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
   }
 
@@ -81,6 +82,14 @@ void CodeGenBase::GenerateAll(std::stringstream& cpp_ss,
   GenerateOpenNameSpaces(h_ss);
   h_ss << "class " << fuzzer_extended_class_name << " : public FuzzerBase {"
       << endl;
+  h_ss << " public:" << endl;
+  h_ss << "  " << fuzzer_extended_class_name << "() : FuzzerBase(";
+
+  if (message.component_class() == HAL) h_ss << "HAL";
+  if (message.component_class() == HAL_SUBMODULE) h_ss << "HAL_SUBMODULE";
+  if (message.component_class() == LEGACY_HAL) h_ss << "LEGACY_HAL";
+
+  h_ss << ") { }" << endl;
   h_ss << " protected:" << endl;
   h_ss << "  bool Fuzz(const FunctionSpecificationMessage& func_msg," << endl;
   h_ss << "            void** result);" << endl;

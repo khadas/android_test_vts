@@ -30,7 +30,8 @@ using namespace android;
 namespace android {
 namespace vts {
 
-FuzzerBase::FuzzerBase() {}
+FuzzerBase::FuzzerBase(int target_class)
+    : target_class_(target_class) {}
 
 
 FuzzerBase::~FuzzerBase() {}
@@ -39,7 +40,11 @@ FuzzerBase::~FuzzerBase() {}
 bool FuzzerBase::LoadTargetComponent(const char* target_dll_path) {
   target_dll_path_ = target_dll_path;
   if (!target_loader_.Load(target_dll_path_)) return false;
-  return (device_ = target_loader_.GetHWDevice()) != NULL;
+  if (target_class_ != LEGACY_HAL) {
+    return (device_ = target_loader_.GetHWDevice()) != NULL;
+  } else {
+    return true;
+  }
 }
 
 
@@ -57,7 +62,6 @@ bool FuzzerBase::Fuzz(const vts::InterfaceSpecificationMessage& message,
   }
   return true;
 }
-
 
 }  // namespace vts
 }  // namespace android

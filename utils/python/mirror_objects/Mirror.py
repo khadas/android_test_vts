@@ -36,3 +36,15 @@ class Mirror(MirrorBase.MirrorBase):
     """
     super(Mirror, self).Init("hal", target_type, target_version,
                              target_basepath)
+
+  def InitLegacyHal(self, target_type, target_version, target_basepath=None):
+    """Initializes a legacy HAL (e.g., wifi).
+
+    Args:
+      target_type: string, the target type name (e.g., light, camera).
+      target_version: float, the target component version (e.g., 1.0).
+      target_basepath: string, the base path of where a target file is stored
+          in.
+    """
+    super(Mirror, self).Init("legacy_hal", target_type, target_version,
+                             target_basepath)

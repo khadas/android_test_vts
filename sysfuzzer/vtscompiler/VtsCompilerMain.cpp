@@ -34,6 +34,7 @@
 #include "code_gen/CodeGenBase.h"
 #include "code_gen/HalCodeGen.h"
 #include "code_gen/HalSubmoduleCodeGen.h"
+#include "code_gen/LegacyHalCodeGen.h"
 
 
 using namespace std;
@@ -72,6 +73,9 @@ void Translate(
     case HAL_SUBMODULE:
       code_generator.reset(
           new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
+      break;
+    case LEGACY_HAL:
+      code_generator.reset(new LegacyHalCodeGen(input_vts_file_path, vts_name));
       break;
     default:
       cerr << "not yet supported component_class " << message.component_class();
