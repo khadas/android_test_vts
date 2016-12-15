@@ -40,9 +40,15 @@ FuzzerWrapper::FuzzerWrapper()
 
 bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
     const char* spec_dll_path) {
+  if (!spec_dll_path) {
+    cerr << __func__ << " arg is NULL" << endl;
+    return false;
+  }
+  if (spec_dll_path_ && !strcmp(spec_dll_path, spec_dll_path_)) {
+    return true;
+  }
   spec_dll_path_ = spec_dll_path;
-  if (!spec_dll_path_) return false;
-  if (!dll_loader_.Load(spec_dll_path_)) return false;
+  if (!dll_loader_.Load(spec_dll_path_, false)) return false;
   cout << "DLL loaded " << spec_dll_path_ << endl;
   return true;
 }
@@ -50,8 +56,9 @@ bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
 
 FuzzerBase* FuzzerWrapper::GetFuzzer(
     const vts::InterfaceSpecificationMessage& message) {
+  cout << __func__ << endl;
   if (!spec_dll_path_) {
-    cerr << __FUNCTION__ << ": spec_dll_path_ not set" << endl;
+    cerr << __func__ << ": spec_dll_path_ not set" << endl;
     return NULL;
   }
 
@@ -67,10 +74,10 @@ FuzzerBase* FuzzerWrapper::GetFuzzer(
   loader_function func = dll_loader_.GetLoaderFunction(
       function_name_prefix_chars);
   if (!func) {
-    cerr << __FUNCTION__ << ": function not found." << endl;
+    cerr << __func__ << ": function not found." << endl;
     return NULL;
   }
-  cout << __FUNCTION__ << ": function found; trying to call." << endl;
+  cout << __func__ << ": function found; trying to call." << endl;
   fuzzer_base_ = func();
   function_name_prefix_chars_ = (char*) malloc(strlen(function_name_prefix_chars) + 1);
   strcpy(function_name_prefix_chars_, function_name_prefix_chars);

@@ -31,7 +31,7 @@ class SampleCameraTest(base_test.BaseTestClass):
 
     def testCameraOpenFirst(self):
         """A simple testcase which just calls an open function."""
-        self.hal_mirror.camera.common.methods.open()  # should not crash b/29053974
+        self.hal_mirror.camera.common.methods.open()  # note args are skipped
 
     def testCameraInit(self):
         """A simple testcase which just calls an init function."""
@@ -49,7 +49,7 @@ class SampleCameraTest(base_test.BaseTestClass):
         # self.hal_mirror.camera.init()
         self.hal_mirror.camera.camera_module_callbacks_t()
         self.hal_mirror.camera.set_callbacks()
-        self.hal_mirror.camera.common.methods.open()
+        self.hal_mirror.camera.common.methods.open()  # note args are skipped
 
 
 if __name__ == "__main__":

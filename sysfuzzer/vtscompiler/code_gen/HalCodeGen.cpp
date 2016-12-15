@@ -61,7 +61,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "    FunctionSpecificationMessage* func_msg," << endl;
   cpp_ss << "    void** result) {" << endl;
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
-  cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;" << endl;
+  cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+      << endl;
 
   // to call another function if it's for a sub_struct
   if (message.sub_struct().size() > 0) {
@@ -71,6 +72,21 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     }
     cpp_ss << "  }" << endl;
   }
+
+  cpp_ss << "    " << message.original_data_structure_name()
+      << "* local_device = ";
+  cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
+      << "*>(" << kInstanceVariableName << ");" << endl;
+
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
+  cpp_ss << "      local_device = reinterpret_cast<"
+      << message.original_data_structure_name() << "*>(hmi_);" << endl;
+  cpp_ss << "    }" << endl;
+  cpp_ss << "    if (local_device == NULL) {" << endl;
+  cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;" << endl;
+  cpp_ss << "      return false;" << endl;
+  cpp_ss << "    }" << endl;
 
   for (auto const& api : message.api()) {
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
@@ -146,20 +162,7 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     GenerateCodeToStartMeasurement(cpp_ss);
     cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
 
-    cpp_ss << "    " << message.original_data_structure_name()
-        << "* local_device = ";
-    cpp_ss << "reinterpret_cast<" << message.original_data_structure_name()
-        << "*>(" << kInstanceVariableName << ");" << endl;
-
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
-    cpp_ss << "      local_device = reinterpret_cast<"
-        << message.original_data_structure_name() << "*>(hmi_);" << endl;
-    cpp_ss << "    }" << endl;
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;" << endl;
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
+    // checks whether the function is actaully defined.
     cpp_ss << "    if (reinterpret_cast<" << message.original_data_structure_name()
         << "*>(local_device)->" << api.name() << " == NULL";
     cpp_ss << ") {" << endl;
@@ -240,8 +243,30 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
   cpp_ss << "  const char* func_name = func_msg->name().c_str();" << endl;
   cpp_ss << "  cout << \"Function: \" << __func__ << \" \" << func_name << endl;" << endl;
 
+  bool is_open;
   for (auto const& api : message.api()) {
+    is_open = false;
+    if ((parent_path_printable + message.name()) == "_common_methods"
+        && api.name() == "open") {
+      is_open = true;
+    }
+
     cpp_ss << "  if (!strcmp(func_name, \"" << api.name() << "\")) {" << endl;
+
+    cpp_ss << "    " << original_data_structure_name
+        << "* local_device = ";
+    cpp_ss << "reinterpret_cast<" << original_data_structure_name
+        << "*>(" << kInstanceVariableName << ");" << endl;
+
+    cpp_ss << "    if (local_device == NULL) {" << endl;
+    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
+    cpp_ss << "      local_device = reinterpret_cast<" << original_data_structure_name
+        << "*>(hmi_);" << endl;
+    cpp_ss << "    }" << endl;
+    cpp_ss << "    if (local_device == NULL) {" << endl;
+    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;" << endl;
+    cpp_ss << "      return false;" << endl;
+    cpp_ss << "    }" << endl;
 
     // args - definition;
     int arg_count = 0;
@@ -262,7 +287,8 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
 
         if (arg.primitive_type().size() > 0) {
           cpp_ss << "(" << msg << ".aggregate_type().size() == 0 && "
-              << msg << ".primitive_type().size() == 1)? ";
+              << msg << ".primitive_type().size() == 1 && "
+              << msg << ".primitive_value().size() == 1)? ";
           if (!strcmp(arg.primitive_type(0).c_str(), "pointer")
               || !strcmp(arg.primitive_type(0).c_str(), "char_pointer")
               || !strcmp(arg.primitive_type(0).c_str(), "void_pointer")
@@ -297,12 +323,25 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << ") : ";
         }
 
-        cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
-            << msg << ".primitive_value_size() > 0)? ";
-        cpp_ss << GetCppInstanceType(arg, msg);
-        cpp_ss << " : " << GetCppInstanceType(arg) << " )";
-        // TODO: use the given message and call a lib function which converts
-        // a message to a C/C++ struct.
+        if (is_open) {
+          if (arg_count == 0) {
+            cpp_ss << "hmi_;" << endl;
+          } else if (arg_count == 1) {
+            cpp_ss << "((hmi_) ? const_cast<char*>(hmi_->name) : NULL)" << endl;
+          } else if (arg_count == 2) {
+            cpp_ss << "(struct hw_device_t**) &device_" << endl;
+          } else {
+            cerr << __func__ << " ERROR additional args for open " << arg_count << endl;
+            exit(-1);
+          }
+        } else {
+          cpp_ss << "( (" << msg << ".aggregate_value_size() > 0 || "
+              << msg << ".primitive_value_size() > 0)? ";
+          cpp_ss << GetCppInstanceType(arg, msg);
+          cpp_ss << " : " << GetCppInstanceType(arg) << " )";
+          // TODO: use the given message and call a lib function which converts
+          // a message to a C/C++ struct.
+        }
       }
       cpp_ss << ";" << endl;
       cpp_ss << "    cout << \"arg" << arg_count << " = \" << arg" << arg_count
@@ -314,20 +353,6 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     GenerateCodeToStartMeasurement(cpp_ss);
     cpp_ss << "    cout << \"hit2.\" << device_ << endl;" << endl;
 
-    cpp_ss << "    " << original_data_structure_name
-        << "* local_device = ";
-    cpp_ss << "reinterpret_cast<" << original_data_structure_name
-        << "*>(" << kInstanceVariableName << ");" << endl;
-
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cout << \"use hmi\" << endl;" << endl;
-    cpp_ss << "      local_device = reinterpret_cast<" << original_data_structure_name
-        << "*>(hmi_);" << endl;
-    cpp_ss << "    }" << endl;
-    cpp_ss << "    if (local_device == NULL) {" << endl;
-    cpp_ss << "      cerr << \"both device_ and hmi_ are NULL.\" << endl;" << endl;
-    cpp_ss << "      return false;" << endl;
-    cpp_ss << "    }" << endl;
     cpp_ss << "    if (reinterpret_cast<" << original_data_structure_name
         << "*>(local_device)" << parent_path
         << message.name() << "->" << api.name() << " == NULL";

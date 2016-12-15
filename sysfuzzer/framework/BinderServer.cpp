@@ -179,7 +179,7 @@ class VtsFuzzerServer : public BnVtsFuzzer {
     printf("VtsFuzzerServer::Call(%s)\n", arg.c_str());
     FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
     google::protobuf::TextFormat::MergeFromString(arg, func_msg);
-    printf("call!!!\n");
+    printf("%s: call!!!\n", __func__);
     const string& result = spec_builder_.CallFunction(func_msg);
     printf("call done!!!\n");
     return result.c_str();
