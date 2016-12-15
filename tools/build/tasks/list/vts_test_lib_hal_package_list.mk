@@ -12,18 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := 30149612_poc
-LOCAL_MODULE_STEM_32 := 30149612_poc32
-LOCAL_MODULE_STEM_64 := 30149612_poc64
-
-LOCAL_SRC_FILES := poc.c
-
-LOCAL_MULTILIB := both
-
-include $(BUILD_EXECUTABLE)
+vts_test_lib_hal_packages := \
+  android.hardware.tests.libbinder \
+  android.hardware.tests.libhwbinder@1.0 \
+  lights.bullhead-vts \
+  camera.bullhead-vts \
+  libmmcamera_interface.vts \
+  libmmjpeg_interface.vts \
+  libqdMetaData.vts \
+  libqomx_core.vts \

@@ -38,44 +38,6 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
 
-vts_apk_packages := \
-  CtsVerifier \
-  sl4a \
-
-vts_bin_packages := \
-  vts_hal_agent \
-  vtssysfuzzer \
-  vts_shell_driver \
-
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  28838221_poc \
-  30149612_poc \
-
-vts_lib_packages := \
-  libvts_interfacespecification \
-  libvts_drivercomm \
-  libvts_multidevice_proto \
-  libvts_profiling \
-  libvts_datatype \
-  libvts_common \
-  libvts_codecoverage \
-  libvts_measurement \
-
-vts_test_lib_hidl_packages := \
-  libhwbinder \
-
-vts_test_lib_hal_packages := \
-  android.hardware.tests.libhwbinder@1.0 \
-  android.hardware.tests.libbinder \
-  lights.bullhead-vts \
-
-vts_test_bin_hal_packages := \
-
-.PHONY: vts_runner_python
-vts_runner_python: $(VTS_PYTHON_ZIP)
-
 .PHONY: vts
 vts: $(VTS_PYTHON_ZIP)
 
