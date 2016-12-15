@@ -138,7 +138,7 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 time_in_ns = tokens[1].split()[0]
                 logging.info(benchmark_name)
                 logging.info(time_in_ns)
-                label_result.append(benchmark_name.replace(LABEL_PREFIX, ""))
+                label_result.append(benchmark_name.replace(self.LABEL_PREFIX, ""))
                 value_result.append(int(time_in_ns))
 
         logging.info("result label for %sbits: %s", bits, label_result)
@@ -146,7 +146,8 @@ class HwBinderPerformanceTest(base_test_with_webdb.BaseTestWithWebDbClass):
         # To upload to the web DB.
         self.AddProfilingDataLabeledVector(
             "hwbinder_vector_roundtrip_latency_benchmark_%sbits" % bits,
-            label_result, value_result)
+            label_result, value_result, x_axis_label="Message Size (Bytes)",
+            y_axis_label="Roundtrip HwBinder RPC Latency (naonseconds)")
 
         # Assertions to check the performance requirements
         for label, value in zip(label_result, value_result):

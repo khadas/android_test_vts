@@ -281,13 +281,17 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddProfilingDataLabeledVector(self, name, labels, values):
+    def AddProfilingDataLabeledVector(self, name, labels, values,
+                                      x_axis_label="x-axis",
+                                      y_axis_label="y-axis"):
         """Adds the profiling data in order to upload to the web DB.
 
         Args:
             name: string, profiling point name.
             labels: a list of labels.
             values: a list of values.
+            x-axis_label: string, the x-axis label title for a graph plot.
+            y-axis_label: string, the y-axis label title for a graph plot.
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
@@ -303,6 +307,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         for label, value in zip(labels, values):
             self._profiling[name].label.append(label)
             self._profiling[name].value.append(value)
+        self._profiling[name].x_axis_label = x_axis_label
+        self._profiling[name].y_axis_label = y_axis_label
 
     def AddProfilingDataLabeledPoint(self, name, value):
         """Adds labeled point type profiling data for uploading to the web DB.
