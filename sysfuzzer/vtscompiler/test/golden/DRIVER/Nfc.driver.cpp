@@ -14,46 +14,46 @@ namespace vts {
 
 
 
-static void FuzzerExtended_INfcopen_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfcopen_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback open called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcopen_cb = FuzzerExtended_INfcopen_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfcopen_cb = FuzzerExtended_INfcopen_cb_func;
 
 
-static void FuzzerExtended_INfcwrite_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfcwrite_cb_func(uint32_t arg0) {
   cout << "callback write called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcwrite_cb = FuzzerExtended_INfcwrite_cb_func;
+std::function<void(uint32_t)> FuzzerExtended_INfcwrite_cb = FuzzerExtended_INfcwrite_cb_func;
 
 
-static void FuzzerExtended_INfccoreInitialized_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfccoreInitialized_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback coreInitialized called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfccoreInitialized_cb = FuzzerExtended_INfccoreInitialized_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfccoreInitialized_cb = FuzzerExtended_INfccoreInitialized_cb_func;
 
 
-static void FuzzerExtended_INfcprediscover_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfcprediscover_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback prediscover called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcprediscover_cb = FuzzerExtended_INfcprediscover_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfcprediscover_cb = FuzzerExtended_INfcprediscover_cb_func;
 
 
-static void FuzzerExtended_INfcclose_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfcclose_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback close called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcclose_cb = FuzzerExtended_INfcclose_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfcclose_cb = FuzzerExtended_INfcclose_cb_func;
 
 
-static void FuzzerExtended_INfccontrolGranted_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfccontrolGranted_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback controlGranted called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfccontrolGranted_cb = FuzzerExtended_INfccontrolGranted_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfccontrolGranted_cb = FuzzerExtended_INfccontrolGranted_cb_func;
 
 
-static void FuzzerExtended_INfcpowerCycle_cb_func(int32_t arg0) {
+static void FuzzerExtended_INfcpowerCycle_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback powerCycle called" << endl;
 }
-std::function<void(int32_t)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
+std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
 
 
 bool FuzzerExtended_INfc::GetService(bool get_stub) {
@@ -78,7 +78,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->open(
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->open(
             arg0));
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
@@ -96,7 +96,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->write(
+        *result = reinterpret_cast<void*>((uint32_t)hw_binder_proxy_->write(
             arg0));
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
@@ -114,7 +114,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->coreInitialized(
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->coreInitialized(
             arg0));
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
@@ -126,7 +126,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->prediscover());
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->prediscover());
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
         cout << "called" << endl;
@@ -137,7 +137,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->close());
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->close());
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
         cout << "called" << endl;
@@ -148,7 +148,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->controlGranted());
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->controlGranted());
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
         cout << "called" << endl;
@@ -159,7 +159,7 @@ bool FuzzerExtended_INfc::Fuzz(
         vts_measurement.Start();
         cout << "Call an API" << endl;
         cout << "local_device = " << hw_binder_proxy_.get();
-        *result = reinterpret_cast<void*>((int32_t)hw_binder_proxy_->powerCycle());
+            *result = reinterpret_cast<void*>((::android::hardware::nfc::V1_0::NfcStatus)hw_binder_proxy_->powerCycle());
         vector<float>* measured = vts_measurement.Stop();
         cout << "time " << (*measured)[0] << endl;
         cout << "called" << endl;
