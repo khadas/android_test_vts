@@ -32,6 +32,7 @@
     <appengine.senderEmail></appengine.senderEmail>
     <appengine.emailDomain></appengine.emailDomain>
     <appengine.defaultEmail></appengine.defaultEmail>
+    <appengine.serviceClientID></appengine.serviceClientID>
 
     <hadoop.version>2.4.1</hadoop.version>
     <compat.module>hbase-hadoop2-compat</compat.module>
@@ -94,7 +95,6 @@
     </pluginRepository>
   </pluginRepositories>
 
-
   <dependencies>
     <dependency>
       <groupId>com.google.cloud.bigtable</groupId>
@@ -139,15 +139,59 @@
       <artifactId>slf4j-api</artifactId>
       <version>${slf4jVersion}</version>
     </dependency>
+
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.7</version>
     </dependency>
+
     <dependency>
         <groupId>org.seleniumhq.selenium</groupId>
         <artifactId>selenium-java</artifactId>
         <version>3.0.0-beta2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>1.22.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>1.20.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <version>1.20.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client-jackson</artifactId>
+      <version>1.20.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.google.http-client</groupId>
+        <artifactId>google-http-client-gson</artifactId>
+        <version>1.21.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-oauth2</artifactId>
+      <version>v1-rev124-1.22.0</version>
     </dependency>
   </dependencies>
 
