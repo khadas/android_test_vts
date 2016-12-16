@@ -17,6 +17,8 @@
 import logging
 import os
 
+from google.protobuf import text_format
+from vts.proto import VtsProfilingMessage_pb2 as VtsProfilingMsg
 from vts.runners.host import asserts
 from vts.runners.host import const
 
@@ -99,23 +101,27 @@ def ParseTraceData(trace_file):
 
     myfile = open(trace_file, "r")
     new_entry = True
+    profiling_record_str = ""
     for line in myfile.readlines():
+        if not line.strip():
+            new_entry = False
         if new_entry:
-            time_stamp, event, package, version, interface, api = line.strip(
-            ).split(",")
+            profiling_record_str += line
+        else:
+            vts_profiling_record = VtsProfilingMsg.VtsProfilingRecord()
+            text_format.Merge(profiling_record_str, vts_profiling_record)
             if not profiling_data.name:
                 logging.warning("no name set for the profiling data. ")
                 # TODO(zhuoyao): figure out a better way to set the data name.
-                profiling_data.name = EVENT_TYPE_DICT[int(event)]
+                profiling_data.name = EVENT_TYPE_DICT[
+                    vts_profiling_record.event]
+            api = vts_profiling_record.interface
+            timestamp = vts_profiling_record.timestamp
             if api_timestamps.get(api):
-                api_timestamps[api].append(time_stamp)
+                api_timestamps[api].append(timestamp)
             else:
-                api_timestamps[api] = [time_stamp]
-            new_entry = False
-        else:
-            # get the msg data.
-            if not line.strip():
-                new_entry = True
+                api_timestamps[api] = [timestamp]
+            new_entry = True
     for api, time_stamps in api_timestamps.items():
         latencies = []
         # TODO(zhuoyao): figure out a way to get the latencies, e.g based on the
