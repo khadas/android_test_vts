@@ -67,7 +67,7 @@
     </div>
     <c:if test='${not showAll}'>
       <div id='edit-button-wrapper' class='fixed-action-btn'>
-        <a href='/preferences' id='edit-button' class='btn-floating btn-large red waves-effect'>
+        <a href='/show_preferences' id='edit-button' class='btn-floating btn-large red waves-effect'>
           <i class='large material-icons'>mode_edit</i>
         </a>
       </div>

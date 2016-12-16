@@ -10,7 +10,7 @@
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700'>
   <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
   <link rel='stylesheet' href='/css/navbar.css'>
-  <link rel='stylesheet' href='/css/preferences.css'>
+  <link rel='stylesheet' href='/css/show_preferences.css'>
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
   <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
   <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js'></script>
@@ -155,7 +155,7 @@
         </c:forEach>
       </div>
     </div>
-    <form id='prefs-form' style='visibility:hidden' action='/preferences' method='post'>
+    <form id='prefs-form' style='visibility:hidden' action='/show_preferences' method='post'>
         <input name='addedTests' type='text'>
         <input name='removedTests' type='text'>
     </form>
