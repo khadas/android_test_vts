@@ -68,6 +68,7 @@ int32_t VtsDriverSocketClient::LoadHal(const string& file_path,
                                        int target_class, int target_type,
                                        float target_version,
                                        const string& target_package,
+                                       const string& target_component_name,
                                        const string& module_name) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(LOAD_HAL);
@@ -76,6 +77,7 @@ int32_t VtsDriverSocketClient::LoadHal(const string& file_path,
   command_message.set_target_type(target_type);
   command_message.set_target_version(target_version);
   command_message.set_target_package(target_package);
+  command_message.set_target_component_name(target_component_name);
   command_message.set_module_name(module_name);
   if (!VtsSocketSendMessage(command_message)) return -1;
 

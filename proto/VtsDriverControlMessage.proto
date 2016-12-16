@@ -82,6 +82,8 @@ message VtsDriverControlCommandMessage {
   optional bytes module_name = 1205;
   // the package of a HIDL HAL to open.
   optional bytes target_package = 1206;
+  // the name of a target component (currently used for HIDL HALs only).
+  optional bytes target_component_name = 1207;
 
   // for LIST_FUNCTIONS
   // none
