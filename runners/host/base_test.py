@@ -432,11 +432,13 @@ class BaseTestClass(object):
 
         if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
             bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
+            run_32bit_on_64bit_abi = getattr(
+                 keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, False)
             asserts.skipIf(
                 (test_name.lower().endswith(const.SUFFIX_32BIT) and
-                 self.abi_bitness != "32") or
+                 bitness != "32") or
                 (test_name.lower().endswith(const.SUFFIX_64BIT) and
-                 self.abi_bitness != "64" and not self.run_32bit_on_64bit_abi),
+                 bitness != "64" and not run_32bit_on_64bit_abi),
                 "Test case '{}' excluded as abi bitness is {}.".format(
                     test_name, bitness))
 
