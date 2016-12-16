@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+class ConfigKeys(object):
+    FUZZER_CONFIGS = "fuzzer_configs"
+
 class ExitCode(object):
     """Exit codes for test binaries."""
     FUZZER_TEST_PASS = 0
