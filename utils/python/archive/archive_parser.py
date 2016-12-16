@@ -38,7 +38,11 @@ class Archive(object):
     """
 
     GLOBAL_SIG = '!<arch>\n'  # Unix global signature
+    STRING_TABLE_ID = '//'
+    STRING_TABLE_TERMINATOR = '/\n'
+    SYM_TABLE_ID = '__.SYMDEF'
     FILE_ID_LENGTH = 16  # Number of bytes to store file identifier
+    FILE_ID_TERMINATOR = '/'
     FILE_TIMESTAMP_LENGTH = 12  # Number of bytes to store file mod timestamp
     OWNER_ID_LENGTH = 6  # Number of bytes to store file owner ID
     GROUP_ID_LENGTH = 6  # Number of bytes to store file group ID
@@ -56,6 +60,7 @@ class Archive(object):
         self.files = {}
         self._content = file_content
         self._cursor = 0
+        self._string_table = dict()
 
     def ReadBytes(self, n):
         """Reads n bytes from the content stream.
@@ -97,15 +102,30 @@ class Archive(object):
         Raises:
             ValueError: invalid file format.
         """
-        name = self.ReadBytes(self.FILE_ID_LENGTH).strip().strip('/')
+        name = self.ReadBytes(self.FILE_ID_LENGTH).strip()
         self.ReadBytes(self.FILE_TIMESTAMP_LENGTH)
         self.ReadBytes(self.OWNER_ID_LENGTH)
         self.ReadBytes(self.GROUP_ID_LENGTH)
         self.ReadBytes(self.FILE_MODE_LENGTH)
-        content_size = int(self.ReadBytes(self.CONTENT_SIZE_LENGTH).strip())
+        size = self.ReadBytes(self.CONTENT_SIZE_LENGTH)
+        content_size = int(size)
 
         if self.ReadBytes(len(self.END_TAG)) != self.END_TAG:
             raise ValueError('File is not a valid Unix archive. Missing end tag.')
 
         content = self.ReadBytes(content_size)
-        self.files[name] = content
+        if name == self.STRING_TABLE_ID:
+            acc = 0
+            names = content.split(self.STRING_TABLE_TERMINATOR)
+            for string in names:
+                self._string_table[acc] = string
+                acc += len(string) + len(self.STRING_TABLE_TERMINATOR)
+        elif name != self.SYM_TABLE_ID:
+            if name.endswith(self.FILE_ID_TERMINATOR):
+                name = name[:-len(self.FILE_ID_TERMINATOR)]
+            elif name.startswith(self.FILE_ID_TERMINATOR):
+                offset = int(name[len(self.FILE_ID_TERMINATOR):])
+                if offset not in self._string_table:
+                    raise ValueError('Offset %s not in string table.', offset)
+                name = self._string_table[offset]
+            self.files[name] = content
