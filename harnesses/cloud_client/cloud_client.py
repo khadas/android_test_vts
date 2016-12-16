@@ -21,23 +21,23 @@ from google.cloud.exceptions import NotFound
 from oauth2client.service_account import ServiceAccountCredentials
 from time import sleep
 
+from vts.harnesses.cloud_client import cloud_client_controller
+
 
 class CloudClient(object):
     """Communicates with App Engine to receive and run VTS tests.
 
-    Represents the data in .gcno and .gcda files.
-
     Attributes:
-        clientName The (string) name of the runner machine. This must be pre-
-                   enrolled with the PubSub service.
-        POLL_INTERVAL The fequency at which pubsub service is polled (seconds)
-        MAX_MESSAGES The maximum number of commands to receive at once
+        clientName: string, the name of the runner machine. This must be pre-
+                    enrolled with the PubSub service.
+        POLL_INTERVAL: int, the fequency at which pubsub service is polled (seconds)
+        MAX_MESSAGES: int, the maximum number of commands to receive at once
     """
 
     POLL_INTERVAL = 5
     MAX_MESSAGES = 100
 
-    def __init__(self, clientName, oauth2_service_json):
+    def __init__(self, clientName, oauth2_service_json, path_cmdfile=None):
         """Inits the object with the client name and a PubSub subscription
 
         Args:
@@ -52,6 +52,8 @@ class CloudClient(object):
         self._client = pubsub.Client(credentials=credentials)
         self._topic = self._client.topic(clientName)
         self._sub = self._topic.subscription(clientName)
+        self._controller = cloud_client_controller.CloudClientController(
+            path_cmdfile)
 
     def Pull(self):
         """Fetches new messages from the PubSub subscription.
@@ -63,8 +65,8 @@ class CloudClient(object):
             list of commands (strings) from PubSub subscription.
         """
         logging.info("Waiting for commands: %s", self.clientName)
-        results = self._sub.pull(return_immediately=True,
-                                 max_messages=self.MAX_MESSAGES)
+        results = self._sub.pull(
+            return_immediately=True, max_messages=self.MAX_MESSAGES)
 
         if results:
             logging.info("Commands received: %s", results)
@@ -79,11 +81,11 @@ class CloudClient(object):
         try:
             while True:
                 commands = self.Pull()
-                #TODO @ryancampbell: execute the commands in tradefed
                 print(commands)
                 if not commands:
                     sleep(self.POLL_INTERVAL)
+                else:
+                    self._controller.ExecuteTradeFedCommands(commands)
         except NotFound as e:
             logging.error("No subscription created for client %s",
                           self.clientName)
-
