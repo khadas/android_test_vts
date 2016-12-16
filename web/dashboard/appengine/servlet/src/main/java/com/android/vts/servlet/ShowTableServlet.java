@@ -398,7 +398,7 @@ public class ShowTableServlet extends BaseServlet {
 
         // first column for device grid
         String[] headerFields = {"<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target",
-                                 "Device", "VTS Build ID"};
+                                 "Device", "ABI Target", "VTS Build ID"};
         headerRow[0] = StringUtils.join(headerFields, "<br>");
 
         // first column for time grid
@@ -429,16 +429,28 @@ public class ShowTableServlet extends BaseServlet {
             List<String> buildAliasList = new ArrayList<>();
             List<String> productVariantList = new ArrayList<>();
             List<String> buildFlavorList = new ArrayList<>();
+            List<String> abiInfoList = new ArrayList<>();
             for (AndroidDeviceInfoMessage device : devices) {
                 buildAliasList.add(device.getBuildAlias().toStringUtf8().toLowerCase());
                 productVariantList.add(device.getProductVariant().toStringUtf8());
                 buildFlavorList.add(device.getBuildFlavor().toStringUtf8());
                 buildIdList.add(device.getBuildId().toStringUtf8());
+                String abi = "";
+                String abiName = device.getAbiName().toStringUtf8();
+                String abiBitness = device.getAbiBitness().toStringUtf8();
+                if (abiName.length() > 0) {
+                    abi += abiName;
+                    if (abiBitness.length() > 0) {
+                        abi += " (" + abiBitness + " bit)";
+                    }
+                }
+                abiInfoList.add(abi);
             }
             String buildAlias = StringUtils.join(buildAliasList, ",");
             String productVariant = StringUtils.join(productVariantList, ",");
             String buildFlavor = StringUtils.join(buildFlavorList, ",");
             String buildIds = StringUtils.join(buildIdList, ",");
+            String abiInfo = StringUtils.join(abiInfoList, ",");
             String vtsBuildId = report.getBuildInfo().getId().toStringUtf8();
 
             int passCount = 0;
@@ -508,7 +520,8 @@ public class ShowTableServlet extends BaseServlet {
 
             headerRow[j + 1] = "<span class='valign-wrapper'><b>" + buildIds + "</b>" + icon +
                                "</span>" + buildAlias.toLowerCase() + "<br>" + buildFlavor +
-                               "<br>" + productVariant + "<br>" + vtsBuildId;
+                               "<br>" + productVariant + "<br>" +
+                               abiInfo + "<br>" + vtsBuildId;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -

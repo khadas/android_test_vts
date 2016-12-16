@@ -479,6 +479,42 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getApiLevel();
 
+    // optional bytes abi_name = 51;
+    /**
+     * <code>optional bytes abi_name = 51;</code>
+     *
+     * <pre>
+     * ABI name that is current in use for the test
+     * </pre>
+     */
+    boolean hasAbiName();
+    /**
+     * <code>optional bytes abi_name = 51;</code>
+     *
+     * <pre>
+     * ABI name that is current in use for the test
+     * </pre>
+     */
+    com.google.protobuf.ByteString getAbiName();
+
+    // optional bytes abi_bitness = 52;
+    /**
+     * <code>optional bytes abi_bitness = 52;</code>
+     *
+     * <pre>
+     * ABI bitness that is current in use for the test. Example: '32', '64',
+     * </pre>
+     */
+    boolean hasAbiBitness();
+    /**
+     * <code>optional bytes abi_bitness = 52;</code>
+     *
+     * <pre>
+     * ABI bitness that is current in use for the test. Example: '32', '64',
+     * </pre>
+     */
+    com.google.protobuf.ByteString getAbiBitness();
+
     // optional bytes serial = 101;
     /**
      * <code>optional bytes serial = 101;</code>
@@ -587,8 +623,18 @@ public final class VtsReportMessage {
               apiLevel_ = input.readBytes();
               break;
             }
-            case 810: {
+            case 410: {
               bitField0_ |= 0x00000080;
+              abiName_ = input.readBytes();
+              break;
+            }
+            case 418: {
+              bitField0_ |= 0x00000100;
+              abiBitness_ = input.readBytes();
+              break;
+            }
+            case 810: {
+              bitField0_ |= 0x00000200;
               serial_ = input.readBytes();
               break;
             }
@@ -800,6 +846,54 @@ public final class VtsReportMessage {
       return apiLevel_;
     }
 
+    // optional bytes abi_name = 51;
+    public static final int ABI_NAME_FIELD_NUMBER = 51;
+    private com.google.protobuf.ByteString abiName_;
+    /**
+     * <code>optional bytes abi_name = 51;</code>
+     *
+     * <pre>
+     * ABI name that is current in use for the test
+     * </pre>
+     */
+    public boolean hasAbiName() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional bytes abi_name = 51;</code>
+     *
+     * <pre>
+     * ABI name that is current in use for the test
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getAbiName() {
+      return abiName_;
+    }
+
+    // optional bytes abi_bitness = 52;
+    public static final int ABI_BITNESS_FIELD_NUMBER = 52;
+    private com.google.protobuf.ByteString abiBitness_;
+    /**
+     * <code>optional bytes abi_bitness = 52;</code>
+     *
+     * <pre>
+     * ABI bitness that is current in use for the test. Example: '32', '64',
+     * </pre>
+     */
+    public boolean hasAbiBitness() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>optional bytes abi_bitness = 52;</code>
+     *
+     * <pre>
+     * ABI bitness that is current in use for the test. Example: '32', '64',
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getAbiBitness() {
+      return abiBitness_;
+    }
+
     // optional bytes serial = 101;
     public static final int SERIAL_FIELD_NUMBER = 101;
     private com.google.protobuf.ByteString serial_;
@@ -811,7 +905,7 @@ public final class VtsReportMessage {
      * </pre>
      */
     public boolean hasSerial() {
-      return ((bitField0_ & 0x00000080) == 0x00000080);
+      return ((bitField0_ & 0x00000200) == 0x00000200);
     }
     /**
      * <code>optional bytes serial = 101;</code>
@@ -832,6 +926,8 @@ public final class VtsReportMessage {
       branch_ = com.google.protobuf.ByteString.EMPTY;
       buildAlias_ = com.google.protobuf.ByteString.EMPTY;
       apiLevel_ = com.google.protobuf.ByteString.EMPTY;
+      abiName_ = com.google.protobuf.ByteString.EMPTY;
+      abiBitness_ = com.google.protobuf.ByteString.EMPTY;
       serial_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
@@ -868,6 +964,12 @@ public final class VtsReportMessage {
         output.writeBytes(31, apiLevel_);
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeBytes(51, abiName_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeBytes(52, abiBitness_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
         output.writeBytes(101, serial_);
       }
       getUnknownFields().writeTo(output);
@@ -908,6 +1010,14 @@ public final class VtsReportMessage {
           .computeBytesSize(31, apiLevel_);
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(51, abiName_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(52, abiBitness_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(101, serial_);
       }
@@ -1045,8 +1155,12 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000020);
         apiLevel_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000040);
-        serial_ = com.google.protobuf.ByteString.EMPTY;
+        abiName_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000080);
+        abiBitness_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000100);
+        serial_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -1106,6 +1220,14 @@ public final class VtsReportMessage {
         if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
           to_bitField0_ |= 0x00000080;
         }
+        result.abiName_ = abiName_;
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.abiBitness_ = abiBitness_;
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000200;
+        }
         result.serial_ = serial_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -1143,6 +1265,12 @@ public final class VtsReportMessage {
         }
         if (other.hasApiLevel()) {
           setApiLevel(other.getApiLevel());
+        }
+        if (other.hasAbiName()) {
+          setAbiName(other.getAbiName());
+        }
+        if (other.hasAbiBitness()) {
+          setAbiBitness(other.getAbiBitness());
         }
         if (other.hasSerial()) {
           setSerial(other.getSerial());
@@ -1538,6 +1666,110 @@ public final class VtsReportMessage {
         return this;
       }
 
+      // optional bytes abi_name = 51;
+      private com.google.protobuf.ByteString abiName_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes abi_name = 51;</code>
+       *
+       * <pre>
+       * ABI name that is current in use for the test
+       * </pre>
+       */
+      public boolean hasAbiName() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional bytes abi_name = 51;</code>
+       *
+       * <pre>
+       * ABI name that is current in use for the test
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getAbiName() {
+        return abiName_;
+      }
+      /**
+       * <code>optional bytes abi_name = 51;</code>
+       *
+       * <pre>
+       * ABI name that is current in use for the test
+       * </pre>
+       */
+      public Builder setAbiName(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000080;
+        abiName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes abi_name = 51;</code>
+       *
+       * <pre>
+       * ABI name that is current in use for the test
+       * </pre>
+       */
+      public Builder clearAbiName() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        abiName_ = getDefaultInstance().getAbiName();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes abi_bitness = 52;
+      private com.google.protobuf.ByteString abiBitness_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes abi_bitness = 52;</code>
+       *
+       * <pre>
+       * ABI bitness that is current in use for the test. Example: '32', '64',
+       * </pre>
+       */
+      public boolean hasAbiBitness() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional bytes abi_bitness = 52;</code>
+       *
+       * <pre>
+       * ABI bitness that is current in use for the test. Example: '32', '64',
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getAbiBitness() {
+        return abiBitness_;
+      }
+      /**
+       * <code>optional bytes abi_bitness = 52;</code>
+       *
+       * <pre>
+       * ABI bitness that is current in use for the test. Example: '32', '64',
+       * </pre>
+       */
+      public Builder setAbiBitness(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+        abiBitness_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes abi_bitness = 52;</code>
+       *
+       * <pre>
+       * ABI bitness that is current in use for the test. Example: '32', '64',
+       * </pre>
+       */
+      public Builder clearAbiBitness() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        abiBitness_ = getDefaultInstance().getAbiBitness();
+        onChanged();
+        return this;
+      }
+
       // optional bytes serial = 101;
       private com.google.protobuf.ByteString serial_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -1548,7 +1780,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public boolean hasSerial() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
+        return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       /**
        * <code>optional bytes serial = 101;</code>
@@ -1571,7 +1803,7 @@ public final class VtsReportMessage {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000080;
+  bitField0_ |= 0x00000200;
         serial_ = value;
         onChanged();
         return this;
@@ -1584,7 +1816,7 @@ public final class VtsReportMessage {
        * </pre>
        */
       public Builder clearSerial() {
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000200);
         serial_ = getDefaultInstance().getSerial();
         onChanged();
         return this;
@@ -9709,55 +9941,56 @@ public final class VtsReportMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\026VtsReportMessage.proto\022\013android.vts\"\271\001" +
+      "\n\026VtsReportMessage.proto\022\013android.vts\"\340\001" +
       "\n\030AndroidDeviceInfoMessage\022\024\n\014product_ty" +
       "pe\030\001 \001(\014\022\027\n\017product_variant\030\002 \001(\014\022\024\n\014bui" +
       "ld_flavor\030\013 \001(\014\022\020\n\010build_id\030\014 \001(\014\022\016\n\006bra" +
       "nch\030\025 \001(\014\022\023\n\013build_alias\030\026 \001(\014\022\021\n\tapi_le" +
-      "vel\030\037 \001(\014\022\016\n\006serial\030e \001(\014\"g\n\020AndroidBuil" +
-      "dInfo\022\n\n\002id\030\001 \001(\014\022\014\n\004name\030\013 \001(\014\022\022\n\nbuild" +
-      "_type\030\014 \001(\014\022\016\n\006branch\030\r \001(\014\022\025\n\rbuild_sum" +
-      "mary\030\025 \001(\014\"\275\001\n\025TestCaseReportMessage\022\014\n\004" +
-      "name\030\001 \001(\014\0220\n\013test_result\030\013 \001(\0162\033.androi",
-      "d.vts.TestCaseResult\022\027\n\017start_timestamp\030" +
-      "\025 \001(\003\022\025\n\rend_timestamp\030\026 \001(\003\0224\n\010coverage" +
-      "\030\037 \003(\0132\".android.vts.CoverageReportMessa" +
-      "ge\"\315\001\n\026ProfilingReportMessage\022\014\n\004name\030\001 " +
-      "\001(\014\022+\n\004type\030\002 \001(\0162\035.android.vts.VtsProfi" +
-      "lingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend" +
-      "_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value" +
-      "\030\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014y_axis_l" +
-      "abel\030  \001(\014\"\345\001\n\025CoverageReportMessage\022\021\n\t" +
-      "file_path\030\013 \001(\014\022\024\n\014project_name\030\014 \001(\014\022\020\n",
-      "\010revision\030\r \001(\014\022\034\n\024line_coverage_vector\030" +
-      "\027 \003(\005\022\030\n\020total_line_count\030e \001(\005\022\032\n\022cover" +
-      "ed_line_count\030f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030" +
-      "\001\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002" +
-      "\030\001\"\300\003\n\021TestReportMessage\022\022\n\ntest_suite\030\001" +
-      " \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030." +
-      "android.vts.VtsTestType\022:\n\013device_info\030\004" +
-      " \003(\0132%.android.vts.AndroidDeviceInfoMess" +
-      "age\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts.An" +
-      "droidBuildInfo\022\030\n\020subscriber_email\030\006 \003(\014",
-      "\0225\n\ttest_case\030\013 \003(\0132\".android.vts.TestCa" +
-      "seReportMessage\0226\n\tprofiling\030\025 \003(\0132#.and" +
-      "roid.vts.ProfilingReportMessage\022\027\n\017start" +
-      "_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\022" +
-      "4\n\010coverage\030g \003(\0132\".android.vts.Coverage" +
-      "ReportMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKN" +
-      "OWN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022" +
-      "\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_" +
-      "RESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPT" +
-      "ION\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013",
-      "VtsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n" +
-      "\032VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOS" +
-      "T_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GT" +
-      "EST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020Vt" +
-      "sProfilingType\022\036\n\032UNKNOWN_VTS_PROFILING_" +
-      "TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001" +
-      "\022%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020\002B" +
-      ")\n\025com.android.vts.protoB\020VtsReportMessa" +
-      "ge"
+      "vel\030\037 \001(\014\022\020\n\010abi_name\0303 \001(\014\022\023\n\013abi_bitne" +
+      "ss\0304 \001(\014\022\016\n\006serial\030e \001(\014\"g\n\020AndroidBuild" +
+      "Info\022\n\n\002id\030\001 \001(\014\022\014\n\004name\030\013 \001(\014\022\022\n\nbuild_" +
+      "type\030\014 \001(\014\022\016\n\006branch\030\r \001(\014\022\025\n\rbuild_summ" +
+      "ary\030\025 \001(\014\"\275\001\n\025TestCaseReportMessage\022\014\n\004n",
+      "ame\030\001 \001(\014\0220\n\013test_result\030\013 \001(\0162\033.android" +
+      ".vts.TestCaseResult\022\027\n\017start_timestamp\030\025" +
+      " \001(\003\022\025\n\rend_timestamp\030\026 \001(\003\0224\n\010coverage\030" +
+      "\037 \003(\0132\".android.vts.CoverageReportMessag" +
+      "e\"\315\001\n\026ProfilingReportMessage\022\014\n\004name\030\001 \001" +
+      "(\014\022+\n\004type\030\002 \001(\0162\035.android.vts.VtsProfil" +
+      "ingType\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend_" +
+      "timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value\030" +
+      "\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014y_axis_la" +
+      "bel\030  \001(\014\"\345\001\n\025CoverageReportMessage\022\021\n\tf",
+      "ile_path\030\013 \001(\014\022\024\n\014project_name\030\014 \001(\014\022\020\n\010" +
+      "revision\030\r \001(\014\022\034\n\024line_coverage_vector\030\027" +
+      " \003(\005\022\030\n\020total_line_count\030e \001(\005\022\032\n\022covere" +
+      "d_line_count\030f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030\001" +
+      "\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002\030" +
+      "\001\"\300\003\n\021TestReportMessage\022\022\n\ntest_suite\030\001 " +
+      "\001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.a" +
+      "ndroid.vts.VtsTestType\022:\n\013device_info\030\004 " +
+      "\003(\0132%.android.vts.AndroidDeviceInfoMessa" +
+      "ge\0221\n\nbuild_info\030\005 \001(\0132\035.android.vts.And",
+      "roidBuildInfo\022\030\n\020subscriber_email\030\006 \003(\014\022" +
+      "5\n\ttest_case\030\013 \003(\0132\".android.vts.TestCas" +
+      "eReportMessage\0226\n\tprofiling\030\025 \003(\0132#.andr" +
+      "oid.vts.ProfilingReportMessage\022\027\n\017start_" +
+      "timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\0224" +
+      "\n\010coverage\030g \003(\0132\".android.vts.CoverageR" +
+      "eportMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKNO" +
+      "WN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031" +
+      "\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_R" +
+      "ESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTI",
+      "ON\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013V" +
+      "tsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032" +
+      "VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST" +
+      "_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTE" +
+      "ST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*{\n\020Vts" +
+      "ProfilingType\022\036\n\032UNKNOWN_VTS_PROFILING_T" +
+      "YPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022" +
+      "%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020\002B)" +
+      "\n\025com.android.vts.protoB\020VtsReportMessag" +
+      "e"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9769,7 +10002,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_AndroidDeviceInfoMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_AndroidDeviceInfoMessage_descriptor,
-              new java.lang.String[] { "ProductType", "ProductVariant", "BuildFlavor", "BuildId", "Branch", "BuildAlias", "ApiLevel", "Serial", });
+              new java.lang.String[] { "ProductType", "ProductVariant", "BuildFlavor", "BuildId", "Branch", "BuildAlias", "ApiLevel", "AbiName", "AbiBitness", "Serial", });
           internal_static_android_vts_AndroidBuildInfo_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_android_vts_AndroidBuildInfo_fieldAccessorTable = new
