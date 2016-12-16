@@ -17,31 +17,33 @@ vts_test_lib_hidl_packages := \
   libhwbinder \
   libhidlbase \
   libhidltransport \
+  android.hardware.boot.vts.driver@1.0 \
+  android.hardware.light.vts.driver@2.0 \
+  android.hardware.memtrack.vts.driver@1.0 \
   android.hardware.nfc.vts.driver@1.0 \
-  libvts_profiler_hidl_nfc@1.0 \
-  libvts_driver_hidl_vibrator@1.0 \
-  libvts_profiler_hidl_vibrator@1.0 \
-  libvts_driver_hidl_thermal@1.0 \
-  libvts_profiler_hidl_thermal@1.0 \
-  libvts_driver_hidl_sensors@1.0 \
-  libvts_profiler_hidl_sensors@1.0 \
-  libvts_driver_hidl_power@1.0 \
-  libvts_profiler_hidl_power@1.0 \
-  libvts_driver_hidl_light@2.0 \
-  libvts_driver_hidl_boot@1.0 \
+  android.hardware.power.vts.driver@1.0 \
+  android.hardware.thermal.vts.driver@1.0 \
+  android.hardware.tv.cec.vts.driver@1.0 \
+  android.hardware.vehicle.vts.driver@2.0 \
+  android.hardware.vibrator.vts.driver@1.0 \
+  android.hardware.vr.vts.driver@1.0 \
   libvts_profiler_hidl_boot@1.0 \
-  libvts_driver_hidl_vr@1.0 \
+  libvts_profiler_hidl_nfc@1.0 \
+  libvts_profiler_hidl_power@1.0 \
+  libvts_profiler_hidl_sensors@1.0 \
+  libvts_profiler_hidl_thermal@1.0 \
+  libvts_profiler_hidl_vibrator@1.0 \
   libvts_profiler_hidl_vr@1.0 \
-  libvts_driver_hidl_tv_cec@1.0 \
   libvts_profiler_hidl_tv_cec@1.0 \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
-  nfc_hidl_hal_test \
-  vibrator_hidl_hal_test \
-  thermal_hidl_hal_test \
-  sensors_hidl_hal_test \
-  power_hidl_hal_test \
-  light_hidl_hal_test \
   boot_hidl_hal_test \
+  light_hidl_hal_test \
+  nfc_hidl_hal_test \
+  power_hidl_hal_test \
+  sensors_hidl_hal_test \
+  thermal_hidl_hal_test \
+  vibrator_hidl_hal_test \
   vr_hidl_hal_test \
+

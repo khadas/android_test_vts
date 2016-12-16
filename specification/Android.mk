@@ -96,13 +96,13 @@ LOCAL_SHARED_LIBRARIES += \
   android.hardware.nfc@1.0 \
   android.hardware.nfc.vts.driver@1.0 \
   android.hardware.vibrator@1.0 \
-  libvts_driver_hidl_vibrator@1.0 \
+  android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.thermal@1.0 \
-  libvts_driver_hidl_thermal@1.0 \
+  android.hardware.thermal.vts.driver@1.0 \
   android.hardware.vr@1.0 \
-  libvts_driver_hidl_vr@1.0 \
+  android.hardware.vr.vts.driver@1.0 \
   android.hardware.tv.cec@1.0 \
-  libvts_driver_hidl_tv_cec@1.0 \
+  android.hardware.tv.cec.vts.driver@1.0 \
 
 endif
 
