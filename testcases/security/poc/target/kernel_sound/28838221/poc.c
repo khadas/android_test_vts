@@ -17,10 +17,11 @@ int main(int argc, char* argv[]) {
   const char* path;
   switch(host_input.device_model) {
     case NEXUS_5X:
+    case NEXUS_6P:
       path = "/sys/kernel/debug/asoc/msm8994-tomtom-snd-card/snd-soc-dummy/codec_reg";
       break;
     default:
-      return POC_TEST_FAIL;
+      return POC_TEST_SKIP;
   }
 
   int ret;
