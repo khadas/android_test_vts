@@ -133,6 +133,8 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     return arg.predefined_type();
   } else if (arg.type() == TYPE_SCALAR) {
     return GetCppVariableType(arg.scalar_type());
+  } else if (arg.type() == TYPE_STRING) {
+    return "::std::string";
   } else if (arg.type() == TYPE_ENUM) {
     cout << __func__ << ":" << __LINE__ << " "
          << arg.has_enum_value() << " " << arg.has_predefined_type() << endl;
@@ -339,6 +341,9 @@ string GetCppInstanceType(
       }
       break;
     }
+    case TYPE_STRING: {
+      return "RandomCharPointer()";
+    }
     case TYPE_STRUCT: {
       if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
         return message->component_name() + "::" + arg.predefined_type() +  "()";
@@ -375,24 +380,27 @@ int vts_fs_mkdirs(char* file_path, mode_t mode) {
   return 0;
 }
 
+#define DEFAULT_FACTOR 10000
 
 string GetVersionString(float version, bool for_macro) {
   std::ostringstream out;
   if (for_macro) {
     out << "V";
   }
-  out << int(version);
+  long version_long = version * DEFAULT_FACTOR;
+  out << (version_long / DEFAULT_FACTOR);
   if (!for_macro) {
     out << ".";
   } else {
     out << "_";
   }
-  version -= int(version);
+  version_long -= (version_long / DEFAULT_FACTOR) * DEFAULT_FACTOR;
   bool first = true;
-  while (version > 0.0 || first) {
-    version *= 10;
-    out << int(version);
-    version -= int(version);
+  long factor = DEFAULT_FACTOR / 10;
+  while (first || (version_long > 0 && factor > 1)) {
+    out << (version_long / factor);
+    version_long -= (version_long / factor) * factor;
+    factor /= 10;
     first = false;
   }
   return out.str();

@@ -136,12 +136,15 @@ void DriverCodeGenBase::GenerateHeaderFile(
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
         if (arg_count > 0) out << "," << "\n";
-        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
+        if (arg.type() == TYPE_ENUM) {
           if (arg.is_const()) {
             out << "    const " << arg.predefined_type() << "&";
           } else {
             out << "    " << arg.predefined_type();
           }
+          out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_STRUCT) {
+          out << "    const " << arg.predefined_type() << "&";
           out << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
           out << "    const ";
@@ -292,12 +295,15 @@ void DriverCodeGenBase::GenerateSourceFile(
       int arg_count = 0;
       for (const auto& arg : api.arg()) {
         if (arg_count > 0) out << "," << "\n";
-        if (arg.type() == TYPE_ENUM || arg.type() == TYPE_STRUCT) {
+        if (arg.type() == TYPE_ENUM) {
           if (arg.is_const()) {
             out << "    const " << arg.predefined_type() << "&";
           } else {
             out << "    " << arg.predefined_type();
           }
+          out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_STRUCT) {
+          out << "    const " << arg.predefined_type() << "&";
           out << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
           out << "    const ";
