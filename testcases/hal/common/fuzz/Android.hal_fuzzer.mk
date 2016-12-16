@@ -16,7 +16,6 @@
 
 hal_common_fuzz_dir := test/vts/testcases/hal/common/fuzz
 
-module_name := $(module_name)_blind
 module_path := hal_fuzz
 
 LOCAL_MODULE := $(module_name)
