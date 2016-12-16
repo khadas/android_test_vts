@@ -87,6 +87,8 @@ class BaseTestClass(object):
 
         # Set abi bitness (optional)
         self.abi_bitness = self.getUserParam(keys.ConfigKeys.IKEY_ABI_BITNESS)
+        self.run_32bit_on_64bit_abi = self.getUserParam(
+            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
 
     def __enter__(self):
         return self
@@ -130,7 +132,10 @@ class BaseTestClass(object):
             else:
                 setattr(self, name, self.user_params[name])
 
-    def getUserParam(self, param_name, error_if_not_found=False, default_value=None):
+    def getUserParam(self,
+                     param_name,
+                     error_if_not_found=False,
+                     default_value=None):
         """Get the value of a single user parameter.
 
         This method returns the value of specified user parameter.
@@ -374,6 +379,8 @@ class BaseTestClass(object):
         will be skipped. By our convention, this function will look for bitness in suffix
         formated as "32bit", "32Bit", "32BIT", or 64 bit equivalents.
 
+        This method assumes  const.SUFFIX_32BIT and const.SUFFIX_64BIT are in lower cases.
+
         Args:
             test_name: string, name of a test
 
@@ -399,7 +406,8 @@ class BaseTestClass(object):
                 (test_name[-len(const.SUFFIX_32BIT):].lower() ==
                  const.SUFFIX_32BIT and self.abi_bitness != "32") or
                 (test_name[-len(const.SUFFIX_64BIT):].lower() ==
-                 const.SUFFIX_64BIT and self.abi_bitness != "64"),
+                 const.SUFFIX_64BIT and self.abi_bitness != "64" and
+                 not self.run_32bit_on_64bit_abi),
                 "Test case '{}' excluded as abi bitness is {}.".format(
                     test_name, self.abi_bitness))
 
