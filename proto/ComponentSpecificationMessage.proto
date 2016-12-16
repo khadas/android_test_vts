@@ -102,6 +102,7 @@ enum VariableType {
   TYPE_SUBMODULE = 11;
   TYPE_UNION = 12;
   TYPE_HIDL_INTERFACE = 13;
+  TYPE_HANDLE = 14;
 }
 
 
@@ -260,10 +261,11 @@ message VariableSpecificationMessage {
 
   // the variable type which is one of:
   //     TYPE_SCALAR, TYPE_STRING, TYPE_ENUM, TYPE_ARRAY,
-  //     TYPE_VECTOR, TYPE_STRUCT, TYPE_UNION
+  //     TYPE_VECTOR, TYPE_STRUCT, TYPE_UNION, TYPE_HIDL_CALLBACK,
+  //     TYPE_HIDL_INTERFACE, TYPE_HANDLE
   //
   // not yet supported:
-  //     "template", "typedef", "handle", "binder", "parcelable".
+  //     "template", "typedef", "binder", "parcelable".
   optional VariableType type = 2;
 
   // the actual value(s) for an scalar data type.
