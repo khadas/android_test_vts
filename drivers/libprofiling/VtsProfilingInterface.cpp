@@ -75,7 +75,8 @@ void VtsProfilingInterface::Init() {
   LOG(INFO) << "Creating new profiler instance with file path: " << file_path;
   trace_output_ = std::ofstream(file_path, std::fstream::out);
   if (!trace_output_) {
-    LOG(ERROR) << "Can not open trace file: " << trace_file_path_;
+    LOG(ERROR) << "Can not open trace file: " << file_path << ": "
+               << std::strerror(errno);
     exit(1);
   }
   initialized_ = true;
