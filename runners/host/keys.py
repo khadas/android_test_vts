@@ -62,6 +62,9 @@ class ConfigKeys(object):
     IKEY_API_LEVEL = "api_level"
     IKEY_SERIAL = "serial"
 
+    # Keys for profiling
+    IKEY_ENABLE_PROFILING = "enable_profiling"
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)

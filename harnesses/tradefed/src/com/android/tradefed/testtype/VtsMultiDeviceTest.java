@@ -84,6 +84,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
+    static final String ENABLE_PROFILING = "enable_profiling";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
@@ -126,6 +127,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
             isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
+
+    @Option(name = "enable-profiling", description = "Enable profiling for the tests.")
+    private boolean mEnableProfiling = false;
 
     @Option(name = "run-32bit-on-64bit-abi",
             description = "Whether to run 32bit tests on 64bit abi.")
@@ -514,6 +518,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             jsonObject.put(BINARY_TEST_LD_LIBRARY_PATHS,
                     new JSONArray(mBinaryTestLdLibraryPaths));
             CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHS);
+        }
+
+        if (mEnableProfiling) {
+            jsonObject.put(ENABLE_PROFILING, mEnableProfiling);
+            CLog.i("Added %s to the Json object", ENABLE_PROFILING);
         }
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
           jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
