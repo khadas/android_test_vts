@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-package com.google.android.vts.api;
+package com.android.vts.api;
 
-import com.google.android.vts.helpers.BigtableHelper;
+import com.android.vts.helpers.BigtableHelper;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
