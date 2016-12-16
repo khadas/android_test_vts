@@ -93,6 +93,11 @@ class ProfilerCodeGenBase {
       const VariableSpecificationMessage& val, const std::string& arg_name,
       const std::string& arg_value) = 0;
 
+  // Generates the profiler code for hidl interface type.
+  virtual void GenerateProfilerForHidlInterfaceVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const std::string& arg_name,
+      const std::string& arg_value) = 0;
+
   // Generates the profiler code for method.
   virtual void GenerateProfilerForMethod(Formatter& out,
     const FunctionSpecificationMessage& method) = 0;
