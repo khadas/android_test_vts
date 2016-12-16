@@ -152,15 +152,30 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
   out << "msg.set_name(\"" << method.name() << "\");\n";
+  out << "if (!args) {\n";
+  out.indent();
+  out << "LOG(WARNING) << \"no argument passed\";\n";
+  out.unindent();
+  out << "} else {\n";
+  out.indent();
   out << "switch (event) {\n";
   out.indent();
-
+  // TODO(b/32141398): Support profiling in passthrough mode.
   out << "case HidlInstrumentor::CLIENT_API_ENTRY:\n";
   out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
-  out << "case HidlInstrumentor::PASSTHROUGH_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
+  out << "if ((*args).size() != " <<  method.arg().size() << ") {\n";
+  out.indent();
+  out << "LOG(ERROR) << \"Number of arguments does not match. expect: "
+      << method.arg().size()
+      << ", actual: \" << (*args).size() << \", method name: "
+      << method.name()
+      << ", event type: \" << event;\n";
+  out << "break;\n";
+  out.unindent();
+  out << "}\n";
   for (int i = 0; i < method.arg().size(); i++) {
     const VariableSpecificationMessage arg = method.arg(i);
     std::string arg_name = "arg_" + std::to_string(i);
@@ -177,11 +192,21 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out.unindent();
   out << "}\n";
 
+  // TODO(b/32141398): Support profiling in passthrough mode.
   out << "case HidlInstrumentor::CLIENT_API_EXIT:\n";
   out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
-  out << "case HidlInstrumentor::PASSTHROUGH_EXIT:\n";
   out << "{\n";
   out.indent();
+  out << "if ((*args).size() != " <<  method.return_type_hidl().size() << ") {\n";
+  out.indent();
+  out << "LOG(ERROR) << \"Number of return values does not match. expect: "
+      << method.return_type_hidl().size()
+      << ", actual: \" << (*args).size() << \", method name: "
+      << method.name()
+      << ", event type: \" << event;\n";
+  out << "break;\n";
+  out.unindent();
+  out << "}\n";
   for (int i = 0; i < method.return_type_hidl().size(); i++) {
     const VariableSpecificationMessage arg = method.return_type_hidl(i);
     std::string result_name = "result_" + std::to_string(i);
@@ -205,9 +230,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "}\n";
   out.unindent();
   out << "}\n";
-  out << "profiler.AddTraceEvent(event, package, version, interface, msg);\n";
   out.unindent();
   out << "}\n";
+  out << "profiler.AddTraceEvent(event, package, version, interface, msg);\n";
 }
 
 void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
