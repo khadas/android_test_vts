@@ -277,6 +277,8 @@ message VariableSpecificationMessage {
 
   optional StringDataValueMessage string_value = 111;
 
+  // for the definition of enum type only.
+  // The value of a eunm variable is stored in scalar_value message.
   optional EnumDataValueMessage enum_value = 121;
 
   // for both TYPE_ARRAY (using size field) and TYPE_VECTOR.
