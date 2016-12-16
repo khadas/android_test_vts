@@ -503,8 +503,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if the coverage data is successfully processed, False otherwise
         """
-        logging.info("SetCoverageData %s", coverage_data)
-
         if not getattr(self, self.COVERAGE, False):
             logging.info("coverage disabled")
             return False
@@ -516,9 +514,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         if isinstance(coverage_data, RepeatedCompositeFieldContainer):
             gcda_dict = {}
             for coverage_msg in coverage_data:
-                logging.info("coverage file_path %s", coverage_msg.file_path)
-                logging.info("coverage gcda len %d bytes",
-                             len(coverage_msg.gcda))
                 gcda_dict[coverage_msg.file_path] = coverage_msg.gcda
         elif isinstance(coverage_data, dict):
             gcda_dict = coverage_data
@@ -526,6 +521,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.error("unexpected coverage_data type: %s",
                           str(type(coverage_data)))
             return False
+        logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
         report_msg = self._report_msg if isGlobal else self._current_test_report_msg
 
         try:
