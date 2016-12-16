@@ -73,6 +73,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
     BRANCH = "master"
+    ENABLE_PROFILING = "enable_profiling"
+    VTS_PROFILING_TRACING_PATH = "profiling_trace_path"
 
     def __init__(self, configs):
         super(BaseTestWithWebDbClass, self).__init__(configs)
@@ -82,10 +84,11 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[
-            self.USE_GAE_DB, self.BIGTABLE_BASE_URL,
-            self.MODULES, self.GIT_PROJECT_NAME, self.GIT_PROJECT_PATH,
+            self.USE_GAE_DB, self.BIGTABLE_BASE_URL, self.MODULES,
+            self.GIT_PROJECT_NAME, self.GIT_PROJECT_PATH,
             self.SERVICE_JSON_PATH, keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.KEY_TESTBED_NAME
+            keys.ConfigKeys.KEY_TESTBED_NAME, self.ENABLE_PROFILING,
+            self.VTS_PROFILING_TRACING_PATH
         ])
 
         if getattr(self, self.USE_GAE_DB, False):
@@ -94,14 +97,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             test_module_name = self.__class__.__name__
             if hasattr(self, keys.ConfigKeys.KEY_TESTBED_NAME):
                 user_specified_test_name = getattr(
-                        self, keys.ConfigKeys.KEY_TESTBED_NAME, None)
+                    self, keys.ConfigKeys.KEY_TESTBED_NAME, None)
                 if user_specified_test_name:
                     test_module_name = str(user_specified_test_name)
                 else:
-                    logging.warn(
-                        "%s field = %s",
-                        keys.ConfigKeys.KEY_TESTBED_NAME,
-                        user_specified_test_name)
+                    logging.warn("%s field = %s",
+                                 keys.ConfigKeys.KEY_TESTBED_NAME,
+                                 user_specified_test_name)
             else:
                 logging.warn("%s not defined in the given test config",
                              keys.ConfigKeys.KEY_TESTBED_NAME)
@@ -117,10 +119,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
     def _tearDownClass(self):
         if (getattr(self, self.USE_GAE_DB, False) and
-            getattr(self, self.BIGTABLE_BASE_URL, "")):
+                getattr(self, self.BIGTABLE_BASE_URL, "")):
             # Handle case when runner fails, tests aren't executed
             if (self.results.executed and
-                self.results.executed[-1].test_name == "setup_class"):
+                    self.results.executed[-1].test_name == "setup_class"):
                 # Test failed during setup, all tests were not executed
                 start_index = 0
             else:
@@ -151,9 +153,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
                     self._report_msg.build_info.id = build_id
 
-            bt_client.PutRow(str(self._report_msg.start_timestamp),
-                             "data", self._report_msg.SerializeToString())
-
+            bt_client.PutRow(
+                str(self._report_msg.start_timestamp), "data",
+                self._report_msg.SerializeToString())
 
             logging.info("_tearDownClass hook: report msg proto %s",
                          self._report_msg)
@@ -405,7 +407,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             product = getattr(device_spec,
                               keys.ConfigKeys.IKEY_PRODUCT_VARIANT, None)
             device_build_id = getattr(device_spec,
-                              keys.ConfigKeys.IKEY_BUILD_ID, None)
+                                      keys.ConfigKeys.IKEY_BUILD_ID, None)
 
         if not build_flavor or not product or not device_build_id:
             logging.error("Could not read device information.")
@@ -441,42 +443,42 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             build_client = artifact_fetcher.AndroidBuildClient(
                 service_json_path)
         except Exception:
-            logging.error("Invalid service JSON file %s",
-                service_json_path)
+            logging.error("Invalid service JSON file %s", service_json_path)
             return False
 
         # Fetch repo dictionary
         try:
-            repos = build_client.GetRepoDictionary(self.BRANCH,
-                build_flavor, device_build_id)
+            repos = build_client.GetRepoDictionary(self.BRANCH, build_flavor,
+                                                   device_build_id)
         except:
             logging.error("Could not read build info for branch %s, " +
-                "target %s, id: %s" % (self.BRANCH, build_flavor,
-                    device_build_id))
+                          "target %s, id: %s" % (self.BRANCH, build_flavor,
+                                                 device_build_id))
             return False
 
         # Get revision (commit ID) from manifest
         if project_name not in repos:
             logging.error("Could not find project %s in repo dictionary",
-                project_name)
+                          project_name)
             return False
         revision = str(repos[project_name])
 
         # Fetch coverage zip
         try:
-            cov_zip = io.BytesIO(build_client.GetCoverage("master",
-                build_flavor, device_build_id, product))
+            cov_zip = io.BytesIO(
+                build_client.GetCoverage("master", build_flavor,
+                                         device_build_id, product))
             cov_zip = zipfile.ZipFile(cov_zip)
         except:
             logging.error("Could not read coverage zip for branch %s, " +
-                "target %s, id: %s, product: %s" %
-                (self.BRANCH, build_flavor, device_build_id, product))
+                          "target %s, id: %s, product: %s" %
+                          (self.BRANCH, build_flavor, device_build_id, product
+                           ))
             return False
 
         # Load and parse the gcno archive
         modules = getattr(self, self.MODULES)
         gcnodirs = set([m + '.gcnodir' for m in modules])
-
 
         for name in [name for name in cov_zip.namelist() if name in gcnodirs]:
             archive = archive_parser.Archive(cov_zip.open(name).read())
@@ -505,11 +507,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                      src_file_path)
                         continue
                     if src_file_name.endswith(file_name):
-                        logging.info("Coverage source file: %s" % src_file_path)
+                        logging.info("Coverage source file: %s" %
+                                     src_file_path)
                         break
 
                 if not src_file_path:
-                    logging.error("No source file found for %s." % gcno_file_path)
+                    logging.error("No source file found for %s." %
+                                  gcno_file_path)
                     continue
 
                 gcda_name = file_name + ".gcda"
@@ -523,7 +527,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     coverage.total_line_count, coverage.covered_line_count = (
                         coverage_report.GetCoverageStats(coverage_vec))
                     coverage.line_coverage_vector.extend(coverage_vec)
-                    src_file_path = os.path.relpath(src_file_path, project_path)
+                    src_file_path = os.path.relpath(src_file_path,
+                                                    project_path)
                     coverage.file_path = src_file_path
                     coverage.revision = str(revision)
                     coverage.project_name = str(project_name)

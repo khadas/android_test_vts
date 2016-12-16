@@ -22,6 +22,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
+from vts.utils.python.profiling import profiling_utils
 
 
 class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
@@ -42,12 +43,24 @@ class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.dut.shell.InvokeTerminal("one")
         self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
+        if getattr(self, self.ENABLE_PROFILING, False):
+            profiling_utils.EnableVTSProfiling(self.dut.shell.one)
+
+    def tearDownClass(self):
+        """ If profiling is enabled for the test, collect the profiling data
+            and disable profiling after the test is done.
+        """
+        if getattr(self, self.ENABLE_PROFILING, False):
+            profiling_trace_path = getattr(self,
+                                           self.VTS_PROFILING_TRACING_PATH, "")
+            profiling_utils.GetTraceData(self.dut, profiling_trace_path)
+            profiling_utils.DisableVTSProfiling(self.dut.shell.one)
 
     def testVibratorBasic(self):
         """A simple test case which just calls each registered function."""
         asserts.skipIf(
-                not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
-                "a non-Treble device.")
+            not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
+            "a non-Treble device.")
 
         vibrator_types = self.dut.hal.vibrator.GetHidlTypeInterface("types")
         logging.info("vibrator_types: %s", vibrator_types)

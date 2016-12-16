@@ -31,4 +31,7 @@ DATA/bin/vts_shell_driver64->/data/local/tmp/64/vts_shell_driver64
 DATA/bin/vts_hal_agent32->/data/local/tmp/32/vts_hal_agent32
 DATA/bin/vts_hal_agent64->/data/local/tmp/64/vts_hal_agent64
 
+DATA/lib/libvts_profiling.so->/data/local/tmp/32/libvts_profiling.so
+DATA/lib64/libvts_profiling.so->/data/local/tmp/64/libvts_profiling.so
+
 DATA/app/VtsAgentApp/VtsAgentApp.apk->/data/local/tmp/VtsAgentApp.apk
