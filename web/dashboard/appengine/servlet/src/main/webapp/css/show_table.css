@@ -21,6 +21,10 @@ table {
 .table-header {
     background-color: white;
 }
+.table-header-content {
+    font-weight: initial;
+    display: inline-block;
+}
 #buttons {
     margin-top: 25px;
 }
