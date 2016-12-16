@@ -28,6 +28,11 @@ uint32_t RandomUint32() { return (unsigned int)rand(); }
 
 int32_t RandomInt32() { return rand(); }
 
+uint64_t RandomUint64() {
+  uint64_t num = (unsigned int)rand();
+  return (num << 32) | (unsigned int)rand();
+}
+
 int64_t RandomInt64() {
   int64_t num = rand();
   return (num << 32) | rand();
