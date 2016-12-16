@@ -24,6 +24,8 @@ from vts.runners.host import base_test_with_webdb
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
+PASSTHROUGH_MODE_KEY = "passthrough_mode"
+
 
 class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A simple testcase for the NFC HIDL HAL."""
@@ -40,10 +42,19 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                  target_component_name="INfc",
                                  bits=64)
 
+        self.getUserParams([PASSTHROUGH_MODE_KEY])
+
         self.dut.shell.InvokeTerminal("one")
         self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
         self.dut.shell.one.Execute("service call nfc 4")  # Turn off
         self.dut.shell.one.Execute("service call nfc 5")  # Turn on
+
+        if getattr(self, PASSTHROUGH_MODE_KEY, False):
+            self.dut.shell.one.Execute(
+                "setprop vts.hal.vts.hidl.get_stub true")
+        else:
+            self.dut.shell.one.Execute(
+                "setprop vts.hal.vts.hidl.get_stub false")
 
     def tearDownClass(self):
         """Turns off the framework-layer NFC service."""
