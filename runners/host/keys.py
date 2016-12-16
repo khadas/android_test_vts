@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 """This module has the global key values that are used across framework
 modules.
 """
@@ -46,6 +45,7 @@ class ConfigKeys(object):
     IKEY_USER_PARAM = "user_params"
     IKEY_TESTBED_NAME = "testbed_name"
     IKEY_LOG_PATH = "log_path"
+    IKEY_ABI_NAME = "abi_name"
     IKEY_ABI_BITNESS = "abi_bitness"
     IKEY_RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi"
 

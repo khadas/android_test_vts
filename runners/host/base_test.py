@@ -57,7 +57,8 @@ class BaseTestClass(object):
                        include.
         exclude_filer: A list of string, each representing a test case name to
                        exclude. Has no effect if include_filer is not empty.
-        abi_bitness: String, bitness of abi
+        abi_name: String, name of abi in use
+        abi_bitness: String, bitness of abi in use
     """
 
     TAG = None
@@ -85,10 +86,12 @@ class BaseTestClass(object):
                         strip=True)
                     setattr(self, filter, filter_expanded)
 
-        # Set abi bitness (optional)
-        self.abi_bitness = self.getUserParam(keys.ConfigKeys.IKEY_ABI_BITNESS)
-        self.run_32bit_on_64bit_abi = self.getUserParam(
-            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
+        # TODO: get abi information differently for multi-device support.
+        # Set other optional parameters
+        opt_param_names = [keys.ConfigKeys.IKEY_ABI_NAME,
+                           keys.ConfigKeys.IKEY_ABI_BITNESS,
+                           keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI]
+        self.getUserParams(opt_param_names=opt_param_names)
 
     def __enter__(self):
         return self
@@ -321,7 +324,6 @@ class BaseTestClass(object):
             begin_time: Logline format timestamp taken when the test started.
         """
 
-
     def _onSilent(self, record):
         """Proxy function to guarantee the base implementation of onSilent is
         called.
@@ -428,15 +430,17 @@ class BaseTestClass(object):
             raise signals.TestSilent("Test case '%s' in exclude filter." %
                                      test_name)
 
-        if self.abi_bitness is not None:
+        if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
+            bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
             asserts.skipIf(
                 (test_name[-len(const.SUFFIX_32BIT):].lower() ==
-                 const.SUFFIX_32BIT and self.abi_bitness != "32") or
+                 const.SUFFIX_32BIT and bitness != "32") or
                 (test_name[-len(const.SUFFIX_64BIT):].lower() ==
-                 const.SUFFIX_64BIT and self.abi_bitness != "64" and
-                 not self.run_32bit_on_64bit_abi),
+                 const.SUFFIX_64BIT and bitness != "64" and
+                 not getattr(self, keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI,
+                             False)),
                 "Test case '{}' excluded as abi bitness is {}.".format(
-                    test_name, self.abi_bitness))
+                    test_name, bitness))
 
     def execOneTest(self, test_name, test_func, args, **kwargs):
         """Executes one test case and update test results.

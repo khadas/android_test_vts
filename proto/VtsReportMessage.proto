@@ -71,6 +71,12 @@ message AndroidDeviceInfoMessage {
   // API level
   optional bytes api_level = 31;
 
+  // ABI name that is current in use for the test
+  optional bytes abi_name = 51;
+
+  // ABI bitness that is current in use for the test. Example: '32', '64',
+  optional bytes abi_bitness = 52;
+
   // Device USB serial number
   optional bytes serial = 101;
 }
