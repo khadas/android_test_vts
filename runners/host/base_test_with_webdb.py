@@ -36,11 +36,8 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 
 from vts.utils.app_engine import bigtable_rest_client
-from vts.utils.python.archive import archive_parser
-from vts.utils.python.coverage import coverage_report
-from vts.utils.python.coverage import gcda_parser
-from vts.utils.python.coverage import gcno_parser
 from vts.utils.python.build.api import artifact_fetcher
+from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.profiling import profiling_utils
 
 _ANDROID_DEVICE = "AndroidDevice"
@@ -483,63 +480,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         # Load and parse the gcno archive
         modules = getattr(self, self.MODULES)
-        gcnodirs = set([m + '.gcnodir' for m in modules])
-
-        for name in [name for name in cov_zip.namelist() if name in gcnodirs]:
-            archive = archive_parser.Archive(cov_zip.open(name).read())
-            try:
-                archive.Parse()
-            except ValueError:
-                logging.error("Archive could not be parsed: %s" % name)
-                continue
-
-            for gcno_file_path in archive.files:
-                file_name_path = gcno_file_path.rsplit(".", 1)[0]
-                file_name = os.path.basename(file_name_path)
-                gcno_content = archive.files[gcno_file_path]
-                gcno_stream = io.BytesIO(gcno_content)
-                gcno_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
-                src_file_path = None
-
-                # Match gcno file with source files
-                for key in gcno_summary.functions:
-                    src_file_path = gcno_summary.functions[key].src_file_name
-                    src_parts = src_file_path.rsplit(".", 1)
-                    src_file_name = src_parts[0]
-                    src_extension = src_parts[1]
-                    if src_extension not in ["c", "cpp", "cc"]:
-                        logging.warn("Found unsupported file type: %s" %
-                                     src_file_path)
-                        continue
-                    if src_file_name.endswith(file_name):
-                        logging.info("Coverage source file: %s" %
-                                     src_file_path)
-                        break
-
-                if not src_file_path:
-                    logging.error("No source file found for %s." %
-                                  gcno_file_path)
-                    continue
-
-                gcda_name = file_name + ".gcda"
-                if gcda_name in gcda_dict:
-                    gcda_content = gcda_dict[gcda_name]
-                    gcda_stream = io.BytesIO(gcda_content)
-                    gcda_parser.GCDAParser(gcda_stream, gcno_summary).Parse()
-                    coverage_vec = coverage_report.GenerateLineCoverageVector(
-                        src_file_path, gcno_summary)
-                    coverage = self._current_test_report_msg.coverage.add()
-                    coverage.total_line_count, coverage.covered_line_count = (
-                        coverage_report.GetCoverageStats(coverage_vec))
-                    coverage.line_coverage_vector.extend(coverage_vec)
-                    src_file_path = os.path.relpath(src_file_path,
-                                                    project_path)
-                    coverage.file_path = src_file_path
-                    coverage.revision = str(revision)
-                    coverage.project_name = str(project_name)
-                else:
-                    logging.error("No gcda file found %s." % gcda_name)
-                    continue
+        coverage_utils.GenerateCoverageMessages(self._report_msg, cov_zip,
+                                                modules, gcda_dict, project_name,
+                                                project_path, revision)
         return True
 
     def ProcessAndUploadTraceData(self, dut, profiling_trace_path):
