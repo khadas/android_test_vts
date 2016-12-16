@@ -45,15 +45,18 @@ table {
     max-width: inherit;
     width: 100%;
 }
-#buttons {
-    margin: 25px 10px 0;
+.page-button-wrapper {
+    top: 50%;
+}
+#newer-wrapper {
+    left: 23px;
 }
 #chart_holder {
     padding: 30px 5px;
 }
 #pie_chart_div {
     width: 100%;
-    height: 380px;
+    height: 300px;
 }
 #profiling_container {
     padding: 30px 25px;
