@@ -68,7 +68,15 @@ class FuzzerBase {
   // Called after calling a target function. Fills in the code coverage info.
   bool FunctionCallEnd(FunctionSpecificationMessage* msg);
 
+  // Scans all GCDA files under a given dir and adds to the message.
+  bool ScanAllGcdaFiles(
+      const string& basepath, FunctionSpecificationMessage* msg);
+
  protected:
+  bool ReadGcdaFile(
+      const string& basepath, const string& filename,
+      FunctionSpecificationMessage* msg);
+
   // a pointer to a HAL data structure of the loaded component.
   struct hw_device_t* device_;
 
