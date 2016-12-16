@@ -172,7 +172,6 @@ class TestCasesParser(object):
         '''
         testsuite_script = os.path.join(self._data_path,
                                         ltp_configs.LTP_RUNTEST_DIR, testsuite)
-        testsuite = testsuite.replace('-', '_')
 
         result = []
         for line in open(testsuite_script, 'r'):
@@ -183,7 +182,7 @@ class TestCasesParser(object):
             testname = line.split()[0]
             testname_prefix = ('DISABLED_'
                                if testname in disabled_tests_list else '')
-            testname_modified = testname_prefix + testname.replace('-', '_')
+            testname_modified = testname_prefix + testname
 
             result.append("\t".join([testsuite, testname_modified, line[len(
                 testname):].strip()]))
