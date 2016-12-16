@@ -21,8 +21,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libvts_datatype
 LOCAL_MODULE_TAGS := optional
 
-# TODO: uncomment when ready
-#LOCAL_CFLAGS += -Wno-unused-parameter -Werror
+LOCAL_CFLAGS += -Wall -Werror
 
 LOCAL_SRC_FILES := \
   vts_datatype.cpp \

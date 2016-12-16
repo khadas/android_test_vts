@@ -52,13 +52,13 @@ class FuzzerBase {
   // Actual implementation of routines to test a specific function using the
   // provided function interface specification message.
   // Returns true iff the testing is conducted completely.
-  virtual bool Fuzz(vts::FunctionSpecificationMessage* func_msg, void** result,
-                    const string& callback_socket_name) {
+  virtual bool Fuzz(vts::FunctionSpecificationMessage* /*func_msg*/,
+                    void** /*result*/, const string& /*callback_socket_name*/) {
     return false;
   };
 
-  virtual bool GetAttribute(vts::FunctionSpecificationMessage* func_msg,
-                            void** result) {
+  virtual bool GetAttribute(vts::FunctionSpecificationMessage* /*func_msg*/,
+                            void** /*result*/) {
     return false;
   }
 

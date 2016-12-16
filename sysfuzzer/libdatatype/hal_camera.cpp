@@ -36,30 +36,30 @@ namespace vts {
 
 // Callbacks {
 static void vts_camera_device_status_change(
-    const struct camera_module_callbacks*, int camera_id, int new_status) {}
+    const struct camera_module_callbacks*, int /*camera_id*/,
+    int /*new_status*/) {}
 
-static void vts_torch_mode_status_change(const struct camera_module_callbacks*,
-                                         const char* camera_id,
-                                         int new_status) {}
+static void vts_torch_mode_status_change(
+    const struct camera_module_callbacks*, const char* /*camera_id*/,
+    int /*new_status*/) {}
 
-static void vts_camera_notify_callback(int32_t msg_type, int32_t ext1,
-                                       int32_t ext2, void* user) {}
+static void vts_camera_notify_callback(
+    int32_t /*msg_type*/, int32_t /*ext1*/, int32_t /*ext2*/,
+    void* /*user*/) {}
 
-static void vts_camera_data_callback(int32_t msg_type,
-                                     const camera_memory_t* data,
-                                     unsigned int index,
-                                     camera_frame_metadata_t* metadata,
-                                     void* user) {}
+static void vts_camera_data_callback(
+    int32_t /*msg_type*/, const camera_memory_t* /*data*/,
+    unsigned int /*index*/, camera_frame_metadata_t* /*metadata*/,
+    void* /*user*/) {}
 
-static void vts_camera_data_timestamp_callback(int64_t timestamp,
-                                               int32_t msg_type,
-                                               const camera_memory_t* data,
-                                               unsigned int index, void* user) {
+static void vts_camera_data_timestamp_callback(
+    int64_t /*timestamp*/, int32_t /*msg_type*/,
+    const camera_memory_t* /*data*/, unsigned int /*index*/, void* /*user*/) {
 }
 
-static camera_memory_t* vts_camera_request_memory(int fd, size_t buf_size,
-                                                  unsigned int num_bufs,
-                                                  void* user) {
+static camera_memory_t* vts_camera_request_memory(
+    int /*fd*/, size_t /*buf_size*/, unsigned int /*num_bufs*/,
+    void* /*user*/) {
   cout << __func__ << endl;
   return NULL;
 }
@@ -182,7 +182,7 @@ camera_info_t* GenerateCameraInfo() {
 }
 
 camera_info_t* GenerateCameraInfoUsingMessage(
-    const VariableSpecificationMessage& msg) {
+    const VariableSpecificationMessage& /*msg*/) {
   cout << __func__ << endl;
   // TODO: acutally use msg.
   camera_info_t* caminfo = (camera_info_t*)malloc(sizeof(camera_info_t));

@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libvts_common
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS += -Wno-unused-parameter -Werror
+LOCAL_CFLAGS += -Wall -Werror
 
 LOCAL_SRC_FILES := \
   binder/VtsFuzzerBinderService.cpp \
@@ -70,7 +70,7 @@ LOCAL_MODULE := libvts_common_host
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_HOST_OS := darwin linux
 
-LOCAL_CFLAGS += -Wno-unused-parameter -Werror
+LOCAL_CFLAGS += -Wall -Werror
 
 # Files needed for VTSC.
 LOCAL_SRC_FILES := \
