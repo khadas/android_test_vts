@@ -18,5 +18,7 @@
     <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
     <option name="compatibility:include-filter" value="LightFuzzTest" />
+    <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
+    <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
