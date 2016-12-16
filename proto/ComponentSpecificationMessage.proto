@@ -100,6 +100,7 @@ enum VariableType {
   TYPE_HIDL_CALLBACK = 10;
   TYPE_SUBMODULE = 11;
   TYPE_UNION = 12;
+  TYPE_HIDL_INTERFACE = 13;
 }
 
 
