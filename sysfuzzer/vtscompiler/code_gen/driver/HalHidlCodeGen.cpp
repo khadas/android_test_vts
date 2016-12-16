@@ -724,10 +724,22 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         for (int index = 0; index < attribute.enum_value().enumerator().size(); index++) {
           out << "if (choice == ";
           out << "(" << attribute.enum_value().scalar_type() << ") ";
-          if (attribute.enum_value().scalar_type() == "int32_t") {
+          if (attribute.enum_value().scalar_type() == "int8_t") {
+            out << attribute.enum_value().scalar_value(index).int8_t();
+          } else if (attribute.enum_value().scalar_type() == "uint8_t") {
+            out << attribute.enum_value().scalar_value(index).uint8_t();
+          } else if (attribute.enum_value().scalar_type() == "int16_t") {
+            out << attribute.enum_value().scalar_value(index).int16_t();
+          } else if (attribute.enum_value().scalar_type() == "uint16_t") {
+            out << attribute.enum_value().scalar_value(index).uint16_t();
+          } else if (attribute.enum_value().scalar_type() == "int32_t") {
             out << attribute.enum_value().scalar_value(index).int32_t();
           } else if (attribute.enum_value().scalar_type() == "uint32_t") {
             out << attribute.enum_value().scalar_value(index).uint32_t();
+          } else if (attribute.enum_value().scalar_type() == "int64_t") {
+            out << attribute.enum_value().scalar_value(index).int64_t();
+          } else if (attribute.enum_value().scalar_type() == "uint64_t") {
+            out << attribute.enum_value().scalar_value(index).uint64_t();
           } else {
             cerr << __func__ << ":" << __LINE__ << " ERROR unsupported enum type "
                  << attribute.enum_value().scalar_type() << "\n";
@@ -859,11 +871,28 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             if (struct_value.has_predefined_type()) {
               std::string struct_attribute_name = struct_value.predefined_type();
               ReplaceSubString(struct_attribute_name, "::", "__");
+              // TODO(yim): support struct type.
               out << "/*" << struct_value.predefined_type() << "*/";
-              //"arg->" << struct_value.name() << " = "
-              //    << "" << enum_attribute_name << "("
-              //    << "var_msg.struct_value(" << struct_index
-              //    << ").enum_value());" << "\n";
+            } else {
+              cerr << __func__ << ":" << __LINE__ << " ERROR predefined_type "
+                   << "not defined." << "\n";
+              exit(-1);
+            }
+          } else if (struct_value.type() == TYPE_UNION) {
+            if (struct_value.has_predefined_type()) {
+              std::string struct_attribute_name = struct_value.predefined_type();
+              ReplaceSubString(struct_attribute_name, "::", "__");
+              /*
+               * TODO(yim): support union which is defined inside a struct.
+               * A function needs to be auto-generated which can the pointer to
+               * a union instance and assign values in a recursive way.
+               * for (const auto& union_value : struct_value.union_value()) {
+               *  out << "arg->" << struct_value.name() << "." << union_value.name() << " = "
+               *      << "EnumValue" << enum_attribute_name << "("
+               *      << "var_msg.struct_value(" << struct_index
+               *      << ").enum_value());" << "\n";
+               * }
+               */
             } else {
               cerr << __func__ << ":" << __LINE__ << " ERROR predefined_type "
                    << "not defined." << "\n";

@@ -509,7 +509,8 @@ void DriverCodeGenBase::GenerateClassHeader(
         out << attribute.name() << " "
             << "Random" << attribute_name << "();"
             << "\n";
-      } else if (attribute.type() == TYPE_STRUCT) {
+      } else if (attribute.type() == TYPE_STRUCT ||
+                 attribute.type() == TYPE_UNION) {
         std::string attribute_name = attribute.name();
         ReplaceSubString(attribute_name, "::", "__");
         out << "void " << "MessageTo" << attribute_name
