@@ -74,6 +74,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """
         push_src = os.path.join(self.data_file_path, testcase)
         self._dut.adb.push("%s %s" % (push_src, config.FUZZER_TEST_DIR))
+        logging.info("Adb pushed: %s", testcase)
 
     # TODO(trong): save crash-causing inputs to the fuzzer.
     def RunTestcase(self, testcase):
@@ -83,6 +84,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
             testcase: string, path to executable fuzzer.
         """
         self.PushFiles(testcase)
+        testcase = testcase.split("/")[-1]
 
         chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, testcase)
         cd_cmd = "cd %s" % os.path.join(config.FUZZER_TEST_DIR)
