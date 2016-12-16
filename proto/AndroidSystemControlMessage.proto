@@ -110,6 +110,9 @@ message AndroidSystemControlCommandMessage {
   // the name of a HAL module to open.
   optional bytes module_name = 3007;
 
+  // the package name of a HIDL HAL.
+  optional bytes target_package = 3008;
+
   // for LIST_APIS
   // none
 

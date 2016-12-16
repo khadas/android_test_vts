@@ -16,6 +16,7 @@
 
 #include "HalHidlProfilerCodeGen.h"
 #include "utils/InterfaceSpecUtil.h"
+#include "utils/StringUtil.h"
 #include "VtsCompilerUtils.h"
 
 namespace android {
