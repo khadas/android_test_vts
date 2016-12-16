@@ -151,6 +151,7 @@ public class VtsAlertJobServlet extends HttpServlet {
     /**
      * Checks whether any new failures have occurred beginning since (and including) startTime.
      * @param tableName The name of the table that stores the results for a test, string.
+     * @param link The string URL linking to the test's status table.
      * @param lastUploadTimestamp The timestamp (long) representing when test data was last updated.
      * @param prevStatusMessage The raw (byte[]) TestStatusMessage for the previous iteration.
      * @param emails The list of email addresses to send notifications to.
@@ -158,14 +159,14 @@ public class VtsAlertJobServlet extends HttpServlet {
      * @returns latest raw TestStatusMessage (byte[]).
      * @throws IOException
      */
-    public byte[] getTestStatus(String tableName, long lastUploadTimestamp,
+    public byte[] getTestStatus(String tableName, String link, long lastUploadTimestamp,
                                 byte[] prevStatusMessage, List<String> emails,
                                 List<Message> messages) throws IOException {
         Scan scan = new Scan();
         long startTime = lastUploadTimestamp - ONE_DAY;
         Set<ByteString> failedTestcases = new HashSet<>();
         String footer = "<br><br>For details, visit the"
-                        + " <a href='https://android-vts-internal.googleplex.com/'>"
+                        + " <a href='" + link + "'>"
                         + "VTS dashboard.</a>";
         if (prevStatusMessage != null) {
             TestStatusMessage testStatusMessage = VtsWebStatusMessage.TestStatusMessage
@@ -413,8 +414,12 @@ public class VtsAlertJobServlet extends HttpServlet {
                 continue;
             }
             List<Message> messageQueue = new ArrayList<>();
-
-            byte[] newStatus = getTestStatus(testName, lastUploadTimestamp, value, emails, messageQueue);
+            StringBuffer fullUrl = request.getRequestURL();
+            String baseUrl = fullUrl.substring(0, fullUrl.indexOf(request.getRequestURI()));
+            String link = baseUrl + "/show_table?testName=" +
+                          testName.substring(TABLE_PREFIX.length(), testName.length());
+            byte[] newStatus = getTestStatus(testName, link, lastUploadTimestamp, value, emails,
+                                             messageQueue);
 
             if (newStatus != null) {
                 // Create row insertion operation.
