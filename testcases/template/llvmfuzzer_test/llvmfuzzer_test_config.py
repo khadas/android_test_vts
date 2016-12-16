@@ -26,13 +26,16 @@ class ExitCode(object):
 # Directory on the target where the tests are copied.
 FUZZER_TEST_DIR = "/data/local/tmp/llvmfuzzer_test"
 
+# Directory under data_file_path on the host where fuzzer executables are.
+FUZZER_SRC_DIR = "hal_fuzzer"
+
 # File used to save crash-causing fuzzer input.
 FUZZER_TEST_CRASH_REPORT = FUZZER_TEST_DIR + "/crash_report"
 
 # Default parameters that will be passed to fuzzer executable.
 FUZZER_PARAMS = {
-    "max_len": 64,
-    "max_total_time": 10,
+    "max_len": 100,
+    "max_total_time": 60,
     "exact_artifact_path": FUZZER_TEST_CRASH_REPORT
 }
 

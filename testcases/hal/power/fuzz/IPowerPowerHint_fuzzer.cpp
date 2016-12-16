@@ -25,16 +25,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (power_hal == nullptr) {
     return 0;
   }
-  if (size < sizeof(PowerHint)) {
+
+  size_t min_size = sizeof(PowerHint) + sizeof(int32_t);
+  if (size < min_size) {
     return 0;
   }
+
   PowerHint hint;
   memcpy(&hint, data, sizeof(PowerHint));
-
-  int32_t payload = 0;
-  size_t copy_amount = std::min(sizeof(int32_t), size - sizeof(PowerHint));
   data += sizeof(PowerHint);
-  memcpy(&payload, data, copy_amount);
+
+  int32_t payload;
+  memcpy(&payload, data, sizeof(int32_t));
 
   power_hal->powerHint(hint, payload);
   return 0;
