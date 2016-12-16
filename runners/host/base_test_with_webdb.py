@@ -208,9 +208,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return traceback.extract_stack(None, 2)[0][2]
 
     def _testEntry(self, test_name):
-        """Proxy function to guarantee the base implementation of setUpTest is
-        called.
-        """
+        """Internal function to be called upon entry of a test case."""
         if getattr(self, self.USE_GAE_DB, False):
             self._current_test_report_msg = self._report_msg.test_case.add()
             self._current_test_report_msg.name = test_name
@@ -222,7 +220,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         if getattr(self, self.USE_GAE_DB, False):
-            self._current_test_report_msg.end_timestamp = self.GetTimestamp()
+            if self._current_test_report_msg:
+                self._current_test_report_msg.end_timestamp = self.GetTimestamp()
+            else:
+                logging.info("test result of '%s' is empty and will not be uploaded.", test_name)
         return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
     def _onFail(self, record):
@@ -260,6 +261,19 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         if getattr(self, self.USE_GAE_DB, False):
             self._current_test_report_msg.test_result = ReportMsg.TEST_CASE_RESULT_SKIP
         return super(BaseTestWithWebDbClass, self)._onSkip(record)
+
+    def _onSilent(self, record):
+        """Proxy function to guarantee the base implementation of onSilent is
+        called.
+
+        Args:
+            record: The records.TestResultRecord object for the skipped test
+                    case.
+        """
+        if getattr(self, self.USE_GAE_DB, False):
+            self._report_msg.test_case.remove(self._current_test_report_msg)
+            self._current_test_report_msg = None
+        return super(BaseTestWithWebDbClass, self)._onSilent(record)
 
     def _onException(self, record):
         """Proxy function to guarantee the base implementation of onException
