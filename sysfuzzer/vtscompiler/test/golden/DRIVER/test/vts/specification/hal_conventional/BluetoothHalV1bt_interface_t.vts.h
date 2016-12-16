@@ -21,10 +21,10 @@ class FuzzerExtended_bt_interface_t : public FuzzerBase {
  public:
     FuzzerExtended_bt_interface_t() : FuzzerBase(HAL_CONVENTIONAL_SUBMODULE) {}
  protected:
-    bool Fuzz(FunctionSpecificationMessage* func_msg,
-              void** result, const string& callback_socket_name);
-    bool GetAttribute(FunctionSpecificationMessage* func_msg,
-              void** result);
+    bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
+    bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
     void SetSubModule(bt_interface_t* submodule) {
         submodule_ = submodule;
     }

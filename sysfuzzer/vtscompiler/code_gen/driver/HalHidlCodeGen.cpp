@@ -130,17 +130,17 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
       out << "\n";
     }
 
-    out << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+    out << "sp<" << message.component_name() << "> VtsFuzzerCreate"
         << message.component_name() << "(const string& callback_socket_name)";
     out << " {" << "\n";
     out.indent();
-    out << "return new Vts" << message.component_name().substr(1) << "();"
-        << "\n";
+    out << "sp<" << message.component_name() << "> result;\n";
+    out << "result = new Vts" << message.component_name().substr(1) << "();\n";
+    out << "return result;\n";
     out.unindent();
     out << "}" << "\n" << "\n";
   }
 }
-
 
 void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
     Formatter& out, const ComponentSpecificationMessage& message,
@@ -240,12 +240,10 @@ void HalHidlCodeGen::GenerateScalarTypeInC(Formatter& out, const string& type) {
   }
 }
 
+
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     Formatter& out, const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
-  GenerateCppBodySyncCallbackFunction(
-      out, message, fuzzer_extended_class_name);
-
   set<string> callbacks;
   for (auto const& api : message.interface().api()) {
     for (auto const& arg : api.arg()) {
@@ -266,33 +264,6 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                                   message.original_data_structure_name(),
                                   sub_struct.is_pointer() ? "->" : ".");
     }
-
-    out << "bool " << fuzzer_extended_class_name
-        << "::GetService(bool get_stub) {" << "\n";
-    out.indent();
-
-    out << "static bool initialized = false;" << "\n";
-    out << "if (!initialized) {" << "\n";
-    out.indent();
-    out << "cout << \"[agent:hal] HIDL getService\" << endl;" << "\n";
-    string service_name = message.package().substr(
-        message.package().find_last_of(".") + 1);
-    if (service_name == "nfc") {
-      // TODO(yim): remove this special case after b/32158398 is fixed.
-      service_name = "nfc_nci";
-    }
-    out << "hw_binder_proxy_ = " << message.component_name()
-        << "::getService(\""
-        << service_name
-        << "\", get_stub);" << "\n";
-    out << "cout << \"[agent:hal] hw_binder_proxy_ = \" << "
-        << "hw_binder_proxy_.get() << endl;" << "\n";
-    out << "initialized = true;" << "\n";
-    out.unindent();
-    out << "}" << "\n";
-    out << "return true;" << "\n";
-    out.unindent();
-    out << "}" << "\n" << "\n";
 
     out << "bool " << fuzzer_extended_class_name << "::Fuzz(" << "\n";
     out << "    FunctionSpecificationMessage* func_msg," << "\n";
@@ -869,8 +840,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   }
 }
 
-void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
-    Formatter& out, const StructSpecificationMessage& message,
+void HalHidlCodeGen::GenerateCppBodyFuzzFunction(Formatter& out,
+    const StructSpecificationMessage& message,
     const string& fuzzer_extended_class_name,
     const string& original_data_structure_name, const string& parent_path) {
   for (auto const& sub_struct : message.sub_struct()) {
@@ -895,8 +866,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   bool is_open;
   for (auto const& api : message.api()) {
     is_open = false;
-    if ((parent_path_printable + message.name()) == "_common_methods" &&
-        api.name() == "open") {
+    if ((parent_path_printable + message.name()) == "_common_methods"
+        && api.name() == "open") {
       is_open = true;
     }
 
@@ -915,10 +886,10 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         if (arg.type() == TYPE_SCALAR) {
           out << "(" << msg << ".type() == TYPE_SCALAR && " << msg
               << ".scalar_value()";
-          if (arg.scalar_type() == "pointer" ||
-              arg.scalar_type() == "char_pointer" ||
-              arg.scalar_type() == "void_pointer" ||
-              arg.scalar_type() == "function_pointer") {
+          if (arg.scalar_type() == "pointer"
+              || arg.scalar_type() == "char_pointer"
+              || arg.scalar_type() == "void_pointer"
+              || arg.scalar_type() == "function_pointer") {
             out << ".has_pointer())? ";
             out << "reinterpret_cast<" << GetCppVariableType(arg) << ">";
           } else {
@@ -926,26 +897,24 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           }
           out << "(" << msg << ".scalar_value()";
 
-          if (arg.scalar_type() == "bool_t" ||
-              arg.scalar_type() == "int32_t" ||
-              arg.scalar_type() == "uint32_t" ||
-              arg.scalar_type() == "int64_t" ||
-              arg.scalar_type() == "uint64_t" ||
-              arg.scalar_type() == "int16_t" ||
-              arg.scalar_type() == "uint16_t" ||
-              arg.scalar_type() == "int8_t" ||
-              arg.scalar_type() == "uint8_t" ||
-              arg.scalar_type() == "float_t" ||
-              arg.scalar_type() == "double_t") {
+          if (arg.scalar_type() == "bool_t" || arg.scalar_type() == "int32_t"
+              || arg.scalar_type() == "uint32_t"
+              || arg.scalar_type() == "int64_t"
+              || arg.scalar_type() == "uint64_t"
+              || arg.scalar_type() == "int16_t"
+              || arg.scalar_type() == "uint16_t"
+              || arg.scalar_type() == "int8_t" || arg.scalar_type() == "uint8_t"
+              || arg.scalar_type() == "float_t"
+              || arg.scalar_type() == "double_t") {
             out << "." << arg.scalar_type() << "() ";
-          } else if (arg.scalar_type() == "pointer" ||
-                     arg.scalar_type() == "char_pointer" ||
-                     arg.scalar_type() == "function_pointer" ||
-                     arg.scalar_type() == "void_pointer") {
+          } else if (arg.scalar_type() == "pointer"
+              || arg.scalar_type() == "char_pointer"
+              || arg.scalar_type() == "function_pointer"
+              || arg.scalar_type() == "void_pointer") {
             out << ".pointer() ";
           } else {
             cerr << __func__ << " ERROR unsupported type " << arg.scalar_type()
-                 << "\n";
+                << "\n";
             exit(-1);
           }
           out << ") : ";
@@ -970,10 +939,11 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     out << "cout << \"Call an API.\" << endl;" << "\n";
     out << "cout << \"local_device = \" << " << kInstanceVariableName
         << ".get();" << "\n";
-    out << "*result = const_cast<void*>(reinterpret_cast<const void*>(new string("
-        << kInstanceVariableName << "->" << parent_path << message.name()
-        << "->" << api.name() << "(";
-    if (arg_count > 0) out << "\n";
+    out << "*result = const_cast<void*>(reinterpret_cast<const void*>"
+        << "(new string(" << kInstanceVariableName << "->" << parent_path
+        << message.name() << "->" << api.name() << "(";
+    if (arg_count > 0)
+      out << "\n";
 
     out.indent();
     for (int index = 0; index < arg_count; index++) {
@@ -985,7 +955,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     out.unindent();
 
     if (api.return_type_hidl_size() > 0) {
-      if (arg_count != 0) out << ", ";
+      if (arg_count != 0)
+        out << ", ";
       out << fuzzer_extended_class_name << api.name() << "_cb";
       // TODO: support callback as the last arg and setup barrier here to
       // do *result = ...;
@@ -999,9 +970,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     for (auto const& arg : api.arg()) {
       if (arg.is_output()) {
         // TODO check the return value
-        out << GetConversionToProtobufFunctionName(arg) << "(arg"
-            << arg_count << ", "
-            << "func_msg->mutable_arg(" << arg_count << "));" << "\n";
+        out << GetConversionToProtobufFunctionName(arg) << "(arg" << arg_count
+            << ", " << "func_msg->mutable_arg(" << arg_count << "));" << "\n";
       }
       arg_count++;
     }
@@ -1013,6 +983,133 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
   // TODO: if there were pointers, free them.
   out << "  return false;" << "\n";
   out << "}" << "\n";
+}
+
+void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
+    const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  if (message.component_name() != "types"
+      && !endsWith(message.component_name(), "Callback")) {
+    out << "bool " << fuzzer_extended_class_name << "::CallFunction("
+        << "FunctionSpecificationMessage* func_msg, void** result, "
+        << "const string& callback_socket_name) {\n";
+    out.indent();
+
+    out << "const char* func_name = func_msg->name().c_str();" << "\n";
+    out << "cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+        << "\n";
+
+    for (auto const& api : message.interface().api()) {
+      out << "if (!strcmp(func_name, \"" << api.name() << "\")) {\n";
+      out.indent();
+
+      // args - definition;
+      int arg_count = 0;
+      for (auto const& arg : api.arg()) {
+        string cur_arg_name = "arg" + std::to_string(arg_count);
+        if (arg.type() != TYPE_HIDL_CALLBACK) {
+          out << GetCppVariableType(arg, &message) << " " << cur_arg_name
+              << ";\n";
+        } else {
+          out << "sp<" << GetCppVariableType(arg, &message) << "> "
+              << cur_arg_name << ";\n";
+        }
+        GenerateDriverImplForTypedVariable(
+            out, arg, cur_arg_name,
+            "func_msg->arg(" + std::to_string(arg_count) + ")");
+        arg_count++;
+      }
+
+      // TODO(zhuoyao): refactor the logic to handle the function call and
+      // process the return results.
+      GenerateCodeToStartMeasurement(out);
+
+      // may need to check whether the function is actually defined.
+      out << "cout << \"Call an API\" << endl;" << "\n";
+      out << "cout << \"local_device = \" << " << kInstanceVariableName
+          << ".get();" << "\n";
+
+      // Process the return results.
+      if (api.return_type_hidl_size() == 0 || api.return_type_hidl_size() > 1
+          || api.return_type_hidl(0).type() == TYPE_VOID) {
+        // TODO(yim): support multiple return values (when size > 1)
+        out << "*result = NULL;" << "\n";
+        out << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl_size() == 1
+          && api.return_type_hidl(0).type() != TYPE_SCALAR
+          && api.return_type_hidl(0).type() != TYPE_ENUM) {
+        out << "*result = NULL;" << "\n";
+        out << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
+        out << "*result = reinterpret_cast<void*>(" << "(";
+        GenerateScalarTypeInC(out, api.return_type_hidl(0).scalar_type());
+        out << ")" << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
+        if (api.return_type_hidl(0).has_scalar_type()) {
+          out << "*result = reinterpret_cast<void*>(" << "("
+              << api.return_type_hidl(0).scalar_type() << ")"
+              << kInstanceVariableName << "->" << api.name() << "(";
+        } else if (api.return_type_hidl(0).has_predefined_type()) {
+          out << "    *result = reinterpret_cast<void*>(" << "(";
+          out << api.return_type_hidl(0).predefined_type() << ")"
+              << kInstanceVariableName << "->" << api.name() << "(";
+        } else {
+          cerr << __func__ << ":" << __LINE__ << " unknown return type" << "\n";
+          exit(-1);
+        }
+      } else {
+        out << "*result = const_cast<void*>(reinterpret_cast<"
+            << "const void*>(new string(" << kInstanceVariableName << "->"
+            << api.name() << "(";
+      }
+      if (arg_count > 0)
+        out << "\n";
+
+      out.indent();
+      for (int index = 0; index < arg_count; index++) {
+        out << "arg" << index;
+        if (index != (arg_count - 1)) {
+          out << "," << "\n";
+        }
+      }
+      out.unindent();
+
+      if (api.return_type_hidl_size() == 0
+          || api.return_type_hidl(0).type() == TYPE_VOID) {
+        out << ");" << "\n";
+      } else if (api.return_type_hidl_size() == 1) {
+        if (api.return_type_hidl(0).type() == TYPE_SCALAR
+            || api.return_type_hidl(0).type() == TYPE_ENUM) {
+          out << "));" << "\n";
+        } else {
+          if (arg_count != 0)
+            out << ", ";
+          out << fuzzer_extended_class_name << api.name() << "_cb_func";
+          // TODO(yim): support non-scalar return type.
+          out << ");" << "\n";
+        }
+      } else {
+        if (arg_count != 0)
+          out << ", ";
+        out << fuzzer_extended_class_name << api.name() << "_cb_func";
+        // return type is void
+        // TODO(yim): support multiple return values
+        out << ");" << "\n";
+      }
+
+      GenerateCodeToStopMeasurement(out);
+      out << "cout << \"called\" << endl;" << "\n";
+
+      out << "return true;" << "\n";
+      out.unindent();
+      out << "}" << "\n";
+    }
+
+    // TODO: if there were pointers, free them.
+    out << "return false;" << "\n";
+    out.unindent();
+    out << "}" << "\n";
+  }
 }
 
 void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
@@ -1095,6 +1192,7 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
       && !endsWith(message.component_name(), "Callback")) {
     DriverCodeGenBase::GenerateClassHeader(out, message,
                                            fuzzer_extended_class_name);
+    // TODO(zhuoyao):Define the driver/verification function for attributes.
   } else if (message.component_name() == "types") {
     for (int attr_idx = 0;
         attr_idx
@@ -1125,6 +1223,9 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
             << attribute.type() << endl;
         exit(-1);
       }
+    }
+    for (const auto attribute: message.attribute()){
+       GenerateVerificationDeclForAttribute(out, attribute);
     }
   } else if (endsWith(message.component_name(), "Callback")) {
     out << "\n";
@@ -1223,10 +1324,33 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     out << "};" << "\n";
     out << "\n";
 
-    out << "Vts" << message.component_name().substr(1) << "* VtsFuzzerCreate"
+    out << "sp<" << message.component_name() << "> VtsFuzzerCreate"
         << message.component_name() << "(const string& callback_socket_name);"
         << "\n";
     out << "\n";
+  }
+}
+
+void HalHidlCodeGen::GenerateClassImpl(Formatter& out,
+    const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  if (message.component_name() != "types"
+      && !endsWith(message.component_name(), "Callback")) {
+    GenerateCppBodySyncCallbackFunction(out, message,
+                                        fuzzer_extended_class_name);
+    GenerateGetServiceImpl(out, message, fuzzer_extended_class_name);
+    DriverCodeGenBase::GenerateClassImpl(out, message,
+                                         fuzzer_extended_class_name);
+    // TODO(zhuoyao): Generate driver/verification implementation for attributes
+    // defined within an interface.
+  } else if (message.component_name() == "types") {
+    for (auto attribute : message.attribute()) {
+      GenerateDriverImplForAttribute(out, attribute);
+      GenerateRandomFunctionForAttribute(out, attribute);
+      GenerateVerificationImplForAttribute(out, attribute);
+    }
+  } else if (endsWith(message.component_name(), "Callback")) {
+    GenerateCppBodyCallbackFunction(out, message, fuzzer_extended_class_name);
   }
 }
 
@@ -1257,7 +1381,7 @@ void HalHidlCodeGen::GenerateSourceIncludeFiles(Formatter& out,
     const string& fuzzer_extended_class_name) {
   DriverCodeGenBase::GenerateSourceIncludeFiles(out, message,
                                                 fuzzer_extended_class_name);
-  out << "#include <hidl/HidlSupport.h>" << "\n";
+  out << "#include <hidl/HidlSupport.h>\n";
   string input_vfs_file_path(input_vts_file_path_);
   if (message.has_component_name()) {
     string package_path = message.package();
@@ -1305,7 +1429,8 @@ void HalHidlCodeGen::GenerateSourceIncludeFiles(Formatter& out,
 }
 
 void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
-    const ComponentSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message,
+    const string& /*fuzzer_extended_class_name*/) {
   if (message.component_name() != "types"
       && !endsWith(message.component_name(), "Callback")) {
     out << "bool GetService(bool get_stub);" << "\n\n";
@@ -1315,6 +1440,466 @@ void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
 void HalHidlCodeGen::GeneratePrivateMemberDeclarations(Formatter& out,
     const ComponentSpecificationMessage& message) {
   out << "sp<" << message.component_name() << "> hw_binder_proxy_;" << "\n";
+}
+
+void HalHidlCodeGen::GenerateRandomFunctionForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  // Random value generator
+  if (attribute.type() == TYPE_ENUM) {
+    string attribute_name = ClearStringWithNameSpaceAccess(attribute.name());
+    out << attribute.name() << " " << "Random" << attribute_name << "() {"
+        << "\n";
+    out.indent();
+    out << attribute.enum_value().scalar_type() << " choice = " << "("
+        << attribute.enum_value().scalar_type() << ") " << "rand() / "
+        << attribute.enum_value().enumerator().size() << ";" << "\n";
+    if (attribute.enum_value().scalar_type().find("u") != 0) {
+      out << "if (choice < 0) choice *= -1;" << "\n";
+    }
+    for (int index = 0; index < attribute.enum_value().enumerator().size();
+        index++) {
+      out << "if (choice == ";
+      out << "(" << attribute.enum_value().scalar_type() << ") ";
+      if (attribute.enum_value().scalar_type() == "int8_t") {
+        out << attribute.enum_value().scalar_value(index).int8_t();
+      } else if (attribute.enum_value().scalar_type() == "uint8_t") {
+        out << attribute.enum_value().scalar_value(index).uint8_t();
+      } else if (attribute.enum_value().scalar_type() == "int16_t") {
+        out << attribute.enum_value().scalar_value(index).int16_t();
+      } else if (attribute.enum_value().scalar_type() == "uint16_t") {
+        out << attribute.enum_value().scalar_value(index).uint16_t();
+      } else if (attribute.enum_value().scalar_type() == "int32_t") {
+        out << attribute.enum_value().scalar_value(index).int32_t();
+      } else if (attribute.enum_value().scalar_type() == "uint32_t") {
+        out << attribute.enum_value().scalar_value(index).uint32_t();
+      } else if (attribute.enum_value().scalar_type() == "int64_t") {
+        out << attribute.enum_value().scalar_value(index).int64_t();
+      } else if (attribute.enum_value().scalar_type() == "uint64_t") {
+        out << attribute.enum_value().scalar_value(index).uint64_t();
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported enum type "
+            << attribute.enum_value().scalar_type() << "\n";
+        exit(-1);
+      }
+      out << ") return " << attribute.name() << "::"
+          << attribute.enum_value().enumerator(index) << ";" << "\n";
+    }
+    out << "return " << attribute.name() << "::"
+        << attribute.enum_value().enumerator(0) << ";" << "\n";
+    out.unindent();
+    out << "}" << "\n";
+  }
+}
+
+void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  switch (attribute.type()) {
+    case TYPE_ENUM:
+    {
+      string func_name = "EnumValue"
+          + ClearStringWithNameSpaceAccess(attribute.name());
+      // Message to value converter
+      out << attribute.name() << " " << func_name
+          << "(const EnumDataValueMessage& arg) {\n";
+      out.indent();
+      out << "return (" << attribute.name() << ") arg.scalar_value(0)."
+          << attribute.enum_value().scalar_type() << "();" << "\n";
+      out.unindent();
+      out << "}" << "\n";
+      break;
+    }
+    case TYPE_STRUCT:
+    {
+      // Recursively generate driver implementation method for all sub_types.
+      for (const auto sub_struct : attribute.sub_struct()) {
+        GenerateDriverImplForAttribute(out, sub_struct);
+      }
+      string func_name = "MessageTo"
+          + ClearStringWithNameSpaceAccess(attribute.name());
+      out << "void " << func_name
+          << "(const VariableSpecificationMessage& var_msg, "
+          << attribute.name() << "* arg) {" << "\n";
+      out.indent();
+      int struct_index = 0;
+      for (const auto& struct_value : attribute.struct_value()) {
+        GenerateDriverImplForTypedVariable(
+            out, struct_value, "arg->" + struct_value.name(),
+            "var_msg.struct_value(" + std::to_string(struct_index) + ")");
+        struct_index++;
+      }
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_UNION:
+    {
+      // Recursively generate driver implementation method for all sub_types.
+      for (const auto sub_union : attribute.sub_union()) {
+        GenerateDriverImplForAttribute(out, sub_union);
+      }
+      string func_name = "MessageTo"
+          + ClearStringWithNameSpaceAccess(attribute.name());
+      out << "void " << func_name
+          << "(const VariableSpecificationMessage& var_msg, "
+          << attribute.name() << "* arg) {" << "\n";
+      out.indent();
+      int union_index = 0;
+      for (const auto& union_value : attribute.union_value()) {
+        GenerateDriverImplForTypedVariable(
+            out, union_value, "arg->" + union_value.name(),
+            "var_msg.union_value(" + std::to_string(union_index) + ")");
+        union_index++;
+      }
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    default:
+    {
+      cerr << __func__ << " unsupported attribute type " << attribute.type()
+          << "\n";
+    }
+  }
+}
+
+void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
+    const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  out << "bool " << fuzzer_extended_class_name
+      << "::GetService(bool get_stub) {" << "\n";
+  out.indent();
+
+  out << "static bool initialized = false;" << "\n";
+  out << "if (!initialized) {" << "\n";
+  out.indent();
+  out << "cout << \"[agent:hal] HIDL getService\" << endl;" << "\n";
+  string service_name = message.package().substr(
+      message.package().find_last_of(".") + 1);
+  if (service_name == "nfc") {
+    // TODO(yim): remove this special case after b/32158398 is fixed.
+    service_name = "nfc_nci";
+  }
+  out << "hw_binder_proxy_ = " << message.component_name() << "::getService(\""
+      << service_name << "\", get_stub);" << "\n";
+  out << "cout << \"[agent:hal] hw_binder_proxy_ = \" << "
+      << "hw_binder_proxy_.get() << endl;" << "\n";
+  out << "initialized = true;" << "\n";
+  out.unindent();
+  out << "}" << "\n";
+  out << "return true;" << "\n";
+  out.unindent();
+  out << "}" << "\n" << "\n";
+}
+
+void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
+    const VariableSpecificationMessage& val, const string& arg_name,
+    const string& arg_value_name) {
+  switch (val.type()) {
+    case TYPE_SCALAR:
+    {
+      out << arg_name << " = " << arg_value_name << ".scalar_value()."
+          << val.scalar_type() << "();\n";
+      break;
+    }
+    case TYPE_STRING:
+    {
+      out << arg_name << " = ::android::hardware::hidl_string(" << arg_value_name
+          << ".string_value().message());\n";
+      break;
+    }
+    case TYPE_ENUM:
+    {
+      string func_name = "EnumValue"
+          + ClearStringWithNameSpaceAccess(val.predefined_type());
+      out << arg_name << " = " << func_name << "(" << arg_value_name
+          << ".enum_value());\n";
+      break;
+    }
+    case TYPE_VECTOR:
+    {
+      out << arg_name << ".resize(" << arg_value_name << ".vector_size());\n";
+      out << "for (int i = 0; i <" << arg_value_name
+          << ".vector_size(); i++) {\n";
+      out.indent();
+      GenerateDriverImplForTypedVariable(out, val.vector_value(0),
+                                         arg_name + "[i]",
+                                         arg_value_name + ".vector_value(i)");
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_ARRAY:
+    {
+      out << "for (int i = 0; i < " << arg_value_name
+          << ".vector_size(); i++) {\n";
+      out.indent();
+      GenerateDriverImplForTypedVariable(out, val.vector_value(0),
+                                         arg_name + "[i]",
+                                         arg_value_name + ".vector_value(i)");
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_STRUCT:
+    {
+      if (val.has_predefined_type()) {
+        string func_name = "MessageTo"
+            + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << func_name << "(" << arg_value_name << ", &("
+            << arg_name << "));\n";
+      } else {
+        int struct_index = 0;
+        for (const auto struct_field : val.struct_value()) {
+          string struct_field_name = arg_name + "." + struct_field.name();
+          string struct_field_value_name = arg_value_name + ".struct_value("
+              + std::to_string(struct_index) + ")";
+          GenerateDriverImplForTypedVariable(out, struct_field,
+                                             struct_field_name,
+                                             struct_field_value_name);
+          struct_index++;
+        }
+      }
+      break;
+    }
+    case TYPE_UNION:
+    {
+      if (val.has_predefined_type()) {
+        string func_name = "MessageTo"
+            + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << func_name << "(" << arg_value_name << ", &(" << arg_name
+            << "));\n";
+      } else {
+        int union_index = 0;
+        for (const auto union_field : val.union_value()) {
+          string union_field_name = arg_name + "." + union_field.name();
+          string union_field_value_name = arg_value_name + ".union_value("
+              + std::to_string(union_index) + ")";
+          GenerateDriverImplForTypedVariable(out, union_field, union_field_name,
+                                             union_field_value_name);
+          union_index++;
+        }
+      }
+      break;
+    }
+    case TYPE_HIDL_CALLBACK:
+    {
+      out << arg_name << " = VtsFuzzerCreate" << val.predefined_type()
+          << "(callback_socket_name);\n";
+      break;
+    }
+    case TYPE_HANDLE:
+    {
+      out << " ERROR: TYPE_HANDLE is not supported yet.\n";
+      break;
+    }
+    case TYPE_HIDL_INTERFACE:
+    {
+      out << " ERROR: TYPE_HIDL_INTERFACE is not supported yet.\n";
+      break;
+    }
+    default:
+    {
+      cerr << " ERROR: unsupported type.\n";
+      exit(-1);
+    }
+  }
+}
+
+void HalHidlCodeGen::GenerateVerificationFunctionImpl(Formatter& out,
+    const ComponentSpecificationMessage& message,
+    const string& fuzzer_extended_class_name) {
+  if (message.component_name() != "types"
+      && !endsWith(message.component_name(), "Callback")) {
+    // Generate the main profiler function.
+    out << "\nbool " << fuzzer_extended_class_name
+        << "::VerifyResults(FunctionSpecificationMessage* verification_msg, "
+        << "vector<void *>results) {\n";
+    out.indent();
+    for (const FunctionSpecificationMessage api : message.interface().api()) {
+      out << "if (!strcmp(verification_msg->name().c_str(), \"" << api.name()
+          << "\")) {\n";
+      out.indent();
+      out << "if (results.size() != " << api.return_type_hidl().size()
+          << ") { return false; }\n";
+      for (int i = 0; i < api.return_type_hidl().size(); i++) {
+        const VariableSpecificationMessage result = api.return_type_hidl(i);
+        std::string expected_result = "verification_msg->return_type_hidl("
+            + std::to_string(i) + ")";
+        std::string result_value = "result_" + std::to_string(i);
+        out << GetCppVariableType(result, &message) << " *" << result_value
+            << " = reinterpret_cast<" << GetCppVariableType(result, &message)
+            << "*> (results[" << i << "]);\n";
+        GenerateVerificationForTypedVariable(out, api.return_type_hidl(i),
+                                             "(*" + result_value + ")",
+                                             expected_result);
+      }
+      out.unindent();
+      out << "}\n";
+    }
+    out << "return true;\n";
+    out.unindent();
+    out << "}\n\n";
+  }
+}
+
+void HalHidlCodeGen::GenerateVerificationForTypedVariable(Formatter& out,
+    const VariableSpecificationMessage& val, const string& result_value,
+    const string& expected_result) {
+  switch (val.type()) {
+    case TYPE_SCALAR:
+    {
+      out << "if(" << result_value << "!= " << expected_result
+          << ".scalar_value()." << val.scalar_type()
+          << "()) { return false; }\n";
+      break;
+    }
+    case TYPE_STRING:
+    {
+      out << "if(strcmp(" << result_value << ", " << expected_result
+          << ".string_value().message().c_str())!= 0)" << "{ return false; }\n";
+      break;
+    }
+    case TYPE_ENUM:
+    {
+      if (val.has_predefined_type()) {
+        string func_name = "Verify"
+            + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << "if(!" << func_name << "(" << result_value << ", "
+            << expected_result << ")) { return false; }\n";
+      } else {
+        out << "if((" << val.enum_value().scalar_type() << ")" << result_value
+            << " != " << expected_result << ".enum_value().scalar_value(0)."
+            << val.enum_value().scalar_type() << "()) { return false; }\n";
+      }
+      break;
+    }
+    case TYPE_VECTOR:
+    {
+      out << "for (int i = 0; i <" << expected_result
+          << ".vector_size(); i++) {\n";
+      out.indent();
+      GenerateVerificationForTypedVariable(
+          out, val.vector_value(0), result_value + "[i]",
+          expected_result + ".vector_value(i)");
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_ARRAY:
+    {
+      out << "for (int i = 0; i < " << expected_result
+          << ".vector_size(); i++) {\n";
+      out.indent();
+      GenerateVerificationForTypedVariable(
+          out, val.vector_value(0), result_value + "[i]",
+          expected_result + ".vector_value(i)");
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_STRUCT:
+    {
+      if (val.has_predefined_type()) {
+        string func_name = "Verify"
+            + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << "if(!" << func_name << "(" << result_value << ", "
+            << expected_result << ")) { return false; }\n";
+      } else {
+        int struct_index = 0;
+        for (const auto struct_field : val.struct_value()) {
+          string struct_field_value = result_value + "." + struct_field.name();
+          string struct_field_expected_result = expected_result
+              + ".struct_value(" + std::to_string(struct_index) + ")";
+          GenerateVerificationForTypedVariable(out, struct_field,
+                                               struct_field_value,
+                                               struct_field_expected_result);
+          struct_index++;
+        }
+      }
+      break;
+    }
+    case TYPE_UNION:
+    {
+      if (val.has_predefined_type()) {
+        string func_name = "Verify"
+            + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << "if(!" << func_name << "(" << result_value << ", "
+            << expected_result << ")) {return false; }\n";
+      } else {
+        int union_index = 0;
+        for (const auto union_field : val.union_value()) {
+          string union_field_value = result_value + "." + union_field.name();
+          string union_field_expected_result = expected_result + ".union_value("
+              + std::to_string(union_index) + ")";
+          GenerateVerificationForTypedVariable(out, union_field,
+                                               union_field_value,
+                                               union_field_expected_result);
+          union_index++;
+        }
+      }
+      break;
+    }
+    case TYPE_HIDL_CALLBACK:
+    {
+      out << " ERROR: TYPE_HIDL_CALLBACK is not supported yet.\n";
+      break;
+    }
+    case TYPE_HANDLE:
+    {
+      out << " ERROR: TYPE_HANDLE is not supported yet.\n";
+      break;
+    }
+    case TYPE_HIDL_INTERFACE:
+    {
+      out << " ERROR: TYPE_HIDL_INTERFACE is not supported yet.\n";
+      break;
+    }
+    default:
+    {
+      cerr << " ERROR: unsupported type.\n";
+      exit(-1);
+    }
+  }
+}
+
+void HalHidlCodeGen::GenerateVerificationDeclForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+    // Recursively generate profiler method implementation for all sub_types.
+    for (const auto sub_struct : attribute.sub_struct()) {
+      GenerateVerificationDeclForAttribute(out, sub_struct);
+    }
+    for (const auto sub_union : attribute.sub_union()) {
+      GenerateVerificationDeclForAttribute(out, sub_union);
+    }
+  }
+  std::string func_name = "bool Verify"
+      + ClearStringWithNameSpaceAccess(attribute.name());
+  out << func_name << "(" << attribute.name()
+      << " result_value, VariableSpecificationMessage expected_result);\n";
+}
+
+void HalHidlCodeGen::GenerateVerificationImplForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+    // Recursively generate profiler method implementation for all sub_types.
+    for (const auto sub_struct : attribute.sub_struct()) {
+      GenerateVerificationImplForAttribute(out, sub_struct);
+    }
+    for (const auto sub_union : attribute.sub_union()) {
+      GenerateVerificationImplForAttribute(out, sub_union);
+    }
+  }
+  std::string func_name = "bool Verify"
+      + ClearStringWithNameSpaceAccess(attribute.name());
+  out << func_name << "(" << attribute.name()
+      << " result_value, VariableSpecificationMessage expected_result){\n";
+  out.indent();
+  GenerateVerificationForTypedVariable(out, attribute, "result_value",
+                                       "expected_result");
+  out << "return true;\n";
+  out.unindent();
+  out << "}\n\n";
 }
 
 }  // namespace vts

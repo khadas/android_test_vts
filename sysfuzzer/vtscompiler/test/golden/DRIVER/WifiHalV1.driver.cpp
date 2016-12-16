@@ -8,7 +8,6 @@
 
 namespace android {
 namespace vts {
-
 bool FuzzerExtended_wifi::Fuzz(
     FunctionSpecificationMessage* func_msg,
     void** result, const string& callback_socket_name) {
@@ -24,7 +23,6 @@ bool FuzzerExtended_wifi::Fuzz(
       }
     return false;
 }
-
 bool FuzzerExtended_wifi::GetAttribute(
     FunctionSpecificationMessage* func_msg,
     void** result) {
@@ -33,7 +31,14 @@ bool FuzzerExtended_wifi::GetAttribute(
     cerr << "attribute not supported for legacy hal yet" << endl;
     return false;
 }
-
+bool FuzzerExtended_wifi::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+    /* No implementation yet. */
+    return true;
+}
+bool FuzzerExtended_wifi::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+    /* No implementation yet. */
+    return true;
+}
 extern "C" {
 android::vts::FuzzerBase* vts_func_3_5_1_() {
     return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_wifi();
