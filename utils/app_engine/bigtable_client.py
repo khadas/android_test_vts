@@ -18,8 +18,6 @@ import logging
 from google import protobuf
 from gcloud import bigtable
 
-_PROJECT_ID = 'google.com:android-vts-internal'
-_INSTANCE_ID = 'vts-dev'
 _COLUMN_FAMILY_ID = 'cf1'
 
 
@@ -37,9 +35,9 @@ class BigTableClient(object):
         _table_instance: An instance of the Table that represents the big table.
     """
 
-    def __init__(self, table):
+    def __init__(self, table, project_id):
         self._column_family_id = _COLUMN_FAMILY_ID
-        self._client = bigtable.Client(project=_PROJECT_ID, admin=True)
+        self._client = bigtable.Client(project=project_id, admin=True)
         self._client_instance = None
         self._start_index = 0
         self._end_index = 0
@@ -48,13 +46,13 @@ class BigTableClient(object):
         # Start client to enable receiving requests
         self.StartClient()
 
-    def StartClient(self):
+    def StartClient(self, instance_id):
         """Starts client to prepare it to make requests."""
 
         # Start the client
         if not self._client.is_started():
             self._client.start()
-        self._client_instance = self._client.instance(_INSTANCE_ID)
+        self._client_instance = self._client.instance(instance_id)
         if self._table_instance is None:
             self._table_instance = self._client_instance.table(self._table_name)
 
