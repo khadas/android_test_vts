@@ -23,7 +23,7 @@ int main() {
 
   printf("crash_app: start");
   ALOGI("crash_app: start");
-  *pt = 0xabcd;  // causes a null pointer exception.
+  *pt = 0xab;  // causes a null pointer exception.
   printf("crash_app: end");
   ALOGI("crash_app: end");
   return 0;
