@@ -202,10 +202,8 @@ class TestCasesParser(object):
             self._data_path, ltp_configs.LTP_DISABLED_BUILD_TESTS_CONFIG_PATH)
         disabled_tests_list = self.ReadCommentedTxt(disabled_tests_path)
 
-        ltp_testsuites = ltp_configs.TEST_SUITES
-
         result = []
-        for testsuite in ltp_testsuites:
+        for testsuite in ltp_configs.TEST_SUITES:
             result.extend(
                 self.GenerateLtpTestCases(testsuite, disabled_tests_list))
 
