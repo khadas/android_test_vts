@@ -73,7 +73,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             case HidlInstrumentor::SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
-                hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
+                ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
                 for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
                     auto *arg_0_vector_i = arg_0->add_vector_value();
                     arg_0_vector_i->set_type(TYPE_SCALAR);

@@ -41,9 +41,6 @@ void DriverCodeGenBase::GenerateAll(
   cpp_ss << "#include \"" << input_vfs_file_path << ".h\"" << endl;
 
   if (message.component_class() == HAL_HIDL) {
-    cpp_ss << "#include \""
-           << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
-           << "/types.vts.h\"" << endl;
     cpp_ss << "#include <hidl/HidlSupport.h>" << endl;
   }
 
@@ -59,14 +56,6 @@ void DriverCodeGenBase::GenerateAll(
     cpp_ss << "#include <" << package_path << "/"
            << GetVersionString(message.component_type_version())
            << "/" << message.component_name() << ".h>" << endl;
-    cpp_ss << "#include <" << package_path << "/"
-           << GetVersionString(message.component_type_version())
-           << "/types.h>" << endl;
-    if (message.component_name() != "types") {
-      cpp_ss << "#include <" << package_path << "/"
-             << GetVersionString(message.component_type_version())
-             << "/" << message.component_name() << ".h>" << endl;
-    }
     for (const auto& import : message.import()) {
       string mutable_import = import;
       ReplaceSubString(mutable_import, ".", "/");
@@ -75,34 +64,26 @@ void DriverCodeGenBase::GenerateAll(
           0, mutable_import.find_last_of("::") + 1);
       string base_filename = mutable_import.substr(
           mutable_import.find_last_of("::") + 1);
-      // TODO: consider restoring this when hidl packaging is fully defined.
-      // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
-      cpp_ss << "#include <" << package_path << "/"
-             << GetVersionString(message.component_type_version())
-             << "/" << base_filename << ".h>" << endl;
-      if (!endsWith(base_filename, "Callback")) {
-        // TODO: ditto
-        // cpp_ss << "#include <" << base_dirpath << ...
-        if (base_filename != "types") {
+
+      if (base_filename != "types") {
+        if (message.component_name() != base_filename) {
           cpp_ss << "#include <" << package_path << "/"
                  << GetVersionString(message.component_type_version())
                  << "/" << base_filename << ".h>" << endl;
         }
-      }
-      if (base_filename != "types") {
-        cpp_ss << "#include <" << package_path << "/"
-               << GetVersionString(message.component_type_version())
-               << "/" << base_filename << ".h>" << endl;
         if (base_filename.substr(0, 1) == "I") {
           cpp_ss << "#include \""
                  << input_vfs_file_path.substr(0, input_vfs_file_path.find_last_of("\\/"))
                  << "/" << base_filename.substr(1, base_filename.find_last_of(".h"))
                  << ".vts.h\"" << endl;
         }
+      } else if (message.component_name() != base_filename) {
+        // TODO: consider restoring this when hidl packaging is fully defined.
+        // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << endl;
+        cpp_ss << "#include <" << package_path << "/"
+               << GetVersionString(message.component_type_version())
+               << "/" << base_filename << ".h>" << endl;
       }
-      cpp_ss << "#include <" << package_path << "/"
-             << GetVersionString(message.component_type_version())
-             << "/types.h>" << endl;
     }
   }
   GenerateOpenNameSpaces(cpp_ss, message);
@@ -258,14 +239,6 @@ void DriverCodeGenBase::GenerateAllHeader(
     h_ss << "#include <" << package_path << "/"
          << GetVersionString(message.component_type_version())
          << "/" << message.component_name() << ".h>" << endl;
-    h_ss << "#include <" << package_path << "/"
-         << GetVersionString(message.component_type_version())
-         << "/types.h>" << endl;
-    if (message.component_name() != "types") {
-      h_ss << "#include <" << package_path << "/"
-           << GetVersionString(message.component_type_version())
-           << "/" << message.component_name() << ".h>" << endl;
-    }
     h_ss << "#include <hidl/HidlSupport.h>" << endl;
   }
   h_ss << "\n\n" << endl;
@@ -446,16 +419,22 @@ void DriverCodeGenBase::GenerateClassHeader(
       const auto& attribute = (attr_idx < message.attribute_size()) ?
           message.attribute(attr_idx) :
           message.interface().attribute(attr_idx - message.attribute_size());
+      std::string attribute_name = attribute.name();
+      ReplaceSubString(attribute_name, "::", "__");
       if (attribute.type() == TYPE_ENUM) {
-        std::string attribute_name = attribute.name();
-        ReplaceSubString(attribute_name, "::", "__");
+        h_ss << attribute.name() << " " << "EnumValue" << attribute_name
+             << "(const EnumDataValueMessage& arg, int index=0);" << endl;
         h_ss << attribute.name() << " " << "Random" << attribute_name << "();"
              << endl;
       } else if (attribute.type() == TYPE_STRUCT) {
-        h_ss << "void " << "MessageTo" << attribute.name()
+        h_ss << "void " << "MessageTo" << attribute_name
              << "(const VariableSpecificationMessage& var_msg, "
              << attribute.name() << "* arg);"
              << endl;
+      } else {
+        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+             << attribute.type() << endl;
+        exit(-1);
       }
     }
   }

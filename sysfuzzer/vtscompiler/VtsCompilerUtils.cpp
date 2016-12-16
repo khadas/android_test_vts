@@ -162,13 +162,22 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
         cerr << __func__ << ":" << __LINE__ << " ERROR scalar_type not set" << endl;
         exit(-1);
       }
-      return "hidl_vec<" + arg.vector_value(0).scalar_type() + ">";
+      return "::android::hardware::hidl_vec<"
+          + arg.vector_value(0).scalar_type() + ">";
     } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
-      if (arg.vector_value(0).struct_type().length() == 0) {
+      if (arg.vector_value(0).struct_type().length() > 0) {
+        return "::android::hardware::hidl_vec<"
+            + arg.vector_value(0).struct_type() + ">";
+      } else if (arg.vector_value(0).predefined_type().length() > 0) {
+        return "::android::hardware::hidl_vec<"
+            + arg.vector_value(0).predefined_type() + ">";
+      } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR struct_type not set" << endl;
         exit(-1);
       }
-      return "hidl_vec<" + arg.vector_value(0).struct_type() + ">";
+    } else if (arg.vector_value(0).type() == TYPE_STRING) {
+      return "const ::android::hardware::hidl_vec< "
+          "::android::hardware::hidl_string> &";
     } else {
       cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
            << arg.vector_value(0).type() << endl;
@@ -176,8 +185,6 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
     return arg.predefined_type();
   }
-  cerr << __func__ << ":" << __LINE__ << " "
-       << ": type " << arg.type() << " not supported" << endl;
   cerr << __func__ << ":" << __LINE__ << " "
        << ": type " << arg.type() << " not supported" << endl;
   string* output = new string();
@@ -270,7 +277,9 @@ string GetCppInstanceType(
       break;
     }
     case TYPE_SCALAR: {
-      if (arg.scalar_type() == "uint32_t") {
+      if (arg.scalar_type() == "bool_t") {
+        return "RandomBool()";
+      } else if (arg.scalar_type() == "uint32_t") {
         return "RandomUint32()";
       } else if (arg.scalar_type() == "int32_t") {
         return "RandomInt32()";

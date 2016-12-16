@@ -104,7 +104,8 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
           */
           if (arg.scalar_type() == "char_pointer") {
             cpp_ss << "char* ";
-          } else if (arg.scalar_type() == "int32_t" ||
+          } else if (arg.scalar_type() == "bool_t" ||
+                     arg.scalar_type() == "int32_t" ||
                      arg.scalar_type() == "uint32_t" ||
                      arg.scalar_type() == "size_t" ||
                      arg.scalar_type() == "int64_t" ||
@@ -196,34 +197,53 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
 
   for (auto const& api : message.interface().api()) {
     if (api.return_type_hidl_size() > 0) {
-      cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func(";
-      if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
-        cpp_ss << api.return_type_hidl(0).scalar_type();
-      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
-        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
-      } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
-        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
-      } else {
-        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
-             << api.return_type_hidl(0).type() << endl;
-        exit(-1);
+      cpp_ss << "static void " << fuzzer_extended_class_name
+             << api.name() << "_cb_func(";
+      bool first_return_type = true;
+      int arg_index = 0;
+      for (const auto& return_type_hidl : api.return_type_hidl()) {
+        if (first_return_type) {
+          first_return_type = false;
+        } else {
+          cpp_ss << ", ";
+        }
+        if (return_type_hidl.type() == TYPE_SCALAR) {
+          cpp_ss << return_type_hidl.scalar_type();
+        } else if (return_type_hidl.type() == TYPE_ENUM ||
+                   return_type_hidl.type() == TYPE_VECTOR ||
+                   return_type_hidl.type() == TYPE_STRUCT) {
+          cpp_ss << GetCppVariableType(return_type_hidl, &message);
+        } else {
+          cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+               << return_type_hidl.type() << endl;
+        }
+        cpp_ss << " arg" << arg_index;
+        arg_index++;
       }
-      cpp_ss << " arg) {" << endl;
+      cpp_ss << ") {" << endl;
       // TODO: support other non-scalar type and multiple args.
       cpp_ss << "  cout << \"callback " << api.name() << " called\""
              << " << endl;" << endl;
       cpp_ss << "}" << endl;
       cpp_ss << "std::function<"
               << "void(";
-      if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
-        cpp_ss << api.return_type_hidl(0).scalar_type();
-      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
-        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
-      } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
-        cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
-      } else {
-        cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
-             << api.return_type_hidl(0).type() << endl;
+      first_return_type = true;
+      for (const auto& return_type_hidl : api.return_type_hidl()) {
+        if (first_return_type) {
+          first_return_type = false;
+        } else {
+          cpp_ss << ", ";
+        }
+        if (return_type_hidl.type() == TYPE_SCALAR) {
+          cpp_ss << return_type_hidl.scalar_type();
+        } else if (return_type_hidl.type() == TYPE_ENUM ||
+                   return_type_hidl.type() == TYPE_VECTOR ||
+                   return_type_hidl.type() == TYPE_STRUCT) {
+          cpp_ss << GetCppVariableType(return_type_hidl, &message);
+        } else {
+          cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+               << return_type_hidl.type() << endl;
+        }
       }
       cpp_ss << ")> "
              << fuzzer_extended_class_name << api.name() << "_cb = "
@@ -428,7 +448,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               }
               cpp_ss << "(" << msg << ".scalar_value()";
 
-              if (arg.scalar_type() == "int32_t" ||
+              if (arg.scalar_type() == "bool_t" ||
+                  arg.scalar_type() == "int32_t" ||
                   arg.scalar_type() == "uint32_t" ||
                   arg.scalar_type() == "int64_t" ||
                   arg.scalar_type() == "uint64_t" ||
@@ -482,8 +503,11 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           cpp_ss << ";" << endl;
           if (arg.type() == TYPE_STRUCT) {
             if (message.component_class() == HAL_HIDL) {
-              cpp_ss << "    MessageTo" << GetCppVariableType(arg, &message)
-                     << "(func_msg->arg(" << arg_count << "), &arg" << arg_count << ");" << endl;
+              std::string attribute_name = arg.name();
+              ReplaceSubString(attribute_name, "::", "__");
+              cpp_ss << "    MessageTo" << attribute_name
+                     << "(func_msg->arg(" << arg_count
+                     << "), &arg" << arg_count << ");" << endl;
             }
           }
         }
@@ -498,7 +522,14 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       cpp_ss << "    cout << \"local_device = \" << " << kInstanceVariableName
              << ".get();" << endl;
       if (api.return_type_hidl_size() == 0 ||
+          api.return_type_hidl_size() > 1 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
+        // TODO(yim): support multiple return values (when size > 1)
+        cpp_ss << "    *result = NULL;" << endl;
+        cpp_ss << "    " << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl_size() == 1 &&
+                 api.return_type_hidl(0).type() != TYPE_SCALAR &&
+                 api.return_type_hidl(0).type() != TYPE_ENUM) {
         cpp_ss << "    *result = NULL;" << endl;
         cpp_ss << "    " << kInstanceVariableName << "->" << api.name() << "(";
       } else if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
@@ -543,9 +574,20 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       } else {
         if (api.return_type_hidl_size() > 0) {
           if (arg_count != 0) cpp_ss << ", ";
-          cpp_ss << fuzzer_extended_class_name << api.name() << "_cb";
+          cpp_ss << fuzzer_extended_class_name << api.name() << "_cb_func";
         }
-        cpp_ss << ").toString8().string())));" << endl;
+        if (api.return_type_hidl_size() > 1) {  // return type is void
+          // TODO(yim): support multiple return values
+          cpp_ss << ");" << endl;
+        } else if (
+            api.return_type_hidl_size() == 1 &&
+            api.return_type_hidl(0).type() != TYPE_SCALAR &&
+            api.return_type_hidl(0).type() != TYPE_ENUM) {
+          // TODO(yim): support non-scalar return type.
+          cpp_ss << ");" << endl;
+        } else {
+          cpp_ss << ").toString8().string())));" << endl;
+        }
       }
 
       GenerateCodeToStopMeasurement(cpp_ss);
@@ -581,9 +623,20 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       if (attribute.type() == TYPE_ENUM) {
         std::string attribute_name = attribute.name();
         ReplaceSubString(attribute_name, "::", "__");
+
+        // Message to value converter
+        cpp_ss << attribute.name() << " " << "EnumValue" << attribute_name
+               << "(const EnumDataValueMessage& arg, int index) {" << endl;
+        cpp_ss << "  return (" << attribute.name()
+               << ") arg.scalar_value(index)."
+               << attribute.enum_value().scalar_type() << "();" << endl;
+        cpp_ss << "}" << endl;
+
+        // Random value generator
         cpp_ss << attribute.name() << " " << "Random" << attribute_name << "() {"
                << endl;
-        cpp_ss << "int choice = rand() / " << attribute.enum_value().enumerator().size() << ";" << endl;
+        cpp_ss << "int choice = rand() / "
+               << attribute.enum_value().enumerator().size() << ";" << endl;
         cpp_ss << "if (choice < 0) choice *= -1;" << endl;
         for (int index = 0; index < attribute.enum_value().enumerator().size(); index++) {
           cpp_ss << "    if (choice == ";
@@ -606,7 +659,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                << ";" << endl;
         cpp_ss << "}" << endl;
       } else if (attribute.type() == TYPE_STRUCT) {
-        cpp_ss << "void " << "MessageTo" << attribute.name()
+        std::string attribute_name = attribute.name();
+        ReplaceSubString(attribute_name, "::", "__");
+        cpp_ss << "void " << "MessageTo" << attribute_name
                << "(const VariableSpecificationMessage& var_msg, "
                << attribute.name() << "* arg) {"
                << endl;
@@ -649,8 +704,26 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                          << sub_struct_value.name() << " = "
                          << "var_msg.struct_value(" << struct_index
                          << ").vector_value(value_index).struct_value("
-                         << sub_value_index << ").scalar_type()."
+                         << sub_value_index << ").scalar_value()."
                          << sub_struct_value.scalar_type() << "();" << endl;
+                  sub_value_index++;
+                } else if (sub_struct_value.type() == TYPE_ENUM) {
+                  std::string enum_attribute_name = sub_struct_value.predefined_type();
+                  ReplaceSubString(enum_attribute_name, "::", "__");
+                  cpp_ss << "    arg->" << struct_value.name() << "[value_index]."
+                         << sub_struct_value.name() << " = "
+                         << "EnumValue" << enum_attribute_name << "("
+                         << "var_msg.struct_value(" << struct_index
+                         << ").vector_value(value_index).struct_value("
+                         << sub_value_index << ").enum_value());" << endl;
+                  sub_value_index++;
+                } else if (sub_struct_value.type() == TYPE_STRING) {
+                  cpp_ss << "    arg->" << struct_value.name() << "[value_index]."
+                         << sub_struct_value.name() << " = "
+                         << "var_msg.struct_value(" << struct_index
+                         << ").vector_value(value_index).struct_value("
+                         << sub_value_index << ").string_value().message();"
+                         << endl;
                   sub_value_index++;
                 } else {
                   cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
@@ -664,6 +737,13 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                    << struct_value.vector_value(0).type() << endl;
               exit(-1);
             }
+          } else if (struct_value.type() == TYPE_ENUM) {
+            std::string enum_attribute_name = struct_value.predefined_type();
+            ReplaceSubString(enum_attribute_name, "::", "__");
+            cpp_ss << "    arg->" << struct_value.name() << " = "
+                   << "EnumValue" << enum_attribute_name << "("
+                   << "var_msg.struct_value(" << struct_index
+                   << ").enum_value());" << endl;
           } else {
             cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                  << struct_value.type() << endl;
@@ -738,7 +818,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           }
           cpp_ss << "(" << msg << ".scalar_value()";
 
-          if (arg.scalar_type() == "int32_t" ||
+          if (arg.scalar_type() == "bool_t" ||
+              arg.scalar_type() == "int32_t" ||
               arg.scalar_type() == "uint32_t" ||
               arg.scalar_type() == "int64_t" ||
               arg.scalar_type() == "uint64_t" ||
