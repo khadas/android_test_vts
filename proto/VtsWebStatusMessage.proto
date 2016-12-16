@@ -15,7 +15,7 @@
 syntax = "proto2";
 
 package android.vts;
-option java_package = "com.google.android.vts.proto";
+option java_package = "com.android.vts.proto";
 option java_outer_classname = "VtsWebStatusMessage";
 
 
