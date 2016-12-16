@@ -59,9 +59,12 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             case SERVER_API_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
-                nfc_data_t *arg_val_0 = reinterpret_cast<nfc_data_t*> ((*args)[0]);
-                arg_0->set_type(TYPE_STRUCT);
-                profile__nfc_data_t(arg_0, (*arg_val_0));
+                hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<hidl_vec<uint8_t>*> ((*args)[0]);
+                for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
+                    auto *arg_0_vector_i = arg_0->add_vector_value();
+                    arg_0_vector_i->set_type(TYPE_SCALAR);
+                    arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                }
                 break;
             }
             case SERVER_API_EXIT:
@@ -80,7 +83,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         }
         VtsProfilingInterface::getInstance().AddTraceEvent(msg);
     }
-    if (strcmp(method, "core_initialized") == 0) {
+    if (strcmp(method, "coreInitialized") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
             case SERVER_API_ENTRY:
@@ -110,7 +113,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         }
         VtsProfilingInterface::getInstance().AddTraceEvent(msg);
     }
-    if (strcmp(method, "pre_discover") == 0) {
+    if (strcmp(method, "prediscover") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
             case SERVER_API_ENTRY:
@@ -156,7 +159,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         }
         VtsProfilingInterface::getInstance().AddTraceEvent(msg);
     }
-    if (strcmp(method, "control_granted") == 0) {
+    if (strcmp(method, "controlGranted") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
             case SERVER_API_ENTRY:
@@ -179,7 +182,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         }
         VtsProfilingInterface::getInstance().AddTraceEvent(msg);
     }
-    if (strcmp(method, "power_cycle") == 0) {
+    if (strcmp(method, "powerCycle") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
             case SERVER_API_ENTRY:

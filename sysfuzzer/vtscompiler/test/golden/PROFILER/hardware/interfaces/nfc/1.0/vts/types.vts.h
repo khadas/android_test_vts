@@ -17,12 +17,10 @@ namespace android {
 namespace vts {
 
 extern "C" {
-    void profile__nfc_event_t(VariableSpecificationMessage* arg_name,
-    nfc_event_t arg_val_name);
-    void profile__nfc_status_t(VariableSpecificationMessage* arg_name,
-    nfc_status_t arg_val_name);
-    void profile__nfc_data_t(VariableSpecificationMessage* arg_name,
-    nfc_data_t arg_val_name);
+    void profile__NfcEvent(VariableSpecificationMessage* arg_name,
+    NfcEvent arg_val_name);
+    void profile__NfcStatus(VariableSpecificationMessage* arg_name,
+    NfcStatus arg_val_name);
 }
 
 }  // namespace vts
