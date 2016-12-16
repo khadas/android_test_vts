@@ -27,4 +27,5 @@ vts_test_bin_packages := \
 
 # some CTS packages for record-and-replay test development purpose
 vts_test_bin_packages := \
+  CtsAccelerationTestCases \
   CtsSensorTestCases \
