@@ -125,9 +125,11 @@ void LegacyHalCodeGen::GenerateCppBodyGetAttributeFunction(
   out << "}" << "\n";
 }
 
-
-void LegacyHalCodeGen::GenerateHeaderGlobalFunctionDeclarations(
-    Formatter& /*h_ss*/, const string& /*function_prototype*/) {}
+void LegacyHalCodeGen::GenerateClassConstructionFunction(Formatter& out,
+    const ComponentSpecificationMessage& /*message*/,
+    const string& fuzzer_extended_class_name) {
+  out << fuzzer_extended_class_name << "() : FuzzerBase(HAL_LEGACY) {}\n";
+}
 
 }  // namespace vts
 }  // namespace android

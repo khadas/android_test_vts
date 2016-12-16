@@ -63,20 +63,62 @@ class DriverCodeGenBase : public CodeGenBase {
       Formatter& out, const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
-  // Generates header code to declare the C/C++ global functions.
-  virtual void GenerateHeaderGlobalFunctionDeclarations(
-      Formatter& out, const string& function_prototype) = 0;
+  // Generates code for Call(...) function body.
+  // TODO(zhuoyao): generate the code to call the given function. This will
+  // replace the Fuzz(...) function once we split driver/fuzzer.
+  virtual void GenerateCallFunctionImpl(Formatter& /*out*/,
+      const ComponentSpecificationMessage& /*message*/,
+      const string& /*fuzzer_extended_class_name*/) {};
+
+  // Generates code for Verify(...) function body.
+  // TODO(zhuoyao): generate the code to verify the results of a given function.
+  virtual void GenerateVerificationFunctionImpl(Formatter& /*out*/,
+      const ComponentSpecificationMessage& /*message*/,
+      const string& /*fuzzer_extended_class_name*/) {};
 
   // Generates C/C++ code for callback functions.
-  virtual void GenerateCppBodyCallbackFunction(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
-
-  // Generates code for the bodies of the C/C++ global functions.
-  virtual void GenerateCppBodyGlobalFunctions(
-      Formatter& out, const string& function_prototype,
+  virtual void GenerateCppBodyCallbackFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) = 0;
 
+  // Generates header code for construction function.
+  virtual void GenerateClassConstructionFunction(Formatter& out,
+        const ComponentSpecificationMessage& message,
+        const string& fuzzer_extended_class_name) = 0;
+
+  // Generates header code for a specific class.
+  virtual void GenerateClassHeader(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // Generates header code to declare the C/C++ global functions.
+  virtual void GenerateHeaderGlobalFunctionDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message);
+
+  // Generates code for the bodies of the C/C++ global functions.
+  virtual void GenerateCppBodyGlobalFunctions(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // Generates header code for include declarations.
+  virtual void GenerateHeaderIncludeFiles(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // Generates source code for include declarations.
+  virtual void GenerateSourceIncludeFiles(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name);
+
+  // Generates header code for additional function declarations if any.
+  virtual void GenerateAdditionalFuctionDeclarations(Formatter& /*out*/,
+        const ComponentSpecificationMessage& /*message*/) {};
+
+  // Generates header code for private member declarations if any.
+  virtual void GeneratePrivateMemberDeclarations(Formatter& /*out*/,
+      const ComponentSpecificationMessage& /*message*/) {};
+
+  //**********   Utility functions   *****************
   // Generates the namespace name of a HIDL component, crashes otherwise.
   void GenerateNamespaceName(
       Formatter& out, const ComponentSpecificationMessage& message);
@@ -93,11 +135,6 @@ class DriverCodeGenBase : public CodeGenBase {
 
   // Generates code that stops the measurement.
   void GenerateCodeToStopMeasurement(Formatter& out);
-
-  // Generate header code for a specific class.
-  void GenerateClassHeader(const string& fuzzer_extended_class_name,
-                           Formatter& out,
-                           const ComponentSpecificationMessage& message);
 
   string GetComponentName(const ComponentSpecificationMessage& message);
 

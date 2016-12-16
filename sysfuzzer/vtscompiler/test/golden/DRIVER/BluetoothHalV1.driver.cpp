@@ -4,10 +4,10 @@
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <iostream>
+
+
 namespace android {
 namespace vts {
-
-
 
 bool FuzzerExtended_bluetooth_module_t::Fuzz(
     FunctionSpecificationMessage* func_msg,
@@ -43,6 +43,7 @@ if (!strcmp(func_name, "get_bluetooth_interface")) {
 cerr << "func not found" << endl;
 return false;
     }
+
     bool FuzzerExtended_bluetooth_module_t::GetAttribute(
         FunctionSpecificationMessage* func_msg,
         void** result) {
@@ -60,10 +61,9 @@ if (local_device == NULL) {
 cerr << "attribute not found" << endl;
 return false;
     }
+
     extern "C" {
-    android::vts::FuzzerBase* 
-    vts_func_1_7_1_(
-    ) {
+    android::vts::FuzzerBase* vts_func_1_7_1_() {
 return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_bluetooth_module_t();
     }
 
