@@ -34,7 +34,6 @@
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
       google.charts.setOnLoadCallback(drawProfilingTable);
-      google.charts.setOnLoadCallback(drawLegendTable);
       google.charts.setOnLoadCallback(drawPieChart);
       google.charts.setOnLoadCallback(function() {
           $('.gradient').removeClass('gradient');
@@ -168,7 +167,7 @@
           if (topBuildResultCounts.length < 1) {
               return;
           }
-          var resultNames = ${resultNames};
+          var resultNames = ${resultNamesJson};
           var rows = resultNames.map(function(res, i) {
               nickname = res.replace('TEST_CASE_RESULT_', '').replace('_', ' ')
                          .trim().toLowerCase();
@@ -195,37 +194,6 @@
 
           var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
           chart.draw(data, options);
-      }
-
-      // table for legend
-      function drawLegendTable() {
-          var data = new google.visualization.DataTable();
-          var resultNames = ${resultNames};
-          var cells = resultNames.map(function(res) {
-              return '<div class="' + res + ' TEST_CASE_RESULT">&nbsp;</div>';
-          });
-          // add columns
-          data.addColumn('string', 'Result');
-
-          resultNames.forEach(function(res) {
-              nickname = res.replace('TEST_CASE_RESULT_', '').replace('_', ' ')
-                         .trim().toLowerCase();
-              data.addColumn('string', nickname);
-          });
-          cells.unshift('Color');
-          data.addRows([cells]);
-
-          var table = new google.visualization.Table(document.getElementById('legend_table_div'));
-          var options = {
-              showRowNumber: false,
-              allowHtml: true,
-              frozenColumns: 1,
-              cssClassNames: {
-                  headerRow : 'table-header',
-                  headerCell : 'legend-header-cell'
-              }
-          };
-          table.draw(data, options);
       }
 
       // table for grid data
@@ -304,7 +272,16 @@
       <div class='row'>
         <div class='col s12'>
           <div class='card s12 card'>
-            <div id='legend_table_div'></div>
+            <div id='legend_wrapper'>
+              <c:forEach items='${resultNames}' var='res'>
+                <div class='center-align legend-entry'>
+                  <c:set var="trimmed" value="${fn:replace(res, 'TEST_CASE_RESULT_', '')}"/>
+                  <c:set var="nickname" value="${fn:replace(trimmed, '_', ' ')}"/>
+                  <label for='${res}'>${nickname}</label>
+                  <div id='${res}' class='${res} legend-bubble'></div>
+                </div>
+              </c:forEach>
+            </div>
             <div id='build_type_div' class='right'>
               <input type='checkbox' id='presubmit' />
               <label for='presubmit'>Presubmit</label>
