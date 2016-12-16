@@ -94,7 +94,28 @@ The following diagram discusses the flow of the dashboard wrt to the directory :
    Install the Google App Engine Python SDK:
    https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python
 
-4. (Optional) Configure App Engine authorized senders
+4. Configure Source Code API access
+
+   To access source code using the Gerrit API, the App Engine project must be
+   configured with an authentication scope, a request URI, and a client ID.
+   These parameters are required to authenticate over the REST API.
+
+   1) Enable CORS. Ensure that the VTS dashboard's domain is authorized to make requests
+      to the Gerrit server using cross-origin resource sharing (CORS). This is only
+      necessary if the source code is hosted on a different domain than the VTS
+      dashboard. Simply add the VTS dashboard's domain to the configuration file
+      specifying allowed CORS origins.
+
+   2) Create a client ID. Navigate to https://pantheon.corp.google.com/apis/credentials
+      and create an OAuth client ID. Add the VTS dashboard's domain to the list
+      of authorized JavaScript origins in order to permit authenticated RESTful
+      calls from the dashboard.
+
+   3) Specify auth scope, request URI, and client ID in pom.xml. Enter the two
+      addresses and the client ID in the file dashboard/appengine/servlet/pom.xml
+      in the tags gerrit.scope, gerrit.uri, and appengine.clientId.
+
+5. (Optional) Configure App Engine authorized senders
 
    In order for the dashboard to send alert emails when test failures occur, the
    sender address must be added to the authorized list. Navigate to the App Engine

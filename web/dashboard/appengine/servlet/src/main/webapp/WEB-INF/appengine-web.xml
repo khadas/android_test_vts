@@ -18,6 +18,9 @@
       <env-var name="SENDER_EMAIL" value="${appengine.senderEmail}" />
       <env-var name="DEFAULT_EMAIL" value="${appengine.defaultEmail}" />
       <env-var name="SERVICE_CLIENT_ID" value="${appengine.serviceClientID}" />
+      <env-var name="CLIENT_ID" value="${appengine.clientID}" />
+      <env-var name="GERRIT_URI" value="${gerrit.uri}" />
+      <env-var name="GERRIT_SCOPE" value="${gerrit.scope}" />
     </env-variables>
 
     <system-properties>
