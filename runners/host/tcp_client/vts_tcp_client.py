@@ -185,19 +185,28 @@ class VtsTcpClient(object):
                 return mirror_object.MirrorObject(
                      self, result.return_type_submodule_spec, None)
             if len(result.return_type_hidl) == 1:
+                if hasattr(result, "raw_coverage_data"):
+                    has_coverage = True
+                result_scalar = None
                 if (result.return_type_hidl[0].type ==
                     CompSpecMsg_pb2.TYPE_SCALAR):
-                    return getattr(result.return_type_hidl[0].scalar_value,
-                                   result.return_type_hidl[0].scalar_type)
+                    result_scalar =  getattr(
+                        result.return_type_hidl[0].scalar_value,
+                        result.return_type_hidl[0].scalar_type)
                 elif (result.return_type_hidl[0].type ==
-                    CompSpecMsg_pb2.TYPE_ENUM):
+                      CompSpecMsg_pb2.TYPE_ENUM):
                     scalar_type = getattr(result.return_type_hidl[0],
                                           "scalar_type", "")
                     if scalar_type:
-                        return getattr(result.return_type_hidl[0].scalar_value,
-                                       scalar_type)
+                        result_scalar = getattr(
+                            result.return_type_hidl[0].scalar_value,
+                            scalar_type)
                     else:
-                        return result.return_type_hidl[0].scalar_value.int32_t
+                        result_scalar = result.return_type_hidl[0].scalar_value.int32_t
+                if not has_coverage:
+                    return result_scalar
+                else:
+                    return result_scalar, {"coverage": result.raw_coverage_data}
             return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
