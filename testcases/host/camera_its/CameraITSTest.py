@@ -53,7 +53,7 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 "CameraITSTest only tested with Python 2.7." % (
                     str(sys.version_info[:3])))
         modules = ["numpy", "PIL", "Image", "matplotlib", "pylab",
-                   "scipy.stats", "scipy.spatial", "cv2"]
+                   "scipy.stats", "scipy.spatial"]
         for m in modules:
             try:
                 exec ("import " + m)
