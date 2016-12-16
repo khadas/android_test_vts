@@ -30,7 +30,9 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -45,6 +47,7 @@ public class ShowCoverageServlet extends BaseServlet {
 
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
+    private static final String ALL_TESTCASES_LABEL = "All";
 
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
@@ -87,11 +90,12 @@ public class ShowCoverageServlet extends BaseServlet {
 
         List<String> sourceFiles = new ArrayList<>();
         List<List<Integer>> coverageVectors = new ArrayList<>();
-        List<String> testLabels = new ArrayList<>();
         List<String> projects = new ArrayList<>();
         List<String> commits = new ArrayList<>();
+        List<String> indicators = new ArrayList<>();
+        Map<String, List<Integer>> sectionMap = new HashMap<>();
         if (testReportMessage != null) {
-            String testNamePrefix = "<b>" + testReportMessage.getTest().toStringUtf8() + "</b>";
+            List<Integer> indices = new ArrayList<>();
             for (CoverageReportMessage coverageReportMessage : testReportMessage.getCoverageList()) {
                if (coverageReportMessage.getLineCoverageVectorCount() == 0 ||
                    !coverageReportMessage.hasFilePath() ||
@@ -99,14 +103,27 @@ public class ShowCoverageServlet extends BaseServlet {
                    !coverageReportMessage.hasRevision()) {
                    continue;
                }
+               int total = coverageReportMessage.getTotalLineCount();
+               int covered = coverageReportMessage.getCoveredLineCount();
+               indices.add(coverageVectors.size());
                coverageVectors.add(coverageReportMessage.getLineCoverageVectorList());
-               testLabels.add(testNamePrefix);
                sourceFiles.add(coverageReportMessage.getFilePath().toStringUtf8());
                projects.add(coverageReportMessage.getProjectName().toStringUtf8());
                commits.add(coverageReportMessage.getRevision().toStringUtf8());
+               String indicator = "";
+               if (total > 0) {
+                   double pct = Math.round(covered * 10000d / total) / 100d;
+                   String color = pct >= 70 ? "green" : "red";
+                   indicator = "<div class=\"right indicator " + color + "\">" +
+                               pct + "%</div>" + "<span class=\"right total-count\">" +
+                               covered + "/" + total + "</span>";
+               }
+               indicators.add(indicator);
             }
+            if (indices.size() > 0) sectionMap.put(ALL_TESTCASES_LABEL, indices);
             for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
                 if (!testCaseReportMessage.hasName()) continue;
+                indices = new ArrayList<>();
                 for (CoverageReportMessage coverageReportMessage :
                      testCaseReportMessage.getCoverageList()) {
                     if (coverageReportMessage.getLineCoverageVectorCount() == 0 ||
@@ -115,12 +132,25 @@ public class ShowCoverageServlet extends BaseServlet {
                         !coverageReportMessage.hasRevision()) {
                         continue;
                     }
+                    int total = coverageReportMessage.getTotalLineCount();
+                    int covered = coverageReportMessage.getCoveredLineCount();
+                    indices.add(coverageVectors.size());
                     coverageVectors.add(coverageReportMessage.getLineCoverageVectorList());
-                    testLabels.add(testNamePrefix + ": " +
-                                   testCaseReportMessage.getName().toStringUtf8());
                     sourceFiles.add(coverageReportMessage.getFilePath().toStringUtf8());
                     projects.add(coverageReportMessage.getProjectName().toStringUtf8());
                     commits.add(coverageReportMessage.getRevision().toStringUtf8());
+                    String indicator = "";
+                    if (total > 0) {
+                        double pct = Math.round(covered * 10000d / total) / 100d;
+                        String color = pct >= 70 ? "green" : "red";
+                        indicator = "<div class=\"right indicator " + color + "\">" +
+                                    pct + "%</div>" + "<span class=\"right total-count\">" +
+                                    covered + "/" + total + "</span>";
+                    }
+                    indicators.add(indicator);
+                }
+                if (indices.size() > 0) {
+                    sectionMap.put(testCaseReportMessage.getName().toStringUtf8(), indices);
                 }
             }
         }
@@ -130,10 +160,11 @@ public class ShowCoverageServlet extends BaseServlet {
         request.setAttribute("gerritScope", new Gson().toJson(GERRIT_SCOPE));
         request.setAttribute("clientId", new Gson().toJson(CLIENT_ID));
         request.setAttribute("coverageVectors", new Gson().toJson(coverageVectors));
-        request.setAttribute("testLabels", new Gson().toJson(testLabels));
         request.setAttribute("sourceFiles", new Gson().toJson(sourceFiles));
         request.setAttribute("projects", new Gson().toJson(projects));
         request.setAttribute("commits", new Gson().toJson(commits));
+        request.setAttribute("indicators", new Gson().toJson(indicators));
+        request.setAttribute("sectionMap", new Gson().toJson(sectionMap));
         request.setAttribute("startTime", request.getParameter("startTime"));
         request.setAttribute("endTime", request.getParameter("endTime"));
         dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
