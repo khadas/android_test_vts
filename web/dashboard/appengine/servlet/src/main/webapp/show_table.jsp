@@ -95,9 +95,7 @@
           });
 
           var data = google.visualization.arrayToDataTable(rows);
-          var topBuild = ${topBuildJson};
-          var colName = topBuild.substring(0, topBuild.lastIndexOf("."));
-          var title = 'Test Result Status for build ID : ' + colName;
+          var title = 'Test Result Status for build ID : ${topBuildId}';
           var options = {
             title: title,
             is3D: false,
