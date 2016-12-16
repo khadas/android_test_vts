@@ -54,6 +54,8 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_vibrator@1.0.so /data/local/tmp/64/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_thermal@1.0.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_thermal@1.0.so /data/local/tmp/64/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_vr@1.0.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_vr@1.0.so /data/local/tmp/64/
 
   echo "install hal packages"
   adb shell mkdir -p /data/local/tmp/32/hw
