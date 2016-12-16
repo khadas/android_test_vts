@@ -91,7 +91,7 @@ done
 
 # to run in the lab.
 OPTIONAL_JARS="
-  google-tradefed-vts-prebuilt
+  android-vts/tools/google-tradefed-vts-prebuilt
   google-tradefed-prebuilt
   google-tradefed-tests
   google-tf-prod-tests"

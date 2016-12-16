@@ -53,7 +53,7 @@ $(VTS_CAMERAITS_ZIP): $(SOONG_ZIP)
 
 my_deps_copy_pairs :=
   $(foreach d,$(ADDITIONAL_VTS_JARS),\
-    $(eval my_deps_copy_pairs += $(d):$(VTS_OUT_ROOT)/$(notdir $(d))))
+    $(eval my_deps_copy_pairs += $(d):$(VTS_OUT_ROOT)/android-vts/tools/$(notdir $(d))))
 
 vts: $(VTS_PYTHON_ZIP) $(VTS_CAMERAITS_ZIP) $(call copy-many-files,$(my_deps_copy_pairs))
 
