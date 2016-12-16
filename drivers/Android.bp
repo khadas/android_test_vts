@@ -1,5 +1,3 @@
 subdirs = [
      "libdrivercomm",
-     "libprofiling",
-     "shell",
 ]

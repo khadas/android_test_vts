@@ -13,16 +13,7 @@
 // limitations under the License.
 
 subdirs = [
-     "agents",
      "drivers",
-     "hals",
-     "harnesses",
      "proto",
-     "runners",
-     "specification",
      "sysfuzzer",
-     "testcases",
-     "tools",
-     "utils",
-     "web",
 ]
