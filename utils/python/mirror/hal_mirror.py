@@ -42,6 +42,7 @@ COMPONENT_TYPE_DICT = {"audio": 1,
                        "bluetooth": 7,
                        "nfc": 8,
                        "vibrator": 12,
+                       "thermal": 13,
                        "bionic_libm": 1001,
                        "bionic_libc": 1002,
                        "vndk_libcutils": 1101}

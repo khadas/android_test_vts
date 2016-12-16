@@ -8,3 +8,10 @@ DATA/lib64/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/64/libvts_driver_
 
 DATA/lib/libvts_profiler_hidl_vibrator@1.0.so->/data/local/tmp/32/hw/android.hardware.vibrator@1.0::IVibrator.profiler.so
 DATA/lib64/libvts_profiler_hidl_vibrator@1.0.so->/data/local/tmp/64/hw/android.hardware.vibrator@1.0::IVibrator.profiler.so
+
+DATA/lib/libvts_driver_hidl_thermal@1.0.so->/data/local/tmp/32/libvts_driver_hidl_thermal@1.0.so
+DATA/lib64/libvts_driver_hidl_thermal@1.0.so->/data/local/tmp/64/libvts_driver_hidl_thermal@1.0.so
+
+DATA/lib/libvts_profiler_hidl_thermal@1.0.so->/data/local/tmp/32/hw/android.hardware.thermal@1.0::IThermal.profiler.so
+DATA/lib64/libvts_profiler_hidl_thermal@1.0.so->/data/local/tmp/64/hw/android.hardware.thermal@1.0::IThermal.profiler.so
+
