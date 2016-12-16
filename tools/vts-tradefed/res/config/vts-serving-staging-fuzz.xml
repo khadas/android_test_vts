@@ -17,5 +17,6 @@
     <include name="everything" />
     <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="ILightFuzzTest" />
+    <option name="compatibility:include-filter" value="ISensorsFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
