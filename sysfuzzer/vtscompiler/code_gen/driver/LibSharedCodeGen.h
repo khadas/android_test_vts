@@ -37,17 +37,17 @@ class LibSharedCodeGen : public HalCodeGen {
       : HalCodeGen(input_vts_file_path, vts_name) {}
 
  protected:
-  void GenerateCppBodyFuzzFunction(std::stringstream& cpp_ss,
+  void GenerateCppBodyFuzzFunction(Formatter& out,
                                    const ComponentSpecificationMessage& message,
                                    const string& fuzzer_extended_class_name);
 
   void GenerateCppBodyGetAttributeFunction(
-      std::stringstream& cpp_ss,
+      Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
   void GenerateHeaderGlobalFunctionDeclarations(
-      std::stringstream& h_ss, const string& function_prototype);
+      Formatter& out, const string& function_prototype);
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;
