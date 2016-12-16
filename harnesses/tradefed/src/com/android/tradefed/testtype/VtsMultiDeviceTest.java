@@ -71,6 +71,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
+    static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
     static final String VTS = "vts";
@@ -490,6 +491,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
         if (mAbi != null) {
+            jsonObject.put(ABI_NAME, mAbi.getName());
+            CLog.i("Added %s to the Json object", ABI_NAME);
             jsonObject.put(ABI_BITNESS, mAbi.getBitness());
             CLog.i("Added %s to the Json object", ABI_BITNESS);
         }

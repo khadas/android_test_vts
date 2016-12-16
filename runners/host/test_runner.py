@@ -88,7 +88,8 @@ def runTestClass(test_class):
             config_path = sys.argv[1]
             baseline_config = config_parser.GetDefaultConfig(test_cls_name)
             baseline_config[keys.ConfigKeys.KEY_TESTBED] = [
-                baseline_config[keys.ConfigKeys.KEY_TESTBED]]
+                baseline_config[keys.ConfigKeys.KEY_TESTBED]
+            ]
             test_configs = config_parser.load_test_config_file(
                 config_path, baseline_config=baseline_config)
         except IndexError:
