@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,6 +49,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -71,9 +75,105 @@ public class ShowTableServlet extends HttpServlet {
     private static final int DURATION_INFO_ROW_COUNT = 1;
     private static final int SUMMARY_ROW_COUNT = 5;
     private static final long ONE_DAY = 86400000000L;  // units microseconds
+    private static final String[] SEARCH_KEYS = {"devicebuildid", "branch", "target", "device",
+                                                 "vtsbuildid"};
+    private static final String SEARCH_HELP_HEADER = "Search Help";
+    private static final String SEARCH_HELP = "Data can be queried using one or more filters. " +
+        "If more than one filter is provided, results will be returned that match <i>all</i>. " +
+        "<br><br>Filters are delimited by spaces; to specify a multi-word token, enclose it in " +
+        "double quotes. A query may apply to any of header attributes of a column, or it may be " +
+        "a field-specific filter if specified in the format: \"field=value\".<br><br>" +
+        "<b>Supported field qualifiers:</b> " + StringUtils.join(SEARCH_KEYS, ", ") + ".";
+    private static final Set<String> SEARCH_KEYSET = new HashSet<String>(Arrays.asList(SEARCH_KEYS));
     private static final String TABLE_PREFIX = "result_";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
+
+
+    /**
+     * Parse the search string to populate the searchPairs map and the generalTerms set.
+     * General terms apply to any field, while pairs in searchPairs are for a particular field.
+     *
+     * Expected format:
+     *       general1 "general string 2" vtsbuildid="local build"
+     *
+     * Search terms are delimited by spaces and may be enclosed by quotes. General terms have no
+     * prefix, while field-specific search terms are preceded by <field>= where the field is in
+     * SEARCH_KEYS.
+     *
+     * @param searchString The String search query.
+     * @param searchPairs The map to insert search keys to values parsed from the search string.
+     * @param generalTerms The map to insert general search terms (term to index).
+     */
+    private void parseSearchString(String searchString, Map<String, String> searchPairs,
+                                   Map<String, Integer> generalTerms) {
+        if (searchString != null) {
+            Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(searchString);
+            int count = 0;
+            while (m.find()) {
+                String term = m.group(1).replace("\"", "");
+                if (term.contains("=")) {
+                    String[] terms = term.split("=", 2);
+                    if (terms.length == 2 && SEARCH_KEYSET.contains(terms[0].toLowerCase())) {
+                        searchPairs.put(terms[0].toLowerCase(), terms[1]);
+                    }
+                } else {
+                    generalTerms.put(term, count++);
+                }
+            }
+        }
+    }
+
+    /**
+     * Determine if test report should be included in the result based on search terms.
+     * @param report The TestReportMessage object to compare to the search terms.
+     * @param searchPairs The map of search keys to values parsed from the search string.
+     * @param generalTerms General terms non-specific to a particular field.
+     * @returns boolean True if the report matches the search terms, false otherwise.
+     */
+    private boolean includeInSearch(TestReportMessage report, Map<String, String> searchPairs,
+                                    Map<String, Integer> generalTerms) {
+        if (searchPairs.size() + generalTerms.size() == 0) return true;
+
+        boolean[] fieldsSatisfied = new boolean[SEARCH_KEYS.length];
+        boolean[] generalSatisfied = new boolean[generalTerms.size()];
+        // Verify that VTS build ID matches search term.
+        String vtsBuildId = report.getBuildInfo().getId().toStringUtf8().toLowerCase();
+        if (searchPairs.containsKey(SEARCH_KEYS[4])) {
+            if (vtsBuildId.equals(searchPairs.get(SEARCH_KEYS[4]))) {
+                fieldsSatisfied[4] = true;
+            } else {
+                return false;
+            }
+        }
+
+        // Verify that device-specific search terms are satisfied between the target devices.
+        for (AndroidDeviceInfoMessage device : report.getDeviceInfoList()) {
+            String[] props = {device.getBuildId().toStringUtf8().toLowerCase(),
+                              device.getBuildAlias().toStringUtf8().toLowerCase(),
+                              device.getBuildFlavor().toStringUtf8().toLowerCase(),
+                              device.getProductVariant().toStringUtf8().toLowerCase()};
+            Set<String> propSet = new HashSet<>(Arrays.asList(props));
+            for (int i = 0; i < props.length; i++) {
+                if (searchPairs.containsKey(SEARCH_KEYS[i]) &&
+                    props[i].equals(searchPairs.get(SEARCH_KEYS[i]))) {
+                    fieldsSatisfied[i] = true;
+                }
+                for (Map.Entry<String, Integer> entry : generalTerms.entrySet()) {
+                    if (propSet.contains(entry.getKey())) {
+                        generalSatisfied[entry.getValue()] = true;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < fieldsSatisfied.length; i++) {
+            if (!fieldsSatisfied[i] && searchPairs.containsKey(SEARCH_KEYS[i])) return false;
+        }
+        for (int i = 0; i < generalSatisfied.length; i++) {
+            if (!generalSatisfied[i]) return false;
+        }
+        return true;
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -84,6 +184,7 @@ public class ShowTableServlet extends HttpServlet {
         boolean unfiltered = request.getParameter("unfiltered") != null;
         boolean showPresubmit = request.getParameter("showPresubmit") != null;
         boolean showPostsubmit = request.getParameter("showPostsubmit") != null;
+        String searchString = request.getParameter("search");
         Long startTime = null;  // time in microseconds
         Long endTime = null;  // time in microseconds
         RequestDispatcher dispatcher = null;
@@ -143,6 +244,10 @@ public class ShowTableServlet extends HttpServlet {
             showPresubmit = true;
         }
 
+        Map<String, String> searchPairs = new HashMap<>();
+        Map<String, Integer> generalTerms = new HashMap<>();
+        parseSearchString(searchString, searchPairs, generalTerms);
+
         // Add result names to list
         List<String> resultNames = new ArrayList<>();
         for (TestCaseResult r : TestCaseResult.values()) {
@@ -171,9 +276,6 @@ public class ShowTableServlet extends HttpServlet {
 
         // list to hold the test report messages that will be shown on the dashboard
         List<TestReportMessage> tests = new ArrayList<TestReportMessage>();
-
-        // list of column headers (device build IDs)
-        List<String> deviceBuildIdList = new ArrayList<>();
 
         // set to hold orderings of each test case (testcase name to index)
         Map<String, Integer> testCaseNameMap = new HashMap<>();
@@ -204,7 +306,8 @@ public class ShowTableServlet extends HttpServlet {
                 if (testReportMessage.getDeviceInfoList().size() == 0) continue;
 
                 String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
-                                          .getBuildId().toStringUtf8();
+                                            .getBuildId().toStringUtf8();
+                if (!includeInSearch(testReportMessage, searchPairs, generalTerms)) continue;
 
                 try {
                     // filter non-integer build IDs
@@ -228,8 +331,7 @@ public class ShowTableServlet extends HttpServlet {
                 for (ProfilingReportMessage profilingReportMessage :
                     testReportMessage.getProfilingList()) {
 
-                    String profilingPointName = profilingReportMessage
-                        .getName().toStringUtf8();
+                    String profilingPointName = profilingReportMessage.getName().toStringUtf8();
                     profilingPointNameSet.add(profilingPointName);
                 }
 
@@ -352,9 +454,8 @@ public class ShowTableServlet extends HttpServlet {
             String buildAlias = StringUtils.join(buildAliasList, ",");
             String productVariant = StringUtils.join(productVariantList, ",");
             String buildFlavor = StringUtils.join(buildFlavorList, ",");
-            deviceBuildIdList.add(StringUtils.join(buildIdList, ","));
-
-            String buildId = report.getBuildInfo().getId().toStringUtf8();
+            String buildIds = StringUtils.join(buildIdList, ",");
+            String vtsBuildId = report.getBuildInfo().getId().toStringUtf8();
 
             int passCount = 0;
             int nonpassCount = 0;
@@ -413,10 +514,10 @@ public class ShowTableServlet extends HttpServlet {
                 coverageInfo = " - ";
             }
             String icon = "<div class='status-icon " + aggregateStatus.toString() + "'>&nbsp</div>";
-            String buildIds = StringUtils.join(buildIdList, ",");
+
             headerRow[j + 1] = "<span class='valign-wrapper'><b>" + buildIds + "</b>" + icon +
                                "</span>" + buildAlias.toLowerCase() + "<br>" + buildFlavor +
-                               "<br>" + productVariant + "<br>" + buildId;
+                               "<br>" + productVariant + "<br>" + vtsBuildId;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
@@ -435,9 +536,6 @@ public class ShowTableServlet extends HttpServlet {
             profilingDataAlert = PROFILING_DATA_ALERT;
         }
 
-        String[] deviceBuildIdArray =
-            deviceBuildIdList.toArray(new String[deviceBuildIdList.size()]);
-
         boolean hasNewer = BigtableHelper.hasNewer(table, endTime);
         boolean hasOlder = BigtableHelper.hasOlder(table, startTime);
 
@@ -447,6 +545,9 @@ public class ShowTableServlet extends HttpServlet {
 
         request.setAttribute("error", profilingDataAlert);
         request.setAttribute("errorJson", new Gson().toJson(profilingDataAlert));
+        request.setAttribute("searchString", searchString);
+        request.setAttribute("searchHelpHeader", SEARCH_HELP_HEADER);
+        request.setAttribute("searchHelpBody", SEARCH_HELP);
 
         // pass values by converting to JSON
         request.setAttribute("headerRow", new Gson().toJson(headerRow));
@@ -455,7 +556,6 @@ public class ShowTableServlet extends HttpServlet {
         request.setAttribute("summaryGrid", new Gson().toJson(summaryGrid));
         request.setAttribute("resultsGrid", new Gson().toJson(resultsGrid));
         request.setAttribute("profilingPointNameJson", new Gson().toJson(profilingPointNameArray));
-        request.setAttribute("deviceBuildIdArrayJson", new Gson().toJson(deviceBuildIdArray));
         request.setAttribute("resultNames", resultNames);
         request.setAttribute("resultNamesJson", new Gson().toJson(resultNames));
 
