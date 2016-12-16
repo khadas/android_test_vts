@@ -16,7 +16,5 @@
 <configuration description="Run VTS Host-Driven Fuzz Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
-    <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
-    <option name="compatibility:include-filter" value="LightFuzzTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
