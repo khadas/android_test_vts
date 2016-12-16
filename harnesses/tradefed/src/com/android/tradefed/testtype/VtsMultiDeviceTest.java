@@ -78,8 +78,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
     static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
+    static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
+    static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -308,6 +310,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
                 switch (mBinaryTestType) {
                     case BINARY_TEST_TYPE_GTEST:
                         template = TEMPLATE_GTEST_BINARY_TEST_PATH;
+                        break;
+                    case BINARY_TEST_TYPE_LLVMFUZZER:
+                        template = TEMPLATE_LLVMFUZZER_TEST_PATH;
                         break;
                     default:
                         template = TEMPLATE_BINARY_TEST_PATH;
