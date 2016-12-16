@@ -13,16 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run New VTS Tests in the Staging environment">
+<configuration description="VTS Postsubmit Test Serving Plan Using a Tip of Tree Build">
     <include name="everything" />
     <option name="plan" value="vts" />
+
+    <!-- For vts-hal-hidl -->
     <option name="compatibility:include-filter" value="BinderPerformanceTest" />
     <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
-    <option name="compatibility:include-filter" value="LightFuzzTest" />
-    <option name="compatibility:include-filter" value="SampleQtaguidTest" />
-    <option name="compatibility:include-filter" value="KernelLtpTestStaging" />
-    <option name="compatibility:include-filter" value="LinuxKselftestTestStaging" />
-    <option name="compatibility:include-filter" value="SecurityPoCKernelTest" />
-    <option name="compatibility:include-filter" value="CpuProfilingTest" />
+    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
+
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
