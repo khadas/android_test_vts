@@ -24,13 +24,13 @@ target-side) which you would like to enable this code coverage measurement.
 In order to upload the measured code coverage data to a Google App Engine (GAE)
 hosted database and show that on your VTS dashboard, let's add:
 
-`"use_gae_db": True` and `"coverage": True` to `<target test case name>.config` file.
+`"use_gae_db": true` and `"coverage": true` to `<target test case name>.config` file.
 
 Then let's also specify the source files which you have enabled code coverage
 instrumentation and would like to see the measured line coverage data by adding:
 
 ```
-"coverage": True,
+"coverage": true,
 "modules": [{
                 "module_name": "<module name>",
                 "git_project": {
@@ -49,8 +49,8 @@ For the lights HAL, the target config file would look like:
 
 ```
 {
-    "use_gae_db": True
-    "coverage": True,
+    "use_gae_db": true
+    "coverage": true,
     "modules": [{
                     "module_name": "system/lib64/hw/lights.vts",
                     "git_project": {
