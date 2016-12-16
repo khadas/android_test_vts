@@ -84,6 +84,8 @@ string ComponentTypeToString(int component_type) {
       return "nfc";
     case VIBRATOR:
       return "vibrator";
+    case THERMAL:
+      return "thermal";
     case BIONIC_LIBM:
       return "bionic_libm";
   }

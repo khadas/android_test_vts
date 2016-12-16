@@ -68,7 +68,8 @@ enum ComponentType {
   BFP = 11;
   // For a vibrator submodule.
   VIBRATOR = 12;
-
+  // For a thermal submodule.
+  THERMAL=13;
   // for bionic's libm
   BIONIC_LIBM = 1001;
 
