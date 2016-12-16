@@ -195,4 +195,7 @@ message TestReportMessage {
   // execution start and end time stamp.
   optional int64 start_timestamp = 101;
   optional int64 end_timestamp = 102;
+
+  // coverage report per file
+  repeated CoverageReportMessage coverage = 103;
 }
