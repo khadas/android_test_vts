@@ -642,7 +642,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
             File testDir = null;
             try {
                 testDir = mBuildHelper.getTestsDir();
-            } catch(FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 /* pass */
             }
             if (testDir != null) {
@@ -672,6 +672,18 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver {
      * This method gets the python binary
      */
     private String getPythonBinary() {
+        try {
+            File venvDir = FileUtil.createNamedTempDir(
+                    mBuildInfo.getTestTag() + "-virtualenv-" +
+                    mBuildInfo.getDeviceSerial().replaceAll(":", "_"));
+            File pythonBinaryFile = new File(venvDir.getAbsolutePath(), "bin/python");
+            if (pythonBinaryFile.exists()) {
+                return pythonBinaryFile.getAbsolutePath();
+            }
+        } catch (IOException e) {
+            /* pass */
+        }
+
         IRunUtil runUtil = RunUtil.getDefault();
         CommandResult c = runUtil.runTimedCmd(1000, "which", "python");
         String pythonBin = c.getStdout().trim();
