@@ -43,7 +43,8 @@ class HalSubmoduleCodeGen : public HalCodeGen {
       const string& fuzzer_extended_class_name) override;
 
   void GenerateAdditionalFuctionDeclarations(Formatter& out,
-      const ComponentSpecificationMessage& message) override;
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   void GeneratePrivateMemberDeclarations(Formatter& out,
       const ComponentSpecificationMessage& message) override;

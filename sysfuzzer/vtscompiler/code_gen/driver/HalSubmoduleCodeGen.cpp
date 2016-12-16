@@ -41,7 +41,8 @@ void HalSubmoduleCodeGen::GenerateClassConstructionFunction(Formatter& out,
 }
 
 void HalSubmoduleCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
-    const ComponentSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message,
+    const string& /*fuzzer_extended_class_name*/) {
   string component_name = GetComponentName(message);
   out << "void SetSubModule(" << component_name << "* submodule) {" << "\n";
   out.indent();

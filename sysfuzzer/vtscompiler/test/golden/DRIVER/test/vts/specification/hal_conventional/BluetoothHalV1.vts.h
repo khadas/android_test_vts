@@ -21,10 +21,10 @@ class FuzzerExtended_bluetooth_module_t : public FuzzerBase {
  public:
     FuzzerExtended_bluetooth_module_t() : FuzzerBase(HAL_CONVENTIONAL) {}
  protected:
-    bool Fuzz(FunctionSpecificationMessage* func_msg,
-              void** result, const string& callback_socket_name);
-    bool GetAttribute(FunctionSpecificationMessage* func_msg,
-              void** result);
+    bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
+    bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
+    bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
  private:
 };
 

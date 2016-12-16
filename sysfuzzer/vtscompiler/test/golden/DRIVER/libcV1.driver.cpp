@@ -10,7 +10,6 @@
 
 namespace android {
 namespace vts {
-
 bool FuzzerExtended_libc::Fuzz(
     FunctionSpecificationMessage* func_msg,
     void** result, const string& callback_socket_name) {
@@ -192,7 +191,6 @@ bool FuzzerExtended_libc::Fuzz(
       }
     return false;
 }
-
 bool FuzzerExtended_libc::GetAttribute(
     FunctionSpecificationMessage* func_msg,
     void** result) {
@@ -201,7 +199,14 @@ bool FuzzerExtended_libc::GetAttribute(
     cerr << "attribute not supported for shared lib yet" << endl;
     return false;
 }
-
+bool FuzzerExtended_libc::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+    /* No implementation yet. */
+    return true;
+}
+bool FuzzerExtended_libc::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+    /* No implementation yet. */
+    return true;
+}
 extern "C" {
 android::vts::FuzzerBase* vts_func_11_1002_1_() {
     return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_libc();

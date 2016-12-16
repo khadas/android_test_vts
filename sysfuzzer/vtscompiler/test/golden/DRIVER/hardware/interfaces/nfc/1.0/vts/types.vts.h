@@ -26,6 +26,8 @@ namespace vts {
 ::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const EnumDataValueMessage& arg);
 
 ::android::hardware::nfc::V1_0::NfcStatus Random__android__hardware__nfc__V1_0__NfcStatus();
+bool Verify__android__hardware__nfc__V1_0__NfcEvent(::android::hardware::nfc::V1_0::NfcEvent result_value, VariableSpecificationMessage expected_result);
+bool Verify__android__hardware__nfc__V1_0__NfcStatus(::android::hardware::nfc::V1_0::NfcStatus result_value, VariableSpecificationMessage expected_result);
 
 
 }  // namespace vts
