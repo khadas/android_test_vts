@@ -12,15 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_lib_hidl_packages := \
-  libhwbinder \
-  libhidl \
-  libvts_driver_hidl_nfc@1.0 \
-  libvts_profiler_hidl_nfc@1.0 \
-  libvts_driver_hidl_vibrator@1.0 \
-  libvts_profiler_hidl_vibrator@1.0 \
+LOCAL_PATH := $(call my-dir)
 
-vts_test_lib_hidl_packages += \
-  nfc_hidl_hal_test \
-  vibrator_hidl_hal_test \
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := VibratorHidlProfilingTest
+VTS_CONFIG_SRC_DIR := testcases/hal/vibrator/hidl/host_profiling
+include test/vts/tools/build/Android.host_config.mk
