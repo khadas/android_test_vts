@@ -18,7 +18,7 @@
     <option name="plan" value="vts" />
     <!-- For vts-kernel -->
     <option name="compatibility:include-filter" value="KernelLtpTest" />
-    <option name="compatibility:include-filter" value="LinuxKselftestTest" />
+    <option name="compatibility:include-filter" value="LinuxKselftestTestPresubmit" />
 
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
