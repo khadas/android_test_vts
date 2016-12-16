@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "InterfaceSpecUtil.h"
+#include "utils/InterfaceSpecUtil.h"
 
 #include <iostream>
 #include <sstream>

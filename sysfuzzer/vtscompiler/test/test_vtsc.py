@@ -70,13 +70,13 @@ class VtscTester(unittest.TestCase):
 
     def testProfiler(self):
         """Run tests for PROFILER mode. """
-        self.RunTest("PROFILER", "test/vts/specification/hal_hidl/Nfc/Nfc.vts",
+        self.RunTest("PROFILER", "hardware/interfaces/nfc/1.0/vts/Nfc.vts",
                      "nfc.profiler.cpp")
         self.RunTest("PROFILER",
-                     "test/vts/specification/hal_hidl/Nfc/types.vts",
+                     "hardware/interfaces/nfc/1.0/vts/types.vts",
                      "types.profiler.cpp")
         self.RunTest("PROFILER",
-                     "test/vts/specification/hal_hidl/Nfc/NfcClientCallback.vts",
+                     "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts",
                      "nfcClientCallback.profiler.cpp")
 
     def RunTest(self, mode, vts_file_path, source_file_name):

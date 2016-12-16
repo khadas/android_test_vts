@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
   vts_measurement.cpp \
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/include \
   bionic \
   libcore \
   external/protobuf/src \
@@ -40,5 +41,8 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
 LOCAL_MULTILIB := both
+
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+  $(LOCAL_PATH)/include \
 
 include $(BUILD_SHARED_LIBRARY)
