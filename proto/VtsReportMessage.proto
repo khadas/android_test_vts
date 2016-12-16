@@ -101,6 +101,13 @@ message AndroidBuildInfo {
 }
 
 
+// To specify the information about a host node.
+message VtsHostInfo {
+  // the host name (i.e., full domain name).
+  optional bytes hostname = 1;
+}
+
+
 // To specify a test case execution report.
 message TestCaseReportMessage {
   // the test case name.
@@ -191,6 +198,9 @@ message TestReportMessage {
 
   // email addresses of subscribers to the test results
   repeated bytes subscriber_email = 6;
+
+  // info about the host computer
+  optional VtsHostInfo host_info = 7;
 
   // test case reports
   repeated TestCaseReportMessage test_case = 11;
