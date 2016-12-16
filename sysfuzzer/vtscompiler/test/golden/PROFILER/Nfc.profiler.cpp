@@ -41,6 +41,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 INfcClientCallback *arg_val_0 = reinterpret_cast<INfcClientCallback*> ((*args)[0]);
@@ -49,6 +50,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -62,7 +64,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "write") == 0) {
         FunctionSpecificationMessage msg;
@@ -70,6 +72,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
@@ -82,6 +85,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -95,7 +99,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "coreInitialized") == 0) {
         FunctionSpecificationMessage msg;
@@ -103,6 +107,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 auto *arg_0 = msg.add_arg();
                 ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
@@ -115,6 +120,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -128,7 +134,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "prediscover") == 0) {
         FunctionSpecificationMessage msg;
@@ -136,11 +142,13 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 break;
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -154,7 +162,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "close") == 0) {
         FunctionSpecificationMessage msg;
@@ -162,11 +170,13 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 break;
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -180,7 +190,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "controlGranted") == 0) {
         FunctionSpecificationMessage msg;
@@ -188,11 +198,13 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 break;
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -206,7 +218,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
     if (strcmp(method, "powerCycle") == 0) {
         FunctionSpecificationMessage msg;
@@ -214,11 +226,13 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         switch (event) {
             case HidlInstrumentor::CLIENT_API_ENTRY:
             case HidlInstrumentor::SERVER_API_ENTRY:
+            case HidlInstrumentor::PASSTHROUGH_ENTRY:
             {
                 break;
             }
             case HidlInstrumentor::CLIENT_API_EXIT:
             case HidlInstrumentor::SERVER_API_EXIT:
+            case HidlInstrumentor::PASSTHROUGH_EXIT:
             {
                 auto *result_0 = msg.add_return_type_hidl();
                 int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
@@ -232,7 +246,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        profiler.AddTraceEvent(package, version, interface, msg);
+        profiler.AddTraceEvent(event, package, version, interface, msg);
     }
 }
 

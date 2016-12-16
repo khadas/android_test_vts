@@ -19,6 +19,7 @@
 
 #include <android-base/macros.h>
 #include <fstream>
+#include <hidl/HidlSupport.h>
 #include <utils/Condition.h>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -49,8 +50,9 @@ class VtsProfilingInterface {
   static VtsProfilingInterface& getInstance(const string& trace_file_path);
 
   // returns true if the given message is added to the tracing queue.
-  bool AddTraceEvent(const char* package, const char* version,
-      const char* interface, const FunctionSpecificationMessage& message);
+  bool AddTraceEvent(android::hardware::HidlInstrumentor::InstrumentationEvent event,
+      const char* package, const char* version, const char* interface,
+      const FunctionSpecificationMessage& message);
 
  private:
   string trace_file_path_;  // Path of the trace file.

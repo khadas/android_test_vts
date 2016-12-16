@@ -150,6 +150,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
 
   out << "case HidlInstrumentor::CLIENT_API_ENTRY:\n";
   out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
+  out << "case HidlInstrumentor::PASSTHROUGH_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
@@ -171,6 +172,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
 
   out << "case HidlInstrumentor::CLIENT_API_EXIT:\n";
   out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
+  out << "case HidlInstrumentor::PASSTHROUGH_EXIT:\n";
   out << "{\n";
   out.indent();
   for (int i = 0; i < method.return_type_hidl().size(); i++) {
@@ -181,7 +183,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
     out << GetCppVariableType(arg, &message) << " *" << result_value
         << " = reinterpret_cast<" << GetCppVariableType(arg, &message)
         << "*> ((*args)[" << i << "]);\n";
-
     GenerateProfilerForTypedVariable(out, arg, result_name,
                                      "(*" + result_value + ")");
   }
@@ -197,7 +198,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "}\n";
   out.unindent();
   out << "}\n";
-  out << "profiler.AddTraceEvent(package, version, interface, msg);\n";
+  out << "profiler.AddTraceEvent(event, package, version, interface, msg);\n";
   out.unindent();
   out << "}\n";
 }
