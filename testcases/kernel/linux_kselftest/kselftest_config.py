@@ -18,7 +18,7 @@
 from vts.testcases.kernel.linux_kselftest import test_case
 
 class ConfigKeys(object):
-    RUN_STAGING = "run_staging"
+    TEST_TYPE = "test_type"
 
 class ExitCode(object):
     """Exit codes for test binaries and test scripts."""
@@ -31,7 +31,8 @@ class ExitCode(object):
 # Directory on the target where the tests are copied.
 KSFT_DIR = "/data/local/tmp/linux-kselftest"
 
-KSFT_CASES_STABLE = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
+# Presubmit, stable, and staging lists are always mutually exclusive.
+KSFT_CASES_PRESUBMIT = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
     ("futex/functional/futex_wait_timeout", ["arm", "x86"], [32, 64]),
     ("futex/functional/futex_wait_wouldblock", ["arm", "x86"], [32, 64]),
     ("futex/functional/futex_requeue_pi_mismatched_ops", ["arm", "x86"], [32, 64]),
@@ -40,9 +41,8 @@ KSFT_CASES_STABLE = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
     ("net/socket", ["arm", "x86"], [32, 64]),
 ])
 
-KSFT_CASES_STAGING = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
+KSFT_CASES_STABLE = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
     ("net/psock_tpacket", ["arm", "x86"], [32, 64]),
-    ("pstore/pstore_tests", ["arm", "x86"], [32, 64]),
     ("ptrace/peeksiginfo", ["arm", "x86"], [64]),
     ("seccomp/seccomp_bpf", ["arm", "x86"], [32, 64]),
     ("timers/posix_timers", ["arm", "x86"], [32, 64]),
@@ -55,6 +55,10 @@ KSFT_CASES_STAGING = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
     ("timers/threadtest", ["arm", "x86"], [32, 64]),
     ("timers/set-tai", ["arm", "x86"], [32, 64]),
     ("timers/valid-adjtimex", ["arm", "x86"], [64]),
+])
+
+KSFT_CASES_STAGING = map(lambda x: test_case.LinuxKselftestTestcase(*(x)), [
+    ("pstore/pstore_tests", ["arm", "x86"], [32, 64]),
     ("x86/single_step_syscall", ["x86"], [32, 64]),
     ("x86/sysret_ss_attrs", ["x86"], [32]),
     ("x86/syscall_nt", ["x86"], [32, 64]),
