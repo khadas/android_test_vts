@@ -58,7 +58,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
      * @param label The name of the label.
      * @return The StatSummary object if it exists, or null otherwise.
      */
-    public StatSummary getStatReport(ByteString label) {
+    public StatSummary getStatSummary(ByteString label) {
         if (!hasLabel(label)) return null;
         return statSummaries.get(labelIndices.get(label));
     }
@@ -75,7 +75,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
                 labelIndices.put(label, statSummaries.size());
                 statSummaries.add(summary);
             }
-            StatSummary summary = getStatReport(label);
+            StatSummary summary = getStatSummary(label);
             summary.updateStats(report.getValueList().get(i));
         }
         this.labels = report.getLabelList();
