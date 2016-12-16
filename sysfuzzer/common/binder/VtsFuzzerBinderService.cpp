@@ -105,7 +105,7 @@ int32_t BpVtsFuzzer::Status(int32_t type) {
 #endif
 
   int32_t res;
-  status_t status = reply.readInt32(&res);
+  /* status_t */ reply.readInt32(&res);
   return res;
 }
 

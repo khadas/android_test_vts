@@ -128,7 +128,7 @@ SpecificationBuilder::FindComponentSpecification(const string& component_name) {
 
 FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     const vts::ComponentSpecificationMessage& iface_spec_msg,
-    const char* dll_file_name, const char* target_func_name) {
+    const char* dll_file_name, const char* /*target_func_name*/) {
   cout << __func__ << ":" << __LINE__ << " "
        << "entry" << endl;
   FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
@@ -278,7 +278,6 @@ const string& SpecificationBuilder::CallFunction(
   if (func_msg->submodule_name().size() > 0) {
     string submodule_name = func_msg->submodule_name();
     cout << __func__ << " submodule name " << submodule_name << endl;
-    vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
     if (submodule_fuzzerbase_map_.find(submodule_name)
         != submodule_fuzzerbase_map_.end()) {
       cout << __func__ << " call is for a submodule" << endl;
@@ -480,7 +479,6 @@ const string& SpecificationBuilder::GetAttribute(
   if (func_msg->submodule_name().size() > 0) {
     string submodule_name = func_msg->submodule_name();
     cout << __func__ << " submodule name " << submodule_name << endl;
-    vts::ComponentSpecificationMessage* submodule_iface_spec_msg;
     if (submodule_fuzzerbase_map_.find(submodule_name)
         != submodule_fuzzerbase_map_.end()) {
       cout << __func__ << " call is for a submodule" << endl;
