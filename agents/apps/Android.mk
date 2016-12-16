@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2016 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-vts_apk_packages := \
-  VtsAgentApp \
-  CtsVerifier \
-  sl4a
-
+include $(call all-subdir-makefiles)

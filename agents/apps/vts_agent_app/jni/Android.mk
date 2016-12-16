@@ -12,9 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# enable jni only if java build is supported, for PDK
+#ifneq ($(TARGET_BUILD_JAVA_SUPPORT_LEVEL),)
 
-vts_apk_packages := \
-  VtsAgentApp \
-  CtsVerifier \
-  sl4a
+LOCAL_PATH := $(call my-dir)
 
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libvts_agent_app_jni
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+  VtsAgentAppNativeMain.cpp
+
+LOCAL_C_INCLUDES := $(JNI_H_INCLUDE)
+
+LOCAL_MULTILIB := both
+
+include $(BUILD_SHARED_LIBRARY)

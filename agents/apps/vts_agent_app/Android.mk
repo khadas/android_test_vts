@@ -12,9 +12,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_apk_packages := \
-  VtsAgentApp \
-  CtsVerifier \
-  sl4a
+LOCAL_PATH := $(call my-dir)
 
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
+
+LOCAL_PACKAGE_NAME := VtsAgentApp
+
+LOCAL_JNI_SHARED_LIBRARIES := \
+  libvts_agent_app_jni \
+
+LOCAL_MULTILIB := both
+
+LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_DEX_PREOPT := false
+
+include $(BUILD_PACKAGE)
+
+include $(call all-makefiles-under, $(LOCAL_PATH))
