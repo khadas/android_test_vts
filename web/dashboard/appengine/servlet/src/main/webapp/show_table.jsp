@@ -13,36 +13,108 @@
   ~ implied. See the License for the specific language governing
   ~ permissions and limitations under the License.
   --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page contentType='text/html;charset=UTF-8' language='java' %>
+<%@ taglib prefix='fn' uri='http://java.sun.com/jsp/jstl/functions' %>
+<%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core'%>
 
 <html>
   <head>
     <title>VTS Table</title>
-    <link rel="icon" href="//www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png" sizes="32x32">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700">
-    <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
-    <link type="text/css" href="/css/navbar.css" rel="stylesheet">
-    <link type="text/css" href="/css/show_table.css" rel="stylesheet">
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
-    <script src="https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js"></script>
-    <script type="text/javascript">
+    <link rel='icon' href='//www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png' sizes='32x32'>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700'>
+    <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
+    <link type='text/css' href='/css/navbar.css' rel='stylesheet'>
+    <link type='text/css' href='/css/show_table.css' rel='stylesheet'>
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+    <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
+    <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
+    <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
+    <script type='text/javascript'>
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
       google.charts.setOnLoadCallback(drawProfilingTable);
       google.charts.setOnLoadCallback(drawLegendTable);
       google.charts.setOnLoadCallback(drawPieChart);
       google.charts.setOnLoadCallback(function() {
-          $(".gradient").removeClass("gradient");
+          $('.gradient').removeClass('gradient');
       });
+
+      $(document).ready(function() {
+          function verify() {
+              var oneChecked = ($('#presubmit').prop('checked') ||
+                                $('#postsubmit').prop('checked'));
+              if (!oneChecked) {
+                  $('#refresh').addClass('disabled');
+              } else {
+                  $('#refresh').removeClass('disabled');
+              }
+          }
+          $('#presubmit').prop('checked', ${showPresubmit} || false)
+                         .change(verify);
+          $('#postsubmit').prop('checked', ${showPostsubmit} || false)
+                          .change(verify);
+          $('#refresh').click(refresh);
+
+          // disable buttons on load
+          if (!${hasNewer}) {
+              $('#newer_button').toggleClass('disabled');
+          }
+          if (!${hasOlder}) {
+              $('#older_button').toggleClass('disabled');
+          }
+          $('#newer_button').click(prev);
+          $('#older_button').click(next);
+      });
+
+      // refresh the page to see the selected test types (pre-/post-submit)
+      function refresh() {
+          if($(this).hasClass('disabled')) return;
+          var link = '${pageContext.request.contextPath}' +
+              '/show_table?testName=${testName}&startTime=${startTime}' +
+              '&endTime=${endTime}';
+          if ($('#presubmit').prop('checked')) {
+              link += '&showPresubmit=';
+          }
+          if ($('#postsubmit').prop('checked')) {
+              link += '&showPostsubmit=';
+          }
+          window.open(link,'_self');
+      }
+
+      // view older data
+      function next() {
+          if($(this).hasClass('disabled')) return;
+          var endTime = ${startTime};
+          var link = '${pageContext.request.contextPath}' +
+              '/show_table?testName=${testName}&endTime=' + endTime;
+          if ($('#presubmit').prop('checked')) {
+              link += '&showPresubmit=';
+          }
+          if ($('#postsubmit').prop('checked')) {
+              link += '&showPostsubmit=';
+          }
+          window.open(link,'_self');
+      }
+
+      // view newer data
+      function prev() {
+          if($(this).hasClass('disabled')) return;
+          var startTime = ${endTime};
+          var link = '${pageContext.request.contextPath}' +
+              '/show_table?testName=${testName}&startTime=' + startTime;
+          if ($('#presubmit').prop('checked')) {
+              link += '&showPresubmit=';
+          }
+          if ($('#postsubmit').prop('checked')) {
+              link += '&showPostsubmit=';
+          }
+          window.open(link,'_self');
+        }
 
       // table for profiling data
       function drawProfilingTable() {
-          errorMessage = ${errorJson} || "";
+          errorMessage = ${errorJson} || '';
           if (errorMessage.length > 0) {
               return;
           }
@@ -80,13 +152,13 @@
           google.visualization.events.addListener(table, 'select', selectHandler);
 
           function selectHandler(e) {
-              var ctx = "${pageContext.request.contextPath}";
-              var link = ctx + "/show_graph?profilingPoint=" +
+              var ctx = '${pageContext.request.contextPath}';
+              var link = ctx + '/show_graph?profilingPoint=' +
                   data.getValue(table.getSelection()[0].row, 0) +
-                  "&testName=${testName}" +
-                  "&startTime=" + ${startTime} +
-                  "&endTime=" + ${endTime};
-              window.open(link,"_self");
+                  '&testName=${testName}' +
+                  '&startTime=' + ${startTime} +
+                  '&endTime=' + ${endTime};
+              window.open(link,'_self');
           }
       }
 
@@ -106,19 +178,19 @@
 
           // Get CSS color definitions (or default to white)
           var colors = resultNames.map(function(res) {
-              return $("." + res).css('background-color') || 'white';
+              return $('.' + res).css('background-color') || 'white';
           });
 
           var data = google.visualization.arrayToDataTable(rows);
           var title = 'Test Result Status for build ID : ${topBuildId}';
           var options = {
-            title: title,
-            is3D: false,
-            colors: colors,
-            fontName: 'Roboto',
-            fontSize: '14px',
-            legend: 'none',
-            tooltip: {showColorCode: true, ignoreBounds: true}
+              title: title,
+              is3D: false,
+              colors: colors,
+              fontName: 'Roboto',
+              fontSize: '14px',
+              legend: 'none',
+              tooltip: {showColorCode: true, ignoreBounds: true}
           };
 
           var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
@@ -179,9 +251,9 @@
                   var time = moment(cell/1000);
                   // If today, don't display the date
                   if (time.isSame(moment(), 'd')) {
-                      return time.format("H:mm:ssZZ");
+                      return time.format('H:mm:ssZZ');
                   } else {
-                      return time.format("M/D/YY H:mm:ssZZ");
+                      return time.format('M/D/YY H:mm:ssZZ');
                   }
               });
           });
@@ -209,11 +281,11 @@
       }
     </script>
 
-    <nav id="navbar">
-      <div class="nav-wrapper">
+    <nav id='navbar'>
+      <div class='nav-wrapper'>
         <span>
-          <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="#!" class="breadcrumb">${testName}</a>
+          <a href='${pageContext.request.contextPath}/' class='breadcrumb'>VTS Dashboard Home</a>
+          <a href='#!' class='breadcrumb'>${testName}</a>
         </span>
         <ul class='right'><li>
           <a id='dropdown-button' class='dropdown-button btn red lighten-3' href='#' data-activates='dropdown'>
@@ -228,72 +300,58 @@
   </head>
 
   <body>
-    <div class="container">
-      <div class="row">
-        <div class="col s6">
-          <div id="profiling_container" class="col s12 card">
+    <div class='container'>
+      <div class='row'>
+        <div class='col s12'>
+          <div class='card s12 card'>
+            <div id='legend_table_div'></div>
+            <div id='build_type_div' class='right'>
+              <input type='checkbox' id='presubmit' />
+              <label for='presubmit'>Presubmit</label>
+              <input type='checkbox' id='postsubmit' />
+              <label for='postsubmit'>Postsubmit</label>
+              <a id='refresh' class='btn-floating btn-medium red right waves-effect waves-light'>
+                <i class='medium material-icons'>cached</i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class='col s6'>
+          <div id='profiling_container' class='col s12 card'>
             <c:choose>
-              <c:when test="${not empty error}">
-                <div id="error_div" class="center-align"><h5>${error}</h5></div>
+              <c:when test='${not empty error}'>
+                <div id='error_div' class='center-align'><h5>${error}</h5></div>
               </c:when>
               <c:otherwise>
                 <!-- Profiling Table -->
-                <div id="profiling_table_div" class="center-align"></div>
+                <div id='profiling_table_div' class='center-align'></div>
               </c:otherwise>
             </c:choose>
           </div>
         </div>
-        <div class="col s6 valign-wrapper">
+        <div class='col s6 valign-wrapper'>
           <!-- pie chart -->
-          <div id="pie_chart_div" class="valign center-align card"></div>
+          <div id='pie_chart_div' class='valign center-align card'></div>
         </div>
       </div>
 
-      <div class="row">
-        <div id="legend_table_div" class="card"></div>
-        <div id="chart_holder" class="col s12 card">
+      <div class='col s12'>
+        <div id='chart_holder' class='col s12 card'>
           <!-- Grid tables-->
-          <div id="grid_table_div"></div>
+          <div id='grid_table_div'></div>
 
-          <div id="buttons" class="col s12">
-            <a id="newer_button" class="btn-floating waves-effect waves-light red"><i class="material-icons">keyboard_arrow_left</i></a>
-            <a id="older_button" class="btn-floating waves-effect waves-light red right"><i class="material-icons">keyboard_arrow_right</i></a>
+          <div id='buttons' class='col s12'>
+            <a id='newer_button' class='btn-floating waves-effect waves-light red'><i class='material-icons'>keyboard_arrow_left</i></a>
+            <a id='older_button' class='btn-floating waves-effect waves-light red right'><i class='material-icons'>keyboard_arrow_right</i></a>
           </div>
         </div>
       </div>
     </div>
-    <footer class="page-footer">
-      <div class="footer-copyright">
-          <div class="container">© 2016 - The Android Open Source Project
+    <footer class='page-footer'>
+      <div class='footer-copyright'>
+          <div class='container'>© 2016 - The Android Open Source Project
           </div>
       </div>
     </footer>
-
-    <script type="text/javascript">
-        // disable buttons on load
-        if (!${hasNewer}) {
-          $("#newer_button").toggleClass("disabled");
-        }
-        if (!${hasOlder}) {
-          $("#older_button").toggleClass("disabled");
-        }
-        $("#newer_button").click(prev);
-        $("#older_button").click(next);
-
-        // for navigating grid table through previous and next buttons
-        function next() {
-            var endTime = ${startTime};
-            var link = "${pageContext.request.contextPath}" +
-              "/show_table?testName=${testName}&endTime=" + endTime;
-            window.open(link,"_self");
-        }
-
-        function prev() {
-            var startTime = ${endTime};
-            var link = "${pageContext.request.contextPath}" +
-              "/show_table?testName=${testName}&startTime=" + startTime;
-            window.open(link,"_self");
-        }
-    </script>
   </body>
 </html>
