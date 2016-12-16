@@ -19,32 +19,37 @@ Copyright 2016 Google Inc. All Rights Reserved.
 
 <servlet>
   <servlet-name>dashboard_main</servlet-name>
-  <servlet-class>com.google.android.vts.servlet.DashboardMainServlet</servlet-class>
+  <servlet-class>com.android.vts.servlet.DashboardMainServlet</servlet-class>
 </servlet>
 
 <servlet>
   <servlet-name>show_table</servlet-name>
-  <servlet-class>com.google.android.vts.servlet.ShowTableServlet</servlet-class>
+  <servlet-class>com.android.vts.servlet.ShowTableServlet</servlet-class>
 </servlet>
 
 <servlet>
   <servlet-name>show_graph</servlet-name>
-  <servlet-class>com.google.android.vts.servlet.ShowGraphServlet</servlet-class>
+  <servlet-class>com.android.vts.servlet.ShowGraphServlet</servlet-class>
 </servlet>
 
 <servlet>
   <servlet-name>show_coverage</servlet-name>
-  <servlet-class>com.google.android.vts.servlet.ShowCoverageServlet</servlet-class>
+  <servlet-class>com.android.vts.servlet.ShowCoverageServlet</servlet-class>
+</servlet>
+
+<servlet>
+  <servlet-name>show_preferences</servlet-name>
+  <servlet-class>com.android.vts.servlet.ShowPreferencesServlet</servlet-class>
 </servlet>
 
 <servlet>
   <servlet-name>bigtable</servlet-name>
-  <servlet-class>com.google.android.vts.api.BigtableApiServlet</servlet-class>
+  <servlet-class>com.android.vts.api.BigtableApiServlet</servlet-class>
 </servlet>
 
 <servlet>
   <servlet-name>vts_alert_job</servlet-name>
-  <servlet-class>com.google.android.vts.servlet.VtsAlertJobServlet</servlet-class>
+  <servlet-class>com.android.vts.servlet.VtsAlertJobServlet</servlet-class>
 </servlet>
 
 <servlet-mapping>
@@ -53,7 +58,7 @@ Copyright 2016 Google Inc. All Rights Reserved.
 </servlet-mapping>
 
 <servlet-mapping>
-  <servlet-name>preferences</servlet-name>
+  <servlet-name>show_preferences</servlet-name>
   <url-pattern>/show_preferences/*</url-pattern>
 </servlet-mapping>
 
@@ -80,6 +85,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <servlet-mapping>
   <servlet-name>default</servlet-name>
   <url-pattern>*.css</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>default</servlet-name>
+  <url-pattern>*.js</url-pattern>
 </servlet-mapping>
 
 <servlet-mapping>

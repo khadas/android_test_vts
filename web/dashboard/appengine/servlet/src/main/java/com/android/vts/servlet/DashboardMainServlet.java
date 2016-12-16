@@ -28,8 +28,6 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,25 +35,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Represents the servlet that is invoked on loading the first page of dashboard.
  */
-@WebServlet(name = "dashboard_main", urlPatterns = {"/"})
-public class DashboardMainServlet extends HttpServlet {
+public class DashboardMainServlet extends BaseServlet {
 
     private static final String DASHBOARD_MAIN_JSP = "/dashboard_main.jsp";
     private static final String DASHBOARD_ALL_LINK = "/?showAll=true";
     private static final String DASHBOARD_FAVORITES_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
     private static final String STATUS_TABLE = "vts_status_table";
-    private static final String TABLE_PREFIX = "result_";
     private static final String ALL_HEADER = "All Tests";
     private static final String FAVORITES_HEADER = "Favorites";
     private static final String NO_FAVORITES_ERROR = "No subscribed tests. Click the edit button to add to favorites.";
@@ -65,20 +60,13 @@ public class DashboardMainServlet extends HttpServlet {
     private static final String UP_ARROW = "keyboard_arrow_up";
     private static final String DOWN_ARROW = "keyboard_arrow_down";
 
-    private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
-
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
         RequestDispatcher dispatcher = null;
-        String loginURI = userService.createLoginURL(request.getRequestURI());
-        String logoutURI = userService.createLogoutURL(loginURI);
-        if (currentUser == null || currentUser.getEmail() == null) {
-            response.sendRedirect(loginURI);
-            return;
-        }
 
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
         List<String> displayedTests = new ArrayList<>();
@@ -141,7 +129,6 @@ public class DashboardMainServlet extends HttpServlet {
 
         String[] testArray = new String[displayedTests.size()];
         displayedTests.toArray(testArray);
-        response.setContentType("text/plain");
         response.setStatus(HttpServletResponse.SC_OK);
         request.setAttribute("testNames", testArray);
         request.setAttribute("headerLabel", header);
@@ -149,14 +136,12 @@ public class DashboardMainServlet extends HttpServlet {
         request.setAttribute("buttonLabel", buttonLabel);
         request.setAttribute("buttonIcon", buttonIcon);
         request.setAttribute("buttonLink", buttonLink);
-        request.setAttribute("logoutURL", logoutURI);
-        request.setAttribute("email", currentUser.getEmail());
         request.setAttribute("error", error);
         dispatcher = request.getRequestDispatcher(DASHBOARD_MAIN_JSP);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
-            logger.info("Servlet Excpetion caught : ", e);
+            logger.log(Level.SEVERE, "Servlet Excpetion caught : ", e);
         }
     }
 }

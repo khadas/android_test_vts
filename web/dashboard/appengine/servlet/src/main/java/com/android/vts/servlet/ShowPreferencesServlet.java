@@ -31,47 +31,37 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Represents the servlet that is invoked on loading the preferences page to manage favorites.
  */
-@WebServlet(name = "preferences", urlPatterns = {"/show_preferences"})
-public class ShowPreferencesServlet extends HttpServlet {
+public class ShowPreferencesServlet extends BaseServlet {
 
     private static final String PREFERENCES_JSP = "/show_preferences.jsp";
     private static final String DASHBOARD_MAIN_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
     private static final byte[] TEST_FAMILY = Bytes.toBytes("test_to_email");
     private static final String STATUS_TABLE = "vts_status_table";
-    private static final String TABLE_PREFIX = "result_";
-    private static final Logger logger = LoggerFactory.getLogger(ShowPreferencesServlet.class);
 
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         // Get the user's information
         UserService userService = UserServiceFactory.getUserService();
         User currentUser = userService.getCurrentUser();
         RequestDispatcher dispatcher = null;
-
-        // If the user is logged out, allow them to log back in and return to the page.
-        // Set the logout URL to direct back to a login page that directs to the current request.
-        String loginURI = userService.createLoginURL(request.getRequestURI());
-        String logoutURI = userService.createLogoutURL(loginURI);
 
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
         List<String> subscribedTests = new ArrayList<>();
@@ -109,17 +99,14 @@ public class ShowPreferencesServlet extends HttpServlet {
             }
         }
 
-        response.setContentType("text/plain");
         request.setAttribute("allTestsJson", new Gson().toJson(allTests));
         request.setAttribute("subscribedTests", subscribedTests);
         request.setAttribute("subscribedTestsJson", new Gson().toJson(subscribedTests));
-        request.setAttribute("logoutURL", logoutURI);
-        request.setAttribute("email", currentUser.getEmail());
         dispatcher = request.getRequestDispatcher(PREFERENCES_JSP);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
-            logger.info("Servlet Excpetion caught : ", e);
+            logger.log(Level.SEVERE, "Servlet Excpetion caught : ", e);
         }
     }
 

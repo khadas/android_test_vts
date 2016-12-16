@@ -25,9 +25,6 @@ import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
@@ -36,8 +33,6 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,13 +44,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.MessagingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -63,10 +56,8 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet for handling requests to load individual tables.
  */
-@WebServlet(name = "show_table", urlPatterns = {"/show_table"})
-public class ShowTableServlet extends HttpServlet {
+public class ShowTableServlet extends BaseServlet {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShowTableServlet.class);
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
@@ -74,7 +65,6 @@ public class ShowTableServlet extends HttpServlet {
     private static final int TIME_INFO_ROW_COUNT = 2;
     private static final int DURATION_INFO_ROW_COUNT = 1;
     private static final int SUMMARY_ROW_COUNT = 5;
-    private static final long ONE_DAY = 86400000000L;  // units microseconds
     private static final String[] SEARCH_KEYS = {"devicebuildid", "branch", "target", "device",
                                                  "vtsbuildid"};
     private static final String SEARCH_HELP_HEADER = "Search Help";
@@ -85,10 +75,8 @@ public class ShowTableServlet extends HttpServlet {
         "a field-specific filter if specified in the format: \"field=value\".<br><br>" +
         "<b>Supported field qualifiers:</b> " + StringUtils.join(SEARCH_KEYS, ", ") + ".";
     private static final Set<String> SEARCH_KEYSET = new HashSet<String>(Arrays.asList(SEARCH_KEYS));
-    private static final String TABLE_PREFIX = "result_";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
-
 
     /**
      * Parse the search string to populate the searchPairs map and the generalTerms set.
@@ -176,11 +164,8 @@ public class ShowTableServlet extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        UserService userService = UserServiceFactory.getUserService();
-        User currentUser = userService.getCurrentUser();
-        String loginURI = userService.createLoginURL(request.getRequestURI());
-        String logoutURI = userService.createLogoutURL(loginURI);
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         boolean unfiltered = request.getParameter("unfiltered") != null;
         boolean showPresubmit = request.getParameter("showPresubmit") != null;
         boolean showPostsubmit = request.getParameter("showPostsubmit") != null;
@@ -261,8 +246,6 @@ public class ShowTableServlet extends HttpServlet {
                 return new Long(report2.getStartTimestamp()).compareTo(report1.getStartTimestamp());
             }
         };
-
-        response.setContentType("text/plain");
         table = BigtableHelper.getTable(tableName);
 
         // this is the tip of the tree and is used for populating pie chart.
@@ -539,8 +522,6 @@ public class ShowTableServlet extends HttpServlet {
         boolean hasNewer = BigtableHelper.hasNewer(table, endTime);
         boolean hasOlder = BigtableHelper.hasOlder(table, startTime);
 
-        request.setAttribute("logoutURL", logoutURI);
-        request.setAttribute("email", currentUser.getEmail());
         request.setAttribute("testName", request.getParameter("testName"));
 
         request.setAttribute("error", profilingDataAlert);
@@ -574,7 +555,7 @@ public class ShowTableServlet extends HttpServlet {
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
-            logger.error("Servlet Exception caught : " + e.toString());
+            logger.log(Level.SEVERE, "Servlet Exception caught : " + e.toString());
         }
     }
 }

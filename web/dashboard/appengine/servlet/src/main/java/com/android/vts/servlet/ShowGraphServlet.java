@@ -20,9 +20,6 @@ import com.android.vts.helpers.BigtableHelper;
 import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
@@ -31,18 +28,15 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import com.google.gson.Gson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,25 +44,18 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet for handling requests to load graphs.
  */
-@WebServlet(name = "show_graph", urlPatterns = {"/show_graph"})
-public class ShowGraphServlet extends HttpServlet {
+public class ShowGraphServlet extends BaseServlet {
 
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
-    private static final String TABLE_PREFIX = "result_";
-    private static final long ONE_DAY = 86400000000000L;  // units microseconds
-    private static final Logger logger = LoggerFactory.getLogger(ShowGraphServlet.class);
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
-        UserService userService = UserServiceFactory.getUserService();
-        User currentUser = userService.getCurrentUser();
-        String loginURI = userService.createLoginURL(request.getRequestURI());
-        String logoutURI = userService.createLogoutURL(loginURI);
 
         String profilingPointName = request.getParameter("profilingPoint");
         long startTime;
@@ -197,8 +184,6 @@ public class ShowGraphServlet extends HttpServlet {
             request.setAttribute("error", PROFILING_DATA_ALERT);
         }
 
-        request.setAttribute("logoutURL", logoutURI);
-        request.setAttribute("email", currentUser.getEmail());
         // performance data for scatter plot
         request.setAttribute("showProfilingGraph", showProfilingGraph);
         request.setAttribute("showPerformanceGraph", showPerformanceGraph);
@@ -214,12 +199,11 @@ public class ShowGraphServlet extends HttpServlet {
 
         request.setAttribute("profilingPointName", profilingPointName);
         request.setAttribute("percentileValuesJson", new Gson().toJson(percentileValuesArray));
-        response.setContentType("text/plain");
         dispatcher = request.getRequestDispatcher("/show_graph.jsp");
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
-            logger.error("Servlet Excpetion caught : ", e);
+            logger.log(Level.SEVERE, "Servlet Excpetion caught : ", e);
         }
     }
 }

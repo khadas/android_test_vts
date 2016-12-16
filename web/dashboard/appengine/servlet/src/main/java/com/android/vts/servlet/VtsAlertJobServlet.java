@@ -26,8 +26,6 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.android.vts.helpers.BigtableHelper;
 import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
@@ -51,13 +49,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,8 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Represents the notifications service which is automatically called on a fixed schedule.
  */
-@WebServlet(name = "vts_alert_job", urlPatterns = {"/cron/vts_alert_job"})
-public class VtsAlertJobServlet extends HttpServlet {
+public class VtsAlertJobServlet extends BaseServlet {
 
     private static final byte[] RESULTS_FAMILY = Bytes.toBytes("test");
     private static final byte[] TEST_FAMILY = Bytes.toBytes("test_to_email");
@@ -75,15 +72,8 @@ public class VtsAlertJobServlet extends HttpServlet {
     private static final byte[] TIME_QUALIFIER = Bytes.toBytes("upload_timestamp");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String VTS_EMAIL_NAME = "VTS Alert Bot";
-    private static final String TABLE_PREFIX = "result_";
-    private static final String EMAIL_DOMAIN = System.getenv("EMAIL_DOMAIN");
-    private static final String SENDER_EMAIL = System.getenv("SENDER_EMAIL");
-    private static final String DEFAULT_EMAIL = System.getenv("DEFAULT_EMAIL");
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
-    private static final long ONE_DAY = 86400000000L;  // units microseconds
     private static final long THREE_MINUTES = 180000000L;  // units microseconds
-
-    private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
 
     /**
      * Fetches the list of subscriber email addresses for a test.
@@ -139,7 +129,7 @@ public class VtsAlertJobServlet extends HttpServlet {
                                  new InternetAddress(email, email));
             } catch (MessagingException | UnsupportedEncodingException e) {
                 // Gracefully continue when a subscriber email is invalid.
-                logger.warn("Error sending email to recipient " + email + " : ", e);
+                logger.log(Level.WARNING, "Error sending email to recipient " + email + " : ", e);
             }
         }
         msg.setFrom(new InternetAddress(SENDER_EMAIL, VTS_EMAIL_NAME));
@@ -191,7 +181,7 @@ public class VtsAlertJobServlet extends HttpServlet {
                     try {
                         messages.add(composeEmail(emails, subject, body));
                     } catch (MessagingException | UnsupportedEncodingException e) {
-                        logger.error("Error composing email : ", e);
+                        logger.log(Level.WARNING, "Error composing email : ", e);
                     }
                 }
                 return testStatusMessage.toByteArray();
@@ -352,7 +342,7 @@ public class VtsAlertJobServlet extends HttpServlet {
             try {
                 messages.add(composeEmail(emails, subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
-                logger.error("Error composing email : ", e);
+                logger.log(Level.WARNING, "Error composing email : ", e);
             }
         } else if (continuedTestcaseFailures.size() > 0) {
             String subject = "Continued test failures in " + test + " @ " + buildId;
@@ -362,7 +352,7 @@ public class VtsAlertJobServlet extends HttpServlet {
             try {
                 messages.add(composeEmail(emails, subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
-                logger.error("Error composing email : ", e);
+                logger.log(Level.WARNING, "Error composing email : ", e);
             }
         } else if (transientTestcaseFailures.size() > 0) {
             String subject = "Transient test failure in " + test + " @ " + buildId;
@@ -372,7 +362,7 @@ public class VtsAlertJobServlet extends HttpServlet {
             try {
                 messages.add(composeEmail(emails, subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
-                logger.error("Error composing email : ", e);
+                logger.log(Level.WARNING, "Error composing email : ", e);
             }
         } else if (fixedTestcases.size() > 0) {
             String subject = "All test cases passing in " + test + " @ " + buildId;
@@ -382,7 +372,7 @@ public class VtsAlertJobServlet extends HttpServlet {
             try {
                 messages.add(composeEmail(emails, subject, body));
             } catch (MessagingException | UnsupportedEncodingException e) {
-                logger.error("Error composing email : ", e);
+                logger.log(Level.WARNING, "Error composing email : ", e);
             }
         }
         Builder builder = VtsWebStatusMessage.TestStatusMessage.newBuilder();
@@ -393,7 +383,14 @@ public class VtsAlertJobServlet extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        doGetHandler(request, response);
+    }
+
+    @Override
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
         Scan scan = new Scan();
         scan.addFamily(STATUS_FAMILY);
@@ -410,7 +407,7 @@ public class VtsAlertJobServlet extends HttpServlet {
                     result.getValue(STATUS_FAMILY, TIME_QUALIFIER)));
             } catch (NumberFormatException e) {
                 // If no upload timestamp, skip this row.
-                logger.warn("Error parsing upload timestamp: ", e);
+                logger.log(Level.WARNING, "Error parsing upload timestamp: ", e);
                 continue;
             }
             List<Message> messageQueue = new ArrayList<>();
@@ -435,7 +432,7 @@ public class VtsAlertJobServlet extends HttpServlet {
                     try {
                         Transport.send(msg);
                     } catch (MessagingException e) {
-                        logger.error("Error sending email : ", e);
+                        logger.log(Level.WARNING, "Error sending email : ", e);
                     }
                 }
             }

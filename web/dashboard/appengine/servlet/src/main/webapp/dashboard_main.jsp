@@ -26,8 +26,12 @@
   <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
   <link rel='stylesheet' href='/css/navbar.css'>
   <link rel='stylesheet' href='/css/dashboard_main.css'>
+  <script src='/js/analytics.js' type='text/javascript'></script>
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
   <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
+  <script>
+      if (${analytics_id}) analytics_init(${analytics_id});
+  </script>
   <head>
     <title>VTS Dashboard</title>
 

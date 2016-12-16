@@ -25,12 +25,14 @@
     <link type="text/css" href="/css/navbar.css" rel="stylesheet">
     <link type="text/css" href="/css/show_graph.css" rel="stylesheet">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css">
+    <script src="/js/analytics.js" type="text/javascript"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
+    <script src='/js/analytics.js' type='text/javascript'></script>
     <title>Graph</title>
     <script type="text/javascript">
+      if (${analytics_id}) analytics_init(${analytics_id});
       google.charts.load("current", {packages:["corechart", "table", "line"]});
       google.charts.setOnLoadCallback(drawProfilingChart);
       google.charts.setOnLoadCallback(drawPerformanceChart);
