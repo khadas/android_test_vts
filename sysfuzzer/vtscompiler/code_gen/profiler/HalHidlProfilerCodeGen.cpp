@@ -47,7 +47,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForEnumVariable(Formatter& out,
 
   // For predefined type, call the corresponding profile method.
   if (val.has_predefined_type()) {
-    out << "profile__" << val.predefined_type() << "(" << arg_name << ", "
+    std::string predefined_type = val.predefined_type();
+    ReplaceSubString(predefined_type, "::", "__");
+    out << "profile__" << predefined_type << "(" << arg_name << ", "
         << arg_value << ");\n";
   } else {
     const std::string scalar_type = val.enum_value().scalar_type();
@@ -96,7 +98,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForStructVariable(Formatter& out,
   out << arg_name << "->set_type(TYPE_STRUCT);\n";
   // For predefined type, call the corresponding profile method.
   if (val.struct_value().size() == 0 && val.has_predefined_type()) {
-    out << "profile__" << val.predefined_type() << "(" << arg_name << ", "
+    std::string predefined_type = val.predefined_type();
+    ReplaceSubString(predefined_type, "::", "__");
+    out << "profile__" << predefined_type << "(" << arg_name << ", "
         << arg_value << ");\n";
   } else {
     for (const auto struct_field : val.struct_value()) {
@@ -115,7 +119,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForUnionVariable(Formatter& out,
   out << arg_name << "->set_type(TYPE_UNION);\n";
   // For predefined type, call the corresponding profile method.
   if (val.union_value().size() == 0 && val.has_predefined_type()) {
-    out << "profile__" << val.predefined_type() << "(" << arg_name << ", "
+    std::string predefined_type = val.predefined_type();
+    ReplaceSubString(predefined_type, "::", "__");
+    out << "profile__" << predefined_type << "(" << arg_name << ", "
         << arg_value << ");\n";
   } else {
     for (const auto union_field : val.union_value()) {
@@ -142,8 +148,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "switch (event) {\n";
   out.indent();
 
-  out << "case android::hardware::HidlInstrumentor::CLIENT_API_ENTRY:\n";
-  out << "case android::hardware::HidlInstrumentor::SERVER_API_ENTRY:\n";
+  out << "case HidlInstrumentor::CLIENT_API_ENTRY:\n";
+  out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
@@ -163,8 +169,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out.unindent();
   out << "}\n";
 
-  out << "case android::hardware::HidlInstrumentor::CLIENT_API_EXIT:\n";
-  out << "case android::hardware::HidlInstrumentor::SERVER_API_EXIT:\n";
+  out << "case HidlInstrumentor::CLIENT_API_EXIT:\n";
+  out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
   out << "{\n";
   out.indent();
   for (int i = 0; i < method.return_type_hidl().size(); i++) {
@@ -245,6 +251,7 @@ void HalHidlProfilerCodeGen::GenerateUsingDeclaration(Formatter& out,
   out << "using namespace ";
   out << package_path << "::"
       << GetVersionString(message.component_type_version(), true) << ";\n";
+  out << "using namespace android::hardware;\n";
   out << "\n";
 }
 

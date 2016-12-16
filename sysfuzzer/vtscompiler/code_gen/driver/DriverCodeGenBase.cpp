@@ -447,9 +447,9 @@ void DriverCodeGenBase::GenerateClassHeader(
           message.attribute(attr_idx) :
           message.interface().attribute(attr_idx - message.attribute_size());
       if (attribute.type() == TYPE_ENUM) {
-        GenerateNamespaceName(h_ss, message);
-        h_ss << "::" << attribute.name() << " "
-             << "Random" << attribute.name() << "();"
+        std::string attribute_name = attribute.name();
+        ReplaceSubString(attribute_name, "::", "__");
+        h_ss << attribute.name() << " " << "Random" << attribute_name << "();"
              << endl;
       } else if (attribute.type() == TYPE_STRUCT) {
         h_ss << "void " << "MessageTo" << attribute.name()
