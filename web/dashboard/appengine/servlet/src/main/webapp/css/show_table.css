@@ -47,9 +47,12 @@ table {
 }
 .page-button-wrapper {
     top: 50%;
+    bottom: auto;
+    padding: 0;
 }
 #newer-wrapper {
     left: 23px;
+    right: auto;
 }
 #chart_holder {
     padding: 30px 5px;
