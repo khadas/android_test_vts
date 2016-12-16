@@ -93,8 +93,6 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
         result = self.dut.hal.nfc.close()
         logging.info("close result: %s", result)
 
-        time.sleep(5)
-
 
 if __name__ == "__main__":
     test_runner.main()
