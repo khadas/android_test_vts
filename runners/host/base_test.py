@@ -86,10 +86,7 @@ class BaseTestClass(object):
                     setattr(self, filter, filter_expanded)
 
         # Set abi bitness (optional)
-        self.abi_bitness = None
-        if keys.ConfigKeys.IKEY_ABI_BITNESS in self.user_params:
-            self.abi_bitness = self.user_params[
-                keys.ConfigKeys.IKEY_ABI_BITNESS]
+        self.abi_bitness = self.getUserParam(keys.ConfigKeys.IKEY_ABI_BITNESS)
 
     def __enter__(self):
         return self
@@ -132,6 +129,48 @@ class BaseTestClass(object):
                               "configuration, continue."), name)
             else:
                 setattr(self, name, self.user_params[name])
+
+    def getUserParam(self, param_name, error_if_not_found=False, default_value=None):
+        """Get the value of a single user parameter.
+
+        This method returns the value of specified user parameter.
+        Note: this method will not automatically set attribute using the parameter name and value.
+
+        Args:
+            param_name: string or list of string, denoting user parameter names. If provided
+                        a single string, self.user_params["<param_name>"] will be accessed.
+                        If provided multiple strings,
+                        self.user_params["<param_name1>"]["<param_name2>"]["<param_name3>"]...
+                        will be accessed.
+            error_if_not_found: bool, whether to raise error if parameter not exists. Default:
+                                False
+            default_value: object, default value to return if not found. If error_if_not_found is
+                           True, this parameter has no effect. Default: None
+
+        Returns:
+            object, value of the specified parameter name chain if exists;
+            <default_value> if not exists.
+        """
+        if not param_name:
+            if error_if_not_found:
+                raise errors.BaseTestError("empty param_name provided")
+            logging.error("empty param_name")
+            return default_value
+
+        if not isinstance(param_name, list):
+            param_name = [param_name]
+
+        curr_obj = self.user_params
+        for param in param_name:
+            if param not in curr_obj:
+                if error_if_not_found:
+                    raise errors.BaseTestError(
+                        ("Missing user param '%s' "
+                         "in test configuration.") % name)
+                return default_value
+            curr_obj = curr_obj[param]
+
+        return curr_obj
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
