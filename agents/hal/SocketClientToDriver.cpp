@@ -189,10 +189,10 @@ int32_t VtsDriverSocketClient::Status(int32_t type) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);
   command_message.set_status_type(type);
-  if (!VtsSocketSendMessage(command_message)) return NULL;
+  if (!VtsSocketSendMessage(command_message)) return 0;
 
   VtsDriverControlResponseMessage response_message;
-  if (!VtsSocketRecvMessage(&response_message)) return NULL;
+  if (!VtsSocketRecvMessage(&response_message)) return 0;
   return response_message.return_value();
 }
 
