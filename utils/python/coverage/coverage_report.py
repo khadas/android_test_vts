@@ -31,27 +31,8 @@ import os
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 
-TABLE_STYLE = (
-    "border=0 style=\"width: 100%; word-spacing: 5px;"
-    "font-family: monospace; white-space:PRE; border-collapse: collapse\"")
 
-COUNT_STYLE = (
-    "style=\"white-space:nowrap; text-align:right; border-right: 1px "
-    "solid black; padding-right: 5px; font-style: bold\"")
-
-LINE_NO_STYLE = (
-    "style=\"padding-left: 35px; white-space:nowrap; padding-right:5px; "
-    "border-right: 1px dotted gray\"")
-
-SRC_LINE_STYLE = "style=\"padding-left: 10px;width:99%\""
-
-UNCOVERED_STYLE = "bgcolor=\"LightPink\""
-
-COVERED_STYLE = "bgcolor=\"LightGreen\""
-
-
-def GenerateLineCoverageVector(src_file_name, src_file_length,
-                               gcno_file_content, gcda_file_content):
+def GenerateLineCoverageVector(src_file_name, gcno_file_summary):
     """Returns a list of invocation counts for each line in the file.
 
     Parses the GCNO and GCDA file specified to calculate the number of times
@@ -59,101 +40,31 @@ def GenerateLineCoverageVector(src_file_name, src_file_length,
 
     Args:
         src_file_name: string, the source file name.
-        src_file_length: int, the number of lines in the src file.
-        gcno_file_content: string, the raw gcno binary file content.
-        gcda_file_content: string, the raw gcda binary file content.
+        gcno_file_summary: FileSummary object after gcno and gcda files have
+                           been parsed.
 
     Returns:
         A list of non-negative integers or -1 representing the number of times
         the i-th line was executed. -1 indicates a line that is not executable.
     """
-    if gcno_file_content:
-        logging.info("GenerateLineCoverageVector: gcno_file_content %d bytes",
-                     len(gcno_file_content))
-    if gcda_file_content:
-        logging.info("GenerateLineCoverageVector: gcda_file_content %d bytes",
-                     len(gcda_file_content))
-    gcno_stream = io.BytesIO(gcno_file_content)
-    file_summary = gcno_parser.GCNOParser(gcno_stream).Parse()
-    gcda_stream = io.BytesIO(gcda_file_content)
-    gcda_parser.GCDAParser(gcda_stream, file_summary).Parse()
-    src_lines_counts = [-1] * src_file_length
-    logging.info("GenerateLineCoverageVector: src file lines %d",
-                 src_file_length)
-    for ident in file_summary.functions:
-        func = file_summary.functions[ident]
-        if not src_file_name.endswith(os.path.basename(func.src_file_name)):
-            logging.warn("GenerateLineCoverageVector: %s file is skipped",
-                         func.src_file_name)
+    src_lines_counts = []
+    for ident in gcno_file_summary.functions:
+        func = gcno_file_summary.functions[ident]
+        if not src_file_name == func.src_file_name:
+            logging.warn("GenerateLineCoverageVector: \"%s\" file is skipped \"%s\"",
+                         func.src_file_name, src_file_name)
             continue
         for block in func.blocks:
             for line in block.lines:
                 logging.info("GenerateLineCoverageVector: covered line %s",
                              line)
-                if line >= 0 and line < len(src_lines_counts):
-                    if src_lines_counts[line - 1] < 0:
-                        src_lines_counts[line - 1] = 0
-                    src_lines_counts[line - 1] += block.count
-                else:
-                    logging.error(
-                        "GenerateLineCoverageVector: line mismatch %s", line)
+                if line > len(src_lines_counts):
+                    src_lines_counts.extend([-1] *
+                                            (line - len(src_lines_counts)))
+                if src_lines_counts[line - 1] < 0:
+                    src_lines_counts[line - 1] = 0
+                src_lines_counts[line - 1] += block.count
     return src_lines_counts
-
-
-def GenerateCoverageHTML(src_file_content, src_lines_counts):
-    """Generates an HTML coverage report given the source and the counts.
-
-    Outputs an HTML file containing coverage information for the provided
-    source file. Creates a table with a row for each line of code and a
-    cell for the coverage count, line number, and source code.
-
-    Args:
-        src_file_content: string, the C/C++ source file content.
-        src_lines_counts: A list of non-negative integers or -1 representing the
-                          number of times the i-th line was executed. -1
-                          indicates the line is not executable.
-
-    Returns:
-       the coverage HTML produced for the src_file_content.
-    """
-    html = "<div><table %s>\n" % TABLE_STYLE
-    src_lines = src_file_content.split('\n')
-    for line_no in range(len(src_lines)):
-        if src_lines_counts[line_no] < 0:  #  Not executable
-            html += "<tr>\n<td %s>--</td>\n" % COUNT_STYLE
-        elif not src_lines_counts[line_no]:  #  Uncovered line
-            html += "<tr %s>\n<td %s>%i</td>\n" % (
-                UNCOVERED_STYLE, COUNT_STYLE, src_lines_counts[line_no])
-        else:  #  covered line
-            html += "<tr %s>\n<td %s>%i</td>\n" % (COVERED_STYLE, COUNT_STYLE,
-                                                   src_lines_counts[line_no])
-        html += "<td %s>%i</td>\n" % (LINE_NO_STYLE, line_no + 1)
-        html += "<td %s>%s</td>\n</tr>\n" % (SRC_LINE_STYLE,
-                                             cgi.escape(src_lines[line_no]))
-    html += "</table></div>"
-    return html
-
-
-def GenerateCoverageReport(src_file_name, src_file_content, gcno_file_content,
-                           gcda_file_content):
-    """Returns the produced html file contents.
-
-    This produces a coverage html file using the source file as well as the
-    GCNO and GCDA file contents.
-
-    Args:
-        src_file_name: string, the source file name.
-        src_file_content: string, the C/C++ source file content.
-        gcno_file_content: string, the raw gcno binary file content.
-        gcda_file_content: string, the raw gcda binary file content.
-
-    Returns:
-        the coverage HTML produced for 'src_file_name'.
-    """
-    src_lines = src_file_content.split('\n')
-    src_lines_counts = GenerateLineCoverageVector(
-        src_file_name, len(src_lines), gcno_file_content, gcda_file_content)
-    return GenerateCoverageHTML(src_file_content, src_lines_counts)
 
 
 def GetCoverageStats(src_lines_counts):

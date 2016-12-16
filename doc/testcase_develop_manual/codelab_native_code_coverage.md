@@ -2,58 +2,34 @@
 
 ## 1. Build Rule Configuration
 
-### 1.1. Compile with code coverage instrumentation
+### 1.1. Enable code coverage instrumentation
 
-To enable code global coverage instrumentation, first let's set
-the let's set the environment. Copy the command to the terminal:
-
-`export NATIVE_COVERAGE=true`
-
-Next, copy and paste the following:
-
-`LOCAL_NATIVE_COVERAGE := true`
-
-to a target module specified in its Android.mk file.
-
-An alternative way is to add:
+To enable code global coverage instrumentation, two environment variables must be
+set: NATIVE_COVERAGE must be set to true and COVERAGE_DIRS must specify a space-
+delimited list of directories for which coverage will be enabled. For example:
 
 ```
-LOCAL_SANITIZE := never
-LOCAL_CLANG := true
-LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
-LOCAL_LDFLAGS += --coverage
+export NATIVE_COVERAGE=true
+export COVERAGE_DIRS="test/vts/hals/light"
 ```
 
-directly to the same file.
+To enable coverage on more than one directory, simply add it to the COVERAGE_DIRS
+variable using spaces to delimit entries.
 
-### 1.2. Copy Source and GCNO files
 
-For the build system to be able to copy the target source and GCNO files, the
-following shall be added right below a target module specified its Android.mk
+
+
+### 1.2. Configure module makefile
+
+For the runner to be able to locate coverage files later, the
+following must be added right below a target module specified its Android.mk
 file.
 
 ```
 include $(BUILD_SHARED_LIBRARY)
 include test/vts/tools/build/Android.packaging_sharedlib.mk
-
-VTS_GCOV_SRC_DIR := test/vts/hals/<module>/<product>
-VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
-include test/vts/tools/build/Android.packaging_gcno.mk
 ```
 
-An example for lights HAL is:
-
-```
-include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
-
-VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
-VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
-VTS_GCNO_OBJ_DIR_NAME := out/target/product/$(TARGET_PRODUCT)/obj
-include test/vts/tools/build/Android.packaging_gcno.mk
-```
-
-and is available at `test/vts/hals/light/bullhead/Android.mk`.
 
 ## 2. Modify Your VTS Test Case
 
@@ -63,7 +39,7 @@ gives an overview of how to write a VTS test case. This section assumes you have
 completed that codelab and have at least one VTS test case which you would like
 to enable this code coverage measurement.
 
-### 2.1. Enable uploading
+### 2.1. Enable webservice uploading
 
 In order to upload the measured code coverage data to a Google App Engine (GAE)
 hosted database and show that on your VTS dashboard, let's add:
@@ -73,22 +49,27 @@ hosted database and show that on your VTS dashboard, let's add:
 to `<target test case name>.config` file.
 
 Then let's also specify the source files which you have enabled code coverage
-instrumentation and would like to see the measured line coverage data by adding
+instrumentation and would like to see the measured line coverage data by adding:
 
-`"coverage_src_files": ["<module_name>/<source file name with extension>"]`
+```
+"modules": ["<module-name>",...],
+"git_project_path": "<git-project-name>",
+"git_project_name": "<git-project-path>"
+```
 
-to the same config file.
+to the same config file. Note that the module name must match the local module
+name specified in the Android.mk file for which coverage was enabled; necessary
+coverage files are identified by their parent module. Also, project path should
+be relative to the Android root.
 
-Then the target config file would look like:
+For the lights HAL, the target config file would look like:
 
 ```
 {
-    "test_bed":
     ...
-    "log_path": "/tmp/logs",
-    "test_paths": ["./"],
-    "use_gae_db": true,
-    "coverage_src_files": ["lights.vts/lights.c"]]
+    "modules": ["system/lib64/hw/lights.vts"],
+    "git_project_path": "test/vts",
+    "git_project_name": "platform/test/vts"
 }
 ```
 
@@ -117,4 +98,5 @@ An example is available at
 
 That's all. Once all your changes are merged, let's wait for a couple of hours
 until the test serving infrastructure catches up. Then visit your VTS web site
-to find the measured code coverage result.
+to find the measured code coverage result. Coverage information will be available
+for tests run against coverage-instrumented device builds.
