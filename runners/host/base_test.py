@@ -433,7 +433,7 @@ class BaseTestClass(object):
         if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
             bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
             run_32bit_on_64bit_abi = getattr(
-                 keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, False)
+                self, keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, False)
             asserts.skipIf(
                 (test_name.lower().endswith(const.SUFFIX_32BIT) and
                  bitness != "32") or
