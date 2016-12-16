@@ -19,6 +19,7 @@ import getpass
 import io
 import logging
 import os
+import socket
 import traceback
 import time
 import xml.etree.ElementTree as ET
@@ -116,6 +117,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
+            self._report_msg.host_info.hostname = socket.gethostname()
             self.SetDeviceInfo(self._report_msg)
             self.InitializeCoverage()
         self._profiling = {}
