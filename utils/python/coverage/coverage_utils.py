@@ -28,6 +28,12 @@ from vts.utils.python.coverage.parser import FileFormatError
 TARGET_COVERAGE_PATH = "/data/local/tmp/"
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"
 
+COVERAGE_SUFFIX = ".gcnodir"
+GIT_PROJECT = "git_project"
+MODULE_NAME = "module_name"
+NAME = "name"
+PATH = "path"
+
 
 def InitializeDeviceCoverage(dut):
     """Initializes the device for coverage before tests run.
@@ -78,8 +84,7 @@ def GetGcdaDict(dut, local_coverage_path=None):
             gcda_dict[basename] = gcda_content
     return gcda_dict
 
-def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
-                        project_name, project_path, revision):
+def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict, revision_dict):
     """Process coverage data and appends coverage reports to the report message.
 
     Opens the gcno files in the cov_zip for the specified modules and matches
@@ -92,13 +97,33 @@ def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
         cov_zip: the zip file containing gcnodir files from the device build
         modules: the list of module names for which to enable coverage
         gcda_dict: the dictionary of gcda basenames to gcda content (binary string)
-        project_name: the git project name (string) containing the source code
-                      corresponding to the gcno files
-        project_path: the path (string) to the git project root
-        revision: the commit ID used to identify the version of the source code.
+        revision_dict: the dictionary with project names as keys and revision ID
+                       strings as values.
     """
-    gcnodirs = set([m + '.gcnodir' for m in modules])
-    for name in [name for name in cov_zip.namelist() if name in gcnodirs]:
+    covered_modules = set(cov_zip.namelist())
+    for module in modules:
+        if MODULE_NAME not in module or GIT_PROJECT not in module:
+            logging.error("Coverage module must specify name and git project: %s",
+                          module)
+            continue
+        project = module[GIT_PROJECT]
+        if PATH not in project or NAME not in project:
+            logging.error("Project name and path not specified: %s", project)
+            continue
+
+        name = str(module[MODULE_NAME]) + COVERAGE_SUFFIX
+        git_project = str(project[NAME])
+        git_project_path = str(project[PATH])
+
+        if name not in covered_modules:
+            logging.error("No coverage information for module %s", name)
+            continue
+        if git_project not in revision_dict:
+            logging.error("Git project not present in device revision dict: %s",
+                          git_project)
+            continue
+
+        revision = str(revision_dict[git_project])
         archive = archive_parser.Archive(cov_zip.open(name).read())
         try:
             archive.Parse()
@@ -158,8 +183,7 @@ def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
             coverage.total_line_count, coverage.covered_line_count = (
                 coverage_report.GetCoverageStats(coverage_vec))
             coverage.line_coverage_vector.extend(coverage_vec)
-            src_file_path = os.path.relpath(src_file_path,
-                                            project_path)
+            src_file_path = os.path.relpath(src_file_path, git_project_path)
             coverage.file_path = src_file_path
-            coverage.revision = str(revision)
-            coverage.project_name = str(project_name)
+            coverage.revision = revision
+            coverage.project_name = git_project
