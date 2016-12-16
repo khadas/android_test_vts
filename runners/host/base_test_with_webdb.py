@@ -24,8 +24,9 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 
-from vts.proto import VtsReportMessage_pb2 as ReportMsg
+from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 
+from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import errors
@@ -65,11 +66,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         _profiling: a dict containing the current profiling information.
     """
     USE_GAE_DB = "use_gae_db"
+    COVERAGE = "coverage"
     MODULES = "modules"
     GIT_PROJECT_NAME = "git_project_name"
     GIT_PROJECT_PATH = "git_project_path"
     SERVICE_JSON_PATH = "service_key_json_path"
-    COVERAGE_ATTRIBUTE = "_gcov_coverage_data_dict"
+    COVERAGE_ZIP = "coverage_zip"
+    REVISION = "revision"
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
     BRANCH = "master"
@@ -112,9 +115,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
             self.SetDeviceInfo(self._report_msg)
-
+            self.InitializeCoverage()
         self._profiling = {}
-        setattr(self, self.COVERAGE_ATTRIBUTE, [])
         return super(BaseTestWithWebDbClass, self)._setUpClass()
 
     def _tearDownClass(self):
@@ -221,14 +223,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         if getattr(self, self.USE_GAE_DB, False):
             self._current_test_report_msg.end_timestamp = self.GetTimestamp()
-            if hasattr(self, self.MODULES):
-                if not hasattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH):
-                    logging.warning("data_file_path not set. PATH=%s",
-                                    os.environ["PATH"])
-                else:
-                    self.ProcessCoverageData()
-            else:
-                logging.info("coverage - no coverage src file specified")
         return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
     def _onFail(self, record):
@@ -378,60 +372,45 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = value
         return True
 
-    def SetCoverageData(self, raw_coverage_data):
-        """Sets the given coverage data to the class-level list attribute.
+    def InitializeCoverage(self):
+        """Initializes the test for coverage instrumentation.
 
-        In case of gcda, the file is always appended so the last one alone is
-        sufficient for coverage visualization.
-
-        Args:
-            raw_coverage_data: a list of NativeCodeCoverageRawDataMessage.
-        """
-        logging.info("SetCoverageData %s", raw_coverage_data)
-        setattr(self, self.COVERAGE_ATTRIBUTE, raw_coverage_data)
-
-    def ProcessCoverageData(self):
-        """Process reported coverage data.
+        Reads required user params and downloads build artifacts from the build
+        server (gcno zip file and git revision dictionary).
 
         Returns:
-            True if successful, False otherwise.
+            True if test is ready for coverage instrumentation, False otherwise.
         """
-        logging.info("processing coverage data")
+        setattr(self, self.COVERAGE, False)
+        if len(self._report_msg.device_info) == 0:
+            logging.error("could not read device info")
+            return False
 
-        build_flavor = None
-        product = None
-        if len(self._report_msg.device_info) > 0:
-            # Use first device info to get product, flavor, and ID
-            # TODO: support multi-device builds
-            device_spec = self._report_msg.device_info[0]
-            build_flavor = getattr(device_spec,
-                                   keys.ConfigKeys.IKEY_BUILD_FLAVOR, None)
-            product = getattr(device_spec,
-                              keys.ConfigKeys.IKEY_PRODUCT_VARIANT, None)
-            device_build_id = getattr(device_spec,
-                                      keys.ConfigKeys.IKEY_BUILD_ID, None)
+        # Use first device info to get product, flavor, and ID
+        # TODO: support multi-device builds
+        device_spec = self._report_msg.device_info[0]
+        build_flavor = getattr(device_spec,
+                               keys.ConfigKeys.IKEY_BUILD_FLAVOR, None)
+        product = getattr(device_spec,
+                          keys.ConfigKeys.IKEY_PRODUCT_VARIANT, None)
+        device_build_id = getattr(device_spec,
+                                  keys.ConfigKeys.IKEY_BUILD_ID, None)
 
         if not build_flavor or not product or not device_build_id:
             logging.error("Could not read device information.")
             return False
-        else:
-            build_flavor += "_coverage"
-
-        gcda_dict = getattr(self, self.COVERAGE_ATTRIBUTE, [])
-        if not gcda_dict:
-            logging.error("no coverage data found")
-            return False
+        build_flavor += "_coverage"
 
         # Get service json path
         service_json_path = getattr(self, self.SERVICE_JSON_PATH, False)
         if not service_json_path:
-            logging.error("couldn't find project name")
+            logging.error("couldn't find service json path")
             return False
 
         # Get project name
         project_name = getattr(self, self.GIT_PROJECT_NAME, False)
         if not project_name:
-            logging.error("couldn't find project name")
+            logging.error("couldn't find git project name")
             return False
 
         # Get project path
@@ -474,15 +453,69 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         except:
             logging.error("Could not read coverage zip for branch %s, " +
                           "target %s, id: %s, product: %s" %
-                          (self.BRANCH, build_flavor, device_build_id, product
-                           ))
+                          (self.BRANCH, build_flavor, device_build_id, product))
+            return False
+        setattr(self, self.COVERAGE_ZIP, cov_zip)
+        setattr(self, self.REVISION, revision)
+        setattr(self, self.COVERAGE, True)
+        return True
+
+    def SetCoverageData(self, coverage_data, isGlobal=False):
+        """Sets and processes coverage data.
+
+        Organizes coverage data and processes it into a coverage report in the
+        current test case
+
+        Args:
+            coverage_data may be either:
+                          (1) a dict where gcda name is the key and binary
+                              content is the value, or
+                          (2) a list of NativeCodeCoverageRawDataMessage objects
+            isGlobal: True if the coverage data is for the entire test, False if
+                      if the coverage data is just for the current test case.
+
+        Returns:
+            True if the coverage data is successfully processed, False otherwise
+        """
+        logging.info("SetCoverageData %s", coverage_data)
+
+        if not getattr(self, self.COVERAGE, False):
+            logging.info("coverage disabled")
             return False
 
-        # Load and parse the gcno archive
-        modules = getattr(self, self.MODULES)
-        coverage_utils.GenerateCoverageMessages(self._report_msg, cov_zip,
-                                                modules, gcda_dict, project_name,
-                                                project_path, revision)
+        if not coverage_data:
+            logging.info("SetCoverageData: empty coverage data")
+            return False
+
+        if isinstance(coverage_data, RepeatedCompositeFieldContainer):
+            gcda_dict = {}
+            for coverage_msg in coverage_data:
+                logging.info("coverage file_path %s",
+                             coverage_msg.file_path)
+                logging.info("coverage gcda len %d bytes",
+                             len(coverage_msg.gcda))
+                gcda_dict[coverage_msg.file_path] = coverage_msg.gcda
+        elif isinstance(coverage_data, dict):
+            gcda_dict = coverage_data
+        else:
+            logging.error("unexpected coverage_data type: %s",
+                         str(type(coverage_data)))
+            return False
+        report_msg = self._report_msg if isGlobal else self._current_test_report_msg
+
+        try:
+            cov_zip = getattr(self, self.COVERAGE_ZIP)
+            modules = getattr(self, self.MODULES)
+            project_name = getattr(self, self.GIT_PROJECT_NAME)
+            project_path = getattr(self, self.GIT_PROJECT_PATH)
+            revision = getattr(self, self.REVISION)
+        except AttributeError as e:
+            logging.error("attributes not found %s", str(e))
+            return False
+
+        coverage_utils.ProcessCoverageData(report_msg, cov_zip, modules,
+                                           gcda_dict, project_name,
+                                           project_path, revision)
         return True
 
     def ProcessAndUploadTraceData(self, dut, profiling_trace_path):
