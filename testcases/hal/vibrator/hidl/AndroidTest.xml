@@ -15,10 +15,8 @@
 -->
 <configuration description="Config for VTS HAL vibrator test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
-        <option name="push-group" value="HostDrivenTest.push" />
+        <option name="push-group" value="HidlHalTest.push" />
         <option name="cleanup" value="true" />
-        <option name="push" value="DATA/lib/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/32/libvts_driver_hidl_vibrator@1.0.so" />
-        <option name="push" value="DATA/lib64/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/64/libvts_driver_hidl_vibrator@1.0.so" />
         <option name="push" value="spec/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts->/data/local/tmp/spec/Vibrator.vts" />
         <option name="push" value="spec/hardware/interfaces/vibrator/1.0/vts/types.vts->/data/local/tmp/spec/types.vts" />
     </target_preparer>
