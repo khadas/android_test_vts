@@ -26,6 +26,6 @@ vts_test_bin_packages := \
   bionic-unit-tests-static \
 
 # some CTS packages for record-and-replay test development purpose
-vts_test_bin_packages := \
+vts_test_bin_packages += \
   CtsAccelerationTestCases \
   CtsSensorTestCases \
