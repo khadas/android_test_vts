@@ -133,11 +133,13 @@ class TestCasesParser(object):
                 continue
 
             # For failing tests that are being inspected
-            if (not run_staging and self.IsTestcaseInList(
-                    testcase, ltp_configs.STAGING_TESTS, n_bit)):
-                logging.info("[Parser] Skipping test case %s. Reason: "
-                             "staging" % testcase.fullname)
-                continue
+            if self.IsTestcaseInList(testcase, ltp_configs.STAGING_TESTS, n_bit):
+                if not run_staging:
+                    logging.info("[Parser] Skipping test case %s. Reason: "
+                                 "staging" % testcase.fullname)
+                    continue
+                else:
+                    testcase.note = "staging"
 
             logging.info("[Parser] Adding test case %s." % testcase.fullname)
             yield testcase
