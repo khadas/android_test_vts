@@ -772,6 +772,27 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                    << struct_value.vector_value(0).type() << "\n";
               exit(-1);
             }
+          } else if (struct_value.type() == TYPE_ARRAY) {
+            out << "for (int value_index = 0; value_index < "
+                << "var_msg.struct_value(" << struct_index
+                << ").vector_size(); "
+                << "value_index++) {" << "\n";
+            out.indent();
+            if (struct_value.vector_value(0).type() == TYPE_SCALAR) {
+              out << "arg->" << struct_value.name() << "[value_index] = "
+                  << "var_msg.struct_value(" << struct_index
+                  << ").vector_value(value_index).scalar_value()."
+                  << struct_value.vector_value(0).scalar_type() << "();"
+                  << "\n";
+            } else {
+              // TODO(yim): support other types and consider using a recursion or
+              // at least common functions to generate such.
+              cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+                   << struct_value.vector_value(0).type() << "\n";
+              exit(-1);
+            }
+            out.unindent();
+            out << "}" << "\n";
           } else if (struct_value.type() == TYPE_ENUM) {
             std::string enum_attribute_name = struct_value.predefined_type();
             ReplaceSubString(enum_attribute_name, "::", "__");
