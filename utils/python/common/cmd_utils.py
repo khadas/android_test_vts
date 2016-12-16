@@ -69,6 +69,4 @@ def ExecuteShellCommand(cmd):
 
     results = [ExecuteOneShellCommand(command) for command in cmd]
     stdout, stderr, exit_code = zip(*results)
-    return {STDOUT: stdout,
-            STDERR: stderr,
-            EXIT_CODE: exit_code}
+    return {STDOUT: stdout, STDERR: stderr, EXIT_CODE: exit_code}

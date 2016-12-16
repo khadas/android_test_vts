@@ -18,7 +18,11 @@
 import itertools
 
 
-def ExpandItemDelimiters(input_list, delimiter, strip=False, to_str=False):
+def ExpandItemDelimiters(input_list,
+                         delimiter,
+                         strip=False,
+                         to_str=False,
+                         remove_empty=True):
     '''Expand list items that contain the given delimiter.
 
     Args:
@@ -27,6 +31,8 @@ def ExpandItemDelimiters(input_list, delimiter, strip=False, to_str=False):
         strip: bool, whether to strip items after expanding. Default is False
         to_str: bool, whether to convert output items in string.
                 Default is False
+        remove_empty: bool, whether to remove empty string in result list.
+                      Will not remove None items. Default: True
 
     Returns:
         The expended list, which may be the same with input list
@@ -39,5 +45,6 @@ def ExpandItemDelimiters(input_list, delimiter, strip=False, to_str=False):
     do_str = lambda s: str(s) if to_str else s
 
     expended_list_generator = (item.split(delimiter) for item in input_list)
-    return [do_strip(do_str(s))
-            for s in itertools.chain.from_iterable(expended_list_generator)]
+    result = [do_strip(do_str(s))
+              for s in itertools.chain.from_iterable(expended_list_generator)]
+    return filter(lambda s: str(s) != '', result) if remove_empty else result
