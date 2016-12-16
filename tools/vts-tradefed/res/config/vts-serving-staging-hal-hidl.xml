@@ -24,5 +24,6 @@
     <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTest" />
     <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+    <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
