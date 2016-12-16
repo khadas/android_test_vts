@@ -32,5 +32,6 @@
     <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HidlTraceRecorder" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
