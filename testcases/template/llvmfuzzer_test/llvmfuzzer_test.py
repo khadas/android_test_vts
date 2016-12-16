@@ -76,20 +76,19 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.adb.push("%s %s" % (push_src, config.FUZZER_TEST_DIR))
         logging.info("Adb pushed: %s", testcase)
 
-    # TODO(trong): save crash-causing inputs to the fuzzer.
     def RunTestcase(self, testcase):
         """Runs the given testcase and asserts the result.
 
         Args:
-            testcase: string, path to executable fuzzer.
+            testcase: string, path to fuzzer executable.
         """
         self.PushFiles(testcase)
-        testcase = testcase.split("/")[-1]
+        fuzzer = testcase.split("/")[-1]
 
-        chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, testcase)
-        cd_cmd = "cd %s" % os.path.join(config.FUZZER_TEST_DIR)
-        test_cmd = "./%s" % testcase
+        chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, fuzzer)
+        cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
         ld_path = "LD_LIBRARY_PATH=/data/local/tmp/32:/data/local/tmp/64:$LD_LIBRARY_PATH"
+        test_cmd = "./%s" % fuzzer
 
         cmd = [
             chmod_cmd,
@@ -98,10 +97,35 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("Executing: %s", cmd)
 
         result = self._shell.Execute(cmd)
-        self.AssertTestResult(result)
+        self.AssertTestResult(fuzzer, result)
+
+    def LogCrashReport(self, fuzzer):
+        """Logs crash-causing fuzzer input.
+
+        Reads the crash report file and logs the contents in format:
+        "\x01\x23\x45\x67\x89\xab\xcd\xef"
+
+        Args:
+            fuzzer: string, name of fuzzer executable.
+        """
+        cmd = "xxd -p %s" % config.FUZZER_TEST_CRASH_REPORT
+
+        # output is string of a hexdump from crash report file.
+        # From the example above, output would be "0123456789abcdef".
+        output = self._shell.Execute(cmd)[const.STDOUT][0]
+        remove_chars = ["\r", "\t", "\n", " "]
+        for char in remove_chars:
+            output = output.replace(char, "")
+
+        crash_report = ""
+        # output is guaranteed to be even in length since its a hexdump.
+        for offset in xrange(0, len(output), 2):
+            crash_report += "\\x%s" % output[offset:offset + 2]
+
+        logging.info("FUZZER_TEST_CRASH_REPORT for %s: '%s'", fuzzer, crash_report)
 
     # TODO(trong): differentiate between crashes and sanitizer rule violations.
-    def AssertTestResult(self, result):
+    def AssertTestResult(self, fuzzer, result):
         """Asserts that testcase finished as expected.
 
         Checks that device is in responsive state. If not, waits for boot
@@ -109,23 +133,25 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         returned exit code 0.
 
         Args:
+            fuzzer: string, name of fuzzer executable.
             result: dict([str],[str],[int]), command results from shell.
         """
-        if self._dut.hasBooted():
-            exit_codes = result[const.EXIT_CODE]
-            logging.info("EXIT_CODE: %s", exit_codes)
-            asserts.assertFalse(
-                any(exit_codes), "Test case failed.")
-        else:
+        if not self._dut.hasBooted():
             self._dut.waitForBootCompletion()
-            asserts.fail("Test case left the device in unresponsive state.")
+            asserts.fail("%s left the device in unresponsive state." % fuzzer)
+
+        # Last exit code is the exit code of the fuzzer executable.
+        exit_code = result[const.EXIT_CODE][-1]
+        if exit_code == config.ExitCode.FUZZER_TEST_FAIL:
+            self.LogCrashReport(fuzzer)
+            asserts.fail("%s failed" % fuzzer)
 
     def generateFuzzerTests(self):
         """Runs fuzzer tests."""
         self.runGeneratedTests(
             test_func=self.RunTestcase,
             settings=self._testcases,
-            name_func=lambda x: x.replace('/','_'))
+            name_func=lambda x: x.split("/")[-1])
 
 
 if __name__ == "__main__":
