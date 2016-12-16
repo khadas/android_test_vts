@@ -100,16 +100,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
         result = self.dut.hal.nfc.close()
         logging.info("close result: %s", result)
 
-        coverage = self.dut.hal.nfc.GetRawCodeCoverage()
-        if coverage:
-            last_coverage_data = {}
-            for coverage_msg in coverage:
-                logging.info("coverage file_path %s",
-                             coverage_msg.file_path)
-                logging.info("coverage gcda len %d bytes",
-                             len(coverage_msg.gcda))
-                last_coverage_data[coverage_msg.file_path] = coverage_msg.gcda
-            self.SetCoverageData(last_coverage_data)
+        self.SetCoverageData(self.dut.hal.nfc.GetRawCodeCoverage())
 
 if __name__ == "__main__":
     test_runner.main()

@@ -79,8 +79,8 @@ def GetGcdaDict(dut, local_coverage_path=None):
             logging.info("Found gcda %s", gcda)
     return gcda_dict
 
-def GenerateCoverageMessages(report_msg, cov_zip, modules, gcda_dict,
-                             project_name, project_path, revision):
+def ProcessCoverageData(report_msg, cov_zip, modules, gcda_dict,
+                        project_name, project_path, revision):
     """Process coverage data and appends coverage reports to the report message.
 
     Opens the gcno files in the cov_zip for the specified modules and matches
