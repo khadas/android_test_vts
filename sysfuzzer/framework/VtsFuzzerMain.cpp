@@ -45,6 +45,7 @@
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "specification_parser/SpecificationBuilder.h"
+#include "replayer/VtsHidlHalReplayer.h"
 
 #include "BinderServer.h"
 #include "SocketServer.h"
@@ -61,6 +62,7 @@ static const int kDefaultEpochCount = 100;
 
 // Dumps usage on stderr.
 static void usage() {
+  // TODO(zhuoyao): update the usage message.
   fprintf(
       stderr,
       "Usage: fuzzer [options] <target HAL file path>\n"
@@ -93,6 +95,11 @@ int main(int argc, char* const argv[]) {
 #endif
       {"server", optional_argument, NULL, 'd'},
       {"callback_socket_name", optional_argument, NULL, 'p'},
+      // TODO(zhuoyao):make mode a required_argument to support different
+      // execution mode. e.g.: fuzzer/driver/replayer.
+      {"mode", optional_argument, NULL, 'm'},
+      {"trace_path", optional_argument, NULL, 'r'},
+      {"spec_path", optional_argument, NULL, 'a'},
       {NULL, 0, NULL, 0}};
   int target_class;
   int target_type;
@@ -108,6 +115,9 @@ int main(int argc, char* const argv[]) {
   string target_package;
   string target_component_name;
   string callback_socket_name;
+  string mode;
+  string trace_path;
+  string spec_path;;
 
   while (true) {
     int optionIndex = 0;
@@ -126,6 +136,8 @@ int main(int argc, char* const argv[]) {
                   target_class_str.begin(), ::tolower);
         if (!strcmp(target_class_str.c_str(), "hal_conventional")) {
           target_class = vts::HAL_CONVENTIONAL;
+        } else if (!strcmp(target_class_str.c_str(), "hal_hidl")) {
+          target_class = vts::HAL_HIDL;
         } else {
           target_class = 0;
         }
@@ -182,6 +194,15 @@ int main(int argc, char* const argv[]) {
       case 'n':
         target_component_name = string(optarg);
         break;
+      case 'm':
+        mode = string(optarg);
+        break;
+      case 'r':
+        trace_path = string(optarg);
+        break;
+      case 'a':
+        spec_path = string(optarg);
+        break;
       default:
         if (ic != '?') {
           fprintf(stderr, "getopt_long returned unexpected value 0x%x\n", ic);
@@ -197,12 +218,20 @@ int main(int argc, char* const argv[]) {
       fprintf(stderr, "Must specify output file (see --help).\n");
       return 2;
     }
-
-    bool success =
-        spec_builder.Process(argv[optind], INTERFACE_SPEC_LIB_FILENAME,
-                             target_class, target_type, target_version,
-                             target_package.c_str(),
-                             target_component_name.c_str());
+    bool success;
+    if (mode == "replay") {
+      android::vts::VtsHidlHalReplayer replayer(spec_path.c_str(),
+                                                callback_socket_name.c_str());
+      success = replayer.ReplayTrace(argv[optind],
+                                     trace_path.c_str(), target_version,
+                                     target_package.c_str(),
+                                     target_component_name.c_str());
+    } else {
+      success = spec_builder.Process(argv[optind],INTERFACE_SPEC_LIB_FILENAME,
+                                     target_class, target_type, target_version,
+                                     target_package.c_str(),
+                                     target_component_name.c_str());
+    }
     cout << "Result: " << success << endl;
     if (success) {
       cout << endl << PASSED_MARKER << endl;

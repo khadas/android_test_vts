@@ -23,6 +23,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
+#include "test/vts/proto/VtsProfilingMessage.pb.h"
 
 using namespace std;
 
@@ -90,18 +91,24 @@ bool VtsProfilingInterface::AddTraceEvent(
     LOG(ERROR) << "Profiler not initialized. ";
     return false;
   }
-  string msg_str;
-  if (!google::protobuf::TextFormat::PrintToString(message, &msg_str)) {
+
+  // Build the VTSProfilingRecord and print it to string.
+  VtsProfilingRecord record;
+  record.set_timestamp(NanoTime());
+  record.set_event((InstrumentationEventType)static_cast<int>(event));
+  record.set_package(package);
+  record.set_version(stof(version));
+  record.set_interface(interface);
+  *record.mutable_func_msg() = message;
+  string record_str;
+  if (!google::protobuf::TextFormat::PrintToString(record, &record_str)) {
     LOG(ERROR) << "Can't print the message";
     return false;
   }
 
+  // Write the record string to trace file.
   mutex_.lock();
-  // Record the event data with the following format:
-  // timestamp,event,package_name,package_version,interface_name,message
-  trace_output_ << NanoTime() << "," << event << "," << package << ","
-                << version << "," << interface << "," << message.name() << "\n";
-  trace_output_ << msg_str << "\n";
+  trace_output_ << record_str << "\n";
   trace_output_.flush();
   mutex_.unlock();
 
