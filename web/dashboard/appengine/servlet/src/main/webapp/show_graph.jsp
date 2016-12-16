@@ -20,6 +20,9 @@
       google.charts.setOnLoadCallback(drawProfilingChart);
       google.charts.setOnLoadCallback(drawPerformanceChart);
       google.charts.setOnLoadCallback(drawPercentileTable);
+      google.charts.setOnLoadCallback(function() {
+          $(".gradient").removeClass("gradient");
+      });
 
       ONE_DAY = 86400000000;
       MICRO_PER_MILLI = 1000;
@@ -90,26 +93,54 @@
           var data = google.visualization.arrayToDataTable(histogramData, true);
 
           var options = {
-            title: 'Approximating Normal Distribution',
+            title: 'Profiling Samples',
+            titleTextStyle: {
+              color: '#757575',
+              fontSize: 16,
+              bold: false
+            },
             legend: { position: 'none' },
             colors: ['#4285F4'],
+            fontName: 'Roboto',
             vAxis:{
-              title:"Frequency"
+              title: 'Frequency',
+              titleTextStyle: {
+                color: '#424242',
+                fontSize: 12,
+                italic: false
+              },
+              textStyle: {
+                fontSize: 12,
+                color: '#757575'
+              },
             },
             hAxis: {
               ticks: histogramTicks,
-              title:"Time Taken (milliseconds)"
+              title: 'Time Taken (milliseconds)',
+              textStyle: {
+                fontSize: 12,
+                color: '#757575'
+              },
+              titleTextStyle: {
+                color: '#424242',
+                fontSize: 12,
+                italic: false
+              }
             },
             bar: { gap: 0 },
-
             histogram: {
-              bucketSize: 0.02,
               maxNumBuckets: 200,
-              minValue: min,
-              maxValue: max
+              minValue: min * 0.95,
+              maxValue: max * 1.05
+            },
+            chartArea: {
+              width: '100%',
+              top: 40,
+              left: 50,
+              height: '80%'
             }
           };
-          var chart = new google.visualization.Histogram(document.getElementById('profiling_chart_div'));
+          var chart = new google.visualization.Histogram(document.getElementById('profiling-chart-div'));
           chart.draw(data, options);
       }
 
@@ -142,7 +173,7 @@
             },
             legend: { position: 'none' }
           };
-          var chart = new google.charts.Line(document.getElementById('performance_chart_div'));
+          var chart = new google.charts.Line(document.getElementById('performance-chart-div'));
           chart.draw(data, options);
       }
 
@@ -156,7 +187,7 @@
           var data = new google.visualization.DataTable();
 
           // add columns
-          var columns = ["10", "25", "50", "75", "80", "90", "95", "99"];
+          var columns = ["10%", "25%", "50%", "75%", "80%", "90%", "95%", "99%"];
           for (var i = 0; i < columns.length; i++) {
               data.addColumn('string', columns[i]);
           }
@@ -169,11 +200,15 @@
           var rows = new Array(1);
           rows[0] = percentileValues;
           data.addRows(rows);
+          var options = {
+            title: 'Percentile Values',
+            cssClassNames: {
+              headerRow : 'table-header'
+            }
+          };
 
-          var table = new google.visualization.Table(document.getElementById('percentile_table_div'));
-          table.draw(data,
-                    {title: 'Percentile Values',
-                     alternatingRowStyle : true});
+          var table = new google.visualization.Table(document.getElementById('percentile-table-div'));
+          table.draw(data, options);
       }
     </script>
     <nav id="navbar">
@@ -215,17 +250,19 @@
         <div id="profiling-container" class="row card">
           <div class="col s10 offset-s1 center-align">
             <!-- Profiling chart for profiling values. -->
-            <div id="profiling_chart_div" style="width: 80%; height: 500px;"></div>
+            <div id="profiling-chart-div"></div>
 
             <!-- Percentile table -->
-            <div id="percentile_table_div" style="margin-left:10%; margin-top:-40px; margin-bottom:125px"></div>
+            <div id="percentile-table-div"></div>
           </div>
         </div>
       </c:if>
       <c:if test="${showPerformanceGraph}">
         <div id="performance-container" class="row card">
-          <!-- Performance chart for label vs values. -->
-          <div id="performance_chart_div" style="width:80%; margin-left: 10%;height: 500px;"></div>
+          <div class="col s10 offset-s1 center-align">
+            <!-- Performance chart for label vs values. -->
+            <div id="performance-chart-div"></div>
+          </div>
         </div>
       </c:if>
       <c:if test="${not empty error}">
