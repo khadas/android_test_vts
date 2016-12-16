@@ -12,9 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+LOCAL_PATH := $(call my-dir)
 
-vts_test_lib_hal_packages := \
-  android.hardware.tests.libbinder \
-  android.hardware.tests.libhwbinder@1.0 \
-  android.hardware.tests.libhwbinder@1.0-impl \
-  lights.vts \
+include $(call all-subdir-makefiles)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := HwBinderBinderizePerformanceTest
+VTS_CONFIG_SRC_DIR := testcases/performance/hwbinder_benchmark/binderize
+include test/vts/tools/build/Android.host_config.mk
