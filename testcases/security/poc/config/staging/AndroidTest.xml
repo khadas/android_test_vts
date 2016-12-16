@@ -23,6 +23,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="SecurityPoCKernelTestStaging" />
         <option name="test-case-path" value="vts/testcases/security/poc/host/SecurityPoCKernelTest" />
-        <option name="test-config-path" value="vts-config/testcases/security/poc/config/staging/SecurityPoCKernelTestStaging.config" />
+        <option name="test-config-path" value="vts/testcases/security/poc/config/staging/SecurityPoCKernelTestStaging.config" />
     </test>
 </configuration>

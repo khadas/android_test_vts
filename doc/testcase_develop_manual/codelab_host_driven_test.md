@@ -144,7 +144,7 @@ For example:
 At last, add the following line to `com.android.tradefed.testtype.VtsMultiDeviceTest` class
 in `AndroidTest.xml`:
 
-`<option name="test-config-path" value="vts-config/testcases/<your project directiry>/<your project name>.config" />`
+`<option name="test-config-path" value="vts/testcases/<your project directiry>/<your project name>.config" />`
 
 Your config file will overwrite the following default json object defined at
 `test/vts/tools/vts-tradefed/res/default/DefaultTestCase.config`

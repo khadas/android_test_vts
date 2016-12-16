@@ -24,6 +24,6 @@
         <option name="test-timeout" value="3h" />
         <option name="runtime-hint" value="1h" />
         <option name="test-case-path" value="vts/testcases/kernel/ltp/KernelLtpTest" />
-        <option name="test-config-path" value="vts-config/testcases/kernel/ltp/stable/KernelLtpTest.config" />
+        <option name="test-config-path" value="vts/testcases/kernel/ltp/stable/KernelLtpTest.config" />
     </test>
 </configuration>

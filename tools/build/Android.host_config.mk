@@ -24,16 +24,3 @@ $(LOCAL_BUILT_MODULE):
 	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
 	$(hide) touch $@
 
-VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
-
-vts_config_file_src := test/vts/$(VTS_CONFIG_SRC_DIR)/$(LOCAL_MODULE).config
-
-ifneq (,$(wildcard $(vts_config_file_src)))
-vts_config_file := $(VTS_TESTCASES_OUT)/vts-config/$(VTS_CONFIG_SRC_DIR)/$(LOCAL_MODULE).config
-
-$(vts_config_file): $(vts_config_file_src) | $(ACP)
-	$(hide) mkdir -p $(dir $@)
-	$(hide) $(ACP) -fp $< $@
-
-vts: $(vts_config_file)
-endif
