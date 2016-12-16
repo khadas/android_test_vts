@@ -48,6 +48,7 @@ def GenerateLineCoverageVector(src_file_name, gcno_file_summary):
         the i-th line was executed. -1 indicates a line that is not executable.
     """
     src_lines_counts = []
+    covered_line_count = 0
     for ident in gcno_file_summary.functions:
         func = gcno_file_summary.functions[ident]
         if not src_file_name == func.src_file_name:
@@ -56,14 +57,16 @@ def GenerateLineCoverageVector(src_file_name, gcno_file_summary):
             continue
         for block in func.blocks:
             for line in block.lines:
-                logging.info("GenerateLineCoverageVector: covered line %s",
-                             line)
                 if line > len(src_lines_counts):
                     src_lines_counts.extend([-1] *
                                             (line - len(src_lines_counts)))
                 if src_lines_counts[line - 1] < 0:
                     src_lines_counts[line - 1] = 0
                 src_lines_counts[line - 1] += block.count
+                if block.count > 0:
+                    covered_line_count += 1
+    logging.info("GenerateLineCoverageVector: file %s: %s lines covered",
+                 src_file_name, str(covered_line_count))
     return src_lines_counts
 
 

@@ -223,7 +223,6 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         # Retrieve coverage if applicable
         if getattr(self, self.COVERAGE, False):
-            logging.info('Retrieving coverage data.')
             gcda_dict = coverage_utils.GetGcdaDict(self._dut)
             self.SetCoverageData(gcda_dict, True)
 
