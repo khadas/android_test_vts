@@ -14,6 +14,10 @@
 # limitations under the License.
 #
 
+# TODO(trong): enable for mips and x86.
+ifeq (,$(findstring mips, $(TARGET_ARCH)))
+ifeq (,$(findstring x86, $(TARGET_ARCH)))
+
 hal_common_fuzz_dir := test/vts/testcases/hal/common/fuzz
 
 module_path := hal_fuzz
@@ -50,3 +54,6 @@ include $(hal_common_fuzz_dir)/Android.vts_testcase.mk
 
 module_name :=
 module_path :=
+
+endif
+endif
