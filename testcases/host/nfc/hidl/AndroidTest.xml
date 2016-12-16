@@ -17,19 +17,13 @@
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
+        <option name="push" value="DATA/lib/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/32/libvts_driver_hidl_nfc@1.0.so" />
+        <option name="push" value="DATA/lib64/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/64/libvts_driver_hidl_nfc@1.0.so" />
         <option name="push" value="spec/hardware/interfaces/nfc/1.0/vts/Nfc.vts->/data/local/tmp/spec/Nfc.vts" />
         <option name="push" value="spec/hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts->/data/local/tmp/spec/NfcClientCallback.vts" />
         <option name="push" value="spec/hardware/interfaces/nfc/1.0/vts/types.vts->/data/local/tmp/spec/types.vts" />
     </target_preparer>
-    <!--
-    <target_preparer class="com.android.tradefed.targetprep.TestFilePushSetup" />
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
-        <option name="test-file-name" value="sl4a.apk" />
-        <option name="cleanup-apks" value="true" />
-    </target_preparer>
-    -->
-    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/nfc/hidl/NfcHidlBasicTest" />
     </test>
