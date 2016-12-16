@@ -57,6 +57,7 @@ class BaseTestClass(object):
                        include.
         exclude_filer: A list of string, each representing a test case name to
                        exclude. Has no effect if include_filer is not empty.
+        abi_bitness: String, bitness of abi
     """
 
     TAG = None
@@ -83,6 +84,12 @@ class BaseTestClass(object):
                         const.LIST_ITEM_DELIMITER,
                         strip=True)
                     setattr(self, filter, filter_expanded)
+
+        # Set abi bitness (optional)
+        self.abi_bitness = None
+        if keys.ConfigKeys.IKEY_ABI_BITNESS in self.user_params:
+            self.abi_bitness = self.user_params[
+                keys.ConfigKeys.IKEY_ABI_BITNESS]
 
     def __enter__(self):
         return self
@@ -314,12 +321,19 @@ class BaseTestClass(object):
             tr_record.addError(func.__name__, e)
 
     def filterOneTest(self, test_name):
-        """Check test filter for a test name.
+        """Check test filters for a test name.
 
-        If a include filter is not empty, only tests in include filter will
+        The first layer of filter is user defined test filters:
+        if a include filter is not empty, only tests in include filter will
         be executed regardless whether they are also in exclude filter. Else
         if include filter is empty, only tests not in exclude filter will be
         executed.
+
+        The second layer of filter is checking abi bitness:
+        if a test has a suffix indicating the intended architecture bitness,
+        and the current abi bitness information is available, non matching tests
+        will be skipped. By our convention, this function will look for bitness in suffix
+        formated as "32bit", "32Bit", "32BIT", or 64 bit equivalents.
 
         Args:
             test_name: string, name of a test
@@ -340,6 +354,15 @@ class BaseTestClass(object):
             logging.info("Test case '%s' in exclude filter." % test_name)
             raise signals.TestSilent("Test case '%s' in exclude filter." %
                                      test_name)
+
+        if self.abi_bitness is not None:
+            asserts.skipIf(
+                (test_name[-len(const.SUFFIX_32BIT):].lower() ==
+                 const.SUFFIX_32BIT and self.abi_bitness != "32") or
+                (test_name[-len(const.SUFFIX_64BIT):].lower() ==
+                 const.SUFFIX_64BIT and self.abi_bitness != "64"),
+                "Test case '{}' excluded as abi bitness is {}.".format(
+                    test_name, self.abi_bitness))
 
     def execOneTest(self, test_name, test_func, args, **kwargs):
         """Executes one test case and update test results.
