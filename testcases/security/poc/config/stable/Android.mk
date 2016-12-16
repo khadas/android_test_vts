@@ -12,15 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  vts_test_binary_syscall_exists \
-  simpleperf_cpu_hotplug_test \
-  binderThroughputTest \
-  hwbinderThroughputTest \
-  bionic-unit-tests \
-  bionic-unit-tests-gcc \
-  bionic-unit-tests-static \
+LOCAL_PATH := $(call my-dir)
+
+include $(call all-subdir-makefiles)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := SecurityPoCKernelTest
+VTS_CONFIG_SRC_DIR := testcases/security/poc/config/stable
+include test/vts/tools/build/Android.host_config.mk

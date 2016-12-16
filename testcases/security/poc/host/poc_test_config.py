@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.4
 #
 # Copyright (C) 2016 The Android Open Source Project
 #
@@ -14,16 +15,26 @@
 # limitations under the License.
 #
 
-LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
+class ConfigKeys(object):
+    RUN_STAGING = "run_staging"
 
-LOCAL_MODULE := 30149612_poc
-LOCAL_MODULE_STEM_32 := 30149612_poc32
-LOCAL_MODULE_STEM_64 := 30149612_poc64
+class ExitCode(object):
+    """Exit codes for test binaries."""
+    POC_TEST_PASS = 0
+    POC_TEST_FAIL = 1
+    POC_TEST_SKIP = 2
 
-LOCAL_SRC_FILES := poc.c
+# Directory on the target where the tests are copied.
+POC_TEST_DIR = "/data/local/tmp/security/poc"
 
-LOCAL_MULTILIB := both
+POC_TEST_CASES_STABLE = [
+]
 
-include $(BUILD_EXECUTABLE)
+POC_TEST_CASES_STAGING = [
+    "kernel_sound/28838221",
+    "kernel_bluetooth/30149612"
+]
+
+POC_TEST_CASES_DISABLED = [
+]

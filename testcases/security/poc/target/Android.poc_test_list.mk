@@ -12,15 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  vts_test_binary_syscall_exists \
-  simpleperf_cpu_hotplug_test \
-  binderThroughputTest \
-  hwbinderThroughputTest \
-  bionic-unit-tests \
-  bionic-unit-tests-gcc \
-  bionic-unit-tests-static \
+module_testname := kernel_bluetooth/30149612
+module_src_files := kernel_bluetooth/30149612/poc.c
+module_cflags :=
+module_c_includes :=
+module_static_libraries :=
+module_shared_libraries :=
+include $(build_poc_test)
+
+module_testname := kernel_sound/28838221
+module_src_files := kernel_sound/28838221/poc.c
+module_cflags :=
+module_c_includes :=
+module_static_libraries :=
+module_shared_libraries :=
+include $(build_poc_test)
+
