@@ -16,6 +16,7 @@
 
 package com.google.android.vts.servlet;
 
+import com.google.android.vts.helpers.BigtableHelper;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestReportMessage;

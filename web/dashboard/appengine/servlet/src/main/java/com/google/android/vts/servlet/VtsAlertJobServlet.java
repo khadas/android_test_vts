@@ -28,6 +28,7 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.android.vts.helpers.BigtableHelper;
 import com.google.android.vts.proto.VtsReportMessage;
 import com.google.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.google.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
