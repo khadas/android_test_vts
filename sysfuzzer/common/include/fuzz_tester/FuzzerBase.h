@@ -57,6 +57,13 @@ class FuzzerBase {
     return false;
   };
 
+  virtual bool CallFunction(
+            const vts::FunctionSpecificationMessage& /*func_msg*/,
+            const string& /*callback_socket_name*/,
+            vts::FunctionSpecificationMessage* /*result_msg*/) {
+    return false;
+  };
+
   virtual bool GetAttribute(vts::FunctionSpecificationMessage* /*func_msg*/,
                             void** /*result*/) {
     return false;

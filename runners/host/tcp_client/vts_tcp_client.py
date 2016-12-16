@@ -190,9 +190,12 @@ class VtsTcpClient(object):
                 result_scalar = None
                 if (result.return_type_hidl[0].type ==
                     CompSpecMsg_pb2.TYPE_SCALAR):
-                    result_scalar =  getattr(
-                        result.return_type_hidl[0].scalar_value,
-                        result.return_type_hidl[0].scalar_type)
+                    scalar_type = getattr(result.return_type_hidl[0],
+                                          "scalar_type", "")
+                    if scalar_type:
+                        result_scalar = getattr(
+                            result.return_type_hidl[0].scalar_value,
+                            scalar_type)
                 elif (result.return_type_hidl[0].type ==
                       CompSpecMsg_pb2.TYPE_ENUM):
                     scalar_type = getattr(result.return_type_hidl[0],
