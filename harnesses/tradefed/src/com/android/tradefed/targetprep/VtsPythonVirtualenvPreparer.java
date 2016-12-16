@@ -104,10 +104,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
                 CLog.i(String.format(
                     "Result %s. stdout: %s, stderr: %s",
                     result.getStatus(), result.getStdout(), result.getStderr()));
-                if (result.getStatus() != CommandStatus.SUCCESS ||
-                    result.getStdout().contains(
-                        "Requirement already satisfied (use --upgrade to upgrade):")) {
-                    CLog.e("Installing %s failed or may require upgrade.", dep);
+                if (result.getStatus() != CommandStatus.SUCCESS) {
+                    CLog.e("Installing %s failed.", dep);
                     CLog.i("Attempting to upgrade %s", dep);
                     result = mRunUtil.runTimedCmd(
                             BASE_TIMEOUT * 5, mPip, "install", "--upgrade", dep);
@@ -146,6 +144,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
             mVenvDir = FileUtil.createNamedTempDir(
                     buildInfo.getTestTag() + "-virtualenv-" +
                     buildInfo.getDeviceSerial().replaceAll(":", "_"));
+            mRunUtil.runTimedCmd(
+                BASE_TIMEOUT, "virtualenv", "--clear", mVenvDir.getAbsolutePath());
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
             activate();
         } catch (IOException e) {
