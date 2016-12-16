@@ -1,7 +1,6 @@
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 
-using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 
 #define TRACEFILEPREFIX "/data/local/tmp"

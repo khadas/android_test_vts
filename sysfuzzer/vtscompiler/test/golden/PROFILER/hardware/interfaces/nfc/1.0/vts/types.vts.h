@@ -11,7 +11,6 @@
 #include <android/hardware/nfc/1.0/types.h>
 
 
-using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 
 namespace android {
