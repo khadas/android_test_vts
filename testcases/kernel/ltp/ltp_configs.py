@@ -19,6 +19,11 @@ import os
 
 from vts.testcases.kernel.ltp import ltp_enums
 
+VTS_LTP_OUTPUT = 'ltp'
+LTP_RUNTEST_DIR = os.path.join(VTS_LTP_OUTPUT, 'runtest')
+LTP_DISABLED_BUILD_TESTS_CONFIG_PATH = os.path.join(VTS_LTP_OUTPUT, 'disabled_tests.txt')
+
+
 # Environment paths for ltp test cases
 # string, ltp build root directory on target
 LTPDIR = '/data/local/tmp/ltp'
@@ -96,6 +101,46 @@ REQUIREMENT_FOR_ALL = [ltp_enums.Requirements.LTP_TMP_DIR]
 
 # Requirement to test suite dictionary
 REQUIREMENT_TO_TESTSUITE = {}
+
+# List of LTP test suites to run
+TEST_SUITES = [
+    'admin_tools',
+    'can',
+    'cap_bounds',
+    'commands',
+    'connectors',
+    'containers',
+#     'controllers',
+    'cpuhotplug',
+    'dio',
+    'fcntl-locktests_android',
+    'filecaps',
+    'fs',
+    'fs_bind',
+    'fs_ext4',
+    'fs_perms_simple',
+    'fsx',
+    'hugetlb',
+    'hyperthreading',
+    'input',
+    'io',
+    'ipc',
+    'kernel_misc',
+    'math',
+    'mm',
+    'modules',
+    'nptl',
+    'numa',
+    'pipes',
+    'power_management_tests',
+    'pty',
+    'sched',
+    'syscalls',
+    # The following are newly included suites. Test cases are put in staging
+    'timers',
+    'securebits',
+    'tracing'
+]
 
 # Staging tests are for debugging and verifying fixed tests
 # Test specified here can be in format: testsuite-testname,
