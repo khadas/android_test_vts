@@ -151,35 +151,19 @@ STAGING_TESTS = [
     # these will be inspected soon
     'syscalls.open14',
     'syscalls.openat03',
-    # Recently fixed
-    'syscalls.getrusage03',
-    'syscalls.creat07',
-    'syscalls.creat08',
-    'sched.sched_cli_serv',
-    'admin_tools.at_deny01',
-    'admin_tools.at_allow01',
-    'cpuhotplug.cpuhotplug02',
-    'mm.mtest05',
-    'numa.move_pages01_64bit',
-    'numa.move_pages02',
-    'numa.move_pages04',
-    'numa.move_pages05',
-    'numa.move_pages06',
-    'numa.move_pages07',
-    'numa.move_pages08',
-    'numa.move_pages09',
-    'numa.move_pages10',
-    # getrusage04 gives inconsistent result over different runs
-    'syscalls.getrusage04',
     # Fail on local device but pass on lab devices
     'fs.proc01',
-    # Fail on staging but passing on stable
-    'fs.fs_di',
 ]
 
 # Tests disabled
 # Based on external/ltp commit 5f01077afe994f4107b147222f3956716d4a8fde
 DISABLED_TESTS = [
+    # b/32386191 getrusage04 result is flaky
+    'syscalls.getrusage04',
+    # b/31154962
+    'cpuhotplug.cpuhotplug02',
+    # b/32385889
+    'syscalls.creat08',
     # The following test case is designed only for i386
     'f00f',
     # The following test cases are uncategorized
