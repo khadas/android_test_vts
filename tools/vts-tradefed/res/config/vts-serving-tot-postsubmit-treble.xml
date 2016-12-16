@@ -20,7 +20,8 @@
     <!-- For vts-hal-hidl -->
     <option name="compatibility:include-filter" value="BinderPerformanceTest" />
     <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
-    <option name="compatibility:include-filter" value="NfcHidlBasicTest" />
+    <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
+    <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
 
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
