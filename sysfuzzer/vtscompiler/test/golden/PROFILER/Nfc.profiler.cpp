@@ -64,9 +64,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
@@ -111,9 +111,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    uint32_t *result_val_0 = reinterpret_cast<uint32_t*> ((*args)[0]);
                     result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    result_0->mutable_scalar_value()->set_uint32_t((*result_val_0));
                     break;
                 }
                 default:
@@ -158,9 +158,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
@@ -198,9 +198,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
@@ -238,9 +238,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
@@ -278,9 +278,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
@@ -318,9 +318,9 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *result_0 = msg.add_return_type_hidl();
-                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                    result_0->set_type(TYPE_SCALAR);
-                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    ::android::hardware::nfc::V1_0::NfcStatus *result_val_0 = reinterpret_cast<::android::hardware::nfc::V1_0::NfcStatus*> ((*args)[0]);
+                    result_0->set_type(TYPE_ENUM);
+                    profile____android__hardware__nfc__V1_0__NfcStatus(result_0, (*result_val_0));
                     break;
                 }
                 default:
