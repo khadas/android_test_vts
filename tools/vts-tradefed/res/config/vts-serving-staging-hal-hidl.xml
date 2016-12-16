@@ -30,7 +30,6 @@
     <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
-    <option name="compatibility:include-filter" value="ThermalHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
