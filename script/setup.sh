@@ -22,8 +22,11 @@ sudo pip install protobuf
 sudo pip install setuptools
 sudo pip install requests
 
-echo "Install CameraITS packages"
-sudo apt-get install python-numpy
-sudo apt-get install python-scipy
-sudo apt-get install python-matplotlib
-sudo apt-get install python-opencv
+echo "Install packages for Camera ITS tests"
+sudo apt-get install python-tk
+sudo pip install numpy
+sudo pip install scipy
+sudo pip install matplotlib
+sudo apt-get install libjpeg-dev
+sudo apt-get install libtiff-dev
+sudo pip install Pillow
