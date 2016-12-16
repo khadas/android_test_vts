@@ -45,3 +45,6 @@ DATA/lib64/libvts_profiler_hidl_thermal@1.0.so->/data/local/tmp/64/hw/android.ha
 DATA/lib/libvts_profiler_hidl_vibrator@1.0.so->/data/local/tmp/32/hw/android.hardware.vibrator@1.0::IVibrator.profiler.so
 DATA/lib64/libvts_profiler_hidl_vibrator@1.0.so->/data/local/tmp/64/hw/android.hardware.vibrator@1.0::IVibrator.profiler.so
 
+DATA/lib/libvts_profiler_hidl_memtrack@1.0.so->/data/local/tmp/32/hw/android.hardware.memtrack@1.0::IMemtrack.profiler.so
+DATA/lib64/libvts_profiler_hidl_memtrack@1.0.so->/data/local/tmp/64/hw/android.hardware.memtrack@1.0::IMemtrack.profiler.so
+
