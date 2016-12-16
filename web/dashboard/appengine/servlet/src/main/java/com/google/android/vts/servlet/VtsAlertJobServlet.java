@@ -44,8 +44,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.mail.Message;
@@ -83,7 +85,7 @@ public class VtsAlertJobServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(DashboardMainServlet.class);
 
     /**
-     * Fetches the list of subcriber email addresses for a test.
+     * Fetches the list of subscriber email addresses for a test.
      * @param statusTable The Table instance for the VTS status table.
      * @param tableName The name of the table of the test for which to fetch the email addresses.
      * @returns List of email addresses (String).
@@ -202,12 +204,14 @@ public class VtsAlertJobServlet extends HttpServlet {
             return null;
         }
         ResultScanner scanner = table.getScanner(scan);
-        List<TestReportMessage> testReports = new ArrayList<>();
+        TestReportMessage mostRecentReport = null;
         Set<ByteString> failingTestcases = new HashSet<>();
         Set<String> fixedTestcases = new HashSet<>();
         Set<String> newTestcaseFailures = new HashSet<>();
         Set<String> continuedTestcaseFailures = new HashSet<>();
+        Set<String> skippedTestcaseFailures = new HashSet<>();
         Set<String> transientTestcaseFailures = new HashSet<>();
+        Map<String, TestCaseResult> mostRecentTestCaseResults = new HashMap<>();
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             byte[] value = result.getValue(RESULTS_FAMILY, DATA_QUALIFIER);
             TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage
@@ -227,7 +231,7 @@ public class VtsAlertJobServlet extends HttpServlet {
                 // filter non-integer build IDs
                 Integer.parseInt(buildId);
                 Integer.parseInt(firstDeviceBuildId);
-                testReports.add(0, testReportMessage);
+                mostRecentReport = testReportMessage;
             } catch (NumberFormatException e) {
                 /* skip a non-post-submit build */
                 continue;
@@ -235,46 +239,61 @@ public class VtsAlertJobServlet extends HttpServlet {
 
             for (TestCaseReportMessage testCaseReportMessage :
                  testReportMessage.getTestCaseList()) {
-                if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_FAIL) {
-                    transientTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
+                TestCaseResult res = testCaseReportMessage.getTestResult();
+                String name = testCaseReportMessage.getName().toStringUtf8();
+                if (res != TestCaseResult.TEST_CASE_RESULT_PASS
+                    && res != TestCaseResult.TEST_CASE_RESULT_SKIP) {
+                    // Test case failed (not a pass or a skip).
+                    transientTestcaseFailures.add(name);
+                    mostRecentTestCaseResults.put(name, TestCaseResult.TEST_CASE_RESULT_FAIL);
+                } else if (res == TestCaseResult.TEST_CASE_RESULT_PASS) {
+                    // Test case passed.
+                    mostRecentTestCaseResults.put(name, TestCaseResult.TEST_CASE_RESULT_PASS);
                 }
             }
         }
         scanner.close();
-        if (testReports.size() == 0) return null;
+        if (mostRecentReport == null) return null;
 
-        TestReportMessage latestTest = testReports.get(0);
-        for (TestCaseReportMessage testCaseReportMessage : latestTest.getTestCaseList()) {
-            if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_PASS) {
-                 if (failedTestcases.contains(testCaseReportMessage.getName())) {
-                     fixedTestcases.add(testCaseReportMessage.getName().toStringUtf8());
-                 }
-             } else if (testCaseReportMessage.getTestResult() == TestCaseResult.TEST_CASE_RESULT_SKIP) {
-                 if (failedTestcases.contains(testCaseReportMessage.getName())) {
-                     failingTestcases.add(testCaseReportMessage.getName());
-                     continuedTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
-                 }
-                 transientTestcaseFailures.remove(testCaseReportMessage.getName().toStringUtf8());
-             } else {
-                 failingTestcases.add(testCaseReportMessage.getName());
-                 if (!failedTestcases.contains(testCaseReportMessage.getName())) {
-                     newTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
-                 } else {
-                     continuedTestcaseFailures.add(testCaseReportMessage.getName().toStringUtf8());
-                 }
-                 transientTestcaseFailures.remove(testCaseReportMessage.getName().toStringUtf8());
-             }
+        for (TestCaseReportMessage testCaseReportMessage : mostRecentReport.getTestCaseList()) {
+            String name = testCaseReportMessage.getName().toStringUtf8();
+            TestCaseResult mostRecentResult = mostRecentTestCaseResults.get(name);
+            boolean previouslyFailed = failedTestcases.contains(testCaseReportMessage.getName());
+            if (mostRecentResult == null) {
+                // Consistently skipped; preserve the state from the last update.
+                if (previouslyFailed) {
+                    failingTestcases.add(testCaseReportMessage.getName());
+                    skippedTestcaseFailures.add(name);
+                }
+            } else if (mostRecentResult == TestCaseResult.TEST_CASE_RESULT_PASS) {
+                // Test case most recently passed.
+                if (previouslyFailed && !transientTestcaseFailures.contains(name)) {
+                    // Test case fixed since last update and did not fail transiently.
+                    fixedTestcases.add(name);
+                }
+            } else {
+                // Test case failed.
+                failingTestcases.add(testCaseReportMessage.getName());
+                if (!previouslyFailed) {
+                    // Test case previously passed.
+                    newTestcaseFailures.add(name);
+                } else {
+                    // Continued test failure.
+                    continuedTestcaseFailures.add(name);
+                }
+                transientTestcaseFailures.remove(name);
+            }
         }
 
-        String test = latestTest.getTest().toStringUtf8();
+        String test = mostRecentReport.getTest().toStringUtf8();
         List<String> buildIdList = new ArrayList<>();
-        for (AndroidDeviceInfoMessage device : latestTest.getDeviceInfoList()) {
+        for (AndroidDeviceInfoMessage device : mostRecentReport.getDeviceInfoList()) {
             buildIdList.add(device.getBuildId().toStringUtf8());
         }
         String buildId = StringUtils.join(buildIdList, ",");
         String summary = new String();
         TestStatus newStatus = TestStatus.TEST_OK;
-        if (failingTestcases.size() > 0) {
+        if (newTestcaseFailures.size() + continuedTestcaseFailures.size() > 0) {
             summary += "The following test cases failed in the latest test run:<br>";
 
             // Add new test case failures to top of summary in bold font.
@@ -309,6 +328,16 @@ public class VtsAlertJobServlet extends HttpServlet {
                     new ArrayList<>(transientTestcaseFailures);
             Collections.sort(sortedTransientTestcaseFailures);
             for (String testcaseName : sortedTransientTestcaseFailures) {
+                summary += "- " + testcaseName + "<br>";
+            }
+        }
+        if (skippedTestcaseFailures.size() > 0) {
+            // Add skipped test case failures to summary.
+            summary += "<br><br>The following test cases have not been run since failing:<br>";
+            List<String> sortedSkippedTestcaseFailures =
+                    new ArrayList<>(skippedTestcaseFailures);
+            Collections.sort(sortedSkippedTestcaseFailures);
+            for (String testcaseName : sortedSkippedTestcaseFailures) {
                 summary += "- " + testcaseName + "<br>";
             }
         }
