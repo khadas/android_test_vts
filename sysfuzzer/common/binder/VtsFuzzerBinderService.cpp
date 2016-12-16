@@ -63,17 +63,17 @@ int32_t BpVtsFuzzer::LoadHal(const string& path, int target_class,
   data.writeCString(module_name.c_str());
 
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  aout << "BpVtsFuzzer::Status request parcel:\n";
-  data.print(PLOG);
-  endl(PLOG);
+  alog << "BpVtsFuzzer::Status request parcel:\n"
+       << data
+       << endl;
 #endif
 
   remote()->transact(LOAD_HAL, data, &reply);
 
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  aout << "BpVtsFuzzer::Status response parcel:\n";
-  reply.print(PLOG);
-  endl(PLOG);
+  alog << "BpVtsFuzzer::Status response parcel:\n"
+       << reply
+       << endl;
 #endif
 
   int32_t res;
@@ -91,17 +91,17 @@ int32_t BpVtsFuzzer::Status(int32_t type) {
   data.writeInt32(type);
 
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  aout << "BpVtsFuzzer::Status request parcel:\n";
-  data.print(PLOG);
-  endl(PLOG);
+  alog << "BpVtsFuzzer::Status request parcel:\n"
+       << data
+       << endl;
 #endif
 
   remote()->transact(STATUS, data, &reply);
 
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  aout << "BpVtsFuzzer::Status response parcel:\n";
-  reply.print(PLOG);
-  endl(PLOG);
+  alog << "BpVtsFuzzer::Status response parcel:\n"
+       << reply
+       << endl;
 #endif
 
   int32_t res;
@@ -114,14 +114,12 @@ const char* BpVtsFuzzer::Call(const string& call_payload) {
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
   data.writeCString(call_payload.c_str());
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  data.print(PLOG);
-  endl(PLOG);
+  alog << data << endl;
 #endif
 
   remote()->transact(CALL, data, &reply);
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  reply.print(PLOG);
-  endl(PLOG);
+  alog << reply << endl;
 #endif
 
   const char* res = reply.readCString();
@@ -138,14 +136,12 @@ const char* BpVtsFuzzer::GetFunctions() {
   Parcel data, reply;
   data.writeInterfaceToken(IVtsFuzzer::getInterfaceDescriptor());
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  data.print(PLOG);
-  endl(PLOG);
+  alog << data << endl;
 #endif
 
   remote()->transact(GET_FUNCTIONS, data, &reply);
 #ifdef VTS_FUZZER_BINDER_DEBUG
-  reply.print(PLOG);
-  endl(PLOG);
+  alog << reply << endl;
 #endif
 
   const char* res = reply.readCString();

@@ -30,7 +30,7 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
  public:
   VtsDriverHalSocketServer(android::vts::SpecificationBuilder& spec_builder,
                            const char* lib_path)
-      : spec_builder_(spec_builder), lib_path_(lib_path), VtsDriverCommUtil() {}
+      : VtsDriverCommUtil(), spec_builder_(spec_builder), lib_path_(lib_path) {}
 
   // Start a session to handle a new request.
   bool ProcessOneCommand();
