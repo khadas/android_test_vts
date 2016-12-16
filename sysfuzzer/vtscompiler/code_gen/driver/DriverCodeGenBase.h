@@ -66,6 +66,10 @@ class DriverCodeGenBase : public CodeGenBase {
       std::stringstream& cpp_ss, const string& function_prototype,
       const string& fuzzer_extended_class_name) = 0;
 
+  // Generates the namespace name of a HIDL component, crashes otherwise.
+  void GenerateNamespaceName(
+      std::stringstream& ss, const ComponentSpecificationMessage& message);
+
   // Generates code that opens the default namespaces.
   void GenerateOpenNameSpaces(
       std::stringstream& ss, const ComponentSpecificationMessage& message);
