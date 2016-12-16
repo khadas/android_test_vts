@@ -331,7 +331,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Args:
             test_case: BinaryTestCase object
         '''
-        if getattr(self, self.ENABLE_PROFILING, False):
+        if self.enable_profiling:
             profiling_utils.EnableVTSProfiling(
                 self.shell, test_case.profiling_library_path)
 
@@ -341,7 +341,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.VerifyTestResult(test_case, command_results)
 
-        if getattr(self, self.ENABLE_PROFILING, False):
+        if self.enable_profiling:
             profiling_trace_path = getattr(self,
                                            self.VTS_PROFILING_TRACING_PATH, "")
             self.ProcessAndUploadTraceData(self._dut, profiling_trace_path)
