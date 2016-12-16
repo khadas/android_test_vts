@@ -33,10 +33,15 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@echo "build vts python package: $(VTS_PYTHON_ZIP)"
 	$(hide) mkdir -p $(dir $@)
 	$(hide) rm -rf $(VTS_TESTCASES_OUT)/vts
-	$(hide) find test -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) find test/vts -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
 	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	@echo "build vts python testcases"
+	$(hide) find test/vts-testcase -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C test/vts-testcase -l $@.list
+	@rm -f $@.list
+	$(hide)unzip -o $@ -d $(VTS_TESTCASES_OUT)/vts/testcases/
 	@echo "build vts python package for audio effect HAL"
 	$(hide) find hardware/interfaces/audio/effect/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	# uncomment when audio effect HAL test has some py, config, or push files
