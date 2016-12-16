@@ -50,6 +50,8 @@ function vts_multidevice_target_setup {
   echo "install vts driver for hidl"
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/64/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_vibrator@1.0.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_vibrator@1.0.so /data/local/tmp/64/
 
   echo "install hal packages"
   adb shell mkdir -p /data/local/tmp/32/hw
@@ -83,6 +85,9 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/Nfc.vts /data/local/tmp/spec/Nfc.vts
   adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts /data/local/tmp/spec/NfcClientCallback.vts
   adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/types.vts /data/local/tmp/spec/types.vts
+  # uncomment to test vibrator HAL
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts /data/local/tmp/spec/
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/types.vts /data/local/tmp/spec/
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
