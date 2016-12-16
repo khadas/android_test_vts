@@ -12,7 +12,6 @@
 #include <android/hardware/nfc/1.0/types.h>
 
 
-using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 
 namespace android {
@@ -21,7 +20,7 @@ namespace vts {
 extern "C" {
 
     void HIDL_INSTRUMENTATION_FUNCTION(
-            HidlInstrumentor::InstrumentationEvent event,
+            android::hardware::HidlInstrumentor::InstrumentationEvent event,
             const char* package,
             const char* version,
             const char* interface,

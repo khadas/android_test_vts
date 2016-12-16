@@ -13,27 +13,27 @@ namespace vts {
 
 
 
-NfcEvent RandomNfcEvent() {
+android::hardware::nfc::V1_0::NfcEvent RandomNfcEvent() {
 int choice = rand() / 7;
 if (choice < 0) choice *= -1;
-    if (choice == 0) return NfcEvent::OPEN_CPLT;
-    if (choice == 1) return NfcEvent::CLOSE_CPLT;
-    if (choice == 2) return NfcEvent::POST_INIT_CPLT;
-    if (choice == 3) return NfcEvent::PRE_DISCOVER_CPLT;
-    if (choice == 4) return NfcEvent::REQUEST_CONTROL;
-    if (choice == 5) return NfcEvent::RELEASE_CONTROL;
-    if (choice == 6) return NfcEvent::ERROR;
-    return NfcEvent::OPEN_CPLT;
+    if (choice == 0) return android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
+    if (choice == 1) return android::hardware::nfc::V1_0::NfcEvent::CLOSE_CPLT;
+    if (choice == 2) return android::hardware::nfc::V1_0::NfcEvent::POST_INIT_CPLT;
+    if (choice == 3) return android::hardware::nfc::V1_0::NfcEvent::PRE_DISCOVER_CPLT;
+    if (choice == 4) return android::hardware::nfc::V1_0::NfcEvent::REQUEST_CONTROL;
+    if (choice == 5) return android::hardware::nfc::V1_0::NfcEvent::RELEASE_CONTROL;
+    if (choice == 6) return android::hardware::nfc::V1_0::NfcEvent::ERROR;
+    return android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
 }
-NfcStatus RandomNfcStatus() {
+android::hardware::nfc::V1_0::NfcStatus RandomNfcStatus() {
 int choice = rand() / 5;
 if (choice < 0) choice *= -1;
-    if (choice == 0) return NfcStatus::OK;
-    if (choice == 1) return NfcStatus::FAILED;
-    if (choice == 2) return NfcStatus::ERR_TRANSPORT;
-    if (choice == 3) return NfcStatus::ERR_CMD_TIMEOUT;
-    if (choice == 4) return NfcStatus::REFUSED;
-    return NfcStatus::OK;
+    if (choice == 0) return android::hardware::nfc::V1_0::NfcStatus::OK;
+    if (choice == 1) return android::hardware::nfc::V1_0::NfcStatus::FAILED;
+    if (choice == 2) return android::hardware::nfc::V1_0::NfcStatus::ERR_TRANSPORT;
+    if (choice == 3) return android::hardware::nfc::V1_0::NfcStatus::ERR_CMD_TIMEOUT;
+    if (choice == 4) return android::hardware::nfc::V1_0::NfcStatus::REFUSED;
+    return android::hardware::nfc::V1_0::NfcStatus::OK;
 }
 }  // namespace vts
 }  // namespace android

@@ -138,9 +138,12 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHidlCallbackVariable(
 void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
+  out << "msg.set_name(\"" << method.name() << "\");\n";
   out << "switch (event) {\n";
   out.indent();
-  out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
+
+  out << "case android::hardware::HidlInstrumentor::CLIENT_API_ENTRY:\n";
+  out << "case android::hardware::HidlInstrumentor::SERVER_API_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
@@ -159,7 +162,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "break;\n";
   out.unindent();
   out << "}\n";
-  out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
+
+  out << "case android::hardware::HidlInstrumentor::CLIENT_API_EXIT:\n";
+  out << "case android::hardware::HidlInstrumentor::SERVER_API_EXIT:\n";
   out << "{\n";
   out.indent();
   for (int i = 0; i < method.return_type_hidl().size(); i++) {
@@ -237,7 +242,6 @@ void HalHidlProfilerCodeGen::GenerateUsingDeclaration(Formatter& out,
   std::string package_path = GetPackage(message);
   ReplaceSubString(package_path, ".", "::");
 
-  out << "using namespace android::hardware;\n";
   out << "using namespace ";
   out << package_path << "::"
       << GetVersionString(message.component_type_version(), true) << ";\n";
