@@ -38,30 +38,40 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "open") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("open");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                auto *arg_0 = msg.add_arg();
-                INfcClientCallback *arg_val_0 = reinterpret_cast<INfcClientCallback*> ((*args)[0]);
-                arg_0->set_type(TYPE_HIDL_CALLBACK);
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
+                        break;
+                    }
+                    auto *arg_0 = msg.add_arg();
+                    INfcClientCallback *arg_val_0 = reinterpret_cast<INfcClientCallback*> ((*args)[0]);
+                    arg_0->set_type(TYPE_HIDL_CALLBACK);
+                    break;
+                }
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -69,34 +79,44 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "write") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("write");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                auto *arg_0 = msg.add_arg();
-                ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
-                for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                    auto *arg_0_vector_i = arg_0->add_vector_value();
-                    arg_0_vector_i->set_type(TYPE_SCALAR);
-                    arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
+                        break;
+                    }
+                    auto *arg_0 = msg.add_arg();
+                    ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
+                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
+                        auto *arg_0_vector_i = arg_0->add_vector_value();
+                        arg_0_vector_i->set_type(TYPE_SCALAR);
+                        arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                    }
+                    break;
                 }
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -104,34 +124,44 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "coreInitialized") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("coreInitialized");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                auto *arg_0 = msg.add_arg();
-                ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
-                for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                    auto *arg_0_vector_i = arg_0->add_vector_value();
-                    arg_0_vector_i->set_type(TYPE_SCALAR);
-                    arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
+                        break;
+                    }
+                    auto *arg_0 = msg.add_arg();
+                    ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
+                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
+                        auto *arg_0_vector_i = arg_0->add_vector_value();
+                        arg_0_vector_i->set_type(TYPE_SCALAR);
+                        arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                    }
+                    break;
                 }
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -139,27 +169,37 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "prediscover") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("prediscover");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 0) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
+                        break;
+                    }
+                    break;
+                }
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -167,27 +207,37 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "close") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("close");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 0) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: close, event type: " << event;
+                        break;
+                    }
+                    break;
+                }
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: close, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -195,27 +245,37 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "controlGranted") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("controlGranted");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 0) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
+                        break;
+                    }
+                    break;
+                }
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
@@ -223,27 +283,37 @@ void HIDL_INSTRUMENTATION_FUNCTION(
     if (strcmp(method, "powerCycle") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("powerCycle");
-        switch (event) {
-            case HidlInstrumentor::CLIENT_API_ENTRY:
-            case HidlInstrumentor::SERVER_API_ENTRY:
-            case HidlInstrumentor::PASSTHROUGH_ENTRY:
-            {
-                break;
-            }
-            case HidlInstrumentor::CLIENT_API_EXIT:
-            case HidlInstrumentor::SERVER_API_EXIT:
-            case HidlInstrumentor::PASSTHROUGH_EXIT:
-            {
-                auto *result_0 = msg.add_return_type_hidl();
-                int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
-                result_0->set_type(TYPE_SCALAR);
-                result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
-                break;
-            }
-            default:
-            {
-                LOG(WARNING) << "not supported. ";
-                break;
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case HidlInstrumentor::CLIENT_API_ENTRY:
+                case HidlInstrumentor::SERVER_API_ENTRY:
+                {
+                    if ((*args).size() != 0) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
+                        break;
+                    }
+                    break;
+                }
+                case HidlInstrumentor::CLIENT_API_EXIT:
+                case HidlInstrumentor::SERVER_API_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 = msg.add_return_type_hidl();
+                    int32_t *result_val_0 = reinterpret_cast<int32_t*> ((*args)[0]);
+                    result_0->set_type(TYPE_SCALAR);
+                    result_0->mutable_scalar_value()->set_int32_t((*result_val_0));
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
             }
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
