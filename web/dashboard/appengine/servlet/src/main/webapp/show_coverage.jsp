@@ -67,8 +67,8 @@
             var gerritURI = ${gerritURI};
             var projects = ${projects};
             var commits = ${commits};
-            var sourceNames = ${sourceFiles};
-            var promises = sourceNames.map(function(src, i) {
+            var sourceFilenames = ${sourceFiles};
+            var promises = sourceFilenames.map(function(src, i) {
                 url = gerritURI + '/projects/' + encodeURIComponent(projects[i])
                         + '/commits/' + encodeURIComponent(commits[i])
                         + '/files/' + encodeURIComponent(src) + '/content';
@@ -97,8 +97,8 @@
                information are assumed to be non-executable.
             */
             var coverageVectors = ${coverageVectors};
-            var sourceNames = ${sourceFiles};
-            var testcaseNames = ${testcaseNames};
+            var sourceFilenames = ${sourceFiles};
+            var testLabels = ${testLabels};
             sourceContents.forEach(function(src, i) {
                 if (!src) return;
                 srcLines = src.split('\n');
@@ -119,8 +119,9 @@
                 }, String());
                 html = '<li><div class="collapsible-header">';
                 html += '<i class="material-icons">library_books</i>';
-                html += testcaseNames[i];
-                html += '<div class="right">' + sourceNames[i] + '</div></div>';
+                html += testLabels[i];
+                html += '<div class="source-name">' + sourceFilenames[i] +
+                        '</div></div>';
                 html += '<div class="collapsible-body row">';
                 html += '<div id="html_container" class="col s10 push-s1">';
                 html += '<div><table class="table">' + rows + '</table></div>';
