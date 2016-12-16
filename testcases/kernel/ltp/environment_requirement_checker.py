@@ -22,6 +22,8 @@ import itertools
 import operator
 
 from vts.runners.host import const
+from vts.utils.python.common import cmd_utils
+
 from vts.testcases.kernel.ltp.shell_environment import shell_environment
 from vts.testcases.kernel.ltp import ltp_enums
 from vts.testcases.kernel.ltp import ltp_configs
@@ -48,6 +50,7 @@ class EnvironmentRequirementChecker(object):
             shell environments given a shell mirror
         shell: shell mirror object, can be used to execute shell
             commands on target side through runner
+        ltp_bin_host_path: string, host path of ltp binary
     """
 
     def __init__(self, shell):
@@ -136,13 +139,14 @@ class EnvironmentRequirementChecker(object):
         Args:
             test_case: list of TestCase objects.
         """
-        executables_generators = (test_case.GetRequiredExecutablePaths()
-                                  for test_case in test_cases
-                                  if not test_case.is_filtered)
+        executables_generators = (
+            test_case.GetRequiredExecutablePaths(self.ltp_bin_host_path)
+            for test_case in test_cases)
         executables = list(
             set(itertools.chain.from_iterable(executables_generators)))
 
         # Set all executables executable permission using chmod.
+        logging.info("Setting permissions on device")
         permission_command = "chmod 775 %s" % os.path.join(
             ltp_configs.LTPBINPATH, '*')
         permission_result = self.shell.Execute(permission_command)
@@ -157,10 +161,14 @@ class EnvironmentRequirementChecker(object):
             "ls %s" % executable for executable in executables
             if executable not in ltp_configs.INTERNAL_BINS
         ]
+        logging.info("Checking binary existence on host: %s",
+                     executable_exists_commands)
 
-        executable_exists_results = map(
-            operator.not_,
-            self.shell.Execute(executable_exists_commands)[const.EXIT_CODE])
+        cmd_results = cmd_utils.ExecuteShellCommand(executable_exists_commands)
+        executable_exists_results = map(operator.not_,
+                                        cmd_results[cmd_utils.EXIT_CODE])
+        logging.info("Finished checking binary existence on host: %s",
+                     cmd_results)
 
         self._executable_available = dict(
             zip(executables, executable_exists_results))
@@ -168,6 +176,9 @@ class EnvironmentRequirementChecker(object):
         # Check whether all the internal binaries in path needed exist
         bin_path_exist_commands = ["which %s" % bin
                                    for bin in ltp_configs.INTERNAL_BINS]
+        bin_path_results = map(
+            operator.not_,
+            self.shell.Execute(bin_path_exist_commands)[const.EXIT_CODE])
 
         bin_path_results = map(
             operator.not_,
@@ -191,7 +202,8 @@ class EnvironmentRequirementChecker(object):
                          "%s" % test_case)
             return False
 
-        executables = test_case.GetRequiredExecutablePaths()
+        executables = test_case.GetRequiredExecutablePaths(
+            self.ltp_bin_host_path)
         results = [self._executable_available[executable]
                    for executable in executables]
 

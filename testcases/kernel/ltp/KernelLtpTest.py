@@ -27,6 +27,7 @@ from vts.runners.host import base_test_with_webdb
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
+from vts.utils.python.common import cmd_utils
 from vts.utils.python.controllers import android_device
 
 from vts.testcases.kernel.ltp import test_cases_parser
@@ -132,27 +133,29 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         '''
         result = []
         for item in input_list:
-            if item.endswith(const.SUFFIX_32BIT) or item.endswith(
-                    const.SUFFIX_64BIT):
+            if (item.endswith(const.SUFFIX_32BIT) or
+                    item.endswith(const.SUFFIX_64BIT)):
                 result.append(item)
             else:
                 result.append("%s_%s" % (item, const.SUFFIX_32BIT))
                 result.append("%s_%s" % (item, const.SUFFIX_64BIT))
         return result
 
-    def PreTestSetup(self):
+    def PreTestSetup(self, n_bit):
         """Setups that needs to be done before any tests."""
-        replacements = {'#!/bin/sh': '#!/system/bin/sh',
-                        '#! /bin/sh': '#!/system/bin/sh',
-                        '#!/bin/bash': '#!/system/bin/sh',
-                        '#! /bin/bash': '#!/system/bin/sh',
+        replacements = {'#\\!/bin/sh': '#\\!/system/bin/sh',
+                        '#\\! /bin/sh': '#\\!/system/bin/sh',
+                        '#\\!/bin/bash': '#\\!/system/bin/sh',
+                        '#\\! /bin/bash': '#\\!/system/bin/sh',
                         'bs=1M': 'bs=1m',
                         '/var/run': ltp_configs.TMP}
-        sed_command = self._shell_env.CreateSedCommand(ltp_configs.LTPDIR,
-                                                       replacements)
-        results = self.shell.Execute(sed_command)
+        src_host = os.path.join(self.data_file_path, str(n_bit), 'ltp')
+        sed_command = self._shell_env.CreateSedCommand(src_host, replacements)
+        logging.info('Executing sed commands on host: %s', sed_command)
+        results = cmd_utils.ExecuteShellCommand(sed_command)
+        logging.info('Finished sed commands on host. Results: %s', results)
         asserts.assertFalse(
-            any(results[const.EXIT_CODE]),
+            any(results[cmd_utils.EXIT_CODE]),
             "Error: pre-test setup failed. "
             "Commands: {commands}. Results: {results}".format(
                 commands=sed_command, results=results))
@@ -163,12 +166,11 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """Push the related files to target.
 
         Args:
-            n_bit: int, _32BIT, or 32, for 32bit test;
-                   _64BIT, or 64, for 64bit test;
+            n_bit: int, bitness
         """
-
-        self.shell.Execute("mkdir %s -p" % ltp_configs.LTPDIR)
         src = os.path.join(self.data_file_path, str(n_bit), 'ltp', '.')
+        logging.info('Pushing files from %s to %s', src, ltp_configs.LTPDIR)
+        self.shell.Execute("mkdir %s -p" % ltp_configs.LTPDIR)
         self._dut.adb.push(src, ltp_configs.LTPDIR)
         logging.info('finished pushing files from %s to %s', src,
                      ltp_configs.LTPDIR)
@@ -239,17 +241,18 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """Runs all 32-bit or 64-bit LTP test cases.
 
         Args:
-            n_bit: _32BIT, or 32, for 32bit test;
-                   _64BIT, or 64, for 64bit test;
+            n_bit: int, bitness
         """
+        self.PreTestSetup(n_bit)
         self.PushFiles(n_bit)
-        self.PreTestSetup()
 
         test_cases = list(
             self._testcases.Load(
                 ltp_configs.LTPDIR, n_bit=n_bit, run_staging=self.run_staging))
 
         logging.info("Checking binary exists for all test cases.")
+        self._requirement.ltp_bin_host_path = os.path.join(
+            self.data_file_path, str(n_bit), 'ltp', 'testcases', 'bin')
         self._requirement.CheckAllTestCaseExecutables(test_cases)
         logging.info("Start running %i individual tests." % len(test_cases))
 
