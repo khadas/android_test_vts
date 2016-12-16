@@ -72,27 +72,26 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         self.getUserParams(opt_param_names=[
             self.USE_GAE_DB, self.COVERAGE_SRC_FILES, self.SUBSCRIBERS,
-            keys.ConfigKeys.IKEY_DATA_FILE_PATH, keys.ConfigKeys.KEY_TESTBED
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH, keys.ConfigKeys.KEY_TESTBED_NAME
         ])
 
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
             self._report_msg = ReportMsg.TestReportMessage()
             test_module_name = self.__class__.__name__
-            if hasattr(self, keys.ConfigKeys.KEY_TESTBED):
-                testbed_dict = getattr(self, keys.ConfigKeys.KEY_TESTBED, {})
-                if (keys.ConfigKeys.KEY_TESTBED_NAME in testbed_dict and
-                        testbed_dict[keys.ConfigKeys.KEY_TESTBED_NAME]):
-                    test_module_name = testbed_dict[
-                        keys.ConfigKeys.KEY_TESTBED_NAME]
+            if hasattr(self, keys.ConfigKeys.KEY_TESTBED_NAME):
+                user_specified_test_name = getattr(
+                        self, keys.ConfigKeys.KEY_TESTBED_NAME, None)
+                if user_specified_test_name:
+                    test_module_name = str(user_specified_test_name)
                 else:
                     logging.warn(
-                        "%s field not set in the given %s test config",
+                        "%s field = %s",
                         keys.ConfigKeys.KEY_TESTBED_NAME,
-                        keys.ConfigKeys.KEY_TESTBED)
+                        user_specified_test_name)
             else:
                 logging.warn("%s not defined in the given test config",
-                             keys.ConfigKeys.KEY_TESTBED)
+                             keys.ConfigKeys.KEY_TESTBED_NAME)
             logging.info("Test module name: %s", test_module_name)
             self._report_msg.test = test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
