@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "VtsProfilingInterface.h"
+
+#include <fstream>
+#include <string>
+
+#include <android-base/logging.h>
+#include <google/protobuf/text_format.h>
 
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
@@ -27,14 +32,64 @@ const int VtsProfilingInterface::kProfilingPointEntry = 1;
 const int VtsProfilingInterface::kProfilingPointCallback = 2;
 const int VtsProfilingInterface::kProfilingPointExit = 3;
 
-VtsProfilingInterface& VtsProfilingInterface::getInstance()
-{
-    static VtsProfilingInterface instance;
-    return instance;
+VtsProfilingInterface::VtsProfilingInterface(const string& trace_file_path)
+    : trace_file_path_(trace_file_path),
+      trace_output_(nullptr),
+      initialized_(false) {
 }
 
-bool VtsProfilingInterface::AddTraceEvent(
+VtsProfilingInterface::~VtsProfilingInterface() {
+  if (trace_output_) {
+    trace_output_.close();
+  }
+}
+
+static int64_t NanoTime() {
+  std::chrono::nanoseconds duration(
+      std::chrono::steady_clock::now().time_since_epoch());
+  return static_cast<int64_t>(duration.count());
+}
+
+VtsProfilingInterface& VtsProfilingInterface::getInstance(
+    const string& trace_file_path) {
+  static VtsProfilingInterface instance(trace_file_path);
+  return instance;
+}
+
+void VtsProfilingInterface::Init() {
+  if (initialized_) return;
+  // Attach timestamp for the trace file.
+  string file_path = trace_file_path_ + "_" + to_string(NanoTime());
+  LOG(INFO) << "Creating new profiler instance with file path: " << file_path;
+  trace_output_ = std::ofstream(file_path, std::fstream::out);
+  if (!trace_output_) {
+    LOG(ERROR) << "Can not open trace file: " << trace_file_path_;
+    exit(1);
+  }
+  initialized_ = true;
+}
+
+bool VtsProfilingInterface::AddTraceEvent(const char* package,
+    const char* version, const char* interface,
     const FunctionSpecificationMessage& message) {
+  if (!initialized_) {
+    LOG(ERROR) << "Profiler not initialized. ";
+    return false;
+  }
+  string msg_str;
+  if (!google::protobuf::TextFormat::PrintToString(message, &msg_str)) {
+    LOG(ERROR) << "Can't print the message";
+    return false;
+  }
+
+  mutex_.lock();
+  // Record the event data with the following format:
+  // timestamp,package_name,package_version,interface_name,message
+  trace_output_ << NanoTime() << "," << package << "," << version << ","
+                << interface << "," << msg_str << "\n";
+  trace_output_.flush();
+  mutex_.unlock();
+
   return true;
 }
 

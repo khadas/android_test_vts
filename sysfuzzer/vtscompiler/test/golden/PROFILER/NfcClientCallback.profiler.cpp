@@ -4,6 +4,8 @@
 using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 
+#define TRACEFILEPREFIX "/data/local/tmp"
+
 namespace android {
 namespace vts {
 
@@ -27,6 +29,12 @@ void HIDL_INSTRUMENTATION_FUNCTION(
         LOG(WARNING) << "incorrect interface.";
         return;
     }
+
+    char trace_file[PATH_MAX];
+    sprintf(trace_file, "%s/%s@%s", TRACEFILEPREFIX, package, version);
+    VtsProfilingInterface& profiler = VtsProfilingInterface::getInstance(trace_file);
+    profiler.Init();
+
     if (strcmp(method, "sendEvent") == 0) {
         FunctionSpecificationMessage msg;
         switch (event) {
@@ -52,7 +60,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        VtsProfilingInterface::getInstance().AddTraceEvent(msg);
+        profiler.AddTraceEvent(package, version, interface, msg);
     }
     if (strcmp(method, "sendData") == 0) {
         FunctionSpecificationMessage msg;
@@ -78,7 +86,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                 break;
             }
         }
-        VtsProfilingInterface::getInstance().AddTraceEvent(msg);
+        profiler.AddTraceEvent(package, version, interface, msg);
     }
 }
 

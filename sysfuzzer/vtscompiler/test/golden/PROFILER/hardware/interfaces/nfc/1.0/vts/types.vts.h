@@ -4,6 +4,7 @@
 
 #include <android-base/logging.h>
 #include <hidl/HidlSupport.h>
+#include <linux/limits.h>
 #include <test/vts/proto/ComponentSpecificationMessage.pb.h>
 #include <VtsProfilingInterface.h>
 
