@@ -405,6 +405,16 @@ class AndroidDevice(object):
         return "root" in id_str
 
     @property
+    def verityEnabled(self):
+        """True if verity is enabled for this device."""
+        try:
+            self.adb.shell('getprop | grep partition.system.verified').decode("utf-8")
+        except adb.AdbError:
+            # If verity is disabled, there is no property 'partition.system.verified'
+            return False
+        return True
+
+    @property
     def model(self):
         """The Android code name for the device."""
         # If device is in bootloader mode, get mode name from fastboot.
