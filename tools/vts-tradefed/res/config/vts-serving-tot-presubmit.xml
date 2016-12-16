@@ -20,13 +20,23 @@
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />
 
+    <!-- For vts-hal-hidl -->
+    <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
+    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+    <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
+    <option name="compatibility:include-filter" value="HwBinderPerformanceTest" />
+
     <!-- For vts-library -->
+    <option name="compatibility:include-filter" value="CpuProfilingTest" />
 
     <!-- For vts-security -->
 
     <!-- For vts-system -->
     <option name="compatibility:include-filter" value="SampleShellTest" />
     <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
+    <option name="compatibility:include-filter" value="SampleQtaguidTest" />
+    <option name="compatibility:include-filter" value="LibcTest" />
+    <option name="compatibility:include-filter" value="SyscallExistenceTest" />
 
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
