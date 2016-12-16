@@ -96,39 +96,8 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
           out << "const ";
         }
         if (arg.type() == TYPE_SCALAR) {
-          /*
-          if (arg.scalar_type() == "pointer") {
-            out << definition.aggregate_value(
-                primitive_format_index).primitive_name(primitive_type_index)
-                    << " ";
-          }
-          */
-          if (arg.scalar_type() == "char_pointer") {
-            out << "char* ";
-          } else if (arg.scalar_type() == "int8_t" ||
-                     arg.scalar_type() == "uint8_t" ||
-                     arg.scalar_type() == "int16_t" ||
-                     arg.scalar_type() == "uint16_t" ||
-                     arg.scalar_type() == "int32_t" ||
-                     arg.scalar_type() == "uint32_t" ||
-                     arg.scalar_type() == "int64_t" ||
-                     arg.scalar_type() == "uint64_t" ||
-                     arg.scalar_type() == "size_t") {
-            if (arg.scalar_type().length() == 0) {
-              cerr << __func__ << ":" << __LINE__
-                   << " unsupported scalar type " << arg.scalar_type() << "\n";
-              exit(-1);
-            }
-            out << arg.scalar_type() << " ";
-          } else if (arg.scalar_type() == "bool_t") {
-            out << "bool ";
-          } else if (arg.scalar_type() == "void_pointer") {
-            out << "void*";
-          } else {
-            cerr << __func__ << ":" << __LINE__
-                 << " unsupported scalar type " << arg.scalar_type() << "\n";
-            exit(-1);
-          }
+          GenerateScalarTypeInC(out, arg.scalar_type());
+          out << " ";
         } else if (arg.type() == TYPE_PREDEFINED) {
           out << arg.predefined_type() << " ";
         } else {
@@ -236,11 +205,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
           out << ", ";
         }
         if (return_type_hidl.type() == TYPE_SCALAR) {
-          if (return_type_hidl.scalar_type() == "bool_t") {
-            out << "bool";
-          } else {
-            out << return_type_hidl.scalar_type();
-          }
+          GenerateScalarTypeInC(out, return_type_hidl.scalar_type());
         } else if (return_type_hidl.type() == TYPE_ENUM ||
                    return_type_hidl.type() == TYPE_VECTOR) {
           out << GetCppVariableType(return_type_hidl, &message);
@@ -276,11 +241,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
           out << ", ";
         }
         if (return_type_hidl.type() == TYPE_SCALAR) {
-          if (return_type_hidl.scalar_type() == "bool_t") {
-            out << "bool";
-          } else {
-            out << return_type_hidl.scalar_type();
-          }
+          GenerateScalarTypeInC(out, return_type_hidl.scalar_type());
         } else if (return_type_hidl.type() == TYPE_ENUM ||
                    return_type_hidl.type() == TYPE_VECTOR ||
                    return_type_hidl.type() == TYPE_STRUCT) {
@@ -301,6 +262,29 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
   }
 }
 
+void HalHidlCodeGen::GenerateScalarTypeInC(Formatter& out, const string& type) {
+  if (type == "bool_t") {
+    out << "bool";
+  } else if (type == "int8_t" ||
+             type == "uint8_t" ||
+             type == "int16_t" ||
+             type == "uint16_t" ||
+             type == "int32_t" ||
+             type == "uint32_t" ||
+             type == "int64_t" ||
+             type == "uint64_t" ||
+             type == "size_t") {
+    out << type;
+  } else if (type == "char_pointer") {
+    out << "char*";
+  } else if (type == "void_pointer") {
+    out << "void*";
+  } else {
+    cerr << __func__ << ":" << __LINE__
+         << " unsupported scalar type " << type << "\n";
+    exit(-1);
+  }
+}
 
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     Formatter& out, const ComponentSpecificationMessage& message,
@@ -625,8 +609,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         out << kInstanceVariableName << "->" << api.name() << "(";
       } else if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         out << "*result = reinterpret_cast<void*>("
-            << "(" << api.return_type_hidl(0).scalar_type() << ")"
-            << kInstanceVariableName << "->" << api.name() << "(";
+            << "(";
+        GenerateScalarTypeInC(out, api.return_type_hidl(0).scalar_type());
+        out << ")" << kInstanceVariableName << "->" << api.name() << "(";
       } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
         if (api.return_type_hidl(0).has_scalar_type()) {
           out << "*result = reinterpret_cast<void*>("
