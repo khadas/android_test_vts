@@ -134,7 +134,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
   } else if (arg.type() == TYPE_SCALAR) {
     return GetCppVariableType(arg.scalar_type());
   } else if (arg.type() == TYPE_STRING) {
-    return "::std::string";
+    return "::android::hardware::hidl_string";
   } else if (arg.type() == TYPE_ENUM) {
     cout << __func__ << ":" << __LINE__ << " "
          << arg.has_enum_value() << " " << arg.has_predefined_type() << endl;
@@ -342,7 +342,7 @@ string GetCppInstanceType(
       break;
     }
     case TYPE_STRING: {
-      return "RandomCharPointer()";
+      return "android::hardware::hidl_string(RandomCharPointer())";
     }
     case TYPE_STRUCT: {
       if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
