@@ -184,13 +184,21 @@ class VtsTcpClient(object):
                 logging.info("spec: %s", result.return_type_submodule_spec)
                 return mirror_object.MirrorObject(
                      self, result.return_type_submodule_spec, None)
-            if (len(result.return_type_hidl) == 1 and
-                result.return_type_hidl[0].type ==
+            if len(result.return_type_hidl) == 1:
+                if (result.return_type_hidl[0].type ==
                     CompSpecMsg_pb2.TYPE_SCALAR):
-                return getattr(result.return_type_hidl[0].scalar_value,
-                               result.return_type_hidl[0].scalar_type)
-            else:
-                return result
+                    return getattr(result.return_type_hidl[0].scalar_value,
+                                   result.return_type_hidl[0].scalar_type)
+                elif (result.return_type_hidl[0].type ==
+                    CompSpecMsg_pb2.TYPE_ENUM):
+                    scalar_type = getattr(result.return_type_hidl[0],
+                                          "scalar_type", "")
+                    if scalar_type:
+                        return getattr(result.return_type_hidl[0].scalar_value,
+                                       scalar_type)
+                    else:
+                        return result.return_type_hidl[0].scalar_value.int32_t
+            return result
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
         raise errors.VtsTcpCommunicationError(
