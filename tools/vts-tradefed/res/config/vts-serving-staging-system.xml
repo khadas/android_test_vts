@@ -17,7 +17,5 @@
     <include name="everything" />
     <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="CameraITSTest" />
-    <option name="compatibility:include-filter" value="RebootTest" />
-    <option name="compatibility:include-filter" value="RebootRootRemountTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
