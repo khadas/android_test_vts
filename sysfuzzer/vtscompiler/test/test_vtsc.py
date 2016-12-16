@@ -39,7 +39,7 @@ class VtscTester(unittest.TestCase):
 
     example:
         python test/vts/sysfuzzer/vtscompiler/test/test_vtsc.py vtsc
-        test/vts/sysfuzzer/vtscompiler/test/data/ temp_output
+        test/vts/sysfuzzer/vtscompiler/test/golden/ temp_output
 
     Attributes:
         _vtsc_path: the path to run vtsc.
@@ -65,19 +65,25 @@ class VtscTester(unittest.TestCase):
 
     def testAll(self):
         """Run all tests. """
-        self.testProfiler()
+        self.TestDriver()
+        self.TestProfiler()
         self.assertEqual(self._errors, 0)
 
-    def testProfiler(self):
+    def TestDriver(self):
+        """Run tests for DRIVER mode. """
+        logging.info("Running TestDriver test case.")
+        for component_name in ["Nfc", "types", "NfcClientCallback"]:
+            self.RunTest("DRIVER",
+                         "hardware/interfaces/nfc/1.0/vts/%s.vts" % component_name,
+                         "%s.driver.cpp" % component_name)
+
+    def TestProfiler(self):
         """Run tests for PROFILER mode. """
-        self.RunTest("PROFILER", "hardware/interfaces/nfc/1.0/vts/Nfc.vts",
-                     "nfc.profiler.cpp")
-        self.RunTest("PROFILER",
-                     "hardware/interfaces/nfc/1.0/vts/types.vts",
-                     "types.profiler.cpp")
-        self.RunTest("PROFILER",
-                     "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts",
-                     "nfcClientCallback.profiler.cpp")
+        logging.info("Running TestProfiler test case.")
+        for component_name in ["Nfc", "types", "NfcClientCallback"]:
+            self.RunTest("PROFILER",
+                         "hardware/interfaces/nfc/1.0/vts/%s.vts" % component_name,
+                         "%s.profiler.cpp" % component_name)
 
     def RunTest(self, mode, vts_file_path, source_file_name):
         """Run vtsc with given mode for the give vts file and compare the
@@ -89,20 +95,22 @@ class VtscTester(unittest.TestCase):
             source_file_name: name of the generated source file.
         """
         vtsc_cmd = [self._vtsc_path, "-m" + mode, vts_file_path,
-                    self._output_dir,
-                    os.path.join(self._output_dir, source_file_name)]
+                    os.path.join(self._output_dir, mode),
+                    os.path.join(self._output_dir, mode, source_file_name)]
         return_code = cmd_utils.RunCommand(vtsc_cmd)
         if (return_code != 0):
             self.Error("Fail to execute command: %s" % vtsc_cmd)
 
         header_file_name = vts_file_path + ".h"
-        canonical_header_file = os.path.join(self._canonical_dir,
+        canonical_header_file = os.path.join(self._canonical_dir, mode,
                                              header_file_name)
-        output_header_file = os.path.join(self._output_dir, header_file_name)
+        output_header_file = os.path.join(self._output_dir, mode,
+                                          header_file_name)
 
-        canonical_source_file = os.path.join(self._canonical_dir,
-                                             source_file_name)
-        output_source_file = os.path.join(self._output_dir, source_file_name)
+        canonical_source_file = os.path.join(
+            self._canonical_dir, mode, source_file_name)
+        output_source_file = os.path.join(
+            self._output_dir, mode, source_file_name)
 
         self.CompareOutputFile(output_header_file, canonical_header_file)
         self.CompareOutputFile(output_source_file, canonical_source_file)
@@ -115,7 +123,7 @@ class VtscTester(unittest.TestCase):
             output_file: name of the output file.
         """
         if not os.path.isfile(canonical_file):
-            self.Error("Generated unexpected file: %s" % output_file)
+            self.Error("Generated unexpected file: %s (for %s)" % (output_file, canonical_file))
         else:
             if not filecmp.cmp(output_file, canonical_file):
                 self.Error("output file: %s does not match the canonical_file: "
@@ -145,7 +153,7 @@ class VtscTester(unittest.TestCase):
 if __name__ == "__main__":
     # Default values of the input parameter, could be overridden by command.
     vtsc_path = "vtsc"
-    canonical_dir = "test/vts/sysfuzzer/vtscompiler/test/data/"
+    canonical_dir = "test/vts/sysfuzzer/vtscompiler/test/golden/"
     output_dir = "test/vts/sysfuzzer/vtscompiler/test/temp_coutput/"
     # Parse the arguments and set the provided value for
     # vtsc_path/canonical_dar/output_dir.

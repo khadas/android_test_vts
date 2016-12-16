@@ -1,5 +1,5 @@
-#ifndef __VTS_PROFILER_nfcClientCallback.profiler__
-#define __VTS_PROFILER_nfcClientCallback.profiler__
+#ifndef __VTS_PROFILER_NfcClientCallback.profiler__
+#define __VTS_PROFILER_NfcClientCallback.profiler__
 
 
 #include <android-base/logging.h>

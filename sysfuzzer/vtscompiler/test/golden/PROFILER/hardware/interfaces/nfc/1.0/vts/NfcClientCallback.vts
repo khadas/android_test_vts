@@ -1,5 +1,5 @@
-#ifndef __VTS_PROFILER_nfc.profiler__
-#define __VTS_PROFILER_nfc.profiler__
+#ifndef __VTS_PROFILER_NfcClientCallback.profiler__
+#define __VTS_PROFILER_NfcClientCallback.profiler__
 
 
 #include <android-base/logging.h>
@@ -7,7 +7,6 @@
 #include <test/vts/proto/ComponentSpecificationMessage.pb.h>
 #include <VtsProfilingInterface.h>
 
-#include <android/hardware/nfc/1.0/INfc.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <android/hardware/nfc/1.0/types.h>
 
@@ -32,3 +31,4 @@ extern "C" {
 }  // namespace vts
 }  // namespace android
 #endif
+
