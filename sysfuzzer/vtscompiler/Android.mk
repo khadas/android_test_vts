@@ -46,9 +46,8 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
   libvts_common_host \
   libvts_multidevice_proto_host \
-  libprotobuf-cpp-full \
   libhidl-gen-utils \
-  libbase           \
+  libbase \
 
 LOCAL_CFLAGS := -Wall -Werror
 
@@ -75,7 +74,6 @@ LOCAL_SHARED_LIBRARIES := \
   libprotobuf-cpp-full \
   libvts_common_host \
   libvts_multidevice_proto_host \
-  libprotobuf-cpp-full \
   libhidl-gen-utils \
   libbase \
   libvtsc \
