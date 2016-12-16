@@ -58,7 +58,7 @@ enum ComponentType {
   MOBILE = 6;
   // For a WiFi submodule.
   BLUETOOTH = 7;
-  // For a NFC submodule
+  // For a NFC submodule.
   NFC = 8;
   // For a power HAL.
   POWER = 9;
@@ -66,6 +66,8 @@ enum ComponentType {
   MEMTRACK = 10;
   // For a biometrics fingerprint HAL.
   BFP = 11;
+  // For a vibrator submodule.
+  VIBRATOR = 12;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
