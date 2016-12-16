@@ -8,6 +8,6 @@
 ## 3. Run kernel LTP test from VTS-TradeFed console
 `> run vts-kernel`
 
-This will take around 30 minutes to run.
+This will take from 30 minutes to 2 hours to run.
 The test results can be found under `out/host/linux-x86/vts/android-vts/results/`,
 while the device logcat and host logs can be found under `out/host/linux-x86/vts/android-vts/logs/`.
