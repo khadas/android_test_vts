@@ -421,7 +421,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if not self.run_64bit:
             logging.info('User specified not to run 64 bit version LTP tests.')
             return
-        if not self._shell_env.IsDeviceArch64Bit():
+        if not self._dut.is64Bit:
             logging.info('Target device does not support 64 bit tests.')
             return
 
