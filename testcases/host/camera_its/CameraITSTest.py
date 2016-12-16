@@ -56,7 +56,11 @@ class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    "scipy.stats", "scipy.spatial"]
         for m in modules:
             try:
-                exec ("import " + m)
+                if m == "Image":
+                    # Image modules are now imported from PIL
+                    exec ("from PIL import Image")
+                else:
+                    exec ("import " + m)
             except ImportError:
                 asserts.fail("Cannot found python module " + m)
 
