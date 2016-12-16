@@ -24,6 +24,7 @@
     <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
     <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
     <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+    <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTest" />
     <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
