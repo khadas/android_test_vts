@@ -139,7 +139,14 @@ TEST_SUITES = [
     'timers',
     # The following are not included in default LTP scenario group
     'securebits',
-    'tracing'
+    'tracing',
+]
+
+# List of LTP test suites that will not run in multi-thread mode
+TEST_SUITES_MULTITHREAD_DISABLED = [
+    'dio',
+    'io',
+    'mm',
 ]
 
 # Staging tests are for debugging and verifying fixed tests
