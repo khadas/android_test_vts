@@ -95,7 +95,8 @@ class TestCasesParser(object):
             except:
                 logging.info("[Parser] Skipping test case %s. Reason: "
                              "filtered" % testcase.fullname)
-                continue
+                testcase.is_filtered = True
+                testcase.note = "filtered"
 
             # For skipping tests that are not designed for Android
             if test_display_name in self._disabled_tests:
@@ -110,6 +111,7 @@ class TestCasesParser(object):
                                  "staging" % testcase.fullname)
                     continue
                 else:
+                    testcase.is_staging = True
                     testcase.note = "staging"
 
             logging.info("[Parser] Adding test case %s." % testcase.fullname)

@@ -311,7 +311,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
         settings_multithread = []
         settings_singlethread = []
         for test_case in settings:
-            if (test_case.note == 'staging' or test_case.testsuite in
+            if (test_case.is_staging or test_case.testsuite in
                     ltp_configs.TEST_SUITES_REQUIRE_SINGLE_THREAD_MODE):
                 settings_singlethread.append(test_case)
             else:
@@ -376,8 +376,15 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
             test_name = name_func(test_case, *args)
 
+            # Check whether test case is filtered out by base_test's filtering method
+            if test_case.is_filtered:
+                self.InternalResultReportMultiThread(test_name, asserts.skipIf,
+                                                     (False, test_case.note))
+                continue
             logging.info("Worker {} starts checking requirement "
                          "for '{}'.".format(id, test_case))
+
+            # Check test requirements
             requirement_satisfied = self._requirement.Check(test_case)
             if not requirement_satisfied:
                 logging.info("Worker {} reports requirement "
@@ -436,6 +443,7 @@ class KernelLtpTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def RunLtpOnce(self, test_case, n_bit):
         "Run one LTP test case"
+        asserts.skipIf(test_case.is_filtered, test_case.note)
         asserts.skipIf(not self._requirement.Check(test_case), test_case.note)
 
         cmd = "export {envp} && {commands}".format(
