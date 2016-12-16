@@ -87,10 +87,24 @@ public class ShowCoverageServlet extends BaseServlet {
 
         List<String> sourceFiles = new ArrayList<>();
         List<List<Integer>> coverageVectors = new ArrayList<>();
-        List<String> testcaseNames = new ArrayList<>();
+        List<String> testLabels = new ArrayList<>();
         List<String> projects = new ArrayList<>();
         List<String> commits = new ArrayList<>();
         if (testReportMessage != null) {
+            String testNamePrefix = "<b>" + testReportMessage.getTest().toStringUtf8() + "</b>";
+            for (CoverageReportMessage coverageReportMessage : testReportMessage.getCoverageList()) {
+               if (coverageReportMessage.getLineCoverageVectorCount() == 0 ||
+                   !coverageReportMessage.hasFilePath() ||
+                   !coverageReportMessage.hasProjectName() ||
+                   !coverageReportMessage.hasRevision()) {
+                   continue;
+               }
+               coverageVectors.add(coverageReportMessage.getLineCoverageVectorList());
+               testLabels.add(testNamePrefix);
+               sourceFiles.add(coverageReportMessage.getFilePath().toStringUtf8());
+               projects.add(coverageReportMessage.getProjectName().toStringUtf8());
+               commits.add(coverageReportMessage.getRevision().toStringUtf8());
+            }
             for (TestCaseReportMessage testCaseReportMessage : testReportMessage.getTestCaseList()) {
                 if (!testCaseReportMessage.hasName()) continue;
                 for (CoverageReportMessage coverageReportMessage :
@@ -102,7 +116,8 @@ public class ShowCoverageServlet extends BaseServlet {
                         continue;
                     }
                     coverageVectors.add(coverageReportMessage.getLineCoverageVectorList());
-                    testcaseNames.add(testCaseReportMessage.getName().toStringUtf8());
+                    testLabels.add(testNamePrefix + ": " +
+                                   testCaseReportMessage.getName().toStringUtf8());
                     sourceFiles.add(coverageReportMessage.getFilePath().toStringUtf8());
                     projects.add(coverageReportMessage.getProjectName().toStringUtf8());
                     commits.add(coverageReportMessage.getRevision().toStringUtf8());
@@ -115,7 +130,7 @@ public class ShowCoverageServlet extends BaseServlet {
         request.setAttribute("gerritScope", new Gson().toJson(GERRIT_SCOPE));
         request.setAttribute("clientId", new Gson().toJson(CLIENT_ID));
         request.setAttribute("coverageVectors", new Gson().toJson(coverageVectors));
-        request.setAttribute("testcaseNames", new Gson().toJson(testcaseNames));
+        request.setAttribute("testLabels", new Gson().toJson(testLabels));
         request.setAttribute("sourceFiles", new Gson().toJson(sourceFiles));
         request.setAttribute("projects", new Gson().toJson(projects));
         request.setAttribute("commits", new Gson().toJson(commits));
