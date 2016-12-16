@@ -35,7 +35,8 @@ LOCAL_C_INCLUDES := \
 LOCAL_SHARED_LIBRARIES := \
     $(module_shared_libraries) \
     libutils \
-    libhidl \
+    libhidlbase \
+    libhidltransport \
     libhardware \
 
 LOCAL_ARM_MODE := arm
