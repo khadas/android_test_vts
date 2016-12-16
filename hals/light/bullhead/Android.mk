@@ -71,6 +71,7 @@ LOCAL_SANITIZE := address coverage
 LOCAL_MULTILIB := both
 LOCAL_COMPATIBILITY_SUITE := vts
 
-include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
+# TODO(trong): b/30713453
+##include $(BUILD_SHARED_LIBRARY)
+#include test/vts/tools/build/Android.packaging_sharedlib.mk
 endif
