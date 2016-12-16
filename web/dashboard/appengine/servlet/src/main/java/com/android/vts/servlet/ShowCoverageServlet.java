@@ -21,9 +21,6 @@ import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.CoverageReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
@@ -31,15 +28,12 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,23 +41,14 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet for handling requests to show code coverage.
  */
-@WebServlet(name = "show_coverage", urlPatterns = {"/show_coverage"})
-public class ShowCoverageServlet extends HttpServlet {
+public class ShowCoverageServlet extends BaseServlet {
 
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
-    private static final String TABLE_PREFIX = "result_";
-    private static final String GERRIT_URI = System.getenv("GERRIT_URI");
-    private static final String GERRIT_SCOPE = System.getenv("GERRIT_SCOPE");
-    private static final String CLIENT_ID = System.getenv("CLIENT_ID");
-    private static final Logger logger = LoggerFactory.getLogger(ShowCoverageServlet.class);
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        UserService userService = UserServiceFactory.getUserService();
-        User currentUser = userService.getCurrentUser();
-        String loginURI = userService.createLoginURL(request.getRequestURI());
-        String logoutURI = userService.createLogoutURL(loginURI);
+    public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         RequestDispatcher dispatcher = null;
         Table table = null;
         TableName tableName = null;
@@ -125,7 +110,6 @@ public class ShowCoverageServlet extends HttpServlet {
             }
         }
 
-        request.setAttribute("email", currentUser.getEmail());
         request.setAttribute("testName", request.getParameter("testName"));
         request.setAttribute("gerritURI", new Gson().toJson(GERRIT_URI));
         request.setAttribute("gerritScope", new Gson().toJson(GERRIT_SCOPE));
@@ -137,13 +121,12 @@ public class ShowCoverageServlet extends HttpServlet {
         request.setAttribute("commits", new Gson().toJson(commits));
         request.setAttribute("startTime", request.getParameter("startTime"));
         request.setAttribute("endTime", request.getParameter("endTime"));
-        response.setContentType("text/plain");
         dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
 
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
-            logger.error("Servlet Excpetion caught : ", e);
+            logger.log(Level.SEVERE, "Servlet Exception caught : ", e);
         }
     }
 }

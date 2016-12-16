@@ -26,11 +26,13 @@
     <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
     <link type='text/css' href='/css/navbar.css' rel='stylesheet'>
     <link type='text/css' href='/css/show_table.css' rel='stylesheet'>
+    <script src='/js/analytics.js' type='text/javascript'></script>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
     <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
     <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
     <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
     <script type='text/javascript'>
+      if (${analytics_id}) analytics_init(${analytics_id});
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
       google.charts.setOnLoadCallback(drawProfilingTable);

@@ -26,24 +26,22 @@
   <properties>
     <bigtable.version>0.9.1</bigtable.version>
     <hbase.version>1.2.1</hbase.version>
-    <bigtable.projectID>google.com:android-vts-internal</bigtable.projectID>
-    <bigtable.instanceID>vts-dev</bigtable.instanceID>
+    <bigtable.projectID></bigtable.projectID>
+    <bigtable.instanceID></bigtable.instanceID>
+    <appengine.clientID></appengine.clientID>
+    <appengine.serviceClientID></appengine.serviceClientID>
     <appengine.senderEmail></appengine.senderEmail>
     <appengine.emailDomain></appengine.emailDomain>
     <appengine.defaultEmail></appengine.defaultEmail>
-    <appengine.serviceClientID></appengine.serviceClientID>
-    <appengine.clientID></appengine.clientID>
     <gerrit.uri></gerrit.uri>
     <gerrit.scope></gerrit.scope>
+    <analytics.id></analytics.id>
 
     <hadoop.version>2.4.1</hadoop.version>
     <compat.module>hbase-hadoop2-compat</compat.module>
 
     <appengine.version>1.9.40</appengine.version>
     <gcloud.plugin.version>2.0.9.111.v20160527</gcloud.plugin.version>
-
-    <slf4j.version>1.7.12</slf4j.version>
-    <log4j.version>1.2.17</log4j.version>
 
     <requiredMavenVersion>3.3.3</requiredMavenVersion>
 
@@ -161,21 +159,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.api-client</groupId>
-      <artifactId>google-api-client</artifactId>
-      <version>1.20.0</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.http-client</groupId>
       <artifactId>google-http-client</artifactId>
       <version>1.20.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.3.1</version>
     </dependency>
 
     <dependency>
