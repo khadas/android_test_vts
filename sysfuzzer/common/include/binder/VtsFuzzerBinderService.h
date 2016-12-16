@@ -26,9 +26,6 @@
 #include <binder/IInterface.h>
 #include <binder/ProcessState.h>
 
-// Place to print the parcel contents (aout, alog, or aerr).
-#define PLOG alog
-
 // #ifdef VTS_FUZZER_BINDER_DEBUG
 
 #define VTS_FUZZER_BINDER_SERVICE_NAME "VtsFuzzer"
