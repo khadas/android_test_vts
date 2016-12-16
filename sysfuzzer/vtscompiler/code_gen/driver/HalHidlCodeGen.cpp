@@ -105,19 +105,28 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(
           */
           if (arg.scalar_type() == "char_pointer") {
             out << "char* ";
-          } else if (arg.scalar_type() == "int32_t" ||
+          } else if (arg.scalar_type() == "int8_t" ||
+                     arg.scalar_type() == "uint8_t" ||
+                     arg.scalar_type() == "int16_t" ||
+                     arg.scalar_type() == "uint16_t" ||
+                     arg.scalar_type() == "int32_t" ||
                      arg.scalar_type() == "uint32_t" ||
-                     arg.scalar_type() == "size_t" ||
                      arg.scalar_type() == "int64_t" ||
-                     arg.scalar_type() == "uint64_t") {
+                     arg.scalar_type() == "uint64_t" ||
+                     arg.scalar_type() == "size_t") {
+            if (arg.scalar_type().length() == 0) {
+              cerr << __func__ << ":" << __LINE__
+                   << " unsupported scalar type " << arg.scalar_type() << "\n";
+              exit(-1);
+            }
             out << arg.scalar_type() << " ";
           } else if (arg.scalar_type() == "bool_t") {
             out << "bool ";
           } else if (arg.scalar_type() == "void_pointer") {
             out << "void*";
           } else {
-            cerr << __func__ << " unsupported scalar type " << arg.scalar_type()
-                 << "\n";
+            cerr << __func__ << ":" << __LINE__
+                 << " unsupported scalar type " << arg.scalar_type() << "\n";
             exit(-1);
           }
         } else if (arg.type() == TYPE_PREDEFINED) {
@@ -446,17 +455,27 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                   << arg.vector_value(0).scalar_type() << "));"
                   << "\n";
             } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
-              out << arg.vector_value(0).struct_type() << "* "
+              out << arg.vector_value(0).predefined_type() << "* "
                   << "arg" << arg_count << "buffer = ("
-                  << arg.vector_value(0).struct_type()
+                  << arg.vector_value(0).predefined_type()
                   << "*) malloc("
                   << "func_msg->arg(" << arg_count
                   << ").vector_size()"
                   << " * sizeof("
-                  << arg.vector_value(0).struct_type() << "));"
+                  << arg.vector_value(0).predefined_type() << "));"
+                  << "\n";
+            } else if (arg.vector_value(0).type() == TYPE_ENUM) {
+              out << arg.vector_value(0).predefined_type() << "* "
+                  << "arg" << arg_count << "buffer = ("
+                  << arg.vector_value(0).predefined_type()
+                  << "*) malloc("
+                  << "func_msg->arg(" << arg_count
+                  << ").vector_size()"
+                  << " * sizeof("
+                  << arg.vector_value(0).predefined_type() << "));"
                   << "\n";
             } else {
-              cerr << __func__ << " " << __LINE__ << " ERROR unsupported vector sub-type "
+              cerr << __func__ << ":" << __LINE__ << " ERROR unsupported vector sub-type "
                    << arg.vector_value(0).type() << "\n";
             }
           }
@@ -520,8 +539,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               out << ") : ";
             } else if (arg.type() == TYPE_ENUM) {
               // TODO(yim): support this case
-              cerr << __func__ << ":" << __LINE__ << " unknown type "
-                   << arg.type() << "\n";
+              out << "/* enum support */" << "\n";
             } else if (arg.type() == TYPE_STRING) {
               // TODO(yim): support this case
               cerr << __func__ << ":" << __LINE__ << " unknown type "
@@ -545,10 +563,27 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                 << "func_msg->arg(" << arg_count << ").vector_size(); "
                 << "vector_index++) {" << "\n";
             out.indent();
-            out << "arg" << arg_count << "buffer[vector_index] = "
-                << "func_msg->arg(" << arg_count << ").vector_value(vector_index)."
-                << "scalar_value()." << arg.vector_value(0).scalar_type() << "();"
-                << "\n";
+            if (arg.vector_value(0).type() == TYPE_SCALAR) {
+              out << "arg" << arg_count << "buffer[vector_index] = "
+                  << "func_msg->arg(" << arg_count << ").vector_value(vector_index)."
+                  << "scalar_value()." << arg.vector_value(0).scalar_type() << "();"
+                  << "\n";
+            } else if (arg.vector_value(0).type() == TYPE_ENUM) {
+              std::string enum_attribute_name = arg.vector_value(0).predefined_type();
+              ReplaceSubString(enum_attribute_name, "::", "__");
+              out << "arg" << arg_count << "buffer[vector_index] = "
+                  << "EnumValue" << enum_attribute_name
+                  << "(func_msg->arg(" << arg_count << ").vector_value(vector_index)."
+                  << "enum_value());"
+                  << "\n";
+            } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
+              out << "/* arg" << arg_count << "buffer[vector_index] not initialized "
+                  << "since TYPE_STRUCT not yet supported */" << "\n";
+            } else {
+              cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
+                   << arg.vector_value(0).type() << "\n";
+              exit(-1);
+            }
             out.unindent();
             out << "}" << "\n";
             out << "arg" << arg_count << ".setToExternal("
@@ -683,14 +718,17 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
         // Message to value converter
         out << attribute.name() << " " << "EnumValue" << attribute_name
             << "(const EnumDataValueMessage& arg) {" << "\n";
-        out << "  return (" << attribute.name()
+        out.indent();
+        out << "return (" << attribute.name()
             << ") arg.scalar_value(0)."
             << attribute.enum_value().scalar_type() << "();" << "\n";
+        out.unindent();
         out << "}" << "\n";
 
         // Random value generator
         out << attribute.name() << " " << "Random" << attribute_name << "() {"
             << "\n";
+        out.indent();
         out << attribute.enum_value().scalar_type() << " choice = "
             << "(" << attribute.enum_value().scalar_type() << ") "
             << "rand() / "
@@ -714,10 +752,11 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
               << attribute.enum_value().enumerator(index)
               << ";" << "\n";
         }
-        out << "    return "
+        out << "return "
             << attribute.name() << "::"
             << attribute.enum_value().enumerator(0)
             << ";" << "\n";
+        out.unindent();
         out << "}" << "\n";
       } else if (attribute.type() == TYPE_STRUCT) {
         std::string attribute_name = attribute.name();
@@ -1018,7 +1057,8 @@ void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
     out << "    void** result) {" << "\n";
 
     // TOOD: impl
-    cerr << __func__ << " not supported for HIDL HAL yet" << "\n";
+    cerr << __func__ << ":" << __LINE__
+         << " not supported for HIDL HAL yet" << "\n";
 
     out << "  cerr << \"attribute not found\" << endl;" << "\n";
     out << "  return false;" << "\n";

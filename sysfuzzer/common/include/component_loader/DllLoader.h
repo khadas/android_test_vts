@@ -17,8 +17,6 @@
 #ifndef __VTS_SYSFUZZER_COMMON_COMPONENTLOADER_DLLLOADER_H__
 #define __VTS_SYSFUZZER_COMMON_COMPONENTLOADER_DLLLOADER_H__
 
-#include <stdio.h>
-
 #include "hardware/hardware.h"
 
 namespace android {

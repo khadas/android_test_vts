@@ -19,7 +19,6 @@
 
 #include "component_loader/DllLoader.h"
 
-#include <map>
 #include <string>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
