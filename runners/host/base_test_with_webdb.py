@@ -41,9 +41,12 @@ from vts.utils.python.coverage import coverage_report
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 from vts.utils.python.build.api import artifact_fetcher
+from vts.utils.python.profiling import profiling_utils
 
 _ANDROID_DEVICE = "AndroidDevice"
-
+_MAX = "max"
+_MIN = "min"
+_AVG = "avg"
 
 class BaseTestWithWebDbClass(base_test.BaseTestClass):
     """Base class with Web DB interface for test classes to inherit from.
@@ -536,3 +539,24 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                     logging.error("No gcda file found %s." % gcda_name)
                     continue
         return True
+
+    def ProcessAndUploadTraceData(self, dut, profiling_trace_path):
+        """Pulls the generated profiling data to the host, parses the data to
+        get the max/min/avg latency of each API call and uploads these latency
+        metrics to webdb.
+
+        Args:
+            dut: the registered device.
+            porfiling_trace_path: path to store the profiling data on host.
+        """
+        trace_files = profiling_utils.GetTraceFiles(dut, profiling_trace_path)
+        for file in trace_files:
+            logging.info("parsing trace file: %s.", file)
+            data = profiling_utils.ParseTraceData(file)
+            for tag in [_MAX, _MIN, _AVG]:
+                self.AddProfilingDataLabeledVector(
+                    data.name + "_" + tag,
+                    data.labels,
+                    data.values[tag],
+                    x_axis_label="API name",
+                    y_axis_label="API processing latency (nano secs)")

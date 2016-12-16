@@ -53,7 +53,7 @@ class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if getattr(self, self.ENABLE_PROFILING, False):
             profiling_trace_path = getattr(self,
                                            self.VTS_PROFILING_TRACING_PATH, "")
-            profiling_utils.GetTraceData(self.dut, profiling_trace_path)
+            self.ProcessAndUploadTraceData(self.dut, profiling_trace_path)
             profiling_utils.DisableVTSProfiling(self.dut.shell.one)
 
     def testVibratorBasic(self):
