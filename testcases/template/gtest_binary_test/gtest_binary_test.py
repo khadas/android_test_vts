@@ -24,6 +24,7 @@ from vts.runners.host import const
 from vts.runners.host import test_runner
 
 from vts.testcases.template.binary_test import binary_test
+from vts.testcases.template.binary_test import binary_test_case
 from vts.testcases.template.gtest_binary_test import gtest_test_case
 
 
@@ -50,9 +51,25 @@ class GtestBinaryTest(binary_test.BinaryTest):
         Returns:
             A list of GtestTestCase objects
         '''
-        cmd = ['chmod 755 %s' % path, '%s --gtest_list_tests' % path]
+        working_directory = self.working_directories[
+            tag] if tag in self.working_directories else None
+        ld_library_path = self.ld_library_paths[
+            tag] if tag in self.ld_library_paths else None
+
+        list_test_case = binary_test_case.BinaryTestCase(
+            'gtest_list_tests',
+            path,
+            path,
+            tag,
+            self.PutTag,
+            working_directory,
+            ld_library_path,
+            args="--gtest_list_tests")
+        cmd = ['chmod 755 %s' % path, list_test_case.GetRunCommand()]
         cmd_results = self.shell.Execute(cmd)
-        if any(cmd_results[const.EXIT_CODE]):  # gtest binary doesn't exist or is corrupted
+        if any(cmd_results[
+                const.
+                EXIT_CODE]):  # gtest binary doesn't exist or is corrupted
             logging.error('Failed to list test cases from binary %s' % path)
 
         test_cases = []
@@ -64,10 +81,6 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 continue
             elif line.startswith(' '):  # Test case name
                 test_name = line.strip()
-                working_directory = self.working_directories[
-                    tag] if tag in self.working_directories else None
-                ld_library_path = self.ld_library_paths[
-                    tag] if tag in self.ld_library_paths else None
                 test_case = gtest_test_case.GtestTestCase(
                     test_suite, test_name, path, tag, self.PutTag,
                     working_directory, ld_library_path)
