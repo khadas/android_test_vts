@@ -29,6 +29,10 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_multidevice_proto.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_multidevice_proto.so /data/local/tmp/64/
 
+  echo "install vts driver for hidl"
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/libvts_driver_hidl_nfc@1.0.so /data/local/tmp/64/
+
   echo "install hal packages"
   adb shell mkdir -p /data/local/tmp/32/hw
   adb shell mkdir -p /data/local/tmp/64/hw
