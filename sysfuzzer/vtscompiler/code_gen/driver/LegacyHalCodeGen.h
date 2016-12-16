@@ -38,15 +38,20 @@ class LegacyHalCodeGen : public HalCodeGen {
 
  protected:
   void GenerateCppBodyFuzzFunction(Formatter& out,
-                                   const ComponentSpecificationMessage& message,
-                                   const string& fuzzer_extended_class_name);
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateCppBodyGetAttributeFunction(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+  void GenerateCppBodyGetAttributeFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateHeaderGlobalFunctionDeclarations(
-      Formatter& out, const string& function_prototype);
+  void GenerateCppBodyCallbackFunction(Formatter& /*out*/,
+      const ComponentSpecificationMessage& /*message*/,
+      const string& /*fuzzer_extended_class_name*/) override {};
+
+  void GenerateClassConstructionFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;

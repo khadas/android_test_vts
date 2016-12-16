@@ -34,11 +34,19 @@ namespace vts {
 class HalSubmoduleCodeGen : public HalCodeGen {
  public:
   HalSubmoduleCodeGen(const char* input_vts_file_path, const string& vts_name)
-      : HalCodeGen(input_vts_file_path, vts_name) {}
+      : HalCodeGen(input_vts_file_path, vts_name) {
+  }
 
  protected:
-  void GenerateHeaderGlobalFunctionDeclarations(
-      Formatter& out, const string& function_prototype);
+  void GenerateClassConstructionFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateAdditionalFuctionDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message) override;
+
+  void GeneratePrivateMemberDeclarations(Formatter& out,
+      const ComponentSpecificationMessage& message) override;
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;

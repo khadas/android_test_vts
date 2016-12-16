@@ -6,10 +6,10 @@
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <iostream>
+
+
 namespace android {
 namespace vts {
-
-
 
 bool FuzzerExtended_libc::Fuzz(
     FunctionSpecificationMessage* func_msg,
@@ -191,22 +191,22 @@ bool FuzzerExtended_libc::Fuzz(
         return true;
       }
     return false;
-        }
-        bool FuzzerExtended_libc::GetAttribute(
-            FunctionSpecificationMessage* func_msg,
-            void** result) {
-            const char* func_name = func_msg->name().c_str();
-            cout << "Function: " << __func__ << " '" << func_name << "'" << endl;
-            cerr << "attribute not supported for shared lib yet" << endl;
-            return false;
-        }
-        extern "C" {
-        android::vts::FuzzerBase* 
-        vts_func_11_1002_1_(
-        ) {
-            return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_libc();
-        }
+}
 
-        }
-        }  // namespace vts
-        }  // namespace android
+bool FuzzerExtended_libc::GetAttribute(
+    FunctionSpecificationMessage* func_msg,
+    void** result) {
+    const char* func_name = func_msg->name().c_str();
+    cout << "Function: " << __func__ << " '" << func_name << "'" << endl;
+    cerr << "attribute not supported for shared lib yet" << endl;
+    return false;
+}
+
+extern "C" {
+android::vts::FuzzerBase* vts_func_11_1002_1_() {
+    return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_libc();
+}
+
+}
+}  // namespace vts
+}  // namespace android

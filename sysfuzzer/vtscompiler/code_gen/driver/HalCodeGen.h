@@ -40,7 +40,7 @@ class HalCodeGen : public DriverCodeGenBase {
  protected:
   void GenerateCppBodyFuzzFunction(
       Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateCppBodyFuzzFunction(
       Formatter& out, const StructSpecificationMessage& message,
@@ -50,7 +50,7 @@ class HalCodeGen : public DriverCodeGenBase {
 
   void GenerateCppBodyGetAttributeFunction(
       Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateCppBodyGetAttributeFunction(
       Formatter& out, const StructSpecificationMessage& message,
@@ -59,14 +59,11 @@ class HalCodeGen : public DriverCodeGenBase {
 
   void GenerateCppBodyCallbackFunction(
       Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+      const string& fuzzer_extended_class_name) override;
 
-  void GenerateHeaderGlobalFunctionDeclarations(
-      Formatter& out, const string& function_prototype);
-
-  void GenerateCppBodyGlobalFunctions(Formatter& out,
-                                      const string& function_prototype,
-                                      const string& fuzzer_extended_class_name);
+  void GenerateClassConstructionFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateSubStructFuzzFunctionCall(
       Formatter& out, const StructSpecificationMessage& message,

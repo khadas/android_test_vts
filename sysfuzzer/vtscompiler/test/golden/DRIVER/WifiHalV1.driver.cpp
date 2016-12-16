@@ -4,10 +4,10 @@
 #include "vts_datatype.h"
 #include "vts_measurement.h"
 #include <iostream>
+
+
 namespace android {
 namespace vts {
-
-
 
 bool FuzzerExtended_wifi::Fuzz(
     FunctionSpecificationMessage* func_msg,
@@ -24,6 +24,7 @@ bool FuzzerExtended_wifi::Fuzz(
       }
     return false;
 }
+
 bool FuzzerExtended_wifi::GetAttribute(
     FunctionSpecificationMessage* func_msg,
     void** result) {
@@ -32,10 +33,9 @@ bool FuzzerExtended_wifi::GetAttribute(
     cerr << "attribute not supported for legacy hal yet" << endl;
     return false;
 }
+
 extern "C" {
-android::vts::FuzzerBase* 
-vts_func_3_5_1_(
-) {
+android::vts::FuzzerBase* vts_func_3_5_1_() {
     return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_wifi();
 }
 

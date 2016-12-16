@@ -1,18 +1,18 @@
 #include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
+#include "vts_datatype.h"
+#include "vts_measurement.h"
+#include <iostream>
 #include <hidl/HidlSupport.h>
 #include <android/hardware/nfc/1.0/INfc.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include <android/hardware/nfc/1.0/types.h>
-#include "vts_datatype.h"
-#include "vts_measurement.h"
-#include <iostream>
+
+
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-
-
 
 static void FuzzerExtended_INfcopen_cb_func(::android::hardware::nfc::V1_0::NfcStatus arg0) {
   cout << "callback open called" << endl;
@@ -167,17 +167,17 @@ bool FuzzerExtended_INfc::Fuzz(
     }
     return false;
 }
+
 bool FuzzerExtended_INfc::GetAttribute(
     FunctionSpecificationMessage* func_msg,
     void** result) {
   cerr << "attribute not found" << endl;
   return false;
 }
+
 extern "C" {
-android::vts::FuzzerBase* 
-vts_func_4_android_hardware_nfc_1_(
-) {
-  return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_INfc();
+android::vts::FuzzerBase* vts_func_4_android_hardware_nfc_1_() {
+    return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_INfc();
 }
 
 }
