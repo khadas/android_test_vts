@@ -96,9 +96,17 @@ CommandResult* VtsShellDriver::ExecShellCommandPopen(const string& command) {
 CommandResult* VtsShellDriver::ExecShellCommandNohup(const string& command) {
   CommandResult* result = new CommandResult();
 
-  const char* temp_dir = GetDirFromFilePath(this->socket_address_).c_str();
-  char* stdout_file_name = tempnam(temp_dir, "nohup");
-  char* stderr_file_name = tempnam(temp_dir, "nohup");
+  string temp_dir = GetDirFromFilePath(this->socket_address_);
+  string temp_file_name_pattern = temp_dir + "/nohupXXXXXX";
+  int temp_file_name_len = temp_file_name_pattern.length() + 1;
+  char stdout_file_name[temp_file_name_len];
+  char stderr_file_name[temp_file_name_len];
+  strcpy(stdout_file_name, temp_file_name_pattern.c_str());
+  strcpy(stderr_file_name, temp_file_name_pattern.c_str());
+  int stdout_file = mkstemp(stdout_file_name);
+  int stderr_file = mkstemp(stderr_file_name);
+  close(stdout_file);
+  close(stderr_file);
 
   stringstream ss;
   ss << "nohup sh -c '" << command << "' >" << stdout_file_name << " 2>"
