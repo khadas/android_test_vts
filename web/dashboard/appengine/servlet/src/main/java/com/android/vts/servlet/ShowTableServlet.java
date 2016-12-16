@@ -297,7 +297,7 @@ public class ShowTableServlet extends HttpServlet {
         }
 
         // first column for the duration grid
-        durationGrid[0][0] = "<b>Test Duration (microsec)</b>";
+        durationGrid[0][0] = "<b>Test Duration</b>";
 
         // first column for summary grid
         String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
@@ -384,7 +384,7 @@ public class ShowTableServlet extends HttpServlet {
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
-                                               report.getStartTimestamp());
+                                                   report.getStartTimestamp());
             summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
             summaryGrid[1][j + 1] = Integer.toString(passCount);
             summaryGrid[2][j + 1] = passInfo;
