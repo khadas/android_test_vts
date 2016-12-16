@@ -15,10 +15,12 @@
 int main(int argc, char* argv[]) {
   VtsHostInput host_input = ParseVtsHostFlags(argc, argv);
   const char* path;
-  switch(host_input.device_model) {
+  switch (host_input.device_model) {
     case NEXUS_5X:
-    case NEXUS_6P:
       path = "/sys/kernel/debug/asoc/msm8994-tomtom-snd-card/snd-soc-dummy/codec_reg";
+      break;
+    case NEXUS_6P:
+      path = "/sys/kernel/debug/asoc/msm8994-tomtom-mtp-snd-card/snd-soc-dummy/codec_reg";
       break;
     default:
       return POC_TEST_SKIP;
