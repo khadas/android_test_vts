@@ -115,7 +115,7 @@ def ParseTraceData(trace_file):
                 # TODO(zhuoyao): figure out a better way to set the data name.
                 profiling_data.name = EVENT_TYPE_DICT[
                     vts_profiling_record.event]
-            api = vts_profiling_record.interface
+            api = vts_profiling_record.func_msg.name
             timestamp = vts_profiling_record.timestamp
             if api_timestamps.get(api):
                 api_timestamps[api].append(timestamp)
