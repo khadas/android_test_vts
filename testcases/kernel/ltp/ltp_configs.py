@@ -153,7 +153,6 @@ STAGING_TESTS = [
     'syscalls-openat03',
     # Recently fixed
     'connectors-Connectors',
-    'kernel_misc-kmsg01',
     'syscalls-access01',
     'syscalls-add_key01',
     'syscalls-add_key02',
@@ -607,6 +606,10 @@ DISABLED_TESTS = [
     'mm-thp02_64bit',
     'mm-thp03_64bit',
     'mm-vma01_64bit',
+    # kmsg01 would pass but it occasionally causes socket timeout and misalignment
+    # of request and response
+    # b/32343072
+    'kernel_misc-kmsg01',
     # alarm02 tests for a boundary condition which is impractical to implement
     # correctly on 32-bit Linux.  bionic deliberately breaks with POSIX by reporting
     # that it failed to set up the alarm.  (Other libc implementations fail to
