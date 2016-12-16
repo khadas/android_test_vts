@@ -82,6 +82,20 @@ void Translate(VtsCompileMode mode,
   cout << "header: " << output_header_file_path << endl;
   vts_fs_mkdirs(&output_header_file_path[0], 0777);
 
+  FILE* header_file = fopen(output_header_file_path.c_str(), "w");
+  if (header_file == NULL) {
+    cerr << "could not open file " << output_header_file_path;
+    exit(-1);
+  }
+  Formatter header_out(header_file);
+
+  FILE* source_file = fopen(output_cpp_file_path, "w");
+  if (source_file == NULL) {
+    cerr << "could not open file " << output_cpp_file_path;
+    exit(-1);
+  }
+  Formatter source_out(source_file);
+
   if (mode == kProfiler) {
     unique_ptr<ProfilerCodeGenBase> profiler_generator;
     switch (message.component_class()) {
@@ -94,19 +108,6 @@ void Translate(VtsCompileMode mode,
             << message.component_class();
         exit(-1);
     }
-    FILE* header_file = fopen(output_header_file_path.c_str(), "w");
-    if (header_file == NULL) {
-      cerr << "could not open file " << output_header_file_path;
-      exit(-1);
-    }
-    Formatter header_out(header_file);
-
-    FILE* source_file = fopen(output_cpp_file_path, "w");
-    if (source_file == NULL) {
-      cerr << "could not open file " << output_cpp_file_path;
-      exit(-1);
-    }
-    Formatter source_out(source_file);
     profiler_generator->GenerateAll(header_out, source_out, message);
   } else if (mode == kDriver) {
     unique_ptr<CodeGenBase> code_generator;
@@ -134,28 +135,7 @@ void Translate(VtsCompileMode mode,
              << message.component_class();
         exit(-1);
     }
-    std::stringstream cpp_ss;
-    std::stringstream h_ss;
-
-    code_generator->GenerateAll(cpp_ss, h_ss, message);
-
-    // Creates a C/C++ file and its header file.
-    cout << "write to " << output_cpp_file_path << endl;
-    ofstream cpp_out_file(output_cpp_file_path);
-    if (!cpp_out_file.is_open()) {
-      cerr << "Unable to open file" << endl;
-    } else {
-      cpp_out_file << cpp_ss.str();
-      cpp_out_file.close();
-    }
-
-    ofstream header_out_file(output_header_file_path.c_str());
-    if (!header_out_file.is_open()) {
-      cerr << "Unable to open file" << endl;
-    } else {
-      header_out_file << h_ss.str();
-      header_out_file.close();
-    }
+    code_generator->GenerateAll(header_out, source_out, message);
   }
 }
 

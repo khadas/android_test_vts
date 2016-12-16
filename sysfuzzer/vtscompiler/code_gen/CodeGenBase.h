@@ -17,6 +17,7 @@
 #ifndef __VTS_SYSFUZZER_COMPILER_CODEGENBASE_H__
 #define __VTS_SYSFUZZER_COMPILER_CODEGENBASE_H__
 
+#include <hidl-util/Formatter.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -39,9 +40,8 @@ class CodeGenBase {
   virtual ~CodeGenBase();
 
   // Generate both a C/C++ file and its header file.
-  virtual void GenerateAll(
-      std::stringstream& cpp_ss, std::stringstream& h_ss,
-      const ComponentSpecificationMessage& message) = 0;
+  virtual void GenerateAll(Formatter& header_out, Formatter& source_out,
+                           const ComponentSpecificationMessage& message) = 0;
 
   const char* input_vts_file_path() const {
     return input_vts_file_path_;
