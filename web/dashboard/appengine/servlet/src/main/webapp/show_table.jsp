@@ -93,6 +93,9 @@
           if ($('#postsubmit').prop('checked')) {
               link += '&showPostsubmit=';
           }
+          if (${unfiltered}) {
+              link += '&unfiltered=';
+          }
           window.open(link,'_self');
       }
 
@@ -107,6 +110,9 @@
           }
           if ($('#postsubmit').prop('checked')) {
               link += '&showPostsubmit=';
+          }
+          if (${unfiltered}) {
+              link += '&unfiltered=';
           }
           window.open(link,'_self');
         }
