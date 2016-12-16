@@ -39,8 +39,8 @@ cc_library_host_shared {
         "libbase",
         "libhidl-gen-utils",
         "libprotobuf-cpp-full",
-        "libvts_common_host",
-        "libvts_multidevice_proto_host",
+        "libvts_common",
+        "libvts_multidevice_proto",
     ],
 
     cflags: [
@@ -61,7 +61,7 @@ cc_binary_host {
     static_libs: ["libz"],
 
     shared_libs: [
-        "libvts_multidevice_proto_host",
+        "libvts_multidevice_proto",
         "libvtsc",
     ],
 
