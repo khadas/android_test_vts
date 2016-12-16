@@ -226,8 +226,10 @@
 
           // Add column headers.
           headerRow = ${headerRow};
-          headerRow.forEach(function(d) {
-              data.addColumn('string', '<span class="table-header-content">' +
+          headerRow.forEach(function(d, i) {
+              var classNames = 'table-header-content';
+              if (i == 0) classNames += ' table-header-legend';
+              data.addColumn('string', '<span class="' + classNames + '">' +
                              d + '</span>');
           });
 
