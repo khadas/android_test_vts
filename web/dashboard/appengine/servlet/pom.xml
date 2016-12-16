@@ -33,6 +33,9 @@
     <appengine.emailDomain></appengine.emailDomain>
     <appengine.defaultEmail></appengine.defaultEmail>
     <appengine.serviceClientID></appengine.serviceClientID>
+    <appengine.clientID></appengine.clientID>
+    <gerrit.uri></gerrit.uri>
+    <gerrit.scope></gerrit.scope>
 
     <hadoop.version>2.4.1</hadoop.version>
     <compat.module>hbase-hadoop2-compat</compat.module>
