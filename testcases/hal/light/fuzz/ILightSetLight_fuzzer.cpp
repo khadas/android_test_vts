@@ -26,16 +26,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (light_hal == nullptr) {
     return 0;
   }
-  if (size < sizeof(Type)) {
+
+  if (size < sizeof(Type) + sizeof(LightState)) {
     return 0;
   }
+
   Type type;
   memcpy(&type, data, sizeof(Type));
+  data += sizeof(Type);
 
   LightState light_state;
-  size_t copy_amount = std::min(sizeof(LightState), size - sizeof(Type));
-  data += sizeof(Type);
-  memcpy(&light_state, data, copy_amount);
+  memcpy(&light_state, data, sizeof(LightState));
 
   light_hal->setLight(type, light_state);
   return 0;
