@@ -12,15 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  vts_test_binary_syscall_exists \
-  simpleperf_cpu_hotplug_test \
-  binderThroughputTest \
-  hwbinderThroughputTest \
-  bionic-unit-tests \
-  bionic-unit-tests-gcc \
-  bionic-unit-tests-static \
+LOCAL_PATH := $(call my-dir)
+poc_target_dir := $(LOCAL_PATH)
+
+include $(call all-subdir-makefiles)
+
+include $(CLEAR_VARS)
+
+poc_test_src_files := \
+    poc_test.c \
+
+poc_test_cflags := \
+    -Wno-int-conversion \
+    -Wno-unused-parameter \
+
+poc_test_c_includes := \
+    $(poc_target_dir) \
+
+build_poc_test := $(poc_target_dir)/Android.poc_test.mk
+include $(poc_target_dir)/Android.poc_test_list.mk

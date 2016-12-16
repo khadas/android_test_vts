@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <string.h>
+#include "poc_test.h"
+
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
-int main()
-{
+int main(int argc, char* argv[]) {
+  VtsHostInput host_input = ParseVtsHostFlags(argc, argv);
   struct sockaddr sa;
   unsigned int len, i;
   int fd;
@@ -14,32 +16,38 @@ int main()
   fd = socket(AF_BLUETOOTH, SOCK_STREAM, 3);
   if (fd == -1) {
     printf("[-] can't create socket: %s\n", strerror(errno));
-    goto out;
+    return POC_TEST_SKIP;
   }
 
   memset(&sa, 0, sizeof(sa));
   sa.sa_family = AF_BLUETOOTH;
 
-  if ( bind(fd, &sa, 2) ) {
+  if (bind(fd, &sa, 2)) {
     printf("[-] can't bind socket: %s\n", strerror(errno));
-    goto close_out;
+    close(fd);
+    return POC_TEST_SKIP;
   }
 
   len = sizeof(sa);
-  if ( getsockname(fd, &sa, &len) ) {
+  if (getsockname(fd, &sa, &len)) {
     printf("[-] can't getsockname for socket: %s\n", strerror(errno));
-    goto close_out;
+    close(fd);
+    return POC_TEST_SKIP;
   } else {
     printf("[+] getsockname return len = %d\n", len);
   }
 
-  for (i = 0; i < len; i++)
+  for (i = 0; i < len; i++) {
     printf("%02x ", ((unsigned char*)&sa)[i]);
-
+  }
   printf("\n");
 
-close_out:
+  for (i = 1; i < len; i++) {
+    if (((unsigned char*)&sa)[i] != 0) {
+      return POC_TEST_FAIL;
+    }
+  }
+
   close(fd);
-out:
-  return 0;
+  return POC_TEST_PASS;
 }
