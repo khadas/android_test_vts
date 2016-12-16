@@ -267,7 +267,6 @@ void DriverCodeGenBase::GenerateAllHeader(
            << "/" << message.component_name() << ".h>" << endl;
     }
     h_ss << "#include <hidl/HidlSupport.h>" << endl;
-    h_ss << "#include <hidl/IServiceManager.h>" << endl;
   }
   h_ss << "\n\n" << endl;
   GenerateOpenNameSpaces(h_ss, message);

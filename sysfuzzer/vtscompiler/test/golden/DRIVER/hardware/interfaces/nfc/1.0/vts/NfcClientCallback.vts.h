@@ -13,7 +13,6 @@
 #include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <hidl/HidlSupport.h>
-#include <hidl/IServiceManager.h>
 
 
 
