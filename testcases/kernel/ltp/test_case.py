@@ -125,7 +125,7 @@ class TestCase(object):
                 if executable.find('=') > 0 else executable
                 for executable in executables)
 
-    def GetRequiredExecutablePaths(self):
+    def GetRequiredExecutablePaths(self, ltp_bin_path=ltp_configs.LTPBINPATH):
         """Get required executables' paths.
 
         Returns:
@@ -134,7 +134,7 @@ class TestCase(object):
             returned. For binaries in system's PATH, only the name will be
             returned.
         """
-        return [os.path.join(ltp_configs.LTPBINPATH, executable)
+        return [os.path.join(ltp_bin_path, executable)
                 if executable not in ltp_configs.INTERNAL_BINS else executable
                 for executable in self.InternalGetExecutableNames()
                 if executable not in ltp_configs.INTERNAL_SHELL_COMMANDS]
