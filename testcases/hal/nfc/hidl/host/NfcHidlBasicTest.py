@@ -37,6 +37,7 @@ class NfcHidlBasicTest(base_test_with_webdb.BaseTestWithWebDbClass):
                                  target_basepaths=["/system/lib64"],
                                  target_version=1.0,
                                  target_package="android.hardware.nfc",
+                                 target_component_name="INfc",
                                  bits=64)
 
         self.dut.shell.InvokeTerminal("one")

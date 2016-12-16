@@ -147,6 +147,7 @@ class HalMirror(object):
                     target_type,
                     target_version,
                     target_package=None,
+                    target_component_name=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
                     bits=64):
@@ -169,6 +170,7 @@ class HalMirror(object):
                                  target_type,
                                  target_version,
                                  target_package=target_package,
+                                 target_component_name=target_component_name,
                                  target_basepaths=target_basepaths,
                                  handler_name=handler_name,
                                  bits=bits)
@@ -196,6 +198,7 @@ class HalMirror(object):
                             target_type,
                             target_version,
                             target_package=None,
+                            target_component_name=None,
                             target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                             handler_name=None,
                             bits=64):
@@ -209,6 +212,7 @@ class HalMirror(object):
             target_type: string, the target type name (e.g., light, camera).
             target_version: float, the target component version (e.g., 1.0).
             target_package: string, the package name of a HIDL HAL.
+            target_component_name: string, the name of a target component.
             target_basepaths: list of strings, the paths to look for target
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             handler_name: string, the name of the handler. target_type is used
@@ -275,7 +279,8 @@ class HalMirror(object):
             target_class=target_class_id,
             target_type=target_type_id,
             target_version=target_version,
-            target_package=target_package)
+            target_package=target_package,
+            target_component_name=target_component_name)
 
         if not launched:
             raise errors.ComponentLoadingError(
