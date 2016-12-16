@@ -33,6 +33,7 @@
     <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
     <script type="text/javascript">
         if (${analytics_id}) analytics_init(${analytics_id});
+        var coverageVectors = ${coverageVectors};
         $(document).ready(function() {
             // Initialize AJAX for CORS
             $.ajaxSetup({
@@ -43,93 +44,111 @@
 
             // Initialize auth2 client and scope for requests to Gerrit
             gapi.load('auth2', function() {
-                auth2 = gapi.auth2.init({
+                var auth2 = gapi.auth2.init({
                     client_id: ${clientId},
                     scope: ${gerritScope}
                 });
-                var sourceContents = [];
-                // Read the source contents. Display the results when loaded.
-                getSourceCode(sourceContents).done(
-                    function() {
-                        displaySource(sourceContents);
-                        $('#coverage').collapsible({
-                            accordion : true
-                        });
-                    }
-                );
+                auth2.then(displayEntries);
             });
         });
 
-        /* Fetches the source code from Gerrit.
-           Returns a promise that resolves when all of the requests complete.
+        /* Loads source code for a particular entry and displays it with
+           coverage information as the accordion entry expands.
         */
-        var getSourceCode = function(sourceContents) {
+        var onClick = function() {
+            // Remove source code from the accordion entry that was open before
+            var prev = $(this).parent().find('li.active');
+            if (prev.length > 0) {
+                prev.find('.table-container').empty();
+            }
+            var url = $(this).attr('url');
+            var i = $(this).attr('index');
+            var table = $(this).find('.table-container');
+            table.html('<div class="center-align">Loading...</div>');
+            if ($(this).hasClass('active')) {
+                // Remove the code from display
+                table.empty();
+            } else {
+                /* Fetch and display the code.
+                   Note: a coverageVector may be shorter than sourceContents due
+                   to non-executable (i.e. comments or language-specific syntax)
+                   lines in the code. Trailing source lines that have no
+                   coverage information are assumed to be non-executable.
+                */
+                $.ajax({
+                    url: url,
+                    dataType: 'text'
+                }).promise().done(function(src) {
+                    src = atob(src);
+                    if (!src) return;
+                    srcLines = src.split('\n');
+                    covered = 0;
+                    total = 0;
+                    var rows = srcLines.reduce(function(acc, line, j) {
+                        var count = coverageVectors[i][j];
+                        if (typeof count == 'undefined' || count < 0) {
+                            acc += '<tr>';
+                            count = "--";
+                        } else if (count == 0) {
+                            acc += '<tr class="uncovered">';
+                            total += 1;
+                        } else {
+                            acc += '<tr class="covered">';
+                            covered += 1;
+                            total += 1;
+                        }
+                        acc += '<td class="count">' + String(count) + '</td>';
+                        acc += '<td class="line_no">' + String(j+1) + '</td>';
+                        acc += '<td class="code">' + String(line) + '</td></tr>';
+                        return acc;
+                    }, String());
+                    table.html('<table class="table">' + rows + '</table>');
+                }).fail(function() {
+                    table.html('<div class="center-align">Not found.</div>');
+                });
+            }
+        }
+
+        /* Appends a row to the display with test name and aggregated coverage
+           information. On expansion, source code is loaded with coverage
+           highlighted by calling 'onClick'.
+        */
+        var displayEntries = function() {
+            var sourceFilenames = ${sourceFiles};
+            var sectionMap = ${sectionMap};
             var gerritURI = ${gerritURI};
             var projects = ${projects};
             var commits = ${commits};
-            var sourceFilenames = ${sourceFiles};
-            var promises = sourceFilenames.map(function(src, i) {
-                url = gerritURI + '/projects/' + encodeURIComponent(projects[i])
-                        + '/commits/' + encodeURIComponent(commits[i])
-                        + '/files/' + encodeURIComponent(src) + '/content';
-                return $.ajax({
-                    url: url,
-                    dataType: 'text'
-                }).promise();
-            });
-            return $.when.apply($, promises).always(function() {
-                promises.forEach(function(d, i) {
-                    d.done(function(result) {
-                        sourceContents[i] = atob(result);
-                    });
+            var indicators = ${indicators};
+            Object.keys(sectionMap).forEach(function(section) {
+                var indices = sectionMap[section];
+                var html = String();
+                indices.forEach(function(i) {
+                    var url = gerritURI + '/projects/' +
+                              encodeURIComponent(projects[i]) + '/commits/' +
+                              encodeURIComponent(commits[i]) + '/files/' +
+                              encodeURIComponent(sourceFilenames[i]) +
+                              '/content';
+                    html += '<li onclick="onClick" url="' + url + '" index="' +
+                            i + '"><div class="collapsible-header">' +
+                            '<i class="material-icons">library_books</i>' +
+                            sourceFilenames[i] + indicators[i] + '</div>';
+                    html += '<div class="collapsible-body row">' +
+                            '<div class="html-container">' +
+                            '<div class="table-container"></div>' +
+                            '</div></div></li>';
                 });
+                if (html) {
+                    html = '<h4 class="section-title"><b>Coverage:</b> ' +
+                           section + '</h4><ul class="collapsible popout" ' +
+                           'data-collapsible="accordion">' + html + '</ul>';
+                    $('#coverage-container').append(html);
+                }
             });
+            $('.collapsible.popout').collapsible({
+               accordion : true
+            }).children().click(onClick);
         }
-
-        /* Appends source code to the DOM given the contents of the source code.
-           Coverage vectors, source names, and test names passed from the
-           servlet.
-        */
-        var displaySource = function(sourceContents) {
-            /* Note: coverageVectors may be shorter than sourceContents due to
-               non-executable (i.e. comments or language-specific syntax) lines
-               in the code. Trailing source lines that have no coverage
-               information are assumed to be non-executable.
-            */
-            var coverageVectors = ${coverageVectors};
-            var sourceFilenames = ${sourceFiles};
-            var testLabels = ${testLabels};
-            sourceContents.forEach(function(src, i) {
-                if (!src) return;
-                srcLines = src.split('\n');
-                rows = srcLines.reduce(function(acc, line, j) {
-                    var count = coverageVectors[i][j];
-                    if (typeof count == 'undefined' || count < 0) {
-                        acc += '<tr>';
-                        count = "--";
-                    } else if (count == 0) {
-                        acc += '<tr class="uncovered">';
-                    } else {
-                        acc += '<tr class="covered">';
-                    }
-                    acc += '<td class="count">' + String(count) + '</td>';
-                    acc += '<td class="line_no">' + String(j+1) + '</td>';
-                    acc += '<td class="code">' + String(line) + '</td></tr>';
-                    return acc;
-                }, String());
-                html = '<li><div class="collapsible-header">';
-                html += '<i class="material-icons">library_books</i>';
-                html += testLabels[i];
-                html += '<div class="source-name">' + sourceFilenames[i] +
-                        '</div></div>';
-                html += '<div class="collapsible-body row">';
-                html += '<div id="html_container" class="col s10 push-s1">';
-                html += '<div><table class="table">' + rows + '</table></div>';
-                html += '</div></div></li>';
-                $('#coverage').append(html);
-            });
-        }
-
     </script>
     <nav id="navbar">
       <div class="nav-wrapper">
@@ -150,9 +169,7 @@
     </nav>
   </head>
   <body>
-    <div class="container">
-      <ul class="collapsible popout" data-collapsible="accordion" id="coverage">
-      </ul>
+    <div id="coverage-container" class="container">
     </div>
     <footer class="page-footer">
       <div class="footer-copyright">

@@ -64,7 +64,7 @@ public class ShowTableServlet extends BaseServlet {
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
     private static final int TIME_INFO_ROW_COUNT = 2;
     private static final int DURATION_INFO_ROW_COUNT = 1;
-    private static final int SUMMARY_ROW_COUNT = 5;
+    private static final int SUMMARY_ROW_COUNT = 6;
     private static final String[] SEARCH_KEYS = {"devicebuildid", "branch", "target", "device",
                                                  "vtsbuildid"};
     private static final String SEARCH_HELP_HEADER = "Search Help";
@@ -411,7 +411,8 @@ public class ShowTableServlet extends BaseServlet {
         durationGrid[0][0] = "<b>Test Duration</b>";
 
         // first column for summary grid
-        String[] rowNamesSummaryGrid = {"Total", "Passing #", "Non-Passing #", "Passing %", "Coverage %"};
+        String[] rowNamesSummaryGrid = {"Total", "Passing #", "Non-Passing #", "Passing %",
+                                        "Covered Lines", "Coverage %"};
         for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
             summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
         }
@@ -481,23 +482,26 @@ public class ShowTableServlet extends BaseServlet {
             try {
                 double passPct = Math.round((100 * passCount /
                                              report.getTestCaseList().size()) * 100f) / 100f;
-                passInfo = Double.toString(passPct) + " %";
+                passInfo = Double.toString(passPct) + "%";
             } catch (ArithmeticException e) {
                 passInfo = " - ";
             }
 
             String coverageInfo;
+            String coveragePctInfo;
             try {
                 double coveragePct = Math.round((100 * coveredLineCount /
                                                  totalLineCount) * 100f) / 100f;
-                coverageInfo = Double.toString(coveragePct) + " % " +
+                coveragePctInfo = Double.toString(coveragePct) + "%" +
                         "<a href=\"/show_coverage?key=" + report.getStartTimestamp() +
                         "&testName=" + request.getParameter("testName") +
                         "&startTime=" + startTime +
                         "&endTime=" + endTime +
                         "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
                         "<i class=\"material-icons coverage-icon\">menu</i></a>";
+                coverageInfo = coveredLineCount + "/" + totalLineCount;
             } catch (ArithmeticException e) {
+                coveragePctInfo = " - ";
                 coverageInfo = " - ";
             }
             String icon = "<div class='status-icon " + aggregateStatus.toString() + "'>&nbsp</div>";
@@ -514,6 +518,7 @@ public class ShowTableServlet extends BaseServlet {
             summaryGrid[2][j + 1] = Integer.toString(nonpassCount);
             summaryGrid[3][j + 1] = passInfo;
             summaryGrid[4][j + 1] = coverageInfo;
+            summaryGrid[5][j + 1] = coveragePctInfo;
         }
 
         String[] profilingPointNameArray = profilingPointNameSet.
