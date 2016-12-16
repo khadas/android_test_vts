@@ -52,22 +52,31 @@
             });
         });
 
+        /* Open a window to Gerrit so that user can login.
+           Minimize the previously clicked entry.
+        */
+        var gerritLogin = function(element) {
+            window.open(${gerritURI}, "Ratting", "toolbar=0,status=0");
+            element.click();
+        }
+
         /* Loads source code for a particular entry and displays it with
            coverage information as the accordion entry expands.
         */
         var onClick = function() {
             // Remove source code from the accordion entry that was open before
-            var prev = $(this).parent().find('li.active');
+            var self = $(this);
+            var prev = self.parent().siblings('li.active');
             if (prev.length > 0) {
                 prev.find('.table-container').empty();
             }
-            var url = $(this).attr('url');
-            var i = $(this).attr('index');
-            var table = $(this).find('.table-container');
-            table.html('<div class="center-align">Loading...</div>');
-            if ($(this).hasClass('active')) {
+            var url = self.parent().attr('url');
+            var i = self.parent().attr('index');
+            var container = self.parent().find('.table-container');
+            container.html('<div class="center-align">Loading...</div>');
+            if (self.parent().hasClass('active')) {
                 // Remove the code from display
-                table.empty();
+                container.empty();
             } else {
                 /* Fetch and display the code.
                    Note: a coverageVector may be shorter than sourceContents due
@@ -102,9 +111,21 @@
                         acc += '<td class="code">' + String(line) + '</td></tr>';
                         return acc;
                     }, String());
-                    table.html('<table class="table">' + rows + '</table>');
-                }).fail(function() {
-                    table.html('<div class="center-align">Not found.</div>');
+                    container.html('<table class="table">' + rows + '</table>');
+                }).fail(function(error) {
+                    if (error.status == 0) {  // origin error, refresh cookie
+                        container.empty();
+                        container.html('<div class="center-align">' +
+                                       '<span class="login-button">' +
+                                       'Click to authorize Gerrit access' +
+                                       '</span></div>');
+                        container.find('.login-button').click(function() {
+                            gerritLogin(self);
+                        });
+                    } else {
+                        container.html('<div class="center-align">' +
+                                       'Not found.</div>');
+                    }
                 });
             }
         }
@@ -129,8 +150,8 @@
                               encodeURIComponent(commits[i]) + '/files/' +
                               encodeURIComponent(sourceFilenames[i]) +
                               '/content';
-                    html += '<li onclick="onClick" url="' + url + '" index="' +
-                            i + '"><div class="collapsible-header">' +
+                    html += '<li url="' + url + '" index="' + i + '">' +
+                            '<div class="collapsible-header">' +
                             '<i class="material-icons">library_books</i>' +
                             sourceFilenames[i] + indicators[i] + '</div>';
                     html += '<div class="collapsible-body row">' +
@@ -147,7 +168,7 @@
             });
             $('.collapsible.popout').collapsible({
                accordion : true
-            }).children().click(onClick);
+            }).find('.collapsible-header').click(onClick);
         }
     </script>
     <nav id="navbar">
