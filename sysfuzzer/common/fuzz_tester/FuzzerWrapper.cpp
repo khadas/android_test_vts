@@ -53,7 +53,7 @@ bool FuzzerWrapper::LoadInterfaceSpecificationLibrary(
 
 FuzzerBase* FuzzerWrapper::GetFuzzer(
     const vts::ComponentSpecificationMessage& message) {
-  cout << __func__ << endl;
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
   if (spec_dll_path_.size() == 0) {
     cerr << __func__ << ": spec_dll_path_ not set" << endl;
     return NULL;
@@ -61,7 +61,7 @@ FuzzerBase* FuzzerWrapper::GetFuzzer(
 
   string function_name_prefix = GetFunctionNamePrefix(message);
   const char* function_name_prefix_chars = function_name_prefix.c_str();
-  cout << __FUNCTION__ << ": function name '" << function_name_prefix_chars
+  cout << __func__ << ": function name '" << function_name_prefix_chars
        << "'" << endl;
   if (function_name_prefix_chars_ && function_name_prefix_chars &&
       !strcmp(function_name_prefix_chars, function_name_prefix_chars_)) {

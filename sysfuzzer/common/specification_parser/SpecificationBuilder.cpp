@@ -131,17 +131,15 @@ SpecificationBuilder::FindComponentSpecification(const string& component_name) {
 FuzzerBase* SpecificationBuilder::GetFuzzerBase(
     const vts::ComponentSpecificationMessage& iface_spec_msg,
     const char* dll_file_name, const char* /*target_func_name*/) {
-  cout << __func__ << ":" << __LINE__ << " "
-       << "entry" << endl;
+  cout << __func__ << ":" << __LINE__ << " " << "entry" << endl;
   FuzzerBase* fuzzer = wrapper_.GetFuzzer(iface_spec_msg);
   if (!fuzzer) {
-    cerr << __FUNCTION__ << ": couldn't get a fuzzer base class" << endl;
+    cerr << __func__ << ": couldn't get a fuzzer base class" << endl;
     return NULL;
   }
 
   // TODO: don't load multiple times. reuse FuzzerBase*.
-  cout << __func__ << ":" << __LINE__ << " "
-       << "got fuzzer" << endl;
+  cout << __func__ << ":" << __LINE__ << " " << "got fuzzer" << endl;
   if (iface_spec_msg.component_class() == HAL_HIDL) {
     char get_sub_property[PROPERTY_VALUE_MAX];
     bool get_stub = false;  /* default is binderized */
@@ -192,7 +190,8 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseSubModule(
        << "entry object_pointer " << ((uint64_t)object_pointer) << endl;
   FuzzerWrapper wrapper;
   if (!wrapper.LoadInterfaceSpecificationLibrary(spec_lib_file_path_)) {
-    cerr << __func__ << " can't load spec" << endl;
+    cerr << __func__ << " can't load specification lib, "
+         << spec_lib_file_path_ << endl;
     return NULL;
   }
   FuzzerBase* fuzzer = wrapper.GetFuzzer(iface_spec_msg);
@@ -262,6 +261,7 @@ bool SpecificationBuilder::LoadTargetComponent(
     const char* dll_file_name, const char* spec_lib_file_path, int target_class,
     int target_type, float target_version, const char* target_package,
     const char* target_component_name, const char* module_name) {
+  cout << __func__ << " entry dll_file_name = " << dll_file_name << endl;
   if_spec_msg_ =
       FindComponentSpecification(target_class, target_type, target_version,
                                  module_name, target_package,
@@ -278,12 +278,9 @@ bool SpecificationBuilder::LoadTargetComponent(
   dll_file_name_ = (char*)malloc(strlen(dll_file_name) + 1);
   strcpy(dll_file_name_, dll_file_name);
 
-  // cout << "ifspec addr load at " << if_spec_msg_ << endl;
   string output;
   if_spec_msg_->SerializeToString(&output);
   cout << "loaded ifspec length " << output.length() << endl;
-  // cout << "loaded text " << strlen(output.c_str()) << endl;
-  // cout << "loaded text " << output << endl;
 
   module_name_ = (char*)malloc(strlen(module_name) + 1);
   strcpy(module_name_, module_name);
@@ -323,8 +320,8 @@ const string& SpecificationBuilder::CallFunction(
   }
   cout << __func__ << ":" << __LINE__ << endl;
   if (!func_fuzzer) {
-    cerr << "can't find FuzzerBase for " << func_msg->name() << " using "
-         << dll_file_name_ << endl;
+    cerr << "can't find FuzzerBase for " << func_msg->name() << " using '"
+         << dll_file_name_ << "'" << endl;
     return empty_string;
   }
 

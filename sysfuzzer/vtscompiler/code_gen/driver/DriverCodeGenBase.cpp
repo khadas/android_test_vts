@@ -51,8 +51,12 @@ void DriverCodeGenBase::GenerateHeaderFile(
   }
   string fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
 
-  out << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << "\n";
-  out << "#define __VTS_SPEC_" << vts_name_ << "__" << "\n";
+  string macroized_package_name = message.package();
+  ReplaceSubString(macroized_package_name, ".", "_");
+  out << "#ifndef __VTS_SPEC_" << macroized_package_name
+      << "_" << vts_name_ << "__" << "\n";
+  out << "#define __VTS_SPEC_" << macroized_package_name
+      << "_" << vts_name_ << "__" << "\n";
   out << "\n";
 
   out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";

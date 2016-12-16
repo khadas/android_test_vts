@@ -54,6 +54,7 @@ vtslib_interfacespec_shared_libraries := \
   liblog \
   libdl \
   libandroid_runtime \
+  libcamera_metadata \
   libvts_datatype \
   libvts_common \
   libvts_measurement \
@@ -91,7 +92,7 @@ LOCAL_SHARED_LIBRARIES += \
   libhidltransport \
   libutils \
   android.hardware.nfc@1.0 \
-  libvts_driver_hidl_nfc@1.0 \
+  android.hardware.nfc.vts.driver@1.0 \
   android.hardware.vibrator@1.0 \
   libvts_driver_hidl_vibrator@1.0 \
   android.hardware.thermal@1.0 \

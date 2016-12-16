@@ -16,10 +16,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include <iostream>
 
 #include "code_gen/CodeGenBase.h"
+#include "VtsCompilerUtils.h"
 
 using namespace std;
 
@@ -27,11 +30,15 @@ using namespace std;
 //   Usage: vtsc -mDRIVER | -mPROFILER <.vts input file path> \
 //          <header output dir> <C/C++ source output file path>
 // To generate only a header file,
-//   Usage: vtsc -mDRIVER | -mPROFILER -tHEADER <.vts input file path> \
-//          <header output file path>
+//   Usage: vtsc -mDRIVER | -mPROFILER -tHEADER -b<base path> \
+//          <.vts input file or dir path> <header output file or dir path>
 // To generate only a source file,
-//   Usage: vtsc -mDRIVER | -mPROFILER -tSOURCE <.vts input file path> \
-//          <C/C++ source output file path>
+//   Usage: vtsc -mDRIVER | -mPROFILER -tSOURCE -b<base path> \
+//          <.vts input file or dir path> \
+//          <C/C++ source output file or dir path>
+// where <base path> is a base path of where .vts input file or dir is
+// stored but should be excluded when computing the package path of generated
+// source or header output file(s).
 
 int main(int argc, char* argv[]) {
 #ifdef VTS_DEBUG
@@ -40,6 +47,7 @@ int main(int argc, char* argv[]) {
   int opt_count = 0;
   android::vts::VtsCompileMode mode = android::vts::kDriver;
   android::vts::VtsCompileFileType type = android::vts::VtsCompileFileType::kBoth;
+  string vts_base_dir;
   for (int i = 0; i < argc; i++) {
 #ifdef VTS_DEBUG
     cout << "- args[" << i << "] " << argv[i] << endl;
@@ -67,6 +75,12 @@ int main(int argc, char* argv[]) {
 #endif
         }
       }
+      if (argv[i][1] == 'b') {
+        vts_base_dir = &argv[i][2];
+#ifdef VTS_DEBUG
+        cout << "- VTS base dir: " << vts_base_dir << endl;
+#endif
+      }
     }
   }
   if (argc < 5) {
@@ -79,10 +93,61 @@ int main(int argc, char* argv[]) {
           mode, argv[opt_count + 1], argv[opt_count + 2], argv[opt_count + 3]);
       break;
     case android::vts::kHeader:
-    case android::vts::kSource:
-      android::vts::TranslateToFile(
-          mode, argv[opt_count + 1], argv[opt_count + 2], type);
+    case android::vts::kSource: {
+      struct stat s;
+      bool is_dir = false;
+      if (vts_base_dir.length() > 0) {
+        if (chdir(vts_base_dir.c_str())) {
+          cerr << __func__ << " can't chdir to " << vts_base_dir << endl;
+          exit(-1);
+        }
+      }
+      if (stat(argv[opt_count + 1], &s) == 0) {
+        if (s.st_mode & S_IFDIR) {
+          is_dir = true;
+        }
+      }
+      cout << "is_dir: " << is_dir << endl;
+      if (!is_dir) {
+        android::vts::TranslateToFile(
+            mode, argv[opt_count + 1], argv[opt_count + 2], type);
+      } else {
+        DIR* input_dir;
+        struct dirent* ent;
+        if ((input_dir = opendir(argv[opt_count + 1])) != NULL) {
+          // argv[opt_count + 2] should be a directory. if that dir does not exist,
+          // that dir is created as part of the translation operation.
+          while ((ent = readdir(input_dir)) != NULL) {
+            if (!strncmp(&ent->d_name[strlen(ent->d_name)-4], ".vts", 4)) {
+              string src_file = android::vts::RemoveBaseDir(
+                  android::vts::PathJoin(
+                      argv[opt_count + 1], ent->d_name), vts_base_dir);
+              string dst_file = android::vts::RemoveBaseDir(
+                  android::vts::PathJoin(
+                      argv[opt_count + 2], ent->d_name), vts_base_dir);
+              if (type == android::vts::kHeader) {
+                dst_file = android::vts::PathJoin(dst_file.c_str(), ".h");
+              } else {
+                dst_file = android::vts::PathJoin(dst_file.c_str(), ".cpp");
+              }
+#ifdef VTS_DEBUG
+              cout << ent->d_name << endl;
+              cout << "<- " << src_file.c_str() << endl;
+              cout << "-> " << dst_file.c_str() << endl;
+#endif
+              android::vts::TranslateToFile(
+                  mode, src_file.c_str(), dst_file.c_str(), type);
+            }
+          }
+          closedir(input_dir);
+        } else {
+          cerr << __func__ << " can't open the given input dir, "
+               << argv[opt_count + 1] << "." << endl;
+          exit(-1);
+        }
+      }
       break;
+    }
   }
   return 0;
 }

@@ -119,7 +119,8 @@ loader_function DllLoader::GetLoaderFunction(const char* function_name) {
   func = (loader_function)dlsym(handle_, function_name);
   if ((error = dlerror()) != NULL) {
     fputs(error, stderr);
-    cerr << __FUNCTION__ << ": Can't find " << function_name << endl;
+    cerr << endl;
+    cerr << __func__ << ": Can't find " << function_name << endl;
     return NULL;
   }
   return func;

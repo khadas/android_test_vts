@@ -1,7 +1,7 @@
 HostDrivenTest.push
 
-DATA/lib/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/32/libvts_driver_hidl_nfc@1.0.so
-DATA/lib64/libvts_driver_hidl_nfc@1.0.so->/data/local/tmp/64/libvts_driver_hidl_nfc@1.0.so
+DATA/lib/android.hardware.nfc.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.nfc.vts.driver@1.0.so
+DATA/lib64/android.hardware.nfc.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.nfc.vts.driver@1.0.so
 
 DATA/lib/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/32/libvts_driver_hidl_vibrator@1.0.so
 DATA/lib64/libvts_driver_hidl_vibrator@1.0.so->/data/local/tmp/64/libvts_driver_hidl_vibrator@1.0.so

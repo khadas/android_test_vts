@@ -14,10 +14,28 @@
 // limitations under the License.
 //
 
-subdirs = [
-     "common",
-     "libcodecoverage",
-     "libdatatype",
-     "libmeasurement",
-     "vtscompiler",
-]
+cc_library_shared {
+    name: "libvts_datatype",
+    srcs: [
+        "vts_datatype.cpp",
+        "hal_light.cpp",
+        "hal_gps.cpp",
+        "hal_camera.cpp",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    shared_libs: [
+        "libcutils",
+        "libcamera_metadata",
+        "libprotobuf-cpp-full",
+        "libvts_multidevice_proto",
+    ],
+    export_shared_lib_headers: [
+        "libcamera_metadata",
+    ],
+    export_include_dirs: [
+        "include",
+    ],
+}
