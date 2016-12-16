@@ -81,6 +81,8 @@ public class ShowTableServlet extends HttpServlet {
         User currentUser = userService.getCurrentUser();
         String loginURI = userService.createLoginURL(request.getRequestURI());
         String logoutURI = userService.createLogoutURL(loginURI);
+        boolean showPresubmit = request.getParameter("showPresubmit") != null;
+        boolean showPostsubmit = request.getParameter("showPostsubmit") != null;
         Long startTime = null;  // time in microseconds
         Long endTime = null;  // time in microseconds
         RequestDispatcher dispatcher = null;
@@ -129,6 +131,11 @@ public class ShowTableServlet extends HttpServlet {
             }
         }
 
+        // If no params are specified, set to default of postsubmit-only.
+        if (!(showPresubmit || showPostsubmit)) {
+            showPostsubmit = true;
+        }
+
         // Add result names to list
         List<String> resultNames = new ArrayList<>();
         for (TestCaseResult r : TestCaseResult.values()) {
@@ -167,7 +174,10 @@ public class ShowTableServlet extends HttpServlet {
         // set to hold the name of profiling tests to maintain uniqueness
         Set<String> profilingPointNameSet = new HashSet<>();
 
-        while (true) {
+        // number of days of data parsed for the current page. Limit to MAX_BUILD_IDS_PER_PAGE days
+        // (i.e. one test per day)
+        int days = 1;
+        while (days <= MAX_BUILD_IDS_PER_PAGE) {
             // Scan until there is a full page of data or until there is no
             // more older data.
             Scan scan = new Scan();
@@ -181,7 +191,7 @@ public class ShowTableServlet extends HttpServlet {
                 String buildId = testReportMessage.getBuildInfo().getId().toStringUtf8();
 
                 // filter empty build IDs and add only numbers
-                if (buildId.length() == 0) continue;
+                if (buildId == null || buildId.length() == 0) continue;
 
                 // filter empty device info lists
                 if (testReportMessage.getDeviceInfoList().size() == 0) continue;
@@ -192,6 +202,12 @@ public class ShowTableServlet extends HttpServlet {
                 try {
                     // filter non-integer build IDs
                     Integer.parseInt(buildId);
+                    if (!showPostsubmit && firstDeviceBuildId.charAt(0) != 'P') {
+                        continue;
+                    }
+                    if (showPresubmit && firstDeviceBuildId.charAt(0) == 'P') {
+                        firstDeviceBuildId = firstDeviceBuildId.substring(1);
+                    }
                     Integer.parseInt(firstDeviceBuildId);
                     tests.add(0, testReportMessage);
                 } catch (NumberFormatException e) {
@@ -234,6 +250,7 @@ public class ShowTableServlet extends HttpServlet {
                 // Full page or no more data.
                 break;
             }
+            days += 1;
         }
         Collections.sort(tests, reportComparator);
 
@@ -423,16 +440,13 @@ public class ShowTableServlet extends HttpServlet {
 
         // data for pie chart
         request.setAttribute("topBuildResultCounts", new Gson().toJson(topBuildResultCounts));
-
         request.setAttribute("topBuildId", topBuildId);
-
         request.setAttribute("startTime", new Gson().toJson(startTime));
-
         request.setAttribute("endTime", new Gson().toJson(endTime));
-
         request.setAttribute("hasNewer", new Gson().toJson(hasNewer));
-
         request.setAttribute("hasOlder", new Gson().toJson(hasOlder));
+        request.setAttribute("showPresubmit", showPresubmit);
+        request.setAttribute("showPostsubmit", showPostsubmit);
 
         dispatcher = request.getRequestDispatcher("/show_table.jsp");
         try {
