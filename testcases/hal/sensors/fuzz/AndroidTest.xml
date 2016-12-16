@@ -21,12 +21,12 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="ISensorsFuzzTest" />
         <option name="binary-test-sources" value="
-            hal_fuzz/ISensorsFlush_fuzzer,
-            hal_fuzz/ISensorsActivate_fuzzer,
-            hal_fuzz/ISensorsSetDelay_fuzzer,
-            hal_fuzz/ISensorsBatch_fuzzer,
-            hal_fuzz/ISensorsInjectSensorData_fuzzer,
-            hal_fuzz/ISensorsPoll_fuzzer
+            ISensorsFlush_fuzzer,
+            ISensorsActivate_fuzzer,
+            ISensorsSetDelay_fuzzer,
+            ISensorsBatch_fuzzer,
+            ISensorsInjectSensorData_fuzzer,
+            ISensorsPoll_fuzzer
             "/>
         <option name="binary-test-type" value="llvmfuzzer" />
         <option name="test-config-path" value="vts-config/testcases/hal/sensors/fuzz/ISensorsFuzzTest.config" />

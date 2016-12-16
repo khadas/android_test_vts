@@ -25,7 +25,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     return 0;
   }
 
-  if (size < sizeof(int32_t) + sizeof(int32_t) + sizeof(int64_t) + sizeof(int64_t)) {
+  size_t min_size = 2 * sizeof(int32_t) + 2 * sizeof(int64_t);
+  if (size < min_size) {
     return 0;
   }
 
@@ -43,7 +44,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
   int64_t maxReportLatencyNs;
   memcpy(&maxReportLatencyNs, data, sizeof(int64_t));
-  data += sizeof(int64_t);
 
   sensors_hal->batch(sensorHandle, flags, samplingPeriodNs, maxReportLatencyNs);
   return 0;
