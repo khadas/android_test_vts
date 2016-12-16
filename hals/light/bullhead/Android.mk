@@ -54,7 +54,7 @@ include test/vts/tools/build/Android.packaging_gcno.mk
 
 # Sancov-enabled target.
 # TODO(trong): enable for mips.
-ifeq (,$(findstring mips, $(TARGET_PRODUCT)))
+ifeq (,$(findstring mips, $(TARGET_ARCH)))
 include $(CLEAR_VARS)
 LOCAL_MODULE := lights.vts.sancov
 LOCAL_MODULE_TAGS := optional
