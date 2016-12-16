@@ -49,14 +49,20 @@ class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
                 not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
                 "a non-Treble device.")
 
-        result = self.dut.hal.vibrator.on()
-        logging.info("open result: %s", result)
+        vibrator_types = self.dut.hal.vibrator.GetHidlTypeInterface("types")
+        logging.info("vibrator_types: %s", vibrator_types)
+        logging.info("OK: %s", vibrator_types.OK)
+        logging.info("ERR: %s", vibrator_types.ERR)
+
+        result = self.dut.hal.vibrator.on(10000)
+        logging.info("on result: %s", result)
+        asserts.assertEqual(vibrator_types.OK, result)
 
         time.sleep(1)
 
         result = self.dut.hal.vibrator.off()
-        logging.info("prediscover result: %s", result)
-
+        logging.info("off result: %s", result)
+        asserts.assertEqual(vibrator_types.OK, result)
 
 if __name__ == "__main__":
     test_runner.main()
