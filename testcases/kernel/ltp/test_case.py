@@ -38,6 +38,8 @@ class TestCase(object):
                             check results
         note: string, a place to store additional note for the test case
               such as what environment requirement did not satisfy.
+        is_staging: bool, whether test case is a staging test
+        is_filtered: bool, whether test case is excluded by filter
     """
 
     def __init__(self, testsuite, testname, command):
@@ -46,6 +48,8 @@ class TestCase(object):
         self._command = command
         self.requirement_state = ltp_enums.RequirementState.UNCHECKED
         self.note = ""
+        self.is_staging = False
+        self.is_filtered = False
 
     @property
     def note(self):
@@ -142,3 +146,23 @@ class TestCase(object):
 
     def __str__(self):
         return self.fullname
+
+    @property
+    def is_staging(self):
+        '''Whether this test is a staging test.'''
+        return self._is_staging
+
+    @is_staging.setter
+    def is_staging(self, is_staging):
+        '''Set whether this test is a staging test.'''
+        self._is_staging = is_staging
+
+    @property
+    def is_filtered(self):
+        '''Whether this test has been filtered out.'''
+        return self._is_filtered
+
+    @is_filtered.setter
+    def is_filtered(self, is_filtered):
+        '''Set whether this test has been filtered out.'''
+        self._is_filtered = is_filtered
