@@ -1,5 +1,5 @@
-#ifndef __VTS_SPEC_BluetoothHalV1.driver__
-#define __VTS_SPEC_BluetoothHalV1.driver__
+#ifndef __VTS_SPEC__BluetoothHalV1.driver__
+#define __VTS_SPEC__BluetoothHalV1.driver__
 
 #define LOG_TAG "FuzzerExtended_bluetooth_module_t"
 #include <hardware/hardware.h>
