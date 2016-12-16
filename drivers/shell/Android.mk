@@ -38,7 +38,7 @@ LOCAL_C_INCLUDES += \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
-LOCAL_CFLAGS := $(common_c_flags)
+LOCAL_CFLAGS := -Werror -Wall
 
 LOCAL_MULTILIB := both
 
@@ -65,6 +65,6 @@ LOCAL_C_INCLUDES += \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
-LOCAL_CFLAGS := $(common_c_flags)
+LOCAL_CFLAGS := -Werror -Wall
 
 include $(BUILD_NATIVE_TEST)

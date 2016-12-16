@@ -35,6 +35,8 @@ LOCAL_SHARED_LIBRARIES := \
   libvts_multidevice_proto \
   libprotobuf-cpp-full \
 
+LOCAL_CFLAGS := -Werror -Wall
+
 LOCAL_MULTILIB := both
 
 include $(BUILD_SHARED_LIBRARY)
