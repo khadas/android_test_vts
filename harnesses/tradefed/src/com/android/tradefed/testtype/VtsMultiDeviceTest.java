@@ -72,6 +72,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
     static final String ABI_BITNESS = "abi_bitness";
+    static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
     static final String VTS = "vts";
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
@@ -123,6 +124,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
             isTimeVal = true)
     private long mRuntimeHint = 60000;  // 1 minute
+
+    @Option(name = "run-32bit-on-64bit-abi",
+            description = "Whether to run 32bit tests on 64bit abi.")
+    private boolean mRun32bBitOn64BitAbi = false;
 
     @Option(name = "binary-test-sources",
             description = "Binary test source paths relative to vts testcase directory on host."
@@ -475,9 +480,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         CLog.i("Added exclude filter to test suite: %s", mExcludeFilters);
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
-        if (mAbi != null){
+
+        if (mAbi != null) {
             jsonObject.put(ABI_BITNESS, mAbi.getBitness());
             CLog.i("Added %s to the Json object", ABI_BITNESS);
+        }
+        if (mRun32bBitOn64BitAbi) {
+            jsonObject.put(RUN_32BIT_ON_64BIT_ABI, mRun32bBitOn64BitAbi);
+            CLog.i("Added %s to the Json object", RUN_32BIT_ON_64BIT_ABI);
         }
 
         if (!mBinaryTestSources.isEmpty()) {
