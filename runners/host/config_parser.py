@@ -84,7 +84,7 @@ def load_test_config_file(test_config_path, tb_filters=None,
     """
     try:
         configs = utils.load_config(test_config_path)
-        if baseline_config:
+        if keys.ConfigKeys.KEY_TESTBED not in configs and baseline_config:
             configs.update(baseline_config)
 
         if tb_filters:
