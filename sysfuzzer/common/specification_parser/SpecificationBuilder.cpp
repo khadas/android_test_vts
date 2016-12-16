@@ -412,13 +412,17 @@ const string& SpecificationBuilder::CallFunction(
           func_msg->mutable_return_type_hidl(0);
       return_type->mutable_scalar_value()->set_int32_t(*((int*)(&result)));
       cout << "result " << endl;
-    } else {
+    } else if (func_msg->return_type_hidl().size() == 1 &&
+               func_msg->return_type_hidl(0).type() == TYPE_STRING) {
       func_msg->mutable_return_type()->set_type(TYPE_STRING);
       func_msg->mutable_return_type()->mutable_string_value()->set_message(
           *(string*)result);
       func_msg->mutable_return_type()->mutable_string_value()->set_length(
           ((string*)result)->size());
       free(result);
+    } else if (func_msg->return_type_hidl().size() != 0) {
+      cerr << __func__ << ":" << __LINE__ << " ERROR unsupported return type " << endl;
+      return *(new string("unsupported return type"));
     }
     string* output = new string();
     google::protobuf::TextFormat::PrintToString(*func_msg, output);
