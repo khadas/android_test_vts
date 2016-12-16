@@ -362,17 +362,6 @@ int vts_fs_mkdirs(char* file_path, mode_t mode) {
 }
 
 
-void ReplaceSubString(string& original, const string& from, const string& to) {
-  size_t index = 0;
-  int from_len = from.length();
-  while (true) {
-    index = original.find(from, index);
-    if (index == std::string::npos) break;
-    original.replace(index, from_len, to);
-    index += from_len;
-  }
-}
-
 string GetVersionString(float version, bool for_macro) {
   std::ostringstream out;
   if (for_macro) {

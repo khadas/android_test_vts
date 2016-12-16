@@ -24,6 +24,7 @@
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 #include "VtsCompilerUtils.h"
+#include "utils/StringUtil.h"
 
 using namespace std;
 using namespace android;

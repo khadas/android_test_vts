@@ -84,6 +84,7 @@ int main(int argc, char* const argv[]) {
       {"version", required_argument, NULL, 'v'},
       {"epoch_count", required_argument, NULL, 'e'},
       {"spec_dir", required_argument, NULL, 's'},
+      {"target_package", optional_argument, NULL, 'k'},
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
       {"server_socket_path", optional_argument, NULL, 'f'},
 #else  // binder
@@ -103,6 +104,7 @@ int main(int argc, char* const argv[]) {
 #else  // binder
   string service_name(VTS_FUZZER_BINDER_SERVICE_NAME);
 #endif
+  string target_package;
   string callback_socket_name;
 
   while (true) {
@@ -172,6 +174,9 @@ int main(int argc, char* const argv[]) {
       case 'd':
         server = true;
         break;
+      case 'k':
+        target_package = string(optarg);
+        break;
       default:
         if (ic != '?') {
           fprintf(stderr, "getopt_long returned unexpected value 0x%x\n", ic);
@@ -190,7 +195,8 @@ int main(int argc, char* const argv[]) {
 
     bool success =
         spec_builder.Process(argv[optind], INTERFACE_SPEC_LIB_FILENAME,
-                             target_class, target_type, target_version);
+                             target_class, target_type, target_version,
+                             target_package.c_str());
     cout << "Result: " << success << endl;
     if (success) {
       cout << endl << PASSED_MARKER << endl;

@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
   specification_parser/InterfaceSpecificationParser.cpp \
   specification_parser/SpecificationBuilder.cpp \
   utils/InterfaceSpecUtil.cpp \
+  utils/StringUtil.cpp \
 
 LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/include \
@@ -74,7 +75,8 @@ LOCAL_CFLAGS += -Wno-unused-parameter -Werror
 # Files needed for VTSC.
 LOCAL_SRC_FILES := \
   specification_parser/InterfaceSpecificationParser.cpp \
-  utils/InterfaceSpecUtil.cpp
+  utils/InterfaceSpecUtil.cpp \
+  utils/StringUtil.cpp \
 
 LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/include \
