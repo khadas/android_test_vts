@@ -28,11 +28,20 @@ from vts.utils.python.profiling import profiling_utils
 class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
     """A simple testcase for the VIBRATOR HIDL HAL."""
 
-    _TREBLE_DEVICE_NAME_SUFFIX = "_treble"
-
     def setUpClass(self):
         """Creates a mirror and turns on the framework-layer VIBRATOR service."""
         self.dut = self.registerController(android_device)[0]
+
+        self.dut.shell.InvokeTerminal("one")
+        self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
+
+        # Test using the binderized mode
+        self.dut.shell.one.Execute(
+            "setprop vts.hal.vts.hidl.get_stub true")
+
+        if getattr(self, self.ENABLE_PROFILING, False):
+            profiling_utils.EnableVTSProfiling(self.dut.shell.one)
+
         self.dut.hal.InitHidlHal(
             target_type="vibrator",
             target_basepaths=["/system/lib64"],
@@ -41,27 +50,18 @@ class VibratorHidlTest(base_test_with_webdb.BaseTestWithWebDbClass):
             target_component_name="IVibrator",
             bits=64)
 
-        self.dut.shell.InvokeTerminal("one")
-        self.dut.shell.one.Execute("setenforce 0")  # SELinux permissive mode
-        if getattr(self, self.ENABLE_PROFILING, False):
-            profiling_utils.EnableVTSProfiling(self.dut.shell.one)
-
     def tearDownClass(self):
         """ If profiling is enabled for the test, collect the profiling data
             and disable profiling after the test is done.
         """
         if getattr(self, self.ENABLE_PROFILING, False):
-            profiling_trace_path = getattr(self,
-                                           self.VTS_PROFILING_TRACING_PATH, "")
+            profiling_trace_path = getattr(
+                self, self.VTS_PROFILING_TRACING_PATH, "")
             self.ProcessAndUploadTraceData(self.dut, profiling_trace_path)
             profiling_utils.DisableVTSProfiling(self.dut.shell.one)
 
     def testVibratorBasic(self):
         """A simple test case which just calls each registered function."""
-        asserts.skipIf(
-            not self.dut.model.endswith(self._TREBLE_DEVICE_NAME_SUFFIX),
-            "a non-Treble device.")
-
         vibrator_types = self.dut.hal.vibrator.GetHidlTypeInterface("types")
         logging.info("vibrator_types: %s", vibrator_types)
         logging.info("OK: %s", vibrator_types.OK)
