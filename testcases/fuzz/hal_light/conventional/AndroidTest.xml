@@ -29,6 +29,6 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/fuzz/hal_light/conventional/LightFuzzTest" />
-        <option name="test-config-path" value="vts-config/testcases/fuzz/hal_light/conventional/LightFuzzTest.config" />
+        <option name="test-config-path" value="vts/testcases/fuzz/hal_light/conventional/LightFuzzTest.config" />
     </test>
 </configuration>
