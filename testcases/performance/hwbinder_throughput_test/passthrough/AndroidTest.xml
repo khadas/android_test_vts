@@ -15,7 +15,7 @@
 -->
 <configuration description="Config for VTS HwBinderThroughputBenchmark test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
-        <option name="push-group" value="HidlHalTest.push" />
+        <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
         <option name="push" value="DATA/nativetest/hwbinderThroughputTest/hwbinderThroughputTest->/data/local/tmp/32/hwbinderThroughputTest32" />
         <option name="push" value="DATA/nativetest64/hwbinderThroughputTest/hwbinderThroughputTest->/data/local/tmp/64/hwbinderThroughputTest64" />
@@ -23,6 +23,8 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="HwBinderPassthroughThroughputTest" />
         <option name="test-case-path" value="vts/testcases/performance/hwbinder_throughput_test/HwBinderThroughputBenchmark" />
+        <option name="test-config-path" value="vts-config/testcases/performance/hwbinder_throughput_test/passthrough/HwBinderPassthroughThroughputTest.config" />
     </test>
 </configuration>
