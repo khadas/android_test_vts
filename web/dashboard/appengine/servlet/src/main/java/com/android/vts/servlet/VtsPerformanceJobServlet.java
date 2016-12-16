@@ -170,17 +170,17 @@ public class VtsPerformanceJobServlet extends BaseServlet {
      * delta means 100% opacity). If the before value is 0 and the after value is positive, then
      * the color of the cell is 100% red to indicate an increase of undefined magnitude.
      *
-     * @param before The baseline value observed.
-     * @param after The value to compare against the baseline.
+     * @param baseline The baseline value observed.
+     * @param test The value to compare against the baseline.
      * @param style A string containing CSS styles to apply to the table cell.
      * @returns An HTML string for a colored table cell containing the percent change.
      */
-    private static String getPercentChangeHTML(double before, double after, String style) {
+    private static String getPercentChangeHTML(double baseline, double test, String style) {
         String pctChangeString = "0 %";
         double alpha = 0;
-        double delta = after - before;
-        if (after > 0) {
-            double pctChange = delta / after;
+        double delta = test - baseline;
+        if (baseline > 0) {
+            double pctChange = delta / baseline;
             alpha = pctChange;
             pctChangeString = round(pctChange * 100, N_DIGITS) + " %";
         } else if (delta > 0) {
@@ -205,9 +205,9 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             return "<td></td><td></td><td></td><td></td>";
         }
         String row = "";
-        row += "<td style='" + INNER_CELL_STYLE + "'>" + round(test.getMean(), N_DIGITS);
+        row += "<td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMean(), N_DIGITS);
         row += "</td><td style='" + INNER_CELL_STYLE + "'>";
-        row += round(test.getStd(), N_DIGITS) + "</td>";
+        row += round(baseline.getStd(), N_DIGITS) + "</td>";
         // Intensity of red color is a function of the relative (percent) change
         // in the new value compared to the previous day's. Intensity is a linear function
         // of percentage change, reaching a ceiling at 100% change (e.g. a doubling).
