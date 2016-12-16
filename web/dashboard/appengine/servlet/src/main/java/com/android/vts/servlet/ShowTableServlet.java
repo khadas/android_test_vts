@@ -494,7 +494,7 @@ public class ShowTableServlet extends BaseServlet {
             String passInfo;
             try {
                 double passPct = Math.round((100 * passCount /
-                                             report.getTestCaseList().size()) * 100f) / 100f;
+                                             (passCount + nonpassCount)) * 100f) / 100f;
                 passInfo = Double.toString(passPct) + "%";
             } catch (ArithmeticException e) {
                 passInfo = " - ";
