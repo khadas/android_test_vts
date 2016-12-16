@@ -37,6 +37,8 @@ class HwBinderThroughputBenchmark(base_test_with_webdb.BaseTestWithWebDbClass):
     """A test case for the binder throughput benchmarking."""
 
     def setUpClass(self):
+        required_params = ["hidl_hal_mode"]
+        self.getUserParams(required_params)
         self.dut = self.registerController(android_device)[0]
         self.dut.shell.InvokeTerminal("one")
         self.DisableCpuScaling()
@@ -158,14 +160,15 @@ class HwBinderThroughputBenchmark(base_test_with_webdb.BaseTestWithWebDbClass):
                 'time_best', 'time_percentile'.
         """
         # Runs the benchmark.
-        logging.info("Start to run the benchmark (%s bit mode)", bits)
+        logging.info("Start to run the benchmark with HIDL mode %s (%s bit mode)",
+                     self.hidl_hal_mode, bits)
         binary = "/data/local/tmp/%s/hwbinderThroughputTest%s" % (bits, bits)
 
         results = self.dut.shell.one.Execute(
             ["chmod 755 %s" % binary,
              "LD_LIBRARY_PATH=/system/lib%s:/data/local/tmp/%s/hw:"
              "/data/local/tmp/%s:"
-             "$LD_LIBRARY_PATH %s -w %s" % (bits, bits, bits, binary, threads)])
+             "$LD_LIBRARY_PATH %s -m %s -w %s" % (bits, bits, bits, binary, self.hidl_hal_mode.encode("utf-8"), threads)])
 
         # Parses the result.
         asserts.assertEqual(len(results[const.STDOUT]), 2)

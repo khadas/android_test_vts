@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 LOCAL_PATH := $(call my-dir)
 
 include $(call all-subdir-makefiles)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := HwBinderBinderizeThroughputTest
+VTS_CONFIG_SRC_DIR := testcases/performance/hwbinder_throughput_test/binderize
+include test/vts/tools/build/Android.host_config.mk
