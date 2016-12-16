@@ -181,15 +181,14 @@
           });
 
           var data = google.visualization.arrayToDataTable(rows);
-          var title = 'Test Result Status for build ID : ${topBuildId}';
           var options = {
-              title: title,
               is3D: false,
               colors: colors,
               fontName: 'Roboto',
               fontSize: '14px',
               legend: 'none',
-              tooltip: {showColorCode: true, ignoreBounds: true}
+              tooltip: {showColorCode: true, ignoreBounds: true},
+              chartArea: {height: '90%'}
           };
 
           var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
@@ -308,14 +307,17 @@
         </div>
         <div class='col s6 valign-wrapper'>
           <!-- pie chart -->
-          <div id='pie_chart_div' class='valign center-align card'></div>
+          <div id='pie-chart-wrapper' class='col s12 valign center-align card'>
+            <h6 class='pie-chart-title'>Test Status for Device Build ID: ${topBuildId}</h6>
+            <div id='pie_chart_div'></div>
+          </div>
         </div>
       </div>
 
       <div class='col s12'>
         <div id='chart_holder' class='col s12 card'>
           <!-- Grid tables-->
-          <div id='grid_table_div'></div>
+          <div id='grid_table_div' class='center-align'></div>
 
           <div id='buttons' class='col s12'>
             <a id='newer_button' class='btn-floating waves-effect waves-light red'><i class='material-icons'>keyboard_arrow_left</i></a>

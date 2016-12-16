@@ -364,11 +364,11 @@ public class ShowTableServlet extends HttpServlet {
                 if (testCaseReport.getTestResult() != null) {
                     resultsGrid[i][j + 1] = "<div class=\"" +
                                             testCaseReport.getTestResult().toString() +
-                                            " TEST_CASE_RESULT\">&nbsp;</div>";
+                                            " test-case-status\">&nbsp;</div>";
                 } else {
                     resultsGrid[i][j + 1] = "<div class=\"" +
                                             TestCaseResult.UNKNOWN_RESULT.toString() +
-                                            " TEST_CASE_RESULT\">&nbsp;</div>";
+                                            " test-case-status\">&nbsp;</div>";
                 }
             }
             String passInfo;
