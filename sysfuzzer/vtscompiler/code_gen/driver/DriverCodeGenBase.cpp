@@ -438,7 +438,7 @@ void DriverCodeGenBase::GenerateClassHeader(
 
     if (message.component_class() == HAL_HIDL
         && message.component_name() != "types") {
-      out << "bool GetService();" << "\n"
+      out << "bool GetService(bool get_stub);" << "\n"
           << "\n";
       out.unindent();
       out << " private:" << "\n";
@@ -465,7 +465,9 @@ void DriverCodeGenBase::GenerateClassHeader(
             << "Random" << attribute_name << "();"
             << "\n";
       } else if (attribute.type() == TYPE_STRUCT) {
-        out << "void " << "MessageTo" << attribute.name()
+        std::string attribute_name = attribute.name();
+        ReplaceSubString(attribute_name, "::", "__");
+        out << "void " << "MessageTo" << attribute_name
             << "(const VariableSpecificationMessage& var_msg, "
             << attribute.name() << "* arg);"
             << "\n";

@@ -22,6 +22,8 @@
 #include <queue>
 #include <string>
 
+#include <cutils/properties.h>
+
 #include "fuzz_tester/FuzzerBase.h"
 #include "fuzz_tester/FuzzerWrapper.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
@@ -141,7 +143,16 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
   cout << __func__ << ":" << __LINE__ << " "
        << "got fuzzer" << endl;
   if (iface_spec_msg.component_class() == HAL_HIDL) {
-    if (!fuzzer->GetService()) {
+    char get_sub_property[PROPERTY_VALUE_MAX];
+    bool get_stub = false;  /* default is binderized */
+    if (property_get("vts.hidl.get_stub", get_sub_property, "") > 0) {
+      if (!strcmp(get_sub_property, "true") ||
+          !strcmp(get_sub_property, "True") ||
+          !strcmp(get_sub_property, "1")) {
+        get_stub = true;
+      }
+    }
+    if (!fuzzer->GetService(get_stub)) {
       cerr << __FUNCTION__ << ": couldn't get service" << endl;
       return NULL;
     }
