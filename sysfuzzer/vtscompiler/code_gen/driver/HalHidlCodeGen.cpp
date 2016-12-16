@@ -199,11 +199,15 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
       cpp_ss << "static void " << fuzzer_extended_class_name << api.name() << "_cb_func(";
       if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         cpp_ss << api.return_type_hidl(0).scalar_type();
+      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
+        GenerateNamespaceName(cpp_ss, message);
+        cpp_ss << "::" << GetCppVariableType(api.return_type_hidl(0), &message);
       } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
         cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
              << api.return_type_hidl(0).type() << endl;
+        exit(-1);
       }
       cpp_ss << " arg) {" << endl;
       // TODO: support other non-scalar type and multiple args.
@@ -214,6 +218,9 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(
               << "void(";
       if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         cpp_ss << api.return_type_hidl(0).scalar_type();
+      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
+        GenerateNamespaceName(cpp_ss, message);
+        cpp_ss << "::" << GetCppVariableType(api.return_type_hidl(0), &message);
       } else if (api.return_type_hidl(0).type() == TYPE_VECTOR) {
         cpp_ss << GetCppVariableType(api.return_type_hidl(0), &message);
       } else {
@@ -496,11 +503,27 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           api.return_type_hidl(0).type() == TYPE_VOID) {
         cpp_ss << "    *result = NULL;" << endl;
         cpp_ss << "    " << kInstanceVariableName << "->" << api.name() << "(";
-      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR ||
-                 api.return_type_hidl(0).type() == TYPE_ENUM) {
+      } else if (api.return_type_hidl(0).type() == TYPE_SCALAR) {
         cpp_ss << "    *result = reinterpret_cast<void*>("
                << "(" << api.return_type_hidl(0).scalar_type() << ")"
                << kInstanceVariableName << "->" << api.name() << "(";
+      } else if (api.return_type_hidl(0).type() == TYPE_ENUM) {
+        if (api.return_type_hidl(0).has_scalar_type()) {
+          cpp_ss << "    *result = reinterpret_cast<void*>("
+                 << "(" << api.return_type_hidl(0).scalar_type() << ")"
+                 << kInstanceVariableName << "->" << api.name() << "(";
+        } else if (api.return_type_hidl(0).has_predefined_type()) {
+          cpp_ss << "    *result = reinterpret_cast<void*>("
+                 << "(";
+          GenerateNamespaceName(cpp_ss, message);
+          // TODO(yim): check whether predefined_type is defined in the
+          // message's namespace.
+          cpp_ss << "::" << api.return_type_hidl(0).predefined_type() << ")"
+                 << kInstanceVariableName << "->" << api.name() << "(";
+        } else {
+          cerr << __func__ << ":" << __LINE__ << " unknown return type" << endl;
+          exit(-1);
+        }
       } else {
         cpp_ss << "    *result = const_cast<void*>(reinterpret_cast<"
                << "const void*>(new string("

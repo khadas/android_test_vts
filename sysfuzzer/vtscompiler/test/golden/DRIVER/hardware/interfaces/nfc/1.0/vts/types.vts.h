@@ -20,8 +20,8 @@ using namespace android::hardware;
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-NfcEvent RandomNfcEvent();
-NfcStatus RandomNfcStatus();
+android::hardware::nfc::V1_0::NfcEvent RandomNfcEvent();
+android::hardware::nfc::V1_0::NfcStatus RandomNfcStatus();
 
 }  // namespace vts
 }  // namespace android

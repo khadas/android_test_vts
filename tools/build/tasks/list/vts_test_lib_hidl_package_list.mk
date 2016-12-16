@@ -18,3 +18,4 @@ vts_test_lib_hidl_packages := \
   libhidl \
   libvts_driver_hidl_nfc@1.0 \
   libvts_profiler_hidl_nfc@1.0 \
+  libvts_driver_hidl_vibrator@1.0 \
