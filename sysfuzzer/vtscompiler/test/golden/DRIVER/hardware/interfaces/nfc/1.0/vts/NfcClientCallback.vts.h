@@ -29,8 +29,8 @@ class VtsNfcClientCallback: public INfcClientCallback {
   virtual ~VtsNfcClientCallback() = default;
 
   Return<void> sendEvent(
-    NfcEvent arg0,
-    NfcStatus arg1) override;
+    ::android::hardware::nfc::V1_0::NfcEvent arg0,
+    ::android::hardware::nfc::V1_0::NfcStatus arg1) override;
 
   Return<void> sendData(
     const hidl_vec<uint8_t>& arg0) override;

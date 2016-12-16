@@ -16,6 +16,7 @@
 
 #include "ProfilerCodeGenBase.h"
 #include "utils/InterfaceSpecUtil.h"
+#include "utils/StringUtil.h"
 #include "VtsCompilerUtils.h"
 
 namespace android {
@@ -60,7 +61,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION(\n";
     out.indent();
     out.indent();
-    out << "android::hardware::HidlInstrumentor::InstrumentationEvent event,\n";
+    out << "HidlInstrumentor::InstrumentationEvent event,\n";
     out << "const char* package,\n";
     out << "const char* version,\n";
     out << "const char* interface,\n";
@@ -102,8 +103,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION(\n";
     out.indent();
     out.indent();
-
-    out << "android::hardware::HidlInstrumentor::InstrumentationEvent event,\n";
+    out << "HidlInstrumentor::InstrumentationEvent event,\n";
     out << "const char* package,\n";
     out << "const char* version,\n";
     out << "const char* interface,\n";
@@ -198,7 +198,9 @@ void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(Formatter& out,
       GenerateProfilerMethodDeclForAttribute(out, sub_union);
     }
   }
-  out << "void profile__" << attribute.name()
+  std::string attribute_name = attribute.name();
+  ReplaceSubString(attribute_name, "::", "__");
+  out << "void profile__" << attribute_name
       << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
       << " arg_val_name);\n";
 }
@@ -214,7 +216,9 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
       GenerateProfilerMethodDeclForAttribute(out, sub_union);
     }
   }
-  out << "void profile__" << attribute.name()
+  std::string attribute_name = attribute.name();
+  ReplaceSubString(attribute_name, "::", "__");
+  out << "void profile__" << attribute_name
       << "(VariableSpecificationMessage* arg_name,\n" << attribute.name()
       << " arg_val_name) {\n";
   out.indent();

@@ -93,7 +93,7 @@ bool FuzzerExtended_INfc::Fuzz(
   }
   if (!strcmp(func_name, "write")) {
     uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
-    android::hardware::hidl_vec<uint8_t> arg0;
+    hidl_vec<uint8_t> arg0;
     for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
       arg0buffer[vector_index] = func_msg->arg(0).vector_value(vector_index).scalar_value().uint8_t();
     }
@@ -111,7 +111,7 @@ arg0.setToExternal(arg0buffer, func_msg->arg(0).vector_size());
   }
   if (!strcmp(func_name, "coreInitialized")) {
     uint8_t* arg0buffer = (uint8_t*) malloc(func_msg->arg(0).vector_size() * sizeof(uint8_t));
-    android::hardware::hidl_vec<uint8_t> arg0;
+    hidl_vec<uint8_t> arg0;
     for (int vector_index = 0; vector_index < func_msg->arg(0).vector_size(); vector_index++) {
       arg0buffer[vector_index] = func_msg->arg(0).vector_value(vector_index).scalar_value().uint8_t();
     }
