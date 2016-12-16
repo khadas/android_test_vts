@@ -122,7 +122,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         for offset in xrange(0, len(output), 2):
             crash_report += "\\x%s" % output[offset:offset + 2]
 
-        logging.info("FUZZER_TEST_CRASH_REPORT for %s: '%s'", fuzzer, crash_report)
+        logging.info('FUZZER_TEST_CRASH_REPORT for %s: "%s"', fuzzer, crash_report)
 
     # TODO(trong): differentiate between crashes and sanitizer rule violations.
     def AssertTestResult(self, fuzzer, result):
@@ -144,7 +144,9 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         exit_code = result[const.EXIT_CODE][-1]
         if exit_code == config.ExitCode.FUZZER_TEST_FAIL:
             self.LogCrashReport(fuzzer)
-            asserts.fail("%s failed" % fuzzer)
+            asserts.fail("%s failed normally." % fuzzer)
+        elif exit_code != config.ExitCode.FUZZER_TEST_PASS:
+            asserts.fail("%s failed abnormally." % fuzzer)
 
     def generateFuzzerTests(self):
         """Runs fuzzer tests."""
