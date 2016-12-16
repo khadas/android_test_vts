@@ -69,7 +69,7 @@ public class ShowTableServlet extends HttpServlet {
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
     private static final int TIME_INFO_ROW_COUNT = 2;
     private static final int DURATION_INFO_ROW_COUNT = 1;
-    private static final int SUMMARY_ROW_COUNT = 4;
+    private static final int SUMMARY_ROW_COUNT = 5;
     private static final long ONE_DAY = 86400000000L;  // units microseconds
     private static final String TABLE_PREFIX = "result_";
     private static final byte[] FAMILY = Bytes.toBytes("test");
@@ -326,7 +326,7 @@ public class ShowTableServlet extends HttpServlet {
         durationGrid[0][0] = "<b>Test Duration</b>";
 
         // first column for summary grid
-        String[] rowNamesSummaryGrid = {"Total", "Passed #", "Passed %", "Coverage %"};
+        String[] rowNamesSummaryGrid = {"Total", "Passing #", "Non-Passing #", "Passing %", "Coverage %"};
         for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
             summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
         }
@@ -357,11 +357,20 @@ public class ShowTableServlet extends HttpServlet {
             String buildId = report.getBuildInfo().getId().toStringUtf8();
 
             int passCount = 0;
+            int nonpassCount = 0;
+            TestCaseResult aggregateStatus = TestCaseResult.UNKNOWN_RESULT;
             long totalLineCount = 0, coveredLineCount = 0;
             for (TestCaseReportMessage testCaseReport : report.getTestCaseList()) {
                 if (testCaseReport.getTestResult() ==
                     TestCaseResult.TEST_CASE_RESULT_PASS) {
                     passCount++;
+                    if (aggregateStatus == TestCaseResult.UNKNOWN_RESULT) {
+                        aggregateStatus = TestCaseResult.TEST_CASE_RESULT_PASS;
+                    }
+                } else if (testCaseReport.getTestResult() !=
+                           TestCaseResult.TEST_CASE_RESULT_SKIP) {
+                    nonpassCount++;
+                    aggregateStatus = TestCaseResult.TEST_CASE_RESULT_FAIL;
                 }
                 for (CoverageReportMessage coverageReport :
                     testCaseReport.getCoverageList()) {
@@ -403,18 +412,20 @@ public class ShowTableServlet extends HttpServlet {
             } catch (ArithmeticException e) {
                 coverageInfo = " - ";
             }
-
-            headerRow[j + 1] = "<b>" + StringUtils.join(buildIdList, ",") + "</b><br>" +
-                               buildAlias.toLowerCase() + "<br>" + buildFlavor + "<br>" +
-                               productVariant + "<br>" + buildId;
+            String icon = "<div class='status-icon " + aggregateStatus.toString() + "'>&nbsp</div>";
+            String buildIds = StringUtils.join(buildIdList, ",");
+            headerRow[j + 1] = "<span class='valign-wrapper'><b>" + buildIds + "</b>" + icon +
+                               "</span>" + buildAlias.toLowerCase() + "<br>" + buildFlavor +
+                               "<br>" + productVariant + "<br>" + buildId;
             timeGrid[0][j + 1] = Long.toString(report.getStartTimestamp());
             timeGrid[1][j + 1] = Long.toString(report.getEndTimestamp());
             durationGrid[0][j + 1] = Long.toString(report.getEndTimestamp() -
                                                    report.getStartTimestamp());
             summaryGrid[0][j + 1] = Integer.toString(report.getTestCaseList().size());
             summaryGrid[1][j + 1] = Integer.toString(passCount);
-            summaryGrid[2][j + 1] = passInfo;
-            summaryGrid[3][j + 1] = coverageInfo;
+            summaryGrid[2][j + 1] = Integer.toString(nonpassCount);
+            summaryGrid[3][j + 1] = passInfo;
+            summaryGrid[4][j + 1] = coverageInfo;
         }
 
         String[] profilingPointNameArray = profilingPointNameSet.
