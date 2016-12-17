@@ -41,6 +41,7 @@ SpecificationBuilder::SpecificationBuilder(const string dir_path,
       epoch_count_(epoch_count),
       if_spec_msg_(NULL),
       module_name_(NULL),
+      hw_binder_service_name_(NULL),
       callback_socket_name_(callback_socket_name) {}
 
 vts::ComponentSpecificationMessage*
@@ -150,7 +151,14 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBase(
         get_stub = true;
       }
     }
-    if (!fuzzer->GetService(get_stub)) {
+    const char* service_name;
+    if (hw_binder_service_name_ && strlen(hw_binder_service_name_) > 0) {
+      service_name = hw_binder_service_name_;
+    } else {
+      service_name = iface_spec_msg.package().substr(
+          iface_spec_msg.package().find_last_of(".") + 1).c_str();
+    }
+    if (!fuzzer->GetService(get_stub, service_name)) {
       cerr << __FUNCTION__ << ": couldn't get service" << endl;
       return NULL;
     }
@@ -235,7 +243,14 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
         get_stub = true;
       }
     }
-    if (!fuzzer->GetService(get_stub)) {
+    const char* service_name;
+    if (hw_binder_service_name_ && strlen(hw_binder_service_name_) > 0) {
+      service_name = hw_binder_service_name_;
+    } else {
+      service_name = iface_spec_msg.package().substr(
+          iface_spec_msg.package().find_last_of(".") + 1).c_str();
+    }
+    if (!fuzzer->GetService(get_stub, service_name)) {
       cerr << __FUNCTION__ << ": couldn't get service" << endl;
       return NULL;
     }
@@ -260,7 +275,8 @@ FuzzerBase* SpecificationBuilder::GetFuzzerBaseAndAddAllFunctionsToQueue(
 bool SpecificationBuilder::LoadTargetComponent(
     const char* dll_file_name, const char* spec_lib_file_path, int target_class,
     int target_type, float target_version, const char* target_package,
-    const char* target_component_name, const char* module_name) {
+    const char* target_component_name,
+    const char* hw_binder_service_name, const char* module_name) {
   cout << __func__ << " entry dll_file_name = " << dll_file_name << endl;
   if_spec_msg_ =
       FindComponentSpecification(target_class, target_type, target_version,
@@ -284,8 +300,15 @@ bool SpecificationBuilder::LoadTargetComponent(
 
   module_name_ = (char*)malloc(strlen(module_name) + 1);
   strcpy(module_name_, module_name);
-  cout << __FUNCTION__ << ":" << __LINE__ << " module_name " << module_name_
+  cout << __func__ << ":" << __LINE__ << " module_name " << module_name_
        << endl;
+
+  if (hw_binder_service_name) {
+    hw_binder_service_name_ = (char*)malloc(strlen(hw_binder_service_name) + 1);
+    strcpy(hw_binder_service_name_, hw_binder_service_name);
+    cout << __func__ << ":" << __LINE__ << " hw_binder_service_name "
+         << hw_binder_service_name_ << endl;
+  }
   return true;
 }
 
@@ -320,7 +343,7 @@ const string& SpecificationBuilder::CallFunction(
   }
   cout << __func__ << ":" << __LINE__ << endl;
   if (!func_fuzzer) {
-    cerr << "can't find FuzzerBase for " << func_msg->name() << " using '"
+    cerr << "can't find FuzzerBase for '" << func_msg->name() << "' using '"
          << dll_file_name_ << "'" << endl;
     return empty_string;
   }

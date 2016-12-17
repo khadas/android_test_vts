@@ -66,11 +66,13 @@ int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
                                           int target_type, float target_version,
                                           const string& target_package,
                                           const string& target_component_name,
+                                          const string& hw_binder_service_name,
                                           const string& module_name) {
   printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
   bool success = spec_builder_.LoadTargetComponent(
       path.c_str(), lib_path_, target_class, target_type, target_version,
       target_package.c_str(), target_component_name.c_str(),
+      hw_binder_service_name.c_str(),
       module_name.c_str());
   cout << "Result: " << success << std::endl;
   if (success) {
@@ -156,6 +158,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
           command_message.target_type(), command_message.target_version(),
           command_message.target_package(),
           command_message.target_component_name(),
+          command_message.hw_binder_service_name(),
           command_message.module_name());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);

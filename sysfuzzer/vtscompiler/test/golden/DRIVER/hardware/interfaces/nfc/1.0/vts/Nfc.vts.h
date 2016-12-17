@@ -29,7 +29,7 @@ class FuzzerExtended_INfc : public FuzzerBase {
     bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
     bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
     bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
-    bool GetService(bool get_stub);
+    bool GetService(bool get_stub, const char* service_name);
 
  private:
     sp<INfc> hw_binder_proxy_;

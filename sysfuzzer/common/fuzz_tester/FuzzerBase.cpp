@@ -329,7 +329,7 @@ bool FuzzerBase::SetTargetObject(void* object_pointer) {
   return true;
 }
 
-bool FuzzerBase::GetService(bool /*get_stub*/) {
+bool FuzzerBase::GetService(bool /*get_stub*/, const char* /*service_name*/) {
   cerr << __func__ << " not impl" << endl;
   return false;
 }

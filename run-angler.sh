@@ -24,5 +24,6 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.light.conventional.Sample
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.nfc.hidl.host.NfcHidlBasicTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.vibrator.hidl.host.VibratorHidlTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.vr.hidl.host.VrHidlTest
+# PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.tv_cec.hidl.host.TvCecHidlTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.shell.SampleShellTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.fuzz_test.lib_bionic.LibBionicLibmFuzzTest
