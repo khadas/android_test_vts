@@ -282,11 +282,11 @@ bool FuzzerExtended_bt_interface_t::GetAttribute(
     cerr << "attribute not found" << endl;
     return false;
 }
-bool FuzzerExtended_bt_interface_t::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+bool FuzzerExtended_bt_interface_t::CallFunction(const FunctionSpecificationMessage&, const string&, FunctionSpecificationMessage* ) {
     /* No implementation yet. */
     return true;
 }
-bool FuzzerExtended_bt_interface_t::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+bool FuzzerExtended_bt_interface_t::VerifyResults(const FunctionSpecificationMessage&, const FunctionSpecificationMessage&) {
     /* No implementation yet. */
     return true;
 }

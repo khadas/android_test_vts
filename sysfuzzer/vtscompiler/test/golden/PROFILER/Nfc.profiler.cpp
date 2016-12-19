@@ -51,7 +51,7 @@ void HIDL_INSTRUMENTATION_FUNCTION(
                         break;
                     }
                     auto *arg_0 = msg.add_arg();
-                    INfcClientCallback *arg_val_0 = reinterpret_cast<INfcClientCallback*> ((*args)[0]);
+                    sp<INfcClientCallback> *arg_val_0 = reinterpret_cast<sp<INfcClientCallback>*> ((*args)[0]);
                     arg_0->set_type(TYPE_HIDL_CALLBACK);
                     break;
                 }

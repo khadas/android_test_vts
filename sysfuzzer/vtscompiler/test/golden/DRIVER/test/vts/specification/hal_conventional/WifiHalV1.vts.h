@@ -22,8 +22,8 @@ class FuzzerExtended_wifi : public FuzzerBase {
     FuzzerExtended_wifi() : FuzzerBase(HAL_LEGACY) {}
  protected:
     bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
-    bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
-    bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
+    bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);
+    bool VerifyResults(const FunctionSpecificationMessage& expected_result, const FunctionSpecificationMessage& actual_result);
     bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
  private:
 };
