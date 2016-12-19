@@ -47,15 +47,9 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib/libprotobuf-cpp-full.so /data/local/tmp/32/
   adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/libprotobuf-cpp-full.so /data/local/tmp/64/
 
-  echo "install vts driver for hidl"
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc.vts.driver@1.0.so /data/local/tmp/32/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc.vts.driver@1.0.so /data/local/tmp/64/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.vibrator.vts.driver@1.0 /data/local/tmp/32/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.vibrator.vts.driver@1.0 /data/local/tmp/64/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.thermal.vts.driver@1.0 /data/local/tmp/32/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.thermal.vts.driver@1.0 /data/local/tmp/64/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.vr.vts.driver@1.0 /data/local/tmp/32/
-  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.vr.vts.driver@1.0 /data/local/tmp/64/
+  echo "install vts drivers for hidl"
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.*.vts.driver@1.0.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.*.vts.driver@1.0.so /data/local/tmp/64/
 
   echo "install hal packages"
   adb shell mkdir -p /data/local/tmp/32/hw
