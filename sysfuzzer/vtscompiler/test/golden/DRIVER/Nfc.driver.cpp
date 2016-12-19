@@ -55,11 +55,14 @@ static void FuzzerExtended_INfcpowerCycle_cb_func(::android::hardware::nfc::V1_0
 std::function<void(::android::hardware::nfc::V1_0::NfcStatus)> FuzzerExtended_INfcpowerCycle_cb = FuzzerExtended_INfcpowerCycle_cb_func;
 
 
-bool FuzzerExtended_INfc::GetService(bool get_stub) {
+bool FuzzerExtended_INfc::GetService(bool get_stub, const char* service_name) {
     static bool initialized = false;
     if (!initialized) {
         cout << "[agent:hal] HIDL getService" << endl;
-        hw_binder_proxy_ = INfc::getService("nfc_nci", get_stub);
+        if (service_name) {
+          cout << "  - service name: " << service_name << endl;
+        }
+        hw_binder_proxy_ = INfc::getService(service_name, get_stub);
         cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }

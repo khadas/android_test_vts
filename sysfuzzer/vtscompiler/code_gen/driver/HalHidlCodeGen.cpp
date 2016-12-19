@@ -1459,7 +1459,7 @@ void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
     const string& /*fuzzer_extended_class_name*/) {
   if (message.component_name() != "types"
       && !endsWith(message.component_name(), "Callback")) {
-    out << "bool GetService(bool get_stub);" << "\n\n";
+    out << "bool GetService(bool get_stub, const char* service_name);" << "\n\n";
   }
 }
 
@@ -1592,21 +1592,17 @@ void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
     const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   out << "bool " << fuzzer_extended_class_name
-      << "::GetService(bool get_stub) {" << "\n";
+      << "::GetService(bool get_stub, const char* service_name) {" << "\n";
   out.indent();
-
   out << "static bool initialized = false;" << "\n";
   out << "if (!initialized) {" << "\n";
   out.indent();
   out << "cout << \"[agent:hal] HIDL getService\" << endl;" << "\n";
-  string service_name = message.package().substr(
-      message.package().find_last_of(".") + 1);
-  if (service_name == "nfc") {
-    // TODO(yim): remove this special case after b/32158398 is fixed.
-    service_name = "nfc_nci";
-  }
-  out << "hw_binder_proxy_ = " << message.component_name() << "::getService(\""
-      << service_name << "\", get_stub);" << "\n";
+  out << "if (service_name) {\n"
+      << "  cout << \"  - service name: \" << service_name << endl;" << "\n"
+      << "}\n";
+  out << "hw_binder_proxy_ = " << message.component_name() << "::getService("
+      << "service_name, get_stub);" << "\n";
   out << "cout << \"[agent:hal] hw_binder_proxy_ = \" << "
       << "hw_binder_proxy_.get() << endl;" << "\n";
   out << "initialized = true;" << "\n";

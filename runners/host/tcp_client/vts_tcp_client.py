@@ -135,7 +135,8 @@ class VtsTcpClient(object):
     def LaunchDriverService(self, driver_type, service_name, bits,
                             file_path=None, target_class=None, target_type=None,
                             target_version=None, target_package=None,
-                            target_component_name=None):
+                            target_component_name=None,
+                            hw_binder_service_name=None):
         """RPC to LAUNCH_DRIVER_SERVICE."""
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
@@ -150,7 +151,8 @@ class VtsTcpClient(object):
                          target_type=target_type,
                          target_version=target_version,
                          target_package=target_package,
-                         target_component_name=target_component_name)
+                         target_component_name=target_component_name,
+                         hw_binder_service_name=hw_binder_service_name)
         resp = self.RecvResponse()
         logging.info("resp for LAUNCH_DRIVER_SERVICE: %s", resp)
         return (resp.response_code == SysMsg_pb2.SUCCESS)
@@ -302,6 +304,7 @@ class VtsTcpClient(object):
                     target_version=None,
                     target_package=None,
                     target_component_name=None,
+                    hw_binder_service_name=None,
                     module_name=None,
                     service_name=None,
                     callback_port=None,
@@ -340,6 +343,9 @@ class VtsTcpClient(object):
 
         if target_component_name is not None:
             command_msg.target_component_name = target_component_name
+
+        if hw_binder_service_name is not None:
+            command_msg.hw_binder_service_name = hw_binder_service_name
 
         if module_name is not None:
             command_msg.module_name = module_name

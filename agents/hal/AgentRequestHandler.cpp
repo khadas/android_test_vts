@@ -117,7 +117,7 @@ bool AgentRequestHandler::LaunchDriverService(
     int driver_type, const string& service_name, const string& file_path,
     int target_class, int target_type, float target_version,
     const string& target_package, const string& target_component_name,
-    const string& module_name, int bits) {
+    const string& module_name, const string& hw_binder_service_name, int bits) {
   cout << "[runner->agent] command " << __FUNCTION__ << " (file_path="
        << file_path << ")" << endl;
   ResponseCode result = FAIL;
@@ -255,7 +255,8 @@ bool AgentRequestHandler::LaunchDriverService(
           cout << "[agent->driver]: LoadHal " << module_name << endl;
           result = client->LoadHal(file_path, target_class, target_type,
                                    target_version, target_package,
-                                   target_component_name, module_name);
+                                   target_component_name,
+                                   hw_binder_service_name, module_name);
           cout << "[driver->agent]: LoadHal returns " << result << endl;
           if (result == VTS_DRIVER_RESPONSE_SUCCESS) {
             response_msg.set_response_code(SUCCESS);
@@ -509,7 +510,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
           command_msg.file_path(), command_msg.target_class(),
           command_msg.target_type(), command_msg.target_version() / 100.0,
           command_msg.target_package(), command_msg.target_component_name(),
-          command_msg.module_name(), command_msg.bits());
+          command_msg.module_name(), command_msg.hw_binder_service_name(),
+          command_msg.bits());
     case VTS_AGENT_COMMAND_READ_SPECIFICATION:
       return ReadSpecification(command_msg.service_name());
     case LIST_APIS:

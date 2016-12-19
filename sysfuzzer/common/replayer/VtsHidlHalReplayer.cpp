@@ -140,7 +140,9 @@ bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
       get_stub = true;
     }
   }
-  if (!fuzzer->GetService(get_stub)) {
+  const char* service_name = interface_specification_message.package().substr(
+      interface_specification_message.package().find_last_of(".") + 1).c_str();
+  if (!fuzzer->GetService(get_stub, service_name)) {
     cerr << __func__ << ": couldn't get service" << endl;
     return false;
   }

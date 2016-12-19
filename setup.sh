@@ -80,12 +80,13 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1.vts /data/local/tmp/spec/BluetoothHalV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts /data/local/tmp/spec/BluetoothHalV1bt_interface_t.vts
-  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/Nfc.vts /data/local/tmp/spec/Nfc.vts
-  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts /data/local/tmp/spec/NfcClientCallback.vts
-  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/types.vts /data/local/tmp/spec/types.vts
+  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/*.vts /data/local/tmp/spec/
+  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vr/1.0/vts/Vr.vts /data/local/tmp/spec/Vr.vts
+  # uncomment to test TV CEC HAL
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/tv/cec/1.0/vts/*.vts /data/local/tmp/spec/
   # uncomment to test vibrator HAL
-  #adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts /data/local/tmp/spec/
-  #adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/types.vts /data/local/tmp/spec/
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts /data/local/tmp/spec/
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/types.vts /data/local/tmp/spec/
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
