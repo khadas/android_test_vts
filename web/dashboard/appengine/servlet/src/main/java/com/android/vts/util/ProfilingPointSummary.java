@@ -71,7 +71,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
         for (int i = 0; i < report.getLabelList().size(); i++) {
             ByteString label = report.getLabelList().get(i);
             if (!labelIndices.containsKey(label)) {
-                StatSummary summary = new StatSummary(label);
+                StatSummary summary = new StatSummary(label, report.getRegressionMode());
                 labelIndices.put(label, statSummaries.size());
                 statSummaries.add(summary);
             }

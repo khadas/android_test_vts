@@ -26,6 +26,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
+import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
 import com.android.vts.util.BigtableHelper;
 import com.android.vts.util.EmailHelper;
 import com.android.vts.util.ProfilingPointSummary;
@@ -124,6 +125,13 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             }
             for (ProfilingReportMessage profilingReportMessage :
                 testReportMessage.getProfilingList()) {
+                switch(profilingReportMessage.getRegressionMode()) {
+                    case UNKNOWN_REGRESSION_MODE:
+                    case VTS_REGRESSION_MODE_DISABLED:
+                        continue;
+                    default:
+                        break;
+                }
                 String name = profilingReportMessage.getName().toStringUtf8();
                 switch(profilingReportMessage.getType()) {
                     case UNKNOWN_VTS_PROFILING_TYPE:
@@ -175,18 +183,22 @@ public class VtsPerformanceJobServlet extends BaseServlet {
      * @param style A string containing CSS styles to apply to the table cell.
      * @returns An HTML string for a colored table cell containing the percent change.
      */
-    private static String getPercentChangeHTML(double baseline, double test, String style) {
+    private static String getPercentChangeHTML(double baseline, double test, String style,
+                                               VtsProfilingRegressionMode mode) {
         String pctChangeString = "0 %";
         double alpha = 0;
         double delta = test - baseline;
-        if (baseline > 0) {
+        if (baseline != 0) {
             double pctChange = delta / baseline;
             alpha = pctChange;
             pctChangeString = round(pctChange * 100, N_DIGITS) + " %";
-        } else if (delta > 0) {
-            // If the percent change is undefined and change is positive, set to full opacity
-            alpha = 1;
+        } else if (delta != 0){
+            // If the percent change is undefined, the cell will be solid red or white
+            alpha = (int) Math.signum(delta);  // get the sign of the delta (+1, 0, -1)
             pctChangeString = "";
+        }
+        if (mode == VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING) {
+            alpha = -alpha;
         }
         String color = "background-color: rgba(255, 0, 0, " + alpha + ");";
         String html = "<td style='" + style + color + "'>";
@@ -212,9 +224,10 @@ public class VtsPerformanceJobServlet extends BaseServlet {
         // in the new value compared to the previous day's. Intensity is a linear function
         // of percentage change, reaching a ceiling at 100% change (e.g. a doubling).
         row += getPercentChangeHTML(baseline.getMean(), test.getMean(),
-                                    INNER_CELL_STYLE);
+                                    INNER_CELL_STYLE, test.getRegressionMode());
         row += getPercentChangeHTML(baseline.getStd(), test.getStd(),
-                                    OUTER_CELL_STYLE);
+                                    OUTER_CELL_STYLE,
+                                    VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING);
         return row;
     }
 
@@ -298,7 +311,8 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                 for (int i = 1; i < summaryMaps.size(); i++) {
                     Map<String, ProfilingPointSummary> summaryMapOld = summaryMaps.get(i);
                     if (summaryMapOld.containsKey(profilingPoint)) {
-                        tableHTML += getPerformanceComparisonHTML(summaryMapOld.get(profilingPoint).getStatSummary(label), stats);
+                        tableHTML += getPerformanceComparisonHTML(summaryMapOld.get(profilingPoint)
+                                         .getStatSummary(label), stats);
                     }
                 }
                 tableHTML += "</tr>";
