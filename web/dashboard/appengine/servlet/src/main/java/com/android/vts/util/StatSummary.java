@@ -17,6 +17,7 @@
 package com.android.vts.util;
 
 import com.google.protobuf.ByteString;
+import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
 
 /**
  * Helper object for storing statistics.
@@ -26,6 +27,7 @@ public class StatSummary {
     private double mean;
     private double var;
     private int n;
+    private VtsProfilingRegressionMode regression_mode;
 
     /**
      * Initializes the statistical summary.
@@ -34,12 +36,14 @@ public class StatSummary {
      * to 0.
      *
      * @param label The (String) label to assign to the summary.
+     * @param mode The VtsProfilingRegressionMode to use when analyzing performance.
      */
-    public StatSummary(ByteString label) {
+    public StatSummary(ByteString label, VtsProfilingRegressionMode mode) {
         this.label = label;
         this.mean = 0;
         this.var = 0;
         this.n = 0;
+        this.regression_mode = mode;
     }
 
     /**
@@ -83,5 +87,13 @@ public class StatSummary {
      */
     public ByteString getLabel() {
         return label;
+    }
+
+    /**
+     * Gets the regression mode.
+     * @return The VtsProfilingRegressionMode value.
+     */
+    public VtsProfilingRegressionMode getRegressionMode() {
+        return regression_mode;
     }
 }
