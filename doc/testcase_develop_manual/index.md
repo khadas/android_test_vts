@@ -11,7 +11,7 @@ as compared with some other industry (e.g., for mission-critical or high-availab
 As the Android system is being used widely (i.e., requiring frequent security
 patching and fast feature launch velocity), we think that it is a right cultural shift for this time.
 
-Currently, all VTS tests are designed for userdebug build devices only.
+Currently, all VTS tests are designed for userdebug or eng build devices only.
 
 __Table of Contents__
 

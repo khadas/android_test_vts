@@ -8,9 +8,16 @@ enhance the robustness, reliability, and compliance of:
 
 VTS has mainly two types of test suites:
 
-  * automated (e.g., fuzzing) and
-  * structural (e.g., gTest) testing.
+  * automated (e.g., record-and-replay and fuzzing) and
+  * structural (e.g., gTest and host-driven python) testing.
 
 While the VTS framework and test cases are designed for userdebug or eng build
 devices, some test cases can be run on user build devices using its app namely,
 VTS Agent App.
+
+__Table of Contents__
+
+1. [VTS User Manual](doc/user_manual.md)
+2. [Where to find VTS test cases](testcases/README.md)
+3. [VTS Test Developer Manual](doc/test_developer_manual.md)
+4. [VTS Framework Developer Manual](doc/framework_developer_manual.md)
