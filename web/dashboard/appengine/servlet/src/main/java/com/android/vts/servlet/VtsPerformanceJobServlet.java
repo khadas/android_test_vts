@@ -58,10 +58,11 @@ public class VtsPerformanceJobServlet extends BaseServlet {
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
 
     private static final String MEAN = "Mean";
-    private static final String MEAN_DELTA = "&Delta;Mean (%)";
+    private static final String MIN = "Min";
+    private static final String MIN_DELTA = "&Delta;Min (%)";
     private static final String STD = "Std";
-    private static final String STD_DELTA = "&Delta;Std (%)";
     private static final String SUBJECT_PREFIX = "Daily Performance Digest: ";
+    private static final String LAST_WEEK = "Last Week";
     private static final String LABEL_STYLE = "font-family: arial";
     private static final String TABLE_STYLE = "border-collapse: collapse; border: 1px solid black; font-size: 12px; font-family: arial;";
     private static final String SECTION_LABEL_STYLE = "border: 1px solid black; border-bottom: none; background-color: lightgray;";
@@ -126,7 +127,6 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             for (ProfilingReportMessage profilingReportMessage :
                 testReportMessage.getProfilingList()) {
                 switch(profilingReportMessage.getRegressionMode()) {
-                    case UNKNOWN_REGRESSION_MODE:
                     case VTS_REGRESSION_MODE_DISABLED:
                         continue;
                     default:
@@ -190,7 +190,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
         double delta = test - baseline;
         if (baseline != 0) {
             double pctChange = delta / baseline;
-            alpha = pctChange;
+            alpha = pctChange * 2;
             pctChangeString = round(pctChange * 100, N_DIGITS) + " %";
         } else if (delta != 0){
             // If the percent change is undefined, the cell will be solid red or white
@@ -214,20 +214,18 @@ public class VtsPerformanceJobServlet extends BaseServlet {
      */
     public static String getPerformanceComparisonHTML(StatSummary baseline, StatSummary test) {
         if (test == null || baseline == null) {
-            return "<td></td><td></td><td></td><td></td>";
+            return "<td></td><td></td><td></td>";
         }
         String row = "";
-        row += "<td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMean(), N_DIGITS);
-        row += "</td><td style='" + INNER_CELL_STYLE + "'>";
-        row += round(baseline.getStd(), N_DIGITS) + "</td>";
         // Intensity of red color is a function of the relative (percent) change
         // in the new value compared to the previous day's. Intensity is a linear function
         // of percentage change, reaching a ceiling at 100% change (e.g. a doubling).
-        row += getPercentChangeHTML(baseline.getMean(), test.getMean(),
-                                    INNER_CELL_STYLE, test.getRegressionMode());
-        row += getPercentChangeHTML(baseline.getStd(), test.getStd(),
-                                    OUTER_CELL_STYLE,
-                                    VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING);
+        row += getPercentChangeHTML(baseline.getMin(), test.getMin(),
+                INNER_CELL_STYLE, test.getRegressionMode());
+        row += "<td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMin(), N_DIGITS);
+        row += "</td><td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMean(), N_DIGITS);
+        row += "</td><td style='" + OUTER_CELL_STYLE + "'>";
+        row += round(baseline.getStd(), N_DIGITS) + "</td>";
         return row;
     }
 
@@ -277,7 +275,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                 String content = labels.get(i);
                 tableHTML += "<th style='" + SECTION_LABEL_STYLE + "' ";
                 if (i == 0) tableHTML += "colspan='1'";
-                else if (i == 1) tableHTML += "colspan='2'";
+                else if (i == 1) tableHTML += "colspan='3'";
                 else tableHTML += "colspan='4'";
                 tableHTML += ">" + content + "</th>";
             }
@@ -286,16 +284,16 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             // Format column labels
             tableHTML += "<tr>";
             for (int i = 0; i < labels.size(); i++) {
+                if (i > 1) {
+                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MIN_DELTA + "</th>";
+                }
                 if (i == 0) {
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>";
                     tableHTML += summary.xLabel.toStringUtf8() + "</th>";
                 } else if (i > 0) {
+                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MIN + "</th>";
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MEAN + "</th>";
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + STD + "</th>";
-                }
-                if (i > 1) {
-                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MEAN_DELTA + "</th>";
-                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + STD_DELTA + "</th>";
                 }
             }
             tableHTML += "</tr>";
@@ -305,6 +303,8 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                 ByteString label = stats.getLabel();
                 tableHTML += "<tr><td style='" + HEADER_COL_STYLE +"'>" + label.toStringUtf8();
                 tableHTML += "</td><td style='" + INNER_CELL_STYLE + "'>";
+                tableHTML += round(stats.getMin(), N_DIGITS)  + "</td>";
+                tableHTML += "<td style='" + INNER_CELL_STYLE + "'>";
                 tableHTML += round(stats.getMean(), N_DIGITS)  + "</td>";
                 tableHTML += "<td style='" + OUTER_CELL_STYLE + "'>";
                 tableHTML += round(stats.getStd(), N_DIGITS) + "</td>";
@@ -354,6 +354,12 @@ public class VtsPerformanceJobServlet extends BaseServlet {
         String dateStringYesterday = new SimpleDateFormat("MM-dd-yyyy").format(new Date(oneDayAgo));
         TimeInterval yesterday = new TimeInterval(oneDayAgo - ONE_DAY/MILLI_TO_MICRO, oneDayAgo, dateStringYesterday);
         timeIntervals.add(yesterday);
+
+        // Add last week as a baseline time interval for analysis
+        long oneWeek = 7 * ONE_DAY/MILLI_TO_MICRO;
+        long oneWeekAgo = now - oneWeek;
+        TimeInterval lastWeek = new TimeInterval(oneWeekAgo - oneWeek, oneWeekAgo, LAST_WEEK);
+        timeIntervals.add(lastWeek);
 
         for (String tableName : allTables) {
             String body = getPeformanceSummary(tableName, timeIntervals);

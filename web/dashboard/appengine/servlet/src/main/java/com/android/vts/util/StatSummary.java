@@ -24,6 +24,8 @@ import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
  */
 public class StatSummary {
     private ByteString label;
+    private double min;
+    private double max;
     private double mean;
     private double var;
     private int n;
@@ -40,6 +42,8 @@ public class StatSummary {
      */
     public StatSummary(ByteString label, VtsProfilingRegressionMode mode) {
         this.label = label;
+        this.min = Double.MAX_VALUE;
+        this.max = Double.MIN_VALUE;
         this.mean = 0;
         this.var = 0;
         this.n = 0;
@@ -55,6 +59,24 @@ public class StatSummary {
         double oldMean = mean;
         mean = oldMean + (value - oldMean) / n;
         var = var + (value - mean) * (value - oldMean);
+        if (value < min) min = value;
+        if (value > max) max = value;
+    }
+
+    /**
+     * Gets the calculated min of the stream.
+     * @return The min.
+     */
+    public double getMin() {
+        return min;
+    }
+
+    /**
+     * Gets the calculated max of the stream.
+     * @return The max.
+     */
+    public double getMax() {
+        return max;
     }
 
     /**
