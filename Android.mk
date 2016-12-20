@@ -57,6 +57,12 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	#
+	@echo "build vts python package for power HAL"
+	$(hide) find hardware/interfaces/power/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/power/1.0/vts/functional -l $@.list
+	@rm -f $@.list
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
 	@echo "build vts python package for thermal HAL"
 	$(hide) find hardware/interfaces/thermal/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/thermal/1.0/vts/functional -l $@.list
