@@ -72,8 +72,9 @@ bool VtsHidlHalReplayer::LoadComponentSpecification(
   return true;
 }
 
-bool VtsHidlHalReplayer::ParseTrace(
-    const char* trace_file, vector<FunctionSpecificationMessage>* func_msgs) {
+bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
+    vector<FunctionSpecificationMessage>* func_msgs,
+    vector<FunctionSpecificationMessage>* result_msgs) {
   std::ifstream in(trace_file, std::ios::in);
   bool new_record = true;
   std::string record_str;
@@ -89,17 +90,18 @@ bool VtsHidlHalReplayer::ParseTrace(
       unique_ptr<VtsProfilingRecord> record(new VtsProfilingRecord());
       if (!google::protobuf::TextFormat::MergeFromString(record_str,
                                                          record.get())) {
-        cerr << __func__
-             << ": Can't parse a given function message: " << record_str
-             << endl;
+        cerr << __func__ << ": Can't parse a given function message: "
+            << record_str << endl;
         return false;
       }
-      // Only return entry record.
-      // TODO(zhuoyao): Return exit record as well for result verification.
-      if (record->event() == InstrumentationEventType::SERVER_API_ENTRY ||
-          record->event() == InstrumentationEventType::CLIENT_API_ENTRY ||
-          record->event() == InstrumentationEventType::PASSTHROUGH_ENTRY) {
+      if (record->event() == InstrumentationEventType::SERVER_API_ENTRY
+          || record->event() == InstrumentationEventType::CLIENT_API_ENTRY
+          || record->event() == InstrumentationEventType::SYNC_CALLBACK_ENTRY
+          || record->event() == InstrumentationEventType::ASYNC_CALLBACK_ENTRY
+          || record->event() == InstrumentationEventType::PASSTHROUGH_ENTRY) {
         func_msgs->push_back(record->func_msg());
+      } else {
+        result_msgs->push_back(record->func_msg());
       }
       new_record = true;
       record_str.clear();
@@ -149,18 +151,30 @@ bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
 
   // Parse the trace file to get the sequence of function calls.
   vector<FunctionSpecificationMessage> func_msgs;
-  if (!ParseTrace(trace_file, &func_msgs)) {
+  vector<FunctionSpecificationMessage> result_msgs;
+  if (!ParseTrace(trace_file, &func_msgs, &result_msgs)) {
     cerr << __func__ << ": couldn't parse trace file: " << trace_file
          << endl;
     return false;
   }
-  // Replay each function call from the trace.
-  for (vts::FunctionSpecificationMessage func_msg : func_msgs) {
+  // Replay each function call from the trace and verify the results.
+  for (size_t i = 0; i < func_msgs.size(); i++) {
+    vts::FunctionSpecificationMessage func_msg = func_msgs[i];
+    vts::FunctionSpecificationMessage expected_result_msg = result_msgs[i];
     cout << __func__ << ": replay function: " << func_msg.DebugString();
-    void* result;
-    fuzzer->Fuzz(&func_msg, &result, callback_socket_name_);
+    vts::FunctionSpecificationMessage result_msg;
+    if (!fuzzer->CallFunction(func_msg, callback_socket_name_, &result_msg)) {
+      cerr << __func__ << ": replay function fail." << endl;
+      return false;
+    }
+    if (!fuzzer->VerifyResults(expected_result_msg, result_msg)) {
+      // Verification is not strict, i.e. if fail, output error message and
+      // continue the process.
+      cerr << __func__ << ": verification fail.\nexpected_result: "
+           << expected_result_msg.DebugString() << "\nactual_result: "
+           << result_msg.DebugString() << endl;
+    }
   }
-  // TODO(zhuoyao): verify return results.
   return true;
 }
 

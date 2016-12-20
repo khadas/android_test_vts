@@ -64,6 +64,12 @@ class FuzzerBase {
     return false;
   };
 
+  virtual bool VerifyResults(
+      const vts::FunctionSpecificationMessage& /*expected_result_msg*/,
+      const vts::FunctionSpecificationMessage& /*actual_result_msg*/) {
+    return false;
+  };
+
   virtual bool GetAttribute(vts::FunctionSpecificationMessage* /*func_msg*/,
                             void** /*result*/) {
     return false;
