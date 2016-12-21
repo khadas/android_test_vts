@@ -240,7 +240,7 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
   out << "#include <hidl/HidlSupport.h>\n";
   out << "#include <linux/limits.h>\n";
   out << "#include <test/vts/proto/ComponentSpecificationMessage.pb.h>\n";
-  out << "#include <VtsProfilingInterface.h>\n";
+  out << "#include \"VtsProfilingInterface.h\"\n";
   out << "\n";
 
   std::string package_path = GetPackage(message);

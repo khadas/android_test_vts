@@ -30,7 +30,10 @@ DATA/lib64/android.hardware.vibrator.vts.driver@1.0.so->/data/local/tmp/64/andro
 DATA/lib/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.vr.vts.driver@1.0.so
 DATA/lib64/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.vr.vts.driver@1.0.so
 
-/lib/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/32/hw/android.hardware.boot@1.0::IBoot.profiler.so
+DATA/lib/android.hardware.nfc@1.0-INfc-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.nfc@1.0::INfc.profiler.so
+DATA/lib64/android.hardware.nfc@1.0-INfc-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.nfc@1.0::INfc.profiler.so
+
+DATA/lib/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/32/hw/android.hardware.boot@1.0::IBoot.profiler.so
 DATA/lib64/libvts_profiler_hidl_boot@1.0.so->/data/local/tmp/64/hw/android.hardware.boot@1.0::IBoot.profiler.so
 
 DATA/lib/libvts_profiler_hidl_power@1.0.so->/data/local/tmp/32/hw/android.hardware.power@1.0::IPower.profiler.so

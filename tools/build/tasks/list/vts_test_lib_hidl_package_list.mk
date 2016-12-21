@@ -29,7 +29,8 @@ vts_test_lib_hidl_packages := \
   android.hardware.vr.vts.driver@1.0 \
   libvts_profiler_hidl_boot@1.0 \
   libvts_profiler_hidl_memtrack@1.0 \
-  libvts_profiler_hidl_nfc@1.0 \
+  android.hardware.nfc@1.0-INfc-vts.profiler \
+  android.hardware.nfc@1.0-INfcClientCallback-vts.profiler \
   libvts_profiler_hidl_power@1.0 \
   libvts_profiler_hidl_sensors@1.0 \
   libvts_profiler_hidl_thermal@1.0 \
