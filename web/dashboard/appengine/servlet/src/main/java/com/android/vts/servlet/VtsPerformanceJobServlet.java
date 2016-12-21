@@ -218,7 +218,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
      */
     public static String getPerformanceComparisonHTML(StatSummary baseline, StatSummary test) {
         if (test == null || baseline == null) {
-            return "<td></td><td></td><td></td>";
+            return "<td></td><td></td><td></td><td></td>";
         }
         String row = "";
         double baselineValue;
@@ -254,22 +254,14 @@ public class VtsPerformanceJobServlet extends BaseServlet {
      * point. When performance degrades, the cell is shaded red.
      *
      * @param tableName The name of the table whose profiling data to summarize.
+     * @param summaryMaps List of maps for each profiling run (in reverse chronological order)
+     *                    containing profiling point names as keys and ProfilingPointSummary objects
+     *                    as values.
+     * @param labels List of string labels for use as the column headers.
      * @returns An HTML string containing labeled table summaries.
-     * @throws IOException
      */
-    private static String getPeformanceSummary(String tableName, List<TimeInterval> testIntervals)
-            throws IOException {
-        if (testIntervals.size() == 0) return "";
-        List<String> labels = new ArrayList<>();
-        labels.add("");
-        List<Map<String, ProfilingPointSummary>> summaryMaps = new ArrayList<>();
-        for (TimeInterval interval : testIntervals) {
-            Map<String, ProfilingPointSummary> summaryMap = getProfilingSummaryMap(
-                    tableName, interval.start, interval.end);
-            if (summaryMap == null || summaryMap.size() == 0) break;
-            labels.add(interval.label);
-            summaryMaps.add(summaryMap);
-        }
+    public static String getPeformanceSummary(String tableName,
+            List<Map<String, ProfilingPointSummary>> summaryMaps, List<String> labels) {
         if (summaryMaps.size() == 0) return "";
         Map<String, ProfilingPointSummary> now = summaryMaps.get(0);
         String tableHTML = "<p style='" + LABEL_STYLE + "'><b>";
@@ -342,7 +334,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                     if (summaryMapOld.containsKey(profilingPoint)) {
                         tableHTML += getPerformanceComparisonHTML(summaryMapOld.get(profilingPoint)
                                          .getStatSummary(label), stats);
-                    }
+                    } else tableHTML += "<td></td><td></td><td></td><td></td>";
                 }
                 tableHTML += "</tr>";
             }
@@ -393,8 +385,17 @@ public class VtsPerformanceJobServlet extends BaseServlet {
         timeIntervals.add(lastWeek);
 
         for (String tableName : allTables) {
-            if (!tableName.equals("result_BinderThroughputBenchmark")) continue;
-            String body = getPeformanceSummary(tableName, timeIntervals);
+            List<Map<String, ProfilingPointSummary>> summaryMaps = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            labels.add("");
+            for (TimeInterval interval : timeIntervals) {
+                Map<String, ProfilingPointSummary> summaryMap = getProfilingSummaryMap(
+                        tableName, interval.start, interval.end);
+                if (summaryMap == null || summaryMap.size() == 0) continue;
+                summaryMaps.add(summaryMap);
+                labels.add(interval.label);
+            }
+            String body = getPeformanceSummary(tableName, summaryMaps, labels);
             if (body == null || body.equals("")) continue;
             List<String> emails = EmailHelper.getSubscriberEmails(statusTable, tableName);
             if (emails.size() == 0) continue;
