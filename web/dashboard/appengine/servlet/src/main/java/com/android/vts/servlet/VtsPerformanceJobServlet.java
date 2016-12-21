@@ -60,11 +60,15 @@ public class VtsPerformanceJobServlet extends BaseServlet {
     private static final String MEAN = "Mean";
     private static final String MIN = "Min";
     private static final String MIN_DELTA = "&Delta;Min (%)";
+    private static final String MAX_DELTA = "&Delta;Max (%)";
+    private static final String HIGHER_IS_BETTER = "Note: Higher values are better. Maximum is the best-case performance.";
+    private static final String LOWER_IS_BETTER = "Note: Lower values are better. Minimum is the best-case performance.";
     private static final String STD = "Std";
     private static final String SUBJECT_PREFIX = "Daily Performance Digest: ";
     private static final String LAST_WEEK = "Last Week";
     private static final String LABEL_STYLE = "font-family: arial";
-    private static final String TABLE_STYLE = "border-collapse: collapse; border: 1px solid black; font-size: 12px; font-family: arial;";
+    private static final String SUBTEXT_STYLE = "font-family: arial; font-size: 12px";
+    private static final String TABLE_STYLE = "width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 12px; font-family: arial;";
     private static final String SECTION_LABEL_STYLE = "border: 1px solid black; border-bottom: none; background-color: lightgray;";
     private static final String COL_LABEL_STYLE = "border: 1px solid black; border-bottom-width: 2px; border-top: 1px dotted gray; background-color: lightgray;";
     private static final String HEADER_COL_STYLE = "border-top: 1px dotted gray; border-right: 2px solid black; text-align: right; background-color: lightgray;";
@@ -217,11 +221,23 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             return "<td></td><td></td><td></td>";
         }
         String row = "";
+        double baselineValue;
+        double testValue;
+        switch (test.getRegressionMode()) {
+            case VTS_REGRESSION_MODE_DECREASING:
+                baselineValue = baseline.getMax();
+                testValue = test.getMax();
+                break;
+            default:
+                baselineValue = baseline.getMin();
+                testValue = test.getMin();
+                break;
+        }
         // Intensity of red color is a function of the relative (percent) change
         // in the new value compared to the previous day's. Intensity is a linear function
         // of percentage change, reaching a ceiling at 100% change (e.g. a doubling).
-        row += getPercentChangeHTML(baseline.getMin(), test.getMin(),
-                INNER_CELL_STYLE, test.getRegressionMode());
+        row += getPercentChangeHTML(baselineValue, testValue, INNER_CELL_STYLE,
+                                    test.getRegressionMode());
         row += "<td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMin(), N_DIGITS);
         row += "</td><td style='" + INNER_CELL_STYLE + "'>" + round(baseline.getMean(), N_DIGITS);
         row += "</td><td style='" + OUTER_CELL_STYLE + "'>";
@@ -281,11 +297,24 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             }
             tableHTML += "</tr>";
 
+            String deltaString;
+            String subtext;
+            switch (now.get(profilingPoint).getRegressionMode()) {
+                case VTS_REGRESSION_MODE_DECREASING:
+                    deltaString = MAX_DELTA;
+                    subtext = HIGHER_IS_BETTER;
+                    break;
+                default:
+                    deltaString = MIN_DELTA;
+                    subtext = LOWER_IS_BETTER;
+                    break;
+            }
+
             // Format column labels
             tableHTML += "<tr>";
             for (int i = 0; i < labels.size(); i++) {
                 if (i > 1) {
-                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MIN_DELTA + "</th>";
+                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + deltaString + "</th>";
                 }
                 if (i == 0) {
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>";
@@ -317,7 +346,8 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                 }
                 tableHTML += "</tr>";
             }
-            tableHTML += "</table><br>";
+            tableHTML += "</table>";
+            tableHTML += "<i style='" + SUBTEXT_STYLE + "'>" + subtext + "</i><br><br>";
         }
         return tableHTML;
     }
@@ -346,22 +376,24 @@ public class VtsPerformanceJobServlet extends BaseServlet {
         List<TimeInterval> timeIntervals = new ArrayList<>();
         long now = System.currentTimeMillis();
         String dateString = new SimpleDateFormat("MM-dd-yyyy").format(new Date(now));
-        TimeInterval today = new TimeInterval(now - ONE_DAY/MILLI_TO_MICRO, now, dateString);
+        TimeInterval today = new TimeInterval(now - ONE_DAY / MILLI_TO_MICRO, now, dateString);
         timeIntervals.add(today);
 
         // Add yesterday as a baseline time interval for analysis
-        long oneDayAgo = now - ONE_DAY/MILLI_TO_MICRO;
+        long oneDayAgo = now - ONE_DAY / MILLI_TO_MICRO;
         String dateStringYesterday = new SimpleDateFormat("MM-dd-yyyy").format(new Date(oneDayAgo));
-        TimeInterval yesterday = new TimeInterval(oneDayAgo - ONE_DAY/MILLI_TO_MICRO, oneDayAgo, dateStringYesterday);
+        TimeInterval yesterday = new TimeInterval(oneDayAgo - ONE_DAY / MILLI_TO_MICRO, oneDayAgo,
+                                                  dateStringYesterday);
         timeIntervals.add(yesterday);
 
         // Add last week as a baseline time interval for analysis
-        long oneWeek = 7 * ONE_DAY/MILLI_TO_MICRO;
+        long oneWeek = 7 * ONE_DAY / MILLI_TO_MICRO;
         long oneWeekAgo = now - oneWeek;
         TimeInterval lastWeek = new TimeInterval(oneWeekAgo - oneWeek, oneWeekAgo, LAST_WEEK);
         timeIntervals.add(lastWeek);
 
         for (String tableName : allTables) {
+            if (!tableName.equals("result_BinderThroughputBenchmark")) continue;
             String body = getPeformanceSummary(tableName, timeIntervals);
             if (body == null || body.equals("")) continue;
             List<String> emails = EmailHelper.getSubscriberEmails(statusTable, tableName);

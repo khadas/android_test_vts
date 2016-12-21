@@ -17,6 +17,7 @@
 package com.android.vts.util;
 
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
 import com.android.vts.util.StatSummary;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
     private List<StatSummary> statSummaries;
     private Map<ByteString, Integer> labelIndices;
     private List<ByteString> labels;
+    private VtsProfilingRegressionMode regression_mode;
     public ByteString xLabel;
     public ByteString yLabel;
 
@@ -64,6 +66,14 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
     }
 
     /**
+     * Gets the last-seen regression mode.
+     * @return The VtsProfilingRegressionMode value.
+     */
+    public VtsProfilingRegressionMode getRegressionMode() {
+        return regression_mode;
+    }
+
+    /**
      * Updates the profiling summary with the data from a new profiling report.
      * @param report The ProfilingReportMessage object containing profiling data.
      */
@@ -78,6 +88,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
             StatSummary summary = getStatSummary(label);
             summary.updateStats(report.getValueList().get(i));
         }
+        this.regression_mode = report.getRegressionMode();
         this.labels = report.getLabelList();
         this.xLabel = report.getXAxisLabel();
         this.yLabel = report.getYAxisLabel();
