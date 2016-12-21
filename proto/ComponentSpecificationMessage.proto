@@ -74,9 +74,10 @@ enum ComponentType {
   TV_CEC = 15;
   // For sensors submodule
   SENSORS=16;
+  // For vehicle submodule
+  VEHICLE=17;
   // For a VR submodule.
   VR = 18;
-
   // for bionic's libm
   BIONIC_LIBM = 1001;
 
