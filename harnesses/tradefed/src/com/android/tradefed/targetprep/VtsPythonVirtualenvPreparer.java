@@ -47,6 +47,8 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
 
     private static final String PIP = "pip";
     private static final String PATH = "PATH";
+    private static final String OS_NAME = "os.name";
+    private static final String WINDOWS = "Windows";
     protected static final String PYTHONPATH = "PYTHONPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
     private static final String[] DEFAULT_DEP_MODULES = {
@@ -163,11 +165,18 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         mRequirementsFile = f;
     }
 
+    /**
+     * This method returns whether the OS is Windows.
+     */
+    private static boolean isOnWindows() {
+        return System.getProperty(OS_NAME).contains(WINDOWS);
+    }
+
     private void activate() {
-        File binDir = new File(mVenvDir, "bin");
+        File binDir = new File(mVenvDir, isOnWindows() ? "Scripts" : "bin");
         mRunUtil.setWorkingDir(binDir);
         String path = System.getenv(PATH);
-        mRunUtil.setEnvVariable(PATH, binDir + ":" + path);
+        mRunUtil.setEnvVariable(PATH, binDir + File.pathSeparator + path);
         File pipFile = new File(binDir, PIP);
         pipFile.setExecutable(true);
         mPip = pipFile.getAbsolutePath();
