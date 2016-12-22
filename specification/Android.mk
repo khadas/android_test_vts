@@ -63,7 +63,7 @@ vtslib_interfacespec_static_libraries := \
 
 include $(CLEAR_VARS)
 
-# libvts_interfacespecification does  include or link any HIDL HAL driver.
+# libvts_interfacespecification does not include or link any HIDL HAL driver.
 # HIDL HAL drivers and profilers are defined as separated shared libraries
 # in a respective hardware/interfaces/<hal name>/<version>/Android.bp file.
 # libvts_interfacespecification is the driver for:
