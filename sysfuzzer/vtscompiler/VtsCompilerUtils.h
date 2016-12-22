@@ -52,9 +52,6 @@ extern string GetConversionToProtobufFunctionName(
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);
 
-// Get HAL version string to be used to build a relevant dir path.
-string GetVersionString(float version, bool for_macro=false);
-
 // Replace the name space access symbol "::" in the string to "__" to prevent
 // mis-interpretation in generated cpp code.
 string ClearStringWithNameSpaceAccess(const string& str);
