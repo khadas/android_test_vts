@@ -23,6 +23,7 @@ from vts.runners.host import base_test_with_webdb
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
+from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
 
