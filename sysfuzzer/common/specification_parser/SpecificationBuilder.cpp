@@ -27,6 +27,7 @@
 #include "fuzz_tester/FuzzerBase.h"
 #include "fuzz_tester/FuzzerWrapper.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
+#include "utils/InterfaceSpecUtil.h"
 
 #include <google/protobuf/text_format.h>
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -288,8 +289,15 @@ bool SpecificationBuilder::LoadTargetComponent(
          << target_version << endl;
     return false;
   }
-  spec_lib_file_path_ = (char*)malloc(strlen(spec_lib_file_path) + 1);
-  strcpy(spec_lib_file_path_, spec_lib_file_path);
+
+  if (target_class == HAL_HIDL) {
+    asprintf(&spec_lib_file_path_, "%s.vts.driver@%s.so", target_package,
+             GetVersionString(target_version).c_str());
+    cout << __func__ << " spec lib path " << spec_lib_file_path_ << endl;
+  } else {
+    spec_lib_file_path_ = (char*)malloc(strlen(spec_lib_file_path) + 1);
+    strcpy(spec_lib_file_path_, spec_lib_file_path);
+  }
 
   dll_file_name_ = (char*)malloc(strlen(dll_file_name) + 1);
   strcpy(dll_file_name_, dll_file_name);
