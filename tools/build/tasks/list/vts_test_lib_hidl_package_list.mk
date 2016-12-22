@@ -28,6 +28,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
   libvts_profiler_hidl_boot@1.0 \
+  libvts_profiler_hidl_memtrack@1.0 \
   libvts_profiler_hidl_nfc@1.0 \
   libvts_profiler_hidl_power@1.0 \
   libvts_profiler_hidl_sensors@1.0 \
@@ -40,6 +41,7 @@ vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
   boot_hidl_hal_test \
   light_hidl_hal_test \
+  memtrack_hidl_hal_test \
   nfc_hidl_hal_test \
   power_hidl_hal_test \
   sensors_hidl_hal_test \
