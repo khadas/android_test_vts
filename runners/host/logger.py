@@ -173,6 +173,15 @@ def killTestLogger(logger):
         logger.removeHandler(h)
 
 
+def isSymlinkSupported():
+    """Checks whether the OS supports symbolic link.
+
+    Returns:
+        A boolean representing whether the OS supports symbolic link.
+    """
+    return hasattr(os, "symlink")
+
+
 def createLatestLogAlias(actual_path):
     """Creates a symlink to the latest test run logs.
 
@@ -198,7 +207,8 @@ def setupTestLogger(log_path, prefix=None, filename=None):
         filename = getLogFileTimestamp()
     utils.create_dir(log_path)
     logger = _initiateTestLogger(log_path, prefix, filename)
-    createLatestLogAlias(log_path)
+    if isSymlinkSupported():
+        createLatestLogAlias(log_path)
 
 
 def normalizeLogLineTimestamp(log_line_timestamp):

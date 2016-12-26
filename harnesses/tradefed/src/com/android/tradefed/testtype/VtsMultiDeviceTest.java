@@ -695,7 +695,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 } else {
                     CLog.i("VTS log file %s\n", child.getAbsolutePath());
                     try {
-                        if (child.getName().equals("vts_agent.log")) {
+                        if (child.getName().startsWith("vts_agent") &&
+                                child.getName().endsWith(".log")) {
                             CLog.i("Content: %s\n", FileUtil.readStringFromFile(child));
                         } else {
                             CLog.i("skip %s\n", child.getName());

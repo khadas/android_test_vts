@@ -408,7 +408,9 @@ class AndroidDevice(object):
     def verityEnabled(self):
         """True if verity is enabled for this device."""
         try:
-            self.adb.shell('getprop | grep partition.system.verified').decode("utf-8")
+            verified = self.adb.shell('getprop partition.system.verified').decode("utf-8")
+            if not verified:
+                return False
         except adb.AdbError:
             # If verity is disabled, there is no property 'partition.system.verified'
             return False
@@ -428,23 +430,23 @@ class AndroidDevice(object):
                 if len(tokens) > 1:
                     return tokens[1].lower()
             return None
-        out = self.adb.shell('getprop | grep ro.build.product')
-        model = out.decode("utf-8").strip().split('[')[-1][:-1].lower()
+        out = self.adb.shell('getprop ro.build.product')
+        model = out.decode("utf-8").strip().lower()
         if model == "sprout":
             return model
         else:
-            out = self.adb.shell('getprop | grep ro.product.name')
-            model = out.decode("utf-8").strip().split('[')[-1][:-1].lower()
+            out = self.adb.shell('getprop ro.product.name')
+            model = out.decode("utf-8").strip().lower()
             return model
 
     @property
     def cpu_abi(self):
         """CPU ABI (Application Binary Interface) of the device."""
-        out = self.adb.shell('getprop | grep "\[ro.product.cpu.abi\]"')
+        out = self.adb.shell('getprop ro.product.cpu.abi')
         if not out:
             return "unknown"
 
-        cpu_abi = out.decode("utf-8").strip().split('[')[-1][:-1].lower()
+        cpu_abi = out.decode("utf-8").strip().lower()
         return cpu_abi
 
     @property
@@ -679,10 +681,11 @@ class AndroidDevice(object):
                 self.log.warning(
                     "A command to setup the env to start the VTS Agent failed %s",
                     e)
-        vts_agent_log_path = os.path.join(self.log_path, "vts_agent.log")
 
         bits = ['64', '32'] if self.is64Bit else ['32']
         for bitness in bits:
+            vts_agent_log_path = os.path.join(self.log_path,
+                     "vts_agent_" + bitness + ".log")
             cmd = (
                 'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                 '{path}/{bitness}/vts_hal_agent{bitness}'
