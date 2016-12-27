@@ -28,6 +28,16 @@ import com.android.tradefed.targetprep.TargetSetupError;
 import com.android.tradefed.targetprep.BuildError;
 import com.android.tradefed.testtype.IAbi;
 import com.android.tradefed.testtype.IAbiReceiver;
+import com.android.tradefed.util.StreamUtil;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.NoSuchElementException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@link HidlProfilerPreparer} that attempts to enable and disable HIDL profiling on a target device.
@@ -41,6 +51,11 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
 
     private static final String TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/";
     private static final String TARGET_PROFILING_LIBRARY_PATH = "/data/local/tmp/<bitness>";
+    private static final String HOST_PROFILING_TRACE_PATH = "/tmp/vts-trace";
+    private static final String HOST_PROFILING_TRACE_PATH_KEY = "profiling_trace_path";
+
+    private static final String VENDOR_TEST_CONFIG_FILE_PATH =
+            "/config/google-tradefed-vts-config.config";
 
     @Option(name="target-profiling-trace-path", description=
             "The target-side path to store the profiling trace file(s).")
@@ -52,9 +67,13 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     private String mTargetProfilingLibraryPath = TARGET_PROFILING_LIBRARY_PATH;
 
     @Option(name="copy-generated-trace-files", description=
-        "Whether to copy the generated trace files to a host-side, " +
-        "designated destination dir")
+            "Whether to copy the generated trace files to a host-side, " +
+            "designated destination dir")
     private boolean mCopyGeneratedTraceFiles = false;
+
+    @Option(name="host-profiling-trace-path", description=
+            "The host-side path to store the profiling trace file(s).")
+    private String mHostProfilingTracePath = HOST_PROFILING_TRACE_PATH;
 
     private IAbi mAbi = null;
 
@@ -69,7 +88,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
      * Set mTargetProfilingLibraryPath.  Exposed for testing.
      */
     void setTargetProfilingLibraryPath(String path) {
-      mTargetProfilingLibraryPath = path;
+        mTargetProfilingLibraryPath = path;
     }
 
     /**
@@ -85,7 +104,9 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
      */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo) throws TargetSetupError, BuildError,
-            DeviceNotAvailableException {
+            DeviceNotAvailableException, RuntimeException {
+        readVtsTradeFedVendorConfig();
+
         // Cleanup any existing traces
         Log.d(LOG_TAG, String.format("Deleting any existing target-side trace files in %s.",
               mTargetProfilingTracePath));
@@ -111,23 +132,83 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
-      Log.d(LOG_TAG, "Stopping the HIDL Profiling.");
-      // Disables VTS Profiling
-      device.executeShellCommand("setprop hal.instrumentation.lib.path \"\"");
-      device.executeShellCommand("setprop hal.instrumentation.enable false");
+        Log.d(LOG_TAG, "Stopping the HIDL Profiling.");
+        // Disables VTS Profiling
+        device.executeShellCommand("setprop hal.instrumentation.lib.path \"\"");
+        device.executeShellCommand("setprop hal.instrumentation.enable false");
 
-      // Gets trace files from the target.
-      if (!mTargetProfilingTracePath.endsWith("/")) {
-        mTargetProfilingTracePath += "/";
-      }
-      String trace_file_list_string = device.executeShellCommand(
-          String.format("ls %s*.vts.trace", mTargetProfilingTracePath));
-      Log.d(LOG_TAG, String.format("Generated trace files: %s",
-                                   trace_file_list_string));
+        // Gets trace files from the target.
+        if (!mTargetProfilingTracePath.endsWith("/")) {
+            mTargetProfilingTracePath += "/";
+        }
+        String traceFileListString = device.executeShellCommand(
+                String.format("ls %s*.vts.trace", mTargetProfilingTracePath));
+        if (!traceFileListString.contains("No such file or directory")) {
+            Log.d(LOG_TAG, String.format("Generated trace files: %s",
+                                         traceFileListString));
+            if (mCopyGeneratedTraceFiles) {
+                File destDir = new File(mHostProfilingTracePath);
+                if (!destDir.exists() && !destDir.mkdirs()) {
+                    Log.e(LOG_TAG, String.format("Couldn't create a dir, %s.",
+                                                 mHostProfilingTracePath));
+                } else {
+                    for (String traceFilePath : traceFileListString.split("\\s+")) {
+                        File destFile = new File(destDir, traceFilePath);
+                        Log.d(LOG_TAG, String.format("Copying a trace file: %s -> %s",
+                                                     traceFilePath, destFile));
+                        if (device.pullFile(traceFilePath, destFile)) {
+                            Log.d(LOG_TAG, "Copying a trace file succeeded.");
+                        } else {
+                            Log.e(LOG_TAG, "Copying a trace file failed.");
+                        }
+                    }
+                }
+            }
+        } else {
+            Log.d(LOG_TAG, "Generated trace files: none");
+        }
+    }
 
-      if (mCopyGeneratedTraceFiles) {
-          // TODO(yim): adb pull from the target to a host-side directory (provided by a config
-          // stored in a private repository).
-      }
+    /**
+     * Reads HOST_PROFILING_TRACE_PATH_KEY value from VENDOR_TEST_CONFIG_FILE_PATH.
+     */
+    private void readVtsTradeFedVendorConfig() throws RuntimeException {
+        Log.d(LOG_TAG, String.format("Load vendor test config %s",
+                                     VENDOR_TEST_CONFIG_FILE_PATH));
+        InputStream config = getClass().getResourceAsStream(
+                VENDOR_TEST_CONFIG_FILE_PATH);
+        if (config == null) {
+            Log.d(LOG_TAG,
+                  String.format("Vendor test config file %s does not exist.",
+                                VENDOR_TEST_CONFIG_FILE_PATH));
+            return;
+        }
+
+        try {
+            String content = StreamUtil.getStringFromStream(config);
+            Log.d(LOG_TAG, String.format("Loaded vendor test config %s",
+                                         content));
+            if (content != null) {
+                JSONObject vendorConfigJson = new JSONObject(content);
+                try {
+                    String tracePath = vendorConfigJson.getString(
+                            HOST_PROFILING_TRACE_PATH_KEY);
+                    if (tracePath.length() > 0) {
+                        mHostProfilingTracePath = tracePath;
+                    }
+                } catch (NoSuchElementException e) {
+                    Log.d(LOG_TAG,
+                          String.format(
+                                  "Vendor config does not define %s",
+                                  HOST_PROFILING_TRACE_PATH_KEY));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Failed to read vendor config json file");
+        } catch (JSONException e) {
+            throw new RuntimeException(
+                    "Failed to build updated vendor config json data");
+        }
     }
 }
