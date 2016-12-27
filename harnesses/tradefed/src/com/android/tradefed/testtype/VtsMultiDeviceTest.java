@@ -643,6 +643,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             parser.processJsonFile(object);
         }
         printVtsLogs(vtsRunnerLogDir);
+        FileUtil.recursiveDelete(vtsRunnerLogDir);
+        CLog.i("Deleted the runner log dir, %s.", vtsRunnerLogDir);
+        if (jsonFilePath != null) {
+          FileUtil.deleteFile(new File(jsonFilePath));
+          CLog.i("Deleted the runner json config file, %s.", jsonFilePath);
+        }
     }
 
     /**
