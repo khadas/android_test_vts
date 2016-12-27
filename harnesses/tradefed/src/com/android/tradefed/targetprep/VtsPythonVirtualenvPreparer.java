@@ -43,7 +43,7 @@ import java.util.Collection;
  * That means changes here will be upstreamed gradually.
  */
 @OptionClass(alias = "python-venv")
-public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
+public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetCleaner {
 
     private static final String PIP = "pip";
     private static final String PATH = "PATH";
@@ -70,11 +70,27 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     IRunUtil mRunUtil = new RunUtil();
     String mPip = PIP;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
         startVirtualenv(buildInfo);
         installDeps(buildInfo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
+            throws DeviceNotAvailableException {
+        if (mVenvDir != null) {
+            FileUtil.recursiveDelete(mVenvDir);
+            CLog.i("Deleted the virtual env's temp working dir, %s.", mVenvDir);
+            mVenvDir = null;
+        }
     }
 
     protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
@@ -144,11 +160,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
             return;
         }
         try {
-            mVenvDir = FileUtil.createNamedTempDir(
-                    buildInfo.getTestTag() + "-virtualenv-" +
-                    buildInfo.getDeviceSerial().replaceAll(":", "_"));
-            mRunUtil.runTimedCmd(
-                BASE_TIMEOUT, "virtualenv", "--clear", mVenvDir.getAbsolutePath());
+            mVenvDir = FileUtil.createTempDir(buildInfo.getTestTag() + "-virtualenv");
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
             activate();
         } catch (IOException e) {
