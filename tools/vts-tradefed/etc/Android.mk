@@ -13,9 +13,21 @@
 # limitations under the License.
 
 LOCAL_PATH := $(call my-dir)
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
-
 LOCAL_PREBUILT_EXECUTABLES := vts-tradefed
 include $(BUILD_HOST_PREBUILT)
+
+include $(CLEAR_VARS)
+
+LOCAL_IS_HOST_MODULE := true
+LOCAL_MODULE := vts-tradefed_win
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_SRC_FILES := vts-tradefed_win.bat
+LOCAL_MODULE_SUFFIX := .bat
+LOCAL_MULTILIB := first
+LOCAL_MODULE_HOST_OS := windows
+include $(BUILD_PREBUILT)
+
