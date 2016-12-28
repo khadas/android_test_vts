@@ -1,5 +1,9 @@
 # VTS User Manual
 
+Linux is officially supported for building and running VTS. Building on Windows is not supported, but it is possible to [run VTS on Windows](#run_vts) with Python, Java, and ADB installed.
+
+The following instructions assume Linux environment.
+
 ## 1. Setup
 
 ### 1.1. Host setup
@@ -62,11 +66,25 @@ Let's connect an Android device and a host computer using a USB cable.
 
 ## 2. Run VTS Tests
 
-### 2.1. Run a VTS test plan
+### <a name="run_vts" /> 2.1. Run a VTS test plan
+
+For Linux users,
 
 `$ vts-tradefed`
 
 `> run vts`
+
+For Windows users, please build on Linux. Then copy the following zip file to Windows and extract it.
+
+`out/host/linux-x86/vts/android-vts.zip`
+
+Launch the batch file in the extracted folder.
+
+`$ android-vts\tools\vts-tradefed_win.bat`
+
+`> run vts`
+
+Example stdout:
 
 ```
 …
