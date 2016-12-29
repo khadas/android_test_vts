@@ -173,7 +173,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(Formatter& out,
             exit(-1);
           }
         } else if (return_type_hidl.type() == TYPE_HANDLE) {
-          out << "native_handle_t* ";
+          out << "const ::android::hardware::hidl_handle& ";
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
               << return_type_hidl.type() << " for " << api.name() << "\n";
@@ -204,7 +204,7 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(Formatter& out,
         } else if (return_type_hidl.type() == TYPE_STRING) {
           out << "::android::hardware::hidl_string";
         } else if (return_type_hidl.type() == TYPE_HANDLE) {
-          out << "native_handle_t* ";
+          out << "const ::android::hardware::hidl_handle& ";
         } else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
               << return_type_hidl.type() << " for " << api.name() << "\n";
@@ -1716,12 +1716,12 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_HANDLE:
     {
-      out << " ERROR: TYPE_HANDLE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HANDLE is not supported yet. */\n";
       break;
     }
     case TYPE_HIDL_INTERFACE:
     {
-      out << " ERROR: TYPE_HIDL_INTERFACE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
       break;
     }
     default:
@@ -1869,17 +1869,17 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_CALLBACK:
     {
-      out << " ERROR: TYPE_HIDL_CALLBACK is not supported yet.\n";
+      out << "/* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */\n";
       break;
     }
     case TYPE_HANDLE:
     {
-      out << " ERROR: TYPE_HANDLE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HANDLE is not supported yet. */\n";
       break;
     }
     case TYPE_HIDL_INTERFACE:
     {
-      out << " ERROR: TYPE_HIDL_INTERFACE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
       break;
     }
     default:
@@ -2047,13 +2047,13 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HANDLE:
     {
       out << result_msg << "->set_type(TYPE_HANDLE);\n";
-      out << " ERROR: TYPE_HANDLE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HANDLE is not supported yet. */\n";
       break;
     }
     case TYPE_HIDL_INTERFACE:
     {
       out << result_msg << "->set_type(TYPE_HIDL_INTERFACE);\n";
-      out << " ERROR: TYPE_HIDL_INTERFACE is not supported yet.\n";
+      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
       break;
     }
     default:
