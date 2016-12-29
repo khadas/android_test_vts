@@ -24,6 +24,9 @@ DATA/lib64/android.hardware.thermal.vts.driver@1.0.so->/data/local/tmp/64/androi
 DATA/lib/android.hardware.tv.cec.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.tv.cec.vts.driver@1.0.so
 DATA/lib64/android.hardware.tv.cec.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.tv.cec.vts.driver@1.0.so
 
+DATA/lib/android.hardware.tv.input.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.tv.input.vts.driver@1.0.so
+DATA/lib64/android.hardware.tv.input.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.tv.input.vts.driver@1.0.so
+
 DATA/lib/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.vehicle.vts.driver@2.0.so
 DATA/lib64/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.vehicle.vts.driver@2.0.so
 

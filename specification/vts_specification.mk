@@ -22,5 +22,8 @@ PRODUCT_COPY_FILES += \
     harware/interfaces/tv/cec/1.0/vts/HdmiCec.vts:system/etc/HdmiCec.vts \
     harware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts:system/etc/HdmiCecCallback.vts \
     harware/interfaces/tv/cec/1.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/tv/input/1.0/vts/TvInput.vts:system/etc/TvInput.vts \
+    harware/interfaces/tv/input/1.0/vts/TvInputCallback.vts:system/etc/TvInputCallback.vts \
+    harware/interfaces/tv/input/1.0/vts/types.vts:system/etc/types.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
     test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \

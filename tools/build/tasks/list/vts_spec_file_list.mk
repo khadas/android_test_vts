@@ -29,6 +29,9 @@ vts_spec_file_list := \
   test/vts/specification/lib_bionic/libcutilsV1.vts \
 
 vts_spec_file_list += \
+  hardware/interfaces/tv/input/1.0/vts/TvInput.vts \
+  hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts \
+  hardware/interfaces/tv/input/1.0/vts/types.vts \
   hardware/interfaces/nfc/1.0/vts/Nfc.vts \
   hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
   hardware/interfaces/nfc/1.0/vts/types.vts \

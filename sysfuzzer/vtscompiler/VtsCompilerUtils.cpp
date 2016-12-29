@@ -80,6 +80,8 @@ string ComponentTypeToString(int component_type) {
       return "mobile";
     case BLUETOOTH:
       return "bluetooth";
+    case TV_INPUT:
+      return "tv_input";
     case NFC:
       return "nfc";
     case VEHICLE:
