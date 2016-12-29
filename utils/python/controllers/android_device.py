@@ -456,6 +456,16 @@ class AndroidDevice(object):
         return "64" in out
 
     @property
+    def libPaths(self):
+        """List of strings representing the paths to the native library directories."""
+        paths_32 = ["/system/lib", "/vendor/lib"]
+        if self.is64Bit:
+            paths_64 = ["/system/lib64", "/vendor/lib64"]
+            paths_64.extend(paths_32)
+            return paths_64
+        return paths_32
+
+    @property
     def isAdbLogcatOn(self):
         """Whether there is an ongoing adb logcat collection.
         """
