@@ -81,9 +81,26 @@ To run the tests against physical devices,
 
 ### 2.2. Run
 
+You may run your test using VTS TradeFed console. First, start VTS TradeFed console:
+
 `$ vts-tradefed`
 
+Then, use run command to start your test plan:
+
 `> run vts-codelab`
+
+If your test module is not in a test plan, you can specify test module to run directly:
+
+`> run vts -m <your test module name>`
+
+Instead of using TradeFed console, you may also run test directly through shall and make it faster by
+disabling system check and run on primary ABI only:
+
+`vts-tradefed run commandAndExit vts --skip-all-system-status-check --primary-abi-only
+--skip-preconditions --module <your test module name> -l INFO`
+
+The `-l INFO` argument in the end would allow VTS TradeFed print host log to terminal (you may want
+to set Scrollback lines to a higher value in your terminal's setting).
 
 If your test case can violate some SELinux rules, please run:
 
@@ -92,6 +109,11 @@ If your test case can violate some SELinux rules, please run:
 `target$ su`
 
 `target$ setenforce 0`
+
+Tip: you may put the build command and test run command together:
+
+`make vts -j10 && vts-tradefed run commandAndExit vts --skip-all-system-status-check --primary-abi-only
+--skip-preconditions --module <your test module name> -l INFO`
 
 
 ## 3. Customize your test configuration (Optional)
