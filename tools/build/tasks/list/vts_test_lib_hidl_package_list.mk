@@ -25,6 +25,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.sensors.vts.driver@1.0 \
   android.hardware.thermal.vts.driver@1.0 \
   android.hardware.tv.cec.vts.driver@1.0 \
+  android.hardware.tv.input.vts.driver@1.0 \
   android.hardware.vehicle.vts.driver@2.0 \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
