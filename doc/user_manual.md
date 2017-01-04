@@ -44,11 +44,11 @@ Such can happen because tip of tree (ToT) may not always be buildable.
 
 `$ cd ${branch}`
 
-`$ make vts ENABLE_TREBLE=true -j8`
+`$ make vts -j8`
 
 Or use the exact command:
 
-`$ make -j8 vts showcommands dist TARGET_PRODUCT=aosp_arm64 WITH_DEXPREOPT=false TARGET_BUILD_VARIANT=userdebug ENABLE_TREBLE=true`
+`$ make -j8 vts showcommands dist TARGET_PRODUCT=aosp_arm64 WITH_DEXPREOPT=false TARGET_BUILD_VARIANT=userdebug`
 
 ### 1.5. Connect to an Android device
 
