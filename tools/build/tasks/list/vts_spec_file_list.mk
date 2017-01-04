@@ -28,11 +28,3 @@ vts_spec_file_list := \
   test/vts/specification/lib_bionic/libcV1.vts \
   test/vts/specification/lib_bionic/libcutilsV1.vts \
 
-vts_spec_file_list += \
-  hardware/interfaces/nfc/1.0/vts/Nfc.vts \
-  hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
-  hardware/interfaces/nfc/1.0/vts/types.vts \
-  hardware/interfaces/vibrator/1.0/vts/Vibrator.vts \
-  hardware/interfaces/vibrator/1.0/vts/types.vts \
-  hardware/interfaces/thermal/1.0/vts/Thermal.vts \
-  hardware/interfaces/thermal/1.0/vts/types.vts \
