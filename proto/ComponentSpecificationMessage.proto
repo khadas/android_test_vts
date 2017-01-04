@@ -118,6 +118,10 @@ enum VariableType {
   TYPE_UNION = 12;
   TYPE_HIDL_INTERFACE = 13;
   TYPE_HANDLE = 14;
+  // for an enum whose every enumerator value is a number which is power of 2.
+  TYPE_MASK = 15;
+  // for hidl_memory type
+  TYPE_HIDL_MEMORY = 16;
 }
 
 
