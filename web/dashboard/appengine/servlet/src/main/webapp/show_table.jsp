@@ -115,6 +115,10 @@
           if (${unfiltered}) {
               link += '&unfiltered=';
           }
+          var searchString = '${searchString}';
+          if (searchString) {
+              link += '&search=' + encodeURIComponent(searchString);
+          }
           window.open(link,'_self');
       }
 
@@ -132,6 +136,10 @@
           }
           if (${unfiltered}) {
               link += '&unfiltered=';
+          }
+          var searchString = '${searchString}';
+          if (searchString) {
+              link += '&search=' + encodeURIComponent(searchString);
           }
           window.open(link,'_self');
         }
