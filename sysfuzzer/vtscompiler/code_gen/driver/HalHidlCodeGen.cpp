@@ -2015,6 +2015,10 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
           GenerateSetResultCodeForTypedVariable(
               out, struct_field, struct_field_name,
               result_value + "." + struct_field.name());
+          if (struct_field.has_name()) {
+            out << struct_field_name << "->set_name(\""
+                << struct_field.name() << "\");\n";
+          }
         }
       }
       break;
