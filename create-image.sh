@@ -18,6 +18,7 @@ function vts_multidevice_create_image {
   DEVICE=$1
 
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/nfc/ -rf
+  rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vehicle/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vibrator/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vr/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/tv_cec/ -rf
@@ -25,6 +26,7 @@ function vts_multidevice_create_image {
   cd ${ANDROID_BUILD_TOP}; lunch ${DEVICE}-userdebug $2
   cd ${ANDROID_BUILD_TOP}/test/vts; mma -j 32 && cd ${ANDROID_BUILD_TOP}; make vts adb -j 32
   cp ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/functional/vts/testcases/hal/nfc/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/vehicle/2.0/vts/functional/vts/testcases/hal/vehicle/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/functional/vts/testcases/hal/vibrator/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/hardware/interfaces/vr/1.0/vts/functional/vts/testcases/hal/vr/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/hardware/interfaces/tv/cec/1.0/vts/functional/vts/testcases/hal/tv_cec/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
