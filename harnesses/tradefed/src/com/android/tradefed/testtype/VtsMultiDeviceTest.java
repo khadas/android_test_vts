@@ -93,6 +93,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String HWBINDER_SERVICE = "hwbinder_service";
+    static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
@@ -217,6 +218,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
     private String mBinaryTestType = "";
+
+    @Option(name = "systrace-process-name", description = "Process name for systrace.")
+    private String mSystraceProcessName = null;
 
     @Option(name = "collect-tests-only",
             description = "Only invoke the test binary to collect list of applicable test cases. "
@@ -575,6 +579,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mBinaryTestDisableFramework) {
           jsonObject.put(BINARY_TEST_DISABLE_FRAMEWORK, mBinaryTestDisableFramework);
           CLog.i("Added %s to the Json object", BINARY_TEST_DISABLE_FRAMEWORK);
+        }
+
+        if (mSystraceProcessName != null) {
+            jsonObject.put(SYSTRACE_PROCESS_NAME, mSystraceProcessName);
+            CLog.i("Added %s to the Json object", SYSTRACE_PROCESS_NAME);
         }
     }
 
