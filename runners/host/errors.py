@@ -50,3 +50,12 @@ class VtsTcpClientCreationError(VtsError):
 
 class VtsTcpCommunicationError(VtsError):
     """Raised when TcpClient communication failed."""
+
+
+class VtsUnsupportedTypeError(VtsError):
+    """Raised when an unsupported type is used."""
+
+
+class VtsMalformedProtoStringError(VtsError):
+    """Raised when a StringDataValueMessage is not populated or corrupted."""
+
