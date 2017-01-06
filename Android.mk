@@ -52,10 +52,9 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	#
 	@echo "build vts python package for audio effect HAL"
 	$(hide) find hardware/interfaces/audio/effect/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
-	# uncomment when audio effect HAL test has some py, config, or push files
-	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/audio/effect/2.0/vts/functional -l $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/audio/effect/2.0/vts/functional -l $@.list
 	@rm -f $@.list
-	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	#
 	@echo "build vts python package for boot HAL"
 	$(hide) find hardware/interfaces/boot/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
