@@ -1019,10 +1019,29 @@ void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
       GenerateDriverImplForMethod(out, message, api);
     }
 
+    GenerateDriverImplForReservedMethods(out);
+
     out << "return false;\n";
     out.unindent();
     out << "}\n";
   }
+}
+
+void HalHidlCodeGen::GenerateDriverImplForReservedMethods(Formatter& out) {
+  // Generate call for reserved method: notifySyspropsChanged.
+  out << "if (!strcmp(func_name, \"notifySyspropsChanged\")) {\n";
+  out.indent();
+
+  out << "cout << \"Call notifySyspropsChanged\" << endl;" << "\n";
+  out << kInstanceVariableName << "->notifySyspropsChanged();\n";
+  out << "result_msg->set_name(\"notifySyspropsChanged\");\n";
+  out << "cout << \"called\" << endl;\n";
+  out << "return true;\n";
+
+  out.unindent();
+  out << "}\n";
+  // TODO(zhuoyao): Add generation code for other reserved method,
+  // e.g interfaceChain
 }
 
 void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,

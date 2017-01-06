@@ -106,6 +106,9 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   // Generates a scalar type in C/C++.
   void GenerateScalarTypeInC(Formatter& out, const string& type);
 
+  // Generates the driver function implementation for hidl reserved methods.
+  void GenerateDriverImplForReservedMethods(Formatter& out);
+
   // Generates the driver function implementation for a method.
   void GenerateDriverImplForMethod(Formatter& out,
       const ComponentSpecificationMessage& message,
