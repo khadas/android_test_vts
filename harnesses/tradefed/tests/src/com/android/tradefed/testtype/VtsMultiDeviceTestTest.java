@@ -15,32 +15,40 @@
  */
 package com.android.tradefed.testtype;
 
+import com.android.tradefed.build.FolderBuildInfo;
+import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.result.ITestInvocationListener;
-import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
-
+import com.android.tradefed.util.StreamUtil;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.json.JSONObject;
 
 /**
  * Unit tests for {@link VtsMultiDeviceTest}.
+ * This class requires testcase config files.
+ * The working directory is assumed to be
+ * test/
+ * which contains the same config as the build output
+ * out/host/linux-x86/vts/android-vts/testcases/
  */
 public class VtsMultiDeviceTestTest extends TestCase {
 
     private ITestInvocationListener mMockInvocationListener = null;
-    private ITestDevice mMockITestDevice = null;
-    private IRunUtil mRunUtil = null;
+    private IBuildInfo mBuildInfo = null;
     private VtsMultiDeviceTest mTest = null;
     private static final String TEST_CASE_PATH =
-        "test/vts/testcases/host/sample/SampleLightTest";
+        "vts/testcases/host/sample/SampleLightTest";
     private static final String TEST_CONFIG_PATH =
-        "test/vts/testcases/host/sample/SampleLightTest.config";
-    private static final long TEST_TIMEOUT = 1000 * 60 * 5;
-    private String[] mCommand = null;
+        "vts/testcases/host/camera/conventional/3_4/SampleCameraV3Test.config";
 
     /**
      * Helper to initialize the various EasyMocks we'll need.
@@ -48,30 +56,98 @@ public class VtsMultiDeviceTestTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mTest = new VtsMultiDeviceTest();
-        mRunUtil = EasyMock.createMock(IRunUtil.class);
+        mBuildInfo = new FolderBuildInfo("MOCK_ID", "MOCK_NAME");
+        mBuildInfo.addBuildAttribute("ROOT_DIR", "DIR_NOT_EXIST");
+        mBuildInfo.addBuildAttribute("ROOT_DIR2", "DIR_NOT_EXIST");
+        mBuildInfo.addBuildAttribute("SUITE_NAME", "JUNIT_TEST_SUITE");
+        mBuildInfo.setDeviceSerial("1234567890");
         mMockInvocationListener = EasyMock.createMock(ITestInvocationListener.class);
-        mMockITestDevice = EasyMock.createMock(ITestDevice.class);
-        mTest.setRunUtil(mRunUtil);
-        //build the command
-        String[] baseOpts = {"/usr/bin/python", "-m"};
-        String[] testModule = {TEST_CASE_PATH, TEST_CONFIG_PATH};
-        mCommand = ArrayUtil.buildArray(baseOpts, testModule);
+        mTest = new VtsMultiDeviceTest();
+        mTest.setBuild(mBuildInfo);
+        mTest.setTestCasePath(TEST_CASE_PATH);
+        mTest.setTestConfigPath(TEST_CONFIG_PATH);
+    }
+
+    /**
+     * Create a mock IRunUtil which
+     * 1. finds Python binary file and returns a mock path
+     * 2. executes the found Python binary,
+     *    creates empty log file and returns expectedStatus
+     */
+    private static IRunUtil createMockRunUtil(
+            String findFileCommand, String pythonBin,
+            CommandStatus expectedStatus) {
+        IRunUtil runUtil = EasyMock.createMock(IRunUtil.class);
+        CommandResult findResult = new CommandResult();
+        findResult.setStatus(CommandStatus.SUCCESS);
+        findResult.setStdout("mock/" + pythonBin);
+        EasyMock.expect(runUtil.runTimedCmd(EasyMock.anyLong(),
+                EasyMock.eq(findFileCommand), EasyMock.eq(pythonBin))).
+            andReturn(findResult);
+
+        IAnswer<CommandResult> answer = new IAnswer<CommandResult>() {
+            @Override
+            public CommandResult answer() throws Throwable {
+                // find log path
+                String logPath = null;
+                try (FileInputStream fi = new FileInputStream(
+                        (String) EasyMock.getCurrentArguments()[4])) {
+                    JSONObject configJson = new JSONObject(
+                            StreamUtil.getStringFromStream(fi));
+                    logPath = (String) configJson.get(VtsMultiDeviceTest.LOG_PATH);
+                }
+                // create a test result on log path
+                try (FileWriter fw = new FileWriter(
+                        logPath + File.separator + "test_run_summary.json")) {
+                    JSONObject outJson = new JSONObject();
+                    fw.write(outJson.toString());
+                }
+                CommandResult commandResult = new CommandResult();
+                commandResult.setStatus(expectedStatus);
+                return commandResult;
+            }
+        };
+        EasyMock.expect(runUtil.runTimedCmd(EasyMock.anyLong(),
+                EasyMock.eq("mock/" + pythonBin), EasyMock.eq("-m"),
+                EasyMock.eq(TEST_CASE_PATH.replace("/", ".")),
+                EasyMock.endsWith(".json"))).
+            andAnswer(answer).times(0, 1);
+        EasyMock.replay(runUtil);
+        return runUtil;
+    }
+
+    /**
+     * Create a Mock ITestDevice with necessary getter methods.
+     */
+    private static ITestDevice createMockDevice() {
+        // TestDevice
+        ITestDevice device = EasyMock.createMock(ITestDevice.class);
+        try {
+            EasyMock.expect(device.getSerialNumber()).
+                andReturn("1234567890").atLeastOnce();
+            EasyMock.expect(device.getBuildAlias()).
+                andReturn("BUILD_ALIAS");
+            EasyMock.expect(device.getBuildFlavor()).
+                andReturn("BUILD_FLAVOR");
+            EasyMock.expect(device.getBuildId()).
+                andReturn("BUILD_ID");
+            EasyMock.expect(device.getProductType()).
+                andReturn("PRODUCT_TYPE");
+            EasyMock.expect(device.getProductVariant()).
+                andReturn("PRODUCT_VARIANT");
+        } catch (DeviceNotAvailableException e) {
+            fail();
+        }
+        EasyMock.replay(device);
+        return device;
     }
 
     /**
      * Test the run method with a normal input.
      */
-    public void testRunNormalInput(){
-        mTest.setDevice(mMockITestDevice);
-        mTest.setTestCasePath(TEST_CASE_PATH);
-        mTest.setTestConfigPath(TEST_CONFIG_PATH);
-
-        CommandResult commandResult = new CommandResult();
-        commandResult.setStatus(CommandStatus.SUCCESS);
-        EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
-            andReturn(commandResult);
-        EasyMock.replay(mRunUtil);
+    public void testRunNormalInput() {
+        mTest.setDevice(createMockDevice());
+        mTest.setRunUtil(createMockRunUtil("which", "python", CommandStatus.SUCCESS));
         try {
             mTest.run(mMockInvocationListener);
         } catch (IllegalArgumentException e) {
@@ -86,9 +162,25 @@ public class VtsMultiDeviceTestTest extends TestCase {
     }
 
     /**
+     * Test the run method with a normal input and Windows environment variable.
+    */
+    public void testRunNormalInputOnWindows()
+            throws IllegalArgumentException, DeviceNotAvailableException {
+        String originalName = System.getProperty(VtsMultiDeviceTest.OS_NAME);
+        System.setProperty(VtsMultiDeviceTest.OS_NAME, VtsMultiDeviceTest.WINDOWS);
+        mTest.setDevice(createMockDevice());
+        mTest.setRunUtil(createMockRunUtil("where", "python.exe", CommandStatus.SUCCESS));
+        try {
+            mTest.run(mMockInvocationListener);
+        } finally {
+            System.setProperty(VtsMultiDeviceTest.OS_NAME, originalName);
+        }
+    }
+
+    /**
      * Test the run method when the device is set null.
      */
-    public void testRunDevice(){
+    public void testRunDeviceNotAvailable() {
         mTest.setDevice(null);
         try {
             mTest.run(mMockInvocationListener);
@@ -105,21 +197,20 @@ public class VtsMultiDeviceTestTest extends TestCase {
      * Test the run method with abnormal input data.
      */
     public void testRunNormalInputCommandFailed() {
-        mTest.setDevice(mMockITestDevice);
-        CommandResult commandResult = new CommandResult();
-        commandResult.setStatus(CommandStatus.FAILED);
-        EasyMock.expect(mRunUtil.runTimedCmd(TEST_TIMEOUT, mCommand)).
-            andReturn(commandResult);
-        EasyMock.replay(mRunUtil);
+        mTest.setDevice(createMockDevice());
+        mTest.setRunUtil(createMockRunUtil("which", "python", CommandStatus.FAILED));
         try {
             mTest.run(mMockInvocationListener);
             fail();
-       } catch (RuntimeException e) {
-             // expected
-       } catch (DeviceNotAvailableException e) {
-             // not expected
-             fail();
-             e.printStackTrace();
-       }
+        } catch (RuntimeException e) {
+            if (!"Failed to run VTS test".equals(e.getMessage())) {
+                fail();
+            }
+            // expected
+        } catch (DeviceNotAvailableException e) {
+            // not expected
+            fail();
+            e.printStackTrace();
+        }
     }
 }

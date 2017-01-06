@@ -64,6 +64,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES,
             keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS,
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS,
+            keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -78,7 +79,6 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                      self.data_file_path)
         logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
                      self.binary_test_sources)
-
         self.working_directories = {}
         if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORIES):
             self.binary_test_working_directories = list_utils.ExpandItemDelimiters(
@@ -151,6 +151,10 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.include_filter = self.ExpandListItemTags(self.include_filter)
         self.exclude_filter = self.ExpandListItemTags(self.exclude_filter)
 
+        # Stop Android runtime to reduce interference.
+        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK, False):
+          self._dut.stop()
+
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
         source_list = list(map(self.ParseTestSource, self.binary_test_sources))
@@ -220,6 +224,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def tearDownClass(self):
         '''Perform clean-up tasks'''
+        # Restart Android runtime.
+        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK, False):
+          self._dut.start()
 
         # Retrieve coverage if applicable
         if getattr(self, self.COVERAGE, False):

@@ -59,7 +59,7 @@ import java.util.ArrayList;
 
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
+IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
@@ -68,6 +68,8 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     static final String DATA_FILE_PATH = "data_file_path";
     static final String LOG_PATH = "log_path";
     static final String NAME = "name";
+    static final String OS_NAME = "os.name";
+    static final String WINDOWS = "Windows";
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
@@ -82,6 +84,7 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
     static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
     static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
+    static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String ENABLE_PROFILING = "enable_profiling";
@@ -191,6 +194,9 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
             + "specified for the same tag. This option is optional for binary tests. If not "
             + "specified, default directories will be used for files with different tags.")
     private Collection<String> mBinaryTestProfilingLibraryPaths = new ArrayList<>();
+
+    @Option(name = "binary-test-disable-framework", description = "Adb stop/start before/after test.")
+    private boolean mBinaryTestDisableFramework = false;
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -309,9 +315,7 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     /**
      * {@inheritDoc}
      */
-    // TODO(yim): enable below annotation and ITestCollector
-    //            when available on AOSP
-    // @Override
+    @Override
     public void setCollectTestsOnly(boolean shouldCollectTest) {
         mCollectTestsOnly = shouldCollectTest;
     }
@@ -530,7 +534,12 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
           jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
                   new JSONArray(mBinaryTestProfilingLibraryPaths));
           CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
-      }
+        }
+
+        if (mBinaryTestDisableFramework) {
+          jsonObject.put(BINARY_TEST_DISABLE_FRAMEWORK, mBinaryTestDisableFramework);
+          CLog.i("Added %s to the Json object", BINARY_TEST_DISABLE_FRAMEWORK);
+        }
     }
 
     /**
@@ -580,7 +589,7 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
             mPythonBin = getPythonBinary();
         }
         String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath, jsonFilePath};
+        String[] testModule = {mTestCasePath.replace("/", "."), jsonFilePath};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
@@ -634,6 +643,12 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
             parser.processJsonFile(object);
         }
         printVtsLogs(vtsRunnerLogDir);
+        FileUtil.recursiveDelete(vtsRunnerLogDir);
+        CLog.i("Deleted the runner log dir, %s.", vtsRunnerLogDir);
+        if (jsonFilePath != null) {
+          FileUtil.deleteFile(new File(jsonFilePath));
+          CLog.i("Deleted the runner json config file, %s.", jsonFilePath);
+        }
     }
 
     /**
@@ -686,7 +701,8 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
                 } else {
                     CLog.i("VTS log file %s\n", child.getAbsolutePath());
                     try {
-                        if (child.getName().equals("vts_agent.log")) {
+                        if (child.getName().startsWith("vts_agent") &&
+                                child.getName().endsWith(".log")) {
                             CLog.i("Content: %s\n", FileUtil.readStringFromFile(child));
                         } else {
                             CLog.i("skip %s\n", child.getName());
@@ -700,12 +716,23 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     }
 
     /**
-     * This method sets the python path. It's based on the based on the
+     * This method returns whether the OS is Windows.
+     */
+    private static boolean isOnWindows() {
+        return System.getProperty(OS_NAME).contains(WINDOWS);
+    }
+
+    /**
+     * This method sets the python path. It's based on the
      * assumption that the environment variable $ANDROID_BUILD_TOP is set.
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
-        sb.append(System.getenv(PYTHONPATH));
+        String separator = File.pathSeparator;
+        if (System.getenv(PYTHONPATH) != null) {
+            sb.append(separator);
+            sb.append(System.getenv(PYTHONPATH));
+        }
 
         // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
         if (mBuildInfo != null) {
@@ -718,37 +745,44 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
                 /* pass */
             }
             if (testDir != null) {
-                sb.append(":");
+                sb.append(separator);
                 mTestCaseDataDir = testDir.getAbsolutePath();
                 sb.append(mTestCaseDataDir);
             } else if (mBuildInfo.getFile(VTS) != null) {
-                sb.append(":");
+                sb.append(separator);
                 sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
             }
         }
 
         // for when one uses PythonVirtualenvPreparer.
         if (mBuildInfo.getFile(PYTHONPATH) != null) {
-            sb.append(":");
+            sb.append(separator);
             sb.append(mBuildInfo.getFile(PYTHONPATH).getAbsolutePath());
         }
         if (System.getenv("ANDROID_BUILD_TOP") != null) {
-            sb.append(":");
+            sb.append(separator);
             sb.append(System.getenv("ANDROID_BUILD_TOP")).append("/test");
         }
-        mPythonPath = sb.toString();
+        if (sb.length() == 0) {
+            throw new RuntimeException("Could not find python path on host machine");
+        }
+        mPythonPath = sb.substring(1);
         CLog.i("mPythonPath: %s", mPythonPath);
     }
 
     /**
-     * This method gets the python binary
+     * This method gets the python binary.
      */
     private String getPythonBinary() {
+        boolean isWindows = isOnWindows();
+        String python = (isWindows ? "python.exe" : "python");
         try {
             File venvDir = FileUtil.createNamedTempDir(
                     mBuildInfo.getTestTag() + "-virtualenv-" +
                     mBuildInfo.getDeviceSerial().replaceAll(":", "_"));
-            File pythonBinaryFile = new File(venvDir.getAbsolutePath(), "bin/python");
+            String binDir =  (isWindows ? "Script" : "bin");
+            File pythonBinaryFile = new File(venvDir.getAbsolutePath(),
+                    binDir + File.separator + python);
             if (pythonBinaryFile.exists()) {
                 return pythonBinaryFile.getAbsolutePath();
             }
@@ -756,11 +790,12 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
             /* pass */
         }
 
-        IRunUtil runUtil = RunUtil.getDefault();
-        CommandResult c = runUtil.runTimedCmd(1000, "which", "python");
+        IRunUtil runUtil = (mRunUtil == null ? RunUtil.getDefault() : mRunUtil);
+        CommandResult c = runUtil.runTimedCmd(1000,
+                (isWindows ? "where" : "which"), python);
         String pythonBin = c.getStdout().trim();
         if (pythonBin.length() == 0) {
-            throw new RuntimeException("Could not find python binary on host "
+            throw new RuntimeException("Could not find " + python + " on host "
                     + "machine");
         }
         return pythonBin;

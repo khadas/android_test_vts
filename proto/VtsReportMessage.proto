@@ -39,6 +39,15 @@ enum VtsTestType {
   VTS_TARGET_SIDE_FUZZING = 4;
 }
 
+enum VtsProfilingRegressionMode {
+  UNKNOWN_REGRESSION_MODE = 0;
+  // disable analysis
+  VTS_REGRESSION_MODE_DISABLED = 1;
+  // interpret increases in values as regression
+  VTS_REGRESSION_MODE_INCREASING = 2;
+  // interpret decreases in values as regression
+  VTS_REGRESSION_MODE_DECREASING= 3;
+}
 
 enum VtsProfilingType {
   UNKNOWN_VTS_PROFILING_TYPE = 0;
@@ -130,6 +139,7 @@ message ProfilingReportMessage {
   // the instrumentation point name.
   optional bytes name = 1;
   optional VtsProfilingType type = 2;
+  optional VtsProfilingRegressionMode regression_mode = 3;
 
   // profiling start and end time stamp (for performance).
   optional int64 start_timestamp = 11;

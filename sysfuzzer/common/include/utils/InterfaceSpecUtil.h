@@ -31,6 +31,9 @@ namespace vts {
 // Returns the function name prefix of a given interface specification.
 string GetFunctionNamePrefix(const ComponentSpecificationMessage& message);
 
+// Get HAL version string to be used to build a relevant dir path.
+string GetVersionString(float version, bool for_macro=false);
+
 }  // namespace vts
 }  // namespace android
 

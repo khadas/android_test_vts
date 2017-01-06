@@ -1,5 +1,5 @@
-#ifndef __VTS_SPEC_Nfc.driver__
-#define __VTS_SPEC_Nfc.driver__
+#ifndef __VTS_SPEC_android_hardware_nfc_Nfc.driver__
+#define __VTS_SPEC_android_hardware_nfc_Nfc.driver__
 
 #define LOG_TAG "FuzzerExtended_INfc"
 
@@ -26,10 +26,10 @@ class FuzzerExtended_INfc : public FuzzerBase {
     FuzzerExtended_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
  protected:
     bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
-    bool CallFunction(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
-    bool VerifyResults(FunctionSpecificationMessage* func_msg, vector<void *> results);
+    bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);
+    bool VerifyResults(const FunctionSpecificationMessage& expected_result, const FunctionSpecificationMessage& actual_result);
     bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
-    bool GetService(bool get_stub);
+    bool GetService(bool get_stub, const char* service_name);
 
  private:
     sp<INfc> hw_binder_proxy_;

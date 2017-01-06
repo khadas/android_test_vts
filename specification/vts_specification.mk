@@ -11,12 +11,27 @@ PRODUCT_COPY_FILES += \
     test/vts/specification/hal_conventional/WifiHalV1.vts:system/etc/WifiHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1.vts:system/etc/BluetoothHalV1.vts \
     test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts:system/etc/BluetoothHalV1bt_interface_t.vts \
+    harware/interfaces/graphics/allocator/2.0/vts/Allocator.vts:system/etc/Allocator.vts \
+    harware/interfaces/graphics/allocator/2.0/vts/AllocatorClient.vts:system/etc/AllocatorClient.vts \
+    harware/interfaces/graphics/allocator/2.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/graphics/mapper/2.0/vts/Allocator.vts:system/etc/Mapper.vts \
+    harware/interfaces/graphics/mapper/2.0/vts/types.vts:system/etc/types.vts \
     harware/interfaces/nfc/1.0/vts/Nfc.vts:system/etc/Nfc.vts \
     harware/interfaces/nfc/1.0/vts/NfcClientCallback.vts:system/etc/NfcClientCallback.vts \
     harware/interfaces/nfc/1.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/vehicle/2.0/vts/Vehicle.vts:system/etc/Vehicle.vts \
+    harware/interfaces/vehicle/2.0/vts/VehicleCallback.vts:system/etc/VehicleCallback.vts \
+    harware/interfaces/vehicle/2.0/vts/types.vts:system/etc/types.vts \
     harware/interfaces/vibrator/1.0/vts/Vibrator.vts:system/etc/Vibrator.vts \
     harware/interfaces/vibrator/1.0/vts/types.vts:system/etc/types.vts \
     harware/interfaces/thermal/1.0/vts/Thermal.vts:system/etc/Thermal.vts \
     harware/interfaces/thermal/1.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/vr/1.0/vts/Vr.vts:system/etc/Vr.vts \
+    harware/interfaces/tv/cec/1.0/vts/HdmiCec.vts:system/etc/HdmiCec.vts \
+    harware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts:system/etc/HdmiCecCallback.vts \
+    harware/interfaces/tv/cec/1.0/vts/types.vts:system/etc/types.vts \
+    harware/interfaces/tv/input/1.0/vts/TvInput.vts:system/etc/TvInput.vts \
+    harware/interfaces/tv/input/1.0/vts/TvInputCallback.vts:system/etc/TvInputCallback.vts \
+    harware/interfaces/tv/input/1.0/vts/types.vts:system/etc/types.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
     test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \

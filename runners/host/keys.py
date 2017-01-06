@@ -40,6 +40,7 @@ class ConfigKeys(object):
     IKEY_BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories"
     IKEY_BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths"
     IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths"
+    IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"

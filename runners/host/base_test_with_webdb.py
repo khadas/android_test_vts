@@ -348,7 +348,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                       labels,
                                       values,
                                       x_axis_label="x-axis",
-                                      y_axis_label="y-axis"):
+                                      y_axis_label="y-axis",
+                                      regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
         """Adds the profiling data in order to upload to the web DB.
 
         Args:
@@ -357,6 +358,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             values: a list of values.
             x-axis_label: string, the x-axis label title for a graph plot.
             y-axis_label: string, the y-axis label title for a graph plot.
+            regression_mode: specifies the direction of change which indicates
+                             performance regression.
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
@@ -370,6 +373,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].name = name
         self._profiling[
             name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
+        self._profiling[name].regression_mode = regression_mode
         for label, value in zip(labels, values):
             self._profiling[name].label.append(label)
             self._profiling[name].value.append(value)
