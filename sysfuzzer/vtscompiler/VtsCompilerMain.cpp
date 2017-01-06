@@ -60,6 +60,11 @@ int main(int argc, char* argv[]) {
 #ifdef VTS_DEBUG
           cout << "- mode: PROFILER" << endl;
 #endif
+        } else if (!strcmp(&argv[i][2], "FUZZER")) {
+          mode = android::vts::kFuzzer;
+#ifdef VTS_DEBUG
+          cout << "- mode: FUZZER" << endl;
+#endif
         }
       }
       if (argv[i][1] == 't') {
