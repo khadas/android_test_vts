@@ -31,11 +31,11 @@ bool FuzzerExtended_wifi::GetAttribute(
     cerr << "attribute not supported for legacy hal yet" << endl;
     return false;
 }
-bool FuzzerExtended_wifi::CallFunction(FunctionSpecificationMessage*, void**, const string&) {
+bool FuzzerExtended_wifi::CallFunction(const FunctionSpecificationMessage&, const string&, FunctionSpecificationMessage* ) {
     /* No implementation yet. */
     return true;
 }
-bool FuzzerExtended_wifi::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {
+bool FuzzerExtended_wifi::VerifyResults(const FunctionSpecificationMessage&, const FunctionSpecificationMessage&) {
     /* No implementation yet. */
     return true;
 }

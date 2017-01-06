@@ -116,6 +116,9 @@ message AndroidSystemControlCommandMessage {
   // the name of a target component (currently used for HIDL HALs only).
   optional bytes target_component_name = 3009;
 
+  // the name of a HW Binder service to use (only needed for HIDL HAL).
+  optional bytes hw_binder_service_name = 3021;
+
   // for LIST_APIS
   // none
 

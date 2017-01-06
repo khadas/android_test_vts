@@ -37,6 +37,12 @@ namespace vts {
 void DriverCodeGenBase::GenerateAll(
     Formatter& header_out, Formatter& source_out,
     const ComponentSpecificationMessage& message) {
+  GenerateHeaderFile(header_out, message);
+  GenerateSourceFile(source_out, message);
+}
+
+void DriverCodeGenBase::GenerateHeaderFile(
+    Formatter& out, const ComponentSpecificationMessage& message) {
   string component_name = GetComponentName(message);
   if (component_name.empty()) {
     cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
@@ -45,16 +51,12 @@ void DriverCodeGenBase::GenerateAll(
   }
   string fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
 
-  GenerateHeaderFile(header_out, message, fuzzer_extended_class_name);
-  GenerateSourceFile(source_out, message, fuzzer_extended_class_name);
-}
-
-
-void DriverCodeGenBase::GenerateHeaderFile(
-    Formatter& out, const ComponentSpecificationMessage& message,
-    const string& fuzzer_extended_class_name) {
-  out << "#ifndef __VTS_SPEC_" << vts_name_ << "__" << "\n";
-  out << "#define __VTS_SPEC_" << vts_name_ << "__" << "\n";
+  string macroized_package_name = message.package();
+  ReplaceSubString(macroized_package_name, ".", "_");
+  out << "#ifndef __VTS_SPEC_" << macroized_package_name
+      << "_" << vts_name_ << "__" << "\n";
+  out << "#define __VTS_SPEC_" << macroized_package_name
+      << "_" << vts_name_ << "__" << "\n";
   out << "\n";
 
   out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";
@@ -70,8 +72,15 @@ void DriverCodeGenBase::GenerateHeaderFile(
 }
 
 void DriverCodeGenBase::GenerateSourceFile(
-    Formatter& out, const ComponentSpecificationMessage& message,
-    const string& fuzzer_extended_class_name) {
+    Formatter& out, const ComponentSpecificationMessage& message) {
+  string component_name = GetComponentName(message);
+  if (component_name.empty()) {
+    cerr << __func__ << ":" << __LINE__ << " error component_name is empty"
+         << "\n";
+    exit(-1);
+  }
+  string fuzzer_extended_class_name = "FuzzerExtended_" + component_name;
+
   GenerateSourceIncludeFiles(out, message, fuzzer_extended_class_name);
   out << "\n\n";
   GenerateOpenNameSpaces(out, message);
@@ -96,10 +105,11 @@ void DriverCodeGenBase::GenerateClassHeader(Formatter& out,
   out.indent();
   out << "bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, "
       << "const string& callback_socket_name);\n";
-  out << "bool CallFunction(FunctionSpecificationMessage* func_msg, "
-      << "void** result, const string& callback_socket_name);\n";
-  out << "bool VerifyResults(FunctionSpecificationMessage* func_msg, "
-      << "vector<void *> results);\n";
+  out << "bool CallFunction(const FunctionSpecificationMessage& func_msg, "
+      << "const string& callback_socket_name, "
+      << "FunctionSpecificationMessage* result_msg);\n";
+  out << "bool VerifyResults(const FunctionSpecificationMessage& expected_result, "
+      << "const FunctionSpecificationMessage& actual_result);\n";
   out << "bool GetAttribute(FunctionSpecificationMessage* func_msg, "
       << "void** result);\n";
 
@@ -211,8 +221,8 @@ void DriverCodeGenBase::GenerateDriverFunctionImpl(Formatter& out,
     const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
   out << "bool " << fuzzer_extended_class_name
-      << "::CallFunction(FunctionSpecificationMessage*, "
-      << "void**, const string&) {\n";
+      << "::CallFunction(const FunctionSpecificationMessage&, const string&, "
+      << "FunctionSpecificationMessage* ) {\n";
   out.indent();
   out << "/* No implementation yet. */\n";
   out << "return true;\n";
@@ -224,7 +234,8 @@ void DriverCodeGenBase::GenerateVerificationFunctionImpl(Formatter& out,
     const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
   out << "bool " << fuzzer_extended_class_name
-      << "::VerifyResults(FunctionSpecificationMessage*, vector<void *>) {\n";
+      << "::VerifyResults(const FunctionSpecificationMessage&, "
+      << "const FunctionSpecificationMessage&) {\n";
   out.indent();
   out << "/* No implementation yet. */\n";
   out << "return true;\n";

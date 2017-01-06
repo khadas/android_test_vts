@@ -31,8 +31,6 @@ vtslib_interfacespec_srcfiles := \
   lib_bionic/libcV1.vts \
   lib_bionic/libcutilsV1.vts \
 
-VTS_ENABLE_TREBLE := $(ENABLE_TREBLE)
-
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
   test/vts/sysfuzzer \
@@ -54,6 +52,7 @@ vtslib_interfacespec_shared_libraries := \
   liblog \
   libdl \
   libandroid_runtime \
+  libcamera_metadata \
   libvts_datatype \
   libvts_common \
   libvts_measurement \
@@ -64,6 +63,15 @@ vtslib_interfacespec_static_libraries := \
 
 include $(CLEAR_VARS)
 
+# libvts_interfacespecification does not include or link any HIDL HAL driver.
+# HIDL HAL drivers and profilers are defined as separated shared libraries
+# in a respective hardware/interfaces/<hal name>/<version>/Android.bp file.
+# libvts_interfacespecification is the driver for:
+#   legacy HALs,
+#   conventional HALs,
+#   shared libraries,
+#   and so on.
+
 LOCAL_MODULE := libvts_interfacespecification
 LOCAL_MODULE_TAGS := optional
 
@@ -72,32 +80,10 @@ LOCAL_SRC_FILES := \
 
 LOCAL_C_INCLUDES := \
   ${vtslib_interfacespec_includes} \
-  android.hardware.nfc@1.0 \
-  android.hardware.vibrator@1.0 \
-  android.hardware.thermal@1.0 \
   system/core/base/include \
-
-ifeq ($(VTS_ENABLE_TREBLE), true)
-LOCAL_CFLAGS += -DENABLE_TREBLE
-endif
 
 LOCAL_SHARED_LIBRARIES := \
   ${vtslib_interfacespec_shared_libraries} \
-
-ifeq ($(VTS_ENABLE_TREBLE), true)
-LOCAL_SHARED_LIBRARIES += \
-  libhwbinder \
-  libhidlbase \
-  libhidltransport \
-  libutils \
-  android.hardware.nfc@1.0 \
-  libvts_driver_hidl_nfc@1.0 \
-  android.hardware.vibrator@1.0 \
-  libvts_driver_hidl_vibrator@1.0 \
-  android.hardware.thermal@1.0 \
-  libvts_driver_hidl_thermal@1.0 \
-
-endif
 
 LOCAL_STATIC_LIBRARIES := \
   ${vtslib_interfacespec_static_libraries}

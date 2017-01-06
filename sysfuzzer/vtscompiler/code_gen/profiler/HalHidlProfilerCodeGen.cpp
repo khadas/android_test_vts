@@ -53,13 +53,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForEnumVariable(Formatter& out,
         << arg_value << ");\n";
   } else {
     const std::string scalar_type = val.enum_value().scalar_type();
-    out << arg_name << "->mutable_enum_value()->add_scalar_value()->set_"
-        << scalar_type << "(static_cast<" << scalar_type << ">(" << arg_value
-        << "));\n";
-    out << arg_name
-        << "->mutable_enum_value()->set_scalar_type(\""
-        << scalar_type
-        << "\");\n";
+    out << arg_name << "->mutable_scalar_value()->set_" << scalar_type
+        << "(static_cast<" << scalar_type << ">(" << arg_value << "));\n";
+    out << arg_name << "->set_scalar_type(\"" << scalar_type << "\");\n";
   }
 }
 
@@ -244,7 +240,7 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
   out << "#include <hidl/HidlSupport.h>\n";
   out << "#include <linux/limits.h>\n";
   out << "#include <test/vts/proto/ComponentSpecificationMessage.pb.h>\n";
-  out << "#include <VtsProfilingInterface.h>\n";
+  out << "#include \"VtsProfilingInterface.h\"\n";
   out << "\n";
 
   std::string package_path = GetPackage(message);

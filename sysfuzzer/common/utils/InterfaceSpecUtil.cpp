@@ -44,5 +44,31 @@ string GetFunctionNamePrefix(const ComponentSpecificationMessage& message) {
   return prefix_ss.str();
 }
 
+#define DEFAULT_FACTOR 10000
+
+string GetVersionString(float version, bool for_macro) {
+  std::ostringstream out;
+  if (for_macro) {
+    out << "V";
+  }
+  long version_long = version * DEFAULT_FACTOR;
+  out << (version_long / DEFAULT_FACTOR);
+  if (!for_macro) {
+    out << ".";
+  } else {
+    out << "_";
+  }
+  version_long -= (version_long / DEFAULT_FACTOR) * DEFAULT_FACTOR;
+  bool first = true;
+  long factor = DEFAULT_FACTOR / 10;
+  while (first || (version_long > 0 && factor > 1)) {
+    out << (version_long / factor);
+    version_long -= (version_long / factor) * factor;
+    factor /= 10;
+    first = false;
+  }
+  return out.str();
+}
+
 }  // namespace vts
 }  // namespace android

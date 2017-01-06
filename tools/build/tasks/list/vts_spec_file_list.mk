@@ -28,3 +28,32 @@ vts_spec_file_list := \
   test/vts/specification/lib_bionic/libcV1.vts \
   test/vts/specification/lib_bionic/libcutilsV1.vts \
 
+ifeq (O,$(PLATFORM_VERSION))
+
+vts_spec_file_list += \
+  hardware/interfaces/tv/input/1.0/vts/TvInput.vts \
+  hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts \
+  hardware/interfaces/tv/input/1.0/vts/types.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/Allocator.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/AllocatorClient.vts \
+  hardware/interfaces/graphics/allocator/2.0/vts/types.vts \
+  hardware/interfaces/graphics/mapper/2.0/vts/Mapper.vts \
+  hardware/interfaces/graphics/mapper/2.0/vts/types.vts \
+  hardware/interfaces/nfc/1.0/vts/Nfc.vts \
+  hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
+  hardware/interfaces/nfc/1.0/vts/types.vts \
+  hardware/interfaces/vehicle/2.0/vts/Vehicle.vts \
+  hardware/interfaces/vehicle/2.0/vts/VehicleCallback.vts \
+  hardware/interfaces/vehicle/2.0/vts/types.vts \
+  hardware/interfaces/vibrator/1.0/vts/Vibrator.vts \
+  hardware/interfaces/vibrator/1.0/vts/types.vts \
+  hardware/interfaces/thermal/1.0/vts/Thermal.vts \
+  hardware/interfaces/thermal/1.0/vts/types.vts \
+  hardware/interfaces/sensors/1.0/vts/Sensors.vts \
+  hardware/interfaces/sensors/1.0/vts/types.vts \
+  hardware/interfaces/vr/1.0/vts/Vr.vts \
+  hardware/interfaces/tv/cec/1.0/vts/HdmiCec.vts \
+  hardware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts \
+  hardware/interfaces/tv/cec/1.0/vts/types.vts \
+
+endif

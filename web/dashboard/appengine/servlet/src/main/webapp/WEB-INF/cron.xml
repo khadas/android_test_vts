@@ -20,4 +20,10 @@ Copyright 2016 Google Inc. All Rights Reserved.
         <description>Send test failure emails.</description>
         <schedule>every 2 minutes</schedule>
     </cron>
+    <cron>
+        <url>/cron/vts_performance_job</url>
+        <description>Send daily performance digests.</description>
+        <schedule>every day 07:30</schedule>
+        <timezone>America/Los_Angeles</timezone>
+    </cron>
 </cronentries>

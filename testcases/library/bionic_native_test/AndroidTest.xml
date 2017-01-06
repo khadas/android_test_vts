@@ -19,6 +19,7 @@
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="BionicNativeTest" />
         <option name="binary-test-working-directories" value="
             _32bit::/data/local/tmp/nativetest,
             _64bit::/data/local/tmp/nativetest64"/>

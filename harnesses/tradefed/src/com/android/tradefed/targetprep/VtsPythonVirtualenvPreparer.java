@@ -43,10 +43,12 @@ import java.util.Collection;
  * That means changes here will be upstreamed gradually.
  */
 @OptionClass(alias = "python-venv")
-public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
+public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetCleaner {
 
     private static final String PIP = "pip";
     private static final String PATH = "PATH";
+    private static final String OS_NAME = "os.name";
+    private static final String WINDOWS = "Windows";
     protected static final String PYTHONPATH = "PYTHONPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
     private static final String[] DEFAULT_DEP_MODULES = {
@@ -68,11 +70,27 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
     IRunUtil mRunUtil = new RunUtil();
     String mPip = PIP;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
         startVirtualenv(buildInfo);
         installDeps(buildInfo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
+            throws DeviceNotAvailableException {
+        if (mVenvDir != null) {
+            FileUtil.recursiveDelete(mVenvDir);
+            CLog.i("Deleted the virtual env's temp working dir, %s.", mVenvDir);
+            mVenvDir = null;
+        }
     }
 
     protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
@@ -142,11 +160,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
             return;
         }
         try {
-            mVenvDir = FileUtil.createNamedTempDir(
-                    buildInfo.getTestTag() + "-virtualenv-" +
-                    buildInfo.getDeviceSerial().replaceAll(":", "_"));
-            mRunUtil.runTimedCmd(
-                BASE_TIMEOUT, "virtualenv", "--clear", mVenvDir.getAbsolutePath());
+            mVenvDir = FileUtil.createTempDir(buildInfo.getTestTag() + "-virtualenv");
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
             activate();
         } catch (IOException e) {
@@ -163,11 +177,18 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer {
         mRequirementsFile = f;
     }
 
+    /**
+     * This method returns whether the OS is Windows.
+     */
+    private static boolean isOnWindows() {
+        return System.getProperty(OS_NAME).contains(WINDOWS);
+    }
+
     private void activate() {
-        File binDir = new File(mVenvDir, "bin");
+        File binDir = new File(mVenvDir, isOnWindows() ? "Scripts" : "bin");
         mRunUtil.setWorkingDir(binDir);
         String path = System.getenv(PATH);
-        mRunUtil.setEnvVariable(PATH, binDir + ":" + path);
+        mRunUtil.setEnvVariable(PATH, binDir + File.pathSeparator + path);
         File pipFile = new File(binDir, PIP);
         pipFile.setExecutable(true);
         mPip = pipFile.getAbsolutePath();

@@ -16,10 +16,10 @@
 
 package com.android.vts.servlet;
 
-import com.android.vts.helpers.BigtableHelper;
 import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
+import com.android.vts.util.BigtableHelper;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;

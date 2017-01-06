@@ -37,23 +37,100 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test -l $@.list
 	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for TV IPNUT HAL"
+	# $(hide) find hardware/interfaces/tv/input/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/tv/input/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
 	@echo "build vts python testcases"
 	$(hide) find test/vts-testcase -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C test/vts-testcase -l $@.list
 	@rm -f $@.list
 	$(hide)unzip -o $@ -d $(VTS_TESTCASES_OUT)/vts/testcases/
-	# uncomment when audio effect HAL test has some py, config, or push files
-	#@echo "build vts python package for audio effect HAL"
+	#
+	# @echo "build vts python package for audio effect HAL"
 	# $(hide) find hardware/interfaces/audio/effect/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when audio effect HAL test has some py, config, or push files
 	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/audio/effect/2.0/vts/functional -l $@.list
-	@rm -f $@.list
+	# @rm -f $@.list
 	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
-	# uncomment when NFC HAL test has some py, config, or push files
-	#@echo "build vts python package for NFC HAL"
-	#$(hide) find hardware/interfaces/nfc/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
-	#$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/nfc/1.0/vts/functional -l $@.list
-	#@rm -f $@.list
+	#
+	# @echo "build vts python package for boot HAL"
+	# $(hide) find hardware/interfaces/boot/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/boot/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for graphics allocator HAL"
+	# $(hide) find hardware/interfaces/graphics/allocator/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when the list is non-empty
+	#$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/graphics/allocator/2.0/vts/functional -l $@.list
+	# @rm -f $@.list
 	#$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for graphics mapper HAL"
+	# $(hide) find hardware/interfaces/graphics/mapper/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# uncomment when the list is non-empty
+	#$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/graphics/mapper/2.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	#$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for memtrack HAL"
+	# $(hide) find hardware/interfaces/memtrack/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/memtrack/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for NFC HAL"
+	# $(hide) find hardware/interfaces/nfc/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/nfc/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for power HAL"
+	# $(hide) find hardware/interfaces/power/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/power/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for thermal HAL"
+	# $(hide) find hardware/interfaces/thermal/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/thermal/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for vehicle HAL"
+	# $(hide) find hardware/interfaces/vehicle/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/vehicle/2.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for vibrator HAL"
+	# $(hide) find hardware/interfaces/vibrator/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/vibrator/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for sensors HAL"
+	# $(hide) find hardware/interfaces/sensors/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/sensors/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for VR HAL"
+	# $(hide) find hardware/interfaces/vr/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/vr/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
+	# @echo "build vts python package for tv hdmi_cec HAL"
+	# $(hide) find hardware/interfaces/tv/cec/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	# $(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/tv/cec/1.0/vts/functional -l $@.list
+	# @rm -f $@.list
+	# $(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
+	#
 	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
 
 $(VTS_CAMERAITS_ZIP): $(SOONG_ZIP)

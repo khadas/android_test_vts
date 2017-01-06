@@ -43,6 +43,13 @@ COMPONENT_TYPE_DICT = {"audio": 1,
                        "nfc": 8,
                        "vibrator": 12,
                        "thermal": 13,
+                       "tv_input": 14,
+                       "tv_cec": 15,
+                       "sensors": 16,
+                       "vehicle": 17,
+                       "vr": 18,
+                       "graphics_allocator": 19,
+                       "graphics_mapper": 20,
                        "bionic_libm": 1001,
                        "bionic_libc": 1002,
                        "vndk_libcutils": 1101}
@@ -152,6 +159,7 @@ class HalMirror(object):
                     target_component_name=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
+                    hw_binder_service_name=None,
                     bits=64):
         """Initiates a handler for a particular HIDL HAL.
 
@@ -166,6 +174,7 @@ class HalMirror(object):
                               files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             handler_name: string, the name of the handler. target_type is used
                           by default.
+            hw_binder_service_name: string, the name of a HW binder service.
             bits: integer, processor architecture indicator: 32 or 64.
         """
         self._CreateMirrorObject("hal_hidl",
@@ -175,6 +184,7 @@ class HalMirror(object):
                                  target_component_name=target_component_name,
                                  target_basepaths=target_basepaths,
                                  handler_name=handler_name,
+                                 hw_binder_service_name=hw_binder_service_name,
                                  bits=bits)
 
     def RemoveHal(self, handler_name):
@@ -203,6 +213,7 @@ class HalMirror(object):
                             target_component_name=None,
                             target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                             handler_name=None,
+                            hw_binder_service_name=None,
                             bits=64):
         """Initiates the driver for a HAL on the target device and creates a top
         level MirroObject for it.
@@ -219,6 +230,7 @@ class HalMirror(object):
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             handler_name: string, the name of the handler. target_type is used
                           by default.
+            hw_binder_service_name: string, the name of a HW binder service.
             bits: integer, processor architecture indicator: 32 or 64.
 
         Raises:
@@ -282,7 +294,8 @@ class HalMirror(object):
             target_type=target_type_id,
             target_version=target_version,
             target_package=target_package,
-            target_component_name=target_component_name)
+            target_component_name=target_component_name,
+            hw_binder_service_name=hw_binder_service_name)
 
         if not launched:
             raise errors.ComponentLoadingError(

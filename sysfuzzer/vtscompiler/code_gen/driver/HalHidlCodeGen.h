@@ -106,6 +106,24 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   // Generates a scalar type in C/C++.
   void GenerateScalarTypeInC(Formatter& out, const string& type);
 
+  // Generates the driver function implementation for hidl reserved methods.
+  void GenerateDriverImplForReservedMethods(Formatter& out);
+
+  // Generates the driver function implementation for a method.
+  void GenerateDriverImplForMethod(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const FunctionSpecificationMessage& func_msg);
+
+  // Generates the code to perform a Hal function call.
+  void GenerateHalFunctionCall(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const FunctionSpecificationMessage& func_msg);
+
+  // Generates the implementation of a callback passed to the Hal function call.
+  void GenerateSyncCallbackFunctionImpl(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const FunctionSpecificationMessage& func_msg);
+
   // Generates the driver function implementation for attributes defined within
   // an interface or in a types.hal.
   void GenerateDriverImplForAttribute(Formatter& out,
@@ -121,15 +139,30 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   void GenerateVerificationDeclForAttribute(Formatter& out,
       const VariableSpecificationMessage& attribute);
 
-  // Generates the verification function declarations for attributes defined
+  // Generates the verification function implementation for attributes defined
   // within an interface or in a types.hal.
   void GenerateVerificationImplForAttribute(Formatter& out,
       const VariableSpecificationMessage& attribute);
 
   // Generates the verification code for a typed variable.
-  void GenerateVerificationForTypedVariable(Formatter& out,
+  void GenerateVerificationCodeForTypedVariable(Formatter& out,
       const VariableSpecificationMessage& val, const string& result_value,
       const string& expected_result);
+
+  // Generates the SetResult function declarations for attributes defined
+  // within an interface or in a types.hal.
+  void GenerateSetResultDeclForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the SetResult function implementation for attributes defined
+  // within an interface or in a types.hal.
+  void GenerateSetResultImplForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates the SetResult code for a typed variable.
+  void GenerateSetResultCodeForTypedVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const string& result_msg,
+      const string& result_val);
 
   // Generates the random function implementation for attributes defined within
   // an interface or in a types.hal.
@@ -140,6 +173,10 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   void GenerateGetServiceImpl(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
+
+  // Returns true if we could omit the callback function and return result
+  // directly.
+  bool CanElideCallback(const FunctionSpecificationMessage& func_msg);
 
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;

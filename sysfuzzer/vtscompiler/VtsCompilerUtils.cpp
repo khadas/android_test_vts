@@ -80,14 +80,28 @@ string ComponentTypeToString(int component_type) {
       return "mobile";
     case BLUETOOTH:
       return "bluetooth";
+    case TV_INPUT:
+      return "tv_input";
     case NFC:
       return "nfc";
+    case VEHICLE:
+      return "vehicle";
     case VIBRATOR:
       return "vibrator";
     case THERMAL:
       return "thermal";
+    case SENSORS:
+      return "sensors";
+    case VR:
+      return "vr";
+    case GRAPHICS_ALLOCATOR:
+      return "graphics_allocator";
+    case GRAPHICS_MAPPER:
+      return "graphics_mapper";
     case BIONIC_LIBM:
       return "bionic_libm";
+    case TV_CEC:
+      return "tv_cec";
   }
   cerr << "error: invalid component_type " << component_type << endl;
   exit(-1);
@@ -126,6 +140,7 @@ string GetCppVariableType(const std::string scalar_type_string) {
   exit(-1);
 }
 
+// TODO(zhuoyao): refactor and support TYPE_ARRAY.
 string GetCppVariableType(const VariableSpecificationMessage& arg,
                           const ComponentSpecificationMessage* message) {
   if (arg.type() == TYPE_VOID) {
@@ -191,7 +206,9 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
            << arg.vector_value(0).type() << endl;
     }
   } else if (arg.type() == TYPE_HIDL_CALLBACK) {
-    return arg.predefined_type();
+    return "sp<" + arg.predefined_type() + ">";
+  } else if (arg.type() == TYPE_HANDLE) {
+    return "::android::hardware::hidl_handle";
   }
   cerr << __func__ << ":" << __LINE__ << " "
        << ": type " << arg.type() << " not supported" << endl;
@@ -385,36 +402,41 @@ int vts_fs_mkdirs(char* file_path, mode_t mode) {
   return 0;
 }
 
-#define DEFAULT_FACTOR 10000
-
-string GetVersionString(float version, bool for_macro) {
-  std::ostringstream out;
-  if (for_macro) {
-    out << "V";
-  }
-  long version_long = version * DEFAULT_FACTOR;
-  out << (version_long / DEFAULT_FACTOR);
-  if (!for_macro) {
-    out << ".";
-  } else {
-    out << "_";
-  }
-  version_long -= (version_long / DEFAULT_FACTOR) * DEFAULT_FACTOR;
-  bool first = true;
-  long factor = DEFAULT_FACTOR / 10;
-  while (first || (version_long > 0 && factor > 1)) {
-    out << (version_long / factor);
-    version_long -= (version_long / factor) * factor;
-    factor /= 10;
-    first = false;
-  }
-  return out.str();
-}
-
 string ClearStringWithNameSpaceAccess(const string& str) {
   string result = str;
   ReplaceSubString(result, "::", "__");
   return result;
 }
+
+// Returns a string which joins the given dir_path and file_name.
+string PathJoin(const char* dir_path, const char* file_name) {
+  string result;
+  if (dir_path) {
+    result = dir_path;
+    if (!file_name) return result;
+  } else if (!file_name) return result;
+
+  if (file_name[0] != '.') {
+    if (result.c_str()[result.length()-1] != '/') {
+      result += "/";
+    }
+  }
+  result += file_name;
+  return result;
+}
+
+// Returns a string which remove given base_path from file_path if included.
+string RemoveBaseDir(const string& file_path, const string& base_path) {
+  if (strncmp(file_path.c_str(), base_path.c_str(), base_path.length())) {
+    return file_path;
+  }
+  string result;
+  result = &file_path.c_str()[base_path.length()];
+  if (result.c_str()[0] == '/') {
+    result = &result.c_str()[1];
+  }
+  return result;
+}
+
 }  // namespace vts
 }  // namespace android
