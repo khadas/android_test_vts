@@ -68,8 +68,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String DATA_FILE_PATH = "data_file_path";
     static final String LOG_PATH = "log_path";
     static final String NAME = "name";
-    static final String OS_NAME = "os.name";
-    static final String WINDOWS = "Windows";
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
@@ -589,7 +587,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             mPythonBin = getPythonBinary();
         }
         String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath.replace("/", "."), jsonFilePath};
+        String[] testModule = {mTestCasePath, jsonFilePath};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
@@ -716,23 +714,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     }
 
     /**
-     * This method returns whether the OS is Windows.
-     */
-    private static boolean isOnWindows() {
-        return System.getProperty(OS_NAME).contains(WINDOWS);
-    }
-
-    /**
-     * This method sets the python path. It's based on the
+     * This method sets the python path. It's based on the based on the
      * assumption that the environment variable $ANDROID_BUILD_TOP is set.
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
-        String separator = File.pathSeparator;
-        if (System.getenv(PYTHONPATH) != null) {
-            sb.append(separator);
-            sb.append(System.getenv(PYTHONPATH));
-        }
+        sb.append(System.getenv(PYTHONPATH));
 
         // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
         if (mBuildInfo != null) {
@@ -745,44 +732,37 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 /* pass */
             }
             if (testDir != null) {
-                sb.append(separator);
+                sb.append(":");
                 mTestCaseDataDir = testDir.getAbsolutePath();
                 sb.append(mTestCaseDataDir);
             } else if (mBuildInfo.getFile(VTS) != null) {
-                sb.append(separator);
+                sb.append(":");
                 sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
             }
         }
 
         // for when one uses PythonVirtualenvPreparer.
         if (mBuildInfo.getFile(PYTHONPATH) != null) {
-            sb.append(separator);
+            sb.append(":");
             sb.append(mBuildInfo.getFile(PYTHONPATH).getAbsolutePath());
         }
         if (System.getenv("ANDROID_BUILD_TOP") != null) {
-            sb.append(separator);
+            sb.append(":");
             sb.append(System.getenv("ANDROID_BUILD_TOP")).append("/test");
         }
-        if (sb.length() == 0) {
-            throw new RuntimeException("Could not find python path on host machine");
-        }
-        mPythonPath = sb.substring(1);
+        mPythonPath = sb.toString();
         CLog.i("mPythonPath: %s", mPythonPath);
     }
 
     /**
-     * This method gets the python binary.
+     * This method gets the python binary
      */
     private String getPythonBinary() {
-        boolean isWindows = isOnWindows();
-        String python = (isWindows ? "python.exe" : "python");
         try {
             File venvDir = FileUtil.createNamedTempDir(
                     mBuildInfo.getTestTag() + "-virtualenv-" +
                     mBuildInfo.getDeviceSerial().replaceAll(":", "_"));
-            String binDir =  (isWindows ? "Script" : "bin");
-            File pythonBinaryFile = new File(venvDir.getAbsolutePath(),
-                    binDir + File.separator + python);
+            File pythonBinaryFile = new File(venvDir.getAbsolutePath(), "bin/python");
             if (pythonBinaryFile.exists()) {
                 return pythonBinaryFile.getAbsolutePath();
             }
@@ -790,12 +770,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             /* pass */
         }
 
-        IRunUtil runUtil = (mRunUtil == null ? RunUtil.getDefault() : mRunUtil);
-        CommandResult c = runUtil.runTimedCmd(1000,
-                (isWindows ? "where" : "which"), python);
+        IRunUtil runUtil = RunUtil.getDefault();
+        CommandResult c = runUtil.runTimedCmd(1000, "which", "python");
         String pythonBin = c.getStdout().trim();
         if (pythonBin.length() == 0) {
-            throw new RuntimeException("Could not find " + python + " on host "
+            throw new RuntimeException("Could not find python binary on host "
                     + "machine");
         }
         return pythonBin;
