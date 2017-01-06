@@ -47,6 +47,8 @@ vts_test_lib_hidl_packages := \
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
   boot_hidl_hal_test \
+  graphics_allocator_hidl_hal_test \
+  graphics_mapper_hidl_hal_test \
   light_hidl_hal_test \
   memtrack_hidl_hal_test \
   nfc_hidl_hal_test \
