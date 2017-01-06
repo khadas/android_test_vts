@@ -60,6 +60,9 @@ DATA/lib64/android.hardware.thermal@1.0-IThermal-vts.profiler.so->/data/local/tm
 DATA/lib/android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0::IHdmiCec.profiler.so
 DATA/lib64/android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0::IHdmiCec.profiler.so
 
+DATA/lib/android.hardware.tv.input@1.0-ITvInput-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0::ITvInput.profiler.so
+DATA/lib64/android.hardware.tv.input@1.0-ITvInput-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0::ITvInput.profiler.so
+
 DATA/lib/android.hardware.vehicle@2.0-IVehicle-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vehicle@2.0::IVehicle.profiler.so
 DATA/lib64/android.hardware.vehicle@2.0-IVehicle-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vehicle@2.0::IVehicle.profiler.so
 

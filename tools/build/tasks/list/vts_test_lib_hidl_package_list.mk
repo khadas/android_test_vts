@@ -39,6 +39,8 @@ vts_test_lib_hidl_packages := \
   android.hardware.thermal@1.0-IThermal-vts.profiler \
   android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler \
   android.hardware.tv.cec@1.0-IHdmiCecCallback-vts.profiler \
+  android.hardware.tv.input@1.0-ITvInput-vts.profiler \
+  android.hardware.tv.input@1.0-ITvInputCallback-vts.profiler \
   android.hardware.vehicle@2.0-IVehicle-vts.profiler \
   android.hardware.vehicle@2.0-IVehicleCallback-vts.profiler \
   android.hardware.vibrator@1.0-IVibrator-vts.profiler \
