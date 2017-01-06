@@ -303,6 +303,13 @@ bool FuzzerExtended_INfc::CallFunction(const FunctionSpecificationMessage& func_
         cout << "called" << endl;
         return true;
     }
+    if (!strcmp(func_name, "notifySyspropsChanged")) {
+        cout << "Call notifySyspropsChanged" << endl;
+        hw_binder_proxy_->notifySyspropsChanged();
+        result_msg->set_name("notifySyspropsChanged");
+        cout << "called" << endl;
+        return true;
+    }
     return false;
 }
 

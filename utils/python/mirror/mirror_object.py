@@ -181,6 +181,11 @@ class MirrorObject(object):
             None otherwise
         """
         logging.debug("GetAPI %s for %s", api_name, self._if_spec_msg)
+        # handle reserved methods first.
+        if api_name == "notifySyspropsChanged":
+            func_msg = CompSpecMsg.FunctionSpecificationMessage()
+            func_msg.name =  api_name
+            return func_msg
         if isinstance(self._if_spec_msg, CompSpecMsg.ComponentSpecificationMessage):
             if len(self._if_spec_msg.interface.api) > 0:
                 for api in self._if_spec_msg.interface.api:
