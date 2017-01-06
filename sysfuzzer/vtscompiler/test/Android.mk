@@ -17,19 +17,20 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vtsc_test
-LOCAL_MODULE_CLASS := FAKE
-LOCAL_IS_HOST_MODULE := true
+# TODO(yim): uncomment this target after the input files are on AOSP.
+#LOCAL_MODULE := vtsc_test
+#LOCAL_MODULE_CLASS := FAKE
+#LOCAL_IS_HOST_MODULE := true
 
-include $(BUILD_SYSTEM)/base_rules.mk
+#include $(BUILD_SYSTEM)/base_rules.mk
 
-the_py_script := $(LOCAL_PATH)/test_vtsc.py
-$(LOCAL_BUILT_MODULE): PRIVATE_PY_SCRIPT := $(the_py_script)
-$(LOCAL_BUILT_MODULE): PRIVATE_OUT_DIR := $(LOCAL_PATH)/test_out
-$(LOCAL_BUILT_MODULE): PRIVATE_CANONICAL_DIR := test/vts/sysfuzzer/vtscompiler/test/golden
-$(LOCAL_BUILT_MODULE): PRIVATE_HIDL_EXEC := $(HOST_OUT_EXECUTABLES)/vtsc
-$(LOCAL_BUILT_MODULE): $(the_py_script) $(HOST_OUT_EXECUTABLES)/vtsc
-	@echo "host Test: $(PRIVATE_MODULE)"
-	$(hide) PYTHONPATH=$$PYTHONPATH:test/vts/.. \
-	python $(PRIVATE_PY_SCRIPT)  -p $(PRIVATE_HIDL_EXEC) -c $(PRIVATE_CANONICAL_DIR) -o $(PRIVATE_OUT_DIR)
-	$(hide) touch $@
+#the_py_script := $(LOCAL_PATH)/test_vtsc.py
+#$(LOCAL_BUILT_MODULE): PRIVATE_PY_SCRIPT := $(the_py_script)
+#$(LOCAL_BUILT_MODULE): PRIVATE_OUT_DIR := $(LOCAL_PATH)/test_out
+#$(LOCAL_BUILT_MODULE): PRIVATE_CANONICAL_DIR := test/vts/sysfuzzer/vtscompiler/test/golden
+#$(LOCAL_BUILT_MODULE): PRIVATE_HIDL_EXEC := $(HOST_OUT_EXECUTABLES)/vtsc
+#$(LOCAL_BUILT_MODULE): $(the_py_script) $(HOST_OUT_EXECUTABLES)/vtsc
+#	@echo "host Test: $(PRIVATE_MODULE)"
+#	$(hide) PYTHONPATH=$$PYTHONPATH:test/vts/.. \
+#	python $(PRIVATE_PY_SCRIPT)  -p $(PRIVATE_HIDL_EXEC) -c $(PRIVATE_CANONICAL_DIR) -o $(PRIVATE_OUT_DIR)
+#	$(hide) touch $@
