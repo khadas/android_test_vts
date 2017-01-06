@@ -52,6 +52,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
   <servlet-class>com.android.vts.servlet.VtsAlertJobServlet</servlet-class>
 </servlet>
 
+<servlet>
+  <servlet-name>vts_performance_job</servlet-name>
+  <servlet-class>com.android.vts.servlet.VtsPerformanceJobServlet</servlet-class>
+</servlet>
+
 <servlet-mapping>
   <servlet-name>dashboard_main</servlet-name>
   <url-pattern>/</url-pattern>
@@ -95,6 +100,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 <servlet-mapping>
   <servlet-name>vts_alert_job</servlet-name>
   <url-pattern>/cron/vts_alert_job/*</url-pattern>
+</servlet-mapping>
+
+<servlet-mapping>
+  <servlet-name>vts_performance_job</servlet-name>
+  <url-pattern>/cron/vts_performance_job/*</url-pattern>
 </servlet-mapping>
 
 <security-constraint>

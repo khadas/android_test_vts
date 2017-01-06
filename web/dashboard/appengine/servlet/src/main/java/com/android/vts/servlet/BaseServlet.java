@@ -14,9 +14,6 @@ public abstract class BaseServlet extends HttpServlet {
     protected final Logger logger = Logger.getLogger(getClass().getName());
 
     // Environment variables
-    protected static final String EMAIL_DOMAIN = System.getenv("EMAIL_DOMAIN");
-    protected static final String SENDER_EMAIL = System.getenv("SENDER_EMAIL");
-    protected static final String DEFAULT_EMAIL = System.getenv("DEFAULT_EMAIL");
     protected static final String GERRIT_URI = System.getenv("GERRIT_URI");
     protected static final String GERRIT_SCOPE = System.getenv("GERRIT_SCOPE");
     protected static final String CLIENT_ID = System.getenv("CLIENT_ID");

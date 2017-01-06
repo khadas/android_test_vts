@@ -31,7 +31,15 @@
     <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
+    <option name="compatibility:include-filter" value="SensorsHidlTest" /><!-- need runtime stopped -->
+    <option name="compatibility:include-filter" value="SensorsHidlTargetTest" /><!-- need runtime stopped -->
     <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
     <option name="compatibility:include-filter" value="HidlTraceRecorder" />
+    <option name="compatibility:include-filter" value="LightHidlTargetTest" />
+    <option name="compatibility:include-filter" value="VrHidlTest" />
+    <option name="compatibility:include-filter" value="VrHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
+    <!-- option name="compatibility:include-filter" value="HalGraphicsAllocatorHidlTargetTest" / --><!-- need driver support -->
+    <!-- option name="compatibility:include-filter" value="HalGraphicsMapperHidlTargetTest" / --><!-- need driver support -->
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

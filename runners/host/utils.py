@@ -339,6 +339,15 @@ def _assert_subprocess_running(proc):
                             " stdout: %s" % (proc.pid, ret, err, out))
 
 
+def is_on_windows():
+    """Checks whether the OS is Windows.
+
+    Returns:
+        A boolean representing whether the OS is Windows.
+    """
+    return os.name == "nt"
+
+
 def start_standing_subprocess(cmd, check_health_delay=0):
     """Starts a long-running subprocess.
 
@@ -359,12 +368,20 @@ def start_standing_subprocess(cmd, check_health_delay=0):
     Returns:
         The subprocess that got started.
     """
-    proc = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
-        preexec_fn=os.setpgrp)
+    if not is_on_windows():
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            preexec_fn=os.setpgrp)
+    else:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     logging.debug("Start standing subprocess with cmd: %s", cmd)
     if check_health_delay > 0:
         time.sleep(check_health_delay)
@@ -378,18 +395,32 @@ def stop_standing_subprocess(proc, kill_signal=signal.SIGTERM):
     Before killing the process, we check if the process is running, if it has
     terminated, VTSUtilsError is raised.
 
-    Catches and ignores the PermissionError which only happens on Macs.
+    Catches and logs the PermissionError which only happens on Macs.
+
+    On Windows, SIGABRT, SIGINT, and SIGTERM are replaced with CTRL_BREAK_EVENT
+    so as to kill every subprocess in the group.
 
     Args:
         proc: Subprocess to terminate.
+        kill_signal: The signal sent to the subprocess group.
     """
     pid = proc.pid
     logging.debug("Stop standing subprocess %d", pid)
     _assert_subprocess_running(proc)
-    try:
-        os.killpg(pid, kill_signal)
-    except PermissionError:
-        pass
+    if not is_on_windows():
+        try:
+            os.killpg(pid, kill_signal)
+        except PermissionError as e:
+            logging.warning("os.killpg(%d, %s) PermissionError: %s",
+                            pid, str(kill_signal), str(e))
+    else:
+        if kill_signal in [signal.SIGABRT,
+                           signal.SIGINT,
+                           signal.SIGTERM]:
+            windows_signal = signal.CTRL_BREAK_EVENT
+        else:
+            windows_signal = kill_signal
+        os.kill(pid, windows_signal)
 
 
 def wait_for_standing_subprocess(proc, timeout=None):

@@ -38,10 +38,11 @@ class VtsHidlHalReplayer {
                                   const char* component_name,
                                   ComponentSpecificationMessage* message);
 
-  // Parses the trace file and stores the parsed sequence of API calls in
-  // func_msgs.
+  // Parses the trace file, stores the parsed sequence of API calls in
+  // func_msgs and the corresponding return results in result_msgs.
   bool ParseTrace(const char* trace_file,
-                  vector<FunctionSpecificationMessage>* func_msgs);
+                  vector<FunctionSpecificationMessage>* func_msgs,
+                  vector<FunctionSpecificationMessage>* result_msgs);
 
   // Replays the API call sequence parsed from the trace file.
   bool ReplayTrace(const char* spec_lib_file_path, const char* trace_file,

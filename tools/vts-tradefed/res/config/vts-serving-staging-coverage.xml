@@ -20,5 +20,13 @@
     <option name="compatibility:include-filter" value="LightFuzzTest" />
     <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
     <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+    <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
+    <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
+    <option name="compatibility:include-filter" value="SensorsHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
+    <option name="compatibility:include-filter" value="LightHidlTargetTest" />
+    <option name="compatibility:include-filter" value="VrHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

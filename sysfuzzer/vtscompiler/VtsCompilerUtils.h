@@ -52,12 +52,15 @@ extern string GetConversionToProtobufFunctionName(
 // fs_mkdirs for VTS.
 extern int vts_fs_mkdirs(char* file_path, mode_t mode);
 
-// Get HAL version string to be used to build a relevant dir path.
-string GetVersionString(float version, bool for_macro=false);
-
 // Replace the name space access symbol "::" in the string to "__" to prevent
 // mis-interpretation in generated cpp code.
 string ClearStringWithNameSpaceAccess(const string& str);
+
+// Returns a string which joins the given dir_path and file_name.
+string PathJoin(const char* dir_path, const char* file_name);
+
+// Returns a string which remove given base_path from file_path if included.
+string RemoveBaseDir(const string& file_path, const string& base_path);
 
 }  // namespace vts
 }  // namespace android

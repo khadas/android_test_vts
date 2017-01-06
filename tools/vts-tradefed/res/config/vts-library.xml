@@ -16,5 +16,6 @@
 <configuration description="Run VTS Host-Driven, Library Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="compatibility:include-filter" value="BionicNativeTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>

@@ -40,7 +40,7 @@ class FuzzerBase {
 
   // Gets the HIDL service.
   // Returns true iff successful.
-  virtual bool GetService(bool get_stub);
+  virtual bool GetService(bool get_stub, const char* service_name);
 
   // Open Conventional Hal
   int OpenConventionalHal(const char* module_name = NULL);
@@ -54,6 +54,19 @@ class FuzzerBase {
   // Returns true iff the testing is conducted completely.
   virtual bool Fuzz(vts::FunctionSpecificationMessage* /*func_msg*/,
                     void** /*result*/, const string& /*callback_socket_name*/) {
+    return false;
+  };
+
+  virtual bool CallFunction(
+            const vts::FunctionSpecificationMessage& /*func_msg*/,
+            const string& /*callback_socket_name*/,
+            vts::FunctionSpecificationMessage* /*result_msg*/) {
+    return false;
+  };
+
+  virtual bool VerifyResults(
+      const vts::FunctionSpecificationMessage& /*expected_result_msg*/,
+      const vts::FunctionSpecificationMessage& /*actual_result_msg*/) {
     return false;
   };
 
