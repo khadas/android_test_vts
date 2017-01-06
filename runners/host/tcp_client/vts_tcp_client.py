@@ -261,8 +261,11 @@ class VtsTcpClient(object):
                 for return_type_hidl in result.return_type_hidl:
                     result_value.append(self.GetPythonDataOfVariableSpecMsg(
                         return_type_hidl))
-            else:
-                result_value = None
+            else:  # For non-HIDL return value
+                if hasattr(result, "return_type"):
+                    result_value = result
+                else:
+                    result_value = None
 
             if hasattr(result, "raw_coverage_data"):
                 return result_value, {"coverage": result.raw_coverage_data}
