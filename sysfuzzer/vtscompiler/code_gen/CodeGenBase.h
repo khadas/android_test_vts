@@ -34,6 +34,13 @@ enum VtsCompileMode {
   kProfiler
 };
 
+// Specifies what kinds of files to generate.
+enum VtsCompileFileType {
+  kBoth = 0,
+  kHeader,
+  kSource,
+};
+
 class CodeGenBase {
  public:
   explicit CodeGenBase(const char* input_vts_file_path, const string& vts_name);
@@ -42,6 +49,14 @@ class CodeGenBase {
   // Generate both a C/C++ file and its header file.
   virtual void GenerateAll(Formatter& header_out, Formatter& source_out,
                            const ComponentSpecificationMessage& message) = 0;
+
+  // Generates source file.
+  virtual void GenerateSourceFile(
+      Formatter& out, const ComponentSpecificationMessage& message) = 0;
+
+  // Generates header file.
+  virtual void GenerateHeaderFile(
+      Formatter& out, const ComponentSpecificationMessage& message) = 0;
 
   const char* input_vts_file_path() const {
     return input_vts_file_path_;
@@ -56,10 +71,18 @@ class CodeGenBase {
   const string& vts_name_;
 };
 
+// Translates the VTS proto file to C/C++ code and header files.
 void Translate(VtsCompileMode mode,
                const char* input_vts_file_path,
                const char* output_header_dir_path,
                const char* output_cpp_file_path);
+
+
+// Translates the VTS proto file to a C/C++ source or header file.
+void TranslateToFile(VtsCompileMode mode,
+                     const char* input_vts_file_path,
+                     const char* output_file_path,
+                     VtsCompileFileType file_type);
 
 }  // namespace vts
 }  // namespace android

@@ -16,7 +16,7 @@
 
 package com.android.vts.api;
 
-import com.android.vts.helpers.BigtableHelper;
+import com.android.vts.util.BigtableHelper;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -35,10 +35,10 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +51,7 @@ import javax.servlet.http.HttpServletResponse;
 public class BigtableApiServlet extends HttpServlet {
 
     private static final String SERVICE_CLIENT_ID = System.getenv("SERVICE_CLIENT_ID");
-    private static final Logger logger = LoggerFactory.getLogger(BigtableApiServlet.class);
+    private static final Logger logger = Logger.getLogger(BigtableApiServlet.class.getName());
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -99,7 +99,8 @@ public class BigtableApiServlet extends HttpServlet {
                         insertRow(payloadJson);
                         break;
                     default:
-                        logger.info("Invalid Bigtable API verb: ", payloadJson.getString("verb"));
+                        logger.log(Level.INFO, "Invalid Bigtable API verb: " +
+                                   payloadJson.getString("verb"));
                         throw new IOException("Unsupported POST verb.");
                 }
             }
@@ -121,7 +122,7 @@ public class BigtableApiServlet extends HttpServlet {
      */
     private void createTable(JSONObject payloadJson) throws IOException {
         if (!payloadJson.has("tableName") || !payloadJson.has("familyNames")) {
-            logger.info("Missing attributes for bigtable api createTable().");
+            logger.log(Level.INFO, "Missing attributes for bigtable api createTable().");
             throw new IOException("Missing attributes.");
         }
         String table = payloadJson.getString("tableName");
@@ -151,7 +152,7 @@ public class BigtableApiServlet extends HttpServlet {
         if (!payloadJson.has("tableName") || !payloadJson.has("rowKey") ||
             !payloadJson.has("family") || !payloadJson.has("qualifier") ||
             !payloadJson.has("value")) {
-            logger.info("Missing attributes for bigtable api insertRow().");
+            logger.log(Level.INFO, "Missing attributes for bigtable api insertRow().");
             throw new IOException("Missing attributes.");
         }
         String tableName = payloadJson.getString("tableName");

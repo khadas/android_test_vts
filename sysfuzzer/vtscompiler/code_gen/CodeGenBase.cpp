@@ -54,7 +54,8 @@ CodeGenBase::CodeGenBase(const char* input_vts_file_path, const string& vts_name
 
 CodeGenBase::~CodeGenBase() {}
 
-// Translates the vts proto file to C/C++ code and header files.
+// TODO(yim): deprecate this function after type specific translate functions
+//            are used.
 void Translate(VtsCompileMode mode,
                const char* input_vts_file_path,
                const char* output_header_dir_path,
@@ -136,6 +137,90 @@ void Translate(VtsCompileMode mode,
         exit(-1);
     }
     code_generator->GenerateAll(header_out, source_out, message);
+  }
+}
+
+void TranslateToFile(VtsCompileMode mode,
+                     const char* input_vts_file_path,
+                     const char* output_file_path,
+                     VtsCompileFileType file_type) {
+  string output_cpp_file_path_str = string(output_file_path);
+
+  size_t found;
+  found = output_cpp_file_path_str.find_last_of("/");
+  string vts_name = output_cpp_file_path_str
+      .substr(found + 1, output_cpp_file_path_str.length() - found - 5);
+
+  cout << "vts_name: " << vts_name << endl;
+
+  ComponentSpecificationMessage message;
+  if (InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
+    cout << message.component_class();
+  } else {
+    cerr << __func__ << " can't parse " << input_vts_file_path << endl;
+  }
+
+  FILE* output_file = fopen(output_file_path, "w");
+  if (output_file == NULL) {
+    cerr << __func__ << " could not open file " << output_file_path;
+    exit(-1);
+  }
+  Formatter out(output_file);
+
+  if (mode == kProfiler) {
+    unique_ptr<ProfilerCodeGenBase> profiler_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        profiler_generator.reset(
+            new HalHidlProfilerCodeGen(input_vts_file_path, vts_name));
+        break;
+      default:
+        cerr << "not yet supported component_class "
+            << message.component_class();
+        exit(-1);
+    }
+    if (file_type == kHeader) {
+      profiler_generator->GenerateHeaderFile(out, message);
+    } else if (file_type == kSource){
+      profiler_generator->GenerateSourceFile(out, message);
+    } else {
+      cerr << __func__ << " doesn't support file_type = kBoth." << endl;
+      exit(-1);
+    }
+  } else if (mode == kDriver) {
+    unique_ptr<CodeGenBase> code_generator;
+    switch (message.component_class()) {
+      case HAL_CONVENTIONAL:
+        code_generator.reset(new HalCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_CONVENTIONAL_SUBMODULE:
+        code_generator.reset(
+            new HalSubmoduleCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_LEGACY:
+        code_generator.reset(
+            new LegacyHalCodeGen(input_vts_file_path, vts_name));
+        break;
+      case LIB_SHARED:
+        code_generator.reset(
+            new LibSharedCodeGen(input_vts_file_path, vts_name));
+        break;
+      case HAL_HIDL:
+        code_generator.reset(new HalHidlCodeGen(input_vts_file_path, vts_name));
+        break;
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    if (file_type == kHeader) {
+      code_generator->GenerateHeaderFile(out, message);
+    } else if (file_type == kSource){
+      code_generator->GenerateSourceFile(out, message);
+    } else {
+      cerr << __func__ << " doesn't support file_type = kBoth." << endl;
+      exit(-1);
+    }
   }
 }
 

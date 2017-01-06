@@ -6,7 +6,7 @@
 #include <hidl/HidlSupport.h>
 #include <linux/limits.h>
 #include <test/vts/proto/ComponentSpecificationMessage.pb.h>
-#include <VtsProfilingInterface.h>
+#include "VtsProfilingInterface.h"
 
 #include <android/hardware/nfc/1.0/types.h>
 

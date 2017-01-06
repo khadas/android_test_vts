@@ -220,7 +220,7 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
       GenerateProfilerMethodImplForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
-      GenerateProfilerMethodDeclForAttribute(out, sub_union);
+      GenerateProfilerMethodImplForAttribute(out, sub_union);
     }
   }
   std::string attribute_name = attribute.name();

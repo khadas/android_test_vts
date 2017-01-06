@@ -135,7 +135,8 @@ class VtsTcpClient(object):
     def LaunchDriverService(self, driver_type, service_name, bits,
                             file_path=None, target_class=None, target_type=None,
                             target_version=None, target_package=None,
-                            target_component_name=None):
+                            target_component_name=None,
+                            hw_binder_service_name=None):
         """RPC to LAUNCH_DRIVER_SERVICE."""
         logging.info("service_name: %s", service_name)
         logging.info("file_path: %s", file_path)
@@ -150,7 +151,8 @@ class VtsTcpClient(object):
                          target_type=target_type,
                          target_version=target_version,
                          target_package=target_package,
-                         target_component_name=target_component_name)
+                         target_component_name=target_component_name,
+                         hw_binder_service_name=hw_binder_service_name)
         resp = self.RecvResponse()
         logging.info("resp for LAUNCH_DRIVER_SERVICE: %s", resp)
         return (resp.response_code == SysMsg_pb2.SUCCESS)
@@ -163,6 +165,71 @@ class VtsTcpClient(object):
         if (resp.response_code == SysMsg_pb2.SUCCESS):
             return resp.spec
         return None
+
+    def GetPythonDataOfVariableSpecMsg(self, var_spec_msg):
+        """Returns the python native data structure for a given message.
+
+        Args:
+            var_spec_msg: VariableSpecificationMessage
+
+        Returns:
+            python native data structure (e.g., string, integer, list).
+
+        Raises:
+            VtsUnsupportedTypeError if unsupported type is specified.
+            VtsMalformedProtoStringError if StringDataValueMessage is
+                not populated.
+        """
+        if var_spec_msg.type == CompSpecMsg_pb2.TYPE_SCALAR:
+            scalar_type = getattr(var_spec_msg, "scalar_type", "")
+            if scalar_type:
+                return getattr(
+                    var_spec_msg.scalar_value, scalar_type)
+        elif var_spec_msg.type == CompSpecMsg_pb2.TYPE_ENUM:
+            scalar_type = getattr(var_spec_msg, "scalar_type", "")
+            if scalar_type:
+                return getattr(
+                    var_spec_msg.scalar_value, scalar_type)
+            else:
+                return var_spec_msg.scalar_value.int32_t
+        elif var_spec_msg.type == CompSpecMsg_pb2.TYPE_STRING:
+            if hasattr(var_spec_msg, "string_value"):
+                return getattr(
+                    var_spec_msg.string_value, "message", "")
+            raise errors.VtsMalformedProtoStringError()
+        elif var_spec_msg.type == CompSpecMsg_pb2.TYPE_STRUCT:
+            result = {}
+            index = 1
+            for struct_value in var_spec_msg.struct_value:
+                if len(struct_value.name) > 0:
+                    result[struct_value.name] = self.GetPythonDataOfVariableSpecMsg(
+                        struct_value)
+                else:
+                    result["attribute%d" % index] = self.GetPythonDataOfVariableSpecMsg(
+                        struct_value)
+                index += 1
+            return result
+        elif var_spec_msg.type == CompSpecMsg_pb2.TYPE_UNION:
+            result = VtsReturnValueObject()
+            index = 1
+            for union_value in var_spec_msg.union_value:
+                if len(union_value.name) > 0:
+                    result[union_value.name] = self.GetPythonDataOfVariableSpecMsg(
+                        union_value)
+                else:
+                    result["attribute%d" % index] = self.GetPythonDataOfVariableSpecMsg(
+                        union_value)
+                index += 1
+            return result
+        elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_VECTOR or
+              var_spec_msg.type == CompSpecMsg_pb2.TYPE_ARRAY):
+            result = []
+            for vector_value in var_spec_msg.vector_value:
+                result.append(self.GetPythonDataOfVariableSpecMsg(vector_value))
+            return result
+
+        raise errors.VtsUnsupportedTypeError(
+            "unsupported type %s" % var_spec_msg.type)
 
     def CallApi(self, arg):
         """RPC to CALL_API."""
@@ -184,30 +251,27 @@ class VtsTcpClient(object):
                 logging.info("spec: %s", result.return_type_submodule_spec)
                 return mirror_object.MirrorObject(
                      self, result.return_type_submodule_spec, None)
+
+            logging.info("result: %s", result.return_type_hidl)
             if len(result.return_type_hidl) == 1:
-                if hasattr(result, "raw_coverage_data"):
-                    has_coverage = True
-                result_scalar = None
-                if (result.return_type_hidl[0].type ==
-                    CompSpecMsg_pb2.TYPE_SCALAR):
-                    result_scalar =  getattr(
-                        result.return_type_hidl[0].scalar_value,
-                        result.return_type_hidl[0].scalar_type)
-                elif (result.return_type_hidl[0].type ==
-                      CompSpecMsg_pb2.TYPE_ENUM):
-                    scalar_type = getattr(result.return_type_hidl[0],
-                                          "scalar_type", "")
-                    if scalar_type:
-                        result_scalar = getattr(
-                            result.return_type_hidl[0].scalar_value,
-                            scalar_type)
-                    else:
-                        result_scalar = result.return_type_hidl[0].scalar_value.int32_t
-                if not has_coverage:
-                    return result_scalar
+                result_value = self.GetPythonDataOfVariableSpecMsg(
+                    result.return_type_hidl[0])
+            elif len(result.return_type_hidl) > 1:
+                result_value = []
+                for return_type_hidl in result.return_type_hidl:
+                    result_value.append(self.GetPythonDataOfVariableSpecMsg(
+                        return_type_hidl))
+            else:  # For non-HIDL return value
+                if hasattr(result, "return_type"):
+                    result_value = result
                 else:
-                    return result_scalar, {"coverage": result.raw_coverage_data}
-            return result
+                    result_value = None
+
+            if hasattr(result, "raw_coverage_data"):
+                return result_value, {"coverage": result.raw_coverage_data}
+            else:
+                return result_value
+
         logging.error("NOTICE - Likely a crash discovery!")
         logging.error("SysMsg_pb2.SUCCESS is %s", SysMsg_pb2.SUCCESS)
         raise errors.VtsTcpCommunicationError(
@@ -302,6 +366,7 @@ class VtsTcpClient(object):
                     target_version=None,
                     target_package=None,
                     target_component_name=None,
+                    hw_binder_service_name=None,
                     module_name=None,
                     service_name=None,
                     callback_port=None,
@@ -340,6 +405,9 @@ class VtsTcpClient(object):
 
         if target_component_name is not None:
             command_msg.target_component_name = target_component_name
+
+        if hw_binder_service_name is not None:
+            command_msg.hw_binder_service_name = hw_binder_service_name
 
         if module_name is not None:
             command_msg.module_name = module_name

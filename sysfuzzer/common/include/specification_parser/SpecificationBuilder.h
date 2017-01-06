@@ -77,6 +77,7 @@ class SpecificationBuilder {
                            int target_type, float target_version,
                            const char* target_package,
                            const char* target_component_name,
+                           const char* hw_binder_service_name,
                            const char* module_name);
 
   FuzzerBase* GetFuzzerBase(
@@ -105,6 +106,8 @@ class SpecificationBuilder {
   char* spec_lib_file_path_;
   char* dll_file_name_;
   char* module_name_;
+  // HW binder service name only used for HIDL HAL
+  char* hw_binder_service_name_;
   // the server socket port # of the agent.
   const string& callback_socket_name_;
   // map for submodule interface specification messages.

@@ -42,16 +42,15 @@ class DriverCodeGenBase : public CodeGenBase {
   virtual void GenerateAll(Formatter& header_out, Formatter& source_out,
                            const ComponentSpecificationMessage& message);
 
- protected:
   // Generates source file.
   virtual void GenerateSourceFile(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+      Formatter& out, const ComponentSpecificationMessage& message);
 
   // Generates header file.
   virtual void GenerateHeaderFile(
-      Formatter& out, const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
+      Formatter& out, const ComponentSpecificationMessage& message);
+
+ protected:
 
   // Generates header code for a specific class.
   virtual void GenerateClassHeader(Formatter& out,
