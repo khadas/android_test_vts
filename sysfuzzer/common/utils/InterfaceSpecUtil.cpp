@@ -38,8 +38,9 @@ string GetFunctionNamePrefix(const ComponentSpecificationMessage& message) {
     string package_as_function_name(message.package());
     ReplaceSubString(package_as_function_name, ".", "_");
     prefix_ss << VTS_INTERFACE_SPECIFICATION_FUNCTION_NAME_PREFIX
-              << message.component_class() << "_" << package_as_function_name
-              << "_" << int(message.component_type_version()) << "_";
+        << message.component_class() << "_" << package_as_function_name << "_"
+        << int(message.component_type_version()) << "_"
+        << message.component_name() << "_";
   }
   return prefix_ss.str();
 }
