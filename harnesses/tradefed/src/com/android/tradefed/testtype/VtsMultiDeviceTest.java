@@ -766,7 +766,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             if (pythonBinaryFile.exists()) {
                 return pythonBinaryFile.getAbsolutePath();
             }
+            CLog.e("bin/python doesn't exist under the " +
+                   "created virtualenv dir.\n");
         } catch (IOException e) {
+            CLog.e("Checking python binary under the " +
+                   "created virtualenv dir raised an exception.\n");
             /* pass */
         }
 
