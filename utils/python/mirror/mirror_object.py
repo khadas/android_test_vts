@@ -409,6 +409,13 @@ class MirrorObject(object):
                                         arg.scalar_type = value.scalar_type
                                         setattr(arg.scalar_value, value.scalar_type,
                                                 getattr(value.scalar_value, value.scalar_type))
+                                    elif value.type == CompSpecMsg.TYPE_ENUM:
+                                        arg.scalar_type = value.scalar_type
+                                        if hasattr(value.scalar_value, value.scalar_type):
+                                            setattr(arg.scalar_value, value.scalar_type,
+                                                    getattr(value.scalar_value,
+                                                            value.scalar_type))
+                                        arg.enum_value.CopyFrom(value.enum_value)
                                     elif value.type == CompSpecMsg.TYPE_STRING:
                                         arg.string_value.message = value.string_value.message
                                         arg.string_value.length = value.string_value.length
