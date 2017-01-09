@@ -37,6 +37,7 @@
     <option name="compatibility:include-filter" value="VrHidlTest" />
     <option name="compatibility:include-filter" value="VrHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicTest" />
     <!-- option name="compatibility:include-filter" value="HalGraphicsAllocatorHidlTargetTest" / --><!-- need driver support -->
     <!-- option name="compatibility:include-filter" value="HalGraphicsMapperHidlTargetTest" / --><!-- need driver support -->
     <template-include name="reporters" default="basic-reporters" />
