@@ -131,10 +131,11 @@ def ParseTraceData(trace_file):
                 long(time_stamps[index]) - long(time_stamps[index - 1]))
         api_latencies[api] = latencies
     for api, latencies in api_latencies.items():
-        profiling_data.labels.append(api)
-        profiling_data.values["max"].append(max(latencies))
-        profiling_data.values["min"].append(min(latencies))
-        profiling_data.values["avg"].append(sum(latencies) / len(latencies))
+        if latencies:
+          profiling_data.labels.append(api)
+          profiling_data.values["max"].append(max(latencies))
+          profiling_data.values["min"].append(min(latencies))
+          profiling_data.values["avg"].append(sum(latencies) / len(latencies))
 
     return profiling_data
 
