@@ -27,8 +27,6 @@
     <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
     <option name="compatibility:include-filter" value="VibratorHidlTest" />
-    <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
-    <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
     <option name="compatibility:include-filter" value="SensorsHidlTest" /><!-- need runtime stopped -->
