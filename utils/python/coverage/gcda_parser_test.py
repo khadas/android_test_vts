@@ -48,7 +48,8 @@ class GCDAParserTest(unittest.TestCase):
         self.stream = MockStream.concat_int(self.stream, 0)
         self.stream = MockStream.concat_string(self.stream, 'test')
         length = 5
-        parser = gcda_parser.GCDAParser(self.stream, fs)
+        parser = gcda_parser.GCDAParser(self.stream)
+        parser.file_summary = fs
         func = parser.ReadFunction(5)
         assert (func.ident == ident)
 
@@ -68,7 +69,8 @@ class GCDAParserTest(unittest.TestCase):
             blocks[0].exit_arcs.append(arc)
             blocks[i].entry_arcs.append(arc)
             self.stream = MockStream.concat_int64(self.stream, i)
-        parser = gcda_parser.GCDAParser(self.stream, fs)
+        parser = gcda_parser.GCDAParser(self.stream)
+        parser.file_summary = fs
         parser.ReadCounts(func)
         for i, arc in zip(range(1, n), blocks[0].exit_arcs):
             self.assertEqual(i, arc.count)
@@ -103,7 +105,8 @@ class GCDAParserTest(unittest.TestCase):
             blocks[i].entry_arcs.append(arc)
             self.stream = MockStream.concat_int64(self.stream, i)
 
-        parser = gcda_parser.GCDAParser(self.stream, fs)
+        parser = gcda_parser.GCDAParser(self.stream)
+        parser.file_summary = fs
         parser.ReadCounts(func)
         self.assertFalse(blocks[0].exit_arcs[0].resolved)
         self.assertFalse(blocks[0].exit_arcs[1].resolved)
