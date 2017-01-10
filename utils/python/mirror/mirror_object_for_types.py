@@ -19,9 +19,11 @@ import copy
 import logging
 import random
 
-from vts.utils.python.fuzzer import FuzzerUtils
-from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from google.protobuf import text_format
+
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
+from vts.utils.python.fuzzer import FuzzerUtils
+from vts.utils.python.mirror import py2pb
 
 
 class MirrorObjectError(Exception):
@@ -81,6 +83,37 @@ class MirrorObjectForTypes(object):
             # TODO: check in advance whether self._if_spec_msg Interface
             # SpecificationMessage.
             return None
+
+    def GetAttributeSpecification(self, attribute_name):
+        """Returns the ProtoBuf specification of a requested attribute.
+
+        Args:
+            attribute_name: string, the name of a target attribute
+                            (optionally excluding the namespace).
+
+        Returns:
+            VariableSpecificationMessage if found, None otherwise
+        """
+        for attribute in self._if_spec_msg.attribute:
+            if (attribute.name == attribute_name or
+                attribute.name.endswith("::" + attribute_name)):
+                return attribute
+        return None
+
+    def Py2Pb(self, attribute_name, py_values):
+        """Returns the ProtoBuf of a give Python values.
+
+        Args:
+            attribute_name: string, the name of a target attribute.
+            py_values: Python values.
+
+        Returns:
+            Converted VariableSpecificationMessage if found, None otherwise
+        """
+        attribute_msg = self.GetAttributeSpecification(attribute_name)
+        if attribute_msg:
+            return py2pb.Convert(attribute_msg, py_values)
+        return None
 
     def GetConstType(self, type_name):
         """Returns the Argument Specification Message.
