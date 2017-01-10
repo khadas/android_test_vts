@@ -353,7 +353,7 @@ bool FuzzerExtended_INfc::VerifyResults(const FunctionSpecificationMessage& expe
 }
 
 extern "C" {
-android::vts::FuzzerBase* vts_func_4_android_hardware_nfc_1_() {
+android::vts::FuzzerBase* vts_func_4_android_hardware_nfc_1_INfc_() {
     return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_INfc();
 }
 
