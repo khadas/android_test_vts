@@ -401,6 +401,10 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
           } else if (arg.type() == TYPE_VECTOR) {
             out << GetCppVariableType(arg, &message) << " ";
             out << "arg" << arg_count << ";" << "\n";
+          } else if (arg.type() == TYPE_HIDL_INTERFACE) {
+            out << "/* TYPE_HIDL_INTERFACE not supported yet */\n";
+            out << GetCppVariableType(arg, &message) << " ";
+            out << "arg" << arg_count;
           } else {
             out << GetCppVariableType(arg, &message) << " ";
             out << "arg" << arg_count << " = ";
@@ -408,7 +412,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
 
           if (arg.type() != TYPE_VECTOR &&
               arg.type() != TYPE_HIDL_CALLBACK &&
-              arg.type() != TYPE_STRUCT) {
+              arg.type() != TYPE_STRUCT &&
+              arg.type() != TYPE_HIDL_INTERFACE) {
             std::stringstream msg_ss;
             msg_ss << "func_msg->arg(" << arg_count << ")";
             string msg = msg_ss.str();
@@ -490,6 +495,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
               out << "/* arg" << arg_count << "buffer[vector_index] not initialized "
                   << "since TYPE_STRUCT not yet supported */" << "\n";
+            } else if (arg.vector_value(0).type() == TYPE_STRING) {
+              out << "/* arg" << arg_count << "buffer[vector_index] not initialized "
+                  << "since TYPE_STRING not yet supported */" << "\n";
             } else {
               cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                    << arg.vector_value(0).type() << "\n";
@@ -497,10 +505,12 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             }
             out.unindent();
             out << "}" << "\n";
-            out << "arg" << arg_count << ".setToExternal("
-                << "arg" << arg_count << "buffer, "
-                << "func_msg->arg(" << arg_count << ").vector_size()"
-                << ")";
+            if (arg.vector_value(0).type() == TYPE_SCALAR
+                || arg.vector_value(0).type() == TYPE_ENUM) {
+              out << "arg" << arg_count << ".setToExternal(" << "arg"
+                  << arg_count << "buffer, " << "func_msg->arg(" << arg_count
+                  << ").vector_size()" << ")";
+            }
           }
           out << ";" << "\n";
           if (arg.type() == TYPE_STRUCT) {

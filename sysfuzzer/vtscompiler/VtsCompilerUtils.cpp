@@ -199,8 +199,8 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
         exit(-1);
       }
     } else if (arg.vector_value(0).type() == TYPE_STRING) {
-      return "const ::android::hardware::hidl_vec< "
-          "::android::hardware::hidl_string> &";
+      return "::android::hardware::hidl_vec< "
+          "::android::hardware::hidl_string>";
     } else {
       cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
            << arg.vector_value(0).type() << endl;
@@ -209,6 +209,8 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     return "sp<" + arg.predefined_type() + ">";
   } else if (arg.type() == TYPE_HANDLE) {
     return "::android::hardware::hidl_handle";
+  } else if (arg.type() == TYPE_HIDL_INTERFACE) {
+    return "sp<" + arg.predefined_type() + ">";
   }
   cerr << __func__ << ":" << __LINE__ << " "
        << ": type " << arg.type() << " not supported" << endl;
