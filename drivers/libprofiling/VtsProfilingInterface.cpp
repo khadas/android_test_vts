@@ -91,6 +91,8 @@ bool VtsProfilingInterface::AddTraceEvent(
     LOG(ERROR) << "Profiler not initialized. ";
     return false;
   }
+  if (stop_trace_recording_)
+    return true;
 
   // Build the VTSProfilingRecord and print it to string.
   VtsProfilingRecord record;
@@ -108,8 +110,18 @@ bool VtsProfilingInterface::AddTraceEvent(
 
   // Write the record string to trace file.
   mutex_.lock();
-  trace_output_ << record_str << "\n";
-  trace_output_.flush();
+  if ((static_cast<std::string::size_type>(trace_output_.tellp())
+       + record_str.size()) > kTraceFileSizeLimit
+      && (static_cast<std::string::size_type>(trace_output_.tellp())
+          + record_str.size()) >= record_str.size()) {
+    LOG(WARNING) << "Trace file too big, stop recording the trace";
+    trace_output_.close();
+    stop_trace_recording_ = true;
+  }
+  if (!stop_trace_recording_) {
+    trace_output_ << record_str << "\n";
+    trace_output_.flush();
+  }
   mutex_.unlock();
 
   return true;
