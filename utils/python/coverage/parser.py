@@ -38,6 +38,7 @@ class GcovStreamParserUtil(object):
     Attributes:
         stream: File stream object for a GCNO file
         format: Character denoting the endianness of the file
+        checksum: The checksum (int) of the file
     """
 
     def __init__(self, stream, magic):
@@ -56,7 +57,7 @@ class GcovStreamParserUtil(object):
         tag = self.ReadInt()
         self.version = ''.join(
             struct.unpack(self.format + 'ssss', self.stream.read(4)))
-        self.ReadInt()  #   stamp
+        self.checksum = self.ReadInt()
 
         if tag != magic:
             tag = struct.unpack('>I', struct.pack('<I', tag))[0]

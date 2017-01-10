@@ -49,7 +49,7 @@ class GCDAParser(parser.GcovStreamParserUtil):
     TAG_OBJECT = 0xa1000000
     TAG_PROGRAM = 0xa3000000
 
-    def __init__(self, stream, file_summary):
+    def __init__(self, stream):
         """Inits the parser with the input stream and default values.
 
         The byte order is set by default to little endian and the summary file
@@ -57,12 +57,29 @@ class GCDAParser(parser.GcovStreamParserUtil):
 
         Args:
             stream: An input binary file stream to a .gcno file
-            file_summary: The summary from a parsed gcno file
         """
+        self._file_summary = None
         super(GCDAParser, self).__init__(stream, self.MAGIC)
-        self.file_summary = file_summary
 
-    def Parse(self):
+    @property
+    def file_summary(self):
+        """Gets the FileSummary object where coverage data is stored.
+
+        Returns:
+            A FileSummary object.
+        """
+        return self._file_summary
+
+    @file_summary.setter
+    def file_summary(self, file_summary)
+        """Sets the FileSummary object in which to store coverage data.
+
+        Args:
+            file_summary: A FileSummary object from a processed gcno file
+        """
+        self._file_summary = file_summary
+
+    def Parse(self, file_summary):
         """Runs the parser on the file opened in the stream attribute.
 
         Reads coverage information from the GCDA file stream and resolves
@@ -75,6 +92,7 @@ class GCDAParser(parser.GcovStreamParserUtil):
         Raises:
             parser.FileFormatError: invalid file format or invalid counts.
         """
+        self.file_summary = file_summary
         func = None
 
         while True:
@@ -163,4 +181,4 @@ def ParseGcdaFile(file_name, file_summary):
     """
 
     with open(file_name, 'rb') as stream:
-        return GCDAParser(stream, file_summary).Parse()
+        return GCDAParser(stream).Parse(file_summary)
