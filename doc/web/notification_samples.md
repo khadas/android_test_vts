@@ -23,8 +23,6 @@ The following test cases failed in the latest test run:<br>
 For details, visit the <a href="#">VTS dashboard.</a>
 </div>
 
-
-
 ## VTS Performance Digests
 
 Each day, the VTS Dashboard scans tests which have accompanying performance
