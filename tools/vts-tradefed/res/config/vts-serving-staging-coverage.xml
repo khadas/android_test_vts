@@ -28,5 +28,6 @@
     <option name="compatibility:include-filter" value="LightHidlTargetTest" />
     <option name="compatibility:include-filter" value="VrHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
