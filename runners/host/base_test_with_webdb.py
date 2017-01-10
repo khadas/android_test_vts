@@ -73,6 +73,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     SERVICE_JSON_PATH = "service_key_json_path"
     COVERAGE_ZIP = "coverage_zip"
     REVISION_DICT = "revision_dict"
+    CHECKSUM_GCNO_DICT = "checksum_gcno_dict"
     STATUS_TABLE = "vts_status_table"
     BIGTABLE_BASE_URL = "bigtable_base_url"
     BRANCH = "master"
@@ -401,6 +402,15 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = value
         return True
 
+    def IsCoverageConfigSpecified(self):
+        """Determines if the config file specifies modules for coverage.
+
+        Returns:
+            True if the config file specifies modules for coverage measurement,
+            False otherwise
+        """
+        return hasattr(self, self.MODULES)
+
     def InitializeCoverage(self):
         """Initializes the test for coverage instrumentation.
 
@@ -470,6 +480,11 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                           (self.BRANCH, build_flavor, device_build_id, product
                            ))
             return False
+
+        if not self.IsCoverageConfigSpecified():
+            checksum_gcno_dict = coverage_utils.GetChecksumGcnoDict(cov_zip)
+            setattr(self, self.CHECKSUM_GCNO_DICT, checksum_gcno_dict)
+
         setattr(self, self.COVERAGE_ZIP, cov_zip)
         setattr(self, self.REVISION_DICT, revision_dict)
         setattr(self, self.COVERAGE, True)
@@ -515,14 +530,23 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         try:
             cov_zip = getattr(self, self.COVERAGE_ZIP)
-            modules = getattr(self, self.MODULES)
             revision_dict = getattr(self, self.REVISION_DICT)
         except AttributeError as e:
             logging.error("attributes not found %s", str(e))
             return False
 
-        coverage_utils.ProcessCoverageData(report_msg, cov_zip, modules,
-                                           gcda_dict, revision_dict)
+        if not self.IsCoverageConfigSpecified():
+            # auto-process coverage data
+            checksum_gcno_dict = getattr(self, self.CHECKSUM_GCNO_DICT)
+            coverage_utils.ProcessCoverageData(
+                report_msg, gcda_dict, revision_dict,
+                checksum_gcno_dict=checksum_gcno_dict)
+        else:
+            # explicitly process coverage data for the specified modules
+            modules = getattr(self, self.MODULES)
+            coverage_utils.ProcessCoverageData(
+                report_msg, gcda_dict, revision_dict, modules=modules,
+                cov_zip=cov_zip)
         return True
 
     def ProcessAndUploadTraceData(self, dut, profiling_trace_path):
