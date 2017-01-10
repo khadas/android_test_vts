@@ -30,6 +30,7 @@ sed -i 's/import "ComponentSpecificationMessage.proto";/import "test\/vts\/proto
 sed -i 's/import "ComponentSpecificationMessage.proto";/import "test\/vts\/proto\/ComponentSpecificationMessage.proto";/g' proto/VtsProfilingMessage.proto
 
 protoc -I=proto --python_out=proto proto/ComponentSpecificationMessage.proto
+protoc -I=proto --python_out=proto proto/TestSchedulingPolicyMessage.proto
 protoc -I=proto --python_out=proto proto/VtsReportMessage.proto
 protoc -I=proto --python_out=proto proto/VtsWebStatusMessage.proto
 
