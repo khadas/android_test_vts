@@ -71,7 +71,7 @@ class GCDAParser(parser.GcovStreamParserUtil):
         return self._file_summary
 
     @file_summary.setter
-    def file_summary(self, file_summary)
+    def file_summary(self, file_summary):
         """Sets the FileSummary object in which to store coverage data.
 
         Args:
