@@ -23,5 +23,8 @@ __Table of Contents__
     * [Codelab for Native Code Coverage Measurement](codelab_native_code_coverage.md)
     * [Native Coverage Information and FAQ](native_coverage_faq.md)
 
-3. FAQs
+3.  Enable Profiling for VTS Hidl HAL Tests
+    * [Codelab for Profiling VTS Hidl HAL Tests](codelab_enable_profiling.md)
+
+4. FAQs
     * [How to directly run a VTS test without using VTS-TradeFed](run_vts_directly.md)
