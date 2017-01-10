@@ -59,6 +59,8 @@ class VtsProfilingInterface {
   std::ofstream trace_output_;  // Writer to the trace file.
   Mutex mutex_;  // Mutex used to synchronize the writing to the trace file.
   bool initialized_;
+  bool stop_trace_recording_ = false;
+  const size_t kTraceFileSizeLimit = 5 * 1024 * 1024; /* limit trace file to 5MB */
 
   DISALLOW_COPY_AND_ASSIGN (VtsProfilingInterface);
 };
