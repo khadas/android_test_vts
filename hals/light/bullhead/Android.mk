@@ -34,20 +34,8 @@ LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SHARED_LIBRARIES := \
     liblog \
 
-LOCAL_SANITIZE := never
-LOCAL_CLANG := true
-LOCAL_CFLAGS += -fprofile-arcs -ftest-coverage
-LOCAL_LDFLAGS += --coverage
-
 LOCAL_MULTILIB := both
 
 LOCAL_COMPATIBILITY_SUITE := vts
 
-VTS_GCNO_MODULE := $(LOCAL_MODULE)
-
 include $(BUILD_SHARED_LIBRARY)
-include test/vts/tools/build/Android.packaging_sharedlib.mk
-
-VTS_GCOV_SRC_DIR := test/vts/hals/light/bullhead
-VTS_GCOV_SRC_CPP_FILES := $(LOCAL_SRC_FILES)
-include test/vts/tools/build/Android.packaging_gcno.mk
