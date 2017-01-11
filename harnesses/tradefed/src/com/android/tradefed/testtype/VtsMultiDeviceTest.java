@@ -71,6 +71,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
+    static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
@@ -758,20 +759,19 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
      * This method gets the python binary
      */
     private String getPythonBinary() {
-        try {
-            File venvDir = FileUtil.createNamedTempDir(
-                    mBuildInfo.getTestTag() + "-virtualenv-" +
-                    mBuildInfo.getDeviceSerial().replaceAll(":", "_"));
+        File venvDir = mBuildInfo.getFile(VIRTUAL_ENV_PATH);
+        if (venvDir != null) {
             File pythonBinaryFile = new File(venvDir.getAbsolutePath(), "bin/python");
+            String pythonBinPath = pythonBinaryFile.getAbsolutePath();
             if (pythonBinaryFile.exists()) {
-                return pythonBinaryFile.getAbsolutePath();
+                CLog.i("Python path " + pythonBinPath + ".\n");
+                return pythonBinPath;
             }
             CLog.e("bin/python doesn't exist under the " +
-                   "created virtualenv dir.\n");
-        } catch (IOException e) {
-            CLog.e("Checking python binary under the " +
-                   "created virtualenv dir raised an exception.\n");
-            /* pass */
+                   "created virtualenv dir (" + pythonBinPath + ").\n");
+        } else {
+          CLog.e(VIRTUAL_ENV_PATH + " not available in BuildInfo. " +
+                 "Please use VtsPythonVirtualenvPreparer tartget preparer.\n");
         }
 
         IRunUtil runUtil = RunUtil.getDefault();
