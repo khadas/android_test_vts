@@ -67,16 +67,13 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                      a GAE-side bigtable.
         _profiling: a dict containing the current profiling information.
     """
-    USE_GAE_DB = "use_gae_db"
-    COVERAGE = "coverage"
-    MODULES = "modules"
-    SERVICE_JSON_PATH = "service_key_json_path"
+
+    BRANCH = "master"  # TODO: read from tradefed parameters
+    CHECKSUM_GCNO_DICT = "checksum_gcno_dict"
     COVERAGE_ZIP = "coverage_zip"
     REVISION_DICT = "revision_dict"
-    CHECKSUM_GCNO_DICT = "checksum_gcno_dict"
     STATUS_TABLE = "vts_status_table"
-    BIGTABLE_BASE_URL = "bigtable_base_url"
-    BRANCH = "master"
+    USE_GAE_DB = "use_gae_db"
     VTS_PROFILING_TRACING_PATH = "profiling_trace_path"
 
     def __init__(self, configs):
@@ -87,8 +84,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         is called.
         """
         self.getUserParams(opt_param_names=[
-            self.USE_GAE_DB, self.BIGTABLE_BASE_URL, self.MODULES, self.COVERAGE,
-            self.SERVICE_JSON_PATH, keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+            self.USE_GAE_DB, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL,
+            keys.ConfigKeys.IKEY_MODULES, keys.ConfigKeys.IKEY_ENABLE_COVERAGE,
+            keys.ConfigKeys.IKEY_SERVICE_JSON_PATH,
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.KEY_TESTBED_NAME, self.VTS_PROFILING_TRACING_PATH
         ])
 
@@ -125,7 +124,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """Calls sub-class's tearDownClass first and then uploads to web DB."""
         result = super(BaseTestWithWebDbClass, self)._tearDownClass()
         if (getattr(self, self.USE_GAE_DB, False) and
-                getattr(self, self.BIGTABLE_BASE_URL, "")):
+            getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL, "")):
             # Handle case when runner fails, tests aren't executed
             if (self.results.executed and
                     self.results.executed[-1].test_name == "setup_class"):
@@ -147,7 +146,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.info("_tearDownClass hook: start (username: %s)",
                          getpass.getuser())
 
-            bt_url = getattr(self, self.BIGTABLE_BASE_URL)
+            bt_url = getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL)
             bt_client = bigtable_rest_client.HbaseRestClient(
                 "result_%s" % self._report_msg.test, bt_url)
             bt_client.CreateTable("test")
@@ -409,7 +408,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             True if the config file specifies modules for coverage measurement,
             False otherwise
         """
-        return hasattr(self, self.MODULES)
+        return hasattr(self, keys.ConfigKeys.IKEY_MODULES)
 
     def InitializeCoverage(self):
         """Initializes the test for coverage instrumentation.
@@ -420,10 +419,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if test is ready for coverage instrumentation, False otherwise.
         """
-        if not getattr(self, self.COVERAGE, False):
+        if not getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
             logging.info("coverage disabled in config")
             return
-        setattr(self, self.COVERAGE, False)
+        setattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False)
         if len(self._report_msg.device_info) == 0:
             logging.error("could not read device info")
             return False
@@ -444,7 +443,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         build_flavor += "_coverage"
 
         # Get service json path
-        service_json_path = getattr(self, self.SERVICE_JSON_PATH, False)
+        service_json_path = getattr(
+            self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH, False)
         if not service_json_path:
             logging.error("couldn't find service json path")
             return False
@@ -463,8 +463,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                                            build_flavor,
                                                            device_build_id)
         except:
-            logging.error("Could not read build info for branch %s, " +
-                          "target %s, id: %s", self.BRANCH, build_flavor,
+            logging.error("Could not read build info for branch: %s, " +
+                          "target: %s, id: %s", self.BRANCH, build_flavor,
                           device_build_id)
             return False
 
@@ -475,10 +475,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                          device_build_id, product))
             cov_zip = zipfile.ZipFile(cov_zip)
         except:
-            logging.error("Could not read coverage zip for branch %s, " +
-                          "target %s, id: %s, product: %s" %
-                          (self.BRANCH, build_flavor, device_build_id, product
-                           ))
+            logging.error("Could not read coverage zip for branch: %s, " +
+                          "target: %s, id: %s, product: %s", self.BRANCH,
+                          build_flavor, device_build_id, product)
             return False
 
         if not self.IsCoverageConfigSpecified():
@@ -487,7 +486,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         setattr(self, self.COVERAGE_ZIP, cov_zip)
         setattr(self, self.REVISION_DICT, revision_dict)
-        setattr(self, self.COVERAGE, True)
+        setattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, True)
         return True
 
     def SetCoverageData(self, coverage_data, isGlobal=False):
@@ -507,7 +506,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         Returns:
             True if the coverage data is successfully processed, False otherwise
         """
-        if not getattr(self, self.COVERAGE, False):
+        if not getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
             logging.info("coverage disabled")
             return False
 
@@ -543,7 +542,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 checksum_gcno_dict=checksum_gcno_dict)
         else:
             # explicitly process coverage data for the specified modules
-            modules = getattr(self, self.MODULES)
+            modules = getattr(self, keys.ConfigKeys.IKEY_MODULES)
             coverage_utils.ProcessCoverageData(
                 report_msg, gcda_dict, revision_dict, modules=modules,
                 cov_zip=cov_zip)

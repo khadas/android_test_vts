@@ -65,6 +65,7 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     static final String BUILD = "build";
     static final String BUILD_ID = "build_id";
     static final String BUILD_TARGET = "build_target";
+    static final String COVERAGE_PROPERTY = "ro.vts.coverage";
     static final String DATA_FILE_PATH = "data_file_path";
     static final String LOG_PATH = "log_path";
     static final String NAME = "name";
@@ -87,6 +88,7 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String ENABLE_PROFILING = "enable_profiling";
+    static final String ENABLE_COVERAGE = "enable_coverage";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
@@ -132,6 +134,12 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
 
     @Option(name = "enable-profiling", description = "Enable profiling for the tests.")
     private boolean mEnableProfiling = false;
+
+    @Option(name = "enable-coverage",
+            description = "Enable coverage for the tests. In order for coverage to be measured, " +
+                          "ro.vts.coverage system must have value \"1\" to indicate the target " +
+                          "build is coverage instrumented.")
+    private boolean mEnableCoverage = true;
 
     @Option(name = "run-32bit-on-64bit-abi",
             description = "Whether to run 32bit tests on 64bit abi.")
@@ -441,12 +449,15 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
         JSONArray deviceArray = new JSONArray();
         JSONObject deviceItemObject = new JSONObject();
         deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
+        boolean coverageBuild = false;
         try {
             deviceItemObject.put("product_type", mDevice.getProductType());
             deviceItemObject.put("product_variant", mDevice.getProductVariant());
             deviceItemObject.put("build_alias", mDevice.getBuildAlias());
             deviceItemObject.put("build_id", mDevice.getBuildId());
             deviceItemObject.put("build_flavor", mDevice.getBuildFlavor());
+            String coverageProperty = mDevice.getProperty(COVERAGE_PROPERTY);
+            coverageBuild = coverageProperty != null && coverageProperty.equals("1");
         } catch (DeviceNotAvailableException e) {
             CLog.e("A device not available - continuing");
             throw new RuntimeException("Failed to get device information");
@@ -530,6 +541,14 @@ IRuntimeHintProvider, IBuildReceiver, IAbiReceiver {
         if (mEnableProfiling) {
             jsonObject.put(ENABLE_PROFILING, mEnableProfiling);
             CLog.i("Added %s to the Json object", ENABLE_PROFILING);
+        }
+        if (mEnableCoverage) {
+            if (coverageBuild) {
+                jsonObject.put(ENABLE_COVERAGE, mEnableCoverage);
+                CLog.i("Added %s to the Json object", ENABLE_COVERAGE);
+            } else {
+                CLog.i("Device build has coverage disabled");
+            }
         }
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
           jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,

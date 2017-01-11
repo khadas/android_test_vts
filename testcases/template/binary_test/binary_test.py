@@ -134,7 +134,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
-        if getattr(self, self.COVERAGE, False):
+        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
             coverage_utils.InitializeDeviceCoverage(self._dut)
 
         self.testcases = []
@@ -229,7 +229,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
           self._dut.start()
 
         # Retrieve coverage if applicable
-        if getattr(self, self.COVERAGE, False):
+        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
             gcda_dict = coverage_utils.GetGcdaDict(self._dut)
             self.SetCoverageData(gcda_dict, True)
 
