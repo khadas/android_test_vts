@@ -23,6 +23,3 @@ vts_lib_packages := \
   libvts_multidevice_proto \
   libvts_profiling \
   libprotobuf-cpp-full \
-  libclang_rt.asan-arm-android \
-  libclang_rt.asan-aarch64-android \
-  libclang_rt.asan-i686-android \
