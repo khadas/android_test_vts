@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Config for VTS BionicUnitTests test cases">
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
+        <option name="push-group" value="HostDrivenTest.push" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="BionicUnitTests" />
+        <option name="binary-test-ld-library-paths" value="
+            _32bit::/data/local/tmp/nativetest,
+            _32bit::/data/nativetest/bionic-loader-test-libs,
+            _32bit::/data/nativetest/bionic-loader-test-libs/libdlext_test_fd,
+            _32bit::/data/nativetest/bionic-loader-test-libs/dt_runpath_b_c_x,
+            _32bit::/data/nativetest/bionic-loader-test-libs/libdlext_test_runpath_zip,
+            _32bit::/data/nativetest/bionic-loader-test-libs/public_namespace_libs,
+            _32bit::/data/nativetest/bionic-loader-test-libs/dt_runpath_a,
+            _32bit::/data/nativetest/bionic-loader-test-libs/libatest_simple_zip,
+            _32bit::/data/nativetest/bionic-loader-test-libs/prebuilt-elf-files,
+            _64bit::/data/local/tmp/nativetest64,
+            _64bit::/data/nativetest64/bionic-loader-test-libs,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/libdlext_test_fd,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/dt_runpath_b_c_x,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/libdlext_test_runpath_zip,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/public_namespace_libs,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/dt_runpath_a,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/libatest_simple_zip,
+            _64bit::/data/nativetest64/bionic-loader-test-libs/prebuilt-elf-files," />
+        <option name="binary-test-sources" value="
+            _32bit::DATA/nativetest/bionic-unit-tests/bionic-unit-tests,
+            _64bit::DATA/nativetest64/bionic-unit-tests/bionic-unit-tests,
+            _32bit::DATA/nativetest/bionic-loader-test-libs->/data/nativetest/bionic-loader-test-libs,
+            _64bit::DATA/nativetest64/bionic-loader-test-libs->/data/nativetest64/bionic-loader-test-libs
+            "/>
+        <option name="binary-test-type" value="gtest" />
+    </test>
+</configuration>
