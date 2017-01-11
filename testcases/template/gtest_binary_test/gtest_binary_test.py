@@ -82,7 +82,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
             if not len(line.strip()):
                 continue
             elif line.startswith(' '):  # Test case name
-                test_name = line.strip()
+                test_name = line.split('#')[0].strip()
                 test_case = gtest_test_case.GtestTestCase(
                     test_suite, test_name, path, tag, self.PutTag,
                     working_directory, ld_library_path, profiling_library_path)
