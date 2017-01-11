@@ -48,6 +48,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
     private static final String PIP = "pip";
     private static final String PATH = "PATH";
     protected static final String PYTHONPATH = "PYTHONPATH";
+    protected static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
     private static final String[] DEFAULT_DEP_MODULES = {
             "future", "futures", "enum", "protobuf", "requests", "httplib2",
@@ -159,7 +160,11 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
         }
         try {
             mVenvDir = FileUtil.createTempDir(buildInfo.getTestTag() + "-virtualenv");
-            mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", mVenvDir.getAbsolutePath());
+            String virtualEnvPath = mVenvDir.getAbsolutePath();
+            mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
+            CLog.i(VIRTUAL_ENV_PATH + " = " + virtualEnvPath + "\n");
+            buildInfo.setFile(VIRTUAL_ENV_PATH, new File(virtualEnvPath),
+                              buildInfo.getBuildId());
             activate();
         } catch (IOException e) {
             CLog.e("Failed to create temp directory for virtualenv");
