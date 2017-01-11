@@ -17,6 +17,8 @@
     <include name="everything" />
     <option name="plan" value="vts" />
     <option name="compatibility:include-filter" value="CpuProfilingTest" />
-    <option name="compatibility:include-filter" value="BionicNativeTest" />
+    <option name="compatibility:include-filter" value="BionicUnitTests" />
+    <option name="compatibility:include-filter" value="BionicUnitTestsGcc" />
+    <option name="compatibility:include-filter" value="BionicUnitTestsStatic" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
