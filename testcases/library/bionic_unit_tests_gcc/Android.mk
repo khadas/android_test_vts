@@ -20,6 +20,6 @@ include $(call all-subdir-makefiles)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := BionicNativeTest
-VTS_CONFIG_SRC_DIR := testcases/library/bionic_native_test
+LOCAL_MODULE := BionicUnitTestsGcc
+VTS_CONFIG_SRC_DIR := testcases/library/bionic_unit_tests_gcc
 include test/vts/tools/build/Android.host_config.mk
