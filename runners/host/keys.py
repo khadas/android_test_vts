@@ -66,6 +66,12 @@ class ConfigKeys(object):
     # Keys for profiling
     IKEY_ENABLE_PROFILING = "enable_profiling"
 
+    # Keys for coverage
+    IKEY_ENABLE_COVERAGE = "enable_coverage"
+    IKEY_MODULES = "modules"
+    IKEY_SERVICE_JSON_PATH = "service_key_json_path"
+    IKEY_BIGTABLE_BASE_URL = "bigtable_base_url"
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
