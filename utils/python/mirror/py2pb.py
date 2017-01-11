@@ -16,6 +16,7 @@
 #
 
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
+import logging
 
 
 def PyValue2PbEnum(message, pb_spec, py_value):
