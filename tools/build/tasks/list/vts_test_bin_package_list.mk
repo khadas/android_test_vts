@@ -14,19 +14,24 @@
 # limitations under the License.
 
 vts_test_bin_packages := \
-  libhwbinder_benchmark \
-  libbinder_benchmark \
-  vts_test_binary_crash_app \
-  vts_test_binary_syscall_exists \
-  simpleperf_cpu_hotplug_test \
-  binderThroughputTest \
-  hwbinderThroughputTest \
-  bionic-unit-tests \
-  bionic-unit-tests-gcc \
-  bionic-unit-tests-static \
-  stressapptest \
+    libhwbinder_benchmark \
+    libbinder_benchmark \
+    vts_test_binary_crash_app \
+    vts_test_binary_syscall_exists \
+    simpleperf_cpu_hotplug_test \
+    binderThroughputTest \
+    hwbinderThroughputTest \
+    bionic-unit-tests \
+    bionic-unit-tests-gcc \
+    bionic-unit-tests-static \
+    stressapptest \
 
 # some CTS packages for record-and-replay test development purpose
 vts_test_bin_packages += \
-  CtsAccelerationTestCases \
-  CtsSensorTestCases \
+    CtsAccelerationTestCases \
+    CtsSensorTestCases \
+
+# Proto fuzzer executable
+vts_test_bin_packages += \
+    vts_proto_fuzzer \
+
