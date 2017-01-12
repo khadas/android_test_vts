@@ -137,7 +137,7 @@ def ExtractSourceName(gcno_summary, file_name):
         src_file_path = gcno_summary.functions[key].src_file_name
         src_parts = src_file_path.rsplit(".", 1)
         src_file_name = src_parts[0]
-        src_extension = src_parts[1]
+        src_extension = src_parts[1] if len(src_parts) > 1 else None
         if src_extension not in ["c", "cpp", "cc"]:
             logging.warn("Found unsupported file type: %s", src_file_path)
             continue
@@ -212,14 +212,14 @@ def AutoProcess(report_msg, checksum_gcno_dict, gcda_dict, revision_dict):
         try:
             gcno_summary = gcno_file_parser.Parse()
         except FileFormatError:
-            logging.error("Error parsing gcno file %s", gcno_file_path)
+            logging.error("Error parsing gcno for gcda %s", gcda_name)
             continue
 
         file_name = gcda_name.rsplit(".", 1)[0]
         src_file_path = ExtractSourceName(gcno_summary, file_name)
 
         if not src_file_path:
-            logging.error("No source file found for %s.", gcno_file_path)
+            logging.error("No source file found for gcda %s.", gcda_name)
             continue
 
         # Process and merge gcno/gcda data
