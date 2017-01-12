@@ -56,6 +56,7 @@ vts_test_lib_hidl_packages += \
   nfc_hidl_hal_test \
   power_hidl_hal_test \
   sensors_hidl_hal_test \
+  soundtrigger_hidl_hal_test \
   thermal_hidl_hal_test \
   vibrator_hidl_hal_test \
   vr_hidl_hal_test \
