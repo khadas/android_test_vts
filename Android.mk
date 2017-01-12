@@ -118,12 +118,6 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@rm -f $@.list
 	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
 	#
-	@echo "build vts python package for soundtrigger HAL"
-	$(hide) find hardware/interfaces/soundtrigger/2.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
-	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/soundtrigger/2.0/vts/functional -l $@.list
-	@rm -f $@.list
-	$(hide) unzip $@ -d $(VTS_TESTCASES_OUT)
-	#
 	@echo "build vts python package for VR HAL"
 	$(hide) find hardware/interfaces/vr/1.0/vts/functional -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C hardware/interfaces/vr/1.0/vts/functional -l $@.list
