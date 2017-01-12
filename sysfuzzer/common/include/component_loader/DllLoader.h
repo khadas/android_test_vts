@@ -69,6 +69,10 @@ class DllLoader {
 
   // pointer to the HAL data structure found in the loaded file.
   struct hw_device_t* device_;
+
+  // Loads a symbol and prints error message.
+  // Returns the symbol value if successful; NULL otherwise.
+  void* LoadSymbol(const char* symbol_name);
 };
 
 }  // namespace vts
