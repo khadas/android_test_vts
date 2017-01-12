@@ -38,9 +38,10 @@ class GCDAParser(parser.GcovStreamParserUtil):
     Stores the file stream and a FileSummary object as it is updated.
 
     Attributes:
-        stream: File stream object for a GCDA file
+        checksum: The checksum (int) of the file
+        file_summary: The FileSummary object describing the source file
         format: Character denoting the endianness of the file
-        summary: The FileSummary object describing the source file
+        stream: File stream object for a GCDA file
     """
 
     MAGIC = 0x67636461

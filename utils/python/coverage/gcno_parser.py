@@ -45,9 +45,11 @@ class GCNOParser(parser.GcovStreamParserUtil):
     Stores the file stream and summary object as it is updated.
 
     Attributes:
-        stream: File stream object for a GCNO file
+        checksum: The checksum (int) of the file
+        file_summary: The FileSummary object describing the GCNO file
         format: Character denoting the endianness of the file
-        summary: The FileSummary object describing the GCNO file
+        parsed: True if the content has been parsed, False otherwise
+        stream: File stream object for a GCNO file
         version: The (integer) version of the GCNO file
     """
 
@@ -70,6 +72,7 @@ class GCNOParser(parser.GcovStreamParserUtil):
         """
         super(GCNOParser, self).__init__(stream, self.MAGIC)
         self.file_summary = file_summary.FileSummary()
+        self.parsed = False
 
     def Parse(self):
         """Runs the parser on the file opened in the stream attribute.
@@ -84,6 +87,8 @@ class GCNOParser(parser.GcovStreamParserUtil):
         Raises:
             parser.FileFormatError: invalid file format.
         """
+        if self.parsed:
+            return self.file_summary
 
         func = None
 
@@ -101,6 +106,7 @@ class GCNOParser(parser.GcovStreamParserUtil):
                 if not func:
                     raise parser.FileFormatError("Invalid file.")
                 self.file_summary.functions[func.ident] = func
+                self.parsed = True
                 return self.file_summary  #  end of file reached
 
             if tag == self.TAG_FUNCTION:
