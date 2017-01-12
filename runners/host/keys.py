@@ -72,6 +72,9 @@ class ConfigKeys(object):
     IKEY_SERVICE_JSON_PATH = "service_key_json_path"
     IKEY_BIGTABLE_BASE_URL = "bigtable_base_url"
 
+    # Keys for the HAL HIDL GTest type.
+    IKEY_HWBINDER_SERVICE = "hwbinder_service"  # when a service is required.
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
