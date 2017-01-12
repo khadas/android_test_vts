@@ -159,7 +159,10 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
             return;
         }
         try {
-            mVenvDir = FileUtil.createTempDir(buildInfo.getTestTag() + "-virtualenv");
+            mVenvDir = buildInfo.getFile(VIRTUAL_ENV_PATH);
+            if (mVenvDir == null) {
+                mVenvDir = FileUtil.createTempDir(buildInfo.getTestTag() + "-virtualenv");
+            }
             String virtualEnvPath = mVenvDir.getAbsolutePath();
             mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
             CLog.i(VIRTUAL_ENV_PATH + " = " + virtualEnvPath + "\n");
