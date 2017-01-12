@@ -174,7 +174,9 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(Formatter& out,
           }
         } else if (return_type_hidl.type() == TYPE_HANDLE) {
           out << "const ::android::hardware::hidl_handle& ";
-        } else {
+        } else if (return_type_hidl.type() == TYPE_HIDL_INTERFACE) {
+          out << "sp<" << return_type_hidl.predefined_type() << ">";
+        }else {
           cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
               << return_type_hidl.type() << " for " << api.name() << "\n";
           exit(-1);
@@ -199,7 +201,8 @@ void HalHidlCodeGen::GenerateCppBodySyncCallbackFunction(Formatter& out,
           GenerateScalarTypeInC(out, return_type_hidl.scalar_type());
         } else if (return_type_hidl.type() == TYPE_ENUM
             || return_type_hidl.type() == TYPE_VECTOR
-            || return_type_hidl.type() == TYPE_STRUCT) {
+            || return_type_hidl.type() == TYPE_STRUCT
+            || return_type_hidl.type() == TYPE_HIDL_INTERFACE) {
           out << GetCppVariableType(return_type_hidl, &message);
         } else if (return_type_hidl.type() == TYPE_STRING) {
           out << "::android::hardware::hidl_string";
@@ -1376,15 +1379,15 @@ void HalHidlCodeGen::GenerateClassImpl(Formatter& out,
       && !endsWith(message.component_name(), "Callback")) {
     GenerateCppBodySyncCallbackFunction(out, message,
                                         fuzzer_extended_class_name);
-    GenerateGetServiceImpl(out, message, fuzzer_extended_class_name);
-    DriverCodeGenBase::GenerateClassImpl(out, message,
-                                         fuzzer_extended_class_name);
-    for (auto attribute : message.attribute()) {
+    for (auto attribute : message.interface().attribute()) {
       GenerateDriverImplForAttribute(out, attribute);
       GenerateRandomFunctionForAttribute(out, attribute);
       GenerateVerificationImplForAttribute(out, attribute);
       GenerateSetResultImplForAttribute(out, attribute);
     }
+    GenerateGetServiceImpl(out, message, fuzzer_extended_class_name);
+    DriverCodeGenBase::GenerateClassImpl(out, message,
+                                         fuzzer_extended_class_name);
   } else if (message.component_name() == "types") {
     for (auto attribute : message.attribute()) {
       GenerateDriverImplForAttribute(out, attribute);
