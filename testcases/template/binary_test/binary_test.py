@@ -42,6 +42,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         tags: all the tags that appeared in binary list
         DEVICE_TMP_DIR: string, temp location for storing binary
         TAG_DELIMITER: string, separator used to separate tag and path
+        _skip_all_testcases: boolean - True to skip all test cases.
     '''
 
     DEVICE_TMP_DIR = '/data/local/tmp'
@@ -56,6 +57,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
+        self._skip_all_testcases = False
+
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
@@ -338,6 +341,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         Args:
             test_case: BinaryTestCase object
         '''
+        if self._skip_all_testcases:
+            asserts.skip("All test cases skipped")
+
         if self.enable_profiling:
             profiling_utils.EnableVTSProfiling(
                 self.shell, test_case.profiling_library_path)

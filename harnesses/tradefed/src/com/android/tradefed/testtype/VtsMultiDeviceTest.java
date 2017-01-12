@@ -87,11 +87,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
+    static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
+    static final String HWBINDER_SERVICE = "hwbinder_service";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
+    static final String TEMPLATE_HAL_HIDL_GTEST_PATH = "vts/testcases/template/hal_hidl_gtest/hal_hidl_gtest";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -115,6 +118,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "test-config-path",
             description = "The path for test case config file.")
     private String mTestConfigPath = null;
+
+    @Option(name = "hwbinder-service",
+            description = "The name of a HW binder service needed to run the test.")
+    private String mHwBinderServiceName = null;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -348,6 +355,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     case BINARY_TEST_TYPE_LLVMFUZZER:
                         template = TEMPLATE_LLVMFUZZER_TEST_PATH;
                         break;
+                    case BINARY_TEST_TYPE_HAL_HIDL_GTEST:
+                      template = TEMPLATE_HAL_HIDL_GTEST_PATH;
+                      break;
                     default:
                         template = TEMPLATE_BINARY_TEST_PATH;
                 }
@@ -548,6 +558,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 CLog.i("Device build has coverage disabled");
             }
         }
+
+        if (mHwBinderServiceName != null) {
+            jsonObject.put(HWBINDER_SERVICE, mHwBinderServiceName);
+            CLog.i("Added %s to the Json object", ENABLE_PROFILING);
+        }
+
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
           jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
                   new JSONArray(mBinaryTestProfilingLibraryPaths));
