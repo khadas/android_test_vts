@@ -17,8 +17,6 @@
 #include "component_loader/DllLoader.h"
 
 #include <dlfcn.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <iostream>
 
@@ -40,100 +38,80 @@ DllLoader::~DllLoader() {
 
 void* DllLoader::Load(const char* file_path, bool is_conventional_hal) {
   if (!file_path) {
-    cerr << __FUNCTION__ << ": file_path is NULL" << endl;
+    cerr << __func__ << ": file_path is NULL" << endl;
     return NULL;
   }
 
   // consider using the load mechanism in hardware/libhardware/hardware.c
   handle_ = dlopen(file_path, RTLD_LAZY);
   if (!handle_) {
-    fputs(dlerror(), stderr);
-    cerr << endl
-         << "Can't load a shared library, " << file_path << "." << endl;
+    cerr << __func__ << ": " << dlerror() << endl;
+    cerr << __func__ << ": Can't load a shared library, " << file_path << "."
+         << endl;
     return NULL;
   }
-  cout << __func__ << " DLL loaded " << file_path << endl;
+  cout << __func__ << ": DLL loaded " << file_path << endl;
   if (is_conventional_hal) {
-    cout << __func__ << " setting hmi" << endl;
-    hmi_ = (struct hw_module_t*)dlsym(handle_, HAL_MODULE_INFO_SYM_AS_STR);
-    if (!hmi_) {
-      cerr << __func__ << ": " << HAL_MODULE_INFO_SYM_AS_STR << " not found"
-           << endl;
-    }
+    cout << __func__ << ": setting hmi" << endl;
+    hmi_ = (struct hw_module_t*)LoadSymbol(HAL_MODULE_INFO_SYM_AS_STR);
   }
   return handle_;
 }
 
 struct hw_module_t* DllLoader::InitConventionalHal() {
   if (!handle_) {
-    cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
+    cerr << __func__ << ": handle_ is NULL" << endl;
     return NULL;
   }
-  hmi_ = (struct hw_module_t*)dlsym(handle_, HAL_MODULE_INFO_SYM_AS_STR);
+  hmi_ = (struct hw_module_t*)LoadSymbol(HAL_MODULE_INFO_SYM_AS_STR);
   if (!hmi_) {
-    cerr << __FUNCTION__ << ": " << HAL_MODULE_INFO_SYM_AS_STR << " not found"
-         << endl;
     return NULL;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << endl;
+  cout << __func__ << ":" << __LINE__ << endl;
   hmi_->dso = handle_;
   device_ = NULL;
-  cout << __FUNCTION__ << ": version " << hmi_->module_api_version << endl;
+  cout << __func__ << ": version " << hmi_->module_api_version << endl;
   return hmi_;
 }
 
 struct hw_device_t* DllLoader::OpenConventionalHal(const char* module_name) {
   cout << __func__ << endl;
   if (!handle_) {
-    cerr << __FUNCTION__ << ": handle_ is NULL" << endl;
+    cerr << __func__ << ": handle_ is NULL" << endl;
     return NULL;
   }
   if (!hmi_) {
-    cerr << __FUNCTION__ << ": hmi_ is NULL" << endl;
+    cerr << __func__ << ": hmi_ is NULL" << endl;
     return NULL;
   }
 
   device_ = NULL;
   int ret;
   if (module_name && strlen(module_name) > 0) {
-    cout << __FUNCTION__ << ":" << __LINE__ << ": module_name |" << module_name
+    cout << __func__ << ":" << __LINE__ << ": module_name |" << module_name
          << "|" << endl;
     ret =
         hmi_->methods->open(hmi_, module_name, (struct hw_device_t**)&device_);
   } else {
-    cout << __FUNCTION__ << ":" << __LINE__ << ": (default) " << hmi_->name
+    cout << __func__ << ":" << __LINE__ << ": (default) " << hmi_->name
          << endl;
     ret = hmi_->methods->open(hmi_, hmi_->name, (struct hw_device_t**)&device_);
   }
   if (ret != 0) {
     cout << "returns " << ret << " " << strerror(errno) << endl;
   }
-  cout << __FUNCTION__ << ":" << __LINE__ << " device_ " << device_ << endl;
+  cout << __func__ << ":" << __LINE__ << " device_ " << device_ << endl;
   return device_;
 }
 
 loader_function DllLoader::GetLoaderFunction(const char* function_name) {
-  const char* error;
-  loader_function func;
-
-  func = (loader_function)dlsym(handle_, function_name);
-  if ((error = dlerror()) != NULL) {
-    fputs(error, stderr);
-    cerr << endl;
-    cerr << __func__ << ": Can't find " << function_name << endl;
-    return NULL;
-  }
+  loader_function func = (loader_function)LoadSymbol(function_name);
   return func;
 }
 
 bool DllLoader::SancovResetCoverage() {
-  const char* error;
-  void (*func)();
-
-  func = (void (*)())dlsym(handle_, "__sanitizer_reset_coverage");
-  if ((error = dlerror()) != NULL) {
-    fputs(error, stderr);
-    cerr << __FUNCTION__ << ": Can't find __sanitizer_reset_coverage" << endl;
+  void (*func)() = (void (*)())LoadSymbol("__sanitizer_reset_coverage");
+  if (func == NULL) {
     return false;
   }
   func();
@@ -141,13 +119,9 @@ bool DllLoader::SancovResetCoverage() {
 }
 
 bool DllLoader::GcovInit(writeout_fn wfn, flush_fn ffn) {
-  const char* error;
-  void (*func)(writeout_fn, flush_fn);
-
-  func = (void (*)(writeout_fn, flush_fn))dlsym(handle_, "llvm_gcov_init");
-  if ((error = dlerror()) != NULL) {
-    fputs(error, stderr);
-    cerr << __FUNCTION__ << ": Can't find llvm_gcov_init" << endl;
+  void (*func)(writeout_fn, flush_fn) =
+      (void (*)(writeout_fn, flush_fn))LoadSymbol("llvm_gcov_init");
+  if (func == NULL) {
     return false;
   }
   func(wfn, ffn);
@@ -155,18 +129,28 @@ bool DllLoader::GcovInit(writeout_fn wfn, flush_fn ffn) {
 }
 
 bool DllLoader::GcovFlush() {
-  const char* error;
-  void (*func)();
-
-  func = (void (*)())dlsym(handle_, "__gcov_flush");
-  if ((error = dlerror()) != NULL) {
-    fputs(error, stderr);
-    cerr << __FUNCTION__ << ": Can't find __gcov_flush" << endl;
+  void (*func)() = (void (*)()) LoadSymbol("__gcov_flush");
+  if (func == NULL) {
     return false;
   }
   func();
-
   return true;
+}
+
+void* DllLoader::LoadSymbol(const char* symbol_name) {
+  const char* error = dlerror();
+  if (error != NULL) {
+    cerr << __func__ << ": existing error message before loading "
+         << symbol_name << endl;
+    cerr << __func__ << ": " << error << endl;
+  }
+  void* sym = dlsym(handle_, symbol_name);
+  if ((error = dlerror()) != NULL) {
+    cerr << __func__ << ": Can't find " << symbol_name << endl;
+    cerr << __func__ << ": " << error << endl;
+    return NULL;
+  }
+  return sym;
 }
 
 }  // namespace vts
