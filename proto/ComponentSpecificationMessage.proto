@@ -122,6 +122,8 @@ enum VariableType {
   TYPE_MASK = 15;
   // for hidl_memory type
   TYPE_HIDL_MEMORY = 16;
+  // for pointer type
+  TYPE_POINTER = 17;
 }
 
 

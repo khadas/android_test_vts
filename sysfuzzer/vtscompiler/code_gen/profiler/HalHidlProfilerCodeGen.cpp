@@ -144,6 +144,27 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHidlInterfaceVariable(
   // TODO(zhuoyao): figure the right way to profile hidl interface type.
 }
 
+void HalHidlProfilerCodeGen::GenerateProfilerForMaskVariable(Formatter& out,
+    const VariableSpecificationMessage&, const std::string& arg_name,
+    const std::string&) {
+  out << arg_name << "->set_type(TYPE_MAKS);\n";
+  // TODO(zhuoyao): figure the right way to profile mask type.
+}
+
+void HalHidlProfilerCodeGen::GenerateProfilerForHidlMemoryVariable(
+    Formatter& out, const VariableSpecificationMessage&,
+    const std::string& arg_name, const std::string&) {
+  out << arg_name << "->set_type(TYPE_HIDL_MEMORY);\n";
+  // TODO(zhuoyao): figure the right way to profile hidl memory type.
+}
+
+void HalHidlProfilerCodeGen::GenerateProfilerForPointerVariable(Formatter& out,
+    const VariableSpecificationMessage&, const std::string& arg_name,
+    const std::string&) {
+  out << arg_name << "->set_type(TYPE_POINTER);\n";
+  // TODO(zhuoyao): figure the right way to profile pointer type.
+}
+
 void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
