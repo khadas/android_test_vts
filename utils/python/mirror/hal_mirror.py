@@ -57,7 +57,7 @@ COMPONENT_TYPE_DICT = {"audio": 1,
 VTS_CALLBACK_SERVER_TARGET_SIDE_PORT = 5010
 
 _DEFAULT_TARGET_BASE_PATHS = ["/system/lib64/hw"]
-
+_DEFAULT_HWBINDER_SERVICE = "default"
 
 class HalMirror(object):
     """The class that acts as the mirror to an Android device's HAL layer.
@@ -159,7 +159,7 @@ class HalMirror(object):
                     target_component_name=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
-                    hw_binder_service_name=None,
+                    hw_binder_service_name=_DEFAULT_TARGET_BASE_PATHS,
                     bits=64):
         """Initiates a handler for a particular HIDL HAL.
 
