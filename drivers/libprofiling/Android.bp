@@ -35,3 +35,18 @@ cc_library_shared {
 
     export_include_dirs: ["."],
 }
+
+cc_binary {
+    name: "vts_profiling_configure",
+
+    srcs: ["VtsProfilingConfigureMain.cpp"],
+
+    shared_libs: [
+        "libbase",
+        "libutils",
+        "libcutils",
+        "libhidlbase",
+        "libhidltransport",
+        "android.hidl.manager@1.0",
+    ],
+}
