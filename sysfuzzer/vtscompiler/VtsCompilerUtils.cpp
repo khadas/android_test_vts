@@ -140,85 +140,124 @@ string GetCppVariableType(const std::string scalar_type_string) {
   exit(-1);
 }
 
-// TODO(zhuoyao): refactor and support TYPE_ARRAY.
 string GetCppVariableType(const VariableSpecificationMessage& arg,
                           const ComponentSpecificationMessage* message) {
-  if (arg.type() == TYPE_VOID) {
-    return "void";
-  }
-  if (arg.type() == TYPE_PREDEFINED) {
-    return arg.predefined_type();
-  } else if (arg.type() == TYPE_SCALAR) {
-    return GetCppVariableType(arg.scalar_type());
-  } else if (arg.type() == TYPE_STRING) {
-    return "::android::hardware::hidl_string";
-  } else if (arg.type() == TYPE_ENUM) {
-    cout << __func__ << ":" << __LINE__ << " "
-         << arg.has_enum_value() << " " << arg.has_predefined_type() << endl;
-    if (!arg.has_enum_value() && arg.has_predefined_type()) {
-      if (!message || message->component_class() != HAL_HIDL) {
+  switch (arg.type()) {
+    case TYPE_VOID:
+    {
+      return "void";
+    }
+    case TYPE_PREDEFINED:
+    {
+      return arg.predefined_type();
+    }
+    case TYPE_SCALAR:
+    {
+      return GetCppVariableType(arg.scalar_type());
+    }
+    case TYPE_STRING:
+    {
+      return "::android::hardware::hidl_string";
+    }
+    case TYPE_ENUM:
+    {
+      if (!arg.has_enum_value() && arg.has_predefined_type()) {
         return arg.predefined_type();
       } else {
-        if (!endsWith(message->component_name(), "Callback")) {
-          return arg.predefined_type();
-        } else {
-          return arg.predefined_type();
-        }
-      }
-    }
-  } else if (arg.type() == TYPE_STRUCT) {
-    cout << __func__ << ":" << __LINE__ << " "
-         << arg.struct_value_size() << " " << arg.has_predefined_type() << endl;
-    if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
-      if (!message || message->component_class() != HAL_HIDL) {
-        return arg.predefined_type();
-      } else {
-        return arg.predefined_type();
-      }
-    }
-  } else if (arg.type() == TYPE_VECTOR) {
-    if (arg.vector_value(0).type() == TYPE_SCALAR) {
-      if (arg.vector_value(0).scalar_type().length() == 0) {
-        cerr << __func__ << ":" << __LINE__ << " ERROR scalar_type not set" << endl;
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type set for enum variable" << endl;
         exit(-1);
       }
-      return "::android::hardware::hidl_vec<"
-          + arg.vector_value(0).scalar_type() + ">";
-    } else if (arg.vector_value(0).type() == TYPE_ENUM) {
-      return "::android::hardware::hidl_vec<"
-          + arg.vector_value(0).predefined_type() + ">";
-    } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
-      if (arg.vector_value(0).struct_type().length() > 0) {
-        return "::android::hardware::hidl_vec<"
-            + arg.vector_value(0).struct_type() + ">";
-      } else if (arg.vector_value(0).predefined_type().length() > 0) {
-        return "::android::hardware::hidl_vec<"
-            + arg.vector_value(0).predefined_type() + ">";
+    }
+    case TYPE_VECTOR:
+    {
+      string element_type = GetCppVariableType(arg.vector_value(0), message);
+      return "::android::hardware::hidl_vec<" + element_type + ">";
+    }
+    case TYPE_ARRAY:
+    {
+      string element_type = GetCppVariableType(arg.vector_value(0), message);
+      return "::android::hardware::hidl_vec<" + element_type + ","
+          + to_string(arg.vector_size()) + ">";
+    }
+    case TYPE_STRUCT:
+    {
+      if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
+        return arg.predefined_type();
+      } else if (arg.has_struct_type()) {
+        return arg.struct_type();
       } else {
-        cerr << __func__ << ":" << __LINE__ << " ERROR struct_type not set" << endl;
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type or struct_type set for struct"
+             << " variable" << endl;
         exit(-1);
       }
-    } else if (arg.vector_value(0).type() == TYPE_STRING) {
-      return "::android::hardware::hidl_vec< "
-          "::android::hardware::hidl_string>";
-    } else {
-      cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
-           << arg.vector_value(0).type() << endl;
     }
-  } else if (arg.type() == TYPE_HIDL_CALLBACK) {
-    return "sp<" + arg.predefined_type() + ">";
-  } else if (arg.type() == TYPE_HANDLE) {
-    return "::android::hardware::hidl_handle";
-  } else if (arg.type() == TYPE_HIDL_INTERFACE) {
-    return "sp<" + arg.predefined_type() + ">";
+    case TYPE_UNION:
+    {
+      if (arg.union_value_size() == 0 && arg.has_predefined_type()) {
+        return arg.predefined_type();
+      } else if (arg.has_union_type()) {
+        return arg.union_type();
+      } else {
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type or union_type set for union"
+             << " variable" << endl;
+        exit(-1);
+      }
+    }
+    case TYPE_HIDL_CALLBACK:
+    {
+      if (arg.has_predefined_type()) {
+        return "sp<" + arg.predefined_type() + ">";
+      } else {
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type set for hidl callback variable"
+             << endl;
+        exit(-1);
+      }
+    }
+    case TYPE_HANDLE:
+    {
+      return "::android::hardware::hidl_handle";
+    }
+    case TYPE_HIDL_INTERFACE:
+    {
+      if (arg.has_predefined_type()) {
+        return "sp<" + arg.predefined_type() + ">";
+      } else {
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type set for hidl interface variable"
+             << endl;
+        exit(-1);
+      }
+    }
+    case TYPE_MASK:
+    {
+      // Mask is a special enum type.
+      if (arg.has_predefined_type()) {
+        return arg.predefined_type();
+      } else {
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type set for mask variable" << endl;
+        exit(-1);
+      }
+    }
+    case TYPE_HIDL_MEMORY:
+    {
+        return "::android::hardware::hidl_memory";
+    }
+    case TYPE_POINTER:
+    {
+      return "void*";
+    }
+    default:
+    {
+      cerr << __func__ << ":" << __LINE__ << " " << ": type " << arg.type()
+          << " not supported" << endl;
+      exit(-1);
+    }
   }
-  cerr << __func__ << ":" << __LINE__ << " "
-       << ": type " << arg.type() << " not supported" << endl;
-  string* output = new string();
-  google::protobuf::TextFormat::PrintToString(arg, output);
-  cerr << *output;
-  delete output;
-  exit(-1);
 }
 
 string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg) {
