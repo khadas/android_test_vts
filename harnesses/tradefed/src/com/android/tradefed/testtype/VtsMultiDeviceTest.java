@@ -352,9 +352,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     case BINARY_TEST_TYPE_GTEST:
                         template = TEMPLATE_GTEST_BINARY_TEST_PATH;
                         break;
-                    case BINARY_TEST_TYPE_LLVMFUZZER:
-                        template = TEMPLATE_LLVMFUZZER_TEST_PATH;
-                        break;
                     case BINARY_TEST_TYPE_HAL_HIDL_GTEST:
                       template = TEMPLATE_HAL_HIDL_GTEST_PATH;
                       break;
@@ -363,6 +360,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 }
                 CLog.i("Using default test case template at %s.", template);
                 setTestCasePath(template);
+            } else if (mBinaryTestType.equals(BINARY_TEST_TYPE_LLVMFUZZER)) {
+                // Fuzz test don't need test-case-path.
+                setTestCasePath(TEMPLATE_LLVMFUZZER_TEST_PATH);
             } else {
                 throw new IllegalArgumentException("test-case-path is not set.");
             }

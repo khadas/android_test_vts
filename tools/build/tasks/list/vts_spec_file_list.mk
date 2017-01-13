@@ -55,5 +55,7 @@ vts_spec_file_list += \
   hardware/interfaces/tv/cec/1.0/vts/HdmiCec.vts \
   hardware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts \
   hardware/interfaces/tv/cec/1.0/vts/types.vts \
+  hardware/interfaces/light/2.0/vts/Light.vts \
+  hardware/interfaces/light/2.0/vts/types.vts \
 
 endif
