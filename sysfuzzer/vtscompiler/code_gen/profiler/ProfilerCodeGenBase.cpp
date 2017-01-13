@@ -187,6 +187,21 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
       GenerateProfilerForHidlInterfaceVariable(out, val, arg_name, arg_value);
       break;
     }
+    case TYPE_MASK:
+    {
+      GenerateProfilerForMaskVariable(out, val, arg_name, arg_value);
+      break;
+    }
+    case TYPE_HIDL_MEMORY:
+    {
+      GenerateProfilerForHidlMemoryVariable(out, val, arg_name, arg_value);
+      break;
+    }
+    case TYPE_POINTER:
+    {
+      GenerateProfilerForPointerVariable(out, val, arg_name, arg_value);
+      break;
+    }
     default:
     {
       cout << "not supported.\n";
