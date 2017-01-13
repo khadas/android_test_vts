@@ -41,21 +41,15 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         """Creates a remote shell instance, and copies data files."""
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
             config.ConfigKeys.FUZZER_CONFIGS
         ]
         self.getUserParams(required_params)
 
-        self._testcases = list_utils.ExpandItemDelimiters(
-            self.binary_test_sources,
-            const.LIST_ITEM_DELIMITER,
-            strip=True,
-            to_str=True)
+        self._testcases = map(lambda x: str(x), self.fuzzer_configs.keys())
 
+        logging.info("Testcases: %s", self._testcases)
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
             self.data_file_path)
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
-            self._testcases)
         logging.info("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
             self.fuzzer_configs)
 
@@ -85,14 +79,55 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
             fuzzer_config: dict, contains configuration for the fuzzer.
 
         Returns:
-            string, of form "-<flag0>=<val0> -<flag1>=<val1> ... "
+            string, command line flags for fuzzer executable.
         """
-        fuzzer_params = config.FUZZER_PARAMS.copy()
-        fuzzer_params.update(fuzzer_config.get("fuzzer_params", {}))
+        def _SerializeVTSFuzzerParams(params):
+            """Creates VTS command line flags for fuzzer executable.
 
-        test_flags = " ".join(
-            ["-%s=%s" % (k, v) for k, v in fuzzer_params.items()])
-        return test_flags
+            Args:
+                params: dict, contains flags and their values.
+
+            Returns:
+                string, of form "--<flag0>=<val0> --<flag1>=<val1> ... "
+            """
+            VTS_SPEC_FILES = "vts_spec_files"
+            VTS_EXEC_SIZE = "vts_exec_size"
+            DELIMITER = ":"
+
+            # vts_spec_files is a string list, will be serialized like this:
+            # [a, b, c] -> "a:b:c"
+            vts_spec_files = params.get(VTS_SPEC_FILES, {})
+            flags = "--%s=\"%s\" " % (
+                VTS_SPEC_FILES,
+                DELIMITER.join(map(
+                    lambda x: os.path.join(config.FUZZER_SPEC_DIR, x),
+                    vts_spec_files)))
+
+            vts_exec_size = params.get(VTS_EXEC_SIZE, {})
+            flags += "--%s=%s" % (VTS_EXEC_SIZE, vts_exec_size)
+            return flags
+
+        def _SerializeLLVMFuzzerParams(params):
+            """Creates LLVM libfuzzer command line flags for fuzzer executable.
+
+            Args:
+                params: dict, contains flags and their values.
+
+            Returns:
+                string, of form "--<flag0>=<val0> --<flag1>=<val1> ... "
+            """
+            return " ".join(["-%s=%s" % (k, v) for k, v in params.items()])
+
+
+        vts_fuzzer_params = fuzzer_config.get("vts_fuzzer_params", {})
+
+        llvmfuzzer_params = config.FUZZER_PARAMS.copy()
+        llvmfuzzer_params.update(fuzzer_config.get("llvmfuzzer_params", {}))
+
+        vts_fuzzer_flags = _SerializeVTSFuzzerParams(vts_fuzzer_params)
+        llvmfuzzer_flags = _SerializeLLVMFuzzerParams(llvmfuzzer_params)
+
+        return vts_fuzzer_flags + " -- " + llvmfuzzer_flags
 
     def CreateCorpus(self, fuzzer, fuzzer_config):
         """Creates a corpus directory on target.
@@ -134,7 +169,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._shell.Execute(chmod_cmd)
 
         cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
-        ld_path = "LD_LIBRARY_PATH=/data/local/tmp/32:/data/local/tmp/64:$LD_LIBRARY_PATH"
+        ld_path = "LD_LIBRARY_PATH=/data/local/tmp/64:/data/local/tmp/32:$LD_LIBRARY_PATH"
         test_cmd = "./%s" % fuzzer
 
         fuzz_cmd = "%s && %s %s %s %s" % (cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
@@ -192,6 +227,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
             fuzzer: string, name of fuzzer executable.
             result: dict(str, str, int), command results from shell.
         """
+        logging.info("Test result: %s" % result)
         if not self._dut.hasBooted():
             self._dut.waitForBootCompletion()
             asserts.fail("%s left the device in unresponsive state." % fuzzer)
