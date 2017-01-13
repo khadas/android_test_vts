@@ -112,11 +112,14 @@ string GetCppVariableType(const std::string scalar_type_string) {
       scalar_type_string == "int32_t" || scalar_type_string == "uint32_t" ||
       scalar_type_string == "int8_t" || scalar_type_string == "uint8_t" ||
       scalar_type_string == "int64_t" || scalar_type_string == "uint64_t" ||
-      scalar_type_string == "int16_t" || scalar_type_string == "uint16_t" ||
-      scalar_type_string == "float_t" || scalar_type_string == "double_t") {
+      scalar_type_string == "int16_t" || scalar_type_string == "uint16_t") {
     return scalar_type_string;
   } else if (scalar_type_string == "bool_t") {
     return "bool";
+  } else if (scalar_type_string == "float_t") {
+    return "float";
+  } else if (scalar_type_string == "double_t") {
+    return "double";
   } else if (scalar_type_string == "ufloat") {
     return "unsigned float";
   } else if (scalar_type_string == "udouble") {
