@@ -98,6 +98,21 @@ class ProfilerCodeGenBase {
       const VariableSpecificationMessage& val, const std::string& arg_name,
       const std::string& arg_value) = 0;
 
+  // Generates the profiler code for mask type.
+    virtual void GenerateProfilerForMaskVariable(Formatter& out,
+        const VariableSpecificationMessage& val, const std::string& arg_name,
+        const std::string& arg_value) = 0;
+
+  // Generates the profiler code for hidl memory type.
+  virtual void GenerateProfilerForHidlMemoryVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const std::string& arg_name,
+      const std::string& arg_value) = 0;
+
+  // Generates the profiler code for pointer type.
+  virtual void GenerateProfilerForPointerVariable(Formatter& out,
+      const VariableSpecificationMessage& val, const std::string& arg_name,
+      const std::string& arg_value) = 0;
+
   // Generates the profiler code for method.
   virtual void GenerateProfilerForMethod(Formatter& out,
     const FunctionSpecificationMessage& method) = 0;
