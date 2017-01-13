@@ -535,7 +535,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
       // may need to check whether the function is actually defined.
       out << "cout << \"Call an API\" << endl;" << "\n";
       out << "cout << \"local_device = \" << " << kInstanceVariableName
-          << ".get();" << "\n";
+          << ".get()" << " << endl;\n";
       if (api.return_type_hidl_size() == 0 ||
           api.return_type_hidl_size() > 1 ||
           api.return_type_hidl(0).type() == TYPE_VOID) {
@@ -966,7 +966,7 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(Formatter& out,
     out.indent();
     out << "cout << \"Call an API.\" << endl;" << "\n";
     out << "cout << \"local_device = \" << " << kInstanceVariableName
-        << ".get();" << "\n";
+        << ".get()" << " << endl;\n";
     out << "*result = const_cast<void*>(reinterpret_cast<const void*>"
         << "(new string(" << kInstanceVariableName << "->" << parent_path
         << message.name() << "->" << api.name() << "(";
@@ -1074,8 +1074,8 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   GenerateCodeToStartMeasurement(out);
   // may need to check whether the function is actually defined.
   out << "cout << \"Call an API\" << endl;" << "\n";
-  out << "cout << \"local_device = \" << " << kInstanceVariableName << ".get();"
-      << "\n";
+  out << "cout << \"local_device = \" << " << kInstanceVariableName << ".get()"
+      << " << endl;\n";
 
   // Define the return results and call the Hal function.
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
