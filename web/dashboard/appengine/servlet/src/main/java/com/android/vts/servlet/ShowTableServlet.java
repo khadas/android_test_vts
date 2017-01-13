@@ -269,7 +269,7 @@ public class ShowTableServlet extends BaseServlet {
         // number of days of data parsed for the current page. Limit to MAX_BUILD_IDS_PER_PAGE days
         // (i.e. one test per day)
         int days = 1;
-        while (days <= MAX_BUILD_IDS_PER_PAGE) {
+        while (true) {
             // Scan until there is a full page of data or until there is no
             // more older data.
             Scan scan = new Scan();
@@ -329,7 +329,9 @@ public class ShowTableServlet extends BaseServlet {
                 }
             }
             scanner.close();
-            if (tests.size() < MAX_BUILD_IDS_PER_PAGE && showMostRecent
+            if (days >= MAX_BUILD_IDS_PER_PAGE) {
+                break;
+            } else if (tests.size() < MAX_BUILD_IDS_PER_PAGE && showMostRecent
                 && BigtableHelper.hasOlder(table, startTime)) {
                 // Look further back in time a day
                 endTime = startTime;
