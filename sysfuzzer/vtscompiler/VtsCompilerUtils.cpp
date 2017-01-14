@@ -380,7 +380,8 @@ string GetCppInstanceType(
            << "error: unsupported scalar data type " << arg.scalar_type() << endl;
       exit(-1);
     }
-    case TYPE_ENUM: {
+    case TYPE_ENUM:
+    case TYPE_MASK: {
       if (!arg.has_enum_value() && arg.has_predefined_type()) {
         if (!message || message->component_class() != HAL_HIDL) {
           return "(" + arg.predefined_type() +  ") RandomUint32()";

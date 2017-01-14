@@ -495,6 +495,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                   << "(func_msg->arg(" << arg_count << ").vector_value(vector_index)."
                   << "scalar_value());"
                   << "\n";
+            } else if (arg.vector_value(0).type() == TYPE_MASK) {
+              // TODO(yim): fix an issue when assigning a uint64_t mask type.
+              out << "/* TYPE_MASK not yet supported. */\n";
             } else if (arg.vector_value(0).type() == TYPE_STRUCT) {
               out << "/* arg" << arg_count << "buffer[vector_index] not initialized "
                   << "since TYPE_STRUCT not yet supported */" << "\n";
@@ -509,7 +512,8 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             out.unindent();
             out << "}" << "\n";
             if (arg.vector_value(0).type() == TYPE_SCALAR
-                || arg.vector_value(0).type() == TYPE_ENUM) {
+                || arg.vector_value(0).type() == TYPE_ENUM
+                || arg.vector_value(0).type() == TYPE_MASK) {
               out << "arg" << arg_count << ".setToExternal(" << "arg"
                   << arg_count << "buffer, " << "func_msg->arg(" << arg_count
                   << ").vector_size()" << ")";
@@ -694,6 +698,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
             << ";" << "\n";
         out.unindent();
         out << "}" << "\n";
+      } else if (attribute.type() == TYPE_MASK) {
+        // TODO(yim): fix an issue when assigning a uint64_t mask type.
+        out << "/* TYPE_MASK not yet supported. */\n";
       } else if (attribute.type() == TYPE_STRUCT) {
         std::string attribute_name = attribute.name();
         ReplaceSubString(attribute_name, "::", "__");
@@ -787,6 +794,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                   << ").vector_value(value_index).scalar_value());" << "\n";
               out.unindent();
               out << "}" << "\n";
+            } else if (struct_value.vector_value(0).type() == TYPE_MASK) {
+              // TODO(yim): fix an issue when assigning a uint64_t mask type.
+              out << "/* TYPE_MASK not yet supported. */\n";
             } else {
               cerr << __func__ << ":" << __LINE__ << " ERROR unsupported type "
                    << struct_value.vector_value(0).type() << "\n";
@@ -820,6 +830,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
                 << "EnumValue" << enum_attribute_name << "("
                 << "var_msg.struct_value(" << struct_index
                 << ").scalar_value());" << "\n";
+          } else if (struct_value.type() == TYPE_MASK) {
+            // TODO(yim): fix an issue when assigning a uint64_t mask type.
+            out << "/* TYPE_MASK not yet supported. */\n";
           } else if (struct_value.type() == TYPE_STRUCT) {
             if (struct_value.has_predefined_type()) {
               std::string struct_attribute_name = struct_value.predefined_type();
@@ -1293,27 +1306,28 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
 
       out << api.name() << "(" << "\n";
       int arg_count = 0;
+      out.indent();
       for (const auto& arg : api.arg()) {
         if (arg_count > 0)
           out << "," << "\n";
         if (arg.type() == TYPE_ENUM) {
           if (arg.is_const()) {
-            out << "    const " << arg.predefined_type() << "&";
+            out << "const " << arg.predefined_type() << "&";
           } else {
-            out << "    " << arg.predefined_type();
+            out << arg.predefined_type();
           }
           out << " arg" << arg_count;
         } else if (arg.type() == TYPE_SCALAR) {
           if (arg.is_const()) {
-            out << "    const " << arg.scalar_type() << "&";
+            out << "const " << arg.scalar_type() << "&";
           } else {
-            out << "    " << arg.scalar_type();
+            out << arg.scalar_type();
           }
         } else if (arg.type() == TYPE_STRUCT) {
-          out << "    const " << arg.predefined_type() << "&";
+          out << "const " << arg.predefined_type() << "&";
           out << " arg" << arg_count;
         } else if (arg.type() == TYPE_VECTOR) {
-          out << "    const ";
+          out << "const ";
           if (arg.vector_value(0).type() == TYPE_SCALAR) {
             if (arg.vector_value(0).scalar_type().length() == 0) {
               cerr << __func__ << ":" << __LINE__
@@ -1331,6 +1345,9 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
             }
             out << "::android::hardware::hidl_vec<"
                 << arg.vector_value(0).predefined_type() << ">&";
+          } else if (arg.vector_value(0).type() == TYPE_HANDLE) {
+            out << "::android::hardware::hidl_vec<"
+                << GetCppVariableType(arg, &message) << ">&";
           } else {
             cerr << __func__ << ":" << __LINE__ << " unknown vector arg type "
                 << arg.vector_value(0).type() << "\n";
@@ -1338,7 +1355,6 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
           }
           out << " arg" << arg_count;
         } else if (arg.type() == TYPE_ARRAY) {
-          out << "    ";
           if (arg.is_const()) {
             out << "const ";
           }
@@ -1351,6 +1367,9 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
             exit(-1);
           }
           out << " arg" << arg_count;
+        } else if (arg.type() == TYPE_HANDLE) {
+          out << "const ::android::hardware::hidl_handle&"
+              << " arg" << arg_count;
         } else {
           cerr << __func__ << ":" << __LINE__ << " unknown arg type "
               << arg.type() << "\n";
@@ -1358,6 +1377,7 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
         }
         arg_count++;
       }
+      out.unindent();
       out << ") override;" << "\n";
       out << "\n";
     }
@@ -1674,6 +1694,11 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       }
       break;
     }
+    case TYPE_MASK:
+    {
+      out << "/* TYPE_MASK not yet supported. */\n";
+      break;
+    }
     case TYPE_VECTOR:
     {
       out << arg_name << ".resize(" << arg_value_name << ".vector_size());\n";
@@ -1821,6 +1846,7 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
       break;
     }
     case TYPE_ENUM:
+    case TYPE_MASK:
     {
       if (val.has_predefined_type()) {
         string func_name = "Verify"
@@ -2000,6 +2026,11 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
             << "(static_cast<" << scalar_type << ">(" << result_value
             << "));\n";
       }
+      break;
+    }
+    case TYPE_MASK:
+    {
+      out << "/* TYPE_MASK not yet supported. */\n";
       break;
     }
     case TYPE_VECTOR:
