@@ -15,7 +15,7 @@ import ComponentSpecificationMessage_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsProfilingMessage.proto',
   package='android.vts',
-  serialized_pb='\n\x19VtsProfilingMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\xcf\x01\n\x12VtsProfilingRecord\x12\x11\n\ttimestamp\x18\x01 \x01(\r\x12\x34\n\x05\x65vent\x18\x02 \x01(\x0e\x32%.android.vts.InstrumentationEventType\x12\x0f\n\x07package\x18\x03 \x01(\x0c\x12\x0f\n\x07version\x18\x04 \x01(\x02\x12\x11\n\tinterface\x18\x05 \x01(\x0c\x12;\n\x08\x66unc_msg\x18\x06 \x01(\x0b\x32).android.vts.FunctionSpecificationMessage\"G\n\x13VtsProfilingMessage\x12\x30\n\x07records\x18\x01 \x03(\x0b\x32\x1f.android.vts.VtsProfilingRecord*\x81\x02\n\x18InstrumentationEventType\x12\x14\n\x10SERVER_API_ENTRY\x10\x00\x12\x13\n\x0fSERVER_API_EXIT\x10\x01\x12\x14\n\x10\x43LIENT_API_ENTRY\x10\x02\x12\x13\n\x0f\x43LIENT_API_EXIT\x10\x03\x12\x17\n\x13SYNC_CALLBACK_ENTRY\x10\x04\x12\x16\n\x12SYNC_CALLBACK_EXIT\x10\x05\x12\x18\n\x14\x41SYNC_CALLBACK_ENTRY\x10\x06\x12\x17\n\x13\x41SYNC_CALLBACK_EXIT\x10\x07\x12\x15\n\x11PASSTHROUGH_ENTRY\x10\x08\x12\x14\n\x10PASSTHROUGH_EXIT\x10\t')
+  serialized_pb='\n\x19VtsProfilingMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\xcf\x01\n\x12VtsProfilingRecord\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x34\n\x05\x65vent\x18\x02 \x01(\x0e\x32%.android.vts.InstrumentationEventType\x12\x0f\n\x07package\x18\x03 \x01(\x0c\x12\x0f\n\x07version\x18\x04 \x01(\x02\x12\x11\n\tinterface\x18\x05 \x01(\x0c\x12;\n\x08\x66unc_msg\x18\x06 \x01(\x0b\x32).android.vts.FunctionSpecificationMessage\"G\n\x13VtsProfilingMessage\x12\x30\n\x07records\x18\x01 \x03(\x0b\x32\x1f.android.vts.VtsProfilingRecord*\x81\x02\n\x18InstrumentationEventType\x12\x14\n\x10SERVER_API_ENTRY\x10\x00\x12\x13\n\x0fSERVER_API_EXIT\x10\x01\x12\x14\n\x10\x43LIENT_API_ENTRY\x10\x02\x12\x13\n\x0f\x43LIENT_API_EXIT\x10\x03\x12\x17\n\x13SYNC_CALLBACK_ENTRY\x10\x04\x12\x16\n\x12SYNC_CALLBACK_EXIT\x10\x05\x12\x18\n\x14\x41SYNC_CALLBACK_ENTRY\x10\x06\x12\x17\n\x13\x41SYNC_CALLBACK_EXIT\x10\x07\x12\x15\n\x11PASSTHROUGH_ENTRY\x10\x08\x12\x14\n\x10PASSTHROUGH_EXIT\x10\t')
 
 _INSTRUMENTATIONEVENTTYPE = _descriptor.EnumDescriptor(
   name='InstrumentationEventType',
@@ -93,7 +93,7 @@ _VTSPROFILINGRECORD = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='android.vts.VtsProfilingRecord.timestamp', index=0,
-      number=1, type=13, cpp_type=3, label=1,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
