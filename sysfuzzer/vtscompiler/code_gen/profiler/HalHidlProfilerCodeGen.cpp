@@ -147,7 +147,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHidlInterfaceVariable(
 void HalHidlProfilerCodeGen::GenerateProfilerForMaskVariable(Formatter& out,
     const VariableSpecificationMessage&, const std::string& arg_name,
     const std::string&) {
-  out << arg_name << "->set_type(TYPE_MAKS);\n";
+  out << arg_name << "->set_type(TYPE_MASK);\n";
   // TODO(zhuoyao): figure the right way to profile mask type.
 }
 
