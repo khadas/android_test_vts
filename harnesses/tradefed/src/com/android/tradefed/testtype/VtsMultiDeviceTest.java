@@ -69,6 +69,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String DATA_FILE_PATH = "data_file_path";
     static final String LOG_PATH = "log_path";
     static final String NAME = "name";
+    static final String OS_NAME = "os.name";
+    static final String WINDOWS = "Windows";
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
@@ -623,7 +625,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             mPythonBin = getPythonBinary();
         }
         String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath, jsonFilePath};
+        String[] testModule = {mTestCasePath.replace("/", "."), jsonFilePath};
         String[] cmd;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
@@ -750,12 +752,23 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     }
 
     /**
-     * This method sets the python path. It's based on the based on the
+     * This method returns whether the OS is Windows.
+     */
+    private static boolean isOnWindows() {
+        return System.getProperty(OS_NAME).contains(WINDOWS);
+    }
+
+    /**
+     * This method sets the python path. It's based on the
      * assumption that the environment variable $ANDROID_BUILD_TOP is set.
      */
     private void setPythonPath() {
         StringBuilder sb = new StringBuilder();
-        sb.append(System.getenv(PYTHONPATH));
+        String separator = File.pathSeparator;
+        if (System.getenv(PYTHONPATH) != null) {
+            sb.append(separator);
+            sb.append(System.getenv(PYTHONPATH));
+        }
 
         // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
         if (mBuildInfo != null) {
@@ -768,49 +781,57 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 /* pass */
             }
             if (testDir != null) {
-                sb.append(":");
+                sb.append(separator);
                 mTestCaseDataDir = testDir.getAbsolutePath();
                 sb.append(mTestCaseDataDir);
             } else if (mBuildInfo.getFile(VTS) != null) {
-                sb.append(":");
+                sb.append(separator);
                 sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
             }
         }
 
         // for when one uses PythonVirtualenvPreparer.
         if (mBuildInfo.getFile(PYTHONPATH) != null) {
-            sb.append(":");
+            sb.append(separator);
             sb.append(mBuildInfo.getFile(PYTHONPATH).getAbsolutePath());
         }
         if (System.getenv("ANDROID_BUILD_TOP") != null) {
-            sb.append(":");
+            sb.append(separator);
             sb.append(System.getenv("ANDROID_BUILD_TOP")).append("/test");
         }
-        mPythonPath = sb.toString();
+        if (sb.length() == 0) {
+            throw new RuntimeException("Could not find python path on host machine");
+        }
+        mPythonPath = sb.substring(1);
         CLog.i("mPythonPath: %s", mPythonPath);
     }
 
     /**
-     * This method gets the python binary
+     * This method gets the python binary.
      */
     private String getPythonBinary() {
+        boolean isWindows = isOnWindows();
+        String python = (isWindows? "python.exe": "python");
         File venvDir = mBuildInfo.getFile(VIRTUAL_ENV_PATH);
         if (venvDir != null) {
-            File pythonBinaryFile = new File(venvDir.getAbsolutePath(), "bin/python");
+            String binDir = (isWindows? "Scripts": "bin");
+            File pythonBinaryFile = new File(venvDir.getAbsolutePath(),
+                    binDir + File.separator + python);
             String pythonBinPath = pythonBinaryFile.getAbsolutePath();
             if (pythonBinaryFile.exists()) {
                 CLog.i("Python path " + pythonBinPath + ".\n");
                 return pythonBinPath;
             }
-            CLog.e("bin/python doesn't exist under the " +
+            CLog.e(python + " doesn't exist under the " +
                    "created virtualenv dir (" + pythonBinPath + ").\n");
         } else {
           CLog.e(VIRTUAL_ENV_PATH + " not available in BuildInfo. " +
                  "Please use VtsPythonVirtualenvPreparer tartget preparer.\n");
         }
 
-        IRunUtil runUtil = RunUtil.getDefault();
-        CommandResult c = runUtil.runTimedCmd(1000, "which", "python");
+        IRunUtil runUtil = (mRunUtil == null ? RunUtil.getDefault() : mRunUtil);
+        CommandResult c = runUtil.runTimedCmd(1000,
+                (isWindows ? "where" : "which"), python);
         String pythonBin = c.getStdout().trim();
         if (pythonBin.length() == 0) {
             throw new RuntimeException("Could not find python binary on host "
