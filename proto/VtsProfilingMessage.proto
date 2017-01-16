@@ -45,7 +45,7 @@ enum InstrumentationEventType {
 // To specify a VTS profiling record.
 message VtsProfilingRecord {
   // The timestamp of the profiling record.
-  optional uint32 timestamp = 1;
+  optional int64 timestamp = 1;
   // Type of the profiling event.
   optional InstrumentationEventType event = 2;
   // Package name of the profiling HAL.
