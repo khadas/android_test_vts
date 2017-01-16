@@ -234,6 +234,10 @@ void HalHidlCodeGen::GenerateScalarTypeInC(Formatter& out, const string& type) {
              type == "uint64_t" ||
              type == "size_t") {
     out << type;
+  } else if (type == "float_t") {
+    out << "float";
+  } else if (type == "double_t") {
+    out << "double";
   } else if (type == "char_pointer") {
     out << "char*";
   } else if (type == "void_pointer") {
