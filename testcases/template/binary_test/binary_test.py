@@ -139,7 +139,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.shell = self._dut.shell.one
         if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
             coverage_utils.InitializeDeviceCoverage(self._dut)
-
+        # TODO: only set permissive mode for userdebug and eng build.
+        self.shell.Execute("setenforce 0")  # SELinux permissive mode
         self.testcases = []
         self.tags = set()
         self.CreateTestCases()
