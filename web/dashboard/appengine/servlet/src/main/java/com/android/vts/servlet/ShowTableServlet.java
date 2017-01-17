@@ -540,6 +540,7 @@ public class ShowTableServlet extends BaseServlet {
 
         String[] profilingPointNameArray = profilingPointNameSet.
             toArray(new String[profilingPointNameSet.size()]);
+        Arrays.sort(profilingPointNameArray);
 
         if (profilingPointNameArray.length == 0) {
             profilingDataAlert = PROFILING_DATA_ALERT;
@@ -562,6 +563,7 @@ public class ShowTableServlet extends BaseServlet {
         request.setAttribute("durationGrid", new Gson().toJson(durationGrid));
         request.setAttribute("summaryGrid", new Gson().toJson(summaryGrid));
         request.setAttribute("resultsGrid", new Gson().toJson(resultsGrid));
+        request.setAttribute("profilingPointNames", profilingPointNameArray);
         request.setAttribute("profilingPointNameJson", new Gson().toJson(profilingPointNameArray));
         request.setAttribute("resultNames", resultNames);
         request.setAttribute("resultNamesJson", new Gson().toJson(resultNames));
