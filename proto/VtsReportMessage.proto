@@ -131,6 +131,9 @@ message TestCaseReportMessage {
 
   // coverage report per file
   repeated CoverageReportMessage coverage = 31;
+
+  // profiling reports
+  repeated ProfilingReportMessage profiling = 41;
 }
 
 
