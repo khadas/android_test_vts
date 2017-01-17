@@ -146,52 +146,7 @@
 
       // table for profiling data
       function drawProfilingTable() {
-          errorMessage = ${errorJson} || '';
-          if (errorMessage.length > 0) {
-              return;
-          }
-          var data = new google.visualization.DataTable();
 
-          // add columns
-          data.addColumn('string', 'Profiling Point Names');
-
-          // add rows
-          var profilingPointNameArray = ${profilingPointNameJson};
-          var rowArray = new Array(profilingPointNameArray.length);
-
-          for (var i = 0; i < rowArray.length; i++) {
-              var row = new Array(1);
-              row[0] = profilingPointNameArray[i];
-              rowArray[i] = row;
-          }
-          data.addRows(rowArray);
-
-          var table = new google.visualization.Table(
-              document.getElementById('profiling_table_div'));
-
-          var options = {
-              showRowNumber: false,
-              alternatingRowStyle : true,
-              width: '100%',
-              sortColumn: 0,
-              sortAscending: true,
-              cssClassNames: {
-                  headerRow : 'table-header'
-              }
-          };
-          table.draw(data, options);
-
-          google.visualization.events.addListener(table, 'select', selectHandler);
-
-          function selectHandler(e) {
-              var ctx = '${pageContext.request.contextPath}';
-              var link = ctx + '/show_graph?profilingPoint=' +
-                  data.getValue(table.getSelection()[0].row, 0) +
-                  '&testName=${testName}' +
-                  '&startTime=' + ${startTime} +
-                  '&endTime=' + ${endTime};
-              window.open(link,'_self');
-          }
       }
 
       // to draw pie chart
@@ -224,7 +179,7 @@
               chartArea: {height: '90%'}
           };
 
-          var chart = new google.visualization.PieChart(document.getElementById('pie_chart_div'));
+          var chart = new google.visualization.PieChart(document.getElementById('pie-chart-div'));
           chart.draw(data, options);
       }
 
@@ -274,7 +229,7 @@
           data.addRows(summaryGrid);
           data.addRows(resultsGrid);
 
-          var table = new google.visualization.Table(document.getElementById('grid_table_div'));
+          var table = new google.visualization.Table(document.getElementById('grid-table-div'));
           var classNames = {
               headerRow : 'table-header',
               headerCell : 'table-header-cell'
@@ -324,7 +279,7 @@
             <div id='help-icon-wrapper'>
               <i class='material-icons' id='help-icon'>help</i>
             </div>
-            <div id='build_type_div' class='right'>
+            <div id='build-type-div' class='right'>
               <input type='checkbox' id='presubmit' />
               <label for='presubmit'>Presubmit</label>
               <input type='checkbox' id='postsubmit' />
@@ -337,7 +292,7 @@
         </div>
         <div class='col s7'>
           <div class='col s12 card center-align'>
-            <div id='legend_wrapper'>
+            <div id='legend-wrapper'>
               <c:forEach items='${resultNames}' var='res'>
                 <div class='center-align legend-entry'>
                   <c:set var='trimmed' value='${fn:replace(res, "TEST_CASE_RESULT_", "")}'/>
@@ -348,14 +303,33 @@
               </c:forEach>
             </div>
           </div>
-          <div id='profiling_container' class='col s12 card'>
+          <div id='profiling-container' class='col s12'>
             <c:choose>
-              <c:when test='${not empty error}'>
-                <div id='error_div' class='center-align'><h5>${error}</h5></div>
+              <c:when test='${empty profilingPointNames}'>
+                <div id='error-div' class='center-align card'><h5>${error}</h5></div>
               </c:when>
               <c:otherwise>
-                <!-- Profiling Table -->
-                <div id='profiling_table_div' class='center-align'></div>
+                <ul id='profiling-body' class='collapsible' data-collapsible='accordion'>
+                  <li>
+                    <div class='collapsible-header'><i class='material-icons'>timeline</i>Profiling Graphs</div>
+                    <div class='collapsible-body'>
+                      <ul id='profiling-list' class='collection'>
+                        <c:forEach items='${profilingPointNames}' var='pt'>
+                          <c:set var='profPointArgs' value='testName=${testName}&profilingPoint=${pt}'/>
+                          <c:set var='timeArgs' value='startTime=${startTime}&endTime=${endTime}'/>
+                          <a href='/show_graph?${profPointArgs}&${timeArgs}'
+                             class='collection-item profiling-point-name'>${pt}
+                          </a>
+                        </c:forEach>
+                      </ul>
+                    </div>
+                  </li>
+                  <li>
+                    <a class='collapsible-link' href='/show_performance_digest?testName=${testName}'>
+                      <div class='collapsible-header'><i class='material-icons'>toc</i>Performance Digest</div>
+                    </a>
+                  </li>
+                </ul>
               </c:otherwise>
             </c:choose>
           </div>
@@ -364,15 +338,15 @@
           <!-- pie chart -->
           <div id='pie-chart-wrapper' class='col s12 valign center-align card'>
             <h6 class='pie-chart-title'>Test Status for Device Build ID: ${topBuildId}</h6>
-            <div id='pie_chart_div'></div>
+            <div id='pie-chart-div'></div>
           </div>
         </div>
       </div>
 
       <div class='col s12'>
-        <div id='chart_holder' class='col s12 card'>
+        <div id='chart-holder' class='col s12 card'>
           <!-- Grid tables-->
-          <div id='grid_table_div'></div>
+          <div id='grid-table-div'></div>
         </div>
       </div>
       <div id='newer-wrapper' class='page-button-wrapper fixed-action-btn'>
