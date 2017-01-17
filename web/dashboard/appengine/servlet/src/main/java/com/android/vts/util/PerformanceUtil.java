@@ -51,6 +51,10 @@ public class PerformanceUtil {
             this.end = end;
             this.label = label;
         }
+
+        public TimeInterval(long start, long end) {
+            this(start, end, "<span class='date-label'>" + Long.toString(end) + "</span>");
+        }
     }
 
     /**
