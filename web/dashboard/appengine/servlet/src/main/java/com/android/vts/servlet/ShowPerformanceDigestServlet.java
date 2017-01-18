@@ -18,16 +18,18 @@ package com.android.vts.servlet;
 
 import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
 import com.android.vts.util.MathUtil;
+import com.android.vts.util.PerformanceSummary;
 import com.android.vts.util.PerformanceUtil;
 import com.android.vts.util.PerformanceUtil.TimeInterval;
 import com.android.vts.util.ProfilingPointSummary;
 import com.android.vts.util.StatSummary;
+import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
@@ -135,27 +137,26 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
      * point. When performance degrades, the cell is shaded red.
      *
      * @param profilingPoint The name of the profiling point to summarize.
-     * @param baseline The ProfilingPointSummary object to compare against.
-     * @param summaryMaps List of maps for each profiling run (in reverse chronological order)
-     *                    containing profiling point names as keys and ProfilingPointSummary objects
-     *                    as values.
+     * @param testSummary The ProfilingPointSummary object to compare against.
+     * @param perfSummaries List of PerformanceSummary objects for each profiling run
+     *                      (in reverse chronological order).
      * @param sectionLabels HTML string for the section labels (i.e. for each time interval).
      * @returns An HTML string for a table comparing the profiling point results across time intervals.
      */
-    public static String getPeformanceSummary(String profilingPoint, ProfilingPointSummary baseline,
-            List<Map<String, ProfilingPointSummary>> summaryMaps, String sectionLabels) {
-        if (summaryMaps.size() == 0) return null;
+    public static String getPeformanceSummary(String profilingPoint, ProfilingPointSummary testSummary,
+            List<PerformanceSummary> perfSummaries, String sectionLabels) {
+        if (perfSummaries.size() == 0) return null;
         String tableHTML = "<table>";
 
         // Format section labels
         tableHTML += "<tr>";
         tableHTML += "<th class='section-label grey lighten-2'>";
-        tableHTML += baseline.yLabel.toStringUtf8() + "</th>";
+        tableHTML += testSummary.yLabel.toStringUtf8() + "</th>";
         tableHTML += sectionLabels;
         tableHTML += "</tr>";
 
         String deltaString;
-        switch (baseline.getRegressionMode()) {
+        switch (testSummary.getRegressionMode()) {
             case VTS_REGRESSION_MODE_DECREASING:
                 deltaString = MAX_DELTA;
                 //subtext = HIGHER_IS_BETTER;
@@ -168,13 +169,13 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
 
         // Format column labels
         tableHTML += "<tr>";
-        for (int i = 0; i <= summaryMaps.size() + 1; i++) {
+        for (int i = 0; i <= perfSummaries.size() + 1; i++) {
             if (i > 1) {
                 tableHTML += "<th class='section-label grey lighten-2'>" + deltaString + "</th>";
             }
             if (i == 0) {
                 tableHTML += "<th class='section-label grey lighten-2'>";
-                tableHTML += baseline.xLabel.toStringUtf8() + "</th>";
+                tableHTML += testSummary.xLabel.toStringUtf8() + "</th>";
             } else if (i > 0) {
                 tableHTML += "<th class='section-label grey lighten-2'>" + MIN + "</th>";
                 tableHTML += "<th class='section-label grey lighten-2'>" + MEAN + "</th>";
@@ -184,7 +185,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         tableHTML += "</tr>";
 
         // Populate data cells
-        for (StatSummary stats : baseline) {
+        for (StatSummary stats : testSummary) {
             ByteString label = stats.getLabel();
             tableHTML += "<tr><td class='axis-label grey lighten-2'>" + label.toStringUtf8();
             tableHTML += "</td><td class='cell inner-cell'>";
@@ -193,11 +194,12 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
             tableHTML += MathUtil.round(stats.getMean(), N_DIGITS)  + "</td>";
             tableHTML += "<td class='cell outer-cell'>";
             tableHTML += MathUtil.round(stats.getStd(), N_DIGITS) + "</td>";
-            for (int i = 0; i < summaryMaps.size(); i++) {
-                Map<String, ProfilingPointSummary> summaryMapOld = summaryMaps.get(i);
-                if (summaryMapOld.containsKey(profilingPoint)) {
-                    tableHTML += getPerformanceComparisonHTML(summaryMapOld.get(profilingPoint)
-                                     .getStatSummary(label), stats);
+            for (int i = 0; i < perfSummaries.size(); i++) {
+                PerformanceSummary prevPerformance = perfSummaries.get(i);
+                if (prevPerformance.hasProfilingPoint(profilingPoint)) {
+                    StatSummary baseline = prevPerformance.getProfilingPointSummary(profilingPoint)
+                                                          .getStatSummary(label);
+                    tableHTML += getPerformanceComparisonHTML(baseline, stats);
                 } else tableHTML += "<td></td><td></td><td></td><td></td>";
             }
             tableHTML += "</tr>";
@@ -242,15 +244,17 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         TimeInterval lastWeek = new TimeInterval(oneWeekAgo - oneWeek, oneWeekAgo, label);
         timeIntervals.add(lastWeek);
 
-        List<Map<String, ProfilingPointSummary>> summaryMaps = new ArrayList<>();
+        List<PerformanceSummary> perfSummaries = new ArrayList<>();
+        Set<String> deviceSet = new HashSet<>();
 
         String sectionLabels = "";
         int i = 0;
         for (TimeInterval interval : timeIntervals) {
-            Map<String, ProfilingPointSummary> summaryMap =
-                PerformanceUtil.getProfilingSummaryMap(tableName, interval.start, interval.end);
-            if (summaryMap == null || summaryMap.size() == 0) continue;
-            summaryMaps.add(summaryMap);
+            PerformanceSummary perfSummary = new PerformanceSummary();
+            PerformanceUtil.updatePerformanceSummary(tableName, interval.start, interval.end, perfSummary);
+            if (perfSummary.size() == 0) continue;
+            perfSummaries.add(perfSummary);
+            deviceSet.addAll(perfSummary.getDevices());
             String content = interval.label;
             sectionLabels += "<th class='section-label grey lighten-2 center' ";
             if (i++ == 0) sectionLabels += "colspan='3'";
@@ -261,16 +265,15 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         List<String> tables = new ArrayList<>();
         List<String> tableTitles = new ArrayList<>();
         List<String> tableSubtitles = new ArrayList<>();
-        if (summaryMaps.size() != 0) {
-            Map<String, ProfilingPointSummary> todayPerformance = summaryMaps.remove(0);
-            Set<String> profilingNameSet = todayPerformance.keySet();
-            String[] profilingNames = profilingNameSet.toArray(new String[profilingNameSet.size()]);
-            Arrays.sort(profilingNames);
+        if (perfSummaries.size() != 0) {
+            PerformanceSummary todayPerformance = perfSummaries.remove(0);
+            String[] profilingNames = todayPerformance.getProfilingPointNames();
 
             for (String profilingPointName : profilingNames) {
-                ProfilingPointSummary baselinePerformance = todayPerformance.get(profilingPointName);
+                ProfilingPointSummary baselinePerformance = todayPerformance
+                        .getProfilingPointSummary(profilingPointName);
                 String table = getPeformanceSummary(profilingPointName, baselinePerformance,
-                                                    summaryMaps, sectionLabels);
+                                                    perfSummaries, sectionLabels);
                 if (table != null) {
                     tables.add(table);
                     tableTitles.add(profilingPointName);
@@ -285,11 +288,16 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
                 }
             }
         }
+
+        String[] devices = deviceSet.toArray(new String[deviceSet.size()]);
+        Arrays.sort(devices);
+
         request.setAttribute("testName", request.getParameter("testName"));
         request.setAttribute("tables", tables);
         request.setAttribute("tableTitles", tableTitles);
         request.setAttribute("tableSubtitles", tableSubtitles);
         request.setAttribute("startTime", Long.toString(startTime * 1000L));
+        request.setAttribute("devices", new Gson().toJson(devices));
 
         dispatcher = request.getRequestDispatcher("/show_performance_digest.jsp");
         try {
