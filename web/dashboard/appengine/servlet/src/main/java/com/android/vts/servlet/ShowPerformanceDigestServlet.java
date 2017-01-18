@@ -23,7 +23,6 @@ import com.android.vts.util.PerformanceUtil;
 import com.android.vts.util.PerformanceUtil.TimeInterval;
 import com.android.vts.util.ProfilingPointSummary;
 import com.android.vts.util.StatSummary;
-import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -214,6 +213,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         RequestDispatcher dispatcher = null;
         String testName = request.getParameter("testName");
         String tableName = TABLE_PREFIX + testName;
+        String selectedDevice = request.getParameter("device");
         Long startTime = null;
         if (request.getParameter("startTime") != null) {
             String time = request.getParameter("startTime");
@@ -250,7 +250,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         String sectionLabels = "";
         int i = 0;
         for (TimeInterval interval : timeIntervals) {
-            PerformanceSummary perfSummary = new PerformanceSummary();
+            PerformanceSummary perfSummary = new PerformanceSummary(selectedDevice);
             PerformanceUtil.updatePerformanceSummary(tableName, interval.start, interval.end, perfSummary);
             if (perfSummary.size() == 0) continue;
             perfSummaries.add(perfSummary);
@@ -289,6 +289,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
             }
         }
 
+        if (!deviceSet.contains(selectedDevice)) selectedDevice = null;
         String[] devices = deviceSet.toArray(new String[deviceSet.size()]);
         Arrays.sort(devices);
 
@@ -297,7 +298,8 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         request.setAttribute("tableTitles", tableTitles);
         request.setAttribute("tableSubtitles", tableSubtitles);
         request.setAttribute("startTime", Long.toString(startTime * 1000L));
-        request.setAttribute("devices", new Gson().toJson(devices));
+        request.setAttribute("selectedDevice", selectedDevice);
+        request.setAttribute("devices", devices);
 
         dispatcher = request.getRequestDispatcher("/show_performance_digest.jsp");
         try {
