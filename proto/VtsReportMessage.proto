@@ -154,6 +154,11 @@ message ProfilingReportMessage {
   // x-axis and y-axis title labels when displaying the data as a graph
   optional bytes x_axis_label = 31;
   optional bytes y_axis_label = 32;
+
+  // a list of strings where each string has the form of 'key=value'.
+  // used to tell certain properties of the data (e.g., passthrough vs.
+  // binderized).
+  repeated bytes options = 41;
 }
 
 
