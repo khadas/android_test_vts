@@ -11,12 +11,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage.Builder;
 import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
+import com.android.vts.util.PerformanceSummary;
 import com.android.vts.util.ProfilingPointSummary;
 
 public class VtsPerformanceJobServletTest {
@@ -25,7 +24,7 @@ public class VtsPerformanceJobServletTest {
     private static long[] highValues = new long[]{10, 20, 30};
     private static long[] lowValues = new long[]{1, 2, 3};
 
-    List<Map<String, ProfilingPointSummary>> dailySummaries;
+    List<PerformanceSummary> dailySummaries;
     List<String> legendLabels;
 
     /**
@@ -75,56 +74,56 @@ public class VtsPerformanceJobServletTest {
         legendLabels.add("");
 
         // Add today's data
-        Map<String, ProfilingPointSummary> today = new HashMap<>();
+        PerformanceSummary today = new PerformanceSummary();
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
         ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
         summary.update(report);
         summary.update(report);
-        today.put("p1", summary);
+        today.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
         report = createProfilingReport(labels, lowValues, mode);
         summary.update(report);
         summary.update(report);
-        today.put("p2", summary);
+        today.insertProfilingPointSummary("p2", summary);
         dailySummaries.add(today);
         legendLabels.add("today");
 
         // Add yesterday data with regressions
-        Map<String, ProfilingPointSummary> yesterday = new HashMap<>();
+        PerformanceSummary yesterday = new PerformanceSummary();
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
         report = createProfilingReport(labels, lowValues, mode);
         summary.update(report);
         summary.update(report);
-        yesterday.put("p1", summary);
+        yesterday.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
         report = createProfilingReport(labels, highValues, mode);
         summary.update(report);
         summary.update(report);
-        yesterday.put("p2", summary);
+        yesterday.insertProfilingPointSummary("p2", summary);
         dailySummaries.add(yesterday);
         legendLabels.add("yesterday");
 
         // Add last week data without regressions
-        Map<String, ProfilingPointSummary> lastWeek = new HashMap<>();
+        PerformanceSummary lastWeek = new PerformanceSummary();
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
         report = createProfilingReport(labels, highValues, mode);
         summary.update(report);
         summary.update(report);
-        lastWeek.put("p1", summary);
+        lastWeek.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
         report = createProfilingReport(labels, lowValues, mode);
         summary.update(report);
         summary.update(report);
-        lastWeek.put("p2", summary);
+        lastWeek.insertProfilingPointSummary("p2", summary);
         dailySummaries.add(lastWeek);
         legendLabels.add("last week");
     }
@@ -144,13 +143,13 @@ public class VtsPerformanceJobServletTest {
      */
     @Test
     public void testPerformanceSummaryDroppedProfilingPoint() throws FileNotFoundException, IOException {
-        Map<String, ProfilingPointSummary> yesterday = dailySummaries.get(dailySummaries.size() - 1);
+        PerformanceSummary yesterday = dailySummaries.get(dailySummaries.size() - 1);
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
         ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
         summary.update(report);
         summary.update(report);
-        yesterday.put("p3", summary);
+        yesterday.insertProfilingPointSummary("p3", summary);
         String output = VtsPerformanceJobServlet.getPeformanceSummary("result_test", dailySummaries, legendLabels);
         compareToBaseline(output, "performanceSummary2.html");
     }
@@ -160,13 +159,13 @@ public class VtsPerformanceJobServletTest {
      */
     @Test
     public void testPerformanceSummaryAddedProfilingPoint() throws FileNotFoundException, IOException {
-        Map<String, ProfilingPointSummary> today = dailySummaries.get(0);
+        PerformanceSummary today = dailySummaries.get(0);
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
         ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
         summary.update(report);
         summary.update(report);
-        today.put("p3", summary);
+        today.insertProfilingPointSummary("p3", summary);
         String output = VtsPerformanceJobServlet.getPeformanceSummary("result_test", dailySummaries, legendLabels);
         compareToBaseline(output, "performanceSummary3.html");
     }
