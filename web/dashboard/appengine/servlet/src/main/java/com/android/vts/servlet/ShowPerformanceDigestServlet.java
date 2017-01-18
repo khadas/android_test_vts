@@ -24,10 +24,8 @@ import com.android.vts.util.ProfilingPointSummary;
 import com.android.vts.util.StatSummary;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +50,6 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
     private static final String HIGHER_IS_BETTER = "Note: Higher values are better. Maximum is the best-case performance.";
     private static final String LOWER_IS_BETTER = "Note: Lower values are better. Minimum is the best-case performance.";
     private static final String STD = "Std";
-    private static final String LAST_WEEK = "Last Week";
 
 
     /**
@@ -142,11 +139,11 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
      * @param summaryMaps List of maps for each profiling run (in reverse chronological order)
      *                    containing profiling point names as keys and ProfilingPointSummary objects
      *                    as values.
-     * @param labels List of string labels for use as the column headers.
+     * @param sectionLabels HTML string for the section labels (i.e. for each time interval).
      * @returns An HTML string for a table comparing the profiling point results across time intervals.
      */
     public static String getPeformanceSummary(String profilingPoint, ProfilingPointSummary baseline,
-            List<Map<String, ProfilingPointSummary>> summaryMaps, List<String> labels) {
+            List<Map<String, ProfilingPointSummary>> summaryMaps, String sectionLabels) {
         if (summaryMaps.size() == 0) return null;
         String tableHTML = "<table>";
 
@@ -154,13 +151,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         tableHTML += "<tr>";
         tableHTML += "<th class='section-label grey lighten-2'>";
         tableHTML += baseline.yLabel.toStringUtf8() + "</th>";
-        for (int i = 0; i < labels.size(); i++) {
-            String content = labels.get(i);
-            tableHTML += "<th class='section-label grey lighten-2 center' ";
-            if (i == 0) tableHTML += "colspan='3'";
-            else tableHTML += "colspan='4'";
-            tableHTML += ">" + content + "</th>";
-        }
+        tableHTML += sectionLabels;
         tableHTML += "</tr>";
 
         String deltaString;
@@ -177,7 +168,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
 
         // Format column labels
         tableHTML += "<tr>";
-        for (int i = 0; i < labels.size() + 1; i++) {
+        for (int i = 0; i <= summaryMaps.size() + 1; i++) {
             if (i > 1) {
                 tableHTML += "<th class='section-label grey lighten-2'>" + deltaString + "</th>";
             }
@@ -221,36 +212,50 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         RequestDispatcher dispatcher = null;
         String testName = request.getParameter("testName");
         String tableName = TABLE_PREFIX + testName;
+        Long startTime = null;
+        if (request.getParameter("startTime") != null) {
+            String time = request.getParameter("startTime");
+            try {
+                startTime = Long.parseLong(time) / 1000L;
+            } catch (NumberFormatException e) {}
+        }
+        if (startTime == null) {
+            startTime = System.currentTimeMillis();
+        }
 
         // Add today to the list of time intervals to analyze
         List<TimeInterval> timeIntervals = new ArrayList<>();
-        long now = System.currentTimeMillis();
-        String dateString = new SimpleDateFormat("MM-dd-yyyy").format(new Date(now));
-        TimeInterval today = new TimeInterval(now - ONE_DAY / MILLI_TO_MICRO, now, dateString);
+        TimeInterval today = new TimeInterval(startTime - ONE_DAY / MILLI_TO_MICRO, startTime);
         timeIntervals.add(today);
 
         // Add yesterday as a baseline time interval for analysis
-        long oneDayAgo = now - ONE_DAY / MILLI_TO_MICRO;
-        String dateStringYesterday = new SimpleDateFormat("MM-dd-yyyy").format(new Date(oneDayAgo));
-        TimeInterval yesterday = new TimeInterval(oneDayAgo - ONE_DAY / MILLI_TO_MICRO, oneDayAgo,
-                                                  dateStringYesterday);
+        long oneDayAgo = startTime - ONE_DAY / MILLI_TO_MICRO;
+        TimeInterval yesterday = new TimeInterval(oneDayAgo - ONE_DAY / MILLI_TO_MICRO, oneDayAgo);
         timeIntervals.add(yesterday);
 
         // Add last week as a baseline time interval for analysis
         long oneWeek = 7 * ONE_DAY / MILLI_TO_MICRO;
-        long oneWeekAgo = now - oneWeek;
-        TimeInterval lastWeek = new TimeInterval(oneWeekAgo - oneWeek, oneWeekAgo, LAST_WEEK);
+        long oneWeekAgo = startTime - oneWeek;
+        String spanString = "<span class='date-label'>";
+        String label = spanString + (oneWeekAgo - oneWeek) + "</span>";
+        label += " - " + spanString + oneWeekAgo + "</span>";
+        TimeInterval lastWeek = new TimeInterval(oneWeekAgo - oneWeek, oneWeekAgo, label);
         timeIntervals.add(lastWeek);
 
         List<Map<String, ProfilingPointSummary>> summaryMaps = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
 
+        String sectionLabels = "";
+        int i = 0;
         for (TimeInterval interval : timeIntervals) {
             Map<String, ProfilingPointSummary> summaryMap =
                 PerformanceUtil.getProfilingSummaryMap(tableName, interval.start, interval.end);
             if (summaryMap == null || summaryMap.size() == 0) continue;
             summaryMaps.add(summaryMap);
-            labels.add(interval.label);
+            String content = interval.label;
+            sectionLabels += "<th class='section-label grey lighten-2 center' ";
+            if (i++ == 0) sectionLabels += "colspan='3'";
+            else sectionLabels += "colspan='4'";
+            sectionLabels += ">" + content + "</th>";
         }
 
         List<String> tables = new ArrayList<>();
@@ -264,7 +269,8 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
 
             for (String profilingPointName : profilingNames) {
                 ProfilingPointSummary baselinePerformance = todayPerformance.get(profilingPointName);
-                String table = getPeformanceSummary(profilingPointName, baselinePerformance, summaryMaps, labels);
+                String table = getPeformanceSummary(profilingPointName, baselinePerformance,
+                                                    summaryMaps, sectionLabels);
                 if (table != null) {
                     tables.add(table);
                     tableTitles.add(profilingPointName);
@@ -283,6 +289,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         request.setAttribute("tables", tables);
         request.setAttribute("tableTitles", tableTitles);
         request.setAttribute("tableSubtitles", tableSubtitles);
+        request.setAttribute("startTime", Long.toString(startTime * 1000L));
 
         dispatcher = request.getRequestDispatcher("/show_performance_digest.jsp");
         try {

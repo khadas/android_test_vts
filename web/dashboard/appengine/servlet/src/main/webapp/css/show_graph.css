@@ -42,52 +42,6 @@
     font-size: 1.4rem
 }
 
-#ui-datepicker-div {
-    font-family: "Roboto", sans-serif;
-    padding: 0;
-}
-
-.ui-corner-all {
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-    border-top-left-radius: 0 !important;
-}
-
-.ui-datepicker td span.ui-state-default, .ui-datepicker td a.ui-state-default {
-    text-align: center;
-    padding: 0.7em 0.4em;
-    border: none;
-    border-radius: 10em;
-    background: none;
-}
-
-.ui-datepicker td span.ui-state-hover, .ui-datepicker td a.ui-state-hover {
-    background: #e0f2f1;
-}
-
-.ui-datepicker td span.ui-state-active, .ui-datepicker td a.ui-state-active {
-    color: white;
-    font-weight: 600;
-    background: #009688;
-}
-
-.ui-datepicker-header.ui-widget-header.ui-helper-clearfix.ui-corner-all {
-    background: #009688;
-    border: none;
-    color: white;
-}
-
-table {
-    font-family: Roboto !important;
-    font-size: 13px !important;
-    white-space: nowrap !important;
-}
-
-.table-header {
-    background-color: white;
-}
-
 #profiling-container, #performance-container, #error-container {
     padding-top: 25px;
     padding-bottom: 25px;
@@ -106,17 +60,3 @@ table {
     margin-bottom: 20px;
 }
 
-.ui-datepicker-next.ui-state-hover.ui-datepicker-next-hover {
-    right: 2px;
-    top: 2px;
-}
-
-.ui-datepicker-prev.ui-state-hover.ui-datepicker-prev-hover {
-    left: 2px;
-    top: 2px;
-}
-
-.ui-datepicker-next.ui-corner-all.ui-state-hover, .ui-datepicker-prev.ui-corner-all.ui-state-hover {
-    background: none;
-    border: none;
-}
