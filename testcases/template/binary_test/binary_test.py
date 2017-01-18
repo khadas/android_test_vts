@@ -259,6 +259,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning('Failed to remove: %s', cmd_results)
 
+        if self.enable_profiling:
+            self.ProcessAndUploadTraceData()
+
         logging.info('Finished class cleaning up jobs.')
 
     def ParseTestSource(self, source):
@@ -358,7 +361,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if self.enable_profiling:
             profiling_trace_path = getattr(self,
                                            self.VTS_PROFILING_TRACING_PATH, "")
-            self.ProcessAndUploadTraceData(self._dut, profiling_trace_path)
+            self.ProcessTraceDataForTestCase(self._dut, profiling_trace_path)
             profiling_utils.DisableVTSProfiling(self.shell)
 
     def generateAllTests(self):
