@@ -61,15 +61,17 @@ class VTSProfilingData(object):
     Attributes:
         name: A string to describe the profiling data. e.g. server_side_latency.
         labels: A list of profiling data labels. e.g. a list of api names.
-        values: A dict that stores the profiling data for different metrics.
+        values: A dict that stores the profiling data. e.g. latencies of each api.
+        aggregated_values: A dict that stores the aggregated profiling data.
         options: A set of strings where each string specifies an associated
                  option (which is the form of 'key=value').
     """
 
     def __init__(self):
-        self.name = ""
+        self.name = None
+        self.values = {}
         self.labels = []
-        self.values = {"avg": [], "max": [], "min": []}
+        self.aggregated_values = {"avg": [], "max": [], "min": []}
         self.options = set()
 
 
@@ -120,10 +122,6 @@ def ParseTraceData(trace_file):
         else:
             vts_profiling_record = VtsProfilingMsg.VtsProfilingRecord()
             text_format.Merge(profiling_record_str, vts_profiling_record)
-            if not profiling_data.name:
-                logging.warning("no name set for the profiling data. ")
-                # TODO(zhuoyao): figure out a better way to set the data name.
-                profiling_data.name = None
 
             if IsEventFromBinderizedHal(vts_profiling_record.event):
                 profiling_data.options.add("hidl_hal_mode=binder")
@@ -144,14 +142,13 @@ def ParseTraceData(trace_file):
         for index in range(1, len(time_stamps), 2):
             latencies.append(
                 long(time_stamps[index]) - long(time_stamps[index - 1]))
-        api_latencies[api] = latencies
-    for api, latencies in api_latencies.items():
+        profiling_data.values[api] = latencies
+    for api, latencies in profiling_data.values.items():
         if latencies:
             profiling_data.labels.append(api)
-            profiling_data.values["max"].append(max(latencies))
-            profiling_data.values["min"].append(min(latencies))
-            profiling_data.values["avg"].append(sum(latencies) / len(latencies))
-
+            profiling_data.aggregated_values["max"].append(max(latencies))
+            profiling_data.aggregated_values["min"].append(min(latencies))
+            profiling_data.aggregated_values["avg"].append(sum(latencies) / len(latencies))
     return profiling_data
 
 
