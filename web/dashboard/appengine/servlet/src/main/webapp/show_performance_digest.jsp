@@ -24,14 +24,44 @@
     <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700'>
     <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css">
     <link type='text/css' href='/css/navbar.css' rel='stylesheet'>
+    <link type="text/css" href="/css/datepicker.css" rel="stylesheet">
     <link type='text/css' href='/css/show_performance_digest.css' rel='stylesheet'>
     <script src='/js/analytics.js' type='text/javascript'></script>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
     <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
     <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type='text/javascript'>
       if (${analytics_id}) analytics_init(${analytics_id});
+
+      ONE_DAY = 86400000000;
+      MICRO_PER_MILLI = 1000;
+
+      function load() {
+          var time = $('#date').datepicker('getDate').getTime() - 1;
+          time = time * MICRO_PER_MILLI + ONE_DAY;  // end of day
+          var ctx = '${pageContext.request.contextPath}';
+          var link = ctx + '/show_performance_digest?profilingPoint=${profilingPointName}' +
+              '&testName=${testName}' +
+              '&startTime=' + time;
+          window.open(link,'_self');
+      }
+
+      $(function() {
+          var date = $('#date').datepicker({
+              showAnim: "slideDown",
+              maxDate: new Date()
+          });
+          date.datepicker('setDate', new Date(${startTime} / MICRO_PER_MILLI));
+          $('#load').click(load);
+
+          $('.date-label').each(function(i) {
+              var label = $(this);
+              label.html(moment(parseInt(label.html())).format('M/D/YY'));
+          });
+      });
 
     </script>
 
@@ -56,16 +86,25 @@
 
   <body>
     <div class='container'>
+      <div class='row card'>
+        <div id='header-container' class='col s12'>
+          <div class='col s9'>
+            <h4>Daily Performance Digest</h4>
+          </div>
+          <input type='text' id='date' name='date' class='col s2'>
+          <a id='load' class='btn-floating btn-medium red right waves-effect waves-light'>
+            <i class='medium material-icons'>cached</i>
+          </a>
+        </div>
+      </div>
       <div class='row'>
         <c:forEach items='${tables}' var='table' varStatus='loop'>
           <div class='col s12 card summary'>
-            <div id='header-container' class='valign-wrapper col s12'>
-              <div class='col s3 valign'>
-                <h5>Profiling Point:</h5>
-              </div>
-              <div class='col s9 right-align valign'>
-                <h5 class="profiling-name truncate">${tableTitles[loop.index]}</h5>
-              </div>
+            <div class='col s3 valign'>
+              <h5>Profiling Point:</h5>
+            </div>
+            <div class='col s9 right-align valign'>
+              <h5 class="profiling-name truncate">${tableTitles[loop.index]}</h5>
             </div>
             ${table}
             <span class='profiling-subtitle'>

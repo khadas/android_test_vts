@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700">
     <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
     <link type="text/css" href="/css/navbar.css" rel="stylesheet">
+    <link type="text/css" href="/css/datepicker.css" rel="stylesheet">
     <link type="text/css" href="/css/show_graph.css" rel="stylesheet">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css">
     <script src="/js/analytics.js" type="text/javascript"></script>
