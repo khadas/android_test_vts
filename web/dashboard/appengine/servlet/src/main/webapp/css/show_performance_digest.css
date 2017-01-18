@@ -24,12 +24,21 @@
     min-height: 85%;
 }
 
-div.col.card.summary {
-    padding: 0 20px 20px;
+#header-container {
+    padding: 25px;
 }
 
-#header-container {
-    padding: 15px 0;
+#load {
+    margin-top: 15px;
+}
+
+#date {
+    margin-bottom: 0;
+    margin-top: 10px;
+}
+
+div.col.card.summary {
+    padding: 0 20px 20px;
 }
 
 .profiling-name {
@@ -44,7 +53,7 @@ div.col.card.summary {
     margin-left: 2px;
 }
 
-table {
+.summary table {
     width: 100%;
     border-collapse: collapse;
     border: 1px solid black;
@@ -52,7 +61,7 @@ table {
     font-family: Roboto !important;
 }
 
-table td, th {
+.summary table td, th {
     padding: 2px;
 }
 
