@@ -5126,6 +5126,38 @@ public final class VtsReportMessage {
      * <code>optional bytes y_axis_label = 32;</code>
      */
     com.google.protobuf.ByteString getYAxisLabel();
+
+    // repeated bytes options = 41;
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    java.util.List<com.google.protobuf.ByteString> getOptionsList();
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    int getOptionsCount();
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    com.google.protobuf.ByteString getOptions(int index);
   }
   /**
    * Protobuf type {@code android.vts.ProfilingReportMessage}
@@ -5258,6 +5290,14 @@ public final class VtsReportMessage {
               yAxisLabel_ = input.readBytes();
               break;
             }
+            case 330: {
+              if (!((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
+                options_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000200;
+              }
+              options_.add(input.readBytes());
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -5271,6 +5311,9 @@ public final class VtsReportMessage {
         }
         if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
           value_ = java.util.Collections.unmodifiableList(value_);
+        }
+        if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
+          options_ = java.util.Collections.unmodifiableList(options_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -5486,6 +5529,47 @@ public final class VtsReportMessage {
       return yAxisLabel_;
     }
 
+    // repeated bytes options = 41;
+    public static final int OPTIONS_FIELD_NUMBER = 41;
+    private java.util.List<com.google.protobuf.ByteString> options_;
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getOptionsList() {
+      return options_;
+    }
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    public int getOptionsCount() {
+      return options_.size();
+    }
+    /**
+     * <code>repeated bytes options = 41;</code>
+     *
+     * <pre>
+     * a list of strings where each string has the form of 'key=value'.
+     * used to tell certain properties of the data (e.g., passthrough vs.
+     * binderized).
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getOptions(int index) {
+      return options_.get(index);
+    }
+
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
       type_ = com.android.vts.proto.VtsReportMessage.VtsProfilingType.UNKNOWN_VTS_PROFILING_TYPE;
@@ -5496,6 +5580,7 @@ public final class VtsReportMessage {
       value_ = java.util.Collections.emptyList();
       xAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
       yAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
+      options_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5535,6 +5620,9 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeBytes(32, yAxisLabel_);
+      }
+      for (int i = 0; i < options_.size(); i++) {
+        output.writeBytes(41, options_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -5590,6 +5678,15 @@ public final class VtsReportMessage {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(32, yAxisLabel_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < options_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(options_.get(i));
+        }
+        size += dataSize;
+        size += 2 * getOptionsList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5729,6 +5826,8 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000080);
         yAxisLabel_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000100);
+        options_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -5795,6 +5894,11 @@ public final class VtsReportMessage {
           to_bitField0_ |= 0x00000040;
         }
         result.yAxisLabel_ = yAxisLabel_;
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          options_ = java.util.Collections.unmodifiableList(options_);
+          bitField0_ = (bitField0_ & ~0x00000200);
+        }
+        result.options_ = options_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5851,6 +5955,16 @@ public final class VtsReportMessage {
         }
         if (other.hasYAxisLabel()) {
           setYAxisLabel(other.getYAxisLabel());
+        }
+        if (!other.options_.isEmpty()) {
+          if (options_.isEmpty()) {
+            options_ = other.options_;
+            bitField0_ = (bitField0_ & ~0x00000200);
+          } else {
+            ensureOptionsIsMutable();
+            options_.addAll(other.options_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -6307,6 +6421,120 @@ public final class VtsReportMessage {
       public Builder clearYAxisLabel() {
         bitField0_ = (bitField0_ & ~0x00000100);
         yAxisLabel_ = getDefaultInstance().getYAxisLabel();
+        onChanged();
+        return this;
+      }
+
+      // repeated bytes options = 41;
+      private java.util.List<com.google.protobuf.ByteString> options_ = java.util.Collections.emptyList();
+      private void ensureOptionsIsMutable() {
+        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
+          options_ = new java.util.ArrayList<com.google.protobuf.ByteString>(options_);
+          bitField0_ |= 0x00000200;
+         }
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getOptionsList() {
+        return java.util.Collections.unmodifiableList(options_);
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public int getOptionsCount() {
+        return options_.size();
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getOptions(int index) {
+        return options_.get(index);
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public Builder setOptions(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureOptionsIsMutable();
+        options_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public Builder addOptions(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureOptionsIsMutable();
+        options_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public Builder addAllOptions(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureOptionsIsMutable();
+        super.addAll(values, options_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes options = 41;</code>
+       *
+       * <pre>
+       * a list of strings where each string has the form of 'key=value'.
+       * used to tell certain properties of the data (e.g., passthrough vs.
+       * binderized).
+       * </pre>
+       */
+      public Builder clearOptions() {
+        options_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000200);
         onChanged();
         return this;
       }
@@ -11341,49 +11569,49 @@ public final class VtsReportMessage {
       "\rend_timestamp\030\026 \001(\003\0224\n\010coverage\030\037 \003(\0132\"" +
       ".android.vts.CoverageReportMessage\0226\n\tpr" +
       "ofiling\030) \003(\0132#.android.vts.ProfilingRep" +
-      "ortMessage\"\217\002\n\026ProfilingReportMessage\022\014\n" +
+      "ortMessage\"\240\002\n\026ProfilingReportMessage\022\014\n" +
       "\004name\030\001 \001(\014\022+\n\004type\030\002 \001(\0162\035.android.vts." +
       "VtsProfilingType\022@\n\017regression_mode\030\003 \001(" +
       "\0162\'.android.vts.VtsProfilingRegressionMo",
       "de\022\027\n\017start_timestamp\030\013 \001(\003\022\025\n\rend_times" +
       "tamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022\r\n\005value\030\026 \003(\003" +
       "\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014y_axis_label\030 " +
-      " \001(\014\"\345\001\n\025CoverageReportMessage\022\021\n\tfile_p" +
-      "ath\030\013 \001(\014\022\024\n\014project_name\030\014 \001(\014\022\020\n\010revis" +
-      "ion\030\r \001(\014\022\034\n\024line_coverage_vector\030\027 \003(\005\022" +
-      "\030\n\020total_line_count\030e \001(\005\022\032\n\022covered_lin" +
-      "e_count\030f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030\001\022\025\n\tf" +
-      "ile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002\030\001\"\355\003\n" +
-      "\021TestReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022\014",
-      "\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.androi" +
-      "d.vts.VtsTestType\022:\n\013device_info\030\004 \003(\0132%" +
-      ".android.vts.AndroidDeviceInfoMessage\0221\n" +
-      "\nbuild_info\030\005 \001(\0132\035.android.vts.AndroidB" +
-      "uildInfo\022\030\n\020subscriber_email\030\006 \003(\014\022+\n\tho" +
-      "st_info\030\007 \001(\0132\030.android.vts.VtsHostInfo\022" +
-      "5\n\ttest_case\030\013 \003(\0132\".android.vts.TestCas" +
-      "eReportMessage\0226\n\tprofiling\030\025 \003(\0132#.andr" +
-      "oid.vts.ProfilingReportMessage\022\027\n\017start_" +
-      "timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\0224",
-      "\n\010coverage\030g \003(\0132\".android.vts.CoverageR" +
-      "eportMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKNO" +
-      "WN_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031" +
-      "\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_R" +
-      "ESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTI" +
-      "ON\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013V" +
-      "tsTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032" +
-      "VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST" +
-      "_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTE" +
-      "ST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*\243\001\n\032Vt",
-      "sProfilingRegressionMode\022\033\n\027UNKNOWN_REGR" +
-      "ESSION_MODE\020\000\022 \n\034VTS_REGRESSION_MODE_DIS" +
-      "ABLED\020\001\022\"\n\036VTS_REGRESSION_MODE_INCREASIN" +
-      "G\020\002\022\"\n\036VTS_REGRESSION_MODE_DECREASING\020\003*" +
-      "{\n\020VtsProfilingType\022\036\n\032UNKNOWN_VTS_PROFI" +
-      "LING_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMEST" +
-      "AMP\020\001\022%\n!VTS_PROFILING_TYPE_LABELED_VECT" +
-      "OR\020\002B)\n\025com.android.vts.protoB\020VtsReport" +
-      "Message"
+      " \001(\014\022\017\n\007options\030) \003(\014\"\345\001\n\025CoverageReport" +
+      "Message\022\021\n\tfile_path\030\013 \001(\014\022\024\n\014project_na" +
+      "me\030\014 \001(\014\022\020\n\010revision\030\r \001(\014\022\034\n\024line_cover" +
+      "age_vector\030\027 \003(\005\022\030\n\020total_line_count\030e \001" +
+      "(\005\022\032\n\022covered_line_count\030f \001(\005\022\024\n\010dir_pa" +
+      "th\030\001 \001(\014B\002\030\001\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004h" +
+      "tml\030\003 \001(\014B\002\030\001\"\355\003\n\021TestReportMessage\022\022\n\nt",
+      "est_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_ty" +
+      "pe\030\003 \001(\0162\030.android.vts.VtsTestType\022:\n\013de" +
+      "vice_info\030\004 \003(\0132%.android.vts.AndroidDev" +
+      "iceInfoMessage\0221\n\nbuild_info\030\005 \001(\0132\035.and" +
+      "roid.vts.AndroidBuildInfo\022\030\n\020subscriber_" +
+      "email\030\006 \003(\014\022+\n\thost_info\030\007 \001(\0132\030.android" +
+      ".vts.VtsHostInfo\0225\n\ttest_case\030\013 \003(\0132\".an" +
+      "droid.vts.TestCaseReportMessage\0226\n\tprofi" +
+      "ling\030\025 \003(\0132#.android.vts.ProfilingReport" +
+      "Message\022\027\n\017start_timestamp\030e \001(\003\022\025\n\rend_",
+      "timestamp\030f \001(\003\0224\n\010coverage\030g \003(\0132\".andr" +
+      "oid.vts.CoverageReportMessage*\263\001\n\016TestCa" +
+      "seResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_CAS" +
+      "E_RESULT_PASS\020\001\022\031\n\025TEST_CASE_RESULT_FAIL" +
+      "\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST_CA" +
+      "SE_RESULT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RESUL" +
+      "T_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOWN_V" +
+      "TS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRUCTU" +
+      "RAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n\025VT" +
+      "S_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_SIDE",
+      "_FUZZING\020\004*\243\001\n\032VtsProfilingRegressionMod" +
+      "e\022\033\n\027UNKNOWN_REGRESSION_MODE\020\000\022 \n\034VTS_RE" +
+      "GRESSION_MODE_DISABLED\020\001\022\"\n\036VTS_REGRESSI" +
+      "ON_MODE_INCREASING\020\002\022\"\n\036VTS_REGRESSION_M" +
+      "ODE_DECREASING\020\003*{\n\020VtsProfilingType\022\036\n\032" +
+      "UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VTS_PROF" +
+      "ILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROFILING_" +
+      "TYPE_LABELED_VECTOR\020\002B)\n\025com.android.vts" +
+      ".protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -11419,7 +11647,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_ProfilingReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_ProfilingReportMessage_descriptor,
-              new java.lang.String[] { "Name", "Type", "RegressionMode", "StartTimestamp", "EndTimestamp", "Label", "Value", "XAxisLabel", "YAxisLabel", });
+              new java.lang.String[] { "Name", "Type", "RegressionMode", "StartTimestamp", "EndTimestamp", "Label", "Value", "XAxisLabel", "YAxisLabel", "Options", });
           internal_static_android_vts_CoverageReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
