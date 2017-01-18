@@ -56,9 +56,10 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 logging.error("The given hwbinder service name %s is invalid.",
                               hwbinder_service_name)
             else:
-                cmd_results = self.shell.Execute(
-                    "ps -A | grep %s@" % hwbinder_service_name)
-                if any(cmd_results[const.EXIT_CODE]):
+                cmd_results = self.shell.Execute("ps -A")
+                hwbinder_service_name += "@"
+                if (any(cmd_results[const.EXIT_CODE])
+                    or hwbinder_service_name not in cmd_results[const.STDOUT]):
                     logging.warn("The required hwbinder service %s not found.",
                                  hwbinder_service_name)
                     self._skip_all_testcases = True
