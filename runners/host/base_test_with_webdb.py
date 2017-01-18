@@ -347,6 +347,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                       name,
                                       labels,
                                       values,
+                                      options=[],
                                       x_axis_label="x-axis",
                                       y_axis_label="y-axis",
                                       regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
@@ -356,6 +357,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             name: string, profiling point name.
             labels: a list of labels.
             values: a list of values.
+            options: a set of options.
             x-axis_label: string, the x-axis label title for a graph plot.
             y-axis_label: string, the y-axis label title for a graph plot.
             regression_mode: specifies the direction of change which indicates
@@ -379,6 +381,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._profiling[name].value.append(value)
         self._profiling[name].x_axis_label = x_axis_label
         self._profiling[name].y_axis_label = y_axis_label
+        for option in options:
+            self._profiling[name].options.append(option)
 
     def AddProfilingDataLabeledPoint(self, name, value):
         """Adds labeled point type profiling data for uploading to the web DB.
@@ -562,9 +566,14 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.info("parsing trace file: %s.", file)
             data = profiling_utils.ParseTraceData(file)
             for tag in [_MAX, _MIN, _AVG]:
+                if data.name is None:
+                    name = tag
+                else:
+                    name = data.name + "_" + tag
                 self.AddProfilingDataLabeledVector(
-                    data.name + "_" + tag,
+                    name,
                     data.labels,
                     data.values[tag],
+                    data.options,
                     x_axis_label="API name",
                     y_axis_label="API processing latency (nano secs)")
