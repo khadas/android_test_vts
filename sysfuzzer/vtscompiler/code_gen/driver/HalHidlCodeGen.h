@@ -96,13 +96,6 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       const string& fuzzer_extended_class_name,
       const string& original_data_structure_name, const string& parent_path);
 
-  void GenerateCppBodySyncCallbackFunction(Formatter& out,
-      const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name);
-
-  void GenerateSubStructFuzzFunctionCall(Formatter& out,
-      const StructSpecificationMessage& message, const string& parent_path);
-
   // Generates a scalar type in C/C++.
   void GenerateScalarTypeInC(Formatter& out, const string& type);
 
