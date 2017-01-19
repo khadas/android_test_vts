@@ -137,8 +137,10 @@ def PyDict2PbStruct(message, pb_spec, py_value):
     if pb_spec.name:
         message.name = pb_spec.name
     message.type = CompSpecMsg.TYPE_STRUCT
+    provided_attrs = set(py_value.keys())
     for attr in pb_spec.struct_value:
         if attr.name in py_value:
+            provided_attrs.remove(attr.name)
             curr_value = py_value[attr.name]
             attr_msg = message.struct_value.add()
             if attr.type == CompSpecMsg.TYPE_ENUM:
@@ -160,6 +162,11 @@ def PyDict2PbStruct(message, pb_spec, py_value):
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
                 exit(-1)
+    if len(provided_attrs) > 0:
+        logging.error("PyDict2PbStruct: provided dictionary included elements" +
+                      " not part of the type being converted to: %s",
+                      provided_attrs)
+        exit(-1)
     return message
 
 
