@@ -46,6 +46,9 @@
           var link = ctx + '/show_performance_digest?profilingPoint=${profilingPointName}' +
               '&testName=${testName}' +
               '&startTime=' + time;
+          if ($('#device-select').prop('selectedIndex') > 1) {
+              link += '&device=' + $('#device-select').val();
+          }
           window.open(link,'_self');
       }
 
@@ -61,6 +64,7 @@
               var label = $(this);
               label.html(moment(parseInt(label.html())).format('M/D/YY'));
           });
+          $('select').material_select();
       });
 
     </script>
@@ -88,10 +92,19 @@
     <div class='container'>
       <div class='row card'>
         <div id='header-container' class='col s12'>
-          <div class='col s9'>
+          <div class='col s12'>
             <h4>Daily Performance Digest</h4>
           </div>
-          <input type='text' id='date' name='date' class='col s2'>
+          <div id='device-select-wrapper' class='input-field col s6 m3 offset-m6'>
+            <select id='device-select'>
+              <option value='' disabled>Select device</option>
+              <option value='0' ${empty selectedDevice ? 'selected' : ''}>All Devices</option>
+              <c:forEach items='${devices}' var='device' varStatus='loop'>
+                <option value=${device} ${selectedDevice eq device ? 'selected' : ''}>${device}</option>
+              </c:forEach>
+            </select>
+          </div>
+          <input type='text' id='date' name='date' class='col s5 m2'>
           <a id='load' class='btn-floating btn-medium red right waves-effect waves-light'>
             <i class='medium material-icons'>cached</i>
           </a>

@@ -36,15 +36,23 @@ public class PerformanceSummary {
     private Set<String> devices;
     private String deviceFilter;
 
+    /**
+     * Creates a performance summary object.
+     */
     public PerformanceSummary() {
         this.summaryMap = new HashMap<>();
         this.devices = new HashSet<>();
         this.deviceFilter = null;
     }
 
+    /**
+     * Creates a performance summary object with the specified device name filter.
+     * If the specified name is null, then use no filter.
+     * @param deviceFilter The name of the device to include in the performance summary.
+     */
     public PerformanceSummary(String deviceFilter) {
         this();
-        this.deviceFilter = deviceFilter.trim().toLowerCase();
+        if (deviceFilter != null) this.deviceFilter = deviceFilter.trim().toLowerCase();
     }
 
     /**
