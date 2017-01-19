@@ -679,8 +679,14 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
     FuzzerBase* func_fuzzer = curr_job.second;
 
     void* result;
+    FunctionSpecificationMessage result_msg;
     cout << "Iteration " << (i + 1) << " Function " << func_msg->name() << endl;
-    func_fuzzer->Fuzz(func_msg, &result, callback_socket_name_);
+    // For Hidl HAL, use CallFunction method.
+    if (interface_specification_message->component_class() == HAL_HIDL) {
+      func_fuzzer->CallFunction(*func_msg, callback_socket_name_, &result_msg);
+    } else {
+      func_fuzzer->Fuzz(func_msg, &result, callback_socket_name_);
+    }
     if (func_msg->return_type().type() == TYPE_PREDEFINED) {
       if (result != NULL) {
         // loads that interface spec and enqueues all functions.
