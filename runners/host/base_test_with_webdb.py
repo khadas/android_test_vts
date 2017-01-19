@@ -41,6 +41,7 @@ from vts.utils.app_engine import bigtable_rest_client
 from vts.utils.python.build.api import artifact_fetcher
 from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.profiling import profiling_utils
+from vts.utils.python.systrace import systrace_controller
 
 _ANDROID_DEVICE = "AndroidDevice"
 _MAX = "max"
@@ -67,6 +68,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                      a GAE-side bigtable.
         _profiling: a dict containing the current profiling information.
         _profiling_data: a list of profiling data generated for each test case.
+        _systrace_controller: SystraceController object
     """
 
     BRANCH = "master"  # TODO: read from tradefed parameters
@@ -81,9 +83,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         super(BaseTestWithWebDbClass, self).__init__(configs)
 
     def _setUpClass(self):
-        """Proxy function to guarantee the base implementation of setUpClass
-        is called.
-        """
+        """Proxy function to guarantee the base implementation of setUpClass is called."""
         self.getUserParams(opt_param_names=[
             self.USE_GAE_DB, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL,
             keys.ConfigKeys.IKEY_MODULES, keys.ConfigKeys.IKEY_ENABLE_COVERAGE,
@@ -95,29 +95,40 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self.enable_profiling = self.getUserParam(
             keys.ConfigKeys.IKEY_ENABLE_PROFILING, default_value=False)
 
+        self._systrace_controller = None
+        systrace_process_name = self.getUserParam(
+            keys.ConfigKeys.IKEY_SYSTRACE_PROCESS_NAME, default_value=None)
+        data_file_path = self.getUserParam(
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH, default_value=None)
+        if systrace_process_name:
+            systrace_process_name = str(systrace_process_name)
+            if data_file_path:
+                android_vts_path = os.path.normpath(
+                    os.path.join(data_file_path, '..'))
+
+                self._systrace_controller = systrace_controller.SystraceController(
+                    android_vts_path, systrace_process_name)
+            else:
+                logging.error('Cannot create systrace controller object: '
+                              'data_file_path not available')
+
+        self.test_module_name = self.getUserParam(
+            keys.ConfigKeys.KEY_TESTBED_NAME,
+            log_warning_and_continue_if_not_found=True,
+            default_value=self.__class__.__name__)
+        self.test_module_name = str(self.test_module_name)
+        logging.info("Test module name: %s", self.test_module_name)
+
         if getattr(self, self.USE_GAE_DB, False):
             logging.info("GAE-DB: turned on")
             self._report_msg = ReportMsg.TestReportMessage()
-            test_module_name = self.__class__.__name__
-            if hasattr(self, keys.ConfigKeys.KEY_TESTBED_NAME):
-                user_specified_test_name = getattr(
-                    self, keys.ConfigKeys.KEY_TESTBED_NAME, None)
-                if user_specified_test_name:
-                    test_module_name = str(user_specified_test_name)
-                else:
-                    logging.warn("%s field = %s",
-                                 keys.ConfigKeys.KEY_TESTBED_NAME,
-                                 user_specified_test_name)
-            else:
-                logging.warn("%s not defined in the given test config",
-                             keys.ConfigKeys.KEY_TESTBED_NAME)
-            logging.info("Test module name: %s", test_module_name)
-            self._report_msg.test = test_module_name
+            self._report_msg.test = self.test_module_name
             self._report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
             self._report_msg.start_timestamp = self.GetTimestamp()
             self._report_msg.host_info.hostname = socket.gethostname()
             self.SetDeviceInfo(self._report_msg)
             self.InitializeCoverage()
+
         self._profiling = {}
         self._profiling_data = []
         return super(BaseTestWithWebDbClass, self)._setUpClass()
@@ -126,7 +137,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """Calls sub-class's tearDownClass first and then uploads to web DB."""
         result = super(BaseTestWithWebDbClass, self)._tearDownClass()
         if (getattr(self, self.USE_GAE_DB, False) and
-            getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL, "")):
+                getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL, "")):
             # Handle case when runner fails, tests aren't executed
             if (self.results.executed and
                     self.results.executed[-1].test_name == "setup_class"):
@@ -227,22 +238,84 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._testEntry(test_name)
 
     def _testExit(self, test_name):
-        """Proxy function to guarantee the base implementation of tearDownTest
-        is called.
+        """Proxy function to guarantee the base implementation of tearDownTest is called.
+
+        Args:
+            test_name: string, test name
         """
+        test_end_time = self.GetTimestamp()
         if getattr(self, self.USE_GAE_DB, False):
             if self._current_test_report_msg:
-                self._current_test_report_msg.end_timestamp = self.GetTimestamp(
-                )
+                self._current_test_report_msg.end_timestamp = test_end_time
+                if self._systrace_controller and self._systrace_controller.is_valid:
+                    if self.getUserParam(
+                            keys.ConfigKeys.IKEY_SYSTRACE_UPLAD_TO_DASHBOARD,
+                            default_value=False):
+                        try:
+                            systrace_msg = self._current_test_report_msg.systrace.add(
+                            )
+                            systrace_msg.process_name = self._systrace_controller.process_name
+                            html = self._systrace_controller.ReadLastOutput()
+                            if html is None:
+                                logging.error(
+                                    'Failed to read systrace output.')
+                            else:
+                                systrace_msg.html.append(html)
+                                logging.info(
+                                    'Systrace html data added to report message. Length: %s',
+                                    len(html))
+                            suc = self._systrace_controller.ClearLastOutput()
+                            if not suc:
+                                logging.error(
+                                    'failed to clear last systrace output.')
+                        except Exception as e:  # TODO(yuexima): more specific exceptions catch
+                            logging.error(
+                                'Failed to add systrace to resport message %s',
+                                e)
+
+                    report_path = self.getUserParam(
+                        keys.ConfigKeys.IKEY_SYSTRACE_REPORT_PATH,
+                        default_value=None)
+                    if report_path:
+                        report_destination_file = os.path.join(
+                            report_path,
+                            '{module}_{test}_{process}_{time}.html'.format(
+                                module=self.test_module_name,
+                                test=test_name,
+                                process=self._systrace_controller.process_name,
+                                time=test_end_time))
+                        self._systrace_controller.SaveLastOutput(
+                            report_destination_file)
+                        logging.info('Systrace output saved to %s',
+                                     report_destination_file)
             else:
                 logging.info(
                     "test result of '%s' is empty and will not be uploaded.",
                     test_name)
         return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
+    def _setUpTest(self, test_name):
+        """Proxy function to guarantee the base implementation of _setUpTest is called.
+
+        Args:
+            test_name: string, test name
+        """
+        if self._systrace_controller:
+            self._systrace_controller.Start()
+        return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
+
+    def _tearDownTest(self, test_name):
+        """Proxy function to guarantee the base implementation of test_name is called.
+
+        Args:
+            test_name: string, test name
+        """
+        if self._systrace_controller:
+            self._systrace_controller.Stop()
+        return super(BaseTestWithWebDbClass, self)._tearDownTest(test_name)
+
     def _onFail(self, record):
-        """Proxy function to guarantee the base implementation of onFail is
-        called.
+        """Proxy function to guarantee the base implementation of _onFail is called.
 
         Args:
             record: The records.TestResultRecord object for the failed test
@@ -253,11 +326,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._onFail(record)
 
     def _onPass(self, record):
-        """Proxy function to guarantee the base implementation of onPass is
-        called.
+        """Proxy function to guarantee the base implementation of _onPass is called.
 
         Args:
-            record: The records.TestResultRecord object for the passed test
+            record: The records.TestResultRecord object for the failed test
                     case.
         """
         if getattr(self, self.USE_GAE_DB, False):
@@ -265,11 +337,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._onPass(record)
 
     def _onSkip(self, record):
-        """Proxy function to guarantee the base implementation of onSkip is
-        called.
+        """Proxy function to guarantee the base implementation of _onSkip is called.
 
         Args:
-            record: The records.TestResultRecord object for the skipped test
+            record: The records.TestResultRecord object for the failed test
                     case.
         """
         if getattr(self, self.USE_GAE_DB, False):
@@ -277,11 +348,10 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._onSkip(record)
 
     def _onSilent(self, record):
-        """Proxy function to guarantee the base implementation of onSilent is
-        called.
+        """Proxy function to guarantee the base implementation of _onSilent is called.
 
         Args:
-            record: The records.TestResultRecord object for the skipped test
+            record: The records.TestResultRecord object for the failed test
                     case.
         """
         if getattr(self, self.USE_GAE_DB, False):
@@ -290,8 +360,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         return super(BaseTestWithWebDbClass, self)._onSilent(record)
 
     def _onException(self, record):
-        """Proxy function to guarantee the base implementation of onException
-        is called.
+        """Proxy function to guarantee the base implementation of _onException is called.
 
         Args:
             record: The records.TestResultRecord object for the failed test
@@ -346,14 +415,15 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddProfilingDataLabeledVector(self,
-                                      name,
-                                      labels,
-                                      values,
-                                      options=[],
-                                      x_axis_label="x-axis",
-                                      y_axis_label="y-axis",
-                                      regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
+    def AddProfilingDataLabeledVector(
+            self,
+            name,
+            labels,
+            values,
+            options=[],
+            x_axis_label="x-axis",
+            y_axis_label="y-axis",
+            regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
         """Adds the profiling data in order to upload to the web DB.
 
         Args:
@@ -466,9 +536,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         # Fetch repo dictionary
         try:
-            revision_dict = build_client.GetRepoDictionary(self.BRANCH,
-                                                           build_flavor,
-                                                           device_build_id)
+            revision_dict = build_client.GetRepoDictionary(
+                self.BRANCH, build_flavor, device_build_id)
         except:
             logging.error("Could not read build info for branch: %s, " +
                           "target: %s, id: %s", self.BRANCH, build_flavor,
@@ -545,13 +614,18 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             # auto-process coverage data
             checksum_gcno_dict = getattr(self, self.CHECKSUM_GCNO_DICT)
             coverage_utils.ProcessCoverageData(
-                report_msg, gcda_dict, revision_dict,
+                report_msg,
+                gcda_dict,
+                revision_dict,
                 checksum_gcno_dict=checksum_gcno_dict)
         else:
             # explicitly process coverage data for the specified modules
             modules = getattr(self, keys.ConfigKeys.IKEY_MODULES)
             coverage_utils.ProcessCoverageData(
-                report_msg, gcda_dict, revision_dict, modules=modules,
+                report_msg,
+                gcda_dict,
+                revision_dict,
+                modules=modules,
                 cov_zip=cov_zip)
         return True
 
@@ -589,14 +663,17 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         for api, latencies in merged_profiling_data.values.items():
             if latencies:
                 merged_profiling_data.labels.append(api)
-                merged_profiling_data.aggregated_values["max"].append(max(latencies))
-                merged_profiling_data.aggregated_values["min"].append(min(latencies))
-                merged_profiling_data.aggregated_values["avg"].append(sum(latencies) / len(latencies))
+                merged_profiling_data.aggregated_values["max"].append(
+                    max(latencies))
+                merged_profiling_data.aggregated_values["min"].append(
+                    min(latencies))
+                merged_profiling_data.aggregated_values["avg"].append(
+                    sum(latencies) / len(latencies))
         for tag in [_MAX, _MIN, _AVG]:
             if merged_profiling_data.name is None:
-              name = tag
+                name = tag
             else:
-              name = merged_profiling_data.name + "_" + tag
+                name = merged_profiling_data.name + "_" + tag
             self.AddProfilingDataLabeledVector(
                 name,
                 merged_profiling_data.labels,
