@@ -19,7 +19,6 @@ package com.android.vts.servlet;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Table;
-import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
 import com.android.vts.util.BigtableHelper;
 import com.android.vts.util.EmailHelper;
 import com.android.vts.util.MathUtil;
@@ -49,6 +48,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
 
     private static final String MEAN = "Mean";
+    private static final String MAX = "Max";
     private static final String MIN = "Min";
     private static final String MIN_DELTA = "&Delta;Min (%)";
     private static final String MAX_DELTA = "&Delta;Max (%)";
@@ -65,80 +65,6 @@ public class VtsPerformanceJobServlet extends BaseServlet {
     private static final String HEADER_COL_STYLE = "border-top: 1px dotted gray; border-right: 2px solid black; text-align: right; background-color: lightgray;";
     private static final String INNER_CELL_STYLE = "border-top: 1px dotted gray; border-right: 1px dotted gray; text-align: right;";
     private static final String OUTER_CELL_STYLE = "border-top: 1px dotted gray; border-right: 2px solid black; text-align: right;";
-
-    /**
-     * Creates the HTML for a table cell representing the percent change between two numbers.
-     *
-     * Computes the percent change (after - before)/before * 100 and inserts it into a table cell
-     * with the specified style. The color of the cell is white if 'after' is less than before.
-     * Otherwise, the cell is colored red with opacity according to the percent change (100%+
-     * delta means 100% opacity). If the before value is 0 and the after value is positive, then
-     * the color of the cell is 100% red to indicate an increase of undefined magnitude.
-     *
-     * @param baseline The baseline value observed.
-     * @param test The value to compare against the baseline.
-     * @param style A string containing CSS styles to apply to the table cell.
-     * @returns An HTML string for a colored table cell containing the percent change.
-     */
-    private static String getPercentChangeHTML(double baseline, double test, String style,
-                                               VtsProfilingRegressionMode mode) {
-        String pctChangeString = "0 %";
-        double alpha = 0;
-        double delta = test - baseline;
-        if (baseline != 0) {
-            double pctChange = delta / baseline;
-            alpha = pctChange * 2;
-            pctChangeString = MathUtil.round(pctChange * 100, N_DIGITS) + " %";
-        } else if (delta != 0){
-            // If the percent change is undefined, the cell will be solid red or white
-            alpha = (int) Math.signum(delta);  // get the sign of the delta (+1, 0, -1)
-            pctChangeString = "";
-        }
-        if (mode == VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING) {
-            alpha = -alpha;
-        }
-        String color = "background-color: rgba(255, 0, 0, " + alpha + ");";
-        String html = "<td style='" + style + color + "'>";
-        html += pctChangeString + "</td>";
-        return html;
-    }
-
-    /**
-     * Compares a test StatSummary to a baseline StatSummary and returns a formatted set of cells
-     * @param baseline The StatSummary object containing initial values to compare against
-     * @param test The StatSummary object containing test values to be compared against the baseline
-     * @return HTML string representing the performance of the test versus the baseline
-     */
-    public static String getPerformanceComparisonHTML(StatSummary baseline, StatSummary test) {
-        if (test == null || baseline == null) {
-            return "<td></td><td></td><td></td><td></td>";
-        }
-        String row = "";
-        double baselineValue;
-        double testValue;
-        switch (test.getRegressionMode()) {
-            case VTS_REGRESSION_MODE_DECREASING:
-                baselineValue = baseline.getMax();
-                testValue = test.getMax();
-                break;
-            default:
-                baselineValue = baseline.getMin();
-                testValue = test.getMin();
-                break;
-        }
-        // Intensity of red color is a function of the relative (percent) change
-        // in the new value compared to the previous day's. Intensity is a linear function
-        // of percentage change, reaching a ceiling at 100% change (e.g. a doubling).
-        row += getPercentChangeHTML(baselineValue, testValue, INNER_CELL_STYLE,
-                                    test.getRegressionMode());
-        row += "<td style='" + INNER_CELL_STYLE + "'>";
-        row += MathUtil.round(baseline.getMin(), N_DIGITS);
-        row += "</td><td style='" + INNER_CELL_STYLE + "'>";
-        row += MathUtil.round(baseline.getMean(), N_DIGITS);
-        row += "</td><td style='" + OUTER_CELL_STYLE + "'>";
-        row += MathUtil.round(baseline.getStd(), N_DIGITS) + "</td>";
-        return row;
-    }
 
     /**
      * Generates an HTML summary of the performance changes for the profiling results in the
@@ -184,14 +110,17 @@ public class VtsPerformanceJobServlet extends BaseServlet {
             tableHTML += "</tr>";
 
             String deltaString;
+            String bestCaseString;
             String subtext;
             switch (now.getProfilingPointSummary(profilingPoint).getRegressionMode()) {
                 case VTS_REGRESSION_MODE_DECREASING:
                     deltaString = MAX_DELTA;
+                    bestCaseString = MAX;
                     subtext = HIGHER_IS_BETTER;
                     break;
                 default:
                     deltaString = MIN_DELTA;
+                    bestCaseString = MIN;
                     subtext = LOWER_IS_BETTER;
                     break;
             }
@@ -206,7 +135,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>";
                     tableHTML += summary.xLabel.toStringUtf8() + "</th>";
                 } else if (i > 0) {
-                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MIN + "</th>";
+                    tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + bestCaseString + "</th>";
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + MEAN + "</th>";
                     tableHTML += "<th style='" + COL_LABEL_STYLE + "'>" + STD + "</th>";
                 }
@@ -218,7 +147,7 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                 ByteString label = stats.getLabel();
                 tableHTML += "<tr><td style='" + HEADER_COL_STYLE +"'>" + label.toStringUtf8();
                 tableHTML += "</td><td style='" + INNER_CELL_STYLE + "'>";
-                tableHTML += MathUtil.round(stats.getMin(), N_DIGITS)  + "</td>";
+                tableHTML += MathUtil.round(stats.getBestCase(), N_DIGITS)  + "</td>";
                 tableHTML += "<td style='" + INNER_CELL_STYLE + "'>";
                 tableHTML += MathUtil.round(stats.getMean(), N_DIGITS)  + "</td>";
                 tableHTML += "<td style='" + OUTER_CELL_STYLE + "'>";
@@ -229,7 +158,8 @@ public class VtsPerformanceJobServlet extends BaseServlet {
                         StatSummary baseline =
                                 oldPerfSummary.getProfilingPointSummary(profilingPoint)
                                               .getStatSummary(label);
-                        tableHTML += getPerformanceComparisonHTML(baseline, stats);
+                        tableHTML += PerformanceUtil.getBestCasePerformanceComparisonHTML(
+                                baseline, stats, "", "", INNER_CELL_STYLE, OUTER_CELL_STYLE);
                     } else tableHTML += "<td></td><td></td><td></td><td></td>";
                 }
                 tableHTML += "</tr>";
