@@ -43,6 +43,9 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
 
     private static final int N_DIGITS = 2;
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
+    private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
+    private static final String[] splitKeysArray = new String[]{HIDL_HAL_OPTION};
+    private static final Set<String> splitKeySet = new HashSet<String>(Arrays.asList(splitKeysArray));
 
     private static final String MEAN = "Mean";
     private static final String MIN = "Min";
@@ -250,7 +253,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         String sectionLabels = "";
         int i = 0;
         for (TimeInterval interval : timeIntervals) {
-            PerformanceSummary perfSummary = new PerformanceSummary(selectedDevice);
+            PerformanceSummary perfSummary = new PerformanceSummary(selectedDevice, splitKeySet);
             PerformanceUtil.updatePerformanceSummary(tableName, interval.start, interval.end, perfSummary);
             if (perfSummary.size() == 0) continue;
             perfSummaries.add(perfSummary);
