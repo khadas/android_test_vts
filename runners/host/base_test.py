@@ -138,6 +138,7 @@ class BaseTestClass(object):
     def getUserParam(self,
                      param_name,
                      error_if_not_found=False,
+                     log_warning_and_continue_if_not_found=False,
                      default_value=None):
         """Get the value of a single user parameter.
 
@@ -152,6 +153,8 @@ class BaseTestClass(object):
                         will be accessed.
             error_if_not_found: bool, whether to raise error if parameter not exists. Default:
                                 False
+            log_warning_and_continue_if_not_found: bool, log a warning message if parameter value
+                                                   not found.
             default_value: object, default value to return if not found. If error_if_not_found is
                            True, this parameter has no effect. Default: None
 
@@ -171,10 +174,11 @@ class BaseTestClass(object):
         curr_obj = self.user_params
         for param in param_name:
             if param not in curr_obj:
+                msg = "Missing user param '%s' in test configuration." % param_name
                 if error_if_not_found:
-                    raise errors.BaseTestError(
-                        ("Missing user param '%s' "
-                         "in test configuration.") % name)
+                    raise errors.BaseTestError(msg)
+                elif log_warning_and_continue_if_not_found:
+                    logging.warn(msg)
                 return default_value
             curr_obj = curr_obj[param]
 
