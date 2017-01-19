@@ -62,12 +62,13 @@ class AndroidDeviceError(signals.ControllerError):
     pass
 
 
-def create(configs):
+def create(configs, start_services=True):
     """Creates AndroidDevice controller objects.
 
     Args:
         configs: A list of dicts, each representing a configuration for an
                  Android device.
+        start_services: boolean, controls whether services will be started.
 
     Returns:
         A list of AndroidDevice objects.
@@ -89,7 +90,8 @@ def create(configs):
         if ad.serial not in connected_ads:
             raise DoesNotExistError(("Android device %s is specified in config"
                                      " but is not attached.") % ad.serial)
-    _startServicesOnAds(ads)
+    if start_services:
+        _startServicesOnAds(ads)
     return ads
 
 
@@ -590,7 +592,7 @@ class AndroidDevice(object):
         self.adb.shell("start")
         self.waitForBootCompletion()
 
-    def reboot(self):
+    def reboot(self, restart_services=True):
         """Reboots the device and wait for device to complete booting.
 
         This is probably going to print some error messages in console. Only
@@ -603,19 +605,24 @@ class AndroidDevice(object):
         if self.isBootloaderMode:
             self.fastboot.reboot()
             return
-        has_adb_log = self.isAdbLogcatOn
-        has_vts_agent = True if self.vts_agent_process else False
-        if has_adb_log:
-            self.stopAdbLogcat()
-        if has_vts_agent:
-            self.stopVtsAgent()
+
+        if restart_services:
+            has_adb_log = self.isAdbLogcatOn
+            has_vts_agent = True if self.vts_agent_process else False
+            if has_adb_log:
+                self.stopAdbLogcat()
+            if has_vts_agent:
+                self.stopVtsAgent()
+
         self.adb.reboot()
         self.waitForBootCompletion()
         self.rootAdb()
-        if has_adb_log:
-            self.startAdbLogcat()
-        if has_vts_agent:
-            self.startVtsAgent()
+
+        if restart_services:
+            if has_adb_log:
+                self.startAdbLogcat()
+            if has_vts_agent:
+                self.startVtsAgent()
 
     def startServices(self):
         """Starts long running services on the android device.
