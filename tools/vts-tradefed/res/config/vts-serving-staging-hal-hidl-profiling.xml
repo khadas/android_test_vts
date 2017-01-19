@@ -23,5 +23,7 @@
     <option name="compatibility:include-filter" value="LightHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="HalPowerHidlTargetProfilingTest" />
     <option name="compatibility:include-filter" value="SensorsHidlProfilingTest" />
+    <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicProfilingTest" />
+    <option name="compatibility:include-filter" value="VrHidlTargetProfilingTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
