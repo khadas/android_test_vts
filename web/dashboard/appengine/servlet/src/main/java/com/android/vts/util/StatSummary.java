@@ -64,6 +64,19 @@ public class StatSummary {
     }
 
     /**
+     * Gets the best case of the stream.
+     * @return The min or max.
+     */
+    public double getBestCase() {
+        switch (regression_mode) {
+            case VTS_REGRESSION_MODE_DECREASING:
+                return getMax();
+            default:
+                return getMin();
+        }
+    }
+
+    /**
      * Gets the calculated min of the stream.
      * @return The min.
      */
