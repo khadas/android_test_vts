@@ -30,6 +30,11 @@
 
 #load {
     margin-top: 15px;
+    margin-right: 30px;
+}
+
+#device-select-wrapper {
+    margin-top: 9px;
 }
 
 #date {
