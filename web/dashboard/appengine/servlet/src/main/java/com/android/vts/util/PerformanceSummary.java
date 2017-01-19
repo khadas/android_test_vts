@@ -19,22 +19,30 @@ import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
+import com.google.protobuf.ByteString;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * PerformanceSummary, an object summarizing performance across profiling points for a test run.
  **/
 public class PerformanceSummary {
+    private static String OPTION_DELIMITER = "=";
+    private static String NAME_DELIMITER = ",";
+
     protected static Logger logger = Logger.getLogger(PerformanceSummary.class.getName());
     private Map<String, ProfilingPointSummary> summaryMap;
     private Set<String> devices;
     private String deviceFilter;
+    private Set<String> optionSplitKeys;
 
     /**
      * Creates a performance summary object.
@@ -49,10 +57,14 @@ public class PerformanceSummary {
      * Creates a performance summary object with the specified device name filter.
      * If the specified name is null, then use no filter.
      * @param deviceFilter The name of the device to include in the performance summary.
+     * @param optionSplitKeys A set of option keys to split on (i.e. profiling data with different
+     *                        values corresponding to the option key will be analyzed as different
+     *                        profiling points).
      */
-    public PerformanceSummary(String deviceFilter) {
+    public PerformanceSummary(String deviceFilter, Set<String> optionSplitKeys) {
         this();
         if (deviceFilter != null) this.deviceFilter = deviceFilter.trim().toLowerCase();
+        this.optionSplitKeys = optionSplitKeys;
     }
 
     /**
@@ -103,6 +115,21 @@ public class PerformanceSummary {
             }
 
             String name = profilingReportMessage.getName().toStringUtf8();
+            List<String> nameSuffixes = new ArrayList<String>();
+            for (ByteString key : profilingReportMessage.getOptionsList()) {
+                String optionString = key.toStringUtf8();
+                String[] optionParts = optionString.split(OPTION_DELIMITER);
+                if (optionParts.length != 2) {
+                    logger.log(Level.WARNING, "Invalid profiling option : " + optionString);
+                }
+                if (optionSplitKeys.contains(optionParts[0])) {
+                    nameSuffixes.add(optionParts[1]);
+                }
+            }
+            if (nameSuffixes.size() > 0) {
+                StringUtils.join(nameSuffixes, NAME_DELIMITER);
+                name += " (" + StringUtils.join(nameSuffixes, NAME_DELIMITER) + ")";
+            }
 
             switch (profilingReportMessage.getType()) {
                 case UNKNOWN_VTS_PROFILING_TYPE:
