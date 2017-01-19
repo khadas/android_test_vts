@@ -243,7 +243,7 @@ class TestRunner(object):
                     ("Controller interface %s in %s "
                      "cannot be null.") % (attr, module.__name__))
 
-    def registerController(self, module):
+    def registerController(self, module, start_services=True):
         """Registers a controller module for a test run.
 
         This declares a controller dependency of this test class. If the target
@@ -253,6 +253,8 @@ class TestRunner(object):
 
         Params:
             module: A module that follows the controller module interface.
+            start_services: boolean, controls whether services (e.g VTS agent)
+                            are started on the target.
 
         Returns:
             A list of controller objects instantiated from controller_module.
@@ -283,7 +285,7 @@ class TestRunner(object):
             controller_config = copy.deepcopy(original_config)
             logging.info("controller_config: %s", controller_config)
             if "use_vts_agent" not in self.testbed_configs:
-                objects = create(controller_config)
+                objects = create(controller_config, start_services)
             else:
                 objects = create(controller_config,
                                  self.testbed_configs["use_vts_agent"])
