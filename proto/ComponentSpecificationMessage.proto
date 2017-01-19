@@ -124,6 +124,9 @@ enum VariableType {
   TYPE_HIDL_MEMORY = 16;
   // for pointer type
   TYPE_POINTER = 17;
+  // for FMQ types
+  TYPE_FMQ_SYNC = 18;
+  TYPE_FMQ_UNSYNC = 19;
 }
 
 
@@ -320,6 +323,9 @@ message VariableSpecificationMessage {
 
   // for nested union type declarations (without actual definitions).
   repeated VariableSpecificationMessage sub_union = 153;
+
+  // for the definition/value of TYPE_FMQ_SYNC and TYPE_FMQ_UNSYNC.
+  repeated VariableSpecificationMessage fmq_value = 161;
 
   // for non HIDL HAL, to use a custom type defined in C/C++.
   optional bytes predefined_type = 201;
