@@ -18,8 +18,13 @@ package com.android.vts.util;
 import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
+import com.google.protobuf.ByteString;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -37,6 +42,8 @@ public class PerformanceUtil {
     private static final byte[] DATA_QUALIFIER = Bytes.toBytes("data");
     private static final int N_DIGITS = 2;
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
+    private static final String OPTION_DELIMITER = "=";
+    private static final String NAME_DELIMITER = ", ";
 
     public static class TimeInterval {
         public final long start;
@@ -176,5 +183,31 @@ public class PerformanceUtil {
                                                                   .parseFrom(value);
             perfSummary.addData(testReportMessage);
         }
+    }
+
+    /**
+     * Generates a string of the values in optionsList which have matches in the optionKeys key set.
+     * @param optionsList The list of ByteString options in the format 'key=value'.
+     * @param optionKeys A list of keys to match against the optionsList key value pairs.
+     * @return The values in optionsList whose key match a key in optionKeys.
+     */
+    public static String getOptionKeys(List<ByteString> optionsList, Set<String> optionKeys) {
+        String name = "";
+        List<String> nameSuffixes = new ArrayList<String>();
+        for (ByteString key : optionsList) {
+            String optionString = key.toStringUtf8();
+            String[] optionParts = optionString.split(OPTION_DELIMITER);
+            if (optionParts.length != 2) {
+                continue;
+            }
+            if (optionKeys.contains(optionParts[0])) {
+                nameSuffixes.add(optionParts[1]);
+            }
+        }
+        if (nameSuffixes.size() > 0) {
+            StringUtils.join(nameSuffixes, NAME_DELIMITER);
+            name += StringUtils.join(nameSuffixes, NAME_DELIMITER);
+        }
+        return name;
     }
 }
