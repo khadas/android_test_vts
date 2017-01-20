@@ -317,7 +317,10 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
       << " << endl;\n";
 
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
-    out << "result" << index << " = arg" << index << ";\n";
+    const auto& return_val = func_msg.return_type_hidl(index);
+    if (return_val.type() != TYPE_FMQ_SYNC
+        && return_val.type() != TYPE_FMQ_UNSYNC)
+      out << "result" << index << " = arg" << index << ";\n";
   }
   out.unindent();
   out << "}";
@@ -642,7 +645,8 @@ void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
     const string& /*fuzzer_extended_class_name*/) {
   if (message.component_name() != "types"
       && !endsWith(message.component_name(), "Callback")) {
-    out << "bool GetService(bool get_stub, const char* service_name);" << "\n\n";
+    out << "bool GetService(bool get_stub, const char* service_name);"
+        << "\n\n";
   }
 }
 
@@ -912,6 +916,26 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
       break;
     }
+    case TYPE_HIDL_MEMORY:
+    {
+      out << "/* ERROR: TYPE_HIDL_MEMORY is not supported yet. */\n";
+      break;
+    }
+    case TYPE_POINTER:
+    {
+      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_SYNC:
+    {
+      out << "/* ERROR: TYPE_FMQ_SYNC is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_UNSYNC:
+    {
+      out << "/* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */\n";
+      break;
+    }
     default:
     {
       cerr << " ERROR: unsupported type.\n";
@@ -1069,6 +1093,26 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     case TYPE_HIDL_INTERFACE:
     {
       out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
+      break;
+    }
+    case TYPE_HIDL_MEMORY:
+    {
+      out << "/* ERROR: TYPE_HIDL_MEMORY is not supported yet. */\n";
+      break;
+    }
+    case TYPE_POINTER:
+    {
+      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_SYNC:
+    {
+      out << "/* ERROR: TYPE_FMQ_SYNC is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_UNSYNC:
+    {
+      out << "/* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */\n";
       break;
     }
     default:
@@ -1252,6 +1296,30 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     {
       out << result_msg << "->set_type(TYPE_HIDL_INTERFACE);\n";
       out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
+      break;
+    }
+    case TYPE_HIDL_MEMORY:
+    {
+      out << result_msg << "->set_type(TYPE_HIDL_MEMORY);\n";
+      out << "/* ERROR: TYPE_HIDL_MEMORY is not supported yet. */\n";
+      break;
+    }
+    case TYPE_POINTER:
+    {
+      out << result_msg << "->set_type(TYPE_POINTER);\n";
+      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_SYNC:
+    {
+      out << result_msg << "->set_type(TYPE_FMQ_SYNC);\n";
+      out << "/* ERROR: TYPE_FMQ_SYNC is not supported yet. */\n";
+      break;
+    }
+    case TYPE_FMQ_UNSYNC:
+    {
+      out << result_msg << "->set_type(TYPE_FMQ_UNSYNC);\n";
+      out << "/* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */\n";
       break;
     }
     default:
