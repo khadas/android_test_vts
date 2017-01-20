@@ -42,5 +42,6 @@
     <option name="compatibility:include-filter" value="HalBootHidlTargetTest" />
     <!-- option name="compatibility:include-filter" value="HalGraphicsAllocatorHidlTargetTest" / --><!-- need driver support -->
     <!-- option name="compatibility:include-filter" value="HalGraphicsMapperHidlTargetTest" / --><!-- need driver support -->
+    <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
