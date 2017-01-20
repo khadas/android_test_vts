@@ -96,6 +96,9 @@ def PyList2PbVector(message, pb_spec, py_value):
     if pb_spec.name:
         message.name = pb_spec.name
     message.type = CompSpecMsg.TYPE_VECTOR
+    if len(vector_value) == 0:
+        return message
+
     vector_spec = pb_spec.vector_value[0]
     for curr_value in py_value:
         new_vector_message = message.vector_value.add()
@@ -104,6 +107,7 @@ def PyList2PbVector(message, pb_spec, py_value):
         else:
             logging.error("unsupported type %s", message.type)
             exit(0)
+    return message
 
 
 def FindSubStructType(pb_spec, sub_struct_name):
