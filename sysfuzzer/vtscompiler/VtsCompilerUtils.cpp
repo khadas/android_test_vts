@@ -254,6 +254,16 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     {
       return "void*";
     }
+    case TYPE_FMQ_SYNC:
+    {
+      string element_type = GetCppVariableType(arg.fmq_value(0), message);
+      return "::android::hardware::MQDescriptorSync<" + element_type + ">";
+    }
+    case TYPE_FMQ_UNSYNC:
+    {
+      string element_type = GetCppVariableType(arg.fmq_value(0), message);
+      return "::android::hardware::MQDescriptorUnsync<" + element_type + ">";
+    }
     default:
     {
       cerr << __func__ << ":" << __LINE__ << " " << ": type " << arg.type()

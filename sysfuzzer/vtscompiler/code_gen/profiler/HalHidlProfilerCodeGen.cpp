@@ -165,6 +165,20 @@ void HalHidlProfilerCodeGen::GenerateProfilerForPointerVariable(Formatter& out,
   // TODO(zhuoyao): figure the right way to profile pointer type.
 }
 
+void HalHidlProfilerCodeGen::GenerateProfilerForFMQSyncVariable(Formatter& out,
+    const VariableSpecificationMessage&, const std::string& arg_name,
+    const std::string&) {
+  out << arg_name << "->set_type(TYPE_FMQ_SYNC);\n";
+  // TODO(zhuoyao): figure the right way to profile fmq sync type.
+}
+
+void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
+    Formatter& out, const VariableSpecificationMessage&,
+    const std::string& arg_name, const std::string&) {
+  out << arg_name << "->set_type(TYPE_FMQ_UNSYNC);\n";
+  // TODO(zhuoyao): figure the right way to profile fmq unsync type.
+}
+
 void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
