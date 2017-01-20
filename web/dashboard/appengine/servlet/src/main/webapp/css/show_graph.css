@@ -23,6 +23,10 @@
     padding-bottom: 30px;
 }
 
+#device-select-wrapper {
+    margin-top: 0;
+}
+
 #date-container {
     padding: 0 50px;
     padding-bottom: 25px;
@@ -32,28 +36,20 @@
     margin-top: 5px;
 }
 
-#to {
-    margin-left: 25px;
-}
-
 .profiling-name {
     font-weight: 200;
     font-style: italic;
     font-size: 1.4rem
 }
 
-#profiling-container, #performance-container, #error-container {
+#error-container {
     padding-top: 25px;
     padding-bottom: 25px;
 }
 
-#performance-chart-div {
-    height: 500px;
-}
-
-#profiling-chart-div {
-    height: 500px;
-    margin-bottom: 35px;
+.graph {
+    padding: 30px;
+    height: 550px;
 }
 
 #percentile-table-div {
