@@ -94,6 +94,9 @@ message VtsDriverControlCommandMessage {
   // for CALL_FUNCTION
   optional bytes arg = 1401;
 
+  // UID of a caller on the driver-side.
+  optional bytes driver_caller_uid = 1501;
+
   // for EXECUTE_COMMAND
   repeated bytes shell_command = 2001;
 }
