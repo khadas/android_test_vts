@@ -202,6 +202,16 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
       GenerateProfilerForPointerVariable(out, val, arg_name, arg_value);
       break;
     }
+    case TYPE_FMQ_SYNC:
+    {
+      GenerateProfilerForFMQSyncVariable(out, val, arg_name, arg_value);
+      break;
+    }
+    case TYPE_FMQ_UNSYNC:
+    {
+      GenerateProfilerForFMQUnsyncVariable(out, val, arg_name, arg_value);
+      break;
+    }
     default:
     {
       cout << "not supported.\n";
