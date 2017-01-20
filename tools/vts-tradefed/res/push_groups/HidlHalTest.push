@@ -3,6 +3,9 @@ HostDrivenTest.push
 DATA/lib/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.boot.vts.driver@1.0.so
 DATA/lib64/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.boot.vts.driver@1.0.so
 
+DATA/lib/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.ir.vts.driver@1.0.so
+DATA/lib64/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.ir.vts.driver@1.0.so
+
 DATA/lib/android.hardware.light.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.light.vts.driver@2.0.so
 DATA/lib64/android.hardware.light.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.light.vts.driver@2.0.so
 
@@ -38,6 +41,9 @@ DATA/lib64/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/64/android.har
 
 DATA/lib/android.hardware.boot@1.0-IBootControl-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0::IBoot.profiler.so
 DATA/lib64/android.hardware.boot@1.0-IBootControl-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0::IBoot.profiler.so
+
+DATA/lib/android.hardware.ir@1.0-IConsumerIr-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0::IConsumerIr.profiler.so
+DATA/lib64/android.hardware.ir@1.0-IConsumerIr-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0::IConsumerIr.profiler.so
 
 DATA/lib/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.light@2.0::ILight.profiler.so
 DATA/lib64/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.light@2.0::ILight.profiler.so
