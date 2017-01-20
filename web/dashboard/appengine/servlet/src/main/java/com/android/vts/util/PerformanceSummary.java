@@ -19,24 +19,18 @@ import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.proto.VtsReportMessage.VtsProfilingRegressionMode;
-import com.google.protobuf.ByteString;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * PerformanceSummary, an object summarizing performance across profiling points for a test run.
  **/
 public class PerformanceSummary {
-    private static String OPTION_DELIMITER = "=";
-    private static String NAME_DELIMITER = ",";
 
     protected static Logger logger = Logger.getLogger(PerformanceSummary.class.getName());
     private Map<String, ProfilingPointSummary> summaryMap;
@@ -115,20 +109,9 @@ public class PerformanceSummary {
             }
 
             String name = profilingReportMessage.getName().toStringUtf8();
-            List<String> nameSuffixes = new ArrayList<String>();
-            for (ByteString key : profilingReportMessage.getOptionsList()) {
-                String optionString = key.toStringUtf8();
-                String[] optionParts = optionString.split(OPTION_DELIMITER);
-                if (optionParts.length != 2) {
-                    logger.log(Level.WARNING, "Invalid profiling option : " + optionString);
-                }
-                if (optionSplitKeys.contains(optionParts[0])) {
-                    nameSuffixes.add(optionParts[1]);
-                }
-            }
-            if (nameSuffixes.size() > 0) {
-                StringUtils.join(nameSuffixes, NAME_DELIMITER);
-                name += " (" + StringUtils.join(nameSuffixes, NAME_DELIMITER) + ")";
+            String optionSuffix = PerformanceUtil.getOptionKeys(profilingReportMessage.getOptionsList(), optionSplitKeys);
+            if (!optionSuffix.equals("")) {
+                name += " (" + optionSuffix + ")";
             }
 
             switch (profilingReportMessage.getType()) {

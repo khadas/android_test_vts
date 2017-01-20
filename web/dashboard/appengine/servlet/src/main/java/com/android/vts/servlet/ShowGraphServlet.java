@@ -17,10 +17,14 @@
 package com.android.vts.servlet;
 
 import com.android.vts.proto.VtsReportMessage;
+import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.util.BigtableHelper;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import com.android.vts.util.Graph;
+import com.android.vts.util.GraphSerializer;
+import com.android.vts.util.LineGraph;
+import com.android.vts.util.PerformanceUtil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -28,12 +32,15 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import com.google.gson.Gson;
-
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -46,9 +53,35 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowGraphServlet extends BaseServlet {
 
-    private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
+
+    private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
+    private static final String[] splitKeysArray = new String[]{HIDL_HAL_OPTION};
+    private static final Set<String> splitKeySet = new HashSet<String>(Arrays.asList(splitKeysArray));
+    private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
+
+
+    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
+
+    /**
+     * Process a profiling report message and determine which graph to insert the point into.
+     * @param profilingReportMessage The profiling report to process.
+     * @param idString The ID derived from the test run to identify the profiling report.
+     * @param graphMap A map from graph name to Graph object.
+     */
+    private static void processLabeledListReport(
+            ProfilingReportMessage profilingReportMessage, String idString,
+            Map<String, Graph> graphMap) {
+        if (profilingReportMessage.getLabelList().size() == 0 ||
+            profilingReportMessage.getLabelList().size() !=
+            profilingReportMessage.getValueList().size()) return;
+        String name = PerformanceUtil.getOptionKeys(profilingReportMessage.getOptionsList(), splitKeySet);
+        if (!graphMap.containsKey(name)) {
+            graphMap.put(name, new LineGraph(name));
+        }
+        graphMap.get(name).addData(idString, profilingReportMessage);
+    }
 
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
@@ -58,15 +91,16 @@ public class ShowGraphServlet extends BaseServlet {
         TableName tableName = null;
 
         String profilingPointName = request.getParameter("profilingPoint");
-        long startTime;
-        long endTime;
-        try {
-            startTime = Long.parseLong(request.getParameter("startTime"));
-            endTime = Long.parseLong(request.getParameter("endTime"));
-        } catch (NumberFormatException e){
-            long now = System.currentTimeMillis() * 1000000L;
-            startTime = now - ONE_DAY;
-            endTime = now;
+        String selectedDevice = request.getParameter("device");
+        Long startTime = null;
+        if (request.getParameter("startTime") != null) {
+            String time = request.getParameter("startTime");
+            try {
+                startTime = Long.parseLong(time);
+            } catch (NumberFormatException e) {}
+        }
+        if (startTime == null) {
+            startTime = System.currentTimeMillis() * MILLI_TO_MICRO;
         }
         tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
         table = BigtableHelper.getTable(tableName);
@@ -74,33 +108,26 @@ public class ShowGraphServlet extends BaseServlet {
         // This list holds the values for all profiling points.
         List<Double> profilingPointValuesList = new ArrayList<>();
 
-        // Map for labels and values
-        Map<String, Integer> labelIndexMap = new HashMap<>();
+        // Set of device names
+        Set<String> deviceSet = new HashSet<String>();
 
-        // Set of all labels
-        List<String> labels = new ArrayList<>();
-
-        // List of all profiling vectors
-        List<ProfilingReportMessage> profilingVectors = new ArrayList<>();
-
-        // List of build IDs for each profiling vector
-        List<String> profilingBuildIds = new ArrayList<>();
-
-        // Performance X and Y labels
-        String performanceLabelX = "";
-        String performanceLabelY = "";
-
-        boolean showProfilingGraph = false;
-        boolean showPerformanceGraph = false;
+        Map<String, Graph> graphMap = new HashMap<>();
 
         Scan scan = new Scan();
-        scan.setStartRow(Long.toString(startTime).getBytes());
-        scan.setStopRow(Long.toString(endTime).getBytes());
+        scan.setStartRow(Long.toString(startTime - ONE_DAY).getBytes());
+        scan.setStopRow(Long.toString(startTime).getBytes());
         ResultScanner scanner = table.getScanner(scan);
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             byte[] value = result.getValue(FAMILY, QUALIFIER);
             TestReportMessage testReportMessage = VtsReportMessage.TestReportMessage.
                 parseFrom(value);
+
+            AndroidDeviceInfoMessage firstDeviceInfo = testReportMessage.getDeviceInfoList().get(0);
+            String firstDeviceBuildId = firstDeviceInfo.getBuildId().toStringUtf8();
+            String firstDeviceType = firstDeviceInfo.getProductVariant().toStringUtf8().toLowerCase();
+            String idString = firstDeviceType + " (" + firstDeviceBuildId + ")";
+            deviceSet.add(firstDeviceType);
+            if (selectedDevice != null && !firstDeviceType.equals(selectedDevice)) continue;
 
             // update map of profiling point names
             for (ProfilingReportMessage profilingReportMessage :
@@ -110,55 +137,22 @@ public class ShowGraphServlet extends BaseServlet {
                 }
                 switch(profilingReportMessage.getType()) {
                     case UNKNOWN_VTS_PROFILING_TYPE:
-                    case VTS_PROFILING_TYPE_TIMESTAMP :
-                        double timeTaken = ((double)(profilingReportMessage.getEndTimestamp() -
-                            profilingReportMessage.getStartTimestamp())) / 1000;
-                        if (timeTaken < 0) {
-                            logger.info("Inappropriate value for time taken");
-                            continue;
-                        }
-                        profilingPointValuesList.add(timeTaken);
-                        break;
-
-                    case VTS_PROFILING_TYPE_LABELED_VECTOR :
-                        if (profilingReportMessage.getLabelList().size() != 0 &&
-                            profilingReportMessage.getLabelList().size() ==
-                            profilingReportMessage.getValueList().size()) {
-                            profilingVectors.add(profilingReportMessage);
-                            profilingBuildIds.add(testReportMessage.getBuildInfo()
-                                .getId().toStringUtf8());
-                        }
+                    case VTS_PROFILING_TYPE_TIMESTAMP:
+                        continue;
+                    case VTS_PROFILING_TYPE_LABELED_VECTOR:
+                        processLabeledListReport(profilingReportMessage, idString, graphMap);
                         break;
                     default :
                         break;
                 }
             }
         }
-        if (profilingVectors.size() > 0) {
-            // Use the most recent profiling vector to generate the labels
-            ProfilingReportMessage profilingReportMessage = profilingVectors
-                .get(profilingVectors.size() - 1);
-            for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
-                labels.add(profilingReportMessage.getLabelList().get(i).toStringUtf8());
-            }
-            performanceLabelX = profilingReportMessage.getXAxisLabel().toStringUtf8();
-            performanceLabelY = profilingReportMessage.getYAxisLabel().toStringUtf8();
-            showPerformanceGraph = true;
-        }
-        for (int i = 0; i < labels.size(); i++) {
-            labelIndexMap.put(labels.get(i), i);
-        }
-        long[][] lineGraphValues = new long[labels.size()][profilingVectors.size()];
-        for (int reportIndex = 0; reportIndex < profilingVectors.size(); reportIndex++) {
-            ProfilingReportMessage report = profilingVectors.get(reportIndex);
-            for (int i = 0; i < report.getLabelList().size(); i++) {
-                String label = report.getLabelList().get(i).toStringUtf8();
+        String[] names = graphMap.keySet().toArray(new String[graphMap.size()]);
+        Arrays.sort(names);
 
-                // Skip value if its label is not present
-                if (!labelIndexMap.containsKey(label)) continue;
-                lineGraphValues[labelIndexMap.get(label)][reportIndex] =
-                    report.getValueList().get(i);
-            }
+        List<Graph> graphList = new ArrayList<>();
+        for (String name : names) {
+            graphList.add(graphMap.get(name));
         }
 
         // fill performance profiling array
@@ -167,38 +161,21 @@ public class ShowGraphServlet extends BaseServlet {
             performanceProfilingValues[i] = profilingPointValuesList.get(i).doubleValue();
         }
 
-        // pass map to show_graph.jsp through request by converting to JSON
-        String valuesJson = new Gson().toJson(performanceProfilingValues);
-        request.setAttribute("performanceValuesJson", valuesJson);
-
-        int[] percentiles = {10, 25, 50 , 75, 80, 90, 95, 99};
-        double[] percentileValuesArray = new double[percentiles.length];
-        for (int i = 0; i < percentiles.length; i++) {
-            percentileValuesArray[i] =
-                Math.round(new Percentile().evaluate(performanceProfilingValues, percentiles[i]) * 1000d) / 1000d;
-        }
-
-        showProfilingGraph = performanceProfilingValues.length != 0;
-
-        if (!showProfilingGraph && !showPerformanceGraph) {
-            request.setAttribute("error", PROFILING_DATA_ALERT);
-        }
-
-        // performance data for scatter plot
-        request.setAttribute("showProfilingGraph", showProfilingGraph);
-        request.setAttribute("showPerformanceGraph", showPerformanceGraph);
-        request.setAttribute("lineGraphValuesJson", new Gson().toJson(lineGraphValues));
-        request.setAttribute("labelsListJson", new Gson().toJson(labels));
-        request.setAttribute("profilingBuildIdsJson", new Gson().toJson(profilingBuildIds));
-        request.setAttribute("performanceLabelX", new Gson().toJson(performanceLabelX));
-        request.setAttribute("performanceLabelY", new Gson().toJson(performanceLabelY));
+        // sort devices list
+        if (!deviceSet.contains(selectedDevice)) selectedDevice = null;
+        String[] devices = deviceSet.toArray(new String[deviceSet.size()]);
+        Arrays.sort(devices);
 
         request.setAttribute("testName", request.getParameter("testName"));
         request.setAttribute("startTime", new Gson().toJson(startTime));
-        request.setAttribute("endTime", new Gson().toJson(endTime));
+        request.setAttribute("devices", devices);
+        request.setAttribute("selectedDevice", selectedDevice);
+        if (graphList.size() == 0) request.setAttribute("error", PROFILING_DATA_ALERT);
+
+        Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Graph.class, new GraphSerializer()).create();
+        request.setAttribute("graphs", gson.toJson(graphList));
 
         request.setAttribute("profilingPointName", profilingPointName);
-        request.setAttribute("percentileValuesJson", new Gson().toJson(percentileValuesArray));
         dispatcher = request.getRequestDispatcher("/show_graph.jsp");
         try {
             dispatcher.forward(request, response);
