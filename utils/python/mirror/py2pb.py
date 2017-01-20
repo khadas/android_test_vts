@@ -96,7 +96,7 @@ def PyList2PbVector(message, pb_spec, py_value):
     if pb_spec.name:
         message.name = pb_spec.name
     message.type = CompSpecMsg.TYPE_VECTOR
-    if len(vector_value) == 0:
+    if len(py_value) == 0:
         return message
 
     vector_spec = pb_spec.vector_value[0]
