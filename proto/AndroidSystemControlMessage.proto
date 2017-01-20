@@ -125,6 +125,9 @@ message AndroidSystemControlCommandMessage {
   // for CALL_API and VTS_AGENT_COMMAND_INVOKE_SYSCALL
   optional bytes arg = 4001;
 
+  // UID of a caller on the driver-side.
+  optional bytes driver_caller_uid = 4101;
+
   // for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND
   repeated bytes shell_command = 5001;
 }
