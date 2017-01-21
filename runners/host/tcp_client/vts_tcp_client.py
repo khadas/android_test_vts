@@ -231,9 +231,9 @@ class VtsTcpClient(object):
         raise errors.VtsUnsupportedTypeError(
             "unsupported type %s" % var_spec_msg.type)
 
-    def CallApi(self, arg):
+    def CallApi(self, arg, caller_uid=None):
         """RPC to CALL_API."""
-        self.SendCommand(SysMsg_pb2.CALL_API, arg=arg)
+        self.SendCommand(SysMsg_pb2.CALL_API, arg=arg, caller_uid=caller_uid)
         resp = self.RecvResponse()
         resp_code = resp.response_code
         if (resp_code == SysMsg_pb2.SUCCESS):
@@ -372,6 +372,7 @@ class VtsTcpClient(object):
                     callback_port=None,
                     driver_type=None,
                     shell_command=None,
+                    caller_uid=None,
                     arg=None):
         """Sends a command.
 
@@ -429,6 +430,9 @@ class VtsTcpClient(object):
 
         if callback_port is not None:
             command_msg.callback_port = callback_port
+
+        if caller_uid is not None:
+            command_msg.driver_caller_uid = caller_uid
 
         if arg is not None:
             command_msg.arg = arg
