@@ -47,12 +47,23 @@
     padding-bottom: 25px;
 }
 
-.graph {
+.graph-wrapper {
     padding: 30px;
-    height: 550px;
 }
 
-#percentile-table-div {
-    margin-bottom: 20px;
+.graph {
+    height: 500px;
+    padding-bottom: 30px;
+}
+
+.percentile-table {
+    width: auto;
+    margin: auto;
+}
+
+.percentile-table td, th{
+    font-size: 12px;
+    text-align: center;
+    padding: 5px 10px;
 }
 

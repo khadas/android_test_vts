@@ -36,30 +36,43 @@
     <script type='text/javascript'>
       if (${analytics_id}) analytics_init(${analytics_id});
       google.charts.load('current', {packages:['corechart', 'table', 'line']});
-      google.charts.setOnLoadCallback(drawAllLineGraphs);
-      google.charts.setOnLoadCallback(function() {
-          $('.gradient').removeClass('gradient');
-      });
+      google.charts.setOnLoadCallback(drawAllGraphs);
 
+      ONE_DAY = 86400000000;
       MICRO_PER_MILLI = 1000;
 
       $(function() {
           $('select').material_select();
           var date = $('#date').datepicker({
-                  showAnim: 'slideDown',
-                  maxDate: new Date()
-                });
+              showAnim: 'slideDown',
+              maxDate: new Date()
+          });
           date.datepicker('setDate', new Date(${startTime} / MICRO_PER_MILLI));
           $('#load').click(load);
       });
 
-      function drawAllLineGraphs() {
+      // Draw all graphs.
+      function drawAllGraphs() {
           var graphs = ${graphs};
           graphs.forEach(function(graph) {
               if (graph.type == 'LINE_GRAPH') drawLineGraph(graph);
+              else if (graph.type == 'HISTOGRAM') drawHistogram(graph);
           });
       }
 
+     /**
+      * Draw a line graph.
+      *
+      * Args:
+      *     lineGraph: a JSON object containing the following fields:
+      *                - name: the name of the graph
+      *                - values: an array of numbers
+      *                - ticks: an array of strings to use as x-axis labels
+      *                - ids: an array of string labels for each point (e.g. the
+      *                       build info for the run that produced the point)
+      *                - x_label: the string label for the x axis
+      *                - y_label: the string label for the y axis
+      */
       function drawLineGraph(lineGraph) {
           var title = 'Performance';
           if (lineGraph.name) title += ' (' + lineGraph.name + ')';
@@ -70,7 +83,7 @@
               lineGraph.values[i].unshift(label);
           });
           var data = new google.visualization.DataTable();
-          data.addColumn('string', lineGraph.x_value);
+          data.addColumn('string', lineGraph.x_label);
           lineGraph.ids.forEach(function(id) {
               data.addColumn('number', id);
           });
@@ -82,14 +95,120 @@
             },
             legend: { position: 'none' }
           };
-          var container = $('<div class="row card center-align col s12 graph"></div>');
+          var container = $('<div class="row card center-align col s12 graph-wrapper"></div>');
           container.appendTo('#profiling-container');
-          var chart = new google.charts.Line(container[0]);
+          var chartDiv = $('<div class="col s12 graph"></div>');
+          chartDiv.appendTo(container);
+          var chart = new google.charts.Line(chartDiv[0]);
           chart.draw(data, options);
       }
 
+     /**
+      * Draw a histogram.
+      *
+      * Args:
+      *     hist: a JSON object containing the following fields:
+      *           - name: the name of the graph
+      *           - values: an array of numbers
+      *           - ids: an array of string labels for each point (e.g. the
+      *                  build info for the run that produced the point)
+      *           - x_label: the string label for the x axis
+      *           - y_label: the string label for the y axis
+      */
+      function drawHistogram(hist) {
+          test = hist;
+          var title = 'Performance';
+          if (hist.name) title += ' (' + hist.name + ')';
+          var values = hist.values;
+          var histogramData = values.map(function(d, i) {
+              return [hist.ids[i], d];
+          });
+          var min = Math.min.apply(null, values),
+              max = Math.max.apply(null, values);
+
+          var histogramTicks = new Array(10);
+          var delta = (max - min) / 10;
+          for (var i = 0; i <= 10; i++) {
+              histogramTicks[i] = Math.round(min + delta * i);
+          }
+
+          var data = google.visualization.arrayToDataTable(histogramData, true);
+
+          var options = {
+              title: title,
+              titleTextStyle: {
+                  color: '#757575',
+                  fontSize: 16,
+                  bold: false
+              },
+              legend: { position: 'none' },
+              colors: ['#4285F4'],
+              fontName: 'Roboto',
+              vAxis:{
+                  title: hist.y_label,
+                  titleTextStyle: {
+                      color: '#424242',
+                      fontSize: 12,
+                      italic: false
+                  },
+                  textStyle: {
+                      fontSize: 12,
+                      color: '#757575'
+                  },
+              },
+              hAxis: {
+                  ticks: histogramTicks,
+                  title: hist.x_label,
+                  textStyle: {
+                      fontSize: 12,
+                      color: '#757575'
+                  },
+                  titleTextStyle: {
+                      color: '#424242',
+                      fontSize: 12,
+                      italic: false
+                  }
+              },
+              bar: { gap: 0 },
+              histogram: {
+                  maxNumBuckets: 200,
+                  minValue: min * 0.95,
+                  maxValue: max * 1.05
+              },
+              chartArea: {
+                  width: '100%',
+                  top: 40,
+                  left: 50,
+                  height: '80%'
+              }
+          };
+          var container = $('<div class="row card col s12 graph-wrapper"></div>');
+          container.appendTo('#profiling-container');
+
+          var chartDiv = $('<div class="col s12 graph"></div>');
+          chartDiv.appendTo(container);
+          var chart = new google.visualization.Histogram(chartDiv[0]);
+          chart.draw(data, options);
+
+          var tableDiv = $('<div class="col s12"></div>');
+          tableDiv.appendTo(container);
+
+          var tableHtml = '<table class="percentile-table"><thead><tr>';
+          hist.percentiles.forEach(function(p) {
+              tableHtml += '<th data-field="id">' + p + '%</th>';
+          });
+          tableHtml += '</tr></thead><tbody><tr>';
+          hist.percentile_values.forEach(function(v) {
+              tableHtml += '<td>' + v + '</td>';
+          });
+          tableHtml += '</tbody></table>';
+          $(tableHtml).appendTo(tableDiv);
+      }
+
+      // Reload the page.
       function load() {
           var startTime = $('#date').datepicker('getDate').getTime();
+          startTime = startTime + (ONE_DAY / MICRO_PER_MILLI) - 1;
           var ctx = '${pageContext.request.contextPath}';
           var link = ctx + '/show_graph?profilingPoint=${profilingPointName}' +
               '&testName=${testName}' +
