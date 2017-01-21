@@ -133,10 +133,11 @@ const char* VtsDriverSocketClient::ReadSpecification(
   return result;
 }
 
-const char* VtsDriverSocketClient::Call(const string& arg) {
+const char* VtsDriverSocketClient::Call(const string& arg, const string& uid) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);
   command_message.set_arg(arg);
+  command_message.set_driver_caller_uid(uid);
   if (!VtsSocketSendMessage(command_message)) return NULL;
 
   VtsDriverControlResponseMessage response_message;
