@@ -114,10 +114,19 @@ static const char kUnixSocketNamePrefixForCallbackServer[] =
     "/data/local/tmp/vts_agent_callback";
 
 bool AgentRequestHandler::LaunchDriverService(
-    int driver_type, const string& service_name, const string& file_path,
-    int target_class, int target_type, float target_version,
-    const string& target_package, const string& target_component_name,
-    const string& module_name, const string& hw_binder_service_name, int bits) {
+    const AndroidSystemControlCommandMessage& command_msg) {
+  int driver_type = command_msg.driver_type();
+  const string& service_name = command_msg.service_name();
+  const string& file_path = command_msg.file_path();
+  int target_class = command_msg.target_class();
+  int target_type = command_msg.target_type();
+  float target_version = command_msg.target_version() / 100.0;
+  const string& target_package = command_msg.target_package();
+  const string& target_component_name = command_msg.target_component_name();
+  const string& module_name = command_msg.module_name();
+  const string& hw_binder_service_name = command_msg.hw_binder_service_name();
+  int bits = command_msg.bits();
+
   cout << "[runner->agent] command " << __FUNCTION__ << " (file_path="
        << file_path << ")" << endl;
   ResponseCode result = FAIL;
@@ -354,7 +363,8 @@ bool AgentRequestHandler::ListApis() {
   return succ;
 }
 
-bool AgentRequestHandler::CallApi(const string& call_payload) {
+bool AgentRequestHandler::CallApi(const string& call_payload,
+                                  const string& uid) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
@@ -368,7 +378,7 @@ bool AgentRequestHandler::CallApi(const string& call_payload) {
     return false;
   }
 
-  const char* result = client->Call(call_payload);
+  const char* result = client->Call(call_payload, uid);
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
@@ -505,19 +515,13 @@ bool AgentRequestHandler::ProcessOneCommand() {
     case CHECK_DRIVER_SERVICE:
       return CheckDriverService(command_msg.service_name(), NULL);
     case LAUNCH_DRIVER_SERVICE:
-      return LaunchDriverService(
-          command_msg.driver_type(), command_msg.service_name(),
-          command_msg.file_path(), command_msg.target_class(),
-          command_msg.target_type(), command_msg.target_version() / 100.0,
-          command_msg.target_package(), command_msg.target_component_name(),
-          command_msg.module_name(), command_msg.hw_binder_service_name(),
-          command_msg.bits());
+      return LaunchDriverService(command_msg);
     case VTS_AGENT_COMMAND_READ_SPECIFICATION:
       return ReadSpecification(command_msg.service_name());
     case LIST_APIS:
       return ListApis();
     case CALL_API:
-      return CallApi(command_msg.arg());
+      return CallApi(command_msg.arg(), command_msg.driver_caller_uid());
     case VTS_AGENT_COMMAND_GET_ATTRIBUTE:
       return GetAttribute(command_msg.arg());
     // for shell driver

@@ -175,8 +175,9 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case CALL_FUNCTION: {
-      cout << __func__ << ":" << __LINE__ << endl;
-      cout << __func__ << ":" << __LINE__ << " " << command_message.arg() << endl;
+      if (command_message.has_driver_caller_uid()) {
+        setuid(atoi(command_message.driver_caller_uid().c_str()));
+      }
       const char* result = Call(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
