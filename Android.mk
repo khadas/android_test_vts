@@ -148,6 +148,8 @@ $(VTS_SYSTRACE_ZIP): $(SOONG_ZIP)
 	$(hide) find external/chromium-trace -path external/chromium-trace/.git -prune -or -print | sort > $@.list
 	$(hide) $(SOONG_ZIP) -d -o $@ -C . -l $@.list
 	@rm -f $@.list
+	$(hide) mkdir -p $(VTS_OUT_ROOT)/android-vts/tools
+	$(hide) rm -rf $(VTS_OUT_ROOT)/android-vts/tools/external/chromium-trace
 	$(hide) unzip $@ -d $(VTS_OUT_ROOT)/android-vts/tools
 
 .PHONY: vts
