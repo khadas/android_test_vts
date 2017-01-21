@@ -63,13 +63,8 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   bool CheckDriverService(const string& service_name, bool* live);
 
   // for the LAUNCH_DRIVER_SERVICE command
-  bool LaunchDriverService(int driver_type, const string& service_name,
-                           const string& file_path, int target_class,
-                           int target_type, float target_version,
-                           const string& target_package,
-                           const string& target_component_name,
-                           const string& module_name,
-                           const string& hw_binder_service_name, int bits);
+  bool LaunchDriverService(
+      const AndroidSystemControlCommandMessage& command_msg);
 
   // for the VTS_AGENT_COMMAND_READ_SPECIFICATION`
   bool ReadSpecification(const string& component_name);
@@ -78,7 +73,7 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   bool ListApis();
 
   // for the CALL_API command
-  bool CallApi(const string& call_payload);
+  bool CallApi(const string& call_payload, const string& uid);
 
   // for the VTS_AGENT_COMMAND_GET_ATTRIBUTE
   bool GetAttribute(const string& payload);

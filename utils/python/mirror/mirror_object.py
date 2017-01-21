@@ -48,6 +48,7 @@ class MirrorObject(object):
         _parent_path: the name of a sub struct this object mirrors.
         _last_raw_code_coverage_data: NativeCodeCoverageRawDataMessage,
                                       last seen raw code coverage data.
+        __caller_uid: string, the caller's UID if not None.
     """
 
     def __init__(self, client, msg, callback_server, parent_path=None):
@@ -56,6 +57,7 @@ class MirrorObject(object):
         self._callback_server = callback_server
         self._parent_path = parent_path
         self._last_raw_code_coverage_data = None
+        self.__caller_uid = None
 
     def GetFunctionPointerID(self, function_pointer):
         """Returns the function pointer ID for the given one."""
@@ -91,9 +93,18 @@ class MirrorObject(object):
             func_msg.return_type.scalar_type = "int32_t"
         logging.debug("final msg %s", func_msg)
 
-        result = self._client.CallApi(text_format.MessageToString(func_msg))
+        result = self._client.CallApi(text_format.MessageToString(func_msg),
+                                      self.__caller_uid)
         logging.debug(result)
         return result
+
+    def SetCallerUid(self, uid):
+        """Sets target-side caller's UID.
+
+        Args:
+            uid: string, the caller's UID.
+        """
+        self.__caller_uid = uid
 
     def GetAttributeValue(self, attribute_name):
         """Retrieves the value of an attribute from a target.
@@ -456,7 +467,8 @@ class MirrorObject(object):
                         if submodule_name.endswith("*"):
                             submodule_name = submodule_name[:-1]
                         func_msg.submodule_name = submodule_name
-            result = self._client.CallApi(text_format.MessageToString(func_msg))
+            result = self._client.CallApi(text_format.MessageToString(func_msg),
+                                          self.__caller_uid)
             logging.debug(result)
             if (isinstance(result, tuple) and len(result) == 2 and
                 isinstance(result[1], dict) and "coverage" in result[1]):
