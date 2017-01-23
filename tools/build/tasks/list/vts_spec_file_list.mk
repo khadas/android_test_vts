@@ -59,5 +59,7 @@ vts_spec_file_list += \
   hardware/interfaces/light/2.0/vts/types.vts \
   hardware/interfaces/power/1.0/vts/Power.vts \
   hardware/interfaces/power/1.0/vts/types.vts \
+  hardware/interfaces/memtrack/1.0/vts/Memtrack.vts \
+  hardware/interfaces/memtrack/1.0/vts/types.vts \
 
 endif
