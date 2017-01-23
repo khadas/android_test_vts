@@ -2,7 +2,6 @@ package com.android.vts.servlet;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.Test;
 import com.google.protobuf.ByteString;
 import java.io.BufferedReader;
@@ -19,10 +18,11 @@ import com.android.vts.util.PerformanceSummary;
 import com.android.vts.util.ProfilingPointSummary;
 
 public class VtsPerformanceJobServletTest {
-    private static String root = "src/test/res/servlet";
-    private static String[] labels = new String[]{"label1", "label2", "label3"};
-    private static long[] highValues = new long[]{10, 20, 30};
-    private static long[] lowValues = new long[]{1, 2, 3};
+    private static final String LABEL = "testLabel";
+    private static final String ROOT = "src/test/res/servlet";
+    private static final String[] LABELS = new String[]{"label1", "label2", "label3"};
+    private static final long[] HIGH_VALS = new long[]{10, 20, 30};
+    private static final long[] LOW_VALS = new long[]{1, 2, 3};
 
     List<PerformanceSummary> dailySummaries;
     List<String> legendLabels;
@@ -52,7 +52,7 @@ public class VtsPerformanceJobServletTest {
      */
     private static void compareToBaseline(String text, String baselineFilename)
             throws FileNotFoundException, IOException {
-        File f = new File(root, baselineFilename);
+        File f = new File(ROOT, baselineFilename);
         String baseline = "";
         try(BufferedReader br = new BufferedReader(new FileReader(f))) {
             StringBuilder sb = new StringBuilder();
@@ -67,8 +67,7 @@ public class VtsPerformanceJobServletTest {
         assertEquals(baseline, text);
     }
 
-    @Before
-    public void setUp() {
+    public void setUp(boolean grouped) {
         dailySummaries = new ArrayList<>();
         legendLabels = new ArrayList<>();
         legendLabels.add("");
@@ -77,16 +76,26 @@ public class VtsPerformanceJobServletTest {
         PerformanceSummary today = new PerformanceSummary();
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
-        ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
-        summary.update(report);
-        summary.update(report);
+        ProfilingReportMessage report = createProfilingReport(LABELS, HIGH_VALS, mode);
+        if (grouped) {
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+        } else {
+            summary.update(report);
+            summary.update(report);
+        }
         today.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
-        report = createProfilingReport(labels, lowValues, mode);
-        summary.update(report);
-        summary.update(report);
+        report = createProfilingReport(LABELS, LOW_VALS, mode);
+        if (grouped) {
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+        } else {
+            summary.update(report);
+            summary.update(report);
+        }
         today.insertProfilingPointSummary("p2", summary);
         dailySummaries.add(today);
         legendLabels.add("today");
@@ -95,16 +104,26 @@ public class VtsPerformanceJobServletTest {
         PerformanceSummary yesterday = new PerformanceSummary();
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
-        report = createProfilingReport(labels, lowValues, mode);
-        summary.update(report);
-        summary.update(report);
+        report = createProfilingReport(LABELS, LOW_VALS, mode);
+        if (grouped) {
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+        } else {
+            summary.update(report);
+            summary.update(report);
+        }
         yesterday.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
-        report = createProfilingReport(labels, highValues, mode);
-        summary.update(report);
-        summary.update(report);
+        report = createProfilingReport(LABELS, HIGH_VALS, mode);
+        if (grouped) {
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+            summary.updateLabel(report, ByteString.copyFromUtf8(LABEL));
+        } else {
+            summary.update(report);
+            summary.update(report);
+        }
         yesterday.insertProfilingPointSummary("p2", summary);
         dailySummaries.add(yesterday);
         legendLabels.add("yesterday");
@@ -113,14 +132,14 @@ public class VtsPerformanceJobServletTest {
         PerformanceSummary lastWeek = new PerformanceSummary();
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
-        report = createProfilingReport(labels, highValues, mode);
+        report = createProfilingReport(LABELS, HIGH_VALS, mode);
         summary.update(report);
         summary.update(report);
         lastWeek.insertProfilingPointSummary("p1", summary);
 
         summary = new ProfilingPointSummary();
         mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_DECREASING;
-        report = createProfilingReport(labels, lowValues, mode);
+        report = createProfilingReport(LABELS, LOW_VALS, mode);
         summary.update(report);
         summary.update(report);
         lastWeek.insertProfilingPointSummary("p2", summary);
@@ -134,6 +153,7 @@ public class VtsPerformanceJobServletTest {
      */
     @Test
     public void testPerformanceSummaryNormal() throws FileNotFoundException, IOException {
+        setUp(false);
         String output = VtsPerformanceJobServlet.getPeformanceSummary("result_test", dailySummaries, legendLabels);
         compareToBaseline(output, "performanceSummary1.html");
     }
@@ -143,10 +163,11 @@ public class VtsPerformanceJobServletTest {
      */
     @Test
     public void testPerformanceSummaryDroppedProfilingPoint() throws FileNotFoundException, IOException {
+        setUp(false);
         PerformanceSummary yesterday = dailySummaries.get(dailySummaries.size() - 1);
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
-        ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
+        ProfilingReportMessage report = createProfilingReport(LABELS, HIGH_VALS, mode);
         summary.update(report);
         summary.update(report);
         yesterday.insertProfilingPointSummary("p3", summary);
@@ -159,14 +180,26 @@ public class VtsPerformanceJobServletTest {
      */
     @Test
     public void testPerformanceSummaryAddedProfilingPoint() throws FileNotFoundException, IOException {
+        setUp(false);
         PerformanceSummary today = dailySummaries.get(0);
         ProfilingPointSummary summary = new ProfilingPointSummary();
         VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
-        ProfilingReportMessage report = createProfilingReport(labels, highValues, mode);
+        ProfilingReportMessage report = createProfilingReport(LABELS, HIGH_VALS, mode);
         summary.update(report);
         summary.update(report);
         today.insertProfilingPointSummary("p3", summary);
         String output = VtsPerformanceJobServlet.getPeformanceSummary("result_test", dailySummaries, legendLabels);
         compareToBaseline(output, "performanceSummary3.html");
+    }
+
+    /**
+     * End-to-end test of performance report labels are grouped (e.g. as if using unlabled data)
+     */
+    @Test
+    public void testPerformanceSummaryGroupedNormal() throws FileNotFoundException, IOException {
+        setUp(true);
+        String output = VtsPerformanceJobServlet.getPeformanceSummary("result_test", dailySummaries, legendLabels);
+        System.out.println(output);
+        compareToBaseline(output, "performanceSummary4.html");
     }
 }
