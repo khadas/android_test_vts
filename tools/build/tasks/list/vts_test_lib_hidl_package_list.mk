@@ -101,6 +101,7 @@ vts_test_lib_hidl_packages += \
   bluetooth_hidl_hal_test \
   boot_hidl_hal_test \
   contexthub_hidl_hal_test \
+  fingerprint_hidl_hal_test \
   graphics_allocator_hidl_hal_test \
   graphics_mapper_hidl_hal_test \
   graphics_composer_hidl_hal_test \
