@@ -26,4 +26,6 @@ spec/hardware/interfaces/light/2.0/vts/Light.vts->/data/local/tmp/spec/light/Lig
 spec/hardware/interfaces/light/2.0/vts/types.vts->/data/local/tmp/spec/light/types.vts
 spec/hardware/interfaces/power/1.0/vts/Power.vts->/data/local/tmp/spec/power/Power.vts
 spec/hardware/interfaces/power/1.0/vts/types.vts->/data/local/tmp/spec/power/types.vts
+spec/hardware/interfaces/memtrack/1.0/vts/Memtrack.vts->/data/local/tmp/spec/memtrack/Memtrack.vts
+spec/hardware/interfaces/memtrack/1.0/vts/types.vts->/data/local/tmp/spec/memtrack/types.vts
 
