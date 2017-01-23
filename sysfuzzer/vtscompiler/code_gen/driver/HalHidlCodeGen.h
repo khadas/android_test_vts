@@ -117,6 +117,11 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       const ComponentSpecificationMessage& message,
       const FunctionSpecificationMessage& func_msg);
 
+  // Generates the driver function declaration for attributes defined within
+  // an interface or in a types.hal.
+  void GenerateDriverDeclForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
   // Generates the driver function implementation for attributes defined within
   // an interface or in a types.hal.
   void GenerateDriverImplForAttribute(Formatter& out,
@@ -170,7 +175,7 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   // Returns true if we could omit the callback function and return result
   // directly.
   bool CanElideCallback(const FunctionSpecificationMessage& func_msg);
-
+  bool isElidableType(const VariableType& type);
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
 };
