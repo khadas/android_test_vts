@@ -392,6 +392,14 @@ public final class VtsReportMessage {
      * </pre>
      */
     VTS_PROFILING_TYPE_LABELED_VECTOR(2, 2),
+    /**
+     * <code>VTS_PROFILING_TYPE_UNLABELED_VECTOR = 3;</code>
+     *
+     * <pre>
+     * for multiple single-type samples without labels.
+     * </pre>
+     */
+    VTS_PROFILING_TYPE_UNLABELED_VECTOR(3, 3),
     ;
 
     /**
@@ -414,6 +422,14 @@ public final class VtsReportMessage {
      * </pre>
      */
     public static final int VTS_PROFILING_TYPE_LABELED_VECTOR_VALUE = 2;
+    /**
+     * <code>VTS_PROFILING_TYPE_UNLABELED_VECTOR = 3;</code>
+     *
+     * <pre>
+     * for multiple single-type samples without labels.
+     * </pre>
+     */
+    public static final int VTS_PROFILING_TYPE_UNLABELED_VECTOR_VALUE = 3;
 
 
     public final int getNumber() { return value; }
@@ -423,6 +439,7 @@ public final class VtsReportMessage {
         case 0: return UNKNOWN_VTS_PROFILING_TYPE;
         case 1: return VTS_PROFILING_TYPE_TIMESTAMP;
         case 2: return VTS_PROFILING_TYPE_LABELED_VECTOR;
+        case 3: return VTS_PROFILING_TYPE_UNLABELED_VECTOR;
         default: return null;
       }
     }
@@ -13205,11 +13222,12 @@ public final class VtsReportMessage {
       "essionMode\022\033\n\027UNKNOWN_REGRESSION_MODE\020\000\022" +
       " \n\034VTS_REGRESSION_MODE_DISABLED\020\001\022\"\n\036VTS" +
       "_REGRESSION_MODE_INCREASING\020\002\022\"\n\036VTS_REG" +
-      "RESSION_MODE_DECREASING\020\003*{\n\020VtsProfilin" +
-      "gType\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n",
-      "\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_P" +
-      "ROFILING_TYPE_LABELED_VECTOR\020\002B)\n\025com.an" +
-      "droid.vts.protoB\020VtsReportMessage"
+      "RESSION_MODE_DECREASING\020\003*\244\001\n\020VtsProfili" +
+      "ngType\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 ",
+      "\n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_" +
+      "PROFILING_TYPE_LABELED_VECTOR\020\002\022\'\n#VTS_P" +
+      "ROFILING_TYPE_UNLABELED_VECTOR\020\003B)\n\025com." +
+      "android.vts.protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
