@@ -104,9 +104,11 @@ class CpuFrequencyScalingController(object):
                 ["cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_max_freq" % cpu_no,
                  "cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % cpu_no])
             asserts.assertEqual(2, len(results[const.STDOUT]))
-            asserts.assertFalse(
-                any(results[const.EXIT_CODE]),
-                "Can't check the current and/or max CPU frequency.")
+            if any(results[const.EXIT_CODE]):
+                logging.error("Can't check the current and/or max CPU frequency.")
+                logging.error("Stderr for scaling_max_freq: %s", results[const.STDERR][0])
+                logging.error("Stderr for scaling_cur_freq: %s", results[const.STDERR][1])
+                return True
             configurable_max_frequency = results[const.STDOUT][0].strip()
             current_frequency = results[const.STDOUT][1].strip()
             if configurable_max_frequency != current_frequency:
