@@ -180,7 +180,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     case TYPE_ARRAY:
     {
       string element_type = GetCppVariableType(arg.vector_value(0), message);
-      return "::android::hardware::hidl_vec<" + element_type + ","
+      return "::android::hardware::hidl_array<" + element_type + ","
           + to_string(arg.vector_size()) + ">";
     }
     case TYPE_STRUCT:
