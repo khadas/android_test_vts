@@ -43,7 +43,7 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
     public ProfilingPointSummary() {
         statSummaries = new ArrayList<>();
         labelIndices = new HashMap<>();
-        labels = null;
+        labels = new ArrayList<>();
     }
 
     /**
@@ -94,6 +94,31 @@ public class ProfilingPointSummary implements Iterable<StatSummary> {
         this.yLabel = report.getYAxisLabel();
     }
 
+    /**
+     * Updates the profiling summary at a label with the data from a new profiling report.
+     *
+     * Updates the summary specified by the label with all values provided in the report. If labels
+     * are provided in the report, they will be ignored -- all values are updated only to the
+     * provided label.
+     *
+     * @param report The ProfilingReportMessage object containing profiling data.
+     * @param label The ByteString label for which all values in the report will be updated.
+     */
+    public void updateLabel(ProfilingReportMessage report, ByteString label) {
+        if (!labelIndices.containsKey(label)) {
+            StatSummary summary = new StatSummary(label, report.getRegressionMode());
+            labelIndices.put(label, labels.size());
+            labels.add(label);
+            statSummaries.add(summary);
+        }
+        StatSummary summary = getStatSummary(label);
+        for (long value : report.getValueList()) {
+            summary.updateStats(value);
+        }
+        this.regression_mode = report.getRegressionMode();
+        this.xLabel = report.getXAxisLabel();
+        this.yLabel = report.getYAxisLabel();
+    }
 
     /**
      * Gets an iterator that returns stat summaries in the ordered the labels were specified in the
