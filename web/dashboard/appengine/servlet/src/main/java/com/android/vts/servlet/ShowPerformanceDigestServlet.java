@@ -71,7 +71,6 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
      */
     public static String getPeformanceSummary(String profilingPoint, ProfilingPointSummary testSummary,
             List<PerformanceSummary> perfSummaries, String sectionLabels) {
-        if (perfSummaries.size() == 0) return null;
         String tableHTML = "<table>";
 
         // Format section labels
