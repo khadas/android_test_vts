@@ -27,6 +27,8 @@ cc_library_host_shared {
         "code_gen/driver/HalHidlCodeGen.cpp",
         "code_gen/driver/LegacyHalCodeGen.cpp",
         "code_gen/driver/LibSharedCodeGen.cpp",
+        "code_gen/fuzzer/FuzzerCodeGenBase.cpp",
+        "code_gen/fuzzer/HalHidlFuzzerCodeGen.cpp",
         "code_gen/profiler/ProfilerCodeGenBase.cpp",
         "code_gen/profiler/HalHidlProfilerCodeGen.cpp",
     ],

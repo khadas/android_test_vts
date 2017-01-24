@@ -41,6 +41,8 @@
 #include "code_gen/driver/HalHidlCodeGen.h"
 #include "code_gen/driver/LegacyHalCodeGen.h"
 #include "code_gen/driver/LibSharedCodeGen.h"
+#include "code_gen/fuzzer/FuzzerCodeGenBase.h"
+#include "code_gen/fuzzer/HalHidlFuzzerCodeGen.h"
 #include "code_gen/profiler/ProfilerCodeGenBase.h"
 #include "code_gen/profiler/HalHidlProfilerCodeGen.h"
 
@@ -82,6 +84,22 @@ void Translate(VtsCompileMode mode,
 
   cout << "header: " << output_header_file_path << endl;
   vts_fs_mkdirs(&output_header_file_path[0], 0777);
+
+  if (mode == kFuzzer) {
+    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        fuzzer_generator =
+            make_unique<HalHidlFuzzerCodeGen>(message, output_cpp_file_path_str);
+        break;
+      default:
+        cerr << "not yet supported component_class "
+            << message.component_class();
+        exit(-1);
+    }
+    fuzzer_generator->GenerateAll();
+    return;
+  }
 
   FILE* header_file = fopen(output_header_file_path.c_str(), "w");
   if (header_file == NULL) {
