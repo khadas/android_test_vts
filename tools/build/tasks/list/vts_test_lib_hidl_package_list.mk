@@ -64,3 +64,4 @@ vts_test_lib_hidl_packages += \
   thermal_hidl_hal_test \
   vibrator_hidl_hal_test \
   vr_hidl_hal_test \
+  wifi_hidl_test \
