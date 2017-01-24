@@ -77,8 +77,10 @@ class ConfigKeys(object):
     IKEY_SERVICE_JSON_PATH = "service_key_json_path"
     IKEY_BIGTABLE_BASE_URL = "bigtable_base_url"
 
-    # Keys for the HAL HIDL GTest type.
-    IKEY_HWBINDER_SERVICE = "hwbinder_service"  # when a service is required.
+    # Keys for the HAL HIDL GTest type (see VtsMultiDeviceTest.java).
+    IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
+    IKEY_PRECONDITION_FEATURE = "precondition_feature"
+    IKEY_PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
