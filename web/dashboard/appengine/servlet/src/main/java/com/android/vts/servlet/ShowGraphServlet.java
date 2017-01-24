@@ -23,6 +23,7 @@ import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.util.BigtableHelper;
 import com.android.vts.util.Graph;
 import com.android.vts.util.GraphSerializer;
+import com.android.vts.util.Histogram;
 import com.android.vts.util.LineGraph;
 import com.android.vts.util.PerformanceUtil;
 import org.apache.hadoop.hbase.TableName;
@@ -58,27 +59,48 @@ public class ShowGraphServlet extends BaseServlet {
 
     private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
     private static final String[] splitKeysArray = new String[]{HIDL_HAL_OPTION};
-    private static final Set<String> splitKeySet = new HashSet<String>(Arrays.asList(splitKeysArray));
+    private static final Set<String> splitKeySet =
+            new HashSet<String>(Arrays.asList(splitKeysArray));
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
 
 
     private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
 
     /**
-     * Process a profiling report message and determine which graph to insert the point into.
+     * Process a profiling report message and determine which line graph to insert the point into.
      * @param profilingReportMessage The profiling report to process.
      * @param idString The ID derived from the test run to identify the profiling report.
      * @param graphMap A map from graph name to Graph object.
      */
-    private static void processLabeledListReport(
+    private static void processLineGraphReport(
             ProfilingReportMessage profilingReportMessage, String idString,
             Map<String, Graph> graphMap) {
         if (profilingReportMessage.getLabelList().size() == 0 ||
             profilingReportMessage.getLabelList().size() !=
             profilingReportMessage.getValueList().size()) return;
-        String name = PerformanceUtil.getOptionKeys(profilingReportMessage.getOptionsList(), splitKeySet);
+        String name = PerformanceUtil.getOptionKeys(profilingReportMessage.getOptionsList(),
+                                                    splitKeySet);
         if (!graphMap.containsKey(name)) {
             graphMap.put(name, new LineGraph(name));
+        }
+        graphMap.get(name).addData(idString, profilingReportMessage);
+    }
+
+    /**
+     * Process a profiling report message and determine which histogram to insert the point into.
+     * @param profilingReportMessage The profiling report to process.
+     * @param graphMap A map from graph name to Graph object.
+     */
+    private static void processHistogramReport(
+            ProfilingReportMessage profilingReportMessage, String idString,
+            Map<String, Graph> graphMap) {
+        if (profilingReportMessage.getValueList().size() == 0 &&
+            profilingReportMessage.getStartTimestamp() >= profilingReportMessage.getEndTimestamp())
+            return;
+        String name = PerformanceUtil.getOptionKeys(
+                profilingReportMessage.getOptionsList(), splitKeySet);
+        if (!graphMap.containsKey(name)) {
+            graphMap.put(name, new Histogram(name));
         }
         graphMap.get(name).addData(idString, profilingReportMessage);
     }
@@ -105,9 +127,6 @@ public class ShowGraphServlet extends BaseServlet {
         tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
         table = BigtableHelper.getTable(tableName);
 
-        // This list holds the values for all profiling points.
-        List<Double> profilingPointValuesList = new ArrayList<>();
-
         // Set of device names
         Set<String> deviceSet = new HashSet<String>();
 
@@ -124,7 +143,8 @@ public class ShowGraphServlet extends BaseServlet {
 
             AndroidDeviceInfoMessage firstDeviceInfo = testReportMessage.getDeviceInfoList().get(0);
             String firstDeviceBuildId = firstDeviceInfo.getBuildId().toStringUtf8();
-            String firstDeviceType = firstDeviceInfo.getProductVariant().toStringUtf8().toLowerCase();
+            String firstDeviceType =
+                    firstDeviceInfo.getProductVariant().toStringUtf8().toLowerCase();
             String idString = firstDeviceType + " (" + firstDeviceBuildId + ")";
             deviceSet.add(firstDeviceType);
             if (selectedDevice != null && !firstDeviceType.equals(selectedDevice)) continue;
@@ -138,9 +158,13 @@ public class ShowGraphServlet extends BaseServlet {
                 switch(profilingReportMessage.getType()) {
                     case UNKNOWN_VTS_PROFILING_TYPE:
                     case VTS_PROFILING_TYPE_TIMESTAMP:
-                        continue;
+                        processHistogramReport(profilingReportMessage, idString, graphMap);
+                        break;
                     case VTS_PROFILING_TYPE_LABELED_VECTOR:
-                        processLabeledListReport(profilingReportMessage, idString, graphMap);
+                        processLineGraphReport(profilingReportMessage, idString, graphMap);
+                        break;
+                    case VTS_PROFILING_TYPE_UNLABELED_VECTOR:
+                        processHistogramReport(profilingReportMessage, idString, graphMap);
                         break;
                     default :
                         break;
@@ -155,12 +179,6 @@ public class ShowGraphServlet extends BaseServlet {
             graphList.add(graphMap.get(name));
         }
 
-        // fill performance profiling array
-        double[] performanceProfilingValues = new double[profilingPointValuesList.size()];
-        for (int i = 0; i < profilingPointValuesList.size(); i++) {
-            performanceProfilingValues[i] = profilingPointValuesList.get(i).doubleValue();
-        }
-
         // sort devices list
         if (!deviceSet.contains(selectedDevice)) selectedDevice = null;
         String[] devices = deviceSet.toArray(new String[deviceSet.size()]);
@@ -172,7 +190,8 @@ public class ShowGraphServlet extends BaseServlet {
         request.setAttribute("selectedDevice", selectedDevice);
         if (graphList.size() == 0) request.setAttribute("error", PROFILING_DATA_ALERT);
 
-        Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Graph.class, new GraphSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(
+                Graph.class, new GraphSerializer()).create();
         request.setAttribute("graphs", gson.toJson(graphList));
 
         request.setAttribute("profilingPointName", profilingPointName);
