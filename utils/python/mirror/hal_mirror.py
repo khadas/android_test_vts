@@ -159,7 +159,7 @@ class HalMirror(object):
                     target_component_name=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
-                    hw_binder_service_name=_DEFAULT_TARGET_BASE_PATHS,
+                    hw_binder_service_name=_DEFAULT_HWBINDER_SERVICE,
                     bits=64):
         """Initiates a handler for a particular HIDL HAL.
 
