@@ -109,28 +109,41 @@ public class PerformanceSummary {
             }
 
             String name = profilingReportMessage.getName().toStringUtf8();
-            String optionSuffix = PerformanceUtil.getOptionKeys(profilingReportMessage.getOptionsList(), optionSplitKeys);
-            if (!optionSuffix.equals("")) {
-                name += " (" + optionSuffix + ")";
-            }
+            String optionSuffix = PerformanceUtil.getOptionKeys(
+                    profilingReportMessage.getOptionsList(), optionSplitKeys);
 
             switch (profilingReportMessage.getType()) {
-                case UNKNOWN_VTS_PROFILING_TYPE:
-                case VTS_PROFILING_TYPE_TIMESTAMP :
+                case VTS_PROFILING_TYPE_TIMESTAMP:
                     logger.log(Level.WARNING, "Timestamp profiling data skipped : " + name);
                     break;
-                case VTS_PROFILING_TYPE_LABELED_VECTOR :
+                case VTS_PROFILING_TYPE_LABELED_VECTOR:
                     if (profilingReportMessage.getLabelList().size() == 0 ||
                         profilingReportMessage.getLabelList().size() !=
                         profilingReportMessage.getValueList().size()) {
-                        continue;
+                        break;
+                    }
+                    if (!optionSuffix.equals("")) {
+                        name += " (" + optionSuffix + ")";
                     }
                     if (!summaryMap.containsKey(name)) {
                         summaryMap.put(name, new ProfilingPointSummary());
                     }
                     summaryMap.get(name).update(profilingReportMessage);
                     break;
-                default :
+                case VTS_PROFILING_TYPE_UNLABELED_VECTOR:
+                    if (profilingReportMessage.getValueList().size() == 0) {
+                        break;
+                    }
+                    // Use the option suffix as the table name.
+                    // Group all profiling points together into one table
+                    if (!summaryMap.containsKey(optionSuffix)) {
+                        summaryMap.put(optionSuffix, new ProfilingPointSummary());
+                    }
+                    summaryMap.get(optionSuffix).updateLabel(
+                            profilingReportMessage, profilingReportMessage.getName());
+                    break;
+                case UNKNOWN_VTS_PROFILING_TYPE:
+                default:
                     break;
             }
         }
