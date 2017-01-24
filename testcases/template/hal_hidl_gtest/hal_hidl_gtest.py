@@ -44,13 +44,16 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         super(HidlHalGTest, self).setUpClass()
 
         opt_params = [
-            keys.ConfigKeys.IKEY_HWBINDER_SERVICE
+            keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
+            keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
+            keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
         ]
         self.getUserParams(opt_param_names=opt_params)
 
-        hwbinder_service_name = str(getattr(
-            self, keys.ConfigKeys.IKEY_HWBINDER_SERVICE, ""))
         self._skip_all_testcases = False
+
+        hwbinder_service_name = str(getattr(
+            self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE, ""))
         if hwbinder_service_name:
             if not hwbinder_service_name.startswith("android.hardware."):
                 logging.error("The given hwbinder service name %s is invalid.",
@@ -59,9 +62,36 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 cmd_results = self.shell.Execute("ps -A")
                 hwbinder_service_name += "@"
                 if (any(cmd_results[const.EXIT_CODE])
-                    or hwbinder_service_name not in cmd_results[const.STDOUT]):
+                    or hwbinder_service_name not in cmd_results[const.STDOUT][0]):
                     logging.warn("The required hwbinder service %s not found.",
                                  hwbinder_service_name)
+                    self._skip_all_testcases = True
+
+        if not self._skip_all_testcases:
+            feature = str(getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
+            if feature:
+                if not feature.startswith("android.hardware."):
+                    logging.error(
+                        "The given feature name %s is invalid for HIDL HAL.",
+                        feature)
+                else:
+                    cmd_results = self.shell.Execute("pm list features")
+                    if (any(cmd_results[const.EXIT_CODE])
+                        or feature not in cmd_results[const.STDOUT][0]):
+                        logging.warn("The required feature %s not found.",
+                                     feature)
+                        self._skip_all_testcases = True
+
+        if not self._skip_all_testcases:
+            file_path_prefix = str(getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
+            if file_path_prefix:
+                cmd_results = self.shell.Execute("ls %s*" % flie_path_prefix)
+                if (any(cmd_results[const.EXIT_CODE])
+                    or file_path_prefix not in cmd_results[const.STDOUT][0]):
+                    logging.warn("The required file (prefix: %s) not found.",
+                                 feature)
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
