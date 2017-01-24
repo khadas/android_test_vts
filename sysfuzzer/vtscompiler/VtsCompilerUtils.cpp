@@ -237,14 +237,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     }
     case TYPE_MASK:
     {
-      // Mask is a special enum type.
-      if (arg.has_predefined_type()) {
-        return arg.predefined_type();
-      } else {
-        cerr << __func__ << ":" << __LINE__
-             << " ERROR no predefined_type set for mask variable" << endl;
-        exit(-1);
-      }
+      return GetCppVariableType(arg.scalar_type());
     }
     case TYPE_HIDL_MEMORY:
     {
