@@ -69,6 +69,7 @@ class VtscTester(unittest.TestCase):
         """Run all tests. """
         self.TestDriver()
         self.TestProfiler()
+        self.TestFuzzer()
         self.assertEqual(self._errors, 0)
 
     def TestDriver(self):
@@ -96,6 +97,34 @@ class VtscTester(unittest.TestCase):
         for component_name in ["Nfc", "types", "NfcClientCallback"]:
             self.RunTest("PROFILER", "hardware/interfaces/nfc/1.0/vts/%s.vts" %
                          component_name, "%s.profiler.cpp" % component_name)
+
+    def TestFuzzer(self):
+        """Run tests for FUZZER mode. """
+        logging.info("Running TestFuzzer test case.")
+        mode = "FUZZER"
+        component_name = "Nfc"
+        vts_file_path = "hardware/interfaces/nfc/1.0/vts/%s.vts" % component_name
+        build_file_name = "Android.bp"
+        apis = ["open", "write", "coreInitialized"]
+
+        self.RunFuzzerTest(mode, vts_file_path, build_file_name)
+        for api in apis:
+            source_file_name = "I%s_%s_fuzzer.cpp" % (component_name, api)
+            self.RunFuzzerTest(mode, vts_file_path, source_file_name)
+
+    def RunFuzzerTest(self, mode, vts_file_path, source_file_name):
+        vtsc_cmd = [
+            self._vtsc_path, "-m" + mode, vts_file_path,
+            os.path.join(self._output_dir, mode),
+            os.path.join(self._output_dir, mode, "")
+        ]
+        return_code = cmd_utils.RunCommand(vtsc_cmd)
+
+        canonical_source_file = os.path.join(self._canonical_dir, mode,
+                                             source_file_name)
+        output_source_file = os.path.join(self._output_dir, mode,
+                                          source_file_name)
+        self.CompareOutputFile(output_source_file, canonical_source_file)
 
     def RunTest(self, mode, vts_file_path, source_file_name):
         """Run vtsc with given mode for the give vts file and compare the
