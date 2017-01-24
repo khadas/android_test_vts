@@ -31,7 +31,8 @@ namespace vts {
 
 enum VtsCompileMode {
   kDriver = 0,
-  kProfiler
+  kProfiler,
+  kFuzzer
 };
 
 // Specifies what kinds of files to generate.
