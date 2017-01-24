@@ -92,7 +92,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
-    static final String HWBINDER_SERVICE = "hwbinder_service";
+    static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
+    static final String PRECONDITION_FEATURE = "precondition_feature";
+    static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -122,9 +124,17 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             description = "The path for test case config file.")
     private String mTestConfigPath = null;
 
-    @Option(name = "hwbinder-service",
+    @Option(name = "precondition-hwbinder-service",
             description = "The name of a HW binder service needed to run the test.")
-    private String mHwBinderServiceName = null;
+    private String mPreconditionHwBinderServiceName = null;
+
+    @Option(name = "precondition-feature",
+        description = "The name of a `pm`-listable feature needed to run the test.")
+    private String mPreconditionFeature = null;
+
+    @Option(name = "precondition-file-path-prefix",
+        description = "The path prefix of a file (e.g., shared lib) needed to run the test.")
+    private String mPreconditionFilePathPrefix = null;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -565,9 +575,19 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             }
         }
 
-        if (mHwBinderServiceName != null) {
-            jsonObject.put(HWBINDER_SERVICE, mHwBinderServiceName);
-            CLog.i("Added %s to the Json object", ENABLE_PROFILING);
+        if (mPreconditionHwBinderServiceName != null) {
+            jsonObject.put(PRECONDITION_HWBINDER_SERVICE, mPreconditionHwBinderServiceName);
+            CLog.i("Added %s to the Json object", PRECONDITION_HWBINDER_SERVICE);
+        }
+
+        if (mPreconditionFeature != null) {
+          jsonObject.put(PRECONDITION_FEATURE, mPreconditionFeature);
+          CLog.i("Added %s to the Json object", PRECONDITION_FEATURE);
+        }
+
+        if (mPreconditionFilePathPrefix != null) {
+          jsonObject.put(PRECONDITION_FILE_PATH_PREFIX, mPreconditionFilePathPrefix);
+          CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
         }
 
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
