@@ -173,6 +173,9 @@ message SystraceReportMessage {
 
   // the produced html report
   repeated bytes html = 11;
+
+  // URLs of the produced html reports
+  repeated bytes url = 21;
 }
 
 // To specify a coverage report.
