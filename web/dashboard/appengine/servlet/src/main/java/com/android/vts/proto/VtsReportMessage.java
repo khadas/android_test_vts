@@ -7087,6 +7087,32 @@ public final class VtsReportMessage {
      * </pre>
      */
     com.google.protobuf.ByteString getHtml(int index);
+
+    // repeated bytes url = 21;
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    java.util.List<com.google.protobuf.ByteString> getUrlList();
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    int getUrlCount();
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    com.google.protobuf.ByteString getUrl(int index);
   }
   /**
    * Protobuf type {@code android.vts.SystraceReportMessage}
@@ -7156,6 +7182,14 @@ public final class VtsReportMessage {
               html_.add(input.readBytes());
               break;
             }
+            case 170: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                url_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              url_.add(input.readBytes());
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -7166,6 +7200,9 @@ public final class VtsReportMessage {
       } finally {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           html_ = java.util.Collections.unmodifiableList(html_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          url_ = java.util.Collections.unmodifiableList(url_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -7258,9 +7295,45 @@ public final class VtsReportMessage {
       return html_.get(index);
     }
 
+    // repeated bytes url = 21;
+    public static final int URL_FIELD_NUMBER = 21;
+    private java.util.List<com.google.protobuf.ByteString> url_;
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getUrlList() {
+      return url_;
+    }
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    public int getUrlCount() {
+      return url_.size();
+    }
+    /**
+     * <code>repeated bytes url = 21;</code>
+     *
+     * <pre>
+     * URLs of the produced html reports
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getUrl(int index) {
+      return url_.get(index);
+    }
+
     private void initFields() {
       processName_ = com.google.protobuf.ByteString.EMPTY;
       html_ = java.util.Collections.emptyList();
+      url_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -7279,6 +7352,9 @@ public final class VtsReportMessage {
       }
       for (int i = 0; i < html_.size(); i++) {
         output.writeBytes(11, html_.get(i));
+      }
+      for (int i = 0; i < url_.size(); i++) {
+        output.writeBytes(21, url_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -7301,6 +7377,15 @@ public final class VtsReportMessage {
         }
         size += dataSize;
         size += 1 * getHtmlList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < url_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(url_.get(i));
+        }
+        size += dataSize;
+        size += 2 * getUrlList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -7426,6 +7511,8 @@ public final class VtsReportMessage {
         bitField0_ = (bitField0_ & ~0x00000001);
         html_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
+        url_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -7463,6 +7550,11 @@ public final class VtsReportMessage {
           bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.html_ = html_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          url_ = java.util.Collections.unmodifiableList(url_);
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.url_ = url_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -7489,6 +7581,16 @@ public final class VtsReportMessage {
           } else {
             ensureHtmlIsMutable();
             html_.addAll(other.html_);
+          }
+          onChanged();
+        }
+        if (!other.url_.isEmpty()) {
+          if (url_.isEmpty()) {
+            url_ = other.url_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureUrlIsMutable();
+            url_.addAll(other.url_);
           }
           onChanged();
         }
@@ -7667,6 +7769,106 @@ public final class VtsReportMessage {
       public Builder clearHtml() {
         html_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+
+      // repeated bytes url = 21;
+      private java.util.List<com.google.protobuf.ByteString> url_ = java.util.Collections.emptyList();
+      private void ensureUrlIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          url_ = new java.util.ArrayList<com.google.protobuf.ByteString>(url_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getUrlList() {
+        return java.util.Collections.unmodifiableList(url_);
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public int getUrlCount() {
+        return url_.size();
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getUrl(int index) {
+        return url_.get(index);
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public Builder setUrl(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUrlIsMutable();
+        url_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public Builder addUrl(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUrlIsMutable();
+        url_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public Builder addAllUrl(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureUrlIsMutable();
+        super.addAll(values, url_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes url = 21;</code>
+       *
+       * <pre>
+       * URLs of the produced html reports
+       * </pre>
+       */
+      public Builder clearUrl() {
+        url_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -13188,46 +13390,47 @@ public final class VtsReportMessage {
       "ngRegressionMode\022\027\n\017start_timestamp\030\013 \001(" +
       "\003\022\025\n\rend_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022" +
       "\r\n\005value\030\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014" +
-      "y_axis_label\030  \001(\014\022\017\n\007options\030) \003(\014\";\n\025S" +
+      "y_axis_label\030  \001(\014\022\017\n\007options\030) \003(\014\"H\n\025S" +
       "ystraceReportMessage\022\024\n\014process_name\030\001 \001" +
-      "(\014\022\014\n\004html\030\013 \003(\014\"\345\001\n\025CoverageReportMessa" +
-      "ge\022\021\n\tfile_path\030\013 \001(\014\022\024\n\014project_name\030\014 " +
-      "\001(\014\022\020\n\010revision\030\r \001(\014\022\034\n\024line_coverage_v" +
-      "ector\030\027 \003(\005\022\030\n\020total_line_count\030e \001(\005\022\032\n",
-      "\022covered_line_count\030f \001(\005\022\024\n\010dir_path\030\001 " +
-      "\001(\014B\002\030\001\022\025\n\tfile_name\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003" +
-      " \001(\014B\002\030\001\"\243\004\n\021TestReportMessage\022\022\n\ntest_s" +
-      "uite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 " +
-      "\001(\0162\030.android.vts.VtsTestType\022:\n\013device_" +
-      "info\030\004 \003(\0132%.android.vts.AndroidDeviceIn" +
-      "foMessage\0221\n\nbuild_info\030\005 \001(\0132\035.android." +
-      "vts.AndroidBuildInfo\022\030\n\020subscriber_email" +
-      "\030\006 \003(\014\022+\n\thost_info\030\007 \001(\0132\030.android.vts." +
-      "VtsHostInfo\0225\n\ttest_case\030\013 \003(\0132\".android",
-      ".vts.TestCaseReportMessage\0226\n\tprofiling\030" +
-      "\025 \003(\0132#.android.vts.ProfilingReportMessa" +
-      "ge\0224\n\010systrace\030\026 \003(\0132\".android.vts.Systr" +
-      "aceReportMessage\022\027\n\017start_timestamp\030e \001(" +
-      "\003\022\025\n\rend_timestamp\030f \001(\003\0224\n\010coverage\030g \003" +
-      "(\0132\".android.vts.CoverageReportMessage*\263" +
-      "\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n" +
-      "\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_CASE_RE" +
-      "SULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022\036" +
-      "\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n\030TEST_C",
-      "ASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024" +
-      "UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVE" +
-      "N_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZIN" +
-      "G\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_TA" +
-      "RGET_SIDE_FUZZING\020\004*\243\001\n\032VtsProfilingRegr" +
-      "essionMode\022\033\n\027UNKNOWN_REGRESSION_MODE\020\000\022" +
-      " \n\034VTS_REGRESSION_MODE_DISABLED\020\001\022\"\n\036VTS" +
-      "_REGRESSION_MODE_INCREASING\020\002\022\"\n\036VTS_REG" +
-      "RESSION_MODE_DECREASING\020\003*\244\001\n\020VtsProfili" +
-      "ngType\022\036\n\032UNKNOWN_VTS_PROFILING_TYPE\020\000\022 ",
-      "\n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_" +
-      "PROFILING_TYPE_LABELED_VECTOR\020\002\022\'\n#VTS_P" +
-      "ROFILING_TYPE_UNLABELED_VECTOR\020\003B)\n\025com." +
-      "android.vts.protoB\020VtsReportMessage"
+      "(\014\022\014\n\004html\030\013 \003(\014\022\013\n\003url\030\025 \003(\014\"\345\001\n\025Covera" +
+      "geReportMessage\022\021\n\tfile_path\030\013 \001(\014\022\024\n\014pr" +
+      "oject_name\030\014 \001(\014\022\020\n\010revision\030\r \001(\014\022\034\n\024li" +
+      "ne_coverage_vector\030\027 \003(\005\022\030\n\020total_line_c",
+      "ount\030e \001(\005\022\032\n\022covered_line_count\030f \001(\005\022\024" +
+      "\n\010dir_path\030\001 \001(\014B\002\030\001\022\025\n\tfile_name\030\002 \001(\014B" +
+      "\002\030\001\022\020\n\004html\030\003 \001(\014B\002\030\001\"\243\004\n\021TestReportMess" +
+      "age\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n" +
+      "\ttest_type\030\003 \001(\0162\030.android.vts.VtsTestTy" +
+      "pe\022:\n\013device_info\030\004 \003(\0132%.android.vts.An" +
+      "droidDeviceInfoMessage\0221\n\nbuild_info\030\005 \001" +
+      "(\0132\035.android.vts.AndroidBuildInfo\022\030\n\020sub" +
+      "scriber_email\030\006 \003(\014\022+\n\thost_info\030\007 \001(\0132\030" +
+      ".android.vts.VtsHostInfo\0225\n\ttest_case\030\013 ",
+      "\003(\0132\".android.vts.TestCaseReportMessage\022" +
+      "6\n\tprofiling\030\025 \003(\0132#.android.vts.Profili" +
+      "ngReportMessage\0224\n\010systrace\030\026 \003(\0132\".andr" +
+      "oid.vts.SystraceReportMessage\022\027\n\017start_t" +
+      "imestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\0224\n" +
+      "\010coverage\030g \003(\0132\".android.vts.CoverageRe" +
+      "portMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKNOW" +
+      "N_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n" +
+      "\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RE" +
+      "SULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTIO",
+      "N\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013Vt" +
+      "sTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032V" +
+      "TS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_" +
+      "DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTES" +
+      "T\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*\243\001\n\032Vts" +
+      "ProfilingRegressionMode\022\033\n\027UNKNOWN_REGRE" +
+      "SSION_MODE\020\000\022 \n\034VTS_REGRESSION_MODE_DISA" +
+      "BLED\020\001\022\"\n\036VTS_REGRESSION_MODE_INCREASING" +
+      "\020\002\022\"\n\036VTS_REGRESSION_MODE_DECREASING\020\003*\244" +
+      "\001\n\020VtsProfilingType\022\036\n\032UNKNOWN_VTS_PROFI",
+      "LING_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMEST" +
+      "AMP\020\001\022%\n!VTS_PROFILING_TYPE_LABELED_VECT" +
+      "OR\020\002\022\'\n#VTS_PROFILING_TYPE_UNLABELED_VEC" +
+      "TOR\020\003B)\n\025com.android.vts.protoB\020VtsRepor" +
+      "tMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -13269,7 +13472,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_SystraceReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_SystraceReportMessage_descriptor,
-              new java.lang.String[] { "ProcessName", "Html", });
+              new java.lang.String[] { "ProcessName", "Html", "Url", });
           internal_static_android_vts_CoverageReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(6);
           internal_static_android_vts_CoverageReportMessage_fieldAccessorTable = new
