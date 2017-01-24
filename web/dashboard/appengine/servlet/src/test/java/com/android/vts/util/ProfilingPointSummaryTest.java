@@ -99,4 +99,26 @@ public class ProfilingPointSummaryTest {
             assertEquals(labels[i++], stats.getLabel().toStringUtf8());
         }
     }
+
+    /**
+     * Test that the updateLabel method updates the StatSummary for just the label provided.
+     */
+    @Test
+    public void testUpdateLabelGrouped() {
+        summary = new ProfilingPointSummary();
+        VtsProfilingRegressionMode mode = VtsProfilingRegressionMode.VTS_REGRESSION_MODE_INCREASING;
+        ProfilingReportMessage report = createProfilingReport(labels, values, mode);
+        summary.updateLabel(report, ByteString.copyFromUtf8(labels[0]));
+
+        // Ensure the label specified is present and has been updated for each data point.
+        assertTrue(summary.hasLabel(ByteString.copyFromUtf8(labels[0])));
+        assertNotNull(summary.getStatSummary(ByteString.copyFromUtf8(labels[0])));
+        assertEquals(summary.getStatSummary(ByteString.copyFromUtf8(
+                labels[0])).getCount(), labels.length);
+
+        // Check that the other labels were not updated.
+        for (int i = 1; i < labels.length; i++) {
+            assertFalse(summary.hasLabel(ByteString.copyFromUtf8(labels[i])));
+        }
+    }
 }
