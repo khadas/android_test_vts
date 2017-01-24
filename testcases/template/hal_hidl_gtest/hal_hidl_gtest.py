@@ -87,7 +87,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             file_path_prefix = str(getattr(
                 self, keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
             if file_path_prefix:
-                cmd_results = self.shell.Execute("ls %s*" % flie_path_prefix)
+                cmd_results = self.shell.Execute("ls %s*" % file_path_prefix)
                 if (any(cmd_results[const.EXIT_CODE])
                     or file_path_prefix not in cmd_results[const.STDOUT][0]):
                     logging.warn("The required file (prefix: %s) not found.",
