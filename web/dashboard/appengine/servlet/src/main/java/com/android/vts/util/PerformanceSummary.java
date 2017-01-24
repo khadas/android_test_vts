@@ -116,7 +116,7 @@ public class PerformanceSummary {
 
             switch (profilingReportMessage.getType()) {
                 case UNKNOWN_VTS_PROFILING_TYPE:
-                case VTS_PROFILING_TYPE_TIMESTAMP :
+                case VTS_PROFILING_TYPE_TIMESTAMP:
                     logger.log(Level.WARNING, "Timestamp profiling data skipped : " + name);
                     break;
                 case VTS_PROFILING_TYPE_LABELED_VECTOR :
@@ -130,6 +130,12 @@ public class PerformanceSummary {
                     }
                     summaryMap.get(name).update(profilingReportMessage);
                     break;
+                case VTS_PROFILING_TYPE_UNLABELED_VECTOR:
+                    if (profilingReportMessage.getValueList().size() == 0) return;
+                    if (!summaryMap.containsKey(name)) {
+                        summaryMap.put(name, new ProfilingPointSummary());
+                    }
+                    summaryMap.get(name).update(profilingReportMessage);
                 default :
                     break;
             }
