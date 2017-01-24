@@ -27,6 +27,8 @@ public abstract class Graph {
 
     public static final String VALUE_KEY = "values";
     public static final String X_LABEL_KEY = "x_label";
+    public static final String Y_LABEL_KEY = "y_label";
+    public static final String IDS_KEY = "ids";
     public static final String NAME_KEY = "name";
     public static final String TYPE_KEY = "type";
 
@@ -48,6 +50,12 @@ public abstract class Graph {
     public abstract String getXLabel();
 
     /**
+     * Get the y axis label.
+     * @return The y axis label.
+     */
+    public abstract String getYLabel();
+
+    /**
      * Get the name of the graph.
      * @return The name of the graph.
      */
@@ -67,6 +75,7 @@ public abstract class Graph {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.add(X_LABEL_KEY, new JsonPrimitive(getXLabel()));
+        json.add(Y_LABEL_KEY, new JsonPrimitive(getYLabel()));
         json.add(NAME_KEY, new JsonPrimitive(getName()));
         json.add(TYPE_KEY, new JsonPrimitive(getType().toString()));
         return json;

@@ -17,31 +17,32 @@
 package com.android.vts.util;
 
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.google.common.primitives.Doubles;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  * Helper object for describing graph data.
  */
-public class LineGraph extends Graph {
+public class Histogram extends Graph {
 
-    public static final String TICKS_KEY = "ticks";
+    public static final String PERCENTILES_KEY = "percentiles";
+    public static final String PERCENTILE_VALUES_KEY = "percentile_values";
 
-    private List<ProfilingReportMessage> profilingReports;
+    private List<Double> values;
     private List<String> ids;
     private String xLabel;
     private String yLabel;
     private String name;
-    private GraphType type = GraphType.LINE_GRAPH;
+    private GraphType type = GraphType.HISTOGRAM;
 
-    public LineGraph(String name) {
+    public Histogram(String name) {
         this.name = name;
-        profilingReports = new ArrayList<>();
-        ids = new ArrayList<>();
+        this.values = new ArrayList<>();
+        this.ids = new ArrayList<>();
     }
 
     /**
@@ -87,13 +88,20 @@ public class LineGraph extends Graph {
      */
     @Override
     public void addData(String id, ProfilingReportMessage profilingReport) {
-        if (profilingReport.getLabelList().size() == 0 ||
-            profilingReport.getLabelList().size() !=
-            profilingReport.getValueList().size()) return;
-        ids.add(id);
-        profilingReports.add(profilingReport);
+        if (profilingReport.getValueList().size() == 0 &&
+            profilingReport.getStartTimestamp() >= profilingReport.getEndTimestamp()) return;
         xLabel = profilingReport.getXAxisLabel().toStringUtf8();
         yLabel = profilingReport.getYAxisLabel().toStringUtf8();
+        for (long value : profilingReport.getValueList()) {
+            values.add((double) value);
+            ids.add(id);
+        }
+        if (profilingReport.getStartTimestamp() != profilingReport.getEndTimestamp() &&
+            profilingReport.getStartTimestamp() < profilingReport.getEndTimestamp()) {
+            values.add((double) profilingReport.getEndTimestamp() -
+                       profilingReport.getStartTimestamp());
+            ids.add(id);
+        }
     }
 
     /**
@@ -102,35 +110,18 @@ public class LineGraph extends Graph {
      */
     @Override
     public JsonObject toJson() {
+        int[] percentiles = {1, 5, 10, 20, 25, 50, 75, 80, 90, 95, 99};
+        double[] percentileValues = new double[percentiles.length];
+        double[] valueList = Doubles.toArray(values);
+        for (int i = 0; i < percentiles.length; i++) {
+            percentileValues[i] =
+                Math.round(new Percentile().evaluate(valueList, percentiles[i]) * 1000d) / 1000d;
+        }
         JsonObject json = super.toJson();
-        // Use the most recent profiling vector to generate the labels
-        ProfilingReportMessage profilingReportMessage = profilingReports
-            .get(profilingReports.size() - 1);
-
-        List<String> axisTicks = new ArrayList<>();
-        Map<String, Integer> tickIndexMap = new HashMap<>();
-        for (int i = 0; i < profilingReportMessage.getLabelList().size(); i++) {
-            String label = profilingReportMessage.getLabelList().get(i).toStringUtf8();
-            axisTicks.add(label);
-            tickIndexMap.put(label, i);
-        }
-
-        long[][] lineGraphValues = new long[axisTicks.size()][profilingReports.size()];
-        for (int reportIndex = 0; reportIndex < profilingReports.size(); reportIndex++) {
-            ProfilingReportMessage report = profilingReports.get(reportIndex);
-            for (int i = 0; i < report.getLabelList().size(); i++) {
-                String label = report.getLabelList().get(i).toStringUtf8();
-
-                // Skip value if its label is not present
-                if (!tickIndexMap.containsKey(label)) continue;
-                int labelIndex = tickIndexMap.get(label);
-
-                lineGraphValues[labelIndex][reportIndex] = report.getValueList().get(i);
-            }
-        }
-        json.add(VALUE_KEY, new Gson().toJsonTree(lineGraphValues).getAsJsonArray());
+        json.add(VALUE_KEY, new Gson().toJsonTree(values).getAsJsonArray());
+        json.add(PERCENTILES_KEY, new Gson().toJsonTree(percentiles).getAsJsonArray());
+        json.add(PERCENTILE_VALUES_KEY, new Gson().toJsonTree(percentileValues).getAsJsonArray());
         json.add(IDS_KEY, new Gson().toJsonTree(ids).getAsJsonArray());
-        json.add(TICKS_KEY, new Gson().toJsonTree(axisTicks));
         return json;
     }
 }
