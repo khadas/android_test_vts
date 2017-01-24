@@ -415,21 +415,23 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].end_timestamp = self.GetTimestamp()
         return True
 
-    def AddProfilingDataLabeledVector(
+    def AddProfilingDataVector(
             self,
             name,
             labels,
             values,
+            data_type,
             options=[],
             x_axis_label="x-axis",
             y_axis_label="y-axis",
             regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
-        """Adds the profiling data in order to upload to the web DB.
+        """Adds the vector profiling data in order to upload to the web DB.
 
         Args:
             name: string, profiling point name.
-            labels: a list of labels.
-            values: a list of values.
+            labels: a list or set of labels.
+            values: a list or set of values where each value is an integer.
+            data_type: profiling data type.
             options: a set of options.
             x-axis_label: string, the x-axis label title for a graph plot.
             y-axis_label: string, the y-axis label title for a graph plot.
@@ -446,23 +448,83 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
 
         self._profiling[name] = self._report_msg.profiling.add()
         self._profiling[name].name = name
-        self._profiling[
-            name].type = ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR
+        self._profiling[name].type = data_type
         self._profiling[name].regression_mode = regression_mode
-        for label, value in zip(labels, values):
-            self._profiling[name].label.append(label)
-            self._profiling[name].value.append(value)
+        if labels:
+            self._profiling[name].label.extend(labels)
+        self._profiling[name].value.extend(values)
         self._profiling[name].x_axis_label = x_axis_label
         self._profiling[name].y_axis_label = y_axis_label
-        for option in options:
-            self._profiling[name].options.append(option)
+        self._profiling[name].options.extend(options)
 
-    def AddProfilingDataLabeledPoint(self, name, value):
-        """Adds labeled point type profiling data for uploading to the web DB.
+    def AddProfilingDataLabeledVector(
+            self,
+            name,
+            labels,
+            values,
+            options=[],
+            x_axis_label="x-axis",
+            y_axis_label="y-axis",
+            regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
+        """Adds the labeled vector profiling data in order to upload to the web DB.
 
         Args:
             name: string, profiling point name.
-            value: int, the value.
+            labels: a list or set of labels.
+            values: a list or set of values where each value is an integer.
+            options: a set of options.
+            x-axis_label: string, the x-axis label title for a graph plot.
+            y-axis_label: string, the y-axis label title for a graph plot.
+            regression_mode: specifies the direction of change which indicates
+                             performance regression.
+        """
+        self.AddProfilingDataVector(name, labels, values,
+                                    ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR,
+                                    options, x_axis_label, y_axis_label,
+                                    regression_mode)
+
+    def AddProfilingDataUnlabeledVector(
+            self,
+            name,
+            values,
+            options=[],
+            x_axis_label="x-axis",
+            y_axis_label="y-axis",
+            regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
+        """Adds the unlabeled vector profiling data in order to upload to the web DB.
+
+        Args:
+            name: string, profiling point name.
+            values: a list or set of values where each value is an integer.
+            options: a set of options.
+            x-axis_label: string, the x-axis label title for a graph plot.
+            y-axis_label: string, the y-axis label title for a graph plot.
+            regression_mode: specifies the direction of change which indicates
+                             performance regression.
+        """
+        self.AddProfilingDataVector(name, None, values,
+                                    ReportMsg.VTS_PROFILING_TYPE_UNLABELED_VECTOR,
+                                    options, x_axis_label, y_axis_label,
+                                    regression_mode)
+
+    def AddProfilingDataTimestamp(
+            self,
+            name,
+            value,
+            options=[],
+            x_axis_label="x-axis",
+            y_axis_label="y-axis",
+            regression_mode=ReportMsg.VTS_REGRESSION_MODE_INCREASING):
+        """Adds the named point type profiling data in order to upload to the web DB.
+
+        Args:
+            name: string, profiling point name.
+            value: integer, the value.
+            options: a set of options.
+            x-axis_label: string, the x-axis label title for a graph plot.
+            y-axis_label: string, the y-axis label title for a graph plot.
+            regression_mode: specifies the direction of change which indicates
+                             performance regression.
         """
         if not getattr(self, self.USE_GAE_DB, False):
             logging.error("'use_gae_db' config is not True.")
@@ -474,9 +536,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name] = self._report_msg.profiling.add()
         self._profiling[name].name = name
         self._profiling[name].type = ReportMsg.VTS_PROFILING_TYPE_TIMESTAMP
+        self._profiling[name].regression_mode = regression_mode
         self._profiling[name].start_timestamp = 0
         self._profiling[name].end_timestamp = value
-        return True
+        self._profiling[name].x_axis_label = x_axis_label
+        self._profiling[name].y_axis_label = y_axis_label
+        self._profiling[name].options.extend(options)
 
     def IsCoverageConfigSpecified(self):
         """Determines if the config file specifies modules for coverage.
@@ -651,8 +716,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         merged_profiling_data = profiling_utils.VTSProfilingData()
         for data in self._profiling_data:
-            if data.name:
-                merged_profiling_data.name = data.name
             for item in data.options:
                 merged_profiling_data.options.add(item)
             for api, latences in data.values.items():
@@ -661,23 +724,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 else:
                     merged_profiling_data.values[api] = latences
         for api, latencies in merged_profiling_data.values.items():
-            if latencies:
-                merged_profiling_data.labels.append(api)
-                merged_profiling_data.aggregated_values["max"].append(
-                    max(latencies))
-                merged_profiling_data.aggregated_values["min"].append(
-                    min(latencies))
-                merged_profiling_data.aggregated_values["avg"].append(
-                    sum(latencies) / len(latencies))
-        for tag in [_MAX, _MIN, _AVG]:
-            if merged_profiling_data.name is None:
-                name = tag
-            else:
-                name = merged_profiling_data.name + "_" + tag
-            self.AddProfilingDataLabeledVector(
-                name,
-                merged_profiling_data.labels,
-                merged_profiling_data.aggregated_values[tag],
+            self.AddProfilingDataUnlabeledVector(
+                api,
+                latencies,
                 merged_profiling_data.options,
-                x_axis_label="API name",
-                y_axis_label="API processing latency (nana secs)")
+                x_axis_label="API processing latency (nano secs)",
+                y_axis_label="Frequency")
