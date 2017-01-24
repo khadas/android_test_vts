@@ -55,6 +55,8 @@ enum VtsProfilingType {
   VTS_PROFILING_TYPE_TIMESTAMP = 1;
   // for multiple single-type samples with labels.
   VTS_PROFILING_TYPE_LABELED_VECTOR = 2;
+  // for multiple single-type samples without labels.
+  VTS_PROFILING_TYPE_UNLABELED_VECTOR = 3;
 }
 
 // To specify a call flow event.
