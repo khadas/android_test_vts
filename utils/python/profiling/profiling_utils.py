@@ -59,19 +59,13 @@ class VTSProfilingData(object):
     """Class to store the VTS profiling data.
 
     Attributes:
-        name: A string to describe the profiling data. e.g. server_side_latency.
-        labels: A list of profiling data labels. e.g. a list of api names.
         values: A dict that stores the profiling data. e.g. latencies of each api.
-        aggregated_values: A dict that stores the aggregated profiling data.
         options: A set of strings where each string specifies an associated
                  option (which is the form of 'key=value').
     """
 
     def __init__(self):
-        self.name = None
         self.values = {}
-        self.labels = []
-        self.aggregated_values = {"avg": [], "max": [], "min": []}
         self.options = set()
 
 
@@ -143,12 +137,6 @@ def ParseTraceData(trace_file):
             latencies.append(
                 long(time_stamps[index]) - long(time_stamps[index - 1]))
         profiling_data.values[api] = latencies
-    for api, latencies in profiling_data.values.items():
-        if latencies:
-            profiling_data.labels.append(api)
-            profiling_data.aggregated_values["max"].append(max(latencies))
-            profiling_data.aggregated_values["min"].append(min(latencies))
-            profiling_data.aggregated_values["avg"].append(sum(latencies) / len(latencies))
     return profiling_data
 
 
