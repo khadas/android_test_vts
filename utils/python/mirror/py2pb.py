@@ -195,13 +195,13 @@ def Convert(pb_spec, py_value):
 
     if pb_spec.type == CompSpecMsg.TYPE_STRUCT:
         PyDict2PbStruct(message, pb_spec, py_value)
-    elif attr.type == CompSpecMsg.TYPE_ENUM:
+    elif pb_spec.type == CompSpecMsg.TYPE_ENUM:
         PyValue2PbEnum(message, pb_spec, py_value)
-    elif attr.type == CompSpecMsg.TYPE_SCALAR:
+    elif pb_spec.type == CompSpecMsg.TYPE_SCALAR:
         PyValue2PbScalar(message, pb_spec, py_value)
-    elif attr.type == CompSpecMsg.TYPE_STRING:
+    elif pb_spec.type == CompSpecMsg.TYPE_STRING:
         PyStringPbString(attr_msg, attr, curr_value)
-    elif attr.type == CompSpecMsg.TYPE_VECTOR:
+    elif pb_spec.type == CompSpecMsg.TYPE_VECTOR:
         PyList2PbVector(message, pb_spec, py_value)
     else:
         logging.error("py2pb.Convert: unsupported type %s",
