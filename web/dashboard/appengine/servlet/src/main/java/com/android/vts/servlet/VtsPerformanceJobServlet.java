@@ -45,7 +45,6 @@ public class VtsPerformanceJobServlet extends BaseServlet {
 
     private static final String STATUS_TABLE = "vts_status_table";
     private static final int N_DIGITS = 2;
-    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
 
     private static final String MEAN = "Mean";
     private static final String MAX = "Max";
@@ -65,6 +64,11 @@ public class VtsPerformanceJobServlet extends BaseServlet {
     private static final String HEADER_COL_STYLE = "border-top: 1px dotted gray; border-right: 2px solid black; text-align: right; background-color: lightgray;";
     private static final String INNER_CELL_STYLE = "border-top: 1px dotted gray; border-right: 1px dotted gray; text-align: right;";
     private static final String OUTER_CELL_STYLE = "border-top: 1px dotted gray; border-right: 2px solid black; text-align: right;";
+
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        return null;
+    }
 
     /**
      * Generates an HTML summary of the performance changes for the profiling results in the

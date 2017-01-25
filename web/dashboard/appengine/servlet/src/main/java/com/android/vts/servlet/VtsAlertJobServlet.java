@@ -63,8 +63,12 @@ public class VtsAlertJobServlet extends BaseServlet {
     private static final byte[] DATA_QUALIFIER = Bytes.toBytes("data");
     private static final byte[] TIME_QUALIFIER = Bytes.toBytes("upload_timestamp");
     private static final String STATUS_TABLE = "vts_status_table";
-    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
     private static final long THREE_MINUTES = 180000000L;  // units microseconds
+
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        return null;
+    }
 
     /**
      * Checks whether any new failures have occurred beginning since (and including) startTime.
