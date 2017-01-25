@@ -16,6 +16,8 @@
 
 LOCAL_PATH := $(call my-dir)
 
+include $(LOCAL_PATH)/../Android.clean.mk
+
 test_cflags = \
     -fstack-protector-all \
     -g \
