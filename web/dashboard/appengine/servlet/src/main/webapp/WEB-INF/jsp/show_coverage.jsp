@@ -13,26 +13,16 @@
   ~ implied. See the License for the specific language governing
   ~ permissions and limitations under the License.
   --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-
+<%@ page contentType='text/html;charset=UTF-8' language='java' %>
+<%@ taglib prefix='fn' uri='http://java.sun.com/jsp/jstl/functions' %>
+<%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core'%>
 
 <html>
-  <head>
-    <title>Coverage Information</title>
-    <link rel="icon" href="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png" sizes="32x32">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700">
-    <link rel="stylesheet" href="https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-    <link rel="stylesheet" href="/css/show_coverage.css">
-    <script src='/js/analytics.js' type='text/javascript'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="https://www.gstatic.com/external_hosted/materialize/materialize.min.js"></script>
-    <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
+  <%@ include file="header.jsp" %>
+  <link rel="stylesheet" href="/css/show_coverage.css">
+  <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
+  <body>
     <script type="text/javascript">
-        if (${analytics_id}) analytics_init(${analytics_id});
         var coverageVectors = ${coverageVectors};
         $(document).ready(function() {
             // Initialize AJAX for CORS
@@ -171,32 +161,8 @@
             }).find('.collapsible-header').click(onClick);
         }
     </script>
-    <nav id="navbar">
-      <div class="nav-wrapper">
-        <span>
-          <a href="${pageContext.request.contextPath}/" class="breadcrumb">VTS Dashboard Home</a>
-          <a href="${pageContext.request.contextPath}/show_table?testName=${testName}&startTime=${startTime}&endTime=${endTime}" class="breadcrumb">${testName}</a>
-          <a href="#!" class="breadcrumb">Coverage</a>
-        </span>
-        <ul class='right'><li>
-          <a id='dropdown-button' class='dropdown-button btn red lighten-3' href='#' data-activates='dropdown'>
-            ${email}
-          </a>
-        </li></ul>
-        <ul id='dropdown' class='dropdown-content'>
-          <li><a href='${logoutURL}'>Log out</a></li>
-        </ul>
-      </div>
-    </nav>
-  </head>
-  <body>
-    <div id="coverage-container" class="container">
+    <div id='coverage-container' class='wide container'>
     </div>
-    <footer class="page-footer">
-      <div class="footer-copyright">
-        <div class="container">© 2016 - The Android Open Source Project
-        </div>
-      </div>
-    </footer>
+    <%@ include file="footer.jsp" %>
   </body>
 </html>
