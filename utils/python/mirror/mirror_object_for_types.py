@@ -143,7 +143,6 @@ class MirrorObjectForTypes(object):
                             if enumerator == type_name:
                                 return copy.copy(attribute)
             return None
-            return None
         except AttributeError as e:
             # TODO: check in advance whether self._if_spec_msg Interface
             # SpecificationMessage.
@@ -261,3 +260,16 @@ class MirrorObjectForTypes(object):
             return ConstGenerator()
 
         raise MirrorObjectError("unknown api name %s" % api_name)
+
+    def __str__(self):
+        """Prints all the attributes and methods."""
+        result = ""
+        if self._if_spec_msg:
+            if self._if_spec_msg.attribute:
+                for attribute in self._if_spec_msg.attribute:
+                    result += "global attribute %s\n" % attribute.name
+            if self._if_spec_msg.interface.attribute:
+                for attribute in self._if_spec_msg.interface.attribute:
+                    result += "interface attribute %s\n" % attribute.name
+        return result
+
