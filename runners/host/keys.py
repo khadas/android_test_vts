@@ -69,6 +69,7 @@ class ConfigKeys(object):
     # Keys for systrace (for hal tests)
     IKEY_SYSTRACE_PROCESS_NAME = "systrace_process_name"
     IKEY_SYSTRACE_REPORT_PATH = "systrace_report_path"
+    IKEY_SYSTRACE_REPORT_URL_PREFIX = "systrace_report_url_prefix"
     IKEY_SYSTRACE_UPLAD_TO_DASHBOARD = "systrace_upload_to_dashboard"
 
     # Keys for coverage
