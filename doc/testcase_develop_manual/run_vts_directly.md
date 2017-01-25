@@ -6,31 +6,11 @@ First of all, if you have not done [VTS setup](../setup/index.md), that is requi
 
 `$ cd test/vts`
 
-`$ ./create-image-<your build target>.sh`
-
-For angler_treble and bullhead, please run:
-
-`$ ./create-image-angler_treble.sh`
-
-and
-
-`$ ./create-image-bullhead.sh`
-
-respectively.
+`$ ./create-image.sh <your build target>`
 
 ## Copy Binaries
 
-`$ ./setup-<your build target>.sh`
-
-For angler_treble and bullhead, please run:
-
-`$ ./setup-angler_treble.sh`
-
-and
-
-`$ ./setup-bullhead.sh`
-
-respectively.
+`$ ./setup.sh <your build target>
 
 ## Run a test direclty
 
@@ -55,4 +35,4 @@ In order to add a new test, the following two files needed to be extended.
 
 Optionally, the command used to add a new test can be also added to:
 
-`test/vts/run-angler.sh`
+`test/vts/run-local.sh`
