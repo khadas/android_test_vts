@@ -619,5 +619,17 @@ class MirrorObject(object):
         raise MirrorObjectError("unknown api name %s" % api_name)
 
     def GetRawCodeCoverage(self):
-      """Returns any measured raw code coverage data."""
-      return self._last_raw_code_coverage_data
+        """Returns any measured raw code coverage data."""
+        return self._last_raw_code_coverage_data
+
+    def __str__(self):
+        """Prints all the attributes and methods."""
+        result = ""
+        if self._if_spec_msg:
+            if self._if_spec_msg.attribute:
+                for attribute in self._if_spec_msg.attribute:
+                    result += "attribute %s\n" % attribute.name
+            if self._if_spec_msg.api:
+                for api in self._if_spec_msg.api:
+                    result += "api %s\n" % api.name
+        return result
