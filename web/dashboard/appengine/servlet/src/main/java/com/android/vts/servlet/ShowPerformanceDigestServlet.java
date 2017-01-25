@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowPerformanceDigestServlet extends BaseServlet {
 
+    private static final String PERF_DIGEST_JSP = "WEB-INF/jsp/show_performance_digest.jsp";
     private static final int N_DIGITS = 2;
-    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
     private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
     private static final String[] splitKeysArray = new String[]{HIDL_HAL_OPTION};
     private static final Set<String> splitKeySet = new HashSet<String>(Arrays.asList(splitKeysArray));
@@ -53,6 +53,27 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
     private static final String HIGHER_IS_BETTER = "Note: Higher values are better. Maximum is the best-case performance.";
     private static final String LOWER_IS_BETTER = "Note: Lower values are better. Minimum is the best-case performance.";
     private static final String STD = "Std";
+
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{root.getUrl(), root.getName()};
+        links.add(rootEntry);
+
+        Page table = Page.TABLE;
+        String testName = request.getParameter("testName");
+        String name = table.getName() + testName;
+        String url = table.getUrl() + "?testName=" + testName;
+        String[] tableEntry = new String[]{url, name};
+        links.add(tableEntry);
+
+        Page perf = Page.PERFORMANCE;
+        url = perf.getUrl() + "?testName=" + testName;
+        String[] perfEntry = new String[]{url, perf.getName()};
+        links.add(perfEntry);
+        return links;
+    }
 
     /**
      * Generates an HTML summary of the performance changes for the profiling results in the
@@ -225,7 +246,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         request.setAttribute("selectedDevice", selectedDevice);
         request.setAttribute("devices", devices);
 
-        dispatcher = request.getRequestDispatcher("/show_performance_digest.jsp");
+        dispatcher = request.getRequestDispatcher(PERF_DIGEST_JSP);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {

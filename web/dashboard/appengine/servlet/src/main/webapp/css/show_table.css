@@ -12,12 +12,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-@media only screen and (min-width: 993px) {
-    .container {
-        width: 80%;
-        max-width: 1600px;
-    }
-}
 
 table {
     font-family: Roboto !important;

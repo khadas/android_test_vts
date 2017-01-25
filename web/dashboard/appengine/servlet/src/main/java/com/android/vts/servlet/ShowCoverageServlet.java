@@ -45,9 +45,32 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowCoverageServlet extends BaseServlet {
 
+    private static final String COVERAGE_JSP = "WEB-INF/jsp/show_coverage.jsp";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
     private static final String ALL_TESTCASES_LABEL = "All";
+
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{root.getUrl(), root.getName()};
+        links.add(rootEntry);
+
+        Page table = Page.TABLE;
+        String testName = request.getParameter("testName");
+        String name = table.getName() + testName;
+        String url = table.getUrl() + "?testName=" + testName;
+        String[] tableEntry = new String[]{url, name};
+        links.add(tableEntry);
+
+        Page coverage = Page.COVERAGE;
+        String startTime = request.getParameter("startTime");
+        url = coverage.getUrl() + "?testName=" + testName + "&startTime=" + startTime;
+        String[] coverageEntry = new String[]{url, coverage.getName()};
+        links.add(coverageEntry);
+        return links;
+    }
 
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
@@ -57,15 +80,13 @@ public class ShowCoverageServlet extends BaseServlet {
         TableName tableName = null;
         tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
 
-        // key is a unique combination of build Id and timestamp that helps identify the
-        // corresponding build id.
-        String key = request.getParameter("key");
+        String timeString = request.getParameter("startTime");
         Scan scan = new Scan();
         long time = -1;
         try {
-            time = Long.parseLong(key);
-            scan.setStartRow(key.getBytes());
-            scan.setStopRow(Long.toString((time + 1)).getBytes());
+            time = Long.parseLong(timeString);
+            scan.setStartRow(Long.toString(time - 1).getBytes());
+            scan.setStopRow(Long.toString(time).getBytes());
         } catch (NumberFormatException e) { }  // Use unbounded scan
 
         TestReportMessage testReportMessage = null;
@@ -80,7 +101,7 @@ public class ShowCoverageServlet extends BaseServlet {
 
             // filter empty build IDs and add only numbers
             if (buildId.length() > 0) {
-                if (time == currentTestReportMessage.getStartTimestamp()) {
+                if (time == currentTestReportMessage.getStartTimestamp() * MILLI_TO_MICRO) {
                     testReportMessage = currentTestReportMessage;
                     break;
                 }
@@ -166,8 +187,7 @@ public class ShowCoverageServlet extends BaseServlet {
         request.setAttribute("indicators", new Gson().toJson(indicators));
         request.setAttribute("sectionMap", new Gson().toJson(sectionMap));
         request.setAttribute("startTime", request.getParameter("startTime"));
-        request.setAttribute("endTime", request.getParameter("endTime"));
-        dispatcher = request.getRequestDispatcher("/show_coverage.jsp");
+        dispatcher = request.getRequestDispatcher(COVERAGE_JSP);
 
         try {
             dispatcher.forward(request, response);
