@@ -16,7 +16,7 @@
 <configuration description="Run New VTS Tests for HIDL HALs in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
-    <option name="compatibility:include-filter" value="TvCecHidlTest" />
-    <option name="compatibility:include-filter" value="TvInputHidlTest" />
+    <option name="compatibility:include-filter" value="TvCecHidlProfilingTest" />
+    <option name="compatibility:include-filter" value="TvInputHidlProfilingTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
