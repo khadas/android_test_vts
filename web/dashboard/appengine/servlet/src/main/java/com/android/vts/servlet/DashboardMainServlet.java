@@ -46,7 +46,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class DashboardMainServlet extends BaseServlet {
 
-    private static final String DASHBOARD_MAIN_JSP = "/dashboard_main.jsp";
+    private static final String DASHBOARD_MAIN_JSP = "WEB-INF/jsp/dashboard_main.jsp";
     private static final String DASHBOARD_ALL_LINK = "/?showAll=true";
     private static final String DASHBOARD_FAVORITES_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
@@ -60,6 +60,14 @@ public class DashboardMainServlet extends BaseServlet {
     private static final String UP_ARROW = "keyboard_arrow_up";
     private static final String DOWN_ARROW = "keyboard_arrow_down";
 
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{CURRENT_PAGE, root.getName()};
+        links.add(rootEntry);
+        return links;
+    }
 
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)

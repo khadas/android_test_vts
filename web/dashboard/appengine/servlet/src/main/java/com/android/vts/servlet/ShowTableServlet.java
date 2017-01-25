@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowTableServlet extends BaseServlet {
 
+    private static final String TABLE_JSP = "WEB-INF/jsp/show_table.jsp";
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
@@ -77,6 +78,22 @@ public class ShowTableServlet extends BaseServlet {
     private static final Set<String> SEARCH_KEYSET = new HashSet<String>(Arrays.asList(SEARCH_KEYS));
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
+
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{root.getUrl(), root.getName()};
+        links.add(rootEntry);
+
+        Page table = Page.TABLE;
+        String testName = request.getParameter("testName");
+        String name = table.getName() + testName;
+        String url = table.getUrl() + "?testName=" + testName;
+        String[] tableEntry = new String[]{url, name};
+        links.add(tableEntry);
+        return links;
+    }
 
     /**
      * Parse the search string to populate the searchPairs map and the generalTerms set.
@@ -508,10 +525,8 @@ public class ShowTableServlet extends BaseServlet {
                 double coveragePct = Math.round((100 * coveredLineCount /
                                                  totalLineCount) * 100f) / 100f;
                 coveragePctInfo = Double.toString(coveragePct) + "%" +
-                        "<a href=\"/show_coverage?key=" + report.getStartTimestamp() +
-                        "&testName=" + request.getParameter("testName") +
-                        "&startTime=" + startTime +
-                        "&endTime=" + endTime +
+                        "<a href=\"/show_coverage?testName=" + request.getParameter("testName") +
+                        "&startTime=" + (report.getStartTimestamp() * MILLI_TO_MICRO) +
                         "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
                         "<i class=\"material-icons coverage-icon\">menu</i></a>";
                 coverageInfo = coveredLineCount + "/" + totalLineCount;
@@ -579,7 +594,7 @@ public class ShowTableServlet extends BaseServlet {
         request.setAttribute("showPresubmit", showPresubmit);
         request.setAttribute("showPostsubmit", showPostsubmit);
 
-        dispatcher = request.getRequestDispatcher("/show_table.jsp");
+        dispatcher = request.getRequestDispatcher(TABLE_JSP);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {
