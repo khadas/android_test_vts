@@ -197,7 +197,7 @@ class SystraceController(object):
 
         if self._path_output:
             try:
-                shutil.rmtree(self._path_output)
+                shutil.rmtree(os.path.basename(self._path_output))
             except Exception as e:
                 logging.error('failed to remove systrace output file. %s', e)
                 return False

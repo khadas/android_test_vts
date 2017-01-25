@@ -248,13 +248,16 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             if self._current_test_report_msg:
                 self._current_test_report_msg.end_timestamp = test_end_time
                 if self._systrace_controller and self._systrace_controller.is_valid:
-                    if self.getUserParam(
-                            keys.ConfigKeys.IKEY_SYSTRACE_UPLAD_TO_DASHBOARD,
-                            default_value=False):
-                        try:
-                            systrace_msg = self._current_test_report_msg.systrace.add(
-                            )
-                            systrace_msg.process_name = self._systrace_controller.process_name
+                    systrace_msg = None
+                    try:
+                        systrace_msg = self._current_test_report_msg.systrace.add(
+                        )
+                        systrace_msg.process_name = self._systrace_controller.process_name
+
+                        if self.getUserParam(
+                                keys.ConfigKeys.
+                                IKEY_SYSTRACE_UPLAD_TO_DASHBOARD,
+                                default_value=False):
                             html = self._systrace_controller.ReadLastOutput()
                             if html is None:
                                 logging.error(
@@ -264,30 +267,47 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                                 logging.info(
                                     'Systrace html data added to report message. Length: %s',
                                     len(html))
-                            suc = self._systrace_controller.ClearLastOutput()
-                            if not suc:
-                                logging.error(
-                                    'failed to clear last systrace output.')
-                        except Exception as e:  # TODO(yuexima): more specific exceptions catch
-                            logging.error(
-                                'Failed to add systrace to resport message %s',
-                                e)
+                    except Exception as e:  # TODO(yuexima): more specific exceptions catch
+                        logging.exception(
+                            'Failed to add systrace to resport message %s', e)
 
                     report_path = self.getUserParam(
                         keys.ConfigKeys.IKEY_SYSTRACE_REPORT_PATH,
                         default_value=None)
                     if report_path:
-                        report_destination_file = os.path.join(
-                            report_path,
-                            '{module}_{test}_{process}_{time}.html'.format(
-                                module=self.test_module_name,
-                                test=test_name,
-                                process=self._systrace_controller.process_name,
-                                time=test_end_time))
+                        report_destination_file_name = '{module}_{test}_{process}_{time}.html'.format(
+                            module=self.test_module_name,
+                            test=test_name,
+                            process=self._systrace_controller.process_name,
+                            time=test_end_time)
+                        report_destination_file_path = os.path.join(
+                            report_path, report_destination_file_name)
                         self._systrace_controller.SaveLastOutput(
-                            report_destination_file)
+                            report_destination_file_path)
                         logging.info('Systrace output saved to %s',
-                                     report_destination_file)
+                                     report_destination_file_path)
+
+                        report_url_prefix = self.getUserParam(
+                            keys.ConfigKeys.IKEY_SYSTRACE_REPORT_URL_PREFIX,
+                            default_value=None)
+                        if report_url_prefix and systrace_msg:
+                            report_url_prefix = str(report_url_prefix)
+                            report_destination_file_url = '%s%s' % (
+                                report_url_prefix,
+                                report_destination_file_name)
+
+                            try:
+                                systrace_msg.url.append(
+                                    report_destination_file_url)
+                                logging.info(
+                                    'systrace result url %s added to protobuf message.',
+                                    report_destination_file_url)
+                            except Exception as e:  # TODO(yuexima): more specific exceptions catch
+                                logging.exception(
+                                    'failed to append systrace result url "%s" to proto message: %s',
+                                    (report_destination_file_url, e))
+                    if not self._systrace_controller.ClearLastOutput():
+                        logging.error('failed to clear last systrace output.')
             else:
                 logging.info(
                     "test result of '%s' is empty and will not be uploaded.",
@@ -478,10 +498,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             regression_mode: specifies the direction of change which indicates
                              performance regression.
         """
-        self.AddProfilingDataVector(name, labels, values,
-                                    ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR,
-                                    options, x_axis_label, y_axis_label,
-                                    regression_mode)
+        self.AddProfilingDataVector(
+            name, labels, values, ReportMsg.VTS_PROFILING_TYPE_LABELED_VECTOR,
+            options, x_axis_label, y_axis_label, regression_mode)
 
     def AddProfilingDataUnlabeledVector(
             self,
@@ -502,10 +521,9 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             regression_mode: specifies the direction of change which indicates
                              performance regression.
         """
-        self.AddProfilingDataVector(name, None, values,
-                                    ReportMsg.VTS_PROFILING_TYPE_UNLABELED_VECTOR,
-                                    options, x_axis_label, y_axis_label,
-                                    regression_mode)
+        self.AddProfilingDataVector(
+            name, None, values, ReportMsg.VTS_PROFILING_TYPE_UNLABELED_VECTOR,
+            options, x_axis_label, y_axis_label, regression_mode)
 
     def AddProfilingDataTimestamp(
             self,
@@ -595,7 +613,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         try:
             build_client = artifact_fetcher.AndroidBuildClient(
                 service_json_path)
-        except Exception:
+        except Exception as e:
+            logging.exception('Failed to instantiate build client: %s', e)
             logging.error("Invalid service JSON file %s", service_json_path)
             return False
 
@@ -603,7 +622,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         try:
             revision_dict = build_client.GetRepoDictionary(
                 self.BRANCH, build_flavor, device_build_id)
-        except:
+        except Exception as e:
+            logging.exception('Failed to fetch repo dictionary: %s', e)
             logging.error("Could not read build info for branch: %s, " +
                           "target: %s, id: %s", self.BRANCH, build_flavor,
                           device_build_id)
@@ -615,7 +635,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                 build_client.GetCoverage("master", build_flavor,
                                          device_build_id, product))
             cov_zip = zipfile.ZipFile(cov_zip)
-        except:
+        except Exception as e:
+            logging.exception('Failed to fetch coverage zip: %s', e)
             logging.error("Could not read coverage zip for branch: %s, " +
                           "target: %s, id: %s, product: %s", self.BRANCH,
                           build_flavor, device_build_id, product)
@@ -672,7 +693,7 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             cov_zip = getattr(self, self.COVERAGE_ZIP)
             revision_dict = getattr(self, self.REVISION_DICT)
         except AttributeError as e:
-            logging.error("attributes not found %s", str(e))
+            logging.exception("attributes not found %s", e)
             return False
 
         if not self.IsCoverageConfigSpecified():
