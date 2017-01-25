@@ -18,21 +18,11 @@
 <%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core'%>
 
 <html>
-  <head>
-    <title>VTS Table</title>
-    <link rel='icon' href='//www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png' sizes='32x32'>
-    <link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
-    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700'>
-    <link rel='stylesheet' href='https://www.gstatic.com/external_hosted/materialize/all_styles-bundle.css'>
-    <link type='text/css' href='/css/navbar.css' rel='stylesheet'>
-    <link type='text/css' href='/css/show_table.css' rel='stylesheet'>
-    <script src='/js/analytics.js' type='text/javascript'></script>
-    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
-    <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
-    <script src='https://www.gstatic.com/external_hosted/materialize/materialize.min.js'></script>
-    <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
-    <script type='text/javascript'>
-      if (${analytics_id}) analytics_init(${analytics_id});
+  <%@ include file="header.jsp" %>
+  <link type='text/css' href='/css/show_table.css' rel='stylesheet'>
+  <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
+  <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
+  <script type='text/javascript'>
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
       google.charts.setOnLoadCallback(drawProfilingTable);
@@ -244,28 +234,10 @@
           };
           table.draw(data, options);
       }
-    </script>
-
-    <nav id='navbar'>
-      <div class='nav-wrapper'>
-        <span>
-          <a href='${pageContext.request.contextPath}/' class='breadcrumb'>VTS Dashboard Home</a>
-          <a href='#!' class='breadcrumb'>${testName}</a>
-        </span>
-        <ul class='right'><li>
-          <a id='dropdown-button' class='dropdown-button btn red lighten-3' href='#' data-activates='dropdown'>
-            ${email}
-          </a>
-        </li></ul>
-        <ul id='dropdown' class='dropdown-content'>
-          <li><a href='${logoutURL}'>Log out</a></li>
-        </ul>
-      </div>
-    </nav>
-  </head>
+  </script>
 
   <body>
-    <div class='container'>
+    <div class='wide container'>
       <div class='row'>
         <div class='col s12'>
           <div class='card' id='filter-wrapper'>
@@ -369,11 +341,6 @@
         <a href="#!" class="modal-action modal-close waves-effect btn-flat">Close</a>
       </div>
     </div>
-    <footer class='page-footer'>
-      <div class='footer-copyright'>
-          <div class='container'>© 2016 - The Android Open Source Project
-          </div>
-      </div>
-    </footer>
+    <%@ include file="footer.jsp" %>
   </body>
 </html>

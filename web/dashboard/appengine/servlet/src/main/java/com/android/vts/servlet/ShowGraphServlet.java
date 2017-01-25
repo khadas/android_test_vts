@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowGraphServlet extends BaseServlet {
 
+    private static final String GRAPH_JSP = "WEB-INF/jsp/show_graph.jsp";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
 
@@ -63,8 +64,27 @@ public class ShowGraphServlet extends BaseServlet {
             new HashSet<String>(Arrays.asList(splitKeysArray));
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
 
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{root.getUrl(), root.getName()};
+        links.add(rootEntry);
 
-    private static final long MILLI_TO_MICRO = 1000;  // conversion factor from milli to micro units
+        Page table = Page.TABLE;
+        String testName = request.getParameter("testName");
+        String name = table.getName() + testName;
+        String url = table.getUrl() + "?testName=" + testName;
+        String[] tableEntry = new String[]{url, name};
+        links.add(tableEntry);
+
+        Page graph = Page.GRAPH;
+        String profilingPointName = request.getParameter("profilingPoint");
+        url = graph.getUrl() + "?testName=" + testName + "&profilingPoint=" + profilingPointName;
+        String[] graphEntry = new String[]{url, graph.getName()};
+        links.add(graphEntry);
+        return links;
+    }
 
     /**
      * Process a profiling report message and determine which line graph to insert the point into.
@@ -195,7 +215,7 @@ public class ShowGraphServlet extends BaseServlet {
         request.setAttribute("graphs", gson.toJson(graphList));
 
         request.setAttribute("profilingPointName", profilingPointName);
-        dispatcher = request.getRequestDispatcher("/show_graph.jsp");
+        dispatcher = request.getRequestDispatcher(GRAPH_JSP);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException e) {

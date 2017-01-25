@@ -12,9 +12,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-.container {
-    min-height: 85%;
-}
 
 #edit-button-wrapper {
     bottom: 25px;
@@ -32,7 +29,7 @@ td {
     text-align: center;
 }
 
-.card.option {
+.row .col.s12.card.option {
     padding: 10px 30px;
     margin: 8px;
 }

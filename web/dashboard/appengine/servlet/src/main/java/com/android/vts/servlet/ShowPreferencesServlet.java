@@ -48,12 +48,24 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ShowPreferencesServlet extends BaseServlet {
 
-    private static final String PREFERENCES_JSP = "/show_preferences.jsp";
+    private static final String PREFERENCES_JSP = "WEB-INF/jsp/show_preferences.jsp";
     private static final String DASHBOARD_MAIN_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
     private static final byte[] TEST_FAMILY = Bytes.toBytes("test_to_email");
     private static final String STATUS_TABLE = "vts_status_table";
 
+    @Override
+    public List<String[]> getNavbarLinks(HttpServletRequest request) {
+        List<String[]> links = new ArrayList<>();
+        Page root = Page.HOME;
+        String[] rootEntry = new String[]{root.getUrl(), root.getName()};
+        links.add(rootEntry);
+
+        Page prefs = Page.PREFERENCES;
+        String[] prefsEntry = new String[]{CURRENT_PAGE, prefs.getName()};
+        links.add(prefsEntry);
+        return links;
+    }
 
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
