@@ -195,9 +195,13 @@ public class ShowGraphServlet extends BaseServlet {
         Arrays.sort(names);
 
         List<Graph> graphList = new ArrayList<>();
+        boolean hasHistogram = false;
         for (String name : names) {
             Graph g = graphMap.get(name);
-            if (g.size() > 0) graphList.add(g);
+            if (g.size() > 0) {
+                graphList.add(g);
+                if (g instanceof Histogram) hasHistogram = true;
+            }
         }
 
         // sort devices list
@@ -206,9 +210,11 @@ public class ShowGraphServlet extends BaseServlet {
         Arrays.sort(devices);
 
         request.setAttribute("testName", request.getParameter("testName"));
+        request.setAttribute("filterVal", request.getParameter("filterVal"));
         request.setAttribute("startTime", new Gson().toJson(startTime));
         request.setAttribute("devices", devices);
         request.setAttribute("selectedDevice", selectedDevice);
+        request.setAttribute("showFilterDropdown", hasHistogram);
         if (graphList.size() == 0) request.setAttribute("error", PROFILING_DATA_ALERT);
 
         Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(
