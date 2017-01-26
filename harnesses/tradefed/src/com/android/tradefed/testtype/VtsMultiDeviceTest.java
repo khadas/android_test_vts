@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
     static final String PRECONDITION_FEATURE = "precondition_feature";
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
+    static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -154,6 +155,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
     @Option(name = "enable-profiling", description = "Enable profiling for the tests.")
     private boolean mEnableProfiling = false;
+
+    @Option(name = "enable-systrace", description = "Enable systrace for the tests.")
+    private boolean mEnableSystrace = false;
 
     @Option(name = "enable-coverage",
             description = "Enable coverage for the tests. In order for coverage to be measured, " +
@@ -565,6 +569,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mEnableProfiling) {
             jsonObject.put(ENABLE_PROFILING, mEnableProfiling);
             CLog.i("Added %s to the Json object", ENABLE_PROFILING);
+        }
+        if (mEnableSystrace) {
+            jsonObject.put(ENABLE_SYSTRACE, mEnableSystrace);
+            CLog.i("Added %s to the Json object", ENABLE_SYSTRACE);
         }
         if (mEnableCoverage) {
             if (coverageBuild) {

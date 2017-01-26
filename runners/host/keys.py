@@ -67,6 +67,7 @@ class ConfigKeys(object):
     IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths"
 
     # Keys for systrace (for hal tests)
+    IKEY_ENABLE_SYSTRACE = "enable_systrace"
     IKEY_SYSTRACE_PROCESS_NAME = "systrace_process_name"
     IKEY_SYSTRACE_REPORT_PATH = "systrace_report_path"
     IKEY_SYSTRACE_REPORT_URL_PREFIX = "systrace_report_url_prefix"
