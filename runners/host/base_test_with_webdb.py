@@ -96,18 +96,20 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_ENABLE_PROFILING, default_value=False)
 
         self._systrace_controller = None
-        systrace_process_name = self.getUserParam(
-            keys.ConfigKeys.IKEY_SYSTRACE_PROCESS_NAME, default_value=None)
-        data_file_path = self.getUserParam(
-            keys.ConfigKeys.IKEY_DATA_FILE_PATH, default_value=None)
-        if systrace_process_name:
+        enable_systrace = self.getUserParam(
+            keys.ConfigKeys.IKEY_ENABLE_SYSTRACE, default_value=False)
+        if enable_systrace:
+            systrace_process_name = self.getUserParam(
+                keys.ConfigKeys.IKEY_SYSTRACE_PROCESS_NAME, default_value='')
             systrace_process_name = str(systrace_process_name)
+            data_file_path = self.getUserParam(
+                keys.ConfigKeys.IKEY_DATA_FILE_PATH, default_value=None)
             if data_file_path:
                 android_vts_path = os.path.normpath(
                     os.path.join(data_file_path, '..'))
 
                 self._systrace_controller = systrace_controller.SystraceController(
-                    android_vts_path, systrace_process_name)
+                    android_vts_path, process_name=systrace_process_name)
             else:
                 logging.error('Cannot create systrace controller object: '
                               'data_file_path not available')
@@ -245,14 +247,17 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         """
         test_end_time = self.GetTimestamp()
         if getattr(self, self.USE_GAE_DB, False):
-            if self._current_test_report_msg:
+            if (self._current_test_report_msg and
+                    self._current_test_report_msg.test_result !=
+                    ReportMsg.TEST_CASE_RESULT_SKIP):
                 self._current_test_report_msg.end_timestamp = test_end_time
                 if self._systrace_controller and self._systrace_controller.is_valid:
                     systrace_msg = None
                     try:
                         systrace_msg = self._current_test_report_msg.systrace.add(
                         )
-                        systrace_msg.process_name = self._systrace_controller.process_name
+                        if self._systrace_controller.process_name:
+                            systrace_msg.process_name = self._systrace_controller.process_name
 
                         if self.getUserParam(
                                 keys.ConfigKeys.
@@ -282,10 +287,12 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
                             time=test_end_time)
                         report_destination_file_path = os.path.join(
                             report_path, report_destination_file_name)
-                        self._systrace_controller.SaveLastOutput(
-                            report_destination_file_path)
-                        logging.info('Systrace output saved to %s',
-                                     report_destination_file_path)
+                        if self._systrace_controller.SaveLastOutput(
+                                report_destination_file_path):
+                            logging.info('Systrace output saved to %s',
+                                         report_destination_file_path)
+                        else:
+                            logging.error('Failed to save systrace output.')
 
                         report_url_prefix = self.getUserParam(
                             keys.ConfigKeys.IKEY_SYSTRACE_REPORT_URL_PREFIX,
