@@ -45,9 +45,19 @@
         // Draw all graphs.
         function drawAllGraphs() {
             var graphs = ${graphs};
+
+            // Get histogram extrema
+            var histMin = null;
+            var histMax = null;
+            graphs.forEach(function(g) {
+                if (g.type != 'HISTOGRAM') return;
+                if (!histMin || g.min < histMin) histMin = g.min;
+                if (!histMax || g.max > histMax) histMax = g.max;
+            });
+
             graphs.forEach(function(graph) {
                 if (graph.type == 'LINE_GRAPH') drawLineGraph(graph);
-                else if (graph.type == 'HISTOGRAM') drawHistogram(graph);
+                else if (graph.type == 'HISTOGRAM') drawHistogram(graph, histMin, histMax);
             });
         }
 
@@ -65,11 +75,11 @@
         *                - y_label: the string label for the y axis
         */
         function drawLineGraph(lineGraph) {
-            var title = 'Performance';
-            if (lineGraph.name) title += ' (' + lineGraph.name + ')';
-            if (lineGraph.ticks.length < 1) {
+            if (!lineGraph.ticks || lineGraph.ticks.length < 1) {
                 return;
             }
+            var title = 'Performance';
+            if (lineGraph.name) title += ' (' + lineGraph.name + ')';
             lineGraph.ticks.forEach(function (label, i) {
                 lineGraph.values[i].unshift(label);
             });
@@ -106,22 +116,14 @@
         *           - x_label: the string label for the x axis
         *           - y_label: the string label for the y axis
         */
-        function drawHistogram(hist) {
-            test = hist;
+        function drawHistogram(hist, min, max) {
+            if (!hist.values || hist.values.length == 0) return;
             var title = 'Performance';
             if (hist.name) title += ' (' + hist.name + ')';
             var values = hist.values;
             var histogramData = values.map(function(d, i) {
                 return [hist.ids[i], d];
             });
-            var min = Math.min.apply(null, values),
-                max = Math.max.apply(null, values);
-
-            var histogramTicks = new Array(10);
-            var delta = (max - min) / 10;
-            for (var i = 0; i <= 10; i++) {
-                histogramTicks[i] = Math.round(min + delta * i);
-            }
 
             var data = google.visualization.arrayToDataTable(histogramData, true);
 
@@ -148,7 +150,6 @@
                     },
                 },
                 hAxis: {
-                    ticks: histogramTicks,
                     title: hist.x_label,
                     textStyle: {
                         fontSize: 12,
@@ -163,14 +164,15 @@
                 bar: { gap: 0 },
                 histogram: {
                     maxNumBuckets: 200,
-                    minValue: min * 0.95,
-                    maxValue: max * 1.05
+                    minValue: min,
+                    maxValue: max,
+                    lastBucketPercentile: 1
                 },
                 chartArea: {
                     width: '100%',
                     top: 40,
-                    left: 50,
-                    height: '80%'
+                    left: 60,
+                    height: 375
                 }
             };
             var container = $('<div class="row card col s12 graph-wrapper"></div>');
@@ -215,7 +217,7 @@
         <i class='large material-icons'>file_download</i>
       </a>
     </div>
-    <div class='container'>
+    <div class='container wide'>
       <div class='row card'>
         <div id='header-container' class='valign-wrapper col s12'>
           <div class='col s3 valign'>
