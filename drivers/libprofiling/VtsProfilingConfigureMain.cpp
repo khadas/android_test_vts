@@ -21,6 +21,7 @@
 using namespace std;
 using namespace android;
 
+// Turns on the HAL instrumentation feature on all registered HIDL HALs.
 bool SetHALInstrumentation() {
   using ::android::hidl::base::V1_0::IBase;
   using ::android::hidl::manager::V1_0::IServiceManager;
@@ -30,17 +31,18 @@ bool SetHALInstrumentation() {
   sp<IServiceManager> sm = ::android::hardware::defaultServiceManager();
 
   if (sm == nullptr) {
-    fprintf(stderr, "failed to get IServiceManager to poke hal services\n");
+    fprintf(stderr, "failed to get IServiceManager to poke HAL services.\n");
     return false;
   }
 
   auto listRet = sm->list([&](const auto &interfaces) {
-    for (size_t i = 0; i < interfaces.size(); i++) {
-      string fqInstanceName = interfaces[i];
+    for (const string &fqInstanceName : interfaces) {
       string::size_type n = fqInstanceName.find("/");
-      if (n == std::string::npos || interfaces[i].size() == n+1) continue;
+      if (n == std::string::npos || fqInstanceName.size() == n+1) continue;
+
       hidl_string fqInterfaceName = fqInstanceName.substr(0, n);
-      hidl_string instanceName = fqInstanceName.substr(n+1, std::string::npos);
+      hidl_string instanceName = fqInstanceName.substr(
+          n+1, std::string::npos);
       Return<sp<IBase>> interfaceRet = sm->get(fqInterfaceName, instanceName);
       if (!interfaceRet.isOk()) {
         fprintf(stderr, "failed to get service %s: %s\n",
@@ -52,9 +54,10 @@ bool SetHALInstrumentation() {
       auto notifyRet = interface->setHALInstrumentation();
       if (!notifyRet.isOk()) {
         fprintf(stderr, "failed to setHALInstrumentation on service %s: %s\n",
-                fqInstanceName.c_str(),
-                notifyRet.description().c_str());
+                fqInstanceName.c_str(), notifyRet.description().c_str());
       }
+      printf("- updated the HAL instrumentation mode setting for %s\n",
+             fqInstanceName.c_str());
     }
   });
   if (!listRet.isOk()) {
@@ -92,14 +95,15 @@ int main(int argc, char* argv[]) {
   }
 
   if (enable_profiling) {
-    printf("enable profiling.\n");
+    printf("* enable profiling.\n");
     if (!EnableHALProfiling()) {
-      fprintf(stderr, "fail to enable profiling.\n");
+      fprintf(stderr, "failed to enable profiling.\n");
     }
   } else {
-    printf("disable profiling.\n");
+    printf("* disable profiling.\n");
     if (!DisableHALProfiling()) {
-      fprintf(stderr, "fail to disable profiling.\n");
+      fprintf(stderr, "failed to disable profiling.\n");
     }
   }
+  return 0;
 }
