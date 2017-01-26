@@ -20,6 +20,7 @@ import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
 import com.google.common.primitives.Doubles;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
@@ -31,6 +32,8 @@ public class Histogram extends Graph {
 
     public static final String PERCENTILES_KEY = "percentiles";
     public static final String PERCENTILE_VALUES_KEY = "percentile_values";
+    public static final String MIN_KEY = "min";
+    public static final String MAX_KEY = "max";
 
     private List<Double> values;
     private List<String> ids;
@@ -38,6 +41,8 @@ public class Histogram extends Graph {
     private String yLabel;
     private String name;
     private GraphType type = GraphType.HISTOGRAM;
+    private Double min = null;
+    private Double max = null;
 
     public Histogram(String name) {
         this.name = name;
@@ -82,6 +87,32 @@ public class Histogram extends Graph {
     }
 
     /**
+     * Get the number of data points stored in the graph.
+     * @return The number of data points stored in the graph.
+     */
+    @Override
+    public int size() {
+        return values.size();
+    }
+
+
+    /**
+     * Get the minimum value.
+     * @return The minimum value.
+     */
+    public Double getMin() {
+        return min;
+    }
+
+    /**
+     * Get the maximum value.
+     * @return The maximum value.
+     */
+    public Double getMax() {
+        return max;
+    }
+
+    /**
      * Add data to the graph.
      * @param id The name of the graph.
      * @param profilingReport The profiling report message containing data to add.
@@ -92,9 +123,12 @@ public class Histogram extends Graph {
             profilingReport.getStartTimestamp() >= profilingReport.getEndTimestamp()) return;
         xLabel = profilingReport.getXAxisLabel().toStringUtf8();
         yLabel = profilingReport.getYAxisLabel().toStringUtf8();
-        for (long value : profilingReport.getValueList()) {
-            values.add((double) value);
+        for (long v : profilingReport.getValueList()) {
+            double value = v;
+            values.add(value);
             ids.add(id);
+            if (max == null || value > max) max = value;
+            if (min == null || value < min) min = value;
         }
         if (profilingReport.getStartTimestamp() != profilingReport.getEndTimestamp() &&
             profilingReport.getStartTimestamp() < profilingReport.getEndTimestamp()) {
@@ -122,6 +156,8 @@ public class Histogram extends Graph {
         json.add(PERCENTILES_KEY, new Gson().toJsonTree(percentiles).getAsJsonArray());
         json.add(PERCENTILE_VALUES_KEY, new Gson().toJsonTree(percentileValues).getAsJsonArray());
         json.add(IDS_KEY, new Gson().toJsonTree(ids).getAsJsonArray());
+        json.add(MIN_KEY, new JsonPrimitive(min));
+        json.add(MAX_KEY, new JsonPrimitive(max));
         return json;
     }
 }

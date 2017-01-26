@@ -196,7 +196,8 @@ public class ShowGraphServlet extends BaseServlet {
 
         List<Graph> graphList = new ArrayList<>();
         for (String name : names) {
-            graphList.add(graphMap.get(name));
+            Graph g = graphMap.get(name);
+            if (g.size() > 0) graphList.add(g);
         }
 
         // sort devices list
