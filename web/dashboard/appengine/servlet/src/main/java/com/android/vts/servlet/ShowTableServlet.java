@@ -20,6 +20,7 @@ import com.android.vts.proto.VtsReportMessage;
 import com.android.vts.proto.VtsReportMessage.AndroidDeviceInfoMessage;
 import com.android.vts.proto.VtsReportMessage.CoverageReportMessage;
 import com.android.vts.proto.VtsReportMessage.ProfilingReportMessage;
+import com.android.vts.proto.VtsReportMessage.SystraceReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseReportMessage;
 import com.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
@@ -35,6 +36,10 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,13 +64,27 @@ import javax.servlet.http.HttpServletResponse;
 public class ShowTableServlet extends BaseServlet {
 
     private static final String TABLE_JSP = "WEB-INF/jsp/show_table.jsp";
+    private static final String HTTPS = "https";
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
-    private static final int TIME_INFO_ROW_COUNT = 2;
-    private static final int DURATION_INFO_ROW_COUNT = 1;
-    private static final int SUMMARY_ROW_COUNT = 6;
+
+    // Row labels for the test time-formatted information.
+    private static final String[] TIME_INFO_NAMES = {"Test Start", "Test End"};
+
+    // Row labels for the test duration information.
+    private static final String[] DURATION_INFO_NAMES = {"<b>Test Duration</b>"};
+
+    // Row labels for the test summary grid.
+    private static final String[] SUMMARY_NAMES = {
+            "Total", "Passing #", "Non-Passing #", "Passing %", "Covered Lines", "Coverage %"};
+
+    // Row labels for the device summary information in the table header.
+    private static final String[] HEADER_NAMES = {
+            "<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target", "Device",
+            "ABI Target", "VTS Build ID", "Hostname"};
+
     private static final String[] SEARCH_KEYS = {"devicebuildid", "branch", "target", "device",
                                                  "vtsbuildid"};
     private static final String SEARCH_HELP_HEADER = "Search Help";
@@ -401,40 +420,23 @@ public class ShowTableServlet extends BaseServlet {
         // Build Flavor and test build ID.
         String[] headerRow = new String[tests.size() + 1];
 
-        // the time grid on the table has two rows - Start Time and End Time.
-        // These represent the start times for the test run.
-        String[][] timeGrid = new String[TIME_INFO_ROW_COUNT][tests.size() + 1];
-
-        // the duration grid on the table has one row - test duration.
-        // These represent the length of time the test elapsed.
-        String[][] durationGrid = new String[DURATION_INFO_ROW_COUNT][tests.size() + 1];
-
-        // the summary grid has four rows - Total, Passing Count, Non-Passing Count, Passing %,
-        // Covered line count, and Coverage %.
-        String[][] summaryGrid = new String[SUMMARY_ROW_COUNT][tests.size() + 1];
-
         // the results an entry for each testcase result for each build.
         String[][] resultsGrid = new String[testCaseNameMap.size()][tests.size() + 1];
+        headerRow[0] = StringUtils.join(HEADER_NAMES, "<br>");
 
-        // first column for device grid
-        String[] headerFields = {"<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target",
-                                 "Device", "ABI Target", "VTS Build ID", "Hostname"};
-        headerRow[0] = StringUtils.join(headerFields, "<br>");
-
-        // first column for time grid
-        String[] rowNamesTimeGrid = {"Test Start", "Test End"};
-        for (int i = 0; i < rowNamesTimeGrid.length; i++) {
-            timeGrid[i][0] = "<b>" + rowNamesTimeGrid[i] + "</b>";
+        String[][] timeGrid = new String[TIME_INFO_NAMES.length][tests.size() + 1];
+        for (int i = 0; i < TIME_INFO_NAMES.length; i++) {
+            timeGrid[i][0] = "<b>" + TIME_INFO_NAMES[i] + "</b>";
         }
 
-        // first column for the duration grid
-        durationGrid[0][0] = "<b>Test Duration</b>";
+        String[][] durationGrid = new String[DURATION_INFO_NAMES.length][tests.size() + 1];
+        for (int i = 0; i < DURATION_INFO_NAMES.length; i++) {
+            durationGrid[i][0] = "<b>" + DURATION_INFO_NAMES[i] + "</b>";
+        }
 
-        // first column for summary grid
-        String[] rowNamesSummaryGrid = {"Total", "Passing #", "Non-Passing #", "Passing %",
-                                        "Covered Lines", "Coverage %"};
-        for (int i = 0; i < rowNamesSummaryGrid.length; i++) {
-            summaryGrid[i][0] = "<b>" + rowNamesSummaryGrid[i] + "</b>";
+        String[][] summaryGrid = new String[SUMMARY_NAMES.length][tests.size() + 1];
+        for (int i = 0; i < SUMMARY_NAMES.length; i++) {
+            summaryGrid[i][0] = "<b>" + SUMMARY_NAMES[i] + "</b>";
         }
 
         // first column for results grid
@@ -450,6 +452,7 @@ public class ShowTableServlet extends BaseServlet {
             List<String> productVariantList = new ArrayList<>();
             List<String> buildFlavorList = new ArrayList<>();
             List<String> abiInfoList = new ArrayList<>();
+            String systraceUrl = null;
             for (AndroidDeviceInfoMessage device : devices) {
                 buildAliasList.add(device.getBuildAlias().toStringUtf8().toLowerCase());
                 productVariantList.add(device.getProductVariant().toStringUtf8());
@@ -494,21 +497,51 @@ public class ShowTableServlet extends BaseServlet {
                     aggregateStatus = TestCaseResult.TEST_CASE_RESULT_FAIL;
                 }
                 for (CoverageReportMessage coverageReport :
-                    testCaseReport.getCoverageList()) {
+                     testCaseReport.getCoverageList()) {
                     totalLineCount += coverageReport.getTotalLineCount();
                     coveredLineCount += coverageReport.getCoveredLineCount();
                 }
 
-                int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
-                if (testCaseReport.getTestResult() != null) {
-                    resultsGrid[i][j + 1] = "<div class=\"" +
-                                            testCaseReport.getTestResult().toString() +
-                                            " test-case-status\">&nbsp;</div>";
-                } else {
-                    resultsGrid[i][j + 1] = "<div class=\"" +
-                                            TestCaseResult.UNKNOWN_RESULT.toString() +
-                                            " test-case-status\">&nbsp;</div>";
+                for (SystraceReportMessage systraceReport :
+                     testCaseReport.getSystraceList()) {
+                    if (systraceReport.getUrlList().size() == 0) {
+                        continue;
+                    }
+                    // Validate the url
+                    String urlString = systraceReport.getUrlList().get(0).toStringUtf8();
+                    try {
+                        URL url = new URL(urlString);
+                        String scheme = url.getProtocol();
+                        String userInfo = url.getUserInfo();
+                        String host = url.getHost();
+                        int port = url.getPort();
+                        String path = url.getPath();
+                        String query = url.getQuery();
+                        String fragment = url.getRef();
+                        if (!url.getProtocol().equals(HTTPS)) throw new MalformedURLException();
+                        URI uri = new URI(scheme, userInfo, host, port, path, query, fragment);
+                        systraceUrl = uri.toString();
+                        break;
+                    } catch (MalformedURLException | URISyntaxException e) {
+                        logger.log(Level.WARNING, "Invalid systrace URL: " + urlString);
+                    }
                 }
+
+                int i = testCaseNameMap.get(testCaseReport.getName().toStringUtf8());
+                String classNames = "test-case-status ";
+                String glyph = "";
+                if (testCaseReport.getTestResult() != null)
+                    classNames += testCaseReport.getTestResult().toString();
+                else
+                    classNames += TestCaseResult.UNKNOWN_RESULT.toString();
+
+                if (systraceUrl != null) {
+                    classNames += " width-1";
+                    glyph += "<a href=\"" + systraceUrl + "\" " +
+                             "class=\"waves-effect waves-light btn red right inline-btn\">" +
+                             "<i class=\"material-icons inline-icon\">info_outline</i></a>";
+                }
+                resultsGrid[i][j + 1] = "<div class=\"" + classNames + "\">&nbsp;</div>" + glyph;
             }
             String passInfo;
             try {
@@ -527,8 +560,8 @@ public class ShowTableServlet extends BaseServlet {
                 coveragePctInfo = Double.toString(coveragePct) + "%" +
                         "<a href=\"/show_coverage?testName=" + request.getParameter("testName") +
                         "&startTime=" + (report.getStartTimestamp() * MILLI_TO_MICRO) +
-                        "\" class=\"waves-effect waves-light btn red right coverage-btn\">" +
-                        "<i class=\"material-icons coverage-icon\">menu</i></a>";
+                        "\" class=\"waves-effect waves-light btn red right inline-btn\">" +
+                        "<i class=\"material-icons inline-icon\">menu</i></a>";
                 coverageInfo = coveredLineCount + "/" + totalLineCount;
             } catch (ArithmeticException e) {
                 coveragePctInfo = " - ";
