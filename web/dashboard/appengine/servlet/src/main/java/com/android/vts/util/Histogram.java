@@ -144,7 +144,7 @@ public class Histogram extends Graph {
      */
     @Override
     public JsonObject toJson() {
-        int[] percentiles = {1, 5, 10, 20, 25, 50, 75, 80, 90, 95, 99};
+        int[] percentiles = {1, 2, 5, 10, 25, 50, 75, 90, 95, 98, 99};
         double[] percentileValues = new double[percentiles.length];
         double[] valueList = Doubles.toArray(values);
         for (int i = 0; i < percentiles.length; i++) {

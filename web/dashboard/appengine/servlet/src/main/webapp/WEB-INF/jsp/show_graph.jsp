@@ -31,6 +31,7 @@
 
         ONE_DAY = 86400000000;
         MICRO_PER_MILLI = 1000;
+        var graphs = ${graphs};
 
         $(function() {
             $('select').material_select();
@@ -40,24 +41,37 @@
             });
             date.datepicker('setDate', new Date(${startTime} / MICRO_PER_MILLI));
             $('#load').click(load);
+            $('#outlier-select').change(drawAllGraphs);
         });
 
         // Draw all graphs.
         function drawAllGraphs() {
-            var graphs = ${graphs};
+            $('#profiling-container').empty();
+            var percentileIndex = Number($('#outlier-select').val());
 
             // Get histogram extrema
             var histMin = null;
             var histMax = null;
             graphs.forEach(function(g) {
                 if (g.type != 'HISTOGRAM') return;
-                if (!histMin || g.min < histMin) histMin = g.min;
-                if (!histMax || g.max > histMax) histMax = g.max;
+                var minVal;
+                var maxVal;
+                if (percentileIndex == -1) {
+                    minVal = g.min;
+                    maxVal = g.max;
+                } else {
+                    minVal = g.percentile_values[percentileIndex];
+                    var endIndex = g.percentiles.length - percentileIndex - 1
+                    maxVal = g.percentile_values[endIndex];
+                }
+                if (!histMin || minVal < histMin) histMin = minVal;
+                if (!histMax || maxVal > histMax) histMax = maxVal;
             });
 
             graphs.forEach(function(graph) {
                 if (graph.type == 'LINE_GRAPH') drawLineGraph(graph);
-                else if (graph.type == 'HISTOGRAM') drawHistogram(graph, histMin, histMax);
+                else if (graph.type == 'HISTOGRAM')
+                    drawHistogram(graph, histMin, histMax);
             });
         }
 
@@ -115,15 +129,18 @@
         *                  build info for the run that produced the point)
         *           - x_label: the string label for the x axis
         *           - y_label: the string label for the y axis
+        *     min: the minimum value to display
+        *     max: the maximum value to display
         */
         function drawHistogram(hist, min, max) {
             if (!hist.values || hist.values.length == 0) return;
             var title = 'Performance';
             if (hist.name) title += ' (' + hist.name + ')';
             var values = hist.values;
-            var histogramData = values.map(function(d, i) {
-                return [hist.ids[i], d];
-            });
+            var histogramData = values.reduce(function(result, d, i) {
+                if (d < max && d > min) result.push([hist.ids[i], d]);
+                return result;
+            }, []);
 
             var data = google.visualization.arrayToDataTable(histogramData, true);
 
@@ -165,8 +182,7 @@
                 histogram: {
                     maxNumBuckets: 200,
                     minValue: min,
-                    maxValue: max,
-                    lastBucketPercentile: 1
+                    maxValue: max
                 },
                 chartArea: {
                     width: '100%',
@@ -202,10 +218,12 @@
         function load() {
             var startTime = $('#date').datepicker('getDate').getTime();
             startTime = startTime + (ONE_DAY / MICRO_PER_MILLI) - 1;
+            var filterVal = $('#outlier-select').val();
             var ctx = '${pageContext.request.contextPath}';
             var link = ctx + '/show_graph?profilingPoint=${profilingPointName}' +
                 '&testName=${testName}' +
-                '&startTime=' + (startTime * MICRO_PER_MILLI);
+                '&startTime=' + (startTime * MICRO_PER_MILLI) +
+                '&filterVal=' + filterVal;
             if ($('#device-select').prop('selectedIndex') > 1) {
                 link += '&device=' + $('#device-select').val();
             }
@@ -228,7 +246,18 @@
           </div>
         </div>
         <div id='date-container' class='col s12'>
-          <div id='device-select-wrapper' class='input-field col s6 m3 offset-m6'>
+          <c:set var='offset' value='${showFilterDropdown ? 0 : 2}' />
+          <c:if test='${showFilterDropdown}'>
+            <div id='outlier-select-wrapper' class='col s2'>
+              <select id='outlier-select'>
+                <option value='-1' ${filterVal eq -1 ? 'selected' : ''}>Show outliers</option>
+                <option value='0' ${filterVal eq 0 ? 'selected' : ''}>Filter outliers (1%)</option>
+                <option value='1' ${filterVal eq 1 ? 'selected' : ''}>Filter outliers (2%)</option>
+                <option value='2' ${filterVal eq 2 ? 'selected' : ''}>Filter outliers (5%)</option>
+              </select>
+            </div>
+          </c:if>
+          <div id='device-select-wrapper' class='input-field col s5 m3 offset-m${offset + 4} offset-s${offset}'>
             <select id='device-select'>
               <option value='' disabled>Select device</option>
               <option value='0' ${empty selectedDevice ? 'selected' : ''}>All Devices</option>
@@ -237,7 +266,7 @@
               </c:forEach>
             </select>
           </div>
-          <input type='text' id='date' name='date' class='col s5 m2'>
+          <input type='text' id='date' name='date' class='col s4 m2'>
           <a id='load' class='btn-floating btn-medium red right waves-effect waves-light'>
             <i class='medium material-icons'>cached</i>
           </a>
