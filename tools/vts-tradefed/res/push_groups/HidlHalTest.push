@@ -21,6 +21,9 @@ DATA/lib64/android.hardware.power.vts.driver@1.0.so->/data/local/tmp/64/android.
 DATA/lib/android.hardware.sensors.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.sensors.vts.driver@1.0.so
 DATA/lib64/android.hardware.sensors.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.sensors.vts.driver@1.0.so
 
+DATA/lib/android.hardware.soundtrigger.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.soundtrigger.vts.driver@2.0.so
+DATA/lib64/android.hardware.soundtrigger.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.soundtrigger.vts.driver@2.0.so
+
 DATA/lib/android.hardware.thermal.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.thermal.vts.driver@1.0.so
 DATA/lib64/android.hardware.thermal.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.thermal.vts.driver@1.0.so
 
@@ -59,6 +62,9 @@ DATA/lib64/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/64
 
 DATA/lib/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.sensors@1.0::ISensors.profiler.so
 DATA/lib64/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.sensors@1.0::ISensors.profiler.so
+
+DATA/lib/android.hardware.soundtrigger@2.0-ISoundTriggerHw-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.soundtrigger@2.0::ISoundTriggerHw.profiler.so
+DATA/lib64/android.hardware.soundtrigger@2.0-ISoundTriggerHw-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.soundtrigger@2.0::ISoundTriggerHw.profiler.so
 
 DATA/lib/android.hardware.thermal@1.0-IThermal-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.thermal@1.0::IThermal.profiler.so
 DATA/lib64/android.hardware.thermal@1.0-IThermal-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.thermal@1.0::IThermal.profiler.so
