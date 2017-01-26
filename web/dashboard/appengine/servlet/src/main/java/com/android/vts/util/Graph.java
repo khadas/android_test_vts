@@ -62,6 +62,12 @@ public abstract class Graph {
     public abstract String getName();
 
     /**
+     * Get the number of data points stored in the graph.
+     * @return The number of data points stored in the graph.
+     */
+    public abstract int size();
+
+    /**
      * Add data to the graph.
      * @param id The name of the graph.
      * @param profilingReport The profiling report message containing data to add.
