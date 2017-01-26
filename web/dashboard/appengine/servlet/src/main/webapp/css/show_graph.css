@@ -59,10 +59,11 @@
 .percentile-table {
     width: auto;
     margin: auto;
+    margin-top: 20px;
 }
 
 .percentile-table td, th{
-    font-size: 12px;
+    font-size: 11px;
     text-align: center;
     padding: 5px 10px;
 }

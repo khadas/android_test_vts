@@ -81,6 +81,15 @@ public class LineGraph extends Graph {
     }
 
     /**
+     * Get the number of data points stored in the graph.
+     * @return The number of data points stored in the graph.
+     */
+    @Override
+    public int size() {
+        return profilingReports.size();
+    }
+
+    /**
      * Add data to the graph.
      * @param id The name of the graph.
      * @param profilingReport The profiling report message containing data to add.
