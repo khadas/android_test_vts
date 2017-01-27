@@ -26,6 +26,8 @@ import com.android.vts.proto.VtsReportMessage.TestCaseResult;
 import com.android.vts.proto.VtsReportMessage.TestReportMessage;
 import com.android.vts.proto.VtsReportMessage.VtsHostInfo;
 import com.android.vts.util.BigtableHelper;
+import com.android.vts.util.FilterUtil;
+import com.android.vts.util.FilterUtil.Key;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
@@ -50,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -85,16 +85,12 @@ public class ShowTableServlet extends BaseServlet {
             "<b>Stats Type \\ Device Build ID</b>", "Branch", "Build Target", "Device",
             "ABI Target", "VTS Build ID", "Hostname"};
 
-    private static final String[] SEARCH_KEYS = {"devicebuildid", "branch", "target", "device",
-                                                 "vtsbuildid"};
     private static final String SEARCH_HELP_HEADER = "Search Help";
     private static final String SEARCH_HELP = "Data can be queried using one or more filters. " +
         "If more than one filter is provided, results will be returned that match <i>all</i>. " +
         "<br><br>Filters are delimited by spaces; to specify a multi-word token, enclose it in " +
-        "double quotes. A query may apply to any of header attributes of a column, or it may be " +
-        "a field-specific filter if specified in the format: \"field=value\".<br><br>" +
-        "<b>Supported field qualifiers:</b> " + StringUtils.join(SEARCH_KEYS, ", ") + ".";
-    private static final Set<String> SEARCH_KEYSET = new HashSet<String>(Arrays.asList(SEARCH_KEYS));
+        "double quotes. A query must be in the format: \"field:value\".<br><br>" +
+        "<b>Supported field qualifiers:</b> " + StringUtils.join(Key.values(), ", ") + ".";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
 
@@ -112,91 +108,6 @@ public class ShowTableServlet extends BaseServlet {
         String[] tableEntry = new String[]{url, name};
         links.add(tableEntry);
         return links;
-    }
-
-    /**
-     * Parse the search string to populate the searchPairs map and the generalTerms set.
-     * General terms apply to any field, while pairs in searchPairs are for a particular field.
-     *
-     * Expected format:
-     *       general1 "general string 2" vtsbuildid="local build"
-     *
-     * Search terms are delimited by spaces and may be enclosed by quotes. General terms have no
-     * prefix, while field-specific search terms are preceded by <field>= where the field is in
-     * SEARCH_KEYS.
-     *
-     * @param searchString The String search query.
-     * @param searchPairs The map to insert search keys to values parsed from the search string.
-     * @param generalTerms The map to insert general search terms (term to index).
-     */
-    private void parseSearchString(String searchString, Map<String, String> searchPairs,
-                                   Map<String, Integer> generalTerms) {
-        if (searchString != null) {
-            Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(searchString);
-            int count = 0;
-            while (m.find()) {
-                String term = m.group(1).replace("\"", "");
-                if (term.contains("=")) {
-                    String[] terms = term.split("=", 2);
-                    if (terms.length == 2 && SEARCH_KEYSET.contains(terms[0].toLowerCase())) {
-                        searchPairs.put(terms[0].toLowerCase(), terms[1]);
-                    }
-                } else {
-                    generalTerms.put(term, count++);
-                }
-            }
-        }
-    }
-
-    /**
-     * Determine if test report should be included in the result based on search terms.
-     * @param report The TestReportMessage object to compare to the search terms.
-     * @param searchPairs The map of search keys to values parsed from the search string.
-     * @param generalTerms General terms non-specific to a particular field.
-     * @returns boolean True if the report matches the search terms, false otherwise.
-     */
-    private boolean includeInSearch(TestReportMessage report, Map<String, String> searchPairs,
-                                    Map<String, Integer> generalTerms) {
-        if (searchPairs.size() + generalTerms.size() == 0) return true;
-
-        boolean[] fieldsSatisfied = new boolean[SEARCH_KEYS.length];
-        boolean[] generalSatisfied = new boolean[generalTerms.size()];
-        // Verify that VTS build ID matches search term.
-        String vtsBuildId = report.getBuildInfo().getId().toStringUtf8().toLowerCase();
-        if (searchPairs.containsKey(SEARCH_KEYS[4])) {
-            if (vtsBuildId.equals(searchPairs.get(SEARCH_KEYS[4]))) {
-                fieldsSatisfied[4] = true;
-            } else {
-                return false;
-            }
-        }
-
-        // Verify that device-specific search terms are satisfied between the target devices.
-        for (AndroidDeviceInfoMessage device : report.getDeviceInfoList()) {
-            String[] props = {device.getBuildId().toStringUtf8().toLowerCase(),
-                              device.getBuildAlias().toStringUtf8().toLowerCase(),
-                              device.getBuildFlavor().toStringUtf8().toLowerCase(),
-                              device.getProductVariant().toStringUtf8().toLowerCase()};
-            Set<String> propSet = new HashSet<>(Arrays.asList(props));
-            for (int i = 0; i < props.length; i++) {
-                if (searchPairs.containsKey(SEARCH_KEYS[i]) &&
-                    props[i].equals(searchPairs.get(SEARCH_KEYS[i]))) {
-                    fieldsSatisfied[i] = true;
-                }
-                for (Map.Entry<String, Integer> entry : generalTerms.entrySet()) {
-                    if (propSet.contains(entry.getKey())) {
-                        generalSatisfied[entry.getValue()] = true;
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < fieldsSatisfied.length; i++) {
-            if (!fieldsSatisfied[i] && searchPairs.containsKey(SEARCH_KEYS[i])) return false;
-        }
-        for (int i = 0; i < generalSatisfied.length; i++) {
-            if (!generalSatisfied[i]) return false;
-        }
-        return true;
     }
 
     @Override
@@ -265,9 +176,7 @@ public class ShowTableServlet extends BaseServlet {
             showPresubmit = true;
         }
 
-        Map<String, String> searchPairs = new HashMap<>();
-        Map<String, Integer> generalTerms = new HashMap<>();
-        parseSearchString(searchString, searchPairs, generalTerms);
+        Map<Key, String> searchPairs  = FilterUtil.parseSearchString(searchString);
 
         // Add result names to list
         List<String> resultNames = new ArrayList<>();
@@ -326,7 +235,7 @@ public class ShowTableServlet extends BaseServlet {
 
                 String firstDeviceBuildId = testReportMessage.getDeviceInfoList().get(0)
                                             .getBuildId().toStringUtf8();
-                if (!includeInSearch(testReportMessage, searchPairs, generalTerms)) continue;
+                if (!FilterUtil.includeInSearch(testReportMessage, searchPairs)) continue;
 
                 try {
                     // filter non-integer build IDs
