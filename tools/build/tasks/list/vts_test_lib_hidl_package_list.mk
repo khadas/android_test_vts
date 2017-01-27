@@ -23,6 +23,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.memtrack.vts.driver@1.0 \
   android.hardware.nfc.vts.driver@1.0 \
   android.hardware.power.vts.driver@1.0 \
+  android.hardware.radio.vts.driver@1.0 \
   android.hardware.sensors.vts.driver@1.0 \
   android.hardware.thermal.vts.driver@1.0 \
   android.hardware.tv.cec.vts.driver@1.0 \
@@ -37,6 +38,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.nfc@1.0-INfc-vts.profiler \
   android.hardware.nfc@1.0-INfcClientCallback-vts.profiler \
   android.hardware.power@1.0-IPower-vts.profiler \
+  android.hardware.radio@1.0-IRadio-vts.profiler \
   android.hardware.sensors@1.0-ISensors-vts.profiler \
   android.hardware.thermal@1.0-IThermal-vts.profiler \
   android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler \

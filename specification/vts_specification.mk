@@ -33,5 +33,11 @@ PRODUCT_COPY_FILES += \
     hardware/interfaces/tv/input/1.0/vts/TvInput.vts:system/etc/TvInput.vts \
     hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts:system/etc/TvInputCallback.vts \
     hardware/interfaces/tv/input/1.0/vts/types.vts:system/etc/types.vts \
+    hardware/interfaces/radio/1.0/vts/Radio.vts:system/etc/Radio.vts \
+    hardware/interfaces/radio/1.0/vts/RadioIndication.vts:system/etc/RadioIndication.vts \
+    hardware/interfaces/radio/1.0/vts/RadioResponse.vts:system/etc/RadioResponse.vts \
+    hardware/interfaces/radio/1.0/vts/Sap.vts:system/etc/Sap.vts \
+    hardware/interfaces/radio/1.0/vts/SapCallback.vts:system/etc/SapCallback.vts \
+    hardware/interfaces/radio/1.0/vts/types.vts:system/etc/types.vts \
     test/vts/specification/lib_bionic/libmV1.vts:system/etc/libmV1.vts \
     test/vts/specification/lib_bionic/libcV1.vts:system/etc/libcV1.vts \
