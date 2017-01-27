@@ -42,6 +42,12 @@ vts_spec_file_list += \
   hardware/interfaces/nfc/1.0/vts/Nfc.vts \
   hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
   hardware/interfaces/nfc/1.0/vts/types.vts \
+  hardware/interfaces/radio/1.0/vts/Radio.vts \
+  hardware/interfaces/radio/1.0/vts/RadioIndication.vts \
+  hardware/interfaces/radio/1.0/vts/RadioResponse.vts \
+  hardware/interfaces/radio/1.0/vts/Sap.vts \
+  hardware/interfaces/radio/1.0/vts/SapCallback.vts \
+  hardware/interfaces/radio/1.0/vts/types.vts \
   hardware/interfaces/vehicle/2.0/vts/Vehicle.vts \
   hardware/interfaces/vehicle/2.0/vts/VehicleCallback.vts \
   hardware/interfaces/vehicle/2.0/vts/types.vts \
