@@ -16,6 +16,8 @@
 
 package com.android.vts.servlet;
 
+import com.android.vts.proto.VtsWebStatusMessage;
+import com.android.vts.proto.VtsWebStatusMessage.TestStatusMessage;
 import com.android.vts.util.BigtableHelper;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -26,15 +28,17 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -50,6 +54,8 @@ public class DashboardMainServlet extends BaseServlet {
     private static final String DASHBOARD_ALL_LINK = "/?showAll=true";
     private static final String DASHBOARD_FAVORITES_LINK = "/";
     private static final byte[] EMAIL_FAMILY = Bytes.toBytes("email_to_test");
+    private static final byte[] STATUS_FAMILY = Bytes.toBytes("status");
+    private static final byte[] DATA_QUALIFIER = Bytes.toBytes("data");
     private static final String STATUS_TABLE = "vts_status_table";
     private static final String ALL_HEADER = "All Tests";
     private static final String FAVORITES_HEADER = "Favorites";
@@ -69,6 +75,45 @@ public class DashboardMainServlet extends BaseServlet {
         return links;
     }
 
+    /**
+     * Helper class for displaying test entries on the main dashboard.
+     */
+    public class TestDisplay implements Comparable<TestDisplay> {
+        private final String name;
+        private final int failCount;
+
+        /**
+         * Test display constructor.
+         * @param name The name of the test.
+         * @param failCount The number of tests failing.
+         */
+        public TestDisplay(String name, int failCount) {
+            this.name = name;
+            this.failCount = failCount;
+        }
+
+        /**
+         * Get the name of the test.
+         * @return The name of the test.
+         */
+        public String getName() {
+            return this.name;
+        }
+
+        /**
+         * Get the number of failing test cases.
+         * @return The number of failing test cases.
+         */
+        public int getFailCount() {
+            return this.failCount;
+        }
+
+        @Override
+        public int compareTo(TestDisplay test) {
+            return this.name.compareTo(test.name);
+        }
+    }
+
     @Override
     public void doGetHandler(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -77,10 +122,11 @@ public class DashboardMainServlet extends BaseServlet {
         RequestDispatcher dispatcher = null;
 
         Table table = BigtableHelper.getTable(TableName.valueOf(STATUS_TABLE));
-        List<String> displayedTests = new ArrayList<>();
+        List<TestDisplay> displayedTests = new ArrayList<>();
 
         HTableDescriptor[] tables = BigtableHelper.getTables();
-        Set<String> allTables = new HashSet<>();
+        Map<String, Integer> failCountMap = new HashMap<>();  // map from table name to fail count
+
         boolean showAll = request.getParameter("showAll") != null;
         String header;
         String buttonLabel;
@@ -91,13 +137,28 @@ public class DashboardMainServlet extends BaseServlet {
         for (HTableDescriptor descriptor : tables) {
             String tableName = descriptor.getNameAsString();
             if (tableName.startsWith(TABLE_PREFIX)) {
-                allTables.add(tableName);
+                failCountMap.put(tableName, -1);
             }
         }
 
+        // Read the status table to determine the number of failed test cases in the latest run.
+        Scan scan = new Scan();
+        scan.addColumn(STATUS_FAMILY, DATA_QUALIFIER);
+        ResultScanner scanner = table.getScanner(scan);
+        for (Result result = scanner.next(); result != null; result = scanner.next()) {
+            String tableName = Bytes.toString(result.getRow());
+            byte[] value = result.getValue(STATUS_FAMILY, DATA_QUALIFIER);
+            TestStatusMessage testStatusMessage =
+                    VtsWebStatusMessage.TestStatusMessage.parseFrom(value);
+            failCountMap.put(tableName, testStatusMessage.getFailedTestcasesList().size());
+        }
+
         if (showAll) {
-            for (String tableName : allTables) {
-                displayedTests.add(tableName.substring(7));
+            for (String tableName : failCountMap.keySet()) {
+                TestDisplay test = new TestDisplay(
+                        tableName.substring(TABLE_PREFIX.length()),
+                        failCountMap.get(tableName));
+                displayedTests.add(test);
             }
             if (displayedTests.size() == 0) {
                 error = NO_TESTS_ERROR;
@@ -112,15 +173,17 @@ public class DashboardMainServlet extends BaseServlet {
                 Get get = new Get(Bytes.toBytes(currentUser.getEmail()));
                 get.addFamily(EMAIL_FAMILY);
                 Result result = table.get(get);
-                if (result != null) {
+                if (result != null && result.listCells() != null) {
                     List<Cell> cells = result.listCells();
-                    if (cells != null) {
-                        for (Cell cell : cells) {
-                            String test = Bytes.toString(cell.getQualifierArray());
-                            String val = Bytes.toString(cell.getValueArray());
-                            if (test != null && val.equals("1") && allTables.contains(test)) {
-                                displayedTests.add(test.substring(TABLE_PREFIX.length()));
-                            }
+                    for (Cell cell : cells) {
+                        String tableName = Bytes.toString(cell.getQualifierArray());
+                        String val = Bytes.toString(cell.getValueArray());
+                        if (tableName != null && val.equals("1") &&
+                                failCountMap.containsKey(tableName)) {
+                            TestDisplay test = new TestDisplay(
+                                    tableName.substring(TABLE_PREFIX.length()),
+                                    failCountMap.get(tableName));
+                            displayedTests.add(test);
                         }
                     }
                 }
@@ -135,10 +198,8 @@ public class DashboardMainServlet extends BaseServlet {
         }
         Collections.sort(displayedTests);
 
-        String[] testArray = new String[displayedTests.size()];
-        displayedTests.toArray(testArray);
         response.setStatus(HttpServletResponse.SC_OK);
-        request.setAttribute("testNames", testArray);
+        request.setAttribute("testNames", displayedTests);
         request.setAttribute("headerLabel", header);
         request.setAttribute("showAll", showAll);
         request.setAttribute("buttonLabel", buttonLabel);
