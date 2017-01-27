@@ -25,16 +25,16 @@ from vts.utils.python.cpu import cpu_frequency_scaling
 
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
-    '''Base class to run gtest (Google Test) binary on target.
+    '''Base class to run a VTS target-side HIDL HAL test.
 
     Attributes:
-        _dut: AndroidDevice, the device under test as config
-        shell: ShellMirrorObject, shell mirror
-        test_cases: list of GtestTestCase objects, list of test cases to run
-        tags: all the tags that appeared in binary list
         DEVICE_TEST_DIR: string, temp location for storing binary
         TAG_PATH_SEPARATOR: string, separator used to separate tag and path
+        shell: ShellMirrorObject, shell mirror
+        tags: all the tags that appeared in binary list
+        test_cases: list of GtestTestCase objects, list of test cases to run
         _cpu_freq: CpuFrequencyScalingController instance of a target device.
+        _dut: AndroidDevice, the device under test as config
         _skip_all_testcases: boolean - to skip all test cases. set when a target
                              device does not have a required HIDL service.
     '''
@@ -88,10 +88,9 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 self, keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
             if file_path_prefix:
                 cmd_results = self.shell.Execute("ls %s*" % file_path_prefix)
-                if (any(cmd_results[const.EXIT_CODE])
-                    or file_path_prefix not in cmd_results[const.STDOUT][0]):
+                if any(cmd_results[const.EXIT_CODE]):
                     logging.warn("The required file (prefix: %s) not found.",
-                                 feature)
+                                 file_path_prefix)
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
