@@ -42,6 +42,19 @@ td {
 .entry {
     font-size: 21px;
     font-weight: 300;
+    position: relative;
+}
+
+.indicator {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 1px 6px;
+    position: absolute;
+    right: 0;
+    min-width: 40px;
+    border-radius: 10px;
+    margin-top: 6px;
 }
 
 #options {
