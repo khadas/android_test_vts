@@ -36,9 +36,15 @@
               <h4 id='section-header'>${headerLabel}</h4>
             </div>
             <c:forEach items='${testNames}' var='test'>
-              <a href='${pageContext.request.contextPath}/show_table?testName=${test}'>
+              <a href='/show_table?testName=${test.getName()}'>
                 <div class='col s12 card hoverable option valign-wrapper waves-effect'>
-                  <span class='entry valign'>${test}</span>
+                  <span class='entry valign'>${test.getName()}
+                    <c:if test='${test.getFailCount() > 0}'>
+                      <span class='indicator red center'>
+                        ${test.getFailCount()}
+                      </span>
+                    </c:if>
+                  </span>
                 </div>
               </a>
             </c:forEach>
