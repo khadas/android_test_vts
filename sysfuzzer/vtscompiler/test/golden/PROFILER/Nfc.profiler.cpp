@@ -10,7 +10,7 @@ namespace android {
 namespace vts {
 
 
-void HIDL_INSTRUMENTATION_FUNCTION(
+void HIDL_INSTRUMENTATION_FUNCTION_INfc(
         HidlInstrumentor::InstrumentationEvent event,
         const char* package,
         const char* version,
