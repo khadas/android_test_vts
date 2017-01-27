@@ -102,6 +102,8 @@ string ComponentTypeToString(int component_type) {
       return "bionic_libm";
     case TV_CEC:
       return "tv_cec";
+    case RADIO:
+      return "radio";
   }
   cerr << "error: invalid component_type " << component_type << endl;
   exit(-1);

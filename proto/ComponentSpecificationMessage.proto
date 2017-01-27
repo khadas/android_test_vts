@@ -69,21 +69,23 @@ enum ComponentType {
   // For a vibrator submodule.
   VIBRATOR = 12;
   // For a thermal submodule.
-  THERMAL=13;
+  THERMAL = 13;
   // For a tv_input HAL.
   TV_INPUT = 14;
-  // For tv hdmi_cec submodule
+  // For a tv hdmi_cec submodule
   TV_CEC = 15;
   // For sensors submodule
-  SENSORS=16;
-  // For vehicle submodule
-  VEHICLE=17;
+  SENSORS = 16;
+  // For a vehicle submodule
+  VEHICLE = 17;
   // For a VR submodule.
   VR = 18;
   // For a graphics allocator submodule.
   GRAPHICS_ALLOCATOR = 19;
   // For a graphics mapper submodule.
   GRAPHICS_MAPPER = 20;
+  // For a radio submodule
+  RADIO = 21;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;

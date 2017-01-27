@@ -18,6 +18,9 @@ DATA/lib64/android.hardware.nfc.vts.driver@1.0.so->/data/local/tmp/64/android.ha
 DATA/lib/android.hardware.power.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.power.vts.driver@1.0.so
 DATA/lib64/android.hardware.power.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.power.vts.driver@1.0.so
 
+DATA/lib/android.hardware.radio.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.radio.vts.driver@1.0.so
+DATA/lib64/android.hardware.radio.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.radio.vts.driver@1.0.so
+
 DATA/lib/android.hardware.sensors.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.sensors.vts.driver@1.0.so
 DATA/lib64/android.hardware.sensors.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.sensors.vts.driver@1.0.so
 
@@ -59,6 +62,9 @@ DATA/lib64/android.hardware.nfc@1.0-INfc-vts.profiler.so->/data/local/tmp/64/hw/
 
 DATA/lib/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.power@1.0::IPower.profiler.so
 DATA/lib64/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.power@1.0::IPower.profiler.so
+
+DATA/lib/android.hardware.radio@1.0-IRadio-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.radio@1.0::IRadio.profiler.so
+DATA/lib64/android.hardware.radio@1.0-IRadio-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.radio@1.0::IRadio.profiler.so
 
 DATA/lib/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.sensors@1.0::ISensors.profiler.so
 DATA/lib64/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.sensors@1.0::ISensors.profiler.so
