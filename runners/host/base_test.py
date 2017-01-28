@@ -90,6 +90,8 @@ class BaseTestClass(object):
         # Set other optional parameters
         opt_param_names = [keys.ConfigKeys.IKEY_ABI_NAME,
                            keys.ConfigKeys.IKEY_ABI_BITNESS,
+                           keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI,
+                           keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI,
                            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI]
         self.getUserParams(opt_param_names=opt_param_names)
 
@@ -438,12 +440,20 @@ class BaseTestClass(object):
             bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
             run_32bit_on_64bit_abi = getattr(
                 self, keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, False)
+
+            skip_on_32bit_abi = getattr(
+                self, keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI, False)
+            skip_on_64bit_abi = getattr(
+                self, keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, False)
+
             asserts.skipIf(
+                ((skip_on_32bit_abi is True) and bitness == "32") or
+                ((skip_on_64bit_abi is True) and bitness == "64") or
                 (test_name.lower().endswith(const.SUFFIX_32BIT) and
                  bitness != "32") or
                 (test_name.lower().endswith(const.SUFFIX_64BIT) and
                  bitness != "64" and not run_32bit_on_64bit_abi),
-                "Test case '{}' excluded as abi bitness is {}.".format(
+                "Test case '{}' excluded as ABI bitness is {}.".format(
                     test_name, bitness))
 
     def execOneTest(self, test_name, test_func, args, **kwargs):
