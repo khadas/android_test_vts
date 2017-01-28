@@ -48,6 +48,8 @@ class ConfigKeys(object):
     IKEY_ABI_NAME = "abi_name"
     IKEY_ABI_BITNESS = "abi_bitness"
     IKEY_RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi"
+    IKEY_SKIP_ON_32BIT_ABI = "skip_on_32bit_abi"
+    IKEY_SKIP_ON_64BIT_ABI = "skip_on_64bit_abi"
 
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
