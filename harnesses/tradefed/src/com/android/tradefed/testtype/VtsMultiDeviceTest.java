@@ -77,6 +77,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
+    static final String SKIP_ON_32BIT_ABI = "skip_on_32bit_abi";
+    static final String SKIP_ON_64BIT_ABI = "skip_on_64bit_abi";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
     static final String VTS = "vts";
     static final String CONFIG_FILE_EXTENSION = ".config";
@@ -165,8 +167,16 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                           "build is coverage instrumented.")
     private boolean mEnableCoverage = true;
 
+    @Option(name = "skip-on-32bit-abi",
+        description = "Whether to skip tests on 32bit ABI.")
+    private boolean mSkipOn32BitAbi = false;
+
+    @Option(name = "skip-on-64bit-abi",
+        description = "Whether to skip tests on 64bit ABI.")
+    private boolean mSkipOn64BitAbi = false;
+
     @Option(name = "run-32bit-on-64bit-abi",
-            description = "Whether to run 32bit tests on 64bit abi.")
+            description = "Whether to run 32bit tests on 64bit ABI.")
     private boolean mRun32bBitOn64BitAbi = false;
 
     @Option(name = "binary-test-sources",
@@ -373,8 +383,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                         template = TEMPLATE_GTEST_BINARY_TEST_PATH;
                         break;
                     case BINARY_TEST_TYPE_HAL_HIDL_GTEST:
-                      template = TEMPLATE_HAL_HIDL_GTEST_PATH;
-                      break;
+                        template = TEMPLATE_HAL_HIDL_GTEST_PATH;
+                        break;
                     default:
                         template = TEMPLATE_BINARY_TEST_PATH;
                 }
@@ -546,7 +556,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             jsonObject.put(ABI_BITNESS, mAbi.getBitness());
             CLog.i("Added %s to the Json object", ABI_BITNESS);
         }
-        if (mRun32bBitOn64BitAbi) {
+        if (mSkipOn32BitAbi) {
+            jsonObject.put(SKIP_ON_32BIT_ABI, mSkipOn32BitAbi);
+            CLog.i("Added %s to the Json object", SKIP_ON_32BIT_ABI);
+        }
+        if (mSkipOn64BitAbi) {
+            jsonObject.put(SKIP_ON_64BIT_ABI, mSkipOn64BitAbi);
+            CLog.i("Added %s to the Json object", SKIP_ON_64BIT_ABI);
+        } else if (mRun32bBitOn64BitAbi) {
             jsonObject.put(RUN_32BIT_ON_64BIT_ABI, mRun32bBitOn64BitAbi);
             CLog.i("Added %s to the Json object", RUN_32BIT_ON_64BIT_ABI);
         }
