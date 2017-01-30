@@ -324,12 +324,17 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
     def _setUpTest(self, test_name):
         """Proxy function to guarantee the base implementation of _setUpTest is called.
 
+        Systrace will be started after other setup procedures are done.
+
         Args:
             test_name: string, test name
         """
+        ret = super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
+
         if self._systrace_controller:
             self._systrace_controller.Start()
-        return super(BaseTestWithWebDbClass, self)._setUpTest(test_name)
+
+        return ret
 
     def _tearDownTest(self, test_name):
         """Proxy function to guarantee the base implementation of test_name is called.
