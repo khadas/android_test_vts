@@ -45,10 +45,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
   out << "\n\n";
   GenerateHeaderIncludeFiles(out, message);
   GenerateUsingDeclaration(out, message);
-  GenerateOpenNameSpaces(out);
-
-  out << "extern \"C\" {\n";
-  out.indent();
+  GenerateOpenNameSpaces(out, message);
 
   if (message.has_interface()) {
     InterfaceSpecificationMessage interface = message.interface();
@@ -57,6 +54,10 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     for (const auto attribute : interface.attribute()) {
       GenerateProfilerMethodDeclForAttribute(out, attribute);
     }
+
+    out << "extern \"C\" {\n";
+    out.indent();
+
     // Generate the declaration of main profiler function.
     out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_"
         << GetComponentName(message) << "(\n";
@@ -70,6 +71,9 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     out << "std::vector<void *> *args);\n";
     out.unindent();
     out.unindent();
+
+    out.unindent();
+    out << "}\n\n";
   } else {
     // For types.vts, just generate the declaration of profiler functions
     // for all user defined types.
@@ -78,10 +82,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     }
   }
 
-  out.unindent();
-  out << "}\n\n";
-
-  GenerateCloseNameSpaces(out);
+  GenerateCloseNameSpaces(out, message);
   out << "#endif\n";
 }
 
@@ -90,7 +91,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
   GenerateSourceIncludeFiles(out, message);
   GenerateUsingDeclaration(out, message);
   GenerateMacros(out, message);
-  GenerateOpenNameSpaces(out);
+  GenerateOpenNameSpaces(out, message);
 
   if (message.has_interface()) {
     InterfaceSpecificationMessage interface = message.interface();
@@ -99,7 +100,6 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     for (const auto attribute : interface.attribute()) {
       GenerateProfilerMethodImplForAttribute(out, attribute);
     }
-
     // Generate the main profiler function.
     out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_"
         << GetComponentName(message) << "(\n";
@@ -138,7 +138,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     }
   }
 
-  GenerateCloseNameSpaces(out);
+  GenerateCloseNameSpaces(out, message);
 }
 
 void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
@@ -261,12 +261,16 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
   out << "}\n\n";
 }
 
-void ProfilerCodeGenBase::GenerateOpenNameSpaces(Formatter& out) {
+void ProfilerCodeGenBase::GenerateOpenNameSpaces(Formatter& out,
+    const ComponentSpecificationMessage& message) {
   out << "namespace android {\n";
-  out << "namespace vts {\n\n";
+  out << "namespace vts {\n";
+  out << "namespace vts" << GetComponentName(message) << " {\n\n";
 }
 
-void ProfilerCodeGenBase::GenerateCloseNameSpaces(Formatter& out) {
+void ProfilerCodeGenBase::GenerateCloseNameSpaces(Formatter& out,
+    const ComponentSpecificationMessage& message) {
+  out << "}  // namespace vts" << GetComponentName(message) << "\n";
   out << "}  // namespace vts\n";
   out << "}  // namespace android\n";
 }

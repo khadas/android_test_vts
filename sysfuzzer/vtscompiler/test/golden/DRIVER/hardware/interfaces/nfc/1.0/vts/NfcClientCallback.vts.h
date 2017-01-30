@@ -14,13 +14,15 @@
 
 
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
-#include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <hidl/HidlSupport.h>
+#include <android/hardware/nfc/1.0/types.h>
 
 
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
+namespace vtsINfcClientCallback {
+
 
 class VtsNfcClientCallback: public INfcClientCallback {
  public:
@@ -41,6 +43,7 @@ sp<INfcClientCallback> VtsFuzzerCreateINfcClientCallback(const string& callback_
 
 
 
+}  // namespace vtsINfcClientCallback
 }  // namespace vts
 }  // namespace android
 #endif

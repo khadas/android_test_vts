@@ -18,6 +18,7 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
+namespace vtsINfc {
 
 extern "C" {
 
@@ -30,6 +31,7 @@ extern "C" {
             std::vector<void *> *args);
 }
 
+}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android
 #endif

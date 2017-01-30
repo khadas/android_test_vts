@@ -18,6 +18,7 @@
 #define __VTS_SYSFUZZER_COMPILER_DRIVER_CODEGENBASE_H__
 
 #include <hidl-util/Formatter.h>
+#include <hidl-util/FQName.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -130,7 +131,8 @@ class DriverCodeGenBase : public CodeGenBase {
       Formatter& out, const ComponentSpecificationMessage& message);
 
   // Generates code that closes the default namespaces.
-  void GenerateCloseNameSpaces(Formatter& out);
+  void GenerateCloseNameSpaces(Formatter& out,
+      const ComponentSpecificationMessage& message);
 
   // Generates code that starts the measurement.
   void GenerateCodeToStartMeasurement(Formatter& out);
