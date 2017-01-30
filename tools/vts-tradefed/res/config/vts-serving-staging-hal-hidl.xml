@@ -43,5 +43,6 @@
     <!-- option name="compatibility:include-filter" value="HalGraphicsMapperHidlTargetTest" / --><!-- need driver support -->
     <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
+    <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
