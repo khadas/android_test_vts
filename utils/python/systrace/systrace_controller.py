@@ -91,8 +91,9 @@ class SystraceController(object):
         if self.process_name:
             process_name_arg = '-a %s' % self.process_name
 
-        self._path_output = os.path.join(tempfile.mkdtemp(),
-                                         self.process_name + '.html')
+        tmp_dir = tempfile.mkdtemp()
+        tmp_filename = self.process_name if self.process_name else 'systrace'
+        self._path_output = os.path.join(tmp_dir, tmp_filename + '.html')
 
         cmd = ('python -u {script} hal sched '
                '{process_name_arg} -o {output}').format(
@@ -119,7 +120,7 @@ class SystraceController(object):
 
         if not success:
             logging.error('Failed to start systrace on process %s',
-                          process_name)
+                          self.process_name)
             stdout, stderr = process.communicate()
             logging.error('stdout: %s', line + stdout)
             logging.error('stderr: %s', stderr)
@@ -147,8 +148,10 @@ class SystraceController(object):
         self._subprocess.stdin.flush()
 
         # Wait for output to be written down
-        self._subprocess.communicate()
+        out, err = self._subprocess.communicate()
         logging.info('Systrace stopped for %s', self.process_name)
+        logging.info('Systrace stdout: %s', out)
+        logging.info('Systrace stderr: %s', err)
         return True
 
     def ReadLastOutput(self):
