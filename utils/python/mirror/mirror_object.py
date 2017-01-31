@@ -333,6 +333,61 @@ class MirrorObject(object):
             # SpecificationMessage.
             return None
 
+    def ArgToPb(self, arg_msg, value_msg):
+        """Converts args to a ProtoBuf message.
+
+        Args:
+            arg_msg: the ProtoBuf message where the result will be stored in.
+            value_msg: value given as an argument. it can be either Python
+                       data structure, a ProtoBuf message, or both.
+
+        Raises:
+            AttributeError: when unexpected type is seen.
+        """
+        if isinstance(value_msg, CompSpecMsg.VariableSpecificationMessage):
+            arg_msg.CopyFrom(value_msg)
+        elif isinstance(value_msg, int):
+            arg_msg.type = CompSpecMsg.TYPE_SCALAR
+            setattr(arg_msg.scalar_value, arg_msg.scalar_type, value_msg)
+        elif isinstance(value_msg, float):
+            arg_msg.type = CompSpecMsg.TYPE_SCALAR
+            arg_msg.scalar_value.float_t = value_msg
+            arg_msg.scalar_type = "float_t"
+        elif isinstance(value_msg, str):
+            if ((arg_msg.type == CompSpecMsg.TYPE_SCALAR and
+                 (arg_msg.scalar_type == "char_pointer" or
+                  arg_msg.scalar_type == "uchar_pointer")) or
+                arg_msg.type == CompSpecMsg.TYPE_STRING):
+                arg_msg.string_value.message = value_msg
+                arg_msg.string_value.length = len(value_msg)
+            else:
+                raise MirrorObjectError(
+                    "unsupported type %s for str" % arg_msg)
+        elif isinstance(value_msg, list):
+            if arg_msg.type == CompSpecMsg.TYPE_VECTOR:
+                first = True
+                for list_element in value_msg:
+                    if first:
+                        self.ArgToPb(arg_msg.vector_value[0], list_element)
+                        first = False
+                    else:
+                        self.ArgToPb(arg_msg.vector_value.add(), list_element)
+            elif arg_msg.type == CompSpecMsg.TYPE_ARRAY:
+                first = True
+                for list_element in value_msg:
+                    if first:
+                        self.ArgToPb(arg_msg.vector_value[0], list_element)
+                        first = False
+                    else:
+                        self.ArgToPb(arg_msg.vector_value.add(), list_element)
+                arg.vector_size = len(value_msg)
+            else:
+                raise MirrorObjectError(
+                    "unsupported arg_msg type %s for list" % arg_msg.type)
+        else:
+            raise MirrorObjectError(
+                "unsupported value type %s" % type(value_msg))
+
     # TODO: Guard against calls to this function after self.CleanUp is called.
     def __getattr__(self, api_name, *args, **kwargs):
         """Calls a target component's API.
@@ -355,96 +410,8 @@ class MirrorObject(object):
                     logging.debug("arg msg %s", arg_msg)
                     logging.debug("value %s", value_msg)
                     if value_msg is not None:
-                        # check whether value_msg is a message
-                        # value_msg.type == "primitive_value"?
-                        if isinstance(value_msg, int):
-                            arg_msg.type = CompSpecMsg.TYPE_SCALAR
-                            setattr(arg_msg.scalar_value, arg_msg.scalar_type, value_msg)
-                        elif isinstance(value_msg, float):
-                            arg_msg.type = CompSpecMsg.TYPE_SCALAR
-                            arg_msg.scalar_value.float_t = value_msg
-                            arg_msg.scalar_type = "float_t"
-                        elif isinstance(value_msg, str):
-                            if ((arg_msg.type == CompSpecMsg.TYPE_SCALAR and
-                                 (arg_msg.scalar_type == "char_pointer" or
-                                  arg_msg.scalar_type == "uchar_pointer")) or
-                                arg_msg.type == CompSpecMsg.TYPE_STRING):
-                                arg_msg.string_value.message = value_msg
-                                arg_msg.string_value.length = len(value_msg)
-                            else:
-                                raise MirrorObjectError(
-                                    "unsupported type %s for str" % arg_msg)
-                        elif isinstance(value_msg, list):
-                            if arg_msg.type == CompSpecMsg.TYPE_VECTOR:
-                                if arg_msg.vector_value[0].type == CompSpecMsg.TYPE_SCALAR:
-                                    first_item = True
-                                    scalar_type = arg_msg.vector_value[0].scalar_type
-                                    for value in value_msg:
-                                        if first_item:
-                                            scalar_value = arg_msg.vector_value[0]
-                                            first_item = False
-                                        else:
-                                            scalar_value = arg_msg.vector_value.add()
-                                        scalar_value.type == CompSpecMsg.TYPE_SCALAR
-                                        scalar_value.scalar_type = scalar_type
-                                        setattr(
-                                            scalar_value.scalar_value,
-                                            scalar_type,
-                                            value)
-                                else:
-                                    raise MirrorObjectError(
-                                        "unsupported type %s" % arg_msg.type)
-                            else:
-                                raise MirrorObjectError(
-                                    "unsupported type %s" % arg_msg.type)
-                        else:
-                            # TODO: check in advance (whether it's a message)
-                            if isinstance(
-                                   value_msg,
-                                   CompSpecMsg.VariableSpecificationMessage):
-                              if value_msg.type == CompSpecMsg.TYPE_STRUCT:
-                                  arg_msg.CopyFrom(value_msg)
-                              elif value_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
-                                  arg_msg.CopyFrom(value_msg)
-                              else:
-                                  raise MirrorObjectError(
-                                      "unknown msg type %s" % value_msg.type)
-                            else:
-                                raise MirrorObjectError(
-                                    "unknown type %s" % type(value_msg))
+                        self.ArgToPb(arg_msg, value_msg)
 
-                            try:
-                                for arg, value in zip(arg_msg.struct_value,
-                                                      value_msg.struct_value):
-                                    if value.type == CompSpecMsg.TYPE_SCALAR:
-                                        arg.scalar_type = value.scalar_type
-                                        setattr(arg.scalar_value, value.scalar_type,
-                                                getattr(value.scalar_value, value.scalar_type))
-                                    elif value.type == CompSpecMsg.TYPE_ENUM:
-                                        arg.scalar_type = value.scalar_type
-                                        if hasattr(value.scalar_value, value.scalar_type):
-                                            setattr(arg.scalar_value, value.scalar_type,
-                                                    getattr(value.scalar_value,
-                                                            value.scalar_type))
-                                        arg.enum_value.CopyFrom(value.enum_value)
-                                    elif value.type == CompSpecMsg.TYPE_STRING:
-                                        arg.string_value.message = value.string_value.message
-                                        arg.string_value.length = value.string_value.length
-                                    elif value.type == CompSpecMsg.TYPE_STRUCT:
-                                        # TODO: assign recursively
-                                        logging.error("TYPE_STRUCT unsupported")
-                                    elif value.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
-                                        logging.error("TYPE_FUNCTION_POINTER unsupported")
-                                    elif value.type == CompSpecMsg.TYPE_VECTOR:
-                                        logging.info("copy before arg %s", arg)
-                                        logging.info("copy before value %s", value)
-                                        # skip
-                                    else:
-                                        raise MirrorObjectError(
-                                            "unsupport type %s" % value.type)
-                            except AttributeError as e:
-                                logging.exception(e)
-                                raise
                 logging.debug("final msg %s", func_msg)
             else:
                 # TODO: use kwargs
