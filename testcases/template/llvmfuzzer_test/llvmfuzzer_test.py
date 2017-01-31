@@ -34,7 +34,6 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     Attributes:
         _dut: AndroidDevice, the device under test as config
-        _shell: ShellMirrorObject, shell mirror
         _testcases: string list, list of testcases to run
     """
     def setUpClass(self):
@@ -53,14 +52,12 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         logging.info("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
             self.fuzzer_configs)
 
-        self._dut = self.registerController(android_device)[0]
-        self._dut.shell.InvokeTerminal("one")
-        self._shell = self._dut.shell.one
-        self._shell.Execute("mkdir %s -p" % config.FUZZER_TEST_DIR)
+        self._dut = self.registerController(android_device, False)[0]
+        self._dut.adb.shell("mkdir %s -p" % config.FUZZER_TEST_DIR)
 
     def tearDownClass(self):
         """Deletes all copied data."""
-        self._shell.Execute("rm -rf %s" % config.FUZZER_TEST_DIR)
+        self._dut.adb.shell("rm -rf %s" % config.FUZZER_TEST_DIR)
 
     def PushFiles(self, testcase):
         """adb pushes testcase file to target.
@@ -142,7 +139,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         corpus = fuzzer_config.get("corpus", [])
         corpus_dir = os.path.join(config.FUZZER_TEST_DIR, "%s_corpus" % fuzzer)
 
-        self._shell.Execute("mkdir %s -p" % corpus_dir)
+        self._dut.adb.shell("mkdir %s -p" % corpus_dir)
         for idx, corpus_entry in enumerate(corpus):
             corpus_entry = corpus_entry.replace("x", "\\x")
             corpus_entry_file = os.path.join(corpus_dir, "input%s" % idx)
@@ -166,13 +163,14 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
         corpus_dir = self.CreateCorpus(fuzzer, fuzzer_config)
 
         chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, fuzzer)
-        self._shell.Execute(chmod_cmd)
+        self._dut.adb.shell(chmod_cmd)
 
         cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
         ld_path = "LD_LIBRARY_PATH=/data/local/tmp/64:/data/local/tmp/32:$LD_LIBRARY_PATH"
         test_cmd = "./%s" % fuzzer
 
-        fuzz_cmd = "%s && %s %s %s %s" % (cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
+        fuzz_cmd = "%s && %s %s %s %s > /dev/null" % (
+            cd_cmd, ld_path, test_cmd, corpus_dir, test_flags)
         logging.info("Executing: %s", fuzz_cmd)
         # TODO(trong): vts shell doesn't handle timeouts properly, change this after it does.
         try:
@@ -203,7 +201,7 @@ class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         # output is string of a hexdump from crash report file.
         # From the example above, output would be "0123456789abcdef".
-        output = self._shell.Execute(cmd)[const.STDOUT][0]
+        output = self._dut.adb.shell(cmd)
         remove_chars = ["\r", "\t", "\n", " "]
         for char in remove_chars:
             output = output.replace(char, "")
