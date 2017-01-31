@@ -150,7 +150,10 @@ public class DashboardMainServlet extends BaseServlet {
             byte[] value = result.getValue(STATUS_FAMILY, DATA_QUALIFIER);
             TestStatusMessage testStatusMessage =
                     VtsWebStatusMessage.TestStatusMessage.parseFrom(value);
-            failCountMap.put(tableName, testStatusMessage.getFailedTestcasesList().size());
+            if (failCountMap.containsKey(tableName)) {
+                int failCount = testStatusMessage.getFailedTestcasesList().size();
+                failCountMap.put(tableName, failCount);
+            }
         }
 
         if (showAll) {
