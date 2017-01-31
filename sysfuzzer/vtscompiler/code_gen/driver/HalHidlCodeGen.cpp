@@ -678,10 +678,15 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
       out.indent();
       int union_index = 0;
       for (const auto& union_value : attribute.union_value()) {
+        out << "if (var_msg.union_value(" << union_index << ").name() == \""
+            << union_value.name() << "\") {" << "\n";
+        out.indent();
         GenerateDriverImplForTypedVariable(
             out, union_value, "arg->" + union_value.name(),
             "var_msg.union_value(" + std::to_string(union_index) + ")");
         union_index++;
+        out.unindent();
+        out << "}" << "\n";
       }
       out.unindent();
       out << "}\n";
@@ -690,7 +695,7 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
     default:
     {
       cerr << __func__ << " unsupported attribute type " << attribute.type()
-          << "\n";
+           << "\n";
       exit(-1);
     }
   }
