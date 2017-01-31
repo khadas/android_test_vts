@@ -13,20 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# for platform/bionic/tests
-vts_test_lib_packages := \
-    libBionicStandardTests \
-    libfortify1-tests-gcc \
-    libfortify2-tests-gcc \
-    libfortify1-tests-clang \
-    libfortify2-tests-clang \
-    libBionicTests \
-    libBionicGtestMain \
-    libBionicLoaderTests \
-    libBionicCtsGtestMain \
-
 # for platform/bionic/tests/libs
 vts_test_lib_packages += \
+    libfortify1-tests-clang \
+    libfortify2-tests-clang \
     libtest_dt_runpath_a \
     libtest_dt_runpath_b \
     libtest_dt_runpath_c \
