@@ -90,6 +90,8 @@ string ComponentTypeToString(int component_type) {
       return "vibrator";
     case THERMAL:
       return "thermal";
+    case CONTEXTHUB:
+      return "contexthub";
     case SENSORS:
       return "sensors";
     case VR:
