@@ -71,6 +71,7 @@ td {
 
 #section-header {
     cursor: default;
+    user-select: none;
     color: #ee6e73;
 }
 
