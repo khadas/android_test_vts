@@ -38,7 +38,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.ir@1.0-IConsumerIr-vts.profiler \
   android.hardware.light@2.0-ILight-vts.profiler \
   android.hardware.memtrack@1.0-IMemtrack-vts.profiler \
-  android.hardware.gatekeeper@1.0-IMemtrack-vts.profiler \
+  android.hardware.gatekeeper@1.0-IGatekeeper-vts.profiler \
   android.hardware.nfc@1.0-INfc-vts.profiler \
   android.hardware.nfc@1.0-INfcClientCallback-vts.profiler \
   android.hardware.power@1.0-IPower-vts.profiler \
