@@ -18,6 +18,7 @@ vts_test_lib_hidl_packages := \
   libhidlbase \
   libhidltransport \
   android.hardware.boot.vts.driver@1.0 \
+  android.hardware.contexthub.vts.driver@1.0 \
   android.hardware.ir.vts.driver@1.0 \
   android.hardware.light.vts.driver@2.0 \
   android.hardware.memtrack.vts.driver@1.0 \
@@ -33,6 +34,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
   android.hardware.boot@1.0-IBootControl-vts.profiler \
+  android.hardware.contexthub@1.0-IContexthub-vts.profiler \
   android.hardware.ir@1.0-IConsumerIr-vts.profiler \
   android.hardware.light@2.0-ILight-vts.profiler \
   android.hardware.memtrack@1.0-IMemtrack-vts.profiler \
@@ -56,6 +58,7 @@ vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
   bluetooth_hidl_hal_test \
   boot_hidl_hal_test \
+  contexthub_hidl_hal_test \
   graphics_allocator_hidl_hal_test \
   graphics_mapper_hidl_hal_test \
   ir_hidl_hal_test \
