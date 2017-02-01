@@ -86,6 +86,8 @@ enum ComponentType {
   GRAPHICS_MAPPER = 20;
   // For a radio submodule
   RADIO = 21;
+  // For the context hub HAL.
+  CONTEXTHUB = 22;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;

@@ -34,6 +34,9 @@ vts_spec_file_list += \
   hardware/interfaces/tv/input/1.0/vts/TvInput.vts \
   hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts \
   hardware/interfaces/tv/input/1.0/vts/types.vts \
+  hardware/interfaces/contexthub/1.0/vts/Contexthub.vts \
+  hardware/interfaces/contexthub/1.0/vts/ContexthubCallback.vts \
+  hardware/interfaces/contexthub/1.0/vts/types.vts \
   hardware/interfaces/graphics/allocator/2.0/vts/Allocator.vts \
   hardware/interfaces/graphics/allocator/2.0/vts/AllocatorClient.vts \
   hardware/interfaces/graphics/allocator/2.0/vts/types.vts \
