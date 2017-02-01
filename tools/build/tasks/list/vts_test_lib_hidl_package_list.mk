@@ -21,6 +21,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.ir.vts.driver@1.0 \
   android.hardware.light.vts.driver@2.0 \
   android.hardware.memtrack.vts.driver@1.0 \
+  android.hardware.gatekeeper.vts.driver@1.0 \
   android.hardware.nfc.vts.driver@1.0 \
   android.hardware.power.vts.driver@1.0 \
   android.hardware.radio.vts.driver@1.0 \
@@ -35,6 +36,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.ir@1.0-IConsumerIr-vts.profiler \
   android.hardware.light@2.0-ILight-vts.profiler \
   android.hardware.memtrack@1.0-IMemtrack-vts.profiler \
+  android.hardware.gatekeeper@1.0-IMemtrack-vts.profiler \
   android.hardware.nfc@1.0-INfc-vts.profiler \
   android.hardware.nfc@1.0-INfcClientCallback-vts.profiler \
   android.hardware.power@1.0-IPower-vts.profiler \
@@ -59,6 +61,7 @@ vts_test_lib_hidl_packages += \
   ir_hidl_hal_test \
   light_hidl_hal_test \
   memtrack_hidl_hal_test \
+  gatekeeper_hidl_hal_test \
   nfc_hidl_hal_test \
   power_hidl_hal_test \
   sensors_hidl_hal_test \
