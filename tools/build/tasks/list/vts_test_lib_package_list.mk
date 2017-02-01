@@ -15,6 +15,8 @@
 
 # for platform/bionic/tests/libs
 vts_test_lib_packages += \
+    libcfi-test \
+    libcfi-test-bad \
     libfortify1-tests-clang \
     libfortify2-tests-clang \
     libtest_dt_runpath_a \
