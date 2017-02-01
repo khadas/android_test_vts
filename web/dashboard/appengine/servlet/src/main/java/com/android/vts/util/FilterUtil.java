@@ -118,7 +118,7 @@ public class FilterUtil {
                 if (term.contains(TERM_DELIMITER)) {
                     String[] terms = term.split(TERM_DELIMITER, 2);
                     if (terms.length == 2 && Key.isKey(terms[0].toLowerCase())) {
-                        searchPairs.put(Key.parse(terms[0].toLowerCase()), terms[1]);
+                        searchPairs.put(Key.parse(terms[0].toLowerCase()), terms[1].toLowerCase());
                     }
                 }
             }
