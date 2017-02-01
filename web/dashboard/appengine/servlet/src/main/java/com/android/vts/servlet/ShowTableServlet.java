@@ -69,6 +69,7 @@ public class ShowTableServlet extends BaseServlet {
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 10;
+    private static final int MAX_SCAN_DAYS = 30;
 
     // Row labels for the test time-formatted information.
     private static final String[] TIME_INFO_NAMES = {"Test Start", "Test End"};
@@ -274,7 +275,7 @@ public class ShowTableServlet extends BaseServlet {
                 }
             }
             scanner.close();
-            if (days >= MAX_BUILD_IDS_PER_PAGE) {
+            if (days >= MAX_SCAN_DAYS) {
                 break;
             } else if (tests.size() < MAX_BUILD_IDS_PER_PAGE && showMostRecent
                 && BigtableHelper.hasOlder(table, startTime)) {
