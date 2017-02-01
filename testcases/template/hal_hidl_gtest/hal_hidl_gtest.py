@@ -47,6 +47,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
             keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
             keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
+            keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
         ]
         self.getUserParams(opt_param_names=opt_params)
 
@@ -91,6 +92,17 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 if any(cmd_results[const.EXIT_CODE]):
                     logging.warn("The required file (prefix: %s) not found.",
                                  file_path_prefix)
+                    self._skip_all_testcases = True
+
+        if not self._skip_all_testcases:
+            feature = str(getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
+            if feature:
+                cmd_results = self.shell.Execute("lshal")
+                if (any(cmd_results[const.EXIT_CODE])
+                    or feature not in cmd_results[const.STDOUT][0]):
+                    logging.warn("The required feature %s not found.",
+                                 feature)
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:

@@ -85,6 +85,7 @@ class ConfigKeys(object):
     IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
     IKEY_PRECONDITION_FEATURE = "precondition_feature"
     IKEY_PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix"
+    IKEY_PRECONDITION_LSHAL = "precondition_lshal"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
