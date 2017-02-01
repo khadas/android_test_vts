@@ -97,6 +97,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
     static final String PRECONDITION_FEATURE = "precondition_feature";
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
+    static final String PRECONDITION_LSHAL = "precondition_lshal";
     static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
@@ -138,6 +139,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "precondition-file-path-prefix",
         description = "The path prefix of a file (e.g., shared lib) needed to run the test.")
     private String mPreconditionFilePathPrefix = null;
+
+    @Option(name = "precondition-lshal",
+        description = "The name of a `lshal`-listable feature needed to run the test.")
+    private String mPreconditionLshal = null;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -613,6 +618,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mPreconditionFilePathPrefix != null) {
           jsonObject.put(PRECONDITION_FILE_PATH_PREFIX, mPreconditionFilePathPrefix);
           CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
+        }
+
+        if (mPreconditionLshal != null) {
+          jsonObject.put(PRECONDITION_LSHAL, mPreconditionLshal);
+          CLog.i("Added %s to the Json object", PRECONDITION_LSHAL);
         }
 
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
