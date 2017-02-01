@@ -364,7 +364,8 @@ class MirrorObject(object):
                 raise MirrorObjectError(
                     "unsupported type %s for str" % arg_msg)
         elif isinstance(value_msg, list):
-            if arg_msg.type == CompSpecMsg.TYPE_VECTOR:
+            if (arg_msg.type == CompSpecMsg.TYPE_VECTOR or
+                arg_msg.type == CompSpecMsg.TYPE_ARRAY):
                 first = True
                 for list_element in value_msg:
                     if first:
@@ -372,15 +373,7 @@ class MirrorObject(object):
                         first = False
                     else:
                         self.ArgToPb(arg_msg.vector_value.add(), list_element)
-            elif arg_msg.type == CompSpecMsg.TYPE_ARRAY:
-                first = True
-                for list_element in value_msg:
-                    if first:
-                        self.ArgToPb(arg_msg.vector_value[0], list_element)
-                        first = False
-                    else:
-                        self.ArgToPb(arg_msg.vector_value.add(), list_element)
-                arg.vector_size = len(value_msg)
+                arg_msg.vector_size = len(value_msg)
             else:
                 raise MirrorObjectError(
                     "unsupported arg_msg type %s for list" % arg_msg.type)
