@@ -87,6 +87,7 @@ function vts_multidevice_target_setup {
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/tv/cec/1.0/vts/*.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/types.vts /data/local/tmp/spec/
+  adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/contexthub/1.0/vts/*.vts /data/local/tmp/spec/
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
