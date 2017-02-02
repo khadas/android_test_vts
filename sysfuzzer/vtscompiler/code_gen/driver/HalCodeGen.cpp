@@ -898,10 +898,10 @@ void HalCodeGen::GenerateSubStructGetAttributeFunctionCall(
           '_');
 
   out << "if (func_msg->parent_path() == \"" << current_path << "\") {"
-         << "\n";
+      << "\n";
   out.indent();
   out << "      return GetAttribute__" << current_path_printable
-         << "(func_msg, result);" << "\n";
+      << "(func_msg, result);" << "\n";
   out.unindent();
   out << "}" << "\n";
 
