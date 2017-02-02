@@ -14,13 +14,16 @@
 
 
 #include <android/hardware/nfc/1.0/INfc.h>
-#include <android/hardware/nfc/1.0/INfc.h>
 #include <hidl/HidlSupport.h>
+#include <android/hardware/nfc/1.0/INfcClientCallback.h>
+#include <android/hardware/nfc/1.0/types.h>
 
 
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
+namespace vtsINfc {
+
 class FuzzerExtended_INfc : public FuzzerBase {
  public:
     FuzzerExtended_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
@@ -39,6 +42,7 @@ class FuzzerExtended_INfc : public FuzzerBase {
 extern "C" {
 extern android::vts::FuzzerBase* vts_func_4_android_hardware_nfc_1_INfc_();
 }
+}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android
 #endif

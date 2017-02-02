@@ -287,32 +287,46 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
 
   // Include imported classes.
   for (const auto& import : message.import()) {
-    string mutable_import = import;
-    string base_filename = mutable_import.substr(
-        mutable_import.find_last_of("::") + 1);
+    FQName import_name = FQName(import);
+    string package_name = import_name.package();
+    string package_version = import_name.version();
+    string component_name = import_name.name();
+    ReplaceSubString(package_name, ".", "/");
 
-    out << "#include <" << package_path << "/" << GetPackageVersion(message)
-        << "/" << base_filename << ".h>\n";
+    out << "#include <" << package_name << "/" << package_version << "/"
+        << component_name << ".h>\n";
   }
   out << "\n\n";
 }
 
 void HalHidlProfilerCodeGen::GenerateSourceIncludeFiles(Formatter& out,
-  const ComponentSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message) {
   // First include the corresponding profiler header file.
   out << "#include \"" << input_vts_file_path_ << ".h\"\n";
 
-  // Include the header file for types profiler.
-  std::string header_path_prefix = input_vts_file_path_.substr(
-      0, input_vts_file_path_.find_last_of("\\/"));
-  bool include_types = false;
+  // Include the import files.
   for (const auto& import : message.import()) {
-    if (endsWith(import, "::types")) {
-      include_types = true;
+    FQName import_name = FQName(import);
+    string package_name = import_name.package();
+    string package_version = import_name.version();
+    string component_name = import_name.name();
+    string package_path = package_name;
+    ReplaceSubString(package_path, ".", "/");
+    if (package_name == message.package()
+        && package_version
+            == GetVersionString(message.component_type_version())) {
+      if (component_name == "types") {
+        out << "#include \""
+            << input_vts_file_path_.substr(
+                0, input_vts_file_path_.find_last_of("\\/"))
+            << "/types.vts.h\"\n";
+      } else {
+        out << "#include \""
+            << input_vts_file_path_.substr(
+                0, input_vts_file_path_.find_last_of("\\/")) << "/"
+            << component_name.substr(1) << ".vts.h\"\n";
+      }
     }
-  }
-  if (include_types || message.component_name() == "types") {
-    out << "#include \"" << header_path_prefix << "/types.vts.h\"\n";
   }
   out << "\n";
 }

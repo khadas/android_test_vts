@@ -1,4 +1,5 @@
 #include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
+#include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 
 using namespace android::hardware::nfc::V1_0;
@@ -8,6 +9,7 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
+namespace vtsINfc {
 
 
 void HIDL_INSTRUMENTATION_FUNCTION_INfc(
@@ -334,5 +336,6 @@ void HIDL_INSTRUMENTATION_FUNCTION_INfc(
     }
 }
 
+}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android

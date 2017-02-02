@@ -67,7 +67,7 @@ void DriverCodeGenBase::GenerateHeaderFile(
   GenerateClassHeader(out, message, fuzzer_extended_class_name);
   out << "\n\n";
   GenerateHeaderGlobalFunctionDeclarations(out, message);
-  GenerateCloseNameSpaces(out);
+  GenerateCloseNameSpaces(out, message);
   out << "#endif" << "\n";
 }
 
@@ -86,7 +86,7 @@ void DriverCodeGenBase::GenerateSourceFile(
   GenerateOpenNameSpaces(out, message);
   GenerateClassImpl(out, message, fuzzer_extended_class_name);
   GenerateCppBodyGlobalFunctions(out, message, fuzzer_extended_class_name);
-  GenerateCloseNameSpaces(out);
+  GenerateCloseNameSpaces(out, message);
 }
 
 void DriverCodeGenBase::GenerateClassHeader(Formatter& out,
@@ -189,8 +189,11 @@ void DriverCodeGenBase::GenerateCppBodyGlobalFunctions(Formatter& out,
   out << "extern \"C\" {" << "\n";
   out << "android::vts::FuzzerBase* " << function_name_prefix << "() {\n";
   out.indent();
-  out << "return (android::vts::FuzzerBase*) " << "new android::vts::"
-      << fuzzer_extended_class_name << "();\n";
+  out << "return (android::vts::FuzzerBase*) " << "new android::vts::";
+  if (message.component_class() == HAL_HIDL) {
+    out << "vts" << message.component_name() << "::";
+  }
+  out << fuzzer_extended_class_name << "();\n";
   out.unindent();
   out << "}\n\n";
   out << "}\n";
@@ -256,8 +259,8 @@ void DriverCodeGenBase::GenerateNamespaceName(
   }
 }
 
-void DriverCodeGenBase::GenerateOpenNameSpaces(
-    Formatter& out, const ComponentSpecificationMessage& message) {
+void DriverCodeGenBase::GenerateOpenNameSpaces(Formatter& out,
+    const ComponentSpecificationMessage& message) {
   if (message.component_class() == HAL_HIDL && message.has_package()) {
     out << "using namespace ";
     GenerateNamespaceName(out, message);
@@ -266,9 +269,16 @@ void DriverCodeGenBase::GenerateOpenNameSpaces(
 
   out << "namespace android {" << "\n";
   out << "namespace vts {" << "\n";
+  if (message.component_class() == HAL_HIDL) {
+    out << "namespace vts" << message.component_name() << " {\n\n";
+  }
 }
 
-void DriverCodeGenBase::GenerateCloseNameSpaces(Formatter& out) {
+void DriverCodeGenBase::GenerateCloseNameSpaces(Formatter& out,
+    const ComponentSpecificationMessage& message) {
+  if (message.component_class() == HAL_HIDL) {
+    out << "}  // namespace vts" << message.component_name() << "\n";
+  }
   out << "}  // namespace vts" << "\n";
   out << "}  // namespace android" << "\n";
 }
