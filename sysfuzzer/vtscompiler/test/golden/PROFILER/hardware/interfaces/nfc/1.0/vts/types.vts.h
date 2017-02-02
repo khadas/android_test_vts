@@ -16,14 +16,13 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
+namespace vtstypes {
 
-extern "C" {
-    void profile____android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* arg_name,
-    ::android::hardware::nfc::V1_0::NfcEvent arg_val_name);
-    void profile____android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* arg_name,
-    ::android::hardware::nfc::V1_0::NfcStatus arg_val_name);
-}
-
+void profile____android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* arg_name,
+::android::hardware::nfc::V1_0::NfcEvent arg_val_name);
+void profile____android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* arg_name,
+::android::hardware::nfc::V1_0::NfcStatus arg_val_name);
+}  // namespace vtstypes
 }  // namespace vts
 }  // namespace android
 #endif
