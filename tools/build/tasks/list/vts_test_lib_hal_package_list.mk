@@ -17,4 +17,5 @@ vts_test_lib_hal_packages := \
   android.hardware.tests.libbinder \
   android.hardware.tests.libhwbinder@1.0 \
   android.hardware.tests.libhwbinder@1.0-impl \
+  android.hardware.tests.msgq@1.0 \
   lights.vts \
