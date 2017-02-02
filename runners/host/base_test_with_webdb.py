@@ -95,25 +95,6 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self.enable_profiling = self.getUserParam(
             keys.ConfigKeys.IKEY_ENABLE_PROFILING, default_value=False)
 
-        self._systrace_controller = None
-        enable_systrace = self.getUserParam(
-            keys.ConfigKeys.IKEY_ENABLE_SYSTRACE, default_value=False)
-        if enable_systrace:
-            systrace_process_name = self.getUserParam(
-                keys.ConfigKeys.IKEY_SYSTRACE_PROCESS_NAME, default_value='')
-            systrace_process_name = str(systrace_process_name)
-            data_file_path = self.getUserParam(
-                keys.ConfigKeys.IKEY_DATA_FILE_PATH, default_value=None)
-            if data_file_path:
-                android_vts_path = os.path.normpath(
-                    os.path.join(data_file_path, '..'))
-
-                self._systrace_controller = systrace_controller.SystraceController(
-                    android_vts_path, process_name=systrace_process_name)
-            else:
-                logging.error('Cannot create systrace controller object: '
-                              'data_file_path not available')
-
         self.test_module_name = self.getUserParam(
             keys.ConfigKeys.KEY_TESTBED_NAME,
             log_warning_and_continue_if_not_found=True,
@@ -130,6 +111,8 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             self._report_msg.host_info.hostname = socket.gethostname()
             self.SetDeviceInfo(self._report_msg)
             self.InitializeCoverage()
+
+        self.InitializeSystrace()
 
         self._profiling = {}
         self._profiling_data = []
@@ -572,6 +555,62 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
         self._profiling[name].x_axis_label = x_axis_label
         self._profiling[name].y_axis_label = y_axis_label
         self._profiling[name].options.extend(options)
+
+    def GetDeviceSerial(self, device_index=0):
+        """Get device serial.
+
+        Args:
+            device_index: int, device index in device list. Default to 0.
+
+        Returns:
+            string, device serial. None if device at the index does
+            not exist; Empty string if device exists but serial information
+            is not available.
+        """
+        devices = self.getUserParam(
+            _ANDROID_DEVICE,
+            log_warning_and_continue_if_not_found=True,
+            default_value=[])
+
+        if len(devices) <= device_index:
+            logging.error("Device  index %s does not exist.", device_index)
+            logging.error("Devices: %s", devices)
+            return None
+
+        if keys.ConfigKeys.IKEY_SERIAL not in devices[device_index]:
+            logging.error("Serial for device at index %s is not available.",
+                          device_index)
+            logging.error("Devices: %s", devices)
+            return ""
+
+        return devices[device_index][keys.ConfigKeys.IKEY_SERIAL]
+
+    def InitializeSystrace(self):
+        """Initialize systrace controller if enabled."""
+        self._systrace_controller = None
+
+        enable_systrace = self.getUserParam(
+            keys.ConfigKeys.IKEY_ENABLE_SYSTRACE, default_value=False)
+        if not enable_systrace:
+            return True
+
+        systrace_process_name = self.getUserParam(
+            keys.ConfigKeys.IKEY_SYSTRACE_PROCESS_NAME, default_value='')
+        systrace_process_name = str(systrace_process_name)
+        data_file_path = self.getUserParam(
+            keys.ConfigKeys.IKEY_DATA_FILE_PATH, default_value=None)
+        if not data_file_path:
+            logging.error('Cannot create systrace controller object: '
+                          'data_file_path not available')
+            return False
+
+        android_vts_path = os.path.normpath(os.path.join(data_file_path, '..'))
+        self._systrace_controller = systrace_controller.SystraceController(
+            android_vts_path,
+            # TODO: handle device_serial for multi-device
+            device_serial=self.GetDeviceSerial(0),
+            process_name=systrace_process_name)
+        return True
 
     def IsCoverageConfigSpecified(self):
         """Determines if the config file specifies modules for coverage.

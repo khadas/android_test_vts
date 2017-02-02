@@ -32,15 +32,21 @@ class SystraceController(object):
         _android_vts_path: string, path to android-vts
         _path_output: string, systrace temporally output path
         _path_systrace_script: string, path to systrace controller python script
+        _device_serial: string, device serial string
         _subprocess: subprocess.Popen, a subprocess objects of systrace shell command
         is_valid: boolean, whether the current environment setting for
                   systrace is valid
         process_name: string, process name to trace. The value can be empty.
     '''
 
-    def __init__(self, android_vts_path, process_name=''):
+    def __init__(self, android_vts_path, device_serial, process_name=''):
         self._android_vts_path = android_vts_path
         self._path_output = None
+        self._device_serial = device_serial
+        if not device_serial:
+            logging.warning(
+                'Device serial is not provided for systrace. '
+                'Tool will not start if multiple devices are connected.')
         self.process_name = process_name
         self._path_systrace_script = os.path.join(android_vts_path,
                                                   PATH_SYSTRACE_SCRIPT)
@@ -91,14 +97,19 @@ class SystraceController(object):
         if self.process_name:
             process_name_arg = '-a %s' % self.process_name
 
+        device_serial_arg = ''
+        if self._device_serial:
+            device_serial_arg = '--serial=%s' % self._device_serial
+
         tmp_dir = tempfile.mkdtemp()
         tmp_filename = self.process_name if self.process_name else 'systrace'
-        self._path_output = os.path.join(tmp_dir, tmp_filename + '.html')
+        self._path_output = str(os.path.join(tmp_dir, tmp_filename + '.html'))
 
         cmd = ('python -u {script} hal sched '
-               '{process_name_arg} -o {output}').format(
+               '{process_name_arg} {serial} -o {output}').format(
                    script=self._path_systrace_script,
                    process_name_arg=process_name_arg,
+                   serial=device_serial_arg,
                    output=self._path_output)
         process = subprocess.Popen(
             str(cmd),
@@ -180,6 +191,7 @@ class SystraceController(object):
         if not report_path:
             logging.error('report path supplied is None')
             return False
+        report_path = str(report_path)
 
         if not self._path_output:
             logging.error(
