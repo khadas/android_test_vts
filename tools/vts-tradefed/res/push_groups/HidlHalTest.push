@@ -45,11 +45,11 @@ DATA/lib64/android.hardware.vibrator.vts.driver@1.0.so->/data/local/tmp/64/andro
 DATA/lib/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.vr.vts.driver@1.0.so
 DATA/lib64/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.vr.vts.driver@1.0.so
 
-DATA/lib/android.hardware.boot@1.0-IBootControl-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0.profiler.so
-DATA/lib64/android.hardware.boot@1.0-IBootControl-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0.profiler.so
+DATA/lib/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0.profiler.so
+DATA/lib64/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0.profiler.so
 
-DATA/lib/android.hardware.ir@1.0-IConsumerIr-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0.profiler.so
-DATA/lib64/android.hardware.ir@1.0-IConsumerIr-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0.profiler.so
+DATA/lib/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0.profiler.so
+DATA/lib64/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0.profiler.so
 
 DATA/lib/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.light@2.0.profiler.so
 DATA/lib64/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.light@2.0.profiler.so
@@ -57,14 +57,14 @@ DATA/lib64/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/64
 DATA/lib/android.hardware.memtrack@1.0-IMemtrack-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.memtrack@1.0.profiler.so
 DATA/lib64/android.hardware.memtrack@1.0-IMemtrack-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.memtrack@1.0.profiler.so
 
-DATA/lib/android.hardware.nfc@1.0-INfc-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.nfc@1.0.profiler.so
-DATA/lib64/android.hardware.nfc@1.0-INfc-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.nfc@1.0.profiler.so
+DATA/lib/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.nfc@1.0.profiler.so
+DATA/lib64/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.nfc@1.0.profiler.so
 
 DATA/lib/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.power@1.0.profiler.so
 DATA/lib64/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.power@1.0.profiler.so
 
-DATA/lib/android.hardware.radio@1.0-IRadio-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.radio@1.0.profiler.so
-DATA/lib64/android.hardware.radio@1.0-IRadio-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.radio@1.0.profiler.so
+DATA/lib/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.radio@1.0.profiler.so
+DATA/lib64/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.radio@1.0.profiler.so
 
 DATA/lib/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.sensors@1.0.profiler.so
 DATA/lib64/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.sensors@1.0.profiler.so
