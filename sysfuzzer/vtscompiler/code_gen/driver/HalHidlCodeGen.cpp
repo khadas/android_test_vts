@@ -342,21 +342,20 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     const string& fuzzer_extended_class_name) {
   if (message.component_name() != "types"
       && !endsWith(message.component_name(), "Callback")) {
+    for (const auto attribute : message.interface().attribute()) {
+      GenerateAllFunctionDeclForAttribute(out, attribute);
+    }
     DriverCodeGenBase::GenerateClassHeader(out, message,
                                            fuzzer_extended_class_name);
   } else if (message.component_name() == "types") {
     for (const auto attribute : message.attribute()) {
-      GenerateDriverDeclForAttribute(out, attribute);
-      if (attribute.type() == TYPE_ENUM) {
-        string attribute_name = ClearStringWithNameSpaceAccess(
-               attribute.name());
-        out << attribute.name() << " " << "Random" << attribute_name
-            << "();\n";
-      }
-      GenerateVerificationDeclForAttribute(out, attribute);
-      GenerateSetResultDeclForAttribute(out, attribute);
-    }
+      GenerateAllFunctionDeclForAttribute(out, attribute);
+    };
   } else if (endsWith(message.component_name(), "Callback")) {
+    for (const auto attribute : message.interface().attribute()) {
+      GenerateAllFunctionDeclForAttribute(out, attribute);
+    }
+
     out << "\n";
     out << "class Vts" << message.component_name().substr(1) << ": public "
         << message.component_name() << " {" << "\n";
@@ -426,22 +425,19 @@ void HalHidlCodeGen::GenerateClassImpl(Formatter& out,
   if (message.component_name() != "types"
       && !endsWith(message.component_name(), "Callback")) {
     for (auto attribute : message.interface().attribute()) {
-      GenerateDriverImplForAttribute(out, attribute);
-      GenerateRandomFunctionForAttribute(out, attribute);
-      GenerateVerificationImplForAttribute(out, attribute);
-      GenerateSetResultImplForAttribute(out, attribute);
+      GenerateAllFunctionImplForAttribute(out, attribute);
     }
     GenerateGetServiceImpl(out, message, fuzzer_extended_class_name);
     DriverCodeGenBase::GenerateClassImpl(out, message,
                                          fuzzer_extended_class_name);
   } else if (message.component_name() == "types") {
     for (auto attribute : message.attribute()) {
-      GenerateDriverImplForAttribute(out, attribute);
-      GenerateRandomFunctionForAttribute(out, attribute);
-      GenerateVerificationImplForAttribute(out, attribute);
-      GenerateSetResultImplForAttribute(out, attribute);
+      GenerateAllFunctionImplForAttribute(out, attribute);
     }
   } else if (endsWith(message.component_name(), "Callback")) {
+    for (auto attribute : message.interface().attribute()) {
+      GenerateAllFunctionImplForAttribute(out, attribute);
+    }
     GenerateCppBodyCallbackFunction(out, message, fuzzer_extended_class_name);
   }
 }
@@ -451,19 +447,24 @@ void HalHidlCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
     const string& fuzzer_extended_class_name) {
   DriverCodeGenBase::GenerateHeaderIncludeFiles(out, message,
                                                 fuzzer_extended_class_name);
-  if (message.has_component_name()) {
-    string package_path = message.package();
-    ReplaceSubString(package_path, ".", "/");
 
-    out << "#include <" << package_path << "/"
-        << GetVersionString(message.component_type_version()) << "/"
-        << message.component_name() << ".h>" << "\n";
-    if (message.component_name() != "types") {
-      out << "#include <" << package_path << "/"
-          << GetVersionString(message.component_type_version()) << "/"
-          << message.component_name() << ".h>" << "\n";
-    }
-    out << "#include <hidl/HidlSupport.h>" << "\n";
+  string package_path = message.package();
+  ReplaceSubString(package_path, ".", "/");
+
+  out << "#include <" << package_path << "/"
+      << GetVersionString(message.component_type_version()) << "/"
+      << message.component_name() << ".h>" << "\n";
+  out << "#include <hidl/HidlSupport.h>" << "\n";
+
+  for (const auto& import : message.import()) {
+    FQName import_name = FQName(import);
+    string package_name = import_name.package();
+    string package_version = import_name.version();
+    string component_name = import_name.name();
+    ReplaceSubString(package_name, ".", "/");
+
+    out << "#include <" << package_name << "/" << package_version << "/"
+        << component_name << ".h>\n";
   }
   out << "\n\n";
 }
@@ -475,59 +476,35 @@ void HalHidlCodeGen::GenerateSourceIncludeFiles(Formatter& out,
                                                 fuzzer_extended_class_name);
   out << "#include <hidl/HidlSupport.h>\n";
   string input_vfs_file_path(input_vts_file_path_);
-  if (message.has_component_name()) {
-    string package_path = message.package();
+  string package_path = message.package();
+  ReplaceSubString(package_path, ".", "/");
+  out << "#include <" << package_path << "/"
+      << GetVersionString(message.component_type_version()) << "/"
+      << message.component_name() << ".h>" << "\n";
+  for (const auto& import : message.import()) {
+    FQName import_name = FQName(import);
+    string package_name = import_name.package();
+    string package_version = import_name.version();
+    string component_name = import_name.name();
+    string package_path = package_name;
     ReplaceSubString(package_path, ".", "/");
-    out << "#include <" << package_path << "/"
-        << GetVersionString(message.component_type_version()) << "/"
-        << message.component_name() << ".h>" << "\n";
-    for (const auto& import : message.import()) {
-      string mutable_import = import;
-
-      string base_filename = mutable_import.substr(
-          mutable_import.find_last_of("::") + 1);
-      string base_dirpath = mutable_import.substr(
-          0, mutable_import.find_last_of("::") - 1);
-      string base_dirpath_without_version = base_dirpath.substr(
-          0, mutable_import.find_last_of("@"));
-      string base_dirpath_version = base_dirpath.substr(
-          mutable_import.find_last_of("@") + 1);
-      ReplaceSubString(base_dirpath_without_version, ".", "/");
-      base_dirpath = base_dirpath_without_version + "/" + base_dirpath_version;
-
-      string package_path_with_version = package_path + "/" +
-          GetVersionString(message.component_type_version());
-      if (base_dirpath == package_path_with_version) {
-        if (base_filename == "types") {
-          out << "#include \""
-              << input_vfs_file_path.substr(
-                  0, input_vfs_file_path.find_last_of("\\/")) << "/types.vts.h\""
-              << "\n";
-        }
-        if (base_filename != "types") {
-          if (message.component_name() != base_filename) {
-            out << "#include <" << package_path << "/"
-                << GetVersionString(message.component_type_version()) << "/"
-                << base_filename << ".h>" << "\n";
-          }
-          if (base_filename.substr(0, 1) == "I") {
-            out << "#include \""
-                << input_vfs_file_path.substr(
-                    0, input_vfs_file_path.find_last_of("\\/")) << "/"
-                << base_filename.substr(1, base_filename.length() - 1)
-                << ".vts.h\"" << "\n";
-          }
-        } else if (message.component_name() != base_filename) {
-          // TODO: consider restoring this when hidl packaging is fully defined.
-          // cpp_ss << "#include <" << base_dirpath << base_filename << ".h>" << "\n";
-          out << "#include <" << package_path << "/"
-              << GetVersionString(message.component_type_version()) << "/"
-              << base_filename << ".h>" << "\n";
-        }
+    if (package_name == message.package()
+        && package_version
+            == GetVersionString(message.component_type_version())) {
+      if (component_name == "types") {
+        out << "#include \""
+            << input_vfs_file_path.substr(
+                0, input_vfs_file_path.find_last_of("\\/"))
+            << "/types.vts.h\"\n";
       } else {
-        out << "#include <" << base_dirpath << "/"
-            << base_filename << ".h>" << "\n";
+        out << "#include \""
+            << input_vfs_file_path.substr(
+                0, input_vfs_file_path.find_last_of("\\/")) << "/"
+            << component_name.substr(1) << ".vts.h\"\n";
       }
+    } else {
+      out << "#include <" << package_path << "/" << package_version << "/"
+          << component_name << ".h>\n";
     }
   }
 }
@@ -547,7 +524,15 @@ void HalHidlCodeGen::GeneratePrivateMemberDeclarations(Formatter& out,
   out << "sp<" << message.component_name() << "> hw_binder_proxy_;" << "\n";
 }
 
-void HalHidlCodeGen::GenerateRandomFunctionForAttribute(Formatter& out,
+void HalHidlCodeGen::GenerateRandomFunctionDeclForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  if (attribute.type() == TYPE_ENUM) {
+    string attribute_name = ClearStringWithNameSpaceAccess(attribute.name());
+    out << attribute.name() << " " << "Random" << attribute_name << "();\n";
+  }
+}
+
+void HalHidlCodeGen::GenerateRandomFunctionImplForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
   // Random value generator
   if (attribute.type() == TYPE_ENUM) {
@@ -828,8 +813,10 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_CALLBACK:
     {
-      out << arg_name << " = VtsFuzzerCreate" << val.predefined_type()
-          << "(callback_socket_name);\n";
+      string local_name = val.predefined_type().substr(
+          val.predefined_type().find_last_of("::") + 1);
+      out << arg_name << " = vts" << local_name << "::VtsFuzzerCreate"
+          << local_name << "(callback_socket_name);\n";
       break;
     }
     case TYPE_HANDLE:
@@ -1297,6 +1284,22 @@ void HalHidlCodeGen::GenerateSetResultImplForAttribute(Formatter& out,
                                         "result_value");
   out.unindent();
   out << "}\n\n";
+}
+
+void HalHidlCodeGen::GenerateAllFunctionDeclForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  GenerateDriverDeclForAttribute(out, attribute);
+  GenerateRandomFunctionDeclForAttribute(out, attribute);
+  GenerateVerificationDeclForAttribute(out, attribute);
+  GenerateSetResultDeclForAttribute(out, attribute);
+}
+
+void HalHidlCodeGen::GenerateAllFunctionImplForAttribute(Formatter& out,
+    const VariableSpecificationMessage& attribute) {
+  GenerateDriverImplForAttribute(out, attribute);
+  GenerateRandomFunctionImplForAttribute(out, attribute);
+  GenerateVerificationImplForAttribute(out, attribute);
+  GenerateSetResultImplForAttribute(out, attribute);
 }
 
 bool HalHidlCodeGen::CanElideCallback(
