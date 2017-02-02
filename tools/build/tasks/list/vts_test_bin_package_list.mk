@@ -14,6 +14,8 @@
 # limitations under the License.
 
 vts_test_bin_packages := \
+    mq_benchmark_service \
+    mq_benchmark_client \
     libhwbinder_benchmark \
     libbinder_benchmark \
     vts_test_binary_crash_app \

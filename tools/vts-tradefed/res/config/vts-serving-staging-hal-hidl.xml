@@ -22,6 +22,7 @@
     <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputTest" />
     <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
     <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
+    <option name="compatibility:include-filter" value="FmqPerformanceTest" />
     <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
     <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
     <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
