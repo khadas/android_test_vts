@@ -348,6 +348,8 @@ class MirrorObject(object):
             arg_msg.CopyFrom(value_msg)
         elif isinstance(value_msg, int):
             arg_msg.type = CompSpecMsg.TYPE_SCALAR
+            if not arg_msg.scalar_type:
+                arg_msg.scalar_type = "int32_t"
             setattr(arg_msg.scalar_value, arg_msg.scalar_type, value_msg)
         elif isinstance(value_msg, float):
             arg_msg.type = CompSpecMsg.TYPE_SCALAR
