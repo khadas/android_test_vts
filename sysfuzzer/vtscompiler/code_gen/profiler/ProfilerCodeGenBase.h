@@ -18,6 +18,7 @@
 #define SYSFUZZER_VTSCOMPILER_CODE_GEN_PROFILER_PROFILERCODEGENBASE_H_
 
 #include <hidl-util/Formatter.h>
+#include <hidl-util/FQName.h>
 #include <iostream>
 #include <string>
 
@@ -166,8 +167,10 @@ class ProfilerCodeGenBase {
     const VariableSpecificationMessage& attribute);
 
   //**********   Utility functions   *****************
-  virtual void GenerateOpenNameSpaces(Formatter& out);
-  virtual void GenerateCloseNameSpaces(Formatter& out);
+  virtual void GenerateOpenNameSpaces(Formatter& out,
+      const ComponentSpecificationMessage& message);
+  virtual void GenerateCloseNameSpaces(Formatter& out,
+      const ComponentSpecificationMessage& message);
   std::string GetPackage(const ComponentSpecificationMessage& message);
   std::string GetPackageVersion(const ComponentSpecificationMessage& message);
   std::string GetComponentName(const ComponentSpecificationMessage& message);

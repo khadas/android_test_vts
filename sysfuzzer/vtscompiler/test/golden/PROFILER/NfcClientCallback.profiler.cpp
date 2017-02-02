@@ -8,6 +8,7 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
+namespace vtsINfcClientCallback {
 
 
 void HIDL_INSTRUMENTATION_FUNCTION_INfcClientCallback(
@@ -124,5 +125,6 @@ void HIDL_INSTRUMENTATION_FUNCTION_INfcClientCallback(
     }
 }
 
+}  // namespace vtsINfcClientCallback
 }  // namespace vts
 }  // namespace android

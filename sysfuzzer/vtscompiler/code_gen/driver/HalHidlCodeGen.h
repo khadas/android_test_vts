@@ -162,15 +162,28 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       const VariableSpecificationMessage& val, const string& result_msg,
       const string& result_val);
 
+  // Generates the random function declaration for attributes defined within
+  // an interface or in a types.hal.
+  void GenerateRandomFunctionDeclForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
   // Generates the random function implementation for attributes defined within
   // an interface or in a types.hal.
-  void GenerateRandomFunctionForAttribute(Formatter& out,
+  void GenerateRandomFunctionImplForAttribute(Formatter& out,
       const VariableSpecificationMessage& attribute);
 
   // Generates the getService function implementation for an interface.
   void GenerateGetServiceImpl(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
+
+  // Generates all function declaration for an attributed.
+  void GenerateAllFunctionDeclForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
+
+  // Generates all function implementation for an attributed.
+  void GenerateAllFunctionImplForAttribute(Formatter& out,
+      const VariableSpecificationMessage& attribute);
 
   // Returns true if we could omit the callback function and return result
   // directly.

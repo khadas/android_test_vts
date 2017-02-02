@@ -1,5 +1,4 @@
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 
 using namespace android::hardware::nfc::V1_0;
 using namespace android::hardware;
@@ -8,6 +7,7 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
+namespace vtstypes {
 
 void profile____android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* arg_name,
 ::android::hardware::nfc::V1_0::NfcEvent arg_val_name) {
@@ -23,5 +23,6 @@ void profile____android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMes
     arg_name->set_scalar_type("uint32_t");
 }
 
+}  // namespace vtstypes
 }  // namespace vts
 }  // namespace android
