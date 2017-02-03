@@ -42,6 +42,10 @@ vts_spec_file_list += \
   hardware/interfaces/graphics/allocator/2.0/vts/types.vts \
   hardware/interfaces/graphics/mapper/2.0/vts/Mapper.vts \
   hardware/interfaces/graphics/mapper/2.0/vts/types.vts \
+  hardware/interfaces/graphics/composer/2.1/vts/Composer.vts \
+  hardware/interfaces/graphics/composer/2.1/vts/ComposerCallback.vts \
+  hardware/interfaces/graphics/composer/2.1/vts/ComposerClient.vts \
+  hardware/interfaces/graphics/composer/2.1/vts/types.vts \
   hardware/interfaces/nfc/1.0/vts/Nfc.vts \
   hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts \
   hardware/interfaces/nfc/1.0/vts/types.vts \

@@ -100,6 +100,8 @@ string ComponentTypeToString(int component_type) {
       return "graphics_allocator";
     case GRAPHICS_MAPPER:
       return "graphics_mapper";
+    case GRAPHICS_COMPOSER:
+      return "graphics_composer";
     case BIONIC_LIBM:
       return "bionic_libm";
     case TV_CEC:
