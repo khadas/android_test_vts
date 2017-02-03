@@ -166,7 +166,9 @@ void DriverCodeGenBase::GenerateSourceIncludeFiles(Formatter& out,
   for (auto const& header : message.header()) {
     out << "#include " << header << "\n";
   }
-  out << "#include \"vts_datatype.h\"" << "\n";
+  if (message.component_class() != HAL_HIDL) {
+    out << "#include \"vts_datatype.h\"" << "\n";
+  }
   out << "#include \"vts_measurement.h\"" << "\n";
   out << "#include <iostream>" << "\n";
 }
