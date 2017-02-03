@@ -33,6 +33,7 @@
             sys_msg.msgget_failure,
             sys_msg.msgrcv_failure,
             sys_msg.msgsnd_failure,
+            sys_personality.current_persona,
             sys_sem.smoke,
             sys_sem.semget_failure,
             sys_sem.semctl_failure,
