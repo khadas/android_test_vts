@@ -52,6 +52,7 @@ COMPONENT_TYPE_DICT = {"audio": 1,
                        "graphics_mapper": 20,
                        "radio": 21,
                        "contexthub": 22,
+                       "graphics_composer": 23,
                        "bionic_libm": 1001,
                        "bionic_libc": 1002,
                        "vndk_libcutils": 1101}
