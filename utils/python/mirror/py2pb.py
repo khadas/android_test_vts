@@ -107,6 +107,7 @@ def PyList2PbVector(message, pb_spec, py_value):
         else:
             logging.error("unsupported type %s", message.type)
             exit(0)
+    message.vector_size = len(py_value)
     return message
 
 
