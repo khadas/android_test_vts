@@ -70,6 +70,7 @@ vts_test_lib_hidl_packages += \
   sensors_hidl_hal_test \
   soundtrigger_hidl_hal_test \
   thermal_hidl_hal_test \
+  tv_input_hidl_hal_test \
   vibrator_hidl_hal_test \
   vr_hidl_hal_test \
   wifi_hidl_test \
