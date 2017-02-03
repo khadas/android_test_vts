@@ -55,9 +55,9 @@ vts_spec_file_list += \
   hardware/interfaces/radio/1.0/vts/Sap.vts \
   hardware/interfaces/radio/1.0/vts/SapCallback.vts \
   hardware/interfaces/radio/1.0/vts/types.vts \
-  hardware/interfaces/vehicle/2.0/vts/Vehicle.vts \
-  hardware/interfaces/vehicle/2.0/vts/VehicleCallback.vts \
-  hardware/interfaces/vehicle/2.0/vts/types.vts \
+  hardware/interfaces/automotive/vehicle/2.0/vts/Vehicle.vts \
+  hardware/interfaces/automotive/vehicle/2.0/vts/VehicleCallback.vts \
+  hardware/interfaces/automotive/vehicle/2.0/vts/types.vts \
   hardware/interfaces/vibrator/1.0/vts/Vibrator.vts \
   hardware/interfaces/vibrator/1.0/vts/types.vts \
   hardware/interfaces/thermal/1.0/vts/Thermal.vts \

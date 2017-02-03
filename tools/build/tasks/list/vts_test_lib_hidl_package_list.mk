@@ -51,7 +51,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec.vts.driver@1.0 \
   android.hardware.tv.input.vts.driver@1.0 \
   android.hardware.usb.vts.driver@1.0 \
-  android.hardware.vehicle.vts.driver@2.0 \
+  android.hardware.automotive.vehicle.vts.driver@2.0 \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
   android.hardware.wifi.vts.driver@1.0 \
@@ -90,7 +90,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec@1.0-vts.profiler \
   android.hardware.tv.input@1.0-vts.profiler \
   android.hardware.usb@1.0-vts.profiler \
-  android.hardware.vehicle@2.0-vts.profiler \
+  android.hardware.automotive.vehicle@2.0-vts.profiler \
   android.hardware.vibrator@1.0-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.wifi@1.0-vts.profiler \
