@@ -19,6 +19,10 @@ PRODUCT_COPY_FILES += \
     hardware/interfaces/graphics/allocator/2.0/vts/types.vts:system/etc/types.vts \
     hardware/interfaces/graphics/mapper/2.0/vts/Allocator.vts:system/etc/Mapper.vts \
     hardware/interfaces/graphics/mapper/2.0/vts/types.vts:system/etc/types.vts \
+    hardware/interfaces/graphics/composer/2.1/vts/Composer.vts:system/etc/Composer.vts \
+    hardware/interfaces/graphics/composer/2.1/vts/ComposerCallback.vts:system/etc/ComposerCallback.vts \
+    hardware/interfaces/graphics/composer/2.1/vts/ComposerClient.vts:system/etc/ComposerClient.vts \
+    hardware/interfaces/graphics/composer/2.1/vts/types.vts:system/etc/types.vts \
     hardware/interfaces/nfc/1.0/vts/Nfc.vts:system/etc/Nfc.vts \
     hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts:system/etc/NfcClientCallback.vts \
     hardware/interfaces/nfc/1.0/vts/types.vts:system/etc/types.vts \

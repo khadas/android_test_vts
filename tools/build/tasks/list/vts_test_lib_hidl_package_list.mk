@@ -60,6 +60,7 @@ vts_test_lib_hidl_packages += \
   contexthub_hidl_hal_test \
   graphics_allocator_hidl_hal_test \
   graphics_mapper_hidl_hal_test \
+  graphics_composer_hidl_hal_test \
   ir_hidl_hal_test \
   light_hidl_hal_test \
   memtrack_hidl_hal_test \
