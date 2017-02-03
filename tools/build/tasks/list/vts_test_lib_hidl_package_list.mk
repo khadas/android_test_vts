@@ -33,16 +33,15 @@ vts_test_lib_hidl_packages := \
   android.hardware.vehicle.vts.driver@2.0 \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
-  android.hardware.boot@1.0-IBootControl-vts.profiler \
+  android.hardware.boot@1.0-vts.profiler \
   android.hardware.contexthub@1.0-IContexthub-vts.profiler \
-  android.hardware.ir@1.0-IConsumerIr-vts.profiler \
+  android.hardware.ir@1.0-vts.profiler \
   android.hardware.light@2.0-ILight-vts.profiler \
   android.hardware.memtrack@1.0-IMemtrack-vts.profiler \
   android.hardware.gatekeeper@1.0-IGatekeeper-vts.profiler \
-  android.hardware.nfc@1.0-INfc-vts.profiler \
-  android.hardware.nfc@1.0-INfcClientCallback-vts.profiler \
+  android.hardware.nfc@1.0-vts.profiler \
   android.hardware.power@1.0-IPower-vts.profiler \
-  android.hardware.radio@1.0-IRadio-vts.profiler \
+  android.hardware.radio@1.0-vts.profiler \
   android.hardware.sensors@1.0-ISensors-vts.profiler \
   android.hardware.thermal@1.0-IThermal-vts.profiler \
   android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler \
