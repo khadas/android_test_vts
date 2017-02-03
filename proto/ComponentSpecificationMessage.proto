@@ -88,6 +88,8 @@ enum ComponentType {
   RADIO = 21;
   // For the context hub HAL.
   CONTEXTHUB = 22;
+  // For a graphics composer submodule.
+  GRAPHICS_COMPOSER = 23;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
