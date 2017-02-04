@@ -195,10 +195,13 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
         return arg.predefined_type();
       } else if (arg.has_struct_type()) {
         return arg.struct_type();
+      } else if (arg.sub_struct_size() > 0) {
+        return arg.name();
       } else {
-        cerr << __func__ << ":" << __LINE__
-             << " ERROR no predefined_type or struct_type set for struct"
-             << " variable" << endl;
+        cerr << __func__ << ":" << __LINE__ << " ERROR"
+             << " no predefined_type, struct_type, nor sub_struct set"
+             << " for struct variable"
+             << " (arg name " << arg.name() << ")" << endl;
         exit(-1);
       }
     }
