@@ -34,7 +34,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
   android.hardware.boot@1.0-vts.profiler \
-  android.hardware.contexthub@1.0-IContexthub-vts.profiler \
+  android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.ir@1.0-vts.profiler \
   android.hardware.light@2.0-ILight-vts.profiler \
   android.hardware.memtrack@1.0-IMemtrack-vts.profiler \

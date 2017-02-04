@@ -3,6 +3,9 @@ HostDrivenTest.push
 DATA/lib/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.boot.vts.driver@1.0.so
 DATA/lib64/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.boot.vts.driver@1.0.so
 
+DATA/lib/android.hardware.contexthub.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.contexthub.vts.driver@1.0.so
+DATA/lib64/android.hardware.contexthub.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.contexthub.vts.driver@1.0.so
+
 DATA/lib/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.ir.vts.driver@1.0.so
 DATA/lib64/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.ir.vts.driver@1.0.so
 
@@ -47,6 +50,9 @@ DATA/lib64/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/64/android.har
 
 DATA/lib/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0.profiler.so
 DATA/lib64/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0.profiler.so
+
+DATA/lib/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.contexthub@1.0.profiler.so
+DATA/lib64/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.contexthub@1.0.profiler.so
 
 DATA/lib/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0.profiler.so
 DATA/lib64/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0.profiler.so
