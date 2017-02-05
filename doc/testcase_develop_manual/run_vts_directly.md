@@ -6,11 +6,15 @@ First of all, if you have not done [VTS setup](../setup/index.md), that is requi
 
 `$ cd test/vts`
 
-`$ ./create-image.sh <your build target>`
+`$ ./create-image.sh <build target>-userdebug`
+
+or
+
+`$ ./create-image.sh <build target>-userdebug ENABLE_TREBLE=true`
 
 ## Copy Binaries
 
-`$ ./setup.sh <your build target>
+`$ ./setup-local.sh <build target>`
 
 ## Run a test direclty
 
@@ -31,7 +35,7 @@ In order to add a new test, the following two files needed to be extended.
 
 `test/vts/create-image.sh`
 
-`test/vts/setup.sh`
+`test/vts/setup-local.sh`
 
 Optionally, the command used to add a new test can be also added to:
 

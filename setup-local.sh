@@ -103,3 +103,5 @@ function vts_multidevice_target_setup {
   adb shell chmod 755 /data/local/tmp/32/vts_hal_agent32
   adb shell chmod 755 /data/local/tmp/64/vts_hal_agent64
 }
+
+vts_multidevice_target_setup $1
