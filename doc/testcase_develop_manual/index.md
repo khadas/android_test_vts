@@ -18,13 +18,14 @@ __Table of Contents__
 1.  Host-Driven Tests
     * [Codelab for Shell-Based Simple Test](codelab_host_driven_test.md)
     * [Codelab for VTS Specification File](codelab_vts_spec.md)
+    * [Codelab for HIDL HAL Tests](codelab_hidl_hal_test.md)
 
 2.  Native Code Coverage
     * [Codelab for Native Code Coverage Measurement](codelab_native_code_coverage.md)
     * [Native Coverage Information and FAQ](native_coverage_faq.md)
 
-3.  Enable Profiling for VTS Hidl HAL Tests
-    * [Codelab for Profiling VTS Hidl HAL Tests](codelab_enable_profiling.md)
+3.  Enable Profiling for VTS HIDL HAL Tests
+    * [Codelab for Profiling VTS HIDL HAL Tests](codelab_enable_profiling.md)
 
 4. FAQs
     * [How to directly run a VTS test without using VTS-TradeFed](run_vts_directly.md)
