@@ -16,17 +16,17 @@
 
 # Only tested on linux so far
 echo "Install Python SDK"
-sudo apt-get install python-dev
+sudo apt-get -y install python-dev
 
 echo "Install Protocol Buffer packages"
-sudo apt-get install python-protobuf
-sudo apt-get install protobuf-compiler
+sudo apt-get -y install python-protobuf
+sudo apt-get -y install protobuf-compiler
 
 echo "Install Python virtualenv and pip tools for VTS TradeFed and Runner"
-sudo apt-get install python-setuptools
-sudo apt-get install python-pip
-sudo apt-get install python3-pip
-sudo apt-get install python-virtualenv
+sudo apt-get -y install python-setuptools
+sudo apt-get -y install python-pip
+sudo apt-get -y install python3-pip
+sudo apt-get -y install python-virtualenv
 
 echo "Install Python modules for VTS Runner"
 sudo pip install future
@@ -41,10 +41,10 @@ sudo pip install google-api-python-client
 sudo pip install google-cloud-pubsub
 
 echo "Install packages for Camera ITS tests"
-sudo apt-get install python-tk
+sudo apt-get -y install python-tk
 sudo pip install numpy
 sudo pip install scipy
 sudo pip install matplotlib
-sudo apt-get install libjpeg-dev
-sudo apt-get install libtiff-dev
+sudo apt-get -y install libjpeg-dev
+sudo apt-get -y install libtiff-dev
 sudo pip install Pillow
