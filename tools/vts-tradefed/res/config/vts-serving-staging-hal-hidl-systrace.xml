@@ -20,6 +20,5 @@
     <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputSystraceTest" />
     <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
     <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
-    <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceAdbSystraceTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
