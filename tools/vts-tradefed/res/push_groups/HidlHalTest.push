@@ -1,16 +1,76 @@
 HostDrivenTest.push
 
+DATA/lib/android.hardware.audio.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.audio.vts.driver@2.0.so
+DATA/lib64/android.hardware.audio.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.audio.vts.driver@2.0.so
+
+DATA/lib/android.hardware.audio.effect.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.audio.effect.vts.driver@2.0.so
+DATA/lib64/android.hardware.audio.effect.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.audio.effect.vts.driver@2.0.so
+
+DATA/lib/android.hardware.biometrics.fingerprint.vts.driver@2.1.so->/data/local/tmp/32/android.hardware.biometrics.fingerprint.vts.driver@2.1.so
+DATA/lib64/android.hardware.biometrics.fingerprint.vts.driver@2.1.so->/data/local/tmp/64/android.hardware.biometrics.fingerprint.vts.driver@2.1.so
+
+DATA/lib/android.hardware.bluetooth.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.bluetooth.vts.driver@1.0.so
+DATA/lib64/android.hardware.bluetooth.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.bluetooth.vts.driver@1.0.so
+
 DATA/lib/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.boot.vts.driver@1.0.so
 DATA/lib64/android.hardware.boot.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.boot.vts.driver@1.0.so
+
+DATA/lib/android.hardware.broadcastradio.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.broadcastradio.vts.driver@1.0.so
+DATA/lib64/android.hardware.broadcastradio.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.broadcastradio.vts.driver@1.0.so
+
+DATA/lib/android.hardware.camera.device.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.camera.device.vts.driver@1.0.so
+DATA/lib64/android.hardware.camera.device.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.camera.device.vts.driver@1.0.so
+
+DATA/lib/android.hardware.camera.device.vts.driver@3.2.so->/data/local/tmp/32/android.hardware.camera.device.vts.driver@3.2.so
+DATA/lib64/android.hardware.camera.device.vts.driver@3.2.so->/data/local/tmp/64/android.hardware.camera.device.vts.driver@3.2.so
+
+DATA/lib/android.hardware.camera.provider.vts.driver@2.4.so->/data/local/tmp/32/android.hardware.camera.provider.vts.driver@2.4.so
+DATA/lib64/android.hardware.camera.provider.vts.driver@2.4.so->/data/local/tmp/64/android.hardware.camera.provider.vts.driver@2.4.so
+
+DATA/lib/android.hardware.configstore.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.configstore.vts.driver@1.0.so
+DATA/lib64/android.hardware.configstore.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.configstore.vts.driver@1.0.so
 
 DATA/lib/android.hardware.contexthub.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.contexthub.vts.driver@1.0.so
 DATA/lib64/android.hardware.contexthub.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.contexthub.vts.driver@1.0.so
 
+DATA/lib/android.hardware.drm.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.drm.vts.driver@1.0.so
+DATA/lib64/android.hardware.drm.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.drm.vts.driver@1.0.so
+
+DATA/lib/android.hardware.dumpstate.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.dumpstate.vts.driver@1.0.so
+DATA/lib64/android.hardware.dumpstate.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.dumpstate.vts.driver@1.0.so
+
+DATA/lib/android.hardware.evs.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.evs.vts.driver@1.0.so
+DATA/lib64/android.hardware.evs.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.evs.vts.driver@1.0.so
+
+DATA/lib/android.hardware.gatekeeper.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.gatekeeper.vts.driver@1.0.so
+DATA/lib64/android.hardware.gatekeeper.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.gatekeeper.vts.driver@1.0.so
+
+DATA/lib/android.hardware.gnss.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.gnss.vts.driver@1.0.so
+DATA/lib64/android.hardware.gnss.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.gnss.vts.driver@1.0.so
+
+DATA/lib/android.hardware.graphics.allocator.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.graphics.allocator.vts.driver@2.0.so
+DATA/lib64/android.hardware.graphics.allocator.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.graphics.allocator.vts.driver@2.0.so
+
+DATA/lib/android.hardware.graphics.composer.vts.driver@2.1.so->/data/local/tmp/32/android.hardware.graphics.composer.vts.driver@2.1.so
+DATA/lib64/android.hardware.graphics.composer.vts.driver@2.1.so->/data/local/tmp/64/android.hardware.graphics.composer.vts.driver@2.1.so
+
+DATA/lib/android.hardware.graphics.mapper.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.graphics.mapper.vts.driver@2.0.so
+DATA/lib64/android.hardware.graphics.mapper.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.graphics.mapper.vts.driver@2.0.so
+
+DATA/lib/android.hardware.health.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.health.vts.driver@1.0.so
+DATA/lib64/android.hardware.health.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.health.vts.driver@1.0.so
+
 DATA/lib/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.ir.vts.driver@1.0.so
 DATA/lib64/android.hardware.ir.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.ir.vts.driver@1.0.so
 
+DATA/lib/android.hardware.keymaster.vts.driver@3.0.so->/data/local/tmp/32/android.hardware.keymaster.vts.driver@3.0.so
+DATA/lib64/android.hardware.keymaster.vts.driver@3.0.so->/data/local/tmp/64/android.hardware.keymaster.vts.driver@3.0.so
+
 DATA/lib/android.hardware.light.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.light.vts.driver@2.0.so
 DATA/lib64/android.hardware.light.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.light.vts.driver@2.0.so
+
+DATA/lib/android.hardware.media.omx.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.media.omx.vts.driver@1.0.so
+DATA/lib64/android.hardware.media.omx.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.media.omx.vts.driver@1.0.so
 
 DATA/lib/android.hardware.memtrack.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.memtrack.vts.driver@1.0.so
 DATA/lib64/android.hardware.memtrack.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.memtrack.vts.driver@1.0.so
@@ -39,6 +99,9 @@ DATA/lib64/android.hardware.tv.cec.vts.driver@1.0.so->/data/local/tmp/64/android
 DATA/lib/android.hardware.tv.input.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.tv.input.vts.driver@1.0.so
 DATA/lib64/android.hardware.tv.input.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.tv.input.vts.driver@1.0.so
 
+DATA/lib/android.hardware.usb.vts.driver@1.0.so->/data/local/tmp/32/hw/android.hardware.usb.vts.driver@1.0.so
+DATA/lib64/android.hardware.usb.vts.driver@1.0.so->/data/local/tmp/64/hw/android.hardware.usb.vts.driver@1.0.so
+
 DATA/lib/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.vehicle.vts.driver@2.0.so
 DATA/lib64/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.vehicle.vts.driver@2.0.so
 
@@ -48,50 +111,125 @@ DATA/lib64/android.hardware.vibrator.vts.driver@1.0.so->/data/local/tmp/64/andro
 DATA/lib/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.vr.vts.driver@1.0.so
 DATA/lib64/android.hardware.vr.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.vr.vts.driver@1.0.so
 
-DATA/lib/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0.profiler.so
-DATA/lib64/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0.profiler.so
+DATA/lib/android.hardware.wifi.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.wifi.vts.driver@1.0.so
+DATA/lib64/android.hardware.wifi.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.wifi.vts.driver@1.0.so
 
-DATA/lib/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.contexthub@1.0.profiler.so
-DATA/lib64/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.contexthub@1.0.profiler.so
+DATA/lib/android.hardware.wifi.supplicant.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.wifi.supplicant.vts.driver@1.0.so
+DATA/lib64/android.hardware.wifi.supplicant.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.wifi.supplicant.vts.driver@1.0.so
 
-DATA/lib/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0.profiler.so
-DATA/lib64/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0.profiler.so
+DATA/lib/android.hardware.audio@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.audio@2.0-vts.profiler.so
+DATA/lib64/android.hardware.audio@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.audio@2.0-vts.profiler.so
 
-DATA/lib/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.light@2.0.profiler.so
-DATA/lib64/android.hardware.light@2.0-ILight-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.light@2.0.profiler.so
+DATA/lib/android.hardware.audio.effect@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.audio.effect@2.0-vts.profiler.so
+DATA/lib64/android.hardware.audio.effect@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.audio.effect@2.0-vts.profiler.so
 
-DATA/lib/android.hardware.memtrack@1.0-IMemtrack-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.memtrack@1.0.profiler.so
-DATA/lib64/android.hardware.memtrack@1.0-IMemtrack-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.memtrack@1.0.profiler.so
+DATA/lib/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so
+DATA/lib64/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so
 
-DATA/lib/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.nfc@1.0.profiler.so
-DATA/lib64/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.nfc@1.0.profiler.so
+DATA/lib/android.hardware.bluetooth@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.bluetooth@1.0-vts.profiler.so
+DATA/lib64/android.hardware.bluetooth@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.bluetooth@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.power@1.0.profiler.so
-DATA/lib64/android.hardware.power@1.0-IPower-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.power@1.0.profiler.so
+DATA/lib/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.boot@1.0-vts.profiler.so
+DATA/lib64/android.hardware.boot@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.boot@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.radio@1.0.profiler.so
-DATA/lib64/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.radio@1.0.profiler.so
+DATA/lib/android.hardware.broadcastradio@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.broadcastradio@1.0-vts.profiler.so
+DATA/lib64/android.hardware.broadcastradio@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.broadcastradio@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.sensors@1.0.profiler.so
-DATA/lib64/android.hardware.sensors@1.0-ISensors-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.sensors@1.0.profiler.so
+DATA/lib/android.hardware.camera.device@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.camera.device@1.0-vts.profiler.so
+DATA/lib64/android.hardware.camera.device@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.camera.device@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.soundtrigger@2.0-ISoundTriggerHw-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.soundtrigger@2.0.profiler.so
-DATA/lib64/android.hardware.soundtrigger@2.0-ISoundTriggerHw-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.soundtrigger@2.0.profiler.so
+DATA/lib/android.hardware.camera.device@3.2-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.camera.device@3.2-vts.profiler.so
+DATA/lib64/android.hardware.camera.device@3.2-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.camera.device@3.2-vts.profiler.so
 
-DATA/lib/android.hardware.thermal@1.0-IThermal-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.thermal@1.0.profiler.so
-DATA/lib64/android.hardware.thermal@1.0-IThermal-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.thermal@1.0.profiler.so
+DATA/lib/android.hardware.camera.provider@2.4-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.camera.provider@2.4-vts.profiler.so
+DATA/lib64/android.hardware.camera.provider@2.4-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.camera.provider@2.4-vts.profiler.so
 
-DATA/lib/android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0.profiler.so
-DATA/lib64/android.hardware.tv.cec@1.0-IHdmiCec-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0.profiler.so
+DATA/lib/android.hardware.configstore@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.configstore@1.0-vts.profiler.so
+DATA/lib64/android.hardware.configstore@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.configstore@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.tv.input@1.0-ITvInput-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0.profiler.so
-DATA/lib64/android.hardware.tv.input@1.0-ITvInput-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0.profiler.so
+DATA/lib/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.contexthub@1.0-vts.profiler.so
+DATA/lib64/android.hardware.contexthub@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.contexthub@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.vehicle@2.0-IVehicle-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vehicle@2.0.profiler.so
-DATA/lib64/android.hardware.vehicle@2.0-IVehicle-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vehicle@2.0.profiler.so
+DATA/lib/android.hardware.drm@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.drm@1.0-vts.profiler.so
+DATA/lib64/android.hardware.drm@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.drm@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.vibrator@1.0-IVibrator-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vibrator@1.0.profiler.so
-DATA/lib64/android.hardware.vibrator@1.0-IVibrator-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vibrator@1.0.profiler.so
+DATA/lib/android.hardware.dumpstate@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.dumpstate@1.0-vts.profiler.so
+DATA/lib64/android.hardware.dumpstate@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.dumpstate@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.vr@1.0-IVr-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vr@1.0.profiler.so
-DATA/lib64/android.hardware.vr@1.0-IVr-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vr@1.0.profiler.so
+DATA/lib/android.hardware.evs@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.evs@1.0-vts.profiler.so
+DATA/lib64/android.hardware.evs@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.evs@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.gatekeeper@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.gatekeeper@1.0-vts.profiler.so
+DATA/lib64/android.hardware.gatekeeper@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.gatekeeper@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.gnss@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.gnss@1.0-vts.profiler.so
+DATA/lib64/android.hardware.gnss@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.gnss@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.graphics.allocator@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.graphics.allocator@2.0-vts.profiler.so
+DATA/lib64/android.hardware.graphics.allocator@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.graphics.allocator@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.graphics.composer@2.1-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.graphics.composer@2.1-vts.profiler.so
+DATA/lib64/android.hardware.graphics.composer@2.1-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.graphics.composer@2.1-vts.profiler.so
+
+DATA/lib/android.hardware.graphics.mapper@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.graphics.mapper@2.0-vts.profiler.so
+DATA/lib64/android.hardware.graphics.mapper@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.graphics.mapper@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.health@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.health@1.0-vts.profiler.so
+DATA/lib64/android.hardware.health@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.health@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.ir@1.0-vts.profiler.so
+DATA/lib64/android.hardware.ir@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.ir@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.keymaster@3.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.keymaster@3.0-vts.profiler.so
+DATA/lib64/android.hardware.keymaster@3.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.keymaster@3.0-vts.profiler.so
+
+DATA/lib/android.hardware.light@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.light@2.0-vts.profiler.so
+DATA/lib64/android.hardware.light@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.light@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.media.omx@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.media.omx@1.0-vts.profiler.so
+DATA/lib64/android.hardware.media.omx@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.media.omx@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.memtrack@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.memtrack@1.0-vts.profiler.so
+DATA/lib64/android.hardware.memtrack@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.memtrack@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.nfc@1.0-vts.profiler.so
+DATA/lib64/android.hardware.nfc@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.nfc@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.power@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.power@1.0-vts.profiler.so
+DATA/lib64/android.hardware.power@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.power@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.radio@1.0-vts.profiler.so
+DATA/lib64/android.hardware.radio@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.radio@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.sensors@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.sensors@1.0-vts.profiler.so
+DATA/lib64/android.hardware.sensors@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.sensors@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.soundtrigger@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.soundtrigger@2.0-vts.profiler.so
+DATA/lib64/android.hardware.soundtrigger@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.soundtrigger@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.thermal@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.thermal@1.0-vts.profiler.so
+DATA/lib64/android.hardware.thermal@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.thermal@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.tv.cec@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.cec@1.0-vts.profiler.so
+DATA/lib64/android.hardware.tv.cec@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.cec@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.tv.input@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.tv.input@1.0-vts.profiler.so
+DATA/lib64/android.hardware.tv.input@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.tv.input@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.usb@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.usb@1.0-vts.profiler.so
+DATA/lib64/android.hardware.usb@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.usb@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.vehicle@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vehicle@2.0-vts.profiler.so
+DATA/lib64/android.hardware.vehicle@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vehicle@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vibrator@1.0-vts.profiler.so
+DATA/lib64/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vibrator@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.vr@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vr@1.0-vts.profiler.so
+DATA/lib64/android.hardware.vr@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vr@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.wifi@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.wifi@1.0-vts.profiler.so
+DATA/lib64/android.hardware.wifi@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.wifi@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.wifi.supplicant@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.wifi.supplicant@1.0-vts.profiler.so
+DATA/lib64/android.hardware.wifi.supplicant@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.wifi.supplicant@1.0-vts.profiler.so
