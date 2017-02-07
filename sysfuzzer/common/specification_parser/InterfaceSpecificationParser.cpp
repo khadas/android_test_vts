@@ -35,8 +35,6 @@ namespace vts {
 
 bool InterfaceSpecificationParser::parse(
     const char* file_path, ComponentSpecificationMessage* is_message) {
-  cout << __FUNCTION__ << " " << file_path << endl;
-
   ifstream in_file(file_path);
   stringstream str_stream;
   if (!in_file.is_open()) {
@@ -53,7 +51,6 @@ bool InterfaceSpecificationParser::parse(
     cerr << data << endl;
     return false;
   }
-
   return true;
 }
 

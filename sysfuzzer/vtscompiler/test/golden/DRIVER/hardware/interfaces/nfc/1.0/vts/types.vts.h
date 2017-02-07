@@ -1,6 +1,7 @@
-#ifndef __VTS_SPEC_android_hardware_nfc_types.driver__
-#define __VTS_SPEC_android_hardware_nfc_types.driver__
+#ifndef __VTS_DRIVER_android_hardware_nfc_types__
+#define __VTS_DRIVER_android_hardware_nfc_types__
 
+#undef LOG_TAG
 #define LOG_TAG "FuzzerExtended_types"
 
 

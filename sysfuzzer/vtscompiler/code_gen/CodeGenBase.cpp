@@ -69,32 +69,28 @@ void Translate(VtsCompileMode mode,
   string vts_name = output_cpp_file_path_str
       .substr(found + 1, output_cpp_file_path_str.length() - found - 5);
 
-  cout << "vts_name: " << vts_name << endl;
-
   ComponentSpecificationMessage message;
-  if (InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
-    cout << message.component_class();
-  } else {
+  if (!InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
     cerr << "can't parse " << input_vts_file_path << endl;
+    exit(-1);
   }
 
   string output_header_file_path = string(output_header_dir_path) + "/"
       + string(input_vts_file_path);
   output_header_file_path = output_header_file_path + ".h";
 
-  cout << "header: " << output_header_file_path << endl;
   vts_fs_mkdirs(&output_header_file_path[0], 0777);
 
   if (mode == kFuzzer) {
     unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
     switch (message.component_class()) {
       case HAL_HIDL:
-        fuzzer_generator =
-            make_unique<HalHidlFuzzerCodeGen>(message, output_cpp_file_path_str);
+        fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(
+            message, output_cpp_file_path_str);
         break;
       default:
         cerr << "not yet supported component_class "
-            << message.component_class();
+             << message.component_class();
         exit(-1);
     }
     fuzzer_generator->GenerateAll();
@@ -120,11 +116,11 @@ void Translate(VtsCompileMode mode,
     switch (message.component_class()) {
       case HAL_HIDL:
         profiler_generator.reset(
-            new HalHidlProfilerCodeGen(input_vts_file_path, vts_name));
+            new HalHidlProfilerCodeGen(input_vts_file_path));
         break;
       default:
         cerr << "not yet supported component_class "
-            << message.component_class();
+             << message.component_class();
         exit(-1);
     }
     profiler_generator->GenerateAll(header_out, source_out, message);
@@ -169,12 +165,8 @@ void TranslateToFile(VtsCompileMode mode,
   string vts_name = output_cpp_file_path_str
       .substr(found + 1, output_cpp_file_path_str.length() - found - 5);
 
-  cout << "vts_name: " << vts_name << endl;
-
   ComponentSpecificationMessage message;
-  if (InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
-    cout << message.component_class();
-  } else {
+  if (!InterfaceSpecificationParser::parse(input_vts_file_path, &message)) {
     cerr << __func__ << " can't parse " << input_vts_file_path << endl;
   }
 
@@ -190,11 +182,11 @@ void TranslateToFile(VtsCompileMode mode,
     switch (message.component_class()) {
       case HAL_HIDL:
         profiler_generator.reset(
-            new HalHidlProfilerCodeGen(input_vts_file_path, vts_name));
+            new HalHidlProfilerCodeGen(input_vts_file_path));
         break;
       default:
         cerr << "not yet supported component_class "
-            << message.component_class();
+             << message.component_class();
         exit(-1);
     }
     if (file_type == kHeader) {
