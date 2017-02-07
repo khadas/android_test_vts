@@ -362,7 +362,6 @@ public class ShowTableServlet extends BaseServlet {
             List<String> productVariantList = new ArrayList<>();
             List<String> buildFlavorList = new ArrayList<>();
             List<String> abiInfoList = new ArrayList<>();
-            String systraceUrl = null;
             for (AndroidDeviceInfoMessage device : devices) {
                 buildAliasList.add(device.getBuildAlias().toStringUtf8().toLowerCase());
                 productVariantList.add(device.getProductVariant().toStringUtf8());
@@ -412,6 +411,7 @@ public class ShowTableServlet extends BaseServlet {
                     coveredLineCount += coverageReport.getCoveredLineCount();
                 }
 
+                String systraceUrl = null;
                 for (SystraceReportMessage systraceReport :
                      testCaseReport.getSystraceList()) {
                     if (systraceReport.getUrlList().size() == 0) {
