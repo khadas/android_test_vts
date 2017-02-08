@@ -15,6 +15,8 @@
 
 # for platform/bionic/tests/libs
 vts_test_lib_packages += \
+    cfi_test_helper \
+    cfi_test_helper2 \
     libcfi-test \
     libcfi-test-bad \
     libfortify1-tests-clang \
