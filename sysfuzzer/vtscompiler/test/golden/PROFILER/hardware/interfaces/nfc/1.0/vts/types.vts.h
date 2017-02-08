@@ -1,5 +1,5 @@
-#ifndef __VTS_PROFILER_types.profiler__
-#define __VTS_PROFILER_types.profiler__
+#ifndef __VTS_PROFILER_types__
+#define __VTS_PROFILER_types__
 
 
 #include <android-base/logging.h>
