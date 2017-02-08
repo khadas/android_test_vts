@@ -22,10 +22,8 @@
 namespace android {
 namespace vts {
 
-ProfilerCodeGenBase::ProfilerCodeGenBase(const std::string& input_vts_file_path,
-                                         const std::string& vts_name)
-    : input_vts_file_path_(input_vts_file_path),
-      vts_name_(vts_name) {
+ProfilerCodeGenBase::ProfilerCodeGenBase(const std::string& input_vts_file_path)
+    : input_vts_file_path_(input_vts_file_path) {
 }
 
 ProfilerCodeGenBase::~ProfilerCodeGenBase() {
@@ -40,8 +38,8 @@ void ProfilerCodeGenBase::GenerateAll(
 
 void ProfilerCodeGenBase::GenerateHeaderFile(
     Formatter& out, const ComponentSpecificationMessage& message) {
-  out << "#ifndef __VTS_PROFILER_" << vts_name_ << "__\n";
-  out << "#define __VTS_PROFILER_" << vts_name_ << "__\n";
+  out << "#ifndef __VTS_PROFILER_" << GetComponentName(message) << "__\n";
+  out << "#define __VTS_PROFILER_" << GetComponentName(message) << "__\n";
   out << "\n\n";
   GenerateHeaderIncludeFiles(out, message);
   GenerateUsingDeclaration(out, message);

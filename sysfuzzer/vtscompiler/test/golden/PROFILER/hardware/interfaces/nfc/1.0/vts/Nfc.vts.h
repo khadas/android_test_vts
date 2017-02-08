@@ -1,5 +1,5 @@
-#ifndef __VTS_PROFILER_Nfc.profiler__
-#define __VTS_PROFILER_Nfc.profiler__
+#ifndef __VTS_PROFILER_INfc__
+#define __VTS_PROFILER_INfc__
 
 
 #include <android-base/logging.h>

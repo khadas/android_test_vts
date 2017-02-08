@@ -53,13 +53,22 @@ void DriverCodeGenBase::GenerateHeaderFile(
 
   string macroized_package_name = message.package();
   ReplaceSubString(macroized_package_name, ".", "_");
-  out << "#ifndef __VTS_SPEC_" << macroized_package_name
-      << "_" << vts_name_ << "__" << "\n";
-  out << "#define __VTS_SPEC_" << macroized_package_name
-      << "_" << vts_name_ << "__" << "\n";
+  out << "#ifndef __VTS_DRIVER_" << macroized_package_name<< "_";
+  if (message.component_class() == HAL_HIDL) {
+    out << message.component_name() << "__" << "\n";
+  } else {
+    out << vts_name_ << "__" << "\n";
+  }
+  out << "#define __VTS_DRIVER_" << macroized_package_name << "_";
+  if (message.component_class() == HAL_HIDL) {
+    out << message.component_name() << "__" << "\n";
+  } else {
+    out << vts_name_ << "__" << "\n";
+  }
   out << "\n";
 
-  out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"" << "\n";
+  out << "#undef LOG_TAG\n";
+  out << "#define LOG_TAG \"" << fuzzer_extended_class_name << "\"\n";
 
   GenerateHeaderIncludeFiles(out, message, fuzzer_extended_class_name);
 
