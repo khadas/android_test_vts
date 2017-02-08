@@ -201,6 +201,9 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
     const auto& arg = func_msg.arg(i);
     string cur_arg_name = "arg" + std::to_string(i);
     out << GetCppVariableType(arg, &message) << " " << cur_arg_name << ";\n";
+    if (arg.type() == TYPE_SCALAR) {
+      out << cur_arg_name << " = 0;\n";
+    }
     GenerateDriverImplForTypedVariable(
         out, arg, cur_arg_name, "func_msg.arg(" + std::to_string(i) + ")");
   }
@@ -298,9 +301,6 @@ void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
     out << "    void** result) {" << "\n";
 
     // TOOD: impl
-    cerr << __func__ << ":" << __LINE__
-         << " not supported for HIDL HAL yet" << "\n";
-
     out << "  cerr << \"attribute not found\" << endl;" << "\n";
     out << "  return false;" << "\n";
     out << "}" << "\n";
@@ -742,7 +742,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_MASK:
     {
-      out << "/* TYPE_MASK not yet supported. */\n";
+      out << arg_name << " = " << arg_value_name << ".scalar_value()."
+          << val.scalar_type() << "();\n";
       break;
     }
     case TYPE_VECTOR:
@@ -930,7 +931,9 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     }
     case TYPE_MASK:
     {
-      out << "/* ERROR: TYPE_MASK is not supported yet. */\n";
+      out << "if (" << actual_result << ".scalar_value()." << val.scalar_type()
+          << "() != " << expected_result << ".scalar_value()."
+          << val.scalar_type() << "()) { return false; }\n";
       break;
     }
     case TYPE_VECTOR:
@@ -1122,7 +1125,11 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     }
     case TYPE_MASK:
     {
-      out << "/* TYPE_MASK not yet supported. */\n";
+      out << result_msg << "->set_type(TYPE_MASK);\n";
+      out << result_msg << "->set_scalar_type(\"" << val.scalar_type()
+          << "\");\n";
+      out << result_msg << "->mutable_scalar_value()->set_" << val.scalar_type()
+          << "(" << result_value << ");\n";
       break;
     }
     case TYPE_VECTOR:
@@ -1200,7 +1207,7 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HIDL_CALLBACK:
     {
       out << result_msg << "->set_type(TYPE_HIDL_CALLBACK);\n";
-      out << " ERROR: TYPE_HIDL_CALLBACK is not supported yet.\n";
+      out << "/* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */\n";
       break;
     }
     case TYPE_HANDLE:
