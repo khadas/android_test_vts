@@ -337,7 +337,7 @@ public class VtsMultiDeviceTestResultParser {
             for (ITestRunListener listener: mListeners) {
                 if (results == null || results.length() < 1) {
                     CLog.e("JSONArray is null.");
-                    throw new RuntimeException("JSONArray is null.");
+                    continue;
                 }
                 // calculate test run time
                 beginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
