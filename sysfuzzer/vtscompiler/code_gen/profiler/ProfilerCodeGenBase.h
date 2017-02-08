@@ -36,8 +36,7 @@ namespace vts {
  */
 class ProfilerCodeGenBase {
  public:
-  ProfilerCodeGenBase(const std::string& input_vts_file_path,
-    const std::string& vts_name);
+  ProfilerCodeGenBase(const std::string& input_vts_file_path);
 
   virtual ~ProfilerCodeGenBase();
 
@@ -176,7 +175,6 @@ class ProfilerCodeGenBase {
   std::string GetComponentName(const ComponentSpecificationMessage& message);
 
   std::string input_vts_file_path_;
-  std::string vts_name_;
   DISALLOW_COPY_AND_ASSIGN (ProfilerCodeGenBase);
 };
 

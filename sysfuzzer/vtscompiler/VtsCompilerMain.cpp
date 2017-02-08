@@ -112,7 +112,6 @@ int main(int argc, char* argv[]) {
           is_dir = true;
         }
       }
-      cout << "is_dir: " << is_dir << endl;
       if (!is_dir) {
         android::vts::TranslateToFile(
             mode, argv[opt_count + 1], argv[opt_count + 2], type);
