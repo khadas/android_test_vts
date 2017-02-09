@@ -315,12 +315,24 @@ class VtsTcpClient(object):
         resp = self.RecvResponse(retries=2)
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                      resp)
-        if resp is not None and resp.response_code == SysMsg_pb2.SUCCESS:
-            return {const.STDOUT: resp.stdout,
-                    const.STDERR: resp.stderr,
-                    const.EXIT_CODE: resp.exit_code,
-                    }
-        return {}
+
+        stdout = None
+        stderr = None
+        exit_code = None
+
+        if not resp:
+            logging.error("resp is: %s.", resp)
+        elif resp.response_code != SysMsg_pb2.SUCCESS:
+            logging.error("resp response code is not success: %s.", resp.response_code)
+        else:
+            stdout = resp.stdout
+            stderr = resp.stderr
+            exit_code = resp.exit_code
+
+        return {const.STDOUT: stdout,
+                const.STDERR: stderr,
+                const.EXIT_CODE: exit_code,
+                }
 
     def Ping(self):
         """RPC to send a PING request.
