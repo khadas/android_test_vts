@@ -1,8 +1,8 @@
-#ifndef __VTS_DRIVER_android_hardware_nfc_INfcClientCallback__
-#define __VTS_DRIVER_android_hardware_nfc_INfcClientCallback__
+#ifndef __VTS_DRIVER__android_hardware_nfc_V1_0_INfcClientCallback__
+#define __VTS_DRIVER__android_hardware_nfc_V1_0_INfcClientCallback__
 
 #undef LOG_TAG
-#define LOG_TAG "FuzzerExtended_INfcClientCallback"
+#define LOG_TAG "FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback"
 
 
 #include <stdio.h>
