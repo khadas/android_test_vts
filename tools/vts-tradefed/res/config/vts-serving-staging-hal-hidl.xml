@@ -48,5 +48,6 @@
     <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
     <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
     <option name="compatibility:include-filter" value="ContexthubHidlTargetTest" /><!-- need runtime stopped -->
+    <option name="compatibility:include-filter" value="ContexthubHidlTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
