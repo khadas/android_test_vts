@@ -100,6 +100,7 @@ vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
   bluetooth_hidl_hal_test \
   boot_hidl_hal_test \
+  camera_hidl_hal_test \
   contexthub_hidl_hal_test \
   graphics_allocator_hidl_hal_test \
   graphics_mapper_hidl_hal_test \
