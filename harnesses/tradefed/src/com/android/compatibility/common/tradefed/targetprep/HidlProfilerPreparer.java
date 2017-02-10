@@ -119,11 +119,36 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
                 "<bitness>", mAbi.getBitness());
         Log.d(LOG_TAG, String.format("Target Profiling Library Path: %s",
                                      mTargetProfilingLibraryPath));
-        device.executeShellCommand(
-                String.format("setprop hal.instrumentation.lib.path %s",
-                        mTargetProfilingLibraryPath));
-        device.executeShellCommand(
-                "setprop hal.instrumentation.enable true");
+
+        // Enables VTS Profiling
+        // TODO(yim,smoreland): deprecate this when that toggle is gone.
+        // this requires a reboot and thus is mainly for development.
+        String result =
+            device.executeShellCommand("setprop persist.hal.binderization true");
+        Log.d(LOG_TAG, String.format("setprop: %s", result));
+
+        result =
+            device.executeShellCommand("setenforce 0");
+        Log.d(LOG_TAG, String.format("setenforce: %s", result));
+
+        // profiler runs as a different user and thus 777 is needed.
+        result =
+            device.executeShellCommand("chmod 777 /data");
+        Log.d(LOG_TAG, String.format("chmod: %s", result));
+        result =
+            device.executeShellCommand("chmod 777 /data/local");
+        Log.d(LOG_TAG, String.format("chmod: %s", result));
+        result =
+            device.executeShellCommand("chmod 777 /data/local/tmp");
+        Log.d(LOG_TAG, String.format("chmod: %s", result));
+
+        result =
+            device.executeShellCommand("chmod 755 /data/local/tmp/vts_profiling_configure");
+        Log.d(LOG_TAG, String.format("chmod: %s", result));
+        result = device.executeShellCommand(
+            String.format("/data/local/tmp/vts_profiling_configure enable %s",
+                          mTargetProfilingLibraryPath));
+        Log.d(LOG_TAG, String.format("start profiling: %s", result));
     }
 
     /**
@@ -134,8 +159,10 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
             throws DeviceNotAvailableException {
         Log.d(LOG_TAG, "Stopping the HIDL Profiling.");
         // Disables VTS Profiling
-        device.executeShellCommand("setprop hal.instrumentation.lib.path \"\"");
-        device.executeShellCommand("setprop hal.instrumentation.enable false");
+        device.executeShellCommand("chmod 755 /data/local/tmp/vts_profiling_configure");
+        String result = device.executeShellCommand(
+            "/data/local/tmp/vts_profiling_configure disable");
+        Log.d(LOG_TAG, String.format("stop profiling: %s", result));
 
         // Gets trace files from the target.
         if (!mTargetProfilingTracePath.endsWith("/")) {
