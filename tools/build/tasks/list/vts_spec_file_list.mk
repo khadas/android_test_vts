@@ -28,8 +28,6 @@ vts_spec_file_list := \
   test/vts/specification/lib_bionic/libcV1.vts \
   test/vts/specification/lib_bionic/libcutilsV1.vts \
 
-ifeq (O,$(PLATFORM_VERSION))
-
 vts_spec_file_list += \
   hardware/interfaces/tv/input/1.0/vts/TvInput.vts \
   hardware/interfaces/tv/input/1.0/vts/TvInputCallback.vts \
@@ -74,5 +72,3 @@ vts_spec_file_list += \
   hardware/interfaces/power/1.0/vts/types.vts \
   hardware/interfaces/memtrack/1.0/vts/Memtrack.vts \
   hardware/interfaces/memtrack/1.0/vts/types.vts \
-
-endif
