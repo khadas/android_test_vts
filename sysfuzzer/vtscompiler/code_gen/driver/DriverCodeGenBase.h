@@ -140,8 +140,6 @@ class DriverCodeGenBase : public CodeGenBase {
   // Generates code that stops the measurement.
   void GenerateCodeToStopMeasurement(Formatter& out);
 
-  string GetComponentName(const ComponentSpecificationMessage& message);
-
   void GenerateFuzzFunctionForSubStruct(
       Formatter& out, const StructSpecificationMessage& message,
       const string& parent_path);
