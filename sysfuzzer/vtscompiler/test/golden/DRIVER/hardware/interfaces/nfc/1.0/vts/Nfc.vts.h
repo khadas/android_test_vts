@@ -1,8 +1,8 @@
-#ifndef __VTS_DRIVER_android_hardware_nfc_INfc__
-#define __VTS_DRIVER_android_hardware_nfc_INfc__
+#ifndef __VTS_DRIVER__android_hardware_nfc_V1_0_INfc__
+#define __VTS_DRIVER__android_hardware_nfc_V1_0_INfc__
 
 #undef LOG_TAG
-#define LOG_TAG "FuzzerExtended_INfc"
+#define LOG_TAG "FuzzerExtended_android_hardware_nfc_V1_0_INfc"
 
 
 #include <stdio.h>
@@ -25,9 +25,9 @@ namespace android {
 namespace vts {
 namespace vtsINfc {
 
-class FuzzerExtended_INfc : public FuzzerBase {
+class FuzzerExtended_android_hardware_nfc_V1_0_INfc : public FuzzerBase {
  public:
-    FuzzerExtended_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
+    FuzzerExtended_android_hardware_nfc_V1_0_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
  protected:
     bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
     bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);

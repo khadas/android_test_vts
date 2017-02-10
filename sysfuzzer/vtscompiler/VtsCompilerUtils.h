@@ -62,5 +62,11 @@ string PathJoin(const char* dir_path, const char* file_name);
 // Returns a string which remove given base_path from file_path if included.
 string RemoveBaseDir(const string& file_path, const string& base_path);
 
+// Get the component name from message,e.g. IFoo, IFooCallback, types etc.
+string GetComponentName(const ComponentSpecificationMessage& message);
+
+// Generate the full component name which can be baked into a token, e.g.
+// android_hardware_Foo_V1_0_IFOO.
+string GetFullComponentNameToken(const ComponentSpecificationMessage& message);
 }  // namespace vts
 }  // namespace android

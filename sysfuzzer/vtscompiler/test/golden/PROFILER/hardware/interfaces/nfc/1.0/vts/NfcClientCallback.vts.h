@@ -21,7 +21,7 @@ namespace vtsINfcClientCallback {
 
 extern "C" {
 
-    void HIDL_INSTRUMENTATION_FUNCTION_INfcClientCallback(
+    void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfcClientCallback(
             HidlInstrumentor::InstrumentationEvent event,
             const char* package,
             const char* version,
