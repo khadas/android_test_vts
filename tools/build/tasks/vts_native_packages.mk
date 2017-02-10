@@ -69,7 +69,8 @@ my_spec_modules := \
 
 my_spec_copy_pairs :=
   $(foreach m,$(my_spec_modules),\
-    $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/spec/$(m)))\
+    $(if $(wildcard $(m)),\
+      $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/spec/$(m))))\
 
 
 $(compatibility_zip): $(call copy-many-files,$(my_copy_pairs)) $(call copy-many-files,$(my_spec_copy_pairs))
