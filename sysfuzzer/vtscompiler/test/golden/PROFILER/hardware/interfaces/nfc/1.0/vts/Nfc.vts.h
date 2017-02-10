@@ -22,7 +22,7 @@ namespace vtsINfc {
 
 extern "C" {
 
-    void HIDL_INSTRUMENTATION_FUNCTION_INfc(
+    void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             HidlInstrumentor::InstrumentationEvent event,
             const char* package,
             const char* version,

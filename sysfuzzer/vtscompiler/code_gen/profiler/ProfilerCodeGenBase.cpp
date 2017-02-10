@@ -57,8 +57,9 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     out.indent();
 
     // Generate the declaration of main profiler function.
-    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_"
-        << GetComponentName(message) << "(\n";
+    string component_name_token = GetFullComponentNameToken(message);
+    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_name_token
+        << "(\n";
     out.indent();
     out.indent();
     out << "HidlInstrumentor::InstrumentationEvent event,\n";
@@ -99,8 +100,9 @@ void ProfilerCodeGenBase::GenerateSourceFile(
       GenerateProfilerMethodImplForAttribute(out, attribute);
     }
     // Generate the main profiler function.
-    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_"
-        << GetComponentName(message) << "(\n";
+    string component_name_token = GetFullComponentNameToken(message);
+    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_name_token
+        << "(\n";
     out.indent();
     out.indent();
     out << "HidlInstrumentor::InstrumentationEvent event,\n";
