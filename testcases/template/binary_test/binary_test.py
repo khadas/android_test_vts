@@ -72,6 +72,11 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
 
+        # test-module-name is required in binary tests.
+        self.getUserParam(
+            keys.ConfigKeys.KEY_TESTBED_NAME,
+            error_if_not_found=True)
+
         self.binary_test_sources = list_utils.ExpandItemDelimiters(
             self.binary_test_sources,
             const.LIST_ITEM_DELIMITER,
