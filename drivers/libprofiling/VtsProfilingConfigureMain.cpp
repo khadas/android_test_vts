@@ -86,11 +86,23 @@ bool DisableHALProfiling() {
   return true;
 }
 
+// Usage examples:
+//   To enable, <binary> enable <lib path>
+//   To disable, <binary> disable clear
 int main(int argc, char* argv[]) {
   bool enable_profiling = false;
-  if (argc == 2) {
+  if (argc >= 2) {
     if (!strcmp(argv[1], "enable")) {
       enable_profiling = true;
+    }
+    if (argc == 3 && strlen(argv[2]) > 0) {
+      if (!strcmp(argv[2], "clear")) {
+        property_set("hal.instrumentation.lib.path", "");
+        printf("* setprop hal.instrumentation.lib.path \"\"\n");
+      } else {
+        property_set("hal.instrumentation.lib.path", argv[2]);
+        printf("* setprop hal.instrumentation.lib.path %s\n", argv[2]);
+      }
     }
   }
 
