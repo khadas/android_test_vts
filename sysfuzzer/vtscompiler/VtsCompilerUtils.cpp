@@ -30,6 +30,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "specification_parser/InterfaceSpecificationParser.h"
+#include "utils/InterfaceSpecUtil.h"
 #include "utils/StringUtil.h"
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -493,6 +494,33 @@ string RemoveBaseDir(const string& file_path, const string& base_path) {
     result = &result.c_str()[1];
   }
   return result;
+}
+
+string GetComponentName(const ComponentSpecificationMessage& message) {
+  if (!message.component_name().empty()) {
+    return message.component_name();
+  }
+
+  string component_name = message.original_data_structure_name();
+  while (!component_name.empty()
+      && (std::isspace(component_name.back()) || component_name.back() == '*')) {
+    component_name.pop_back();
+  }
+  const auto pos = component_name.find_last_of(" ");
+  if (pos != std::string::npos) {
+    component_name = component_name.substr(pos + 1);
+  }
+  return component_name;
+}
+
+string GetFullComponentNameToken(const ComponentSpecificationMessage& message) {
+  string package_name = message.package();
+  ReplaceSubString(package_name, ".", "_");
+  string version = GetVersionString(message.component_type_version(), true);
+  string component_name = GetComponentName(message);
+  string package_name_token = package_name + "_" + version + "_"
+      + component_name;
+  return package_name_token;
 }
 
 }  // namespace vts
