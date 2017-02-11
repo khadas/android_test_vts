@@ -42,6 +42,7 @@ class SystraceController(object):
     def __init__(self, android_vts_path, device_serial, process_name=''):
         self._android_vts_path = android_vts_path
         self._path_output = None
+        self._subprocess = None
         self._device_serial = device_serial
         if not device_serial:
             logging.warning(
@@ -74,6 +75,27 @@ class SystraceController(object):
     def process_name(self, process_name):
         ''''Set process name'''
         self._process_name = process_name
+
+    @property
+    def has_output(self):
+        ''''returns whether output file exists and not empty.
+
+        Returns:
+            False if output path is not specified, or output file doesn't exist, or output
+            file size is zero; True otherwise.
+        '''
+        if not self._path_output:
+            logging.warning('systrace output path is empty.')
+            return False
+
+        try:
+            if os.path.getsize(self._path_output) == 0:
+                logging.warning('systrace output file is empty.')
+                return False
+        except OSError:
+            logging.info('systrace output file does not exist.')
+            return False
+        return True
 
     def Start(self):
         '''Start systrace process.
@@ -146,23 +168,31 @@ class SystraceController(object):
         '''Stop systrace process.
 
         Returns:
-            True if successfully stopped systrace; False otherwise.
+            True if successfully stopped systrace or systrace already stopped;
+            False otherwise.
         '''
-        if not self.is_valid or not self._subprocess:
+        if not self.is_valid:
             logging.warn(
                 'Cannot stop systrace: systrace was not started for %s.',
                 self.process_name)
             return False
 
+        if not self._subprocess:
+            logging.info('Systrace already stopped.')
+            return True
+
         # Press enter to stop systrace script
         self._subprocess.stdin.write('\n')
         self._subprocess.stdin.flush()
-
         # Wait for output to be written down
+        # TODO: use subprocess.TimeoutExpired after upgrading to python >3.3
         out, err = self._subprocess.communicate()
         logging.info('Systrace stopped for %s', self.process_name)
         logging.info('Systrace stdout: %s', out)
         logging.info('Systrace stderr: %s', err)
+
+        self._subprocess = None
+
         return True
 
     def ReadLastOutput(self):
@@ -176,6 +206,11 @@ class SystraceController(object):
                 'Cannot read output: systrace was not started for %s.',
                 self.process_name)
             return None
+
+        if not self.has_output:
+            logging.error(
+                'systrace did not started/ended correctly. Output is empty.')
+            return False
 
         try:
             with open(self._path_output, 'r') as f:
@@ -193,9 +228,9 @@ class SystraceController(object):
             return False
         report_path = str(report_path)
 
-        if not self._path_output:
+        if not self.has_output:
             logging.error(
-                'systrace did not started correctly. Output path is empty.')
+                'systrace did not started/ended correctly. Output is empty.')
             return False
 
         parent_dir = os.path.dirname(report_path)
@@ -229,5 +264,7 @@ class SystraceController(object):
             except Exception as e:
                 logging.error('failed to remove systrace output file. %s', e)
                 return False
+            finally:
+                self._path_output = None
 
         return True
