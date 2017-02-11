@@ -16,6 +16,7 @@
 <configuration description="Run New VTS Tests for HIDL HALs in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts" />
     <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
     <option name="compatibility:include-filter" value="BinderPerformanceTest" />
     <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputTest" />
