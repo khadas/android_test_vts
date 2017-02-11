@@ -74,6 +74,7 @@ vts_test_lib_packages += \
     libtest_empty \
     libtest_init_fini_order_child \
     libtest_init_fini_order_grand_child \
+    libtest_init_fini_order_root2 \
     libtest_init_fini_order_root \
     libtest_ifunc \
     libtest_nodelete_1 \
