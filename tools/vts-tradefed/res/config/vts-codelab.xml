@@ -16,6 +16,7 @@
 <configuration description="Run VTS CodeLab Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts-*" />
     <option name="compatibility:include-filter" value="CodeLabHelloWorldTest" />
     <option name="compatibility:include-filter" value="CodeLabHelloWorldTestStaging" />
     <template-include name="reporters" default="basic-reporters" />
