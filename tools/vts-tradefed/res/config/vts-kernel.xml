@@ -16,6 +16,7 @@
 <configuration description="Run VTS Kernel and Kernel Module Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts" />
     <option name="compatibility:include-filter" value="KernelLtpTest" />
     <option name="compatibility:include-filter" value="LinuxKselftestTest" />
     <option name="compatibility:include-filter" value="SyscallExistenceTest" />

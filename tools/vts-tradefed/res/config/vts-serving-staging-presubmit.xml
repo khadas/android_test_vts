@@ -16,6 +16,7 @@
 <configuration description="Run New VTS Presubmit Tests in the Staging environment">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts-*" />
 
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />

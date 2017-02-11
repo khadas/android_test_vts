@@ -16,6 +16,7 @@
 <configuration description="VTS Serving Plan for an Environment Using a Pinned Build">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts-*" />
     <!-- For vts-kernel -->
     <option name="compatibility:include-filter" value="KernelLtpTest" />
     <option name="compatibility:include-filter" value="LinuxKselftestTestPresubmit" />

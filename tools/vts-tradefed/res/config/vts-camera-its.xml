@@ -16,6 +16,7 @@
 <configuration description="Run VTS Camera ITS (Image Test Suite) Tests">
     <include name="everything" />
     <option name="plan" value="vts" />
+    <option name="test-tag" value="vts-*" />
     <option name="compatibility:include-filter" value="CameraITSTest" />
     <template-include name="reporters" default="basic-reporters" />
 </configuration>
