@@ -229,79 +229,71 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             test_name: string, test name
         """
         test_end_time = self.GetTimestamp()
-        if getattr(self, self.USE_GAE_DB, False):
-            if (self._current_test_report_msg and
-                    self._current_test_report_msg.test_result !=
-                    ReportMsg.TEST_CASE_RESULT_SKIP):
-                self._current_test_report_msg.end_timestamp = test_end_time
-                if self._systrace_controller and self._systrace_controller.is_valid:
-                    systrace_msg = None
-                    try:
-                        systrace_msg = self._current_test_report_msg.systrace.add(
-                        )
-                        if self._systrace_controller.process_name:
-                            systrace_msg.process_name = self._systrace_controller.process_name
+        if (getattr(self, self.USE_GAE_DB, False) and
+                self._current_test_report_msg and
+                self._current_test_report_msg.test_result !=
+                ReportMsg.TEST_CASE_RESULT_SKIP and
+                self._systrace_controller and
+                self._systrace_controller.has_output):
+            self._current_test_report_msg.end_timestamp = test_end_time
+            systrace_msg = None
+            try:
+                systrace_msg = self._current_test_report_msg.systrace.add()
 
-                        if self.getUserParam(
-                                keys.ConfigKeys.
-                                IKEY_SYSTRACE_UPLAD_TO_DASHBOARD,
-                                default_value=False):
-                            html = self._systrace_controller.ReadLastOutput()
-                            if html is None:
-                                logging.error(
-                                    'Failed to read systrace output.')
-                            else:
-                                systrace_msg.html.append(html)
-                                logging.info(
-                                    'Systrace html data added to report message. Length: %s',
-                                    len(html))
-                    except Exception as e:  # TODO(yuexima): more specific exceptions catch
-                        logging.exception(
-                            'Failed to add systrace to resport message %s', e)
+                # Set systrace process name if configured
+                if self._systrace_controller.process_name:
+                    systrace_msg.process_name = self._systrace_controller.process_name
 
-                    report_path = self.getUserParam(
-                        keys.ConfigKeys.IKEY_SYSTRACE_REPORT_PATH,
+                # Write systrace output html content into protobuf if enabled
+                if self.getUserParam(
+                        keys.ConfigKeys.IKEY_SYSTRACE_UPLAD_TO_DASHBOARD,
+                        default_value=False):
+                    html = self._systrace_controller.ReadLastOutput()
+                    if html is None:
+                        logging.error('Failed to read systrace output.')
+                    else:
+                        systrace_msg.html.append(html)
+                        logging.info(
+                            'Systrace html data added to report message. Length: %s',
+                            len(html))
+
+                # Write systrace output x20 url path to protobuf message if enabled
+                report_path = self.getUserParam(
+                    keys.ConfigKeys.IKEY_SYSTRACE_REPORT_PATH,
+                    default_value=None)
+                if report_path:
+                    report_destination_file_name = '{module}_{test}_{process}_{time}.html'.format(
+                        module=self.test_module_name,
+                        test=test_name,
+                        process=self._systrace_controller.process_name,
+                        time=test_end_time)
+                    report_destination_file_path = os.path.join(
+                        report_path, report_destination_file_name)
+                    if self._systrace_controller.SaveLastOutput(
+                            report_destination_file_path):
+                        logging.info('Systrace output saved to %s',
+                                     report_destination_file_path)
+                    else:
+                        logging.error('Failed to save systrace output.')
+
+                    report_url_prefix = self.getUserParam(
+                        keys.ConfigKeys.IKEY_SYSTRACE_REPORT_URL_PREFIX,
                         default_value=None)
-                    if report_path:
-                        report_destination_file_name = '{module}_{test}_{process}_{time}.html'.format(
-                            module=self.test_module_name,
-                            test=test_name,
-                            process=self._systrace_controller.process_name,
-                            time=test_end_time)
-                        report_destination_file_path = os.path.join(
-                            report_path, report_destination_file_name)
-                        if self._systrace_controller.SaveLastOutput(
-                                report_destination_file_path):
-                            logging.info('Systrace output saved to %s',
-                                         report_destination_file_path)
-                        else:
-                            logging.error('Failed to save systrace output.')
+                    if report_url_prefix and systrace_msg:
+                        report_url_prefix = str(report_url_prefix)
+                        report_destination_file_url = '%s%s' % (
+                            report_url_prefix, report_destination_file_name)
 
-                        report_url_prefix = self.getUserParam(
-                            keys.ConfigKeys.IKEY_SYSTRACE_REPORT_URL_PREFIX,
-                            default_value=None)
-                        if report_url_prefix and systrace_msg:
-                            report_url_prefix = str(report_url_prefix)
-                            report_destination_file_url = '%s%s' % (
-                                report_url_prefix,
-                                report_destination_file_name)
-
-                            try:
-                                systrace_msg.url.append(
-                                    report_destination_file_url)
-                                logging.info(
-                                    'systrace result url %s added to protobuf message.',
-                                    report_destination_file_url)
-                            except Exception as e:  # TODO(yuexima): more specific exceptions catch
-                                logging.exception(
-                                    'failed to append systrace result url "%s" to proto message: %s',
-                                    (report_destination_file_url, e))
-                    if not self._systrace_controller.ClearLastOutput():
-                        logging.error('failed to clear last systrace output.')
-            else:
-                logging.info(
-                    "test result of '%s' is empty and will not be uploaded.",
-                    test_name)
+                        systrace_msg.url.append(report_destination_file_url)
+                        logging.info(
+                            'systrace result url %s added to protobuf message.',
+                            report_destination_file_url)
+            except Exception as e:  # TODO(yuexima): more specific exceptions catch
+                logging.exception(
+                    'Failed to add systrace to report message %s', e)
+            finally:
+                if not self._systrace_controller.ClearLastOutput():
+                    logging.error('failed to clear last systrace output.')
         return super(BaseTestWithWebDbClass, self)._testExit(test_name)
 
     def _setUpTest(self, test_name):
