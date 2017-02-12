@@ -17,13 +17,12 @@
 #include <hidl/HidlSupport.h>
 #include <android/hardware/nfc/1.0/types.h>
 #include <android/hardware/nfc/1.0/types.vts.h>
+#include <android/hidl/base/1.0/types.h>
 
 
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-namespace vtsINfcClientCallback {
-
 
 class Vts_android_hardware_nfc_V1_0_INfcClientCallback: public ::android::hardware::nfc::V1_0::INfcClientCallback {
  public:
@@ -44,7 +43,6 @@ sp<::android::hardware::nfc::V1_0::INfcClientCallback> VtsFuzzerCreateVts_androi
 
 
 
-}  // namespace vtsINfcClientCallback
 }  // namespace vts
 }  // namespace android
 #endif
