@@ -141,8 +141,10 @@ string HalHidlFuzzerCodeGen::GetFuzzerBinaryName(
     const FunctionSpecificationMessage &func_spec) {
   string package = comp_spec_.package();
   string version = GetVersionString(comp_spec_.component_type_version());
+  string iface_name = comp_spec_.component_name();
   string func_name = func_spec.name();
-  return package + "@" + version + "-vts.func_fuzzer-" + func_name;
+  return package + "@" + version + "-vts.func_fuzzer." + iface_name + "." +
+         func_name;
 }
 
 string HalHidlFuzzerCodeGen::GetFuzzerSourceName(
