@@ -860,7 +860,6 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
           val.predefined_type().find_last_of("::") + 1);
       string full_name = val.predefined_type();
       ReplaceSubString(full_name, "::", "_");
-      //string component_name_token = "Vts_" + GetFullComponentNameToken(message);
       out << arg_name << " = vts" << local_name << "::VtsFuzzerCreate"
           << "Vts" + full_name << "(callback_socket_name);\n";
       break;
@@ -1384,22 +1383,22 @@ bool HalHidlCodeGen::CanElideCallback(
 }
 
 bool HalHidlCodeGen::isElidableType(const VariableType& type) {
-    if (type == TYPE_SCALAR || type == TYPE_ENUM || type == TYPE_MASK
-        || type == TYPE_POINTER || type == TYPE_HIDL_INTERFACE
-        || type == TYPE_VOID) {
-        return true;
-    }
-    return false;
+  if (type == TYPE_SCALAR || type == TYPE_ENUM || type == TYPE_MASK
+      || type == TYPE_POINTER || type == TYPE_HIDL_INTERFACE
+      || type == TYPE_VOID) {
+    return true;
+  }
+  return false;
 }
 
 bool HalHidlCodeGen::isConstType(const VariableType& type) {
-    if (type == TYPE_ARRAY || type == TYPE_VECTOR || type == TYPE_REF) {
-      return true;
-    }
-    if (isElidableType(type)) {
-        return false;
-    }
+  if (type == TYPE_ARRAY || type == TYPE_VECTOR || type == TYPE_REF) {
     return true;
+  }
+  if (isElidableType(type)) {
+    return false;
+  }
+  return true;
 }
 
 }  // namespace vts
