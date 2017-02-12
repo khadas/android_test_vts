@@ -19,7 +19,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
         if (service_name) {
           cout << "  - service name: " << service_name << endl;
         }
-        hw_binder_proxy_ = INfc::getService(service_name, get_stub);
+        hw_binder_proxy_ = ::android::hardware::nfc::V1_0::INfc::getService(service_name, get_stub);
         cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }
@@ -42,7 +42,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
     cout << "Function: " << __func__ << " " << func_name << endl;
     if (!strcmp(func_name, "open")) {
         sp<INfcClientCallback> arg0;
-        arg0 = vtsINfcClientCallback::VtsFuzzerCreateINfcClientCallback(callback_socket_name);
+        arg0 = vtsINfcClientCallback::VtsFuzzerCreateVtsINfcClientCallback(callback_socket_name);
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
         cout << "Call an API" << endl;
@@ -59,7 +59,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
         return true;
     }
     if (!strcmp(func_name, "write")) {
-        ::android::hardware::hidl_vec<uint8_t> arg0;
+         ::android::hardware::hidl_vec<uint8_t> arg0;
         arg0.resize(func_msg.arg(0).vector_size());
         for (int i = 0; i <func_msg.arg(0).vector_size(); i++) {
             arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().uint8_t();
@@ -81,7 +81,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
         return true;
     }
     if (!strcmp(func_name, "coreInitialized")) {
-        ::android::hardware::hidl_vec<uint8_t> arg0;
+         ::android::hardware::hidl_vec<uint8_t> arg0;
         arg0.resize(func_msg.arg(0).vector_size());
         for (int i = 0; i <func_msg.arg(0).vector_size(); i++) {
             arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().uint8_t();
