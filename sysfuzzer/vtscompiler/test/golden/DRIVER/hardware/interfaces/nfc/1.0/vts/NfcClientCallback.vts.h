@@ -4,19 +4,19 @@
 #undef LOG_TAG
 #define LOG_TAG "FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback"
 
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <utils/Log.h>
+
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
-
 
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <hidl/HidlSupport.h>
 #include <android/hardware/nfc/1.0/types.h>
+#include <android/hardware/nfc/1.0/types.vts.h>
 
 
 using namespace android::hardware::nfc::V1_0;
@@ -25,11 +25,11 @@ namespace vts {
 namespace vtsINfcClientCallback {
 
 
-class VtsNfcClientCallback: public INfcClientCallback {
+class Vts_android_hardware_nfc_V1_0_INfcClientCallback: public ::android::hardware::nfc::V1_0::INfcClientCallback {
  public:
-    VtsNfcClientCallback() {};
+    Vts_android_hardware_nfc_V1_0_INfcClientCallback() {};
 
-    virtual ~VtsNfcClientCallback() = default;
+    virtual ~Vts_android_hardware_nfc_V1_0_INfcClientCallback() = default;
 
     ::android::hardware::Return<void> sendEvent(
         ::android::hardware::nfc::V1_0::NfcEvent arg0,
@@ -40,7 +40,7 @@ class VtsNfcClientCallback: public INfcClientCallback {
 
 };
 
-sp<INfcClientCallback> VtsFuzzerCreateINfcClientCallback(const string& callback_socket_name);
+sp<::android::hardware::nfc::V1_0::INfcClientCallback> VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(const string& callback_socket_name);
 
 
 

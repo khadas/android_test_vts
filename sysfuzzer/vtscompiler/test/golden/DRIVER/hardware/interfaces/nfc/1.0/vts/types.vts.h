@@ -4,15 +4,14 @@
 #undef LOG_TAG
 #define LOG_TAG "FuzzerExtended_android_hardware_nfc_V1_0_types"
 
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <utils/Log.h>
+
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
-
 
 #include <android/hardware/nfc/1.0/types.h>
 #include <hidl/HidlSupport.h>

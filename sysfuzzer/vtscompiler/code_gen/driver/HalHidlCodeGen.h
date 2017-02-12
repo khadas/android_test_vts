@@ -189,6 +189,10 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   // directly.
   bool CanElideCallback(const FunctionSpecificationMessage& func_msg);
   bool isElidableType(const VariableType& type);
+
+  // Returns true if a HIDL type uses 'const' in its native C/C++ form.
+  bool isConstType(const VariableType& type);
+
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
 };

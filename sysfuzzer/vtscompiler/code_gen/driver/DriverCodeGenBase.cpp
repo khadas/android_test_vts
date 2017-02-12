@@ -17,6 +17,8 @@
 #include "code_gen/driver/DriverCodeGenBase.h"
 
 #include <hidl-util/Formatter.h>
+#include <hidl-util/FQName.h>
+
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -166,16 +168,16 @@ void DriverCodeGenBase::GenerateHeaderIncludeFiles(Formatter& out,
   for (auto const& header : message.header()) {
     out << "#include " << header << "\n";
   }
-  out << "\n\n";
+  out << "\n";
   out << "#include <stdio.h>" << "\n";
   out << "#include <stdarg.h>" << "\n";
   out << "#include <stdlib.h>" << "\n";
   out << "#include <string.h>" << "\n";
   out << "#include <utils/Log.h>" << "\n";
-
+  out << "\n";
   out << "#include <fuzz_tester/FuzzerBase.h>" << "\n";
   out << "#include <fuzz_tester/FuzzerCallbackBase.h>" << "\n";
-  out << "\n\n";
+  out << "\n";
 }
 
 void DriverCodeGenBase::GenerateSourceIncludeFiles(Formatter& out,
