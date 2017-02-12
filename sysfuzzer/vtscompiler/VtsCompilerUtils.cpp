@@ -151,7 +151,10 @@ string GetCppVariableType(const std::string scalar_type_string) {
 }
 
 string GetCppVariableType(const VariableSpecificationMessage& arg,
-                          const ComponentSpecificationMessage* message) {
+                          const ComponentSpecificationMessage* message,
+                          bool generate_const,
+                          int var_depth) {
+  string result;
   switch (arg.type()) {
     case TYPE_VOID:
     {
@@ -159,45 +162,65 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     }
     case TYPE_PREDEFINED:
     {
-      return arg.predefined_type();
+      result = arg.predefined_type();
+      break;
     }
     case TYPE_SCALAR:
     {
-      return GetCppVariableType(arg.scalar_type());
+      result = GetCppVariableType(arg.scalar_type());
+      break;
     }
     case TYPE_STRING:
     {
-      return "::android::hardware::hidl_string";
+      result = "::android::hardware::hidl_string";
+      break;
     }
     case TYPE_ENUM:
     {
       if (!arg.has_enum_value() && arg.has_predefined_type()) {
-        return arg.predefined_type();
+        result = arg.predefined_type();
+      } else if (arg.has_enum_value() && arg.has_name()) {
+        result = arg.name();  // nested enum type.
       } else {
         cerr << __func__ << ":" << __LINE__
              << " ERROR no predefined_type set for enum variable" << endl;
         exit(-1);
       }
+      break;
     }
     case TYPE_VECTOR:
     {
       string element_type = GetCppVariableType(arg.vector_value(0), message);
-      return "::android::hardware::hidl_vec<" + element_type + ">";
+      if (generate_const && arg.vector_value(0).type() == TYPE_REF) {
+        result = "::android::hardware::hidl_vec<const " + element_type + ">";
+      } else {
+        result = "::android::hardware::hidl_vec<" + element_type + ">";
+      }
+      break;
     }
     case TYPE_ARRAY:
     {
-      string element_type = GetCppVariableType(arg.vector_value(0), message);
-      return "::android::hardware::hidl_array<" + element_type + ","
-          + to_string(arg.vector_size()) + ">";
+      string element_type;
+      if (arg.vector_value(0).type() != TYPE_ARRAY) {
+        element_type = GetCppVariableType(arg.vector_value(0), message);
+        result = "::android::hardware::hidl_array<" + element_type + ","
+            + to_string(arg.vector_size()) + ">";
+      } else {
+        element_type = GetCppVariableType(arg.vector_value(0), message);
+        string prefix = element_type.substr(0, element_type.find(",") + 1);
+        string suffix = element_type.substr(element_type.find(","));
+        result = prefix + " " + to_string(arg.vector_size()) + suffix;
+      }
+      break;
     }
     case TYPE_STRUCT:
     {
       if (arg.struct_value_size() == 0 && arg.has_predefined_type()) {
-        return arg.predefined_type();
+        result = arg.predefined_type();
       } else if (arg.has_struct_type()) {
-        return arg.struct_type();
-      } else if (arg.sub_struct_size() > 0) {
-        return arg.name();
+        result = arg.struct_type();
+      } else if (arg.sub_struct_size() > 0 || arg.struct_value_size() > 0) {
+        result = arg.name();
       } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR"
              << " no predefined_type, struct_type, nor sub_struct set"
@@ -205,75 +228,107 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
              << " (arg name " << arg.name() << ")" << endl;
         exit(-1);
       }
+      break;
     }
     case TYPE_UNION:
     {
       if (arg.union_value_size() == 0 && arg.has_predefined_type()) {
-        return arg.predefined_type();
+        result = arg.predefined_type();
       } else if (arg.has_union_type()) {
-        return arg.union_type();
+        result = arg.union_type();
       } else {
         cerr << __func__ << ":" << __LINE__
              << " ERROR no predefined_type or union_type set for union"
              << " variable" << endl;
         exit(-1);
       }
+      break;
     }
     case TYPE_HIDL_CALLBACK:
     {
       if (arg.has_predefined_type()) {
-        return "sp<" + arg.predefined_type() + ">";
+        result = "sp<" + arg.predefined_type() + ">";
       } else {
         cerr << __func__ << ":" << __LINE__
              << " ERROR no predefined_type set for hidl callback variable"
              << endl;
         exit(-1);
       }
+      break;
     }
     case TYPE_HANDLE:
     {
-      return "::android::hardware::hidl_handle";
+      result = "::android::hardware::hidl_handle";
+      break;
     }
     case TYPE_HIDL_INTERFACE:
     {
       if (arg.has_predefined_type()) {
-        return "sp<" + arg.predefined_type() + ">";
+        result = "sp<" + arg.predefined_type() + ">";
       } else {
         cerr << __func__ << ":" << __LINE__
              << " ERROR no predefined_type set for hidl interface variable"
              << endl;
         exit(-1);
       }
+      break;
     }
     case TYPE_MASK:
     {
-      return GetCppVariableType(arg.scalar_type());
+      result = GetCppVariableType(arg.scalar_type());
+      break;
     }
     case TYPE_HIDL_MEMORY:
     {
-        return "::android::hardware::hidl_memory";
+      result = "::android::hardware::hidl_memory";
+      break;
     }
     case TYPE_POINTER:
     {
-      return "void*";
+      result = "void*";
+      if (generate_const) {
+        return "const " + result;
+      }
+      return result;
     }
     case TYPE_FMQ_SYNC:
     {
       string element_type = GetCppVariableType(arg.fmq_value(0), message);
-      return "::android::hardware::MQDescriptorSync<" + element_type + ">";
+      result = "::android::hardware::MQDescriptorSync<" + element_type + ">";
+      break;
     }
     case TYPE_FMQ_UNSYNC:
     {
       string element_type = GetCppVariableType(arg.fmq_value(0), message);
-      return "::android::hardware::MQDescriptorUnsync<" + element_type + ">";
+      result = "::android::hardware::MQDescriptorUnsync<" + element_type + ">";
+      break;
+    }
+    case TYPE_REF:
+    {
+      string element_type = GetCppVariableType(arg.ref_value(), message,
+                                               false, var_depth + 1);
+      if (element_type.length() > 0) {
+        if (var_depth == 0) {
+          return "const " + element_type + " *";
+        } else {
+          return element_type + " *const";
+        }
+      }
+      cerr << __func__ << ":" << __LINE__ << " ERROR"
+           << " TYPE_REF malformed" << endl;
+      exit(-1);
     }
     default:
     {
       cerr << __func__ << ":" << __LINE__ << " " << ": type " << arg.type()
-          << " not supported" << endl;
+           << " not supported" << endl;
       exit(-1);
     }
   }
+  if (generate_const) {
+    return "const " + result + "&";
+  }
+  return result;
 }
 
 string GetConversionToProtobufFunctionName(VariableSpecificationMessage arg) {

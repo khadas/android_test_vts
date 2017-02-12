@@ -6,15 +6,14 @@
 #include <hardware/hardware.h>
 #include <hardware/bluetooth.h>
 
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <utils/Log.h>
+
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
-
 
 namespace android {
 namespace vts {
