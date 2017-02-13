@@ -41,6 +41,7 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
     const string& /*fuzzer_extended_class_name*/) {
   if (endsWith(message.component_name(), "Callback")) {
     out << "\n";
+    FQName component_fq_name = GetFQName(message);
     for (const auto& api : message.interface().api()) {
       // Generate return statement.
       if (CanElideCallback(api)) {
@@ -50,7 +51,7 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
         out << "::android::hardware::Return<void> ";
       }
       // Generate function call.
-      out << "Vts_" << GetFullComponentNameToken(message) << "::" << api.name()
+      out << "Vts_" << component_fq_name.tokenName() << "::" << api.name()
           << "(\n";
       out.indent();
       for (int index = 0; index < api.arg_size(); index++) {
@@ -94,16 +95,12 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
       out << "\n";
     }
 
-    FQName fqname = FQName(
-        message.package(),
-        GetVersionString(message.component_type_version()),
-        message.component_name());
-    string component_name_token = "Vts_" + GetFullComponentNameToken(message);
-    out << "sp<" << fqname.cppName() << "> VtsFuzzerCreate"
+    string component_name_token = "Vts_" + component_fq_name.tokenName();
+    out << "sp<" << component_fq_name.cppName() << "> VtsFuzzerCreate"
         << component_name_token << "(const string& callback_socket_name)";
     out << " {" << "\n";
     out.indent();
-    out << "sp<" << fqname.cppName() << "> result;\n";
+    out << "sp<" << component_fq_name.cppName() << "> result;\n";
     out << "result = new " << component_name_token << "();\n";
     out << "return result;\n";
     out.unindent();
@@ -369,13 +366,10 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     }
 
     out << "\n";
-    string component_name_token = "Vts_" + GetFullComponentNameToken(message);
-    FQName fqname = FQName(
-        message.package(),
-        GetVersionString(message.component_type_version()),
-        message.component_name());
+    FQName component_fq_name = GetFQName(message);
+    string component_name_token = "Vts_" + component_fq_name.tokenName();;
     out << "class " << component_name_token << ": public "
-        << fqname.cppName() << " {" << "\n";
+        << component_fq_name.cppName() << " {" << "\n";
     out << " public:" << "\n";
     out.indent();
     out << component_name_token << "() {};" << "\n";
@@ -429,7 +423,7 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     out << "};" << "\n";
     out << "\n";
 
-    out << "sp<" << fqname.cppName() << "> VtsFuzzerCreate"
+    out << "sp<" << component_fq_name.cppName() << "> VtsFuzzerCreate"
         << component_name_token << "(const string& callback_socket_name);"
         << "\n";
     out << "\n";
@@ -490,7 +484,7 @@ void HalHidlCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
       out << "#include <" << package_path << "/" << package_version << "/"
           << component_name << ".vts.h>\n";
     }
-}
+  }
   out << "\n\n";
 }
 
@@ -546,11 +540,8 @@ void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
 
 void HalHidlCodeGen::GeneratePrivateMemberDeclarations(Formatter& out,
     const ComponentSpecificationMessage& message) {
-  FQName fqname = FQName(
-      message.package(),
-      GetVersionString(message.component_type_version()),
-      message.component_name());
-  out << "sp<" << fqname.cppName() << "> " << kInstanceVariableName << ";" << "\n";
+  FQName fqname = GetFQName(message);
+  out << "sp<" << fqname.cppName() << "> " << kInstanceVariableName << ";\n";
 }
 
 void HalHidlCodeGen::GenerateRandomFunctionDeclForAttribute(Formatter& out,
@@ -736,10 +727,7 @@ void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
   out << "if (service_name) {\n"
       << "  cout << \"  - service name: \" << service_name << endl;" << "\n"
       << "}\n";
-  FQName fqname = FQName(
-      message.package(),
-      GetVersionString(message.component_type_version()),
-      message.component_name());
+  FQName fqname = GetFQName(message);
   out << kInstanceVariableName << " = " << fqname.cppName() << "::getService("
       << "service_name, get_stub);" << "\n";
   out << "cout << \"[agent:hal] " << kInstanceVariableName << " = \" << "
@@ -856,12 +844,11 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_CALLBACK:
     {
-      string local_name = val.predefined_type().substr(
-          val.predefined_type().find_last_of("::") + 1);
-      string full_name = val.predefined_type();
-      ReplaceSubString(full_name, "::", "_");
-      out << arg_name << " = vts" << local_name << "::VtsFuzzerCreate"
-          << "Vts" + full_name << "(callback_socket_name);\n";
+      string type_name = val.predefined_type();
+      ReplaceSubString(type_name, "::", "_");
+
+      out << arg_name << " = VtsFuzzerCreateVts" << type_name
+          << "(callback_socket_name);\n";
       break;
     }
     case TYPE_HANDLE:

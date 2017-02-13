@@ -269,7 +269,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
 }
 
 void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
-  const ComponentSpecificationMessage& message) {
+    const ComponentSpecificationMessage& message) {
   // Basic includes.
   out << "#include <android-base/logging.h>\n";
   out << "#include <hidl/HidlSupport.h>\n";
@@ -288,46 +288,30 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
   // Include imported classes.
   for (const auto& import : message.import()) {
     FQName import_name = FQName(import);
-    string package_name = import_name.package();
-    string package_version = import_name.version();
-    string component_name = import_name.name();
-    ReplaceSubString(package_name, ".", "/");
-
-    out << "#include <" << package_name << "/" << package_version << "/"
-        << component_name << ".h>\n";
+    string imported_package_name = import_name.package();
+    string imported_package_version = import_name.version();
+    string imported_component_name = import_name.name();
+    string imported_package_path = imported_package_name;
+    ReplaceSubString(imported_package_path, ".", "/");
+    out << "#include <" << imported_package_path << "/"
+        << imported_package_version << "/" << imported_component_name
+        << ".h>\n";
+    if (imported_package_name.find("android.hardware") != std::string::npos) {
+      if (imported_component_name[0] == 'I') {
+        imported_component_name = imported_component_name.substr(1);
+      }
+      out << "#include <" << imported_package_path << "/"
+          << imported_package_version << "/" << imported_component_name
+          << ".vts.h>\n";
+    }
   }
   out << "\n\n";
 }
 
 void HalHidlProfilerCodeGen::GenerateSourceIncludeFiles(Formatter& out,
-    const ComponentSpecificationMessage& message) {
-  // First include the corresponding profiler header file.
+    const ComponentSpecificationMessage& /*message*/) {
+  // Include the corresponding profiler header file.
   out << "#include \"" << input_vts_file_path_ << ".h\"\n";
-
-  // Include the import files.
-  for (const auto& import : message.import()) {
-    FQName import_name = FQName(import);
-    string package_name = import_name.package();
-    string package_version = import_name.version();
-    string component_name = import_name.name();
-    string package_path = package_name;
-    ReplaceSubString(package_path, ".", "/");
-    if (package_name == message.package()
-        && package_version
-            == GetVersionString(message.component_type_version())) {
-      if (component_name == "types") {
-        out << "#include \""
-            << input_vts_file_path_.substr(
-                0, input_vts_file_path_.find_last_of("\\/"))
-            << "/types.vts.h\"\n";
-      } else {
-        out << "#include \""
-            << input_vts_file_path_.substr(
-                0, input_vts_file_path_.find_last_of("\\/")) << "/"
-            << component_name.substr(1) << ".vts.h\"\n";
-      }
-    }
-  }
   out << "\n";
 }
 
