@@ -51,8 +51,8 @@ void DriverCodeGenBase::GenerateHeaderFile(
          << "\n";
     exit(-1);
   }
-
-  string component_name_token = GetFullComponentNameToken(message);
+  FQName component_fq_name = GetFQName(message);
+  string component_name_token = component_fq_name.tokenName();
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL_HIDL) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name_token;
@@ -95,7 +95,8 @@ void DriverCodeGenBase::GenerateSourceFile(
          << "\n";
     exit(-1);
   }
-  string component_name_token = GetFullComponentNameToken(message);
+  FQName component_fq_name = GetFQName(message);
+  string component_name_token = component_fq_name.tokenName();
   string fuzzer_extended_class_name;
   if (message.component_class() == HAL_HIDL) {
     fuzzer_extended_class_name = "FuzzerExtended_" + component_name_token;
@@ -213,9 +214,6 @@ void DriverCodeGenBase::GenerateCppBodyGlobalFunctions(Formatter& out,
   out << "android::vts::FuzzerBase* " << function_name_prefix << "() {\n";
   out.indent();
   out << "return (android::vts::FuzzerBase*) " << "new android::vts::";
-  if (message.component_class() == HAL_HIDL) {
-    out << "vts" << message.component_name() << "::";
-  }
   out << fuzzer_extended_class_name << "();\n";
   out.unindent();
   out << "}\n\n";
@@ -292,16 +290,10 @@ void DriverCodeGenBase::GenerateOpenNameSpaces(Formatter& out,
 
   out << "namespace android {" << "\n";
   out << "namespace vts {" << "\n";
-  if (message.component_class() == HAL_HIDL) {
-    out << "namespace vts" << message.component_name() << " {\n\n";
-  }
 }
 
 void DriverCodeGenBase::GenerateCloseNameSpaces(Formatter& out,
-    const ComponentSpecificationMessage& message) {
-  if (message.component_class() == HAL_HIDL) {
-    out << "}  // namespace vts" << message.component_name() << "\n";
-  }
+    const ComponentSpecificationMessage& /*message*/) {
   out << "}  // namespace vts" << "\n";
   out << "}  // namespace android" << "\n";
 }

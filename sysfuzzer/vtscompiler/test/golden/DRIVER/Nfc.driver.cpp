@@ -5,13 +5,12 @@
 #include <android/hardware/nfc/1.0/INfc.h>
 #include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
 #include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
+#include <android/hidl/base/1.0/types.h>
 
 
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-namespace vtsINfc {
-
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, const char* service_name) {
     static bool initialized = false;
     if (!initialized) {
@@ -41,8 +40,8 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
     const char* func_name = func_msg.name().c_str();
     cout << "Function: " << __func__ << " " << func_name << endl;
     if (!strcmp(func_name, "open")) {
-        sp<INfcClientCallback> arg0;
-        arg0 = vtsINfcClientCallback::VtsFuzzerCreateVtsINfcClientCallback(callback_socket_name);
+        sp<::android::hardware::nfc::V1_0::INfcClientCallback> arg0;
+        arg0 = VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(callback_socket_name);
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
         cout << "Call an API" << endl;
@@ -216,10 +215,9 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::VerifyResults(const Function
 
 extern "C" {
 android::vts::FuzzerBase* vts_func_4_android_hardware_nfc_1_INfc_() {
-    return (android::vts::FuzzerBase*) new android::vts::vtsINfc::FuzzerExtended_android_hardware_nfc_V1_0_INfc();
+    return (android::vts::FuzzerBase*) new android::vts::FuzzerExtended_android_hardware_nfc_V1_0_INfc();
 }
 
 }
-}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android
