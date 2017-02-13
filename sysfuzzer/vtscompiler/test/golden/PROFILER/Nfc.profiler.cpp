@@ -1,6 +1,4 @@
 #include "hardware/interfaces/nfc/1.0/vts/Nfc.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts.h"
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 
 using namespace android::hardware::nfc::V1_0;
 using namespace android::hardware;
@@ -9,8 +7,6 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
-namespace vtsINfc {
-
 
 void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
         HidlInstrumentor::InstrumentationEvent event,
@@ -53,7 +49,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                         break;
                     }
                     auto *arg_0 = msg.add_arg();
-                    sp<INfcClientCallback> *arg_val_0 = reinterpret_cast<sp<INfcClientCallback>*> ((*args)[0]);
+                    sp<::android::hardware::nfc::V1_0::INfcClientCallback> *arg_val_0 = reinterpret_cast<sp<::android::hardware::nfc::V1_0::INfcClientCallback>*> ((*args)[0]);
                     arg_0->set_type(TYPE_HIDL_CALLBACK);
                     break;
                 }
@@ -336,6 +332,5 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
     }
 }
 
-}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android

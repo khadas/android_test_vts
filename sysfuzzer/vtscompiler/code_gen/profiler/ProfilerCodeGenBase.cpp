@@ -38,8 +38,11 @@ void ProfilerCodeGenBase::GenerateAll(
 
 void ProfilerCodeGenBase::GenerateHeaderFile(
     Formatter& out, const ComponentSpecificationMessage& message) {
-  out << "#ifndef __VTS_PROFILER_" << GetComponentName(message) << "__\n";
-  out << "#define __VTS_PROFILER_" << GetComponentName(message) << "__\n";
+  FQName component_fq_name = GetFQName(message);
+  out << "#ifndef __VTS_PROFILER_" << component_fq_name.tokenName()
+      << "__\n";
+  out << "#define __VTS_PROFILER_" << component_fq_name.tokenName()
+      << "__\n";
   out << "\n\n";
   GenerateHeaderIncludeFiles(out, message);
   GenerateUsingDeclaration(out, message);
@@ -57,8 +60,8 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     out.indent();
 
     // Generate the declaration of main profiler function.
-    string component_name_token = GetFullComponentNameToken(message);
-    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_name_token
+    FQName component_fq_name = GetFQName(message);
+    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_fq_name.tokenName()
         << "(\n";
     out.indent();
     out.indent();
@@ -100,8 +103,8 @@ void ProfilerCodeGenBase::GenerateSourceFile(
       GenerateProfilerMethodImplForAttribute(out, attribute);
     }
     // Generate the main profiler function.
-    string component_name_token = GetFullComponentNameToken(message);
-    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_name_token
+    FQName component_fq_name = GetFQName(message);
+    out << "\nvoid HIDL_INSTRUMENTATION_FUNCTION_" << component_fq_name.tokenName()
         << "(\n";
     out.indent();
     out.indent();
@@ -262,15 +265,13 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
 }
 
 void ProfilerCodeGenBase::GenerateOpenNameSpaces(Formatter& out,
-    const ComponentSpecificationMessage& message) {
+    const ComponentSpecificationMessage& /*message*/) {
   out << "namespace android {\n";
   out << "namespace vts {\n";
-  out << "namespace vts" << GetComponentName(message) << " {\n\n";
 }
 
 void ProfilerCodeGenBase::GenerateCloseNameSpaces(Formatter& out,
-    const ComponentSpecificationMessage& message) {
-  out << "}  // namespace vts" << GetComponentName(message) << "\n";
+    const ComponentSpecificationMessage& /*message*/) {
   out << "}  // namespace vts\n";
   out << "}  // namespace android\n";
 }

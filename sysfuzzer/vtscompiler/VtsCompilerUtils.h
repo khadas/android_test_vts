@@ -16,6 +16,8 @@
 
 #include <string>
 
+#include <hidl-util/FQName.h>
+
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
@@ -67,8 +69,7 @@ string RemoveBaseDir(const string& file_path, const string& base_path);
 // Get the component name from message,e.g. IFoo, IFooCallback, types etc.
 string GetComponentName(const ComponentSpecificationMessage& message);
 
-// Generate the full component name which can be baked into a token, e.g.
-// android_hardware_Foo_V1_0_IFOO.
-string GetFullComponentNameToken(const ComponentSpecificationMessage& message);
+// Generate the FQName of the given message..
+FQName GetFQName(const ComponentSpecificationMessage& message);
 }  // namespace vts
 }  // namespace android
