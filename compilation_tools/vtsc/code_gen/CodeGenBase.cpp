@@ -170,9 +170,29 @@ void TranslateToFile(VtsCompileMode mode,
     cerr << __func__ << " can't parse " << input_vts_file_path << endl;
   }
 
+  if (mode == kFuzzer) {
+    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        {
+          size_t found = output_cpp_file_path_str.find_last_of("/\\");
+          string output_dir = output_cpp_file_path_str.substr(0, found);
+          fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(
+              message, output_dir);
+          break;
+        }
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    fuzzer_generator->GenerateAll();
+    return;
+  }
+
   FILE* output_file = fopen(output_file_path, "w");
   if (output_file == NULL) {
-    cerr << __func__ << " could not open file " << output_file_path;
+    cerr << __func__ << " could not open file " << output_file_path << endl;
     exit(-1);
   }
   Formatter out(output_file);
