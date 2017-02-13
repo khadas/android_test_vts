@@ -1,5 +1,5 @@
-#ifndef __VTS_PROFILER_INfc__
-#define __VTS_PROFILER_INfc__
+#ifndef __VTS_PROFILER_android_hardware_nfc_V1_0_INfc__
+#define __VTS_PROFILER_android_hardware_nfc_V1_0_INfc__
 
 
 #include <android-base/logging.h>
@@ -10,7 +10,10 @@
 
 #include <android/hardware/nfc/1.0/INfc.h>
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
+#include <android/hardware/nfc/1.0/NfcClientCallback.vts.h>
 #include <android/hardware/nfc/1.0/types.h>
+#include <android/hardware/nfc/1.0/types.vts.h>
+#include <android/hidl/base/1.0/types.h>
 
 
 using namespace android::hardware::nfc::V1_0;
@@ -18,8 +21,6 @@ using namespace android::hardware;
 
 namespace android {
 namespace vts {
-namespace vtsINfc {
-
 extern "C" {
 
     void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
@@ -31,7 +32,6 @@ extern "C" {
             std::vector<void *> *args);
 }
 
-}  // namespace vtsINfc
 }  // namespace vts
 }  // namespace android
 #endif
