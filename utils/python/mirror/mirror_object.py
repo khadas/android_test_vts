@@ -28,6 +28,8 @@ from google.protobuf import text_format
 # a dict containing the IDs of the registered function pointers.
 _function_pointer_id_dict = {}
 
+INTERFACE = "interface"
+API = "api"
 
 class MirrorObjectError(Exception):
     """Raised when there is a general error in manipulating a mirror object."""
@@ -64,7 +66,7 @@ class MirrorObject(object):
         max_num = 0
         for key in _function_pointer_id_dict:
             if _function_pointer_id_dict[key] == function_pointer:
-                return _function_pointer_id_dict[function_pointer]
+                return str(key)
             if not max_num or key > max_num:
                 max_num = key
         _function_pointer_id_dict[max_num + 1] = function_pointer
@@ -157,20 +159,30 @@ class MirrorObject(object):
         raise MirrorObjectError("unknown attribute name %s" % attribute_name)
 
     def GetHidlCallbackInterface(self, interface_name, **kwargs):
-        result = self._client.ReadSpecification(interface_name)
-        logging.info("result %s", result)
-
         var_msg = CompSpecMsg.VariableSpecificationMessage()
         var_msg.name = interface_name
         var_msg.type = CompSpecMsg.TYPE_FUNCTION_POINTER
-        for given_name, given_value in kwargs.iteritems():
-            for api in result.interface.api:
-                logging.debug("check %s %s", api.name, given_name)
-                if given_name == api.name:
-                    func_pt_msg = var_msg.function_pointer.add()
-                    func_pt_msg.function_name = given_name
-                    func_pt_msg.id = self.GetFunctionPointerID(given_value)
-                    break
+
+        specification = self._client.ReadSpecification(interface_name)
+        logging.info("specification: %s", specification)
+        interface = getattr(specification, INTERFACE, None)
+        apis = getattr(interface, API, [])
+        for api in apis:
+            function_pointer = None
+            if api.name in kwargs:
+                function_pointer = kwargs[api.name]
+            else:
+                def dummy(*args):
+                    """Dummy implementation for any callback function."""
+                    logging.info("Entering dummy implementation"
+                                 " for callback function: %s", api.name)
+                    for arg_index in range(len(args)):
+                        logging.info("arg%s: %s", arg_index, args[arg_index])
+                function_pointer = dummy
+            func_pt_msg = var_msg.function_pointer.add()
+            func_pt_msg.function_name = api.name
+            func_pt_msg.id = self.GetFunctionPointerID(function_pointer)
+
         return var_msg
 
     def GetHidlTypeInterface(self, interface_name):
