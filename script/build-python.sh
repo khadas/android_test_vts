@@ -15,6 +15,7 @@
 # limitations under the License.
 
 # Modifies any import statements (to remove subdir path)
+pushd ${ANDROID_BUILD_TOP}/test/vts
 
 ## Modifies import statement in proto files.
 sed -i 's/import "test\/vts\/proto\/ComponentSpecificationMessage.proto";/import "ComponentSpecificationMessage.proto";/g' proto/AndroidSystemControlMessage.proto
@@ -37,3 +38,4 @@ protoc -I=proto --python_out=proto proto/VtsWebStatusMessage.proto
 # Compiles all the python source codes.
 python -m compileall .
 
+popd
