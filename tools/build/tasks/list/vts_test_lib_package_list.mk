@@ -118,6 +118,7 @@ vts_test_lib_packages += \
     libnstest_root_not_isolated \
     libnstest_root \
     libnstest_public \
+    libnstest_public_internal \
 
 # for fuzz tests
 vts_test_lib_packages += \
