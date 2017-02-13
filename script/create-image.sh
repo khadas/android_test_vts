@@ -24,12 +24,12 @@ function vts_multidevice_create_image {
   . ${ANDROID_BUILD_TOP}/build/make/envsetup.sh
   cd ${ANDROID_BUILD_TOP}; lunch $1 $2
   cd ${ANDROID_BUILD_TOP}/test/vts; mma -j 32 && cd ${ANDROID_BUILD_TOP}; make vts adb -j 32
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/functional/vts/testcases/hal/nfc/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/sensors/1.0/vts/functional/vts/testcases/hal/sensors/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/automotive/vehicle/2.0/vts/functional/vts/testcases/hal/vehicle/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/functional/vts/testcases/hal/vibrator/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/vr/1.0/vts/functional/vts/testcases/hal/vr/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/hardware/interfaces/tv/cec/1.0/vts/functional/vts/testcases/hal/tv_cec/ ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/nfc ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/sensors ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vehicle ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vibrator ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vr ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/tv ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
 }
 
 vts_multidevice_create_image $1 $2

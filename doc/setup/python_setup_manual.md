@@ -2,6 +2,4 @@
 
 `$ . test/vts/script/setup.sh`
 
-`$ cd test/vts`
-
-`$ ./build-python.sh`
+`$ . test/vts/script/build-python.sh`
