@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_HALSUBMODULECODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_HALSUBMODULECODEGEN_H__
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LIBSHARED_CODEGEN_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LIBSHARED_CODEGEN_H_
 
 #include <fstream>
 #include <iostream>
@@ -31,23 +31,27 @@ using namespace std;
 namespace android {
 namespace vts {
 
-class HalSubmoduleCodeGen : public HalCodeGen {
+class LibSharedCodeGen : public HalCodeGen {
  public:
-  HalSubmoduleCodeGen(const char* input_vts_file_path, const string& vts_name)
-      : HalCodeGen(input_vts_file_path, vts_name) {
-  }
+  LibSharedCodeGen(const char* input_vts_file_path, const string& vts_name)
+      : HalCodeGen(input_vts_file_path, vts_name) {}
 
  protected:
+  void GenerateCppBodyFuzzFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateCppBodyGetAttributeFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
+
+  void GenerateCppBodyCallbackFunction(Formatter& /*out*/,
+      const ComponentSpecificationMessage& /*message*/,
+      const string& /*fuzzer_extended_class_name*/) override {};
+
   void GenerateClassConstructionFunction(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
-
-  void GenerateAdditionalFuctionDeclarations(Formatter& out,
-      const ComponentSpecificationMessage& message,
-      const string& fuzzer_extended_class_name) override;
-
-  void GeneratePrivateMemberDeclarations(Formatter& out,
-      const ComponentSpecificationMessage& message) override;
 
   // instance variable name (e.g., submodule_);
   static const char* const kInstanceVariableName;
@@ -56,4 +60,4 @@ class HalSubmoduleCodeGen : public HalCodeGen {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_HALSUBMODULECODEGEN_H__
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LIBSHARED_CODEGEN_H_

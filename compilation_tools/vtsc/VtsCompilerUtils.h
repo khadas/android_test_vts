@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_UTILS_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_UTILS_H_
+
 #include <string>
 
 #include <hidl-util/FQName.h>
@@ -71,5 +74,8 @@ string GetComponentName(const ComponentSpecificationMessage& message);
 
 // Generate the FQName of the given message..
 FQName GetFQName(const ComponentSpecificationMessage& message);
+
 }  // namespace vts
 }  // namespace android
+
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_UTILS_H_
