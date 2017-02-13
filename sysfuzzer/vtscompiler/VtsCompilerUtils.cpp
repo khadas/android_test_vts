@@ -568,14 +568,10 @@ string GetComponentName(const ComponentSpecificationMessage& message) {
   return component_name;
 }
 
-string GetFullComponentNameToken(const ComponentSpecificationMessage& message) {
-  string package_name = message.package();
-  ReplaceSubString(package_name, ".", "_");
-  string version = GetVersionString(message.component_type_version(), true);
-  string component_name = GetComponentName(message);
-  string package_name_token = package_name + "_" + version + "_"
-      + component_name;
-  return package_name_token;
+FQName GetFQName(const ComponentSpecificationMessage& message) {
+  return FQName(message.package(),
+                GetVersionString(message.component_type_version()),
+                GetComponentName(message));
 }
 
 }  // namespace vts
