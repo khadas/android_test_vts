@@ -24,7 +24,7 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class CodeLabHelloWorldTest(base_test.BaseTestClass):
+class VtsCodelabHelloWorldTest(base_test.BaseTestClass):
     """Two hello world test cases which use the shell driver."""
 
     def setUpClass(self):

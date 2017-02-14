@@ -18,7 +18,7 @@
     <option name="plan" value="vts" />
     <option name="test-tag" value="vts-*" />
     <!-- For vts-codelab -->
-    <option name="compatibility:include-filter" value="CodeLabHelloWorldTest" />
+    <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
 
     <!-- For vts-hal-conventional -->
     <option name="compatibility:include-filter" value="SampleLightTest" />
