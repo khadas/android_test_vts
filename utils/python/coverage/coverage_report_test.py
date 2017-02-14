@@ -37,7 +37,8 @@ class CoverageReportTest(unittest.TestCase):
             gcno_summary = gcno_parser.GCNOParser(file).Parse()
         gcda_path = os.path.join(root_dir, 'sample.gcda')
         with open(gcda_path, 'rb') as file:
-            gcda_parser.GCDAParser(file, gcno_summary).Parse()
+            parser = gcda_parser.GCDAParser(file)
+            parser.Parse(gcno_summary)
         cls.gcno_summary = gcno_summary
 
     def testGenerateLineCoverageVector(self):
