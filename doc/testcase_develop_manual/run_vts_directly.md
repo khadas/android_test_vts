@@ -4,7 +4,7 @@ First of all, if you have not done [VTS setup](../setup/index.md), that is requi
 
 ## Build Binaries
 
-`$ cd test/vts`
+`$ cd test/vts/script`
 
 `$ ./create-image.sh <build target>-userdebug`
 
@@ -12,9 +12,15 @@ or
 
 `$ ./create-image.sh <build target>-userdebug ENABLE_TREBLE=true`
 
+`$ ./create-image.sh aosp_salifish-userdebug ENABLE_TREBLE=true`
+
 ## Copy Binaries
 
-`$ ./setup-local.sh <build target>`
+`$ ./setup-local.sh <device name>`
+
+or
+
+`$ ./setup-local.sh sailfish`
 
 ## Run a test direclty
 
@@ -23,6 +29,8 @@ or
 For example, for SampleShellTest, please run:
 
 `PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.shell.SampleShellTest $ANDROID_BUILD_TOP/test/vts/testcases/host/shell/SampleShellTest.config`
+
+More examples are in `test/vts/script/run-local.sh`.
 
 ## Additional Step for LTP and Linux-Kselftest
 

@@ -14,12 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BASE_DIR=`pwd`/../..
-echo $BASE_DIR
-
-#adb root
-adb push ${BASE_DIR}/out/target/product/gce_x86/system/bin/fuzzer /data/local/tmp/fuzzer
-adb push ${BASE_DIR}/out/target/product/gce_x86/system/bin/vts_hal_agent /data/local/tmp/vts_hal_agent
+adb root
+adb push ${ANDROID_BUILD_TOP}/out/target/product/gce_x86/system/bin/fuzzer /data/local/tmp/fuzzer
+adb push ${ANDROID_BUILD_TOP}/out/target/product/gce_x86/system/bin/vts_hal_agent /data/local/tmp/vts_hal_agent
 adb shell chmod 755 /data/local/tmp/fuzzer
 adb shell chmod 755 /data/local/tmp/vts_hal_agent
 adb shell /data/local/tmp/vts_hal_agent
