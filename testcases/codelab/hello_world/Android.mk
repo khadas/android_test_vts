@@ -19,6 +19,6 @@ include $(call all-subdir-makefiles)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := CodeLabHelloWorldTest
+LOCAL_MODULE := VtsCodelabHelloWorldTest
 VTS_CONFIG_SRC_DIR := testcases/codelab/hello_world
 include test/vts/tools/build/Android.host_config.mk
