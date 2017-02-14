@@ -14,5 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-protoc -I=proto --java_out=web/dashboard/appengine/servlet/src/main/java proto/VtsReportMessage.proto
-protoc -I=proto --java_out=web/dashboard/appengine/servlet/src/main/java proto/VtsWebStatusMessage.proto
+pushd ${ANDROID_BUILD_TOP}/test/vts
+PYTHONPATH=$PYTHONPATH:.. python -m vts.runners.host.tcp_server.callback_server_test
+PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.coverage.coverage_report_test
+popd
+

@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PYTHONPATH=$PYTHONPATH:.. python -m vts.runners.host.tcp_server.vts_tcp_server_test
-PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.app_engine.bigtable_client_test
-PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.coverage.coverage_report_test
+pushd ${ANDROID_BUILD_TOP}/test/vts
+protoc -I=proto --java_out=web/dashboard/appengine/servlet/src/main/java proto/VtsReportMessage.proto
+protoc -I=proto --java_out=web/dashboard/appengine/servlet/src/main/java proto/VtsWebStatusMessage.proto
+popd
+
