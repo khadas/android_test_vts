@@ -15,5 +15,5 @@
 subdirs = [
      "drivers",
      "proto",
-     "sysfuzzer",
+     "compilation_tools",
 ]

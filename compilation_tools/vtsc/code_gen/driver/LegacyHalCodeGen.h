@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LEGACYHALCODEGEN_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LEGACYHALCODEGEN_H_
 
 #include <fstream>
 #include <iostream>
@@ -60,4 +60,4 @@ class LegacyHalCodeGen : public HalCodeGen {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_LEGACYHALCODEGEN_H__
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_LEGACYHALCODEGEN_H_
