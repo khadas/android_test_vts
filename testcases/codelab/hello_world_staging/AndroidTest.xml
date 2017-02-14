@@ -20,7 +20,7 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-module-name" value="CodeLabHelloWorldTestStaging" />
-        <option name="test-case-path" value="vts/testcases/codelab/hello_world/CodeLabHelloWorldTest" />
+        <option name="test-module-name" value="VtsCodelabHelloWorldStagingTest" />
+        <option name="test-case-path" value="vts/testcases/codelab/hello_world/VtsCodelabHelloWorldTest" />
     </test>
 </configuration>
