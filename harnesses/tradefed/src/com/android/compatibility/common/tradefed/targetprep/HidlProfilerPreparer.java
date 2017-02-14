@@ -50,8 +50,8 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     private static final String LOG_TAG = "HidlProfilerPreparer";
 
     private static final String TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/";
-    private static final String TARGET_PROFILING_LIBRARY_PATH = "/data/local/tmp/<bitness>";
-    private static final String HOST_PROFILING_TRACE_PATH = "/tmp/vts-trace";
+    private static final String TARGET_PROFILING_LIBRARY_PATH = "/data/local/tmp/<bitness>/hw/";
+    private static final String HOST_PROFILING_TRACE_PATH = "/tmp/vts-trace/record-replay/";
     private static final String HOST_PROFILING_TRACE_PATH_KEY = "profiling_trace_path";
 
     private static final String VENDOR_TEST_CONFIG_FILE_PATH =
@@ -146,8 +146,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
             device.executeShellCommand("chmod 755 /data/local/tmp/vts_profiling_configure");
         Log.d(LOG_TAG, String.format("chmod: %s", result));
         result = device.executeShellCommand(
-            String.format("/data/local/tmp/vts_profiling_configure enable %s",
-                          mTargetProfilingLibraryPath));
+            String.format("/data/local/tmp/vts_profiling_configure enable"));
         Log.d(LOG_TAG, String.format("start profiling: %s", result));
     }
 
@@ -161,7 +160,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
         // Disables VTS Profiling
         device.executeShellCommand("chmod 755 /data/local/tmp/vts_profiling_configure");
         String result = device.executeShellCommand(
-            "/data/local/tmp/vts_profiling_configure disable");
+            "/data/local/tmp/vts_profiling_configure disable clear");
         Log.d(LOG_TAG, String.format("stop profiling: %s", result));
 
         // Gets trace files from the target.
@@ -180,7 +179,8 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
                                                  mHostProfilingTracePath));
                 } else {
                     for (String traceFilePath : traceFileListString.split("\\s+")) {
-                        File destFile = new File(destDir, traceFilePath);
+                        File traceFile = new File(traceFilePath);
+                        File destFile = new File(destDir, traceFile.getName());
                         Log.d(LOG_TAG, String.format("Copying a trace file: %s -> %s",
                                                      traceFilePath, destFile));
                         if (device.pullFile(traceFilePath, destFile)) {
