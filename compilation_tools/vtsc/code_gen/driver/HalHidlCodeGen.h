@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALHIDLCODEGEN_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALHIDLCODEGEN_H_
 
 #include <fstream>
 #include <iostream>
@@ -200,4 +200,4 @@ class HalHidlCodeGen : public DriverCodeGenBase {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_HALHIDLCODEGEN_H__
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALHIDLCODEGEN_H_

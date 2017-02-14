@@ -39,8 +39,8 @@ class VtscTester(unittest.TestCase):
         python test_vtsc.py path_to_vtsc canonical_dir output_dir
 
     example:
-        python test/vts/sysfuzzer/vtscompiler/test/test_vtsc.py vtsc
-        test/vts/sysfuzzer/vtscompiler/test/golden/ temp_output
+        python test/vts/compilation_tools/vtsc/test/test_vtsc.py vtsc
+        test/vts/compilation_tools/vtsc/test/golden/ temp_output
 
     Attributes:
         _vtsc_path: the path to run vtsc.
@@ -200,8 +200,8 @@ class VtscTester(unittest.TestCase):
 if __name__ == "__main__":
     # Default values of the input parameter, could be overridden by command.
     vtsc_path = "vtsc"
-    canonical_dir = "test/vts/sysfuzzer/vtscompiler/test/golden/"
-    output_dir = "test/vts/sysfuzzer/vtscompiler/test/temp_coutput/"
+    canonical_dir = "test/vts/compilation_tools/vtsc/test/golden/"
+    output_dir = "test/vts/compilation_tools/vtsc/test/temp_coutput/"
     # Parse the arguments and set the provided value for
     # vtsc_path/canonical_dar/output_dir.
     try:
