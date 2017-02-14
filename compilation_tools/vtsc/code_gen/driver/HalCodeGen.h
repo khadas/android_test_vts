@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__
-#define __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALCODEGEN_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALCODEGEN_H_
 
 #include <fstream>
 #include <iostream>
@@ -24,17 +24,18 @@
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
-#include "code_gen/driver/HalCodeGen.h"
+#include "code_gen/driver/DriverCodeGenBase.h"
 
 using namespace std;
 
 namespace android {
 namespace vts {
 
-class LibSharedCodeGen : public HalCodeGen {
+
+class HalCodeGen : public DriverCodeGenBase {
  public:
-  LibSharedCodeGen(const char* input_vts_file_path, const string& vts_name)
-      : HalCodeGen(input_vts_file_path, vts_name) {}
+  HalCodeGen(const char* input_vts_file_path, const string& vts_name)
+      : DriverCodeGenBase(input_vts_file_path, vts_name) {}
 
  protected:
   void GenerateCppBodyFuzzFunction(Formatter& out,
@@ -45,19 +46,35 @@ class LibSharedCodeGen : public HalCodeGen {
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
 
-  void GenerateCppBodyCallbackFunction(Formatter& /*out*/,
-      const ComponentSpecificationMessage& /*message*/,
-      const string& /*fuzzer_extended_class_name*/) override {};
+  void GenerateCppBodyCallbackFunction(Formatter& out,
+      const ComponentSpecificationMessage& message,
+      const string& fuzzer_extended_class_name) override;
 
   void GenerateClassConstructionFunction(Formatter& out,
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
 
-  // instance variable name (e.g., submodule_);
+  void GenerateSubStructFuzzFunctionCall(Formatter& out,
+      const StructSpecificationMessage& message, const string& parent_path);
+
+  void GenerateSubStructGetAttributeFunctionCall(Formatter& out,
+      const StructSpecificationMessage& message, const string& parent_path);
+
+  void GenerateCppBodyFuzzFunction(Formatter& out,
+      const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name, const string& parent_path);
+
+  void GenerateCppBodyGetAttributeFunction(Formatter& out,
+      const StructSpecificationMessage& message,
+      const string& fuzzer_extended_class_name,
+      const string& original_data_structure_name, const string& parent_path);
+
+  // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
 };
 
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_LIBSHARED_CODEGEN_H__
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_HALCODEGEN_H_
