@@ -19,5 +19,4 @@ subdirs = [
      "libcodecoverage",
      "libdatatype",
      "libmeasurement",
-     "vtscompiler",
 ]
