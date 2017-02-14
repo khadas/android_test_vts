@@ -13,9 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for Fuzzing">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Serving Plan for Fuzzing (Tip-of-Tree)">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>
