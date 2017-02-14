@@ -33,7 +33,7 @@ cc_library_host_shared {
         "code_gen/profiler/HalHidlProfilerCodeGen.cpp",
     ],
 
-    include_dirs: ["test/vts/sysfuzzer/common"],
+    include_dirs: ["test/vts/drivers/hal/common"],
 
     static_libs: ["libz"],
 
@@ -58,7 +58,7 @@ cc_binary_host {
 
     srcs: ["VtsCompilerMain.cpp"],
 
-    include_dirs: ["test/vts/sysfuzzer/common"],
+    include_dirs: ["test/vts/drivers/hal/common"],
 
     static_libs: ["libz"],
 

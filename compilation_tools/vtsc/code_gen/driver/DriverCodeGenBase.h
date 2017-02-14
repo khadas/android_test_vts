@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_SYSFUZZER_COMPILER_DRIVER_CODEGENBASE_H__
-#define __VTS_SYSFUZZER_COMPILER_DRIVER_CODEGENBASE_H__
+#ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_CODEGENBASE_H_
+#define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_CODEGENBASE_H_
 
 #include <hidl-util/Formatter.h>
 #include <hidl-util/FQName.h>
@@ -148,4 +148,4 @@ class DriverCodeGenBase : public CodeGenBase {
 }  // namespace vts
 }  // namespace android
 
-#endif  // __VTS_SYSFUZZER_COMPILER_CODEGENBASE_H__
+#endif  // VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_CODEGENBASE_H_
