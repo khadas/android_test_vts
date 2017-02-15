@@ -75,7 +75,7 @@ class FuzzerCodeGenBase {
   // Contains all information about the component.
   const ComponentSpecificationMessage &comp_spec_;
   // All generated file names will be prefixed with this string.
-  const string &output_dir_;
+  string output_dir_;
 };
 
 }  // namespace vts
