@@ -13,10 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Security Tests">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <option name="compatibility:include-filter" value="SecurityPoCKernelTest" />
+<configuration description="Run VTS Security Test Plan">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <!-- For Proof-of-Concept (PoC) Tests -->
+  <option name="compatibility:include-filter" value="SecurityPoCKernelTest" />
+
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
