@@ -13,17 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Host-Driven, HIDL HAL Tests">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts" />
-    <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
-    <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
-    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
-    <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
-    <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
-    <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
-    <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
+<configuration description="VTS HIDL HAL Test Plan">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts" />
+
+  <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>

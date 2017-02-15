@@ -13,28 +13,29 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Postsubmit Test Serving Plan Using a Tip of Tree Build">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <!-- For vts-codelab -->
-    <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
+<configuration description="VTS Serving Plan for Postsubmit Testing (Tip-of-Tree)">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
 
-    <!-- For vts-hal-conventional -->
-    <option name="compatibility:include-filter" value="SampleLightTest" />
+  <!-- For vts-codelab -->
+  <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
 
-    <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+  <!-- For vts-hal-conventional -->
+  <option name="compatibility:include-filter" value="SampleLightTest" />
 
-    <!-- For vts-library -->
+  <option name="compatibility:include-filter" value="BinderPerformanceTest" />
 
-    <!-- For vts-security -->
+  <!-- For vts-library -->
 
-    <!-- For vts-system -->
-    <option name="compatibility:include-filter" value="SampleShellTest" />
-    <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
-    <option name="compatibility:include-filter" value="SyscallExistenceTest" />
-    <option name="compatibility:include-filter" value="SampleQtaguidTest" />
-    <option name="compatibility:include-filter" value="LibcTest" />
+  <!-- For vts-security -->
 
-    <template-include name="reporters" default="basic-reporters" />
+  <!-- For vts-system -->
+  <option name="compatibility:include-filter" value="SampleShellTest" />
+  <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
+  <option name="compatibility:include-filter" value="SyscallExistenceTest" />
+  <option name="compatibility:include-filter" value="SampleQtaguidTest" />
+  <option name="compatibility:include-filter" value="LibcTest" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>
