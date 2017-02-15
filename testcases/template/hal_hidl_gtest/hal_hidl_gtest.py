@@ -23,6 +23,7 @@ from vts.runners.host import test_runner
 from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.utils.python.cpu import cpu_frequency_scaling
 
+VTS_HAL_VTS_HIDL_GET_STUB = 'vts.hal.vts.hidl.get_stub'
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     '''Base class to run a VTS target-side HIDL HAL test.
@@ -37,6 +38,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         _dut: AndroidDevice, the device under test as config
         _skip_all_testcases: boolean - to skip all test cases. set when a target
                              device does not have a required HIDL service.
+        _get_stub: int, used to set passthrough/binderized mode.
+                   >0 for true, 0 for false, <0 for default
     '''
 
     def setUpClass(self):
@@ -50,6 +53,9 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
         ]
         self.getUserParams(opt_param_names=opt_params)
+
+        self._get_stub = self.getUserParam(
+            keys.ConfigKeys.IKEY_GET_STUB, default_value=-1)
 
         self._cpu_freq = None
         self._skip_all_testcases = False
@@ -116,6 +122,10 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if not self._skip_all_testcases:
             if self._cpu_freq:
                 self._cpu_freq.SkipIfThermalThrottling(retry_delay_secs=30)
+            if self._get_stub == 1:
+                self._dut.setProp(VTS_HAL_VTS_HIDL_GET_STUB, "true")
+            elif self._get_stub == 0:
+                self._dut.setProp(VTS_HAL_VTS_HIDL_GET_STUB, "false")
         else:
             logging.info("Skip a test case.")
 
@@ -124,6 +134,9 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if not self._skip_all_testcases:
             if self._cpu_freq:
                 self._cpu_freq.SkipIfThermalThrottling()
+            if self._get_stub >= 0:
+                self._dut.setProp(VTS_HAL_VTS_HIDL_GET_STUB, "")
+
         super(HidlHalGTest, self).tearDownTest()
 
     def tearDownClass(self):
