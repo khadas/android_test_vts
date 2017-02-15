@@ -122,7 +122,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     def tearDownTest(self):
         """Skips the test case if there is thermal throttling."""
         if not self._skip_all_testcases:
-            self._cpu_freq.SkipIfThermalThrottling()
+            if self._cpu_freq:
+                self._cpu_freq.SkipIfThermalThrottling()
         super(HidlHalGTest, self).tearDownTest()
 
     def tearDownClass(self):
