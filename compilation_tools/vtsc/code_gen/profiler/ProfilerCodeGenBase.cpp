@@ -65,7 +65,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
         << "(\n";
     out.indent();
     out.indent();
-    out << "details::HidlInstrumentor::InstrumentationEvent event,\n";
+    out << "HidlInstrumentor::InstrumentationEvent event,\n";
     out << "const char* package,\n";
     out << "const char* version,\n";
     out << "const char* interface,\n";
@@ -108,7 +108,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
         << "(\n";
     out.indent();
     out.indent();
-    out << "details::HidlInstrumentor::InstrumentationEvent event,\n";
+    out << "HidlInstrumentor::InstrumentationEvent event,\n";
     out << "const char* package,\n";
     out << "const char* version,\n";
     out << "const char* interface,\n";
