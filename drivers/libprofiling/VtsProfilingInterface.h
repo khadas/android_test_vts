@@ -50,7 +50,7 @@ class VtsProfilingInterface {
   static VtsProfilingInterface& getInstance(const string& trace_file_path);
 
   // returns true if the given message is added to the tracing queue.
-  bool AddTraceEvent(android::hardware::details::HidlInstrumentor::InstrumentationEvent event,
+  bool AddTraceEvent(android::hardware::HidlInstrumentor::InstrumentationEvent event,
       const char* package, const char* version, const char* interface,
       const FunctionSpecificationMessage& message);
 
