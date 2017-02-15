@@ -192,9 +192,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "switch (event) {\n";
   out.indent();
   // TODO(b/32141398): Support profiling in passthrough mode.
-  out << "case HidlInstrumentor::CLIENT_API_ENTRY:\n";
-  out << "case HidlInstrumentor::SERVER_API_ENTRY:\n";
-  out << "case HidlInstrumentor::PASSTHROUGH_ENTRY:\n";
+  out << "case details::HidlInstrumentor::CLIENT_API_ENTRY:\n";
+  out << "case details::HidlInstrumentor::SERVER_API_ENTRY:\n";
+  out << "case details::HidlInstrumentor::PASSTHROUGH_ENTRY:\n";
   out << "{\n";
   out.indent();
   ComponentSpecificationMessage message;
@@ -225,9 +225,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(Formatter& out,
   out << "}\n";
 
   // TODO(b/32141398): Support profiling in passthrough mode.
-  out << "case HidlInstrumentor::CLIENT_API_EXIT:\n";
-  out << "case HidlInstrumentor::SERVER_API_EXIT:\n";
-  out << "case HidlInstrumentor::PASSTHROUGH_EXIT:\n";
+  out << "case details::HidlInstrumentor::CLIENT_API_EXIT:\n";
+  out << "case details::HidlInstrumentor::SERVER_API_EXIT:\n";
+  out << "case details::HidlInstrumentor::PASSTHROUGH_EXIT:\n";
   out << "{\n";
   out.indent();
   out << "if ((*args).size() != " <<  method.return_type_hidl().size() << ") {\n";
