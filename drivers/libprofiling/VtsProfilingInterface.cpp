@@ -84,7 +84,7 @@ void VtsProfilingInterface::Init() {
 }
 
 bool VtsProfilingInterface::AddTraceEvent(
-    android::hardware::details::HidlInstrumentor::InstrumentationEvent event,
+    android::hardware::HidlInstrumentor::InstrumentationEvent event,
     const char* package, const char* version, const char* interface,
     const FunctionSpecificationMessage& message) {
   if (!initialized_) {
