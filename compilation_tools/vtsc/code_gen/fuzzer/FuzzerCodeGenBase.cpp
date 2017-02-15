@@ -38,7 +38,8 @@ void FuzzerCodeGenBase::GenerateAll() {
         output_dir_ + "/" + GetFuzzerSourceName(func_spec) + ".cpp";
     FILE *source_file = fopen(output_cpp_file.c_str(), "w");
     if (source_file == NULL) {
-      cerr << "could not open file " << output_cpp_file << endl;
+      cerr << __PRETTY_FUNCTION__ << " could not open file" << output_cpp_file
+           << endl;
       exit(-1);
     }
     Formatter source_out(source_file);
