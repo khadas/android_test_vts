@@ -13,9 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Host-Driven Fuzz Tests">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Fuzz Test Plan">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <!-- For HIDL HALs -->
+  <option name="compatibility:include-filter" value="ILightIfaceFuzzTest" />
+  <option name="compatibility:include-filter" value="IPowerIfaceFuzzTest" />
+  <option name="compatibility:include-filter" value="ISensorsIfaceFuzzTest" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>

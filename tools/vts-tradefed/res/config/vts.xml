@@ -13,11 +13,21 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS Target-Side Tests">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts" />
-    <option name="compatibility:include-filter" value="VtsHalLightsTestCases" />
-    <option name="compatibility:include-filter" value="VtsHalPowerTestCases" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Main Test Plan">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts" />
+
+  <!-- From vts-hal.xml -->
+  <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
+
+  <!-- From vts-kernel.xml -->
+  <option name="compatibility:include-filter" value="KernelLtpTest" />
+  <option name="compatibility:include-filter" value="LinuxKselftestTest" />
+  <option name="compatibility:include-filter" value="SyscallExistenceTest" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>

@@ -13,24 +13,26 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run VTS coverage tests in staging environment.">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
-    <option name="compatibility:include-filter" value="LightFuzzTest" />
-    <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
-    <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
-    <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
-    <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
-    <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
-    <!-- option name="compatibility:include-filter" value="SensorsHidlTargetTest" / -->
-    <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
-    <option name="compatibility:include-filter" value="LightHidlTargetTest" />
-    <option name="compatibility:include-filter" value="VrHidlTargetTest" />
-    <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
-    <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicTest" />
-    <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicTest" />
-    <option name="compatibility:include-filter" value="HalBootHidlTargetTest" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Serving Plan for Coverage (Staging)">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
+  <option name="compatibility:include-filter" value="LightFuzzTest" />
+  <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
+  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
+  <!-- option name="compatibility:include-filter" value="SensorsHidlTargetTest" / -->
+  <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
+  <option name="compatibility:include-filter" value="LightHidlTargetTest" />
+  <option name="compatibility:include-filter" value="VrHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalBootHidlTargetTest" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>
