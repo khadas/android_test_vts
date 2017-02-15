@@ -62,6 +62,7 @@ void HalHidlFuzzerCodeGen::GenerateBuildFile(Formatter &out) {
 }
 
 void HalHidlFuzzerCodeGen::GenerateSourceIncludeFiles(Formatter &out) {
+  out << "#include <iostream>\n\n";
   out << "#include <FuzzerInterface.h>\n";
 
   string package_path = comp_spec_.package();
@@ -75,6 +76,9 @@ void HalHidlFuzzerCodeGen::GenerateSourceIncludeFiles(Formatter &out) {
 }
 
 void HalHidlFuzzerCodeGen::GenerateUsingDeclaration(Formatter &out) {
+  out << "using std::cerr;\n";
+  out << "using std::endl;\n\n";
+
   string package_path = comp_spec_.package();
   ReplaceSubString(package_path, ".", "::");
   string comp_version =
@@ -98,6 +102,7 @@ void HalHidlFuzzerCodeGen::GenerateReturnCallback(
   }
   out << "){};\n\n";
 }
+
 void HalHidlFuzzerCodeGen::GenerateLLVMFuzzerTestOneInput(
     Formatter &out, const FunctionSpecificationMessage &func_spec) {
   string prefix = "android.hardware.";
@@ -109,7 +114,13 @@ void HalHidlFuzzerCodeGen::GenerateLLVMFuzzerTestOneInput(
   out << "static ::android::sp<" << comp_spec_.component_name() << "> "
       << hal_name << " = " << comp_spec_.component_name()
       << "::getService(true);\n";
-  out << "if (" << hal_name << "== nullptr) { return 0; }\n\n";
+  out << "if (" << hal_name << " == nullptr) {\n";
+  out.indent();
+  out << "cerr << \"" << comp_spec_.component_name()
+      << "::getService() failed\" << endl;\n";
+  out << "exit(1);\n";
+  out.unindent();
+  out << "}\n\n";
 
   vector<string> types{GetFuncArgTypes(func_spec)};
   for (size_t i = 0; i < types.size(); ++i) {
