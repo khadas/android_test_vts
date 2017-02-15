@@ -13,23 +13,25 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run New VTS Profiling Tests for HIDL HALs in the Staging environment">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
-    <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="ThermalHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="LightHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="HalPowerHidlTargetProfilingTest" />
-    <!-- option name="compatibility:include-filter" value="SensorsHidlProfilingTest" / -->
-    <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicProfilingTest" />
-    <option name="compatibility:include-filter" value="VrHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="HalMemtrackHidlTargetProfilingTest" />
-    <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicProfilingTest" />
-    <option name="compatibility:include-filter" value="BluetoothHidlTargetProfilingTest" />
-    <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
-    <!-- <option name="compatibility:include-filter" value="HalBootHidlTargetProfilingTest" /> -->
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Serving Plan for HIDL HAL Profiling (Staging)">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
+  <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="ThermalHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="LightHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="HalPowerHidlTargetProfilingTest" />
+  <!-- option name="compatibility:include-filter" value="SensorsHidlProfilingTest" / -->
+  <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicProfilingTest" />
+  <option name="compatibility:include-filter" value="VrHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="HalMemtrackHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicProfilingTest" />
+  <option name="compatibility:include-filter" value="BluetoothHidlTargetProfilingTest" />
+  <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
+  <!-- <option name="compatibility:include-filter" value="HalBootHidlTargetProfilingTest" /> -->
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>

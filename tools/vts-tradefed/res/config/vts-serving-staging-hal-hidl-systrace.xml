@@ -13,13 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Run New VTS Tests for HIDL HALs with systrace in the Staging environment">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts-*" />
-    <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputSystraceTest" />
-    <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputSystraceTest" />
-    <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
-    <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
-    <template-include name="reporters" default="basic-reporters" />
+<configuration description="VTS Serving Plan for HIDL HAL Systracing (Staging)">
+  <include name="everything" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-*" />
+
+  <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
+
+  <template-include name="reporters" default="basic-reporters" />
 </configuration>

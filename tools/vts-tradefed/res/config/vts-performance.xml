@@ -13,12 +13,21 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for LTP (Staging)">
+<configuration description="VTS Performance Profiling Plan">
   <include name="everything" />
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts" />
+  <option name="test-tag" value="vts-*" />
 
-  <option name="compatibility:include-filter" value="KernelLtpStagingTest" />
+  <!-- For Kernel HwBinder and Binder Profiling -->
+  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
+  <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
+  <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+  <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
+
+  <!-- For HIDL HAL Profiling -->
+  <option name="compatibility:include-filter" value="BluetoothHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>

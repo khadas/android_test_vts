@@ -13,12 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for LTP (Staging)">
+<configuration description="VTS HAL Test Plan">
   <include name="everything" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts" />
 
-  <option name="compatibility:include-filter" value="KernelLtpStagingTest" />
+  <!-- For HIDL HAL Target-Side Tests -->
+  <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
+  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
+  <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
