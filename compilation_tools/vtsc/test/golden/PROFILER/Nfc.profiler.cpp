@@ -9,7 +9,7 @@ namespace android {
 namespace vts {
 
 void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
-        HidlInstrumentor::InstrumentationEvent event,
+        details::HidlInstrumentor::InstrumentationEvent event,
         const char* package,
         const char* version,
         const char* interface,
@@ -40,9 +40,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
@@ -53,9 +53,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     arg_0->set_type(TYPE_HIDL_CALLBACK);
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: open, event type: " << event;
@@ -83,9 +83,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
@@ -100,9 +100,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: write, event type: " << event;
@@ -130,9 +130,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
@@ -147,9 +147,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: coreInitialized, event type: " << event;
@@ -177,9 +177,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
@@ -187,9 +187,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: prediscover, event type: " << event;
@@ -217,9 +217,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: close, event type: " << event;
@@ -227,9 +227,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: close, event type: " << event;
@@ -257,9 +257,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
@@ -267,9 +267,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: controlGranted, event type: " << event;
@@ -297,9 +297,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
             LOG(WARNING) << "no argument passed";
         } else {
             switch (event) {
-                case HidlInstrumentor::CLIENT_API_ENTRY:
-                case HidlInstrumentor::SERVER_API_ENTRY:
-                case HidlInstrumentor::PASSTHROUGH_ENTRY:
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
                     if ((*args).size() != 0) {
                         LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
@@ -307,9 +307,9 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
                     }
                     break;
                 }
-                case HidlInstrumentor::CLIENT_API_EXIT:
-                case HidlInstrumentor::SERVER_API_EXIT:
-                case HidlInstrumentor::PASSTHROUGH_EXIT:
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
                     if ((*args).size() != 1) {
                         LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: powerCycle, event type: " << event;
