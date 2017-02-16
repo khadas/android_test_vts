@@ -446,8 +446,7 @@ class MirrorObject(object):
             logging.debug(result)
             if (isinstance(result, tuple) and len(result) == 2 and
                 isinstance(result[1], dict) and "coverage" in result[1]):
-                self._last_raw_code_coverage_data = copy.copy(
-                    result[1]["coverage"])
+                self._last_raw_code_coverage_data = result[1]["coverage"]
                 return result[0]
             return result
 
