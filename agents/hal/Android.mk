@@ -48,9 +48,9 @@ LOCAL_C_INCLUDES += \
   external/libcxx/include \
   frameworks/native/include \
   system/core/include \
-  test/vts/sysfuzzer/common \
   test/vts/agents/hal \
   test/vts/agents/hal/proto \
+  test/vts/drivers/hal/common \
   test/vts/drivers/libdrivercomm \
   external/protobuf/src \
 
