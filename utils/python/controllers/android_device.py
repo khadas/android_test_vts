@@ -410,7 +410,7 @@ class AndroidDevice(object):
     def verityEnabled(self):
         """True if verity is enabled for this device."""
         try:
-            verified = self.adb.shell('getprop partition.system.verified').decode("utf-8")
+            verified = self.getProp("partition.system.verified")
             if not verified:
                 return False
         except adb.AdbError:
@@ -432,23 +432,21 @@ class AndroidDevice(object):
                 if len(tokens) > 1:
                     return tokens[1].lower()
             return None
-        out = self.adb.shell('getprop ro.build.product')
-        model = out.decode("utf-8").strip().lower()
+        model = self.getProp("ro.build.product").lower()
         if model == "sprout":
             return model
         else:
-            out = self.adb.shell('getprop ro.product.name')
-            model = out.decode("utf-8").strip().lower()
+            model = self.getProp("ro.product.name").lower()
             return model
 
     @property
     def cpu_abi(self):
         """CPU ABI (Application Binary Interface) of the device."""
-        out = self.adb.shell('getprop ro.product.cpu.abi')
+        out = self.getProp("ro.product.cpu.abi")
         if not out:
             return "unknown"
 
-        cpu_abi = out.decode("utf-8").strip().lower()
+        cpu_abi = out.lower()
         return cpu_abi
 
     @property
@@ -573,8 +571,7 @@ class AndroidDevice(object):
             True if booted, False otherwise.
         """
         try:
-            out = self.adb.shell("getprop sys.boot_completed")
-            completed = out.decode('utf-8').strip()
+            completed = self.getProp("sys.boot_completed")
             if completed == '1':
                 return True
         except adb.AdbError:
@@ -582,15 +579,42 @@ class AndroidDevice(object):
             # process, which is normal. Ignoring these errors.
             return False
 
-    def stop(self):
-        """Stops Android runtime."""
-        self.adb.shell("stop")
-        self.adb.shell("setprop sys.boot_completed 0")
-
     def start(self):
         """Starts Android runtime and waits for ACTION_BOOT_COMPLETED."""
         self.adb.shell("start")
         self.waitForBootCompletion()
+
+    def stop(self):
+        """Stops Android runtime."""
+        self.adb.shell("stop")
+        self.setProp("sys.boot_completed", 0)
+
+    def setProp(self, name, value):
+        """Calls setprop shell command.
+
+        Args:
+            name: string, the name of a system property to set.
+            value: any type, str(value) will be called to convert value to string.
+                   value will also be wrapped with double quote '"', and any existing
+                   '"' inside str(value) will be replaced with '\"'
+        """
+        value = str(value)
+        value.replace("\"", "\\\"")
+        self.adb.shell("setprop %s \"%s\"" % (name, value))
+
+    def getProp(self, name):
+        """Calls getprop shell command.
+
+        Args:
+            name: string, the name of a system property to get.
+
+        Returns:
+            string, value of the property. If name does not exist, an empty
+            string will be returned. decode("utf-8") and strip() will be called
+            on the output before returning.
+        """
+        out = self.adb.shell("getprop %s" % name)
+        return out.decode("utf-8").strip()
 
     def reboot(self, restart_services=True):
         """Reboots the device and wait for device to complete booting.
