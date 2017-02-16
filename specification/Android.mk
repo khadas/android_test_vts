@@ -33,11 +33,11 @@ vtslib_interfacespec_srcfiles := \
 
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
-  test/vts/sysfuzzer \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/libdatatype \
-  test/vts/sysfuzzer/libmeasurement \
-  test/vts/sysfuzzer/common \
+  test/vts/drivers/hal \
+  test/vts/drivers/hal/common \
+  test/vts/drivers/hal/framework \
+  test/vts/drivers/hal/libdatatype \
+  test/vts/drivers/hal/libmeasurement \
   bionic \
   libcore \
   device/google/gce/include \
