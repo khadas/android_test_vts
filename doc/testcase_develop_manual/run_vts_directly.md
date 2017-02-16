@@ -10,9 +10,7 @@ First of all, if you have not done [VTS setup](../setup/index.md), that is requi
 
 or
 
-`$ ./create-image.sh <build target>-userdebug ENABLE_TREBLE=true`
-
-`$ ./create-image.sh aosp_salifish-userdebug ENABLE_TREBLE=true`
+`$ ./create-image.sh aosp_salifish-userdebug`
 
 ## Copy Binaries
 

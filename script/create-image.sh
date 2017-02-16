@@ -22,8 +22,10 @@ function vts_multidevice_create_image {
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vr/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/tv_cec/ -rf
   . ${ANDROID_BUILD_TOP}/build/make/envsetup.sh
-  cd ${ANDROID_BUILD_TOP}; lunch $1 $2
+  cd ${ANDROID_BUILD_TOP}; lunch $1
   cd ${ANDROID_BUILD_TOP}/test/vts; mma -j 32 && cd ${ANDROID_BUILD_TOP}; make vts adb -j 32
+  mkdir ${ANDROID_BUILD_TOP}/test/vts/testcases/hal -p
+  touch ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/__init__.py
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/nfc ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/sensors ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vehicle ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
@@ -32,5 +34,5 @@ function vts_multidevice_create_image {
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/tv ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
 }
 
-vts_multidevice_create_image $1 $2
+vts_multidevice_create_image $1
 
