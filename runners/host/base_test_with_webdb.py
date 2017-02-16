@@ -144,35 +144,39 @@ class BaseTestWithWebDbClass(base_test.BaseTestClass):
             logging.info("_tearDownClass hook: start (username: %s)",
                          getpass.getuser())
 
-            bt_url = getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL)
-            bt_client = bigtable_rest_client.HbaseRestClient(
-                "result_%s" % self._report_msg.test, bt_url)
-            bt_client.CreateTable("test")
+            if len(self._report_msg.test_case) > 0:
+                bt_url = getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL)
+                bt_client = bigtable_rest_client.HbaseRestClient(
+                    "result_%s" % self._report_msg.test, bt_url)
+                bt_client.CreateTable("test")
 
-            self.getUserParams(opt_param_names=[keys.ConfigKeys.IKEY_BUILD])
-            if getattr(self, keys.ConfigKeys.IKEY_BUILD, False):
-                build = self.build
-                if keys.ConfigKeys.IKEY_BUILD_ID in build:
-                    build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
-                    self._report_msg.build_info.id = build_id
+                self.getUserParams(opt_param_names=[keys.ConfigKeys.IKEY_BUILD])
+                if getattr(self, keys.ConfigKeys.IKEY_BUILD, False):
+                    build = self.build
+                    if keys.ConfigKeys.IKEY_BUILD_ID in build:
+                        build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
+                        self._report_msg.build_info.id = build_id
 
-            bt_client.PutRow(
-                str(self._report_msg.start_timestamp), "data",
-                self._report_msg.SerializeToString())
+                bt_client.PutRow(
+                    str(self._report_msg.start_timestamp), "data",
+                    self._report_msg.SerializeToString())
 
-            logging.info("_tearDownClass hook: report msg proto %s",
-                         self._report_msg)
+                logging.info("_tearDownClass hook: report msg proto %s",
+                             self._report_msg)
 
-            bt_client = bigtable_rest_client.HbaseRestClient(self.STATUS_TABLE,
-                                                             bt_url)
-            bt_client.CreateTable("status")
+                bt_client = bigtable_rest_client.HbaseRestClient(
+                    self.STATUS_TABLE, bt_url)
+                bt_client.CreateTable("status")
 
-            bt_client.PutRow("result_%s" % self._report_msg.test,
-                             "upload_timestamp",
+                bt_client.PutRow("result_%s" % self._report_msg.test,
+                                 "upload_timestamp",
+                                 str(self._report_msg.start_timestamp))
+
+                logging.info("_tearDownClass hook: status upload time stamp %s",
                              str(self._report_msg.start_timestamp))
-
-            logging.info("_tearDownClass hook: status upload time stamp %s",
-                         str(self._report_msg.start_timestamp))
+            else:
+                logging.info(
+                    "_tearDownClass hook: skip uploading (no test case)")
 
             logging.info("_tearDownClass hook: done")
         else:
