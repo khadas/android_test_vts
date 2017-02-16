@@ -37,9 +37,9 @@ LOCAL_C_INCLUDES := \
   frameworks/native/include \
   system/core/include \
   system/extras \
+  test/vts/drivers/hal/common \
+  test/vts/drivers/hal/framework \
   test/vts/drivers/libdrivercomm \
-  test/vts/sysfuzzer/framework \
-  test/vts/sysfuzzer/common \
 
 LOCAL_SHARED_LIBRARIES := \
   libutils \
