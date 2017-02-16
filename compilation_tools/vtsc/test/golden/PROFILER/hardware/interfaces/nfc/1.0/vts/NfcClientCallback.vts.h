@@ -22,7 +22,7 @@ namespace vts {
 extern "C" {
 
     void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfcClientCallback(
-            HidlInstrumentor::InstrumentationEvent event,
+            details::HidlInstrumentor::InstrumentationEvent event,
             const char* package,
             const char* version,
             const char* interface,
