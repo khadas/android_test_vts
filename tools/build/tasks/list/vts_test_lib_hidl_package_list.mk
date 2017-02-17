@@ -112,6 +112,7 @@ vts_test_lib_hidl_packages += \
   gatekeeper_hidl_hal_test \
   nfc_hidl_hal_test \
   power_hidl_hal_test \
+  radio_hidl_hal_test \
   sensors_hidl_hal_test \
   soundtrigger_hidl_hal_test \
   thermal_hidl_hal_test \
