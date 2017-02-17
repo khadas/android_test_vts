@@ -51,6 +51,7 @@
   <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
   <option name="compatibility:include-filter" value="ContexthubHidlTargetTest" /><!-- need runtime stopped -->
   <option name="compatibility:include-filter" value="ContexthubHidlTest" />
+  <option name="compatibility:include-filter" value="HalCameraHidlTargetTest" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
