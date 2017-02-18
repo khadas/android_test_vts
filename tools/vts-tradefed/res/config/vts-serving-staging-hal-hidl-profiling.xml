@@ -18,24 +18,27 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
+  <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0TargetProfiling" />
+  <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
+  <!-- option name="compatibility:include-filter" value="VtsHalBootV1_0TargetProfiling" / -->
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalLightV2_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostProfiling" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalPowerV1_0TargetProfiling" />
+  <!-- option name="compatibility:include-filter" value="VtsHalSensorsV1_0HostProfiling" / -->
+  <!-- option name="compatibility:include-filter" value="VtsHalSensorsV1_0TargetProfiling" / -->
+  <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalThermalV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalVrV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalWifiV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0TargetProfiling" />
-  <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
-  <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="ThermalHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="LightHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="HalPowerHidlTargetProfilingTest" />
-  <!-- option name="compatibility:include-filter" value="SensorsHidlProfilingTest" / -->
-  <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicProfilingTest" />
-  <option name="compatibility:include-filter" value="VrHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="HalMemtrackHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicProfilingTest" />
-  <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
-  <!-- <option name="compatibility:include-filter" value="HalBootHidlTargetProfilingTest" /> -->
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
