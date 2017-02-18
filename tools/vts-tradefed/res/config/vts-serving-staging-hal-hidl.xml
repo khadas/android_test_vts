@@ -18,6 +18,13 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts" />
 
+  <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostBinderize" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
   <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
   <option name="compatibility:include-filter" value="BinderPerformanceTest" />
   <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputTest" />
@@ -25,9 +32,6 @@
   <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
   <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
   <option name="compatibility:include-filter" value="FmqPerformanceTest" />
-  <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
-  <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
-  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
   <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
   <option name="compatibility:include-filter" value="VibratorHidlTest" />
   <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
@@ -46,9 +50,6 @@
   <option name="compatibility:include-filter" value="HalGraphicsAllocatorHidlTargetTest" />
   <option name="compatibility:include-filter" value="HalGraphicsMapperHidlTargetTest" />
   <option name="compatibility:include-filter" value="HalGraphicsComposerHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
   <option name="compatibility:include-filter" value="ContexthubHidlTargetTest" /><!-- need runtime stopped -->
   <option name="compatibility:include-filter" value="ContexthubHidlTest" />
 

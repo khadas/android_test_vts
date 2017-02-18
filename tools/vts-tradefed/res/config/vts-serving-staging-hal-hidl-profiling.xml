@@ -18,9 +18,14 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
+  <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalIrV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalWifiV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VibratorHidlProfilingTest" />
   <option name="compatibility:include-filter" value="VibratorHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
   <option name="compatibility:include-filter" value="ThermalHidlTargetProfilingTest" />
   <option name="compatibility:include-filter" value="LightHidlTargetProfilingTest" />
   <option name="compatibility:include-filter" value="HalPowerHidlTargetProfilingTest" />

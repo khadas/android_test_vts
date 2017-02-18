@@ -51,7 +51,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec.vts.driver@1.0 \
   android.hardware.tv.input.vts.driver@1.0 \
   android.hardware.usb.vts.driver@1.0 \
-  android.hardware.vehicle.vts.driver@2.0 \
+  android.hardware.automotive.vehicle.vts.driver@2.0 \
   android.hardware.vibrator.vts.driver@1.0 \
   android.hardware.vr.vts.driver@1.0 \
   android.hardware.wifi.vts.driver@1.0 \
@@ -90,7 +90,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec@1.0-vts.profiler \
   android.hardware.tv.input@1.0-vts.profiler \
   android.hardware.usb@1.0-vts.profiler \
-  android.hardware.vehicle@2.0-vts.profiler \
+  android.hardware.automotive.vehicle@2.0-vts.profiler \
   android.hardware.vibrator@1.0-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.wifi@1.0-vts.profiler \
@@ -98,7 +98,7 @@ vts_test_lib_hidl_packages := \
 
 vts_test_lib_hidl_packages += \
   audio_effect_hidl_hal_test \
-  bluetooth_hidl_hal_test \
+  VtsHalBluetoothV1_0TargetTest \
   boot_hidl_hal_test \
   camera_hidl_hal_test \
   contexthub_hidl_hal_test \
@@ -106,13 +106,13 @@ vts_test_lib_hidl_packages += \
   graphics_allocator_hidl_hal_test \
   graphics_mapper_hidl_hal_test \
   graphics_composer_hidl_hal_test \
-  ir_hidl_hal_test \
+  VtsHalIrV1_0TargetTest \
   light_hidl_hal_test \
   memtrack_hidl_hal_test \
   gatekeeper_hidl_hal_test \
-  nfc_hidl_hal_test \
+  VtsHalNfcV1_0TargetTest \
   power_hidl_hal_test \
-  radio_hidl_hal_test \
+  VtsHalRadioV1_0TargetTest \
   sensors_hidl_hal_test \
   soundtrigger_hidl_hal_test \
   thermal_hidl_hal_test \
@@ -120,3 +120,5 @@ vts_test_lib_hidl_packages += \
   tv_input_hidl_hal_test \
   vibrator_hidl_hal_test \
   vr_hidl_hal_test \
+  VtsHalWifiV1_0TargetTest \
+  VtsHalWifiSupplicantV1_0TargetTest \
