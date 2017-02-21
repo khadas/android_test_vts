@@ -39,7 +39,7 @@
                 showAnim: 'slideDown',
                 maxDate: new Date()
             });
-            date.datepicker('setDate', new Date(${startTime} / MICRO_PER_MILLI));
+            date.datepicker('setDate', new Date(${endTime} / MICRO_PER_MILLI));
             $('#load').click(load);
             $('#outlier-select').change(drawAllGraphs);
         });
@@ -138,7 +138,7 @@
             if (hist.name) title += ' (' + hist.name + ')';
             var values = hist.values;
             var histogramData = values.reduce(function(result, d, i) {
-                if (d < max && d > min) result.push([hist.ids[i], d]);
+                if (d <= max && d >= min) result.push([hist.ids[i], d]);
                 return result;
             }, []);
 
@@ -216,13 +216,13 @@
 
         // Reload the page.
         function load() {
-            var startTime = $('#date').datepicker('getDate').getTime();
-            startTime = startTime + (ONE_DAY / MICRO_PER_MILLI) - 1;
+            var endTime = $('#date').datepicker('getDate').getTime();
+            endTime = endTime + (ONE_DAY / MICRO_PER_MILLI) - 1;
             var filterVal = $('#outlier-select').val();
             var ctx = '${pageContext.request.contextPath}';
             var link = ctx + '/show_graph?profilingPoint=${profilingPointName}' +
                 '&testName=${testName}' +
-                '&startTime=' + (startTime * MICRO_PER_MILLI) +
+                '&endTime=' + (endTime * MICRO_PER_MILLI) +
                 '&filterVal=' + filterVal;
             if ($('#device-select').prop('selectedIndex') > 1) {
                 link += '&device=' + $('#device-select').val();
