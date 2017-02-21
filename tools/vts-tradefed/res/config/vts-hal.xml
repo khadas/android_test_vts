@@ -19,10 +19,10 @@
   <option name="test-tag" value="vts" />
 
   <!-- For HIDL HAL Target-Side Tests -->
-  <option name="compatibility:include-filter" value="HalBluetoothHidlTargetBasicTest" />
-  <option name="compatibility:include-filter" value="HalIrHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalNfcHidlTargetBasicTest" />
-  <option name="compatibility:include-filter" value="HalWifiHidlTargetTest" />
+  <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
