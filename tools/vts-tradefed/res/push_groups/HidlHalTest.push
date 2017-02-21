@@ -102,8 +102,8 @@ DATA/lib64/android.hardware.tv.input.vts.driver@1.0.so->/data/local/tmp/64/andro
 DATA/lib/android.hardware.usb.vts.driver@1.0.so->/data/local/tmp/32/hw/android.hardware.usb.vts.driver@1.0.so
 DATA/lib64/android.hardware.usb.vts.driver@1.0.so->/data/local/tmp/64/hw/android.hardware.usb.vts.driver@1.0.so
 
-DATA/lib/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.vehicle.vts.driver@2.0.so
-DATA/lib64/android.hardware.vehicle.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.vehicle.vts.driver@2.0.so
+DATA/lib/android.hardware.automotive.vehicle.vts.driver@2.0.so->/data/local/tmp/32/android.hardware.automotive.vehicle.vts.driver@2.0.so
+DATA/lib64/android.hardware.automotive.vehicle.vts.driver@2.0.so->/data/local/tmp/64/android.hardware.automotive.vehicle.vts.driver@2.0.so
 
 DATA/lib/android.hardware.vibrator.vts.driver@1.0.so->/data/local/tmp/32/android.hardware.vibrator.vts.driver@1.0.so
 DATA/lib64/android.hardware.vibrator.vts.driver@1.0.so->/data/local/tmp/64/android.hardware.vibrator.vts.driver@1.0.so
@@ -219,8 +219,8 @@ DATA/lib64/android.hardware.tv.input@1.0-vts.profiler.so->/data/local/tmp/64/hw/
 DATA/lib/android.hardware.usb@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.usb@1.0-vts.profiler.so
 DATA/lib64/android.hardware.usb@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.usb@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.vehicle@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vehicle@2.0-vts.profiler.so
-DATA/lib64/android.hardware.vehicle@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vehicle@2.0-vts.profiler.so
+DATA/lib/android.hardware.automotive.vehicle@2.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.automotive.vehicle@2.0-vts.profiler.so
+DATA/lib64/android.hardware.automotive.vehicle@2.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.autotmotive.vehicle@2.0-vts.profiler.so
 
 DATA/lib/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/32/hw/android.hardware.vibrator@1.0-vts.profiler.so
 DATA/lib64/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/64/hw/android.hardware.vibrator@1.0-vts.profiler.so

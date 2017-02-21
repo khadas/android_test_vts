@@ -15,9 +15,9 @@ spec/hardware/interfaces/tv/input/1.0/vts/types.vts->/data/local/tmp/spec/tv/inp
 spec/hardware/interfaces/tv/cec/1.0/vts/HdmiCec.vts->/data/local/tmp/spec/tv/cec/HdmiCec.vts
 spec/hardware/interfaces/tv/cec/1.0/vts/HdmiCecCallback.vts->/data/local/tmp/spec/tv/cec/HdmiCecCallback.vts
 spec/hardware/interfaces/tv/cec/1.0/vts/types.vts->/data/local/tmp/spec/tv/cec/types.vts
-spec/hardware/interfaces/vehicle/2.0/vts/Vehicle.vts->/data/local/tmp/spec/vehicle/Vehicle.vts
-spec/hardware/interfaces/vehicle/2.0/vts/VehicleCallback.vts->/data/local/tmp/spec/vehicle/VehicleCallback.vts
-spec/hardware/interfaces/vehicle/2.0/vts/types.vts->/data/local/tmp/spec/vehicle/types.vts
+spec/hardware/interfaces/automotive/vehicle/2.0/vts/Vehicle.vts->/data/local/tmp/spec/vehicle/Vehicle.vts
+spec/hardware/interfaces/automotive/vehicle/2.0/vts/VehicleCallback.vts->/data/local/tmp/spec/vehicle/VehicleCallback.vts
+spec/hardware/interfaces/automotive/vehicle/2.0/vts/types.vts->/data/local/tmp/spec/vehicle/types.vts
 spec/hardware/interfaces/vr/1.0/vts/Vr.vts->/data/local/tmp/spec/vr/Vr.vts
 spec/hardware/interfaces/nfc/1.0/vts/NfcClientCallback.vts->/data/local/tmp/spec/nfc/NfcClientCallback.vts
 spec/hardware/interfaces/nfc/1.0/vts/Nfc.vts->/data/local/tmp/spec/nfc/Nfc.vts

@@ -82,7 +82,7 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts /data/local/tmp/spec/BluetoothHalV1bt_interface_t.vts
   adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/nfc/1.0/vts/*.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vr/1.0/vts/Vr.vts /data/local/tmp/spec/Vr.vts
-  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vehicle/2.0/vts/*.vts /data/local/tmp/spec/
+  # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/automotive/vehicle/2.0/vts/*.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/sensors/1.0/vts/*.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/tv/cec/1.0/vts/*.vts /data/local/tmp/spec/
   # adb push ${ANDROID_BUILD_TOP}/hardware/interfaces/vibrator/1.0/vts/Vibrator.vts /data/local/tmp/spec/
