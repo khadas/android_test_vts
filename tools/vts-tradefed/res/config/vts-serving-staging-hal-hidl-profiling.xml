@@ -36,6 +36,7 @@
   <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicProfilingTest" />
   <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
   <!-- <option name="compatibility:include-filter" value="HalBootHidlTargetProfilingTest" /> -->
+  <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicProfilingTest" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
