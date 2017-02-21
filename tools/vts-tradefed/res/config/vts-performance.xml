@@ -26,8 +26,8 @@
   <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
 
   <!-- For HIDL HAL Profiling -->
-  <option name="compatibility:include-filter" value="BluetoothHidlTargetProfilingTest" />
-  <option name="compatibility:include-filter" value="NfcHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>

@@ -24,8 +24,8 @@
   <option name="compatibility:include-filter" value="SampleCameraV3Test" />
 
   <!-- For HIDL HALs -->
-  <option name="compatibility:include-filter" value="NfcHidlBinderizeBasicTest" />
-  <option name="compatibility:include-filter" value="NfcHidlPassthroughBasicTest" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostBinderize" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
 
   <!-- For shell-based tests -->
   <option name="compatibility:include-filter" value="SampleShellTest" />
