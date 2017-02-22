@@ -129,6 +129,7 @@ vts_test_lib_hidl_packages += \
   VtsHalThermalV1_0TargetTest \
   thermal_hidl_stress_test \
   VtsHalTvInputV1_0TargetTest \
+  VtsHalUsbV1_0TargetTest \
   VtsHalVibratorV1_0TargetTest \
   VtsHalVrV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
