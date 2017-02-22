@@ -222,10 +222,8 @@ int main(int argc, char* const argv[]) {
     if (mode == "replay") {
       android::vts::VtsHidlHalReplayer replayer(spec_path.c_str(),
                                                 callback_socket_name.c_str());
-      success = replayer.ReplayTrace(argv[optind],
-                                     trace_path.c_str(), target_version,
-                                     target_package.c_str(),
-                                     target_component_name.c_str());
+      success = replayer.ReplayTrace(
+          argv[optind], trace_path.c_str(), target_package.c_str());
     } else {
       success = spec_builder.Process(argv[optind],INTERFACE_SPEC_LIB_FILENAME,
                                      target_class, target_type, target_version,
