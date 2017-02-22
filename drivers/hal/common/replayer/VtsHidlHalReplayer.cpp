@@ -37,8 +37,7 @@ VtsHidlHalReplayer::VtsHidlHalReplayer(const char* spec_path,
     : spec_path_(spec_path), callback_socket_name_(callback_socket_name) {}
 
 bool VtsHidlHalReplayer::LoadComponentSpecification(
-    const float version, const char* package, const char* component_name,
-    ComponentSpecificationMessage* message) {
+    const char* package, ComponentSpecificationMessage* message) {
   if (!spec_path_ || !spec_path_[0]) {
     cerr << __func__ << "spec file not specified. " << endl;
     return false;
@@ -47,22 +46,17 @@ bool VtsHidlHalReplayer::LoadComponentSpecification(
     cerr << __func__ << "message could not be NULL. " << endl;
     return false;
   }
-  cout << __func__ << ": Checking spec file " << spec_path_ << endl;
   if (InterfaceSpecificationParser::parse(spec_path_, message)) {
     if (message->component_class() != HAL_HIDL) {
       cerr << __func__ << ": only support Hidl Hal. " << endl;
       return false;
     }
 
-    if (message->component_type_version() != version ||
-        message->package() != package ||
-        message->component_name() != component_name) {
+    if (message->package() != package) {
       cerr << __func__
-           << ": spec file mismatch. expect: target_version: " << version
-           << ", package: " << package << ", component_name: " << component_name
-           << ", actual: target_version: " << message->component_type_version()
-           << ", package: " << message->package()
-           << ", component_name: " << message->component_name();
+           << ": spec file mismatch. "
+           << "expected package: " << package
+           << ", actual: package: " << message->package();
       return false;
     }
   } else {
@@ -79,6 +73,7 @@ bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
   bool new_record = true;
   std::string record_str;
   std::string line;
+
   while (std::getline(in, line)) {
     // Assume records are separated by '\n'.
     if (line.empty()) {
@@ -112,14 +107,11 @@ bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
 
 bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
                                      const char* trace_file,
-                                     const float version, const char* package,
-                                     const char* component_name) {
+                                     const char* package) {
   ComponentSpecificationMessage interface_specification_message;
-  if (!LoadComponentSpecification(version, package, component_name,
-                                  &interface_specification_message)) {
+  if (!LoadComponentSpecification(package, &interface_specification_message)) {
     cerr << __func__ << ": can not load component spec: " << spec_path_
-         << " for package: " << package << " version: " << version
-         << " component_name: " << component_name << endl;
+         << " for package: " << package << endl;
     return false;
   }
 
@@ -135,18 +127,22 @@ bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
 
   // Get service for Hidl Hal.
   char get_sub_property[PROPERTY_VALUE_MAX];
-  bool get_stub = false; /* default is binderized */
+  bool get_stub = false;  /* default is binderized */
   if (property_get("vts.hidl.get_stub", get_sub_property, "") > 0) {
     if (!strcmp(get_sub_property, "true") ||
         !strcmp(get_sub_property, "True") || !strcmp(get_sub_property, "1")) {
       get_stub = true;
     }
   }
-  const char* service_name = interface_specification_message.package().substr(
-      interface_specification_message.package().find_last_of(".") + 1).c_str();
-  if (!fuzzer->GetService(get_stub, service_name)) {
-    cerr << __func__ << ": couldn't get service" << endl;
-    return false;
+
+  if (!fuzzer->GetService(get_stub, "default")) {
+    cerr << __func__ << ": couldn't get service (default)" << endl;
+    const char* service_name = interface_specification_message.package().substr(
+        interface_specification_message.package().find_last_of(".") + 1).c_str();
+    if (!fuzzer->GetService(get_stub, service_name)) {
+      cerr << __func__ << ": couldn't get service " << service_name << endl;
+      return false;
+    }
   }
 
   // Parse the trace file to get the sequence of function calls.
