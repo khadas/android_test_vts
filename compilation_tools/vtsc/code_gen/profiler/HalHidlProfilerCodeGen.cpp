@@ -62,6 +62,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForEnumVariable(Formatter& out,
 void HalHidlProfilerCodeGen::GenerateProfilerForVectorVariable(Formatter& out,
   const VariableSpecificationMessage& val, const std::string& arg_name,
   const std::string& arg_value) {
+  out << arg_name << "->set_type(TYPE_VECTOR);\n";
+  out << arg_name << "->set_vector_size(" << arg_value << ".size());\n";
   out << "for (int i = 0; i < (int)" << arg_value << ".size(); i++) {\n";
   out.indent();
   std::string vector_element_name = arg_name + "_vector_i";
@@ -77,6 +79,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForArrayVariable(Formatter& out,
   const VariableSpecificationMessage& val, const std::string& arg_name,
   const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_ARRAY);\n";
+  out << arg_name << "->set_vector_size(" << val.vector_size() << ");\n";
   out << "for (int i = 0; i < " << val.vector_size() << "; i++) {\n";
   out.indent();
   std::string array_element_name = arg_name + "_array_i";

@@ -778,9 +778,10 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_VECTOR:
     {
-      out << arg_name << ".resize(" << arg_value_name << ".vector_size());\n";
+      out << arg_name << ".resize(" << arg_value_name
+          << ".vector_value_size());\n";
       out << "for (int i = 0; i <" << arg_value_name
-          << ".vector_size(); i++) {\n";
+          << ".vector_value_size(); i++) {\n";
       out.indent();
       GenerateDriverImplForTypedVariable(out, val.vector_value(0),
                                          arg_name + "[i]",
@@ -792,7 +793,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     case TYPE_ARRAY:
     {
       out << "for (int i = 0; i < " << arg_value_name
-          << ".vector_size(); i++) {\n";
+          << ".vector_value_size(); i++) {\n";
       out.indent();
       GenerateDriverImplForTypedVariable(out, val.vector_value(0),
                                          arg_name + "[i]",
@@ -975,7 +976,7 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     case TYPE_VECTOR:
     {
       out << "for (int i = 0; i <" << expected_result
-          << ".vector_size(); i++) {\n";
+          << ".vector_value_size(); i++) {\n";
       out.indent();
       GenerateVerificationCodeForTypedVariable(
           out, val.vector_value(0), expected_result + ".vector_value(i)",
@@ -987,7 +988,7 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     case TYPE_ARRAY:
     {
       out << "for (int i = 0; i < " << expected_result
-          << ".vector_size(); i++) {\n";
+          << ".vector_value_size(); i++) {\n";
       out.indent();
       GenerateVerificationCodeForTypedVariable(
           out, val.vector_value(0), expected_result + ".vector_value(i)",
@@ -1176,6 +1177,8 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_VECTOR:
     {
       out << result_msg << "->set_type(TYPE_VECTOR);\n";
+      out << result_msg << "->set_vector_size(" << result_value
+          << ".size());\n";
       out << "for (int i = 0; i < (int)" << result_value << ".size(); i++) {\n";
       out.indent();
       string vector_element_name = result_msg + "_vector_i";
@@ -1191,7 +1194,9 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_ARRAY:
     {
       out << result_msg << "->set_type(TYPE_ARRAY);\n";
-      out << "for (int i = 0; i < " << val.vector_size() << "; i++) {\n";
+      out << result_msg << "->set_vector_size(" << val.vector_value_size()
+          << ");\n";
+      out << "for (int i = 0; i < " << val.vector_value_size() << "; i++) {\n";
       out.indent();
       string array_element_name = result_msg + "_array_i";
       out << "auto *" << array_element_name << " = " << result_msg

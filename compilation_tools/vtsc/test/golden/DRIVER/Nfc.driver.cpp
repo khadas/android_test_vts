@@ -59,8 +59,8 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
     }
     if (!strcmp(func_name, "write")) {
          ::android::hardware::hidl_vec<uint8_t> arg0;
-        arg0.resize(func_msg.arg(0).vector_size());
-        for (int i = 0; i <func_msg.arg(0).vector_size(); i++) {
+        arg0.resize(func_msg.arg(0).vector_value_size());
+        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
             arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().uint8_t();
         }
         VtsMeasurement vts_measurement;
@@ -81,8 +81,8 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
     }
     if (!strcmp(func_name, "coreInitialized")) {
          ::android::hardware::hidl_vec<uint8_t> arg0;
-        arg0.resize(func_msg.arg(0).vector_size());
-        for (int i = 0; i <func_msg.arg(0).vector_size(); i++) {
+        arg0.resize(func_msg.arg(0).vector_value_size());
+        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
             arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().uint8_t();
         }
         VtsMeasurement vts_measurement;
