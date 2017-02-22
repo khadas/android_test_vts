@@ -34,8 +34,7 @@ class VtsHidlHalReplayer {
 
   // Loads the given interface specification (.vts file) and parses it to
   // ComponentSpecificationMessage.
-  bool LoadComponentSpecification(const float version, const char* package,
-                                  const char* component_name,
+  bool LoadComponentSpecification(const char* package,
                                   ComponentSpecificationMessage* message);
 
   // Parses the trace file, stores the parsed sequence of API calls in
@@ -46,8 +45,7 @@ class VtsHidlHalReplayer {
 
   // Replays the API call sequence parsed from the trace file.
   bool ReplayTrace(const char* spec_lib_file_path, const char* trace_file,
-                   const float version, const char* package,
-                   const char* component_name);
+                   const char* package);
 
  private:
   // A FuzzerWrapper instance.
