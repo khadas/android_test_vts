@@ -94,6 +94,8 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfcClientCallback(
                     }
                     auto *arg_0 = msg.add_arg();
                     ::android::hardware::hidl_vec<uint8_t> *arg_val_0 = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
+                    arg_0->set_type(TYPE_VECTOR);
+                    arg_0->set_vector_size((*arg_val_0).size());
                     for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
                         auto *arg_0_vector_i = arg_0->add_vector_value();
                         arg_0_vector_i->set_type(TYPE_SCALAR);
