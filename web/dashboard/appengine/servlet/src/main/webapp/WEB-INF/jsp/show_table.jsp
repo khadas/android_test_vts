@@ -288,7 +288,7 @@
                       <ul id='profiling-list' class='collection'>
                         <c:forEach items='${profilingPointNames}' var='pt'>
                           <c:set var='profPointArgs' value='testName=${testName}&profilingPoint=${pt}'/>
-                          <c:set var='timeArgs' value='startTime=${startTime}&endTime=${endTime}'/>
+                          <c:set var='timeArgs' value='endTime=${endTime}'/>
                           <a href='/show_graph?${profPointArgs}&${timeArgs}'
                              class='collection-item profiling-point-name'>${pt}
                           </a>

@@ -57,6 +57,7 @@ public class ShowGraphServlet extends BaseServlet {
     private static final String GRAPH_JSP = "WEB-INF/jsp/show_graph.jsp";
     private static final byte[] FAMILY = Bytes.toBytes("test");
     private static final byte[] QUALIFIER = Bytes.toBytes("data");
+    private static final long DEFAULT_FILTER_OPTION = -1;
 
     private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
     private static final String[] splitKeysArray = new String[]{HIDL_HAL_OPTION};
@@ -134,15 +135,15 @@ public class ShowGraphServlet extends BaseServlet {
 
         String profilingPointName = request.getParameter("profilingPoint");
         String selectedDevice = request.getParameter("device");
-        Long startTime = null;
-        if (request.getParameter("startTime") != null) {
-            String time = request.getParameter("startTime");
+        Long endTime = null;
+        if (request.getParameter("endTime") != null) {
+            String time = request.getParameter("endTime");
             try {
-                startTime = Long.parseLong(time);
+                endTime = Long.parseLong(time);
             } catch (NumberFormatException e) {}
         }
-        if (startTime == null) {
-            startTime = System.currentTimeMillis() * MILLI_TO_MICRO;
+        if (endTime == null) {
+            endTime = System.currentTimeMillis() * MILLI_TO_MICRO;
         }
         tableName = TableName.valueOf(TABLE_PREFIX + request.getParameter("testName"));
         table = BigtableHelper.getTable(tableName);
@@ -153,8 +154,8 @@ public class ShowGraphServlet extends BaseServlet {
         Map<String, Graph> graphMap = new HashMap<>();
 
         Scan scan = new Scan();
-        scan.setStartRow(Long.toString(startTime - ONE_DAY).getBytes());
-        scan.setStopRow(Long.toString(startTime).getBytes());
+        scan.setStartRow(Long.toString(endTime - ONE_DAY).getBytes());
+        scan.setStopRow(Long.toString(endTime).getBytes());
         ResultScanner scanner = table.getScanner(scan);
         for (Result result = scanner.next(); result != null; result = scanner.next()) {
             byte[] value = result.getValue(FAMILY, QUALIFIER);
@@ -209,9 +210,15 @@ public class ShowGraphServlet extends BaseServlet {
         String[] devices = deviceSet.toArray(new String[deviceSet.size()]);
         Arrays.sort(devices);
 
+        String filterVal = request.getParameter("filterVal");
+        try {
+            Long.parseLong(filterVal);
+        } catch (NumberFormatException e) {
+            filterVal = Long.toString(DEFAULT_FILTER_OPTION);
+        }
         request.setAttribute("testName", request.getParameter("testName"));
-        request.setAttribute("filterVal", request.getParameter("filterVal"));
-        request.setAttribute("startTime", new Gson().toJson(startTime));
+        request.setAttribute("filterVal", filterVal);
+        request.setAttribute("endTime", new Gson().toJson(endTime));
         request.setAttribute("devices", devices);
         request.setAttribute("selectedDevice", selectedDevice);
         request.setAttribute("showFilterDropdown", hasHistogram);
