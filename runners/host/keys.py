@@ -90,6 +90,10 @@ class ConfigKeys(object):
     # Keys for setting passthrough or binderize mode
     IKEY_GET_STUB = "get_stub"
 
+    # Keys for the HAL HIDL Replay Test type.
+    IKEY_HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths"
+    IKEY_HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name"
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
