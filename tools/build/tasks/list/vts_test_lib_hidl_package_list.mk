@@ -97,28 +97,29 @@ vts_test_lib_hidl_packages := \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
 
 vts_test_lib_hidl_packages += \
-  audio_effect_hidl_hal_test \
+  VtsHalAudioEffectV2_0TargetTest \
+  VtsHalBiometricsFingerprintV2_1TargetTest \
   VtsHalBluetoothV1_0TargetTest \
-  boot_hidl_hal_test \
-  camera_hidl_hal_test \
-  contexthub_hidl_hal_test \
-  fingerprint_hidl_hal_test \
-  graphics_allocator_hidl_hal_test \
-  graphics_mapper_hidl_hal_test \
-  graphics_composer_hidl_hal_test \
+  VtsHalBootV1_0TargetTest \
+  VtsHalBroadcastradioV1_0TargetTest \
+  VtsHalCameraProviderV2_4TargetTest \
+  VtsHalContexthubV1_0TargetTest \
+  VtsHalGatekeeperV1_0TargetTest \
+  VtsHalGraphicsAllocatorV2_0TargetTest \
+  VtsHalGraphicsComposerV2_1TargetTest \
+  VtsHalGraphicsMapperV2_0TargetTest \
   VtsHalIrV1_0TargetTest \
-  light_hidl_hal_test \
-  memtrack_hidl_hal_test \
-  gatekeeper_hidl_hal_test \
+  VtsHalLightV2_0TargetTest \
+  VtsHalMemtrackV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
-  power_hidl_hal_test \
+  VtsHalPowerV1_0TargetTest \
   VtsHalRadioV1_0TargetTest \
-  sensors_hidl_hal_test \
-  soundtrigger_hidl_hal_test \
-  thermal_hidl_hal_test \
+  VtsHalSensorsV1_0TargetTest \
+  VtsHalSoundtriggerV2_0TargetTest \
+  VtsHalThermalV1_0TargetTest \
   thermal_hidl_stress_test \
-  tv_input_hidl_hal_test \
-  vibrator_hidl_hal_test \
-  vr_hidl_hal_test \
+  VtsHalTvInputV1_0TargetTest \
+  VtsHalVibratorV1_0TargetTest \
+  VtsHalVrV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
