@@ -18,9 +18,9 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
-  <option name="compatibility:include-filter" value="TvCecHidlProfilingTest" />
-  <option name="compatibility:include-filter" value="TvInputHidlProfilingTest" />
-  <option name="compatibility:include-filter" value="HalTvInputHidlTargetProfilingTest" />
+  <option name="compatibility:include-filter" value="VtsHalTvCecV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalTvInputV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalTvInputV1_0TargetProfiling" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>

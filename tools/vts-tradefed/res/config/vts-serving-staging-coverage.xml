@@ -20,19 +20,19 @@
 
   <option name="compatibility:include-filter" value="StandaloneLightFuzzTest" />
   <option name="compatibility:include-filter" value="LightFuzzTest" />
+  <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalLightV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
-  <option name="compatibility:include-filter" value="VibratorHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalAudioEffectHidlTargetBasicTest" />
-  <option name="compatibility:include-filter" value="ThermalHidlTargetTest" />
-  <!-- option name="compatibility:include-filter" value="SensorsHidlTargetTest" / -->
-  <option name="compatibility:include-filter" value="HalPowerHidlTargetTest" />
-  <option name="compatibility:include-filter" value="LightHidlTargetTest" />
-  <option name="compatibility:include-filter" value="VrHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalMemtrackHidlTargetTest" />
-  <option name="compatibility:include-filter" value="HalGatekeeperHidlTargetBasicTest" />
-  <option name="compatibility:include-filter" value="HalSoundTriggerHidlTargetBasicTest" />
-  <option name="compatibility:include-filter" value="HalBootHidlTargetTest" />
+  <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
+  <!-- option name="compatibility:include-filter" value="VtsHalSensorsV1_0Target" / -->
+  <option name="compatibility:include-filter" value="VtsHalSoundTriggerV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalThermalV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
 
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
