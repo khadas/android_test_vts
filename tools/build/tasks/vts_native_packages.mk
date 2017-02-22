@@ -65,12 +65,17 @@ my_copy_pairs :=
 # Packaging rule for android-vts.zip's testcases dir (spec subdir).
 
 my_spec_modules := \
-    $(vts_spec_file_list) \
+  $(VTS_SPEC_FILE_LIST) \
 
 my_spec_copy_pairs :=
   $(foreach m,$(my_spec_modules),\
+    $(eval my_spec_copy_dest :=\
+      spec/hardware/interfaces/$(word 2,$(subst android/hardware/, ,$(m))))\
+    $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/$(my_spec_copy_dest)))\
+
+my_spec_copy_pairs +=
+  $(foreach m,$(vts_spec_file_list),\
     $(if $(wildcard $(m)),\
       $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/spec/$(m))))\
-
 
 $(compatibility_zip): $(call copy-many-files,$(my_copy_pairs)) $(call copy-many-files,$(my_spec_copy_pairs))
