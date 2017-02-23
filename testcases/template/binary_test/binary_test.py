@@ -52,8 +52,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
     DEFAULT_TAG_64 = '_64bit'
     DEFAULT_LD_LIBRARY_PATH_32 = '/data/local/tmp/32/'
     DEFAULT_LD_LIBRARY_PATH_64 = '/data/local/tmp/64/'
-    DEFAULT_PROFILING_LIBRARY_PATH_32 = '/data/local/tmp/32/hw/'
-    DEFAULT_PROFILING_LIBRARY_PATH_64 = '/data/local/tmp/64/hw/'
+    DEFAULT_PROFILING_LIBRARY_PATH_32 = '/data/local/tmp/32/'
+    DEFAULT_PROFILING_LIBRARY_PATH_64 = '/data/local/tmp/64/'
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''

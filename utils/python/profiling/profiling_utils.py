@@ -24,7 +24,7 @@ from vts.runners.host import const
 
 LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
 TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/"
-HAL_INSTRUMENTATION_LIB_PATH = "/data/local/tmp/64/hw/"
+HAL_INSTRUMENTATION_LIB_PATH = "/data/local/tmp/64/"
 
 
 def EnableVTSProfiling(
