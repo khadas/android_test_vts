@@ -115,6 +115,7 @@ vts_test_lib_hidl_packages += \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
+  VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsAllocatorV2_0TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
   VtsHalGraphicsMapperV2_0TargetTest \
