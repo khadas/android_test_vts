@@ -38,7 +38,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
     Attributes:
         _dut: AndroidDevice, the device under test as config
         shell: ShellMirrorObject, shell mirror
-        test_cases: list of BinaryTestCase objects, list of test cases to run
+        testcases: list of BinaryTestCase objects, list of test cases to run
         tags: all the tags that appeared in binary list
         DEVICE_TMP_DIR: string, temp location for storing binary
         TAG_DELIMITER: string, separator used to separate tag and path

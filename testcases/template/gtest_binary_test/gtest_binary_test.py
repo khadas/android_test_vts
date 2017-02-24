@@ -34,7 +34,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
     Attributes:
         _dut: AndroidDevice, the device under test as config
         shell: ShellMirrorObject, shell mirror
-        test_cases: list of GtestTestCase objects, list of test cases to run
+        testcases: list of GtestTestCase objects, list of test cases to run
         tags: all the tags that appeared in binary list
         DEVICE_TEST_DIR: string, temp location for storing binary
         TAG_PATH_SEPARATOR: string, separator used to separate tag and path
