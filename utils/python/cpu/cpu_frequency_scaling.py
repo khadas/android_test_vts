@@ -52,8 +52,12 @@ class CpuFrequencyScalingController(object):
                 "cat /sys/devices/system/cpu/cpu%s/"
                 "cpufreq/scaling_available_frequencies" % cpu_no)
             asserts.assertEqual(1, len(results[const.STDOUT]))
-            self._theoretical_max_frequency[cpu_no] = results[
-                const.STDOUT][0].split()[-1].strip()
+            if results[const.STDOUT][0]:
+                self._theoretical_max_frequency[cpu_no] = results[
+                    const.STDOUT][0].split()[-1].strip()
+            else:
+                logging.warn("cpufreq/scaling_available_frequencies for cpu %s"
+                             " not set.", cpu_no)
         self._init = True
 
     def _GetMinAndMaxCpuNo(self):
