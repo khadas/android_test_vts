@@ -19,8 +19,7 @@
   <option name="test-tag" value="vts-*" />
 
   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0TargetProfiling" />
-  <!--TODO: re-enable when VTS can handle device/hal incompatibility -->
-  <!-- option name="compatibility:include-filter" value="VtsHalBootV1_0TargetProfiling" / -->
+  <option name="compatibility:include-filter" value="VtsHalBootV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0TargetProfiling" />
