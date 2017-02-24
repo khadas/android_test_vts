@@ -87,8 +87,8 @@ class ConfigKeys(object):
     IKEY_PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix"
     IKEY_PRECONDITION_LSHAL = "precondition_lshal"
 
-    # Keys for setting passthrough or binderize mode
-    IKEY_GET_STUB = "get_stub"
+    # Keys for toggle passthrough mode
+    IKEY_PASSTHROUGH_MODE = "passthrough_mode"
 
     # Keys for the HAL HIDL Replay Test type.
     IKEY_HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths"
