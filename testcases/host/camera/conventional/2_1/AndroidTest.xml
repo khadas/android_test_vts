@@ -26,5 +26,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-case-path" value="vts/testcases/host/camera/conventional/2_1/SampleCameraV2Test" />
         <option name="test-config-path" value="vts/testcases/host/camera/conventional/2_1/SampleCameraV2Test.config" />
+        <option name="enable-profiling" value="true"/>
     </test>
 </configuration>

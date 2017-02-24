@@ -17,6 +17,7 @@
 import logging
 import os
 
+from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
 from vts.runners.host import errors
 from vts.runners.host import keys
@@ -26,6 +27,11 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 from vts.runners.host import const
 from vts.utils.python.common import list_utils
+from vts.utils.python.coverage import coverage_utils
+from vts.utils.python.profiling import profiling_utils
+from vts.utils.python.systrace import systrace_utils
+from vts.utils.python.web import feature_utils
+from vts.utils.python.web import web_utils
 
 # Macro strings for test result reporting
 TEST_CASE_TOKEN = "[Test Case]"
@@ -58,6 +64,9 @@ class BaseTestClass(object):
                        exclude. Has no effect if include_filer is not empty.
         abi_name: String, name of abi in use
         abi_bitness: String, bitness of abi in use
+        web: WebFeature, object storing web feature util for test run
+        coverage: CoverageFeature, object storing coverage feature util for test run
+        profiling: ProfilingFeature, object storing profiling feature util for test run
     """
 
     TAG = None
@@ -93,6 +102,10 @@ class BaseTestClass(object):
                            keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI,
                            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI]
         self.getUserParams(opt_param_names=opt_param_names)
+        self.web = web_utils.WebFeature(self.user_params)
+        self.coverage = coverage_utils.CoverageFeature(self.user_params, web=self.web)
+        self.profiling = profiling_utils.ProfilingFeature(self.user_params, web=self.web)
+        self.systrace = systrace_utils.SystraceFeature(self.user_params, web=self.web)
 
     def __enter__(self):
         return self
@@ -207,7 +220,10 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of tearDownClass
         is called.
         """
-        return self.tearDownClass()
+        ret = self.tearDownClass()
+        if self.web.enabled:
+            self.web.Upload(self.results.requested, self.results.executed)
+        return ret
 
     def tearDownClass(self):
         """Teardown function that will be called after all the selected test
@@ -220,11 +236,15 @@ class BaseTestClass(object):
     def _testEntry(self, test_name):
         """Internal function to be called upon entry of a test case."""
         self.currentTestName = test_name
+        if self.web.enabled:
+            self.web.AddTestReport(test_name)
 
     def _setUpTest(self, test_name):
         """Proxy function to guarantee the base implementation of setUpTest is
         called.
         """
+        if self.systrace.enabled:
+            self.systrace.StartSystrace()
         return self.setUpTest()
 
     def setUpTest(self):
@@ -246,6 +266,8 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of tearDownTest
         is called.
         """
+        if self.systrace.enabled:
+            self.systrace.ProcessAndUploadSystrace(test_name)
         self.tearDownTest()
 
     def tearDownTest(self):
@@ -267,6 +289,8 @@ class BaseTestClass(object):
         logging.error(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
+        if self.web.enabled:
+            self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(test_name, begin_time)
 
     def onFail(self, test_name, begin_time):
@@ -293,6 +317,8 @@ class BaseTestClass(object):
         if msg:
             logging.info(msg)
         logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
+        if self.web.enabled:
+            self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_PASS)
         self.onPass(test_name, begin_time)
 
     def onPass(self, test_name, begin_time):
@@ -317,6 +343,8 @@ class BaseTestClass(object):
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
         logging.info("Reason to skip: %s", record.details)
+        if self.web.enabled:
+            self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_SKIP)
         self.onSkip(test_name, begin_time)
 
     def onSkip(self, test_name, begin_time):
@@ -339,6 +367,8 @@ class BaseTestClass(object):
         """
         test_name = record.test_name
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
+        if self.web.enabled:
+            self.web.SetTestResult(None)
         self.onSilent(test_name, begin_time)
 
     def onSilent(self, test_name, begin_time):
@@ -362,6 +392,8 @@ class BaseTestClass(object):
         test_name = record.test_name
         logging.exception(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
+        if self.web.enabled:
+            self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
         self.onException(test_name, begin_time)
 
     def onException(self, test_name, begin_time):

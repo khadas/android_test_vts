@@ -297,13 +297,13 @@ PY_HEADER = '''#!/usr/bin/env python
 TEST_CASE_PY_TEMPLATE = '''import logging
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class {test_name}(base_test_with_webdb.BaseTestWithWebDbClass):
+class {test_name}(base_test.BaseTestClass):
     """Two hello world test cases which use the shell driver."""
 
     def setUpClass(self):
