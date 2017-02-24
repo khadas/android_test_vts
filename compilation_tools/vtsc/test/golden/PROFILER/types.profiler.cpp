@@ -1,4 +1,4 @@
-#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
+#include "test/vts/specification/hal/types.vts.h"
 
 using namespace android::hardware::nfc::V1_0;
 using namespace android::hardware;
