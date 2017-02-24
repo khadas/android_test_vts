@@ -1,4 +1,4 @@
-#include "test/vts/specification/hal/types.vts.h"
+#include "hardware/interfaces/nfc/1.0/vts/types.vts.h"
 #include "vts_measurement.h"
 #include <iostream>
 #include <hidl/HidlSupport.h>
