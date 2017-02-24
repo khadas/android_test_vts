@@ -107,6 +107,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
 
 vts_test_lib_hidl_packages += \
+  VtsHalAudioV2_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
   VtsHalBluetoothV1_0TargetTest \
