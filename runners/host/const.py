@@ -26,3 +26,6 @@ LIST_ITEM_DELIMITER = ','
 # are in lower cases.
 SUFFIX_32BIT = "32bit"
 SUFFIX_64BIT = "64bit"
+
+# for toggling hal hidl test passthrough mode
+VTS_HAL_HIDL_GET_STUB = 'VTS_HAL_HIDL_GET_STUB'
