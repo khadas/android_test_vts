@@ -111,8 +111,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
             if feature:
                 cmd_results = self.shell.Execute("lshal")
-                if (any(cmd_results[const.EXIT_CODE])
-                    or feature not in cmd_results[const.STDOUT][0]):
+                if (feature not in cmd_results[const.STDOUT][0]):
                     logging.warn("The required feature %s not found.",
                                  feature)
                     self._skip_all_testcases = True
