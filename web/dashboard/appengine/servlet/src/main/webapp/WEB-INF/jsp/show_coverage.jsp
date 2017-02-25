@@ -83,25 +83,27 @@
                     srcLines = src.split('\n');
                     covered = 0;
                     total = 0;
-                    var rows = srcLines.reduce(function(acc, line, j) {
+                    var table = $('<table class="table"></table>');
+                    var rows = srcLines.forEach(function(line, j) {
                         var count = coverageVectors[i][j];
+                        var row = $('<tr></tr>');
                         if (typeof count == 'undefined' || count < 0) {
-                            acc += '<tr>';
                             count = "--";
                         } else if (count == 0) {
-                            acc += '<tr class="uncovered">';
+                            row.addClass('uncovered');
                             total += 1;
                         } else {
-                            acc += '<tr class="covered">';
-                            covered += 1;
+                            row.addClass('covered');
                             total += 1;
                         }
-                        acc += '<td class="count">' + String(count) + '</td>';
-                        acc += '<td class="line_no">' + String(j+1) + '</td>';
-                        acc += '<td class="code">' + String(line) + '</td></tr>';
-                        return acc;
-                    }, String());
-                    container.html('<table class="table">' + rows + '</table>');
+                        row.append('<td class="count">' + String(count) + '</td>');
+                        row.append('<td class="line_no">' + String(j+1) + '</td>');
+                        code = $('<td class="code"></td>');
+                        code.text(String(line));
+                        code.appendTo(row);
+                        row.appendTo(table);
+                    });
+                    container.append(table);
                 }).fail(function(error) {
                     if (error.status == 0) {  // origin error, refresh cookie
                         container.empty();
