@@ -108,19 +108,13 @@ class VtscTester(unittest.TestCase):
                          "%s.profiler.cpp" % component_name)
 
     def TestFuzzer(self):
-        """Run tests for FUZZER mode. """
-        logging.info("Running TestFuzzer test case.")
-        self.GenerateVtsFile("android.hardware.nfc@1.0")
-        mode = "FUZZER"
-        component_name = "Nfc"
-        vts_file_path = os.path.join(self._temp_dir, component_name + ".vts")
-        build_file_name = "Android.bp"
-        apis = ["open", "write", "coreInitialized"]
-
-        self.RunFuzzerTest(mode, vts_file_path, build_file_name)
-        for api in apis:
-            source_file_name = "I%s_%s_fuzzer.cpp" % (component_name, api)
-            self.RunFuzzerTest(mode, vts_file_path, source_file_name)
+        """Run tests for Fuzzer mode. """
+        logging.info("Running TestProfiler test case.")
+        self.GenerateVtsFile("android.hardware.renderscript@1.0")
+        for component_name in ["Context", "Device", "types"]:
+            self.RunTest("FUZZER",
+                         os.path.join(self._temp_dir, component_name + ".vts"),
+                         "%s.fuzzer.cpp" % component_name, "SOURCE")
 
     def RunFuzzerTest(self, mode, vts_file_path, source_file_name):
         vtsc_cmd = [
@@ -159,7 +153,7 @@ class VtscTester(unittest.TestCase):
                     os.path.join(output_dir, file),
                     os.path.join(self._temp_dir, file))
 
-    def RunTest(self, mode, vts_file_path, source_file_name):
+    def RunTest(self, mode, vts_file_path, source_file_name, file_type="BOTH"):
         """Run vtsc with given mode for the give vts file and compare the
            output results.
 
@@ -167,6 +161,7 @@ class VtscTester(unittest.TestCase):
             mode: the vtsc mode for generated code. e.g. DRIVER / PROFILER.
             vts_file_path: path of the input vts file.
             source_file_name: name of the generated source file.
+            file_type: type of file e.g. HEADER / SOURCE / BOTH.
         """
         vtsc_cmd = [
             self._vtsc_path, "-m" + mode, vts_file_path,
@@ -177,19 +172,21 @@ class VtscTester(unittest.TestCase):
         if (return_code != 0):
             self.Error("Fail to execute command: %s" % vtsc_cmd)
 
-        header_file_name = vts_file_path + ".h"
-        canonical_header_file = os.path.join(self._canonical_dir, mode,
-                                             header_file_name)
-        output_header_file = os.path.join(self._output_dir, mode,
-                                          header_file_name)
-
-        canonical_source_file = os.path.join(self._canonical_dir, mode,
-                                             source_file_name)
-        output_source_file = os.path.join(self._output_dir, mode,
-                                          source_file_name)
-
-        self.CompareOutputFile(output_header_file, canonical_header_file)
-        self.CompareOutputFile(output_source_file, canonical_source_file)
+        if (file_type == "HEADER" or file_type == "BOTH"):
+            header_file_name = vts_file_path + ".h"
+            canonical_header_file = os.path.join(self._canonical_dir, mode,
+                                                 header_file_name)
+            output_header_file = os.path.join(self._output_dir, mode,
+                                              header_file_name)
+            self.CompareOutputFile(output_header_file, canonical_header_file)
+        elif (file_type == "SOURCE" or file_type == "BOTH"):
+            canonical_source_file = os.path.join(self._canonical_dir, mode,
+                                                 source_file_name)
+            output_source_file = os.path.join(self._output_dir, mode,
+                                              source_file_name)
+            self.CompareOutputFile(output_source_file, canonical_source_file)
+        else:
+            self.Error("No such file_type: %s" % file_type)
 
     def CompareOutputFile(self, output_file, canonical_file):
         """Compares a given file and the corresponding one under canonical_dir.
