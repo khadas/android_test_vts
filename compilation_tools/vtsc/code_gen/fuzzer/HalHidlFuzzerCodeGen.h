@@ -28,23 +28,24 @@ namespace vts {
 // Generates fuzzer code for HIDL HALs.
 class HalHidlFuzzerCodeGen : public FuzzerCodeGenBase {
  public:
-  HalHidlFuzzerCodeGen(const ComponentSpecificationMessage &comp_spec,
-                       const string &output_cpp_prefix)
-      : FuzzerCodeGenBase(comp_spec, output_cpp_prefix) {}
+  HalHidlFuzzerCodeGen(const ComponentSpecificationMessage &comp_spec)
+      : FuzzerCodeGenBase(comp_spec) {}
 
-  void GenerateBuildFile(Formatter &out) override;
   void GenerateSourceIncludeFiles(Formatter &out) override;
   void GenerateUsingDeclaration(Formatter &out) override;
-  void GenerateReturnCallback(
-      Formatter &out, const FunctionSpecificationMessage &func_spec) override;
-  void GenerateLLVMFuzzerTestOneInput(
-      Formatter &out, const FunctionSpecificationMessage &func_spec) override;
-  string GetFuzzerBinaryName(
-      const FunctionSpecificationMessage &func_spec) override;
-  string GetFuzzerSourceName(
-      const FunctionSpecificationMessage &func_spec) override;
+  void GenerateGlobalVars(Formatter &out) override;
+  void GenerateLLVMFuzzerInitialize(Formatter &out) override;
+  void GenerateLLVMFuzzerTestOneInput(Formatter &out) override;
 
  private:
+  // Generates return callback function for HAL function being fuzzed.
+  void GenerateReturnCallback(Formatter &out,
+                              const FunctionSpecificationMessage &func_spec);
+  // Generates function call.
+  void GenerateHalFunctionCall(Formatter &out,
+                               const FunctionSpecificationMessage &func_spec);
+  // Returns name of pointer to hal instance.
+  string GetHalPointerName();
   // Returns true iff callback can be omitted.
   bool CanElideCallback(const FunctionSpecificationMessage &func_spec);
   // Returns a vector of strings containing type names of function arguments.
