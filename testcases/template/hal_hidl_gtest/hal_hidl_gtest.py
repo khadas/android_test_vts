@@ -142,6 +142,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if not self._skip_all_testcases:
             if self._cpu_freq:
                 self._cpu_freq.EnableCpuScaling()
+
         super(HidlHalGTest, self).tearDownClass()
 
 
