@@ -26,45 +26,26 @@ using std::string;
 namespace android {
 namespace vts {
 
-void FuzzerCodeGenBase::GenerateAll() {
-  // Generate one source file per API function.
-  for (const auto &func_spec : comp_spec_.interface().api()) {
-    // Don't fuzz functions with no arguments.
-    if (func_spec.arg_size() == 0) {
-      continue;
-    }
-
-    string output_cpp_file =
-        output_dir_ + "/" + GetFuzzerSourceName(func_spec) + ".cpp";
-    FILE *source_file = fopen(output_cpp_file.c_str(), "w");
-    if (source_file == NULL) {
-      cerr << __PRETTY_FUNCTION__ << " could not open file" << output_cpp_file
-           << endl;
-      exit(-1);
-    }
-    Formatter source_out(source_file);
-    GenerateSourceFile(source_out, func_spec);
-  }
-
-  // Generate Android.bp file.
-  string output_build_file = output_dir_ + "/" + "Android.bp";
-  FILE *build_file = fopen(output_build_file.c_str(), "w");
-  if (build_file == NULL) {
-    cerr << "could not open file " << output_build_file << endl;
-    exit(-1);
-  }
-  Formatter build_out(build_file);
-  GenerateBuildFile(build_out);
+void FuzzerCodeGenBase::GenerateAll(Formatter & /* header_out */,
+                                    Formatter &source_out) {
+  GenerateSourceFile(source_out);
 }
 
-void FuzzerCodeGenBase::GenerateSourceFile(
-    Formatter &out, const FunctionSpecificationMessage &func_spec) {
+void FuzzerCodeGenBase::GenerateHeaderFile(Formatter & /* out */) {
+  cout << "Headers are not generated for fuzzer." << endl;
+}
+
+void FuzzerCodeGenBase::GenerateSourceFile(Formatter &out) {
+  if (!comp_spec_.has_interface()) {
+    return;
+  }
   GenerateWarningComment(out);
   GenerateSourceIncludeFiles(out);
   GenerateUsingDeclaration(out);
-  GenerateReturnCallback(out, func_spec);
   GenerateOpenNameSpaces(out);
-  GenerateLLVMFuzzerTestOneInput(out, func_spec);
+  GenerateGlobalVars(out);
+  GenerateLLVMFuzzerInitialize(out);
+  GenerateLLVMFuzzerTestOneInput(out);
   GenerateCloseNameSpaces(out);
 }
 

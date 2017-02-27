@@ -23,8 +23,6 @@
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
-using std::string;
-
 namespace android {
 namespace vts {
 
@@ -34,38 +32,29 @@ namespace vts {
 // All fuzzer code generators should derive from this class.
 class FuzzerCodeGenBase {
  public:
-  FuzzerCodeGenBase(const ComponentSpecificationMessage &comp_spec,
-                    const string &output_cpp_prefix)
-      : comp_spec_(comp_spec), output_dir_(output_cpp_prefix) {}
+  FuzzerCodeGenBase(const ComponentSpecificationMessage &comp_spec)
+      : comp_spec_(comp_spec) {}
 
   virtual ~FuzzerCodeGenBase(){};
 
   // Generates all files.
-  void GenerateAll();
-  // Generates fuzzer source file for the given function.
-  void GenerateSourceFile(Formatter &out,
-                          const FunctionSpecificationMessage &func_spec);
-  // Generate Android.bp file with build rules for all fuzzers.
-  virtual void GenerateBuildFile(Formatter &out) = 0;
+  void GenerateAll(Formatter &header_out, Formatter &source_out);
+  // Generates fuzzer header file.
+  void GenerateHeaderFile(Formatter &out);
+  // Generates fuzzer source file.
+  void GenerateSourceFile(Formatter &out);
 
  protected:
   // Generates "#include" declarations.
   virtual void GenerateSourceIncludeFiles(Formatter &out) = 0;
   // Generates "using" declarations.
   virtual void GenerateUsingDeclaration(Formatter &out) = 0;
-  // Generates return callback function for HAL function being fuzzed.
-  virtual void GenerateReturnCallback(
-      Formatter &out, const FunctionSpecificationMessage &func_spec) = 0;
+  // Generates global variable declarations.
+  virtual void GenerateGlobalVars(Formatter &out) = 0;
+  // Generates definition of LLVMFuzzerInitialize function.
+  virtual void GenerateLLVMFuzzerInitialize(Formatter &out) = 0;
   // Generates definition of LLVMFuzzerTestOneInput function.
-  virtual void GenerateLLVMFuzzerTestOneInput(
-      Formatter &out, const FunctionSpecificationMessage &func_spec) = 0;
-  // Returns name of executable of the fuzzer.
-  virtual string GetFuzzerBinaryName(
-      const FunctionSpecificationMessage &func_spec) = 0;
-  // Returns name of source file of the fuzzer.
-  virtual string GetFuzzerSourceName(
-      const FunctionSpecificationMessage &func_spec) = 0;
-
+  virtual void GenerateLLVMFuzzerTestOneInput(Formatter &out) = 0;
   virtual void GenerateOpenNameSpaces(Formatter &out);
   virtual void GenerateCloseNameSpaces(Formatter &out);
 
@@ -74,8 +63,6 @@ class FuzzerCodeGenBase {
 
   // Contains all information about the component.
   const ComponentSpecificationMessage &comp_spec_;
-  // All generated file names will be prefixed with this string.
-  string output_dir_;
 };
 
 }  // namespace vts
