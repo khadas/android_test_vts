@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef __VTS_HAL_HIDL_TARGET_BASE_TEST_H
+#define __VTS_HAL_HIDL_TARGET_BASE_TEST_H
+
 #include <gtest/gtest.h>
 #include <hidl/HidlSupport.h>
 #include <utils/RefBase.h>
@@ -24,7 +27,7 @@ namespace testing {
 
 using ::android::sp;
 
-// VTS target side gtest template
+// VTS target side test template
 class VtsHalHidlTargetBaseTest : public ::testing::Test {
  public:
   /*
@@ -66,3 +69,6 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
 };
 
 }  // namespace testing
+
+
+#endif  // __VTS_HAL_HIDL_TARGET_BASE_TEST_H
