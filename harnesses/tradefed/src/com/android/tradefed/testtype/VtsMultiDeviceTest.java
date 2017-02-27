@@ -89,6 +89,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
     static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
     static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
+    static final String BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
@@ -256,6 +257,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
     @Option(name = "binary-test-disable-framework", description = "Adb stop/start before/after test.")
     private boolean mBinaryTestDisableFramework = false;
+
+    @Option(name = "binary-test-stop-native-servers",
+            description = "Set to stop all properly configured native servers during the testing.")
+    private boolean mBinaryTestStopNativeServers = false;
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -633,40 +638,52 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         }
 
         if (mPreconditionFeature != null) {
-          jsonObject.put(PRECONDITION_FEATURE, mPreconditionFeature);
-          CLog.i("Added %s to the Json object", PRECONDITION_FEATURE);
+            jsonObject.put(PRECONDITION_FEATURE, mPreconditionFeature);
+            CLog.i("Added %s to the Json object", PRECONDITION_FEATURE);
         }
 
         if (mPreconditionFilePathPrefix != null) {
-          jsonObject.put(PRECONDITION_FILE_PATH_PREFIX, mPreconditionFilePathPrefix);
-          CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
+            jsonObject.put(PRECONDITION_FILE_PATH_PREFIX, mPreconditionFilePathPrefix);
+            CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
         }
 
         if (mPreconditionLshal != null) {
-          jsonObject.put(PRECONDITION_LSHAL, mPreconditionLshal);
-          CLog.i("Added %s to the Json object", PRECONDITION_LSHAL);
+            jsonObject.put(PRECONDITION_LSHAL, mPreconditionLshal);
+            CLog.i("Added %s to the Json object", PRECONDITION_LSHAL);
         }
 
         if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
-          jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
-                  new JSONArray(mBinaryTestProfilingLibraryPaths));
-          CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
+            jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
+                    new JSONArray(mBinaryTestProfilingLibraryPaths));
+            CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
+        }
+
+        if (mBinaryTestType.equals(BINARY_TEST_TYPE_HAL_HIDL_GTEST)) {
+            CLog.i("Set flags to stop the framework and native servers for %s",
+                   BINARY_TEST_TYPE_HAL_HIDL_GTEST);
+            mBinaryTestDisableFramework = true;
+            mBinaryTestStopNativeServers = true;
         }
 
         if (mBinaryTestDisableFramework) {
-          jsonObject.put(BINARY_TEST_DISABLE_FRAMEWORK, mBinaryTestDisableFramework);
-          CLog.i("Added %s to the Json object", BINARY_TEST_DISABLE_FRAMEWORK);
+            jsonObject.put(BINARY_TEST_DISABLE_FRAMEWORK, mBinaryTestDisableFramework);
+            CLog.i("Added %s to the Json object", BINARY_TEST_DISABLE_FRAMEWORK);
+        }
+
+        if (mBinaryTestStopNativeServers) {
+            jsonObject.put(BINARY_TEST_STOP_NATIVE_SERVERS, mBinaryTestStopNativeServers);
+            CLog.i("Added %s to the Json object", BINARY_TEST_STOP_NATIVE_SERVERS);
         }
 
         if (!mHalHidlReplayTestTracePaths.isEmpty()) {
-          jsonObject.put(HAL_HIDL_REPLAY_TEST_TRACE_PATHS,
-                  new JSONArray(mHalHidlReplayTestTracePaths));
-          CLog.i("Added %s to the Json object", HAL_HIDL_REPLAY_TEST_TRACE_PATHS);
+            jsonObject.put(HAL_HIDL_REPLAY_TEST_TRACE_PATHS,
+                    new JSONArray(mHalHidlReplayTestTracePaths));
+            CLog.i("Added %s to the Json object", HAL_HIDL_REPLAY_TEST_TRACE_PATHS);
         }
 
         if (mHalHidlPackageName != null) {
-          jsonObject.put(HAL_HIDL_PACKAGE_NAME, mHalHidlPackageName);
-          CLog.i("Added %s to the Json object", SYSTRACE_PROCESS_NAME);
+            jsonObject.put(HAL_HIDL_PACKAGE_NAME, mHalHidlPackageName);
+            CLog.i("Added %s to the Json object", SYSTRACE_PROCESS_NAME);
         }
 
         if (mSystraceProcessName != null) {
