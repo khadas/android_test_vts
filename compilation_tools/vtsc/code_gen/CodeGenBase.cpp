@@ -81,22 +81,6 @@ void Translate(VtsCompileMode mode,
 
   vts_fs_mkdirs(&output_header_file_path[0], 0777);
 
-  if (mode == kFuzzer) {
-    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
-    switch (message.component_class()) {
-      case HAL_HIDL:
-        fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(
-            message, output_cpp_file_path_str);
-        break;
-      default:
-        cerr << "not yet supported component_class "
-             << message.component_class();
-        exit(-1);
-    }
-    fuzzer_generator->GenerateAll();
-    return;
-  }
-
   FILE* header_file = fopen(output_header_file_path.c_str(), "w");
   if (header_file == NULL) {
     cerr << "could not open file " << output_header_file_path;
@@ -111,20 +95,7 @@ void Translate(VtsCompileMode mode,
   }
   Formatter source_out(source_file);
 
-  if (mode == kProfiler) {
-    unique_ptr<ProfilerCodeGenBase> profiler_generator;
-    switch (message.component_class()) {
-      case HAL_HIDL:
-        profiler_generator.reset(
-            new HalHidlProfilerCodeGen(input_vts_file_path));
-        break;
-      default:
-        cerr << "not yet supported component_class "
-             << message.component_class();
-        exit(-1);
-    }
-    profiler_generator->GenerateAll(header_out, source_out, message);
-  } else if (mode == kDriver) {
+  if (mode == kDriver) {
     unique_ptr<CodeGenBase> code_generator;
     switch (message.component_class()) {
       case HAL_CONVENTIONAL:
@@ -151,6 +122,31 @@ void Translate(VtsCompileMode mode,
         exit(-1);
     }
     code_generator->GenerateAll(header_out, source_out, message);
+  } else if (mode == kFuzzer) {
+    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(message);
+        break;
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    fuzzer_generator->GenerateAll(header_out, source_out);
+  } else if (mode == kProfiler) {
+    unique_ptr<ProfilerCodeGenBase> profiler_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        profiler_generator.reset(
+            new HalHidlProfilerCodeGen(input_vts_file_path));
+        break;
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    profiler_generator->GenerateAll(header_out, source_out, message);
   }
 }
 
@@ -170,26 +166,6 @@ void TranslateToFile(VtsCompileMode mode,
     cerr << __func__ << " can't parse " << input_vts_file_path << endl;
   }
 
-  if (mode == kFuzzer) {
-    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
-    switch (message.component_class()) {
-      case HAL_HIDL:
-        {
-          size_t found = output_cpp_file_path_str.find_last_of("/\\");
-          string output_dir = output_cpp_file_path_str.substr(0, found);
-          fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(
-              message, output_dir);
-          break;
-        }
-      default:
-        cerr << "not yet supported component_class "
-             << message.component_class();
-        exit(-1);
-    }
-    fuzzer_generator->GenerateAll();
-    return;
-  }
-
   FILE* output_file = fopen(output_file_path, "w");
   if (output_file == NULL) {
     cerr << __func__ << " could not open file " << output_file_path << endl;
@@ -197,27 +173,7 @@ void TranslateToFile(VtsCompileMode mode,
   }
   Formatter out(output_file);
 
-  if (mode == kProfiler) {
-    unique_ptr<ProfilerCodeGenBase> profiler_generator;
-    switch (message.component_class()) {
-      case HAL_HIDL:
-        profiler_generator.reset(
-            new HalHidlProfilerCodeGen(input_vts_file_path));
-        break;
-      default:
-        cerr << "not yet supported component_class "
-             << message.component_class();
-        exit(-1);
-    }
-    if (file_type == kHeader) {
-      profiler_generator->GenerateHeaderFile(out, message);
-    } else if (file_type == kSource){
-      profiler_generator->GenerateSourceFile(out, message);
-    } else {
-      cerr << __func__ << " doesn't support file_type = kBoth." << endl;
-      exit(-1);
-    }
-  } else if (mode == kDriver) {
+  if (mode == kDriver) {
     unique_ptr<CodeGenBase> code_generator;
     switch (message.component_class()) {
       case HAL_CONVENTIONAL:
@@ -247,6 +203,47 @@ void TranslateToFile(VtsCompileMode mode,
       code_generator->GenerateHeaderFile(out, message);
     } else if (file_type == kSource){
       code_generator->GenerateSourceFile(out, message);
+    } else {
+      cerr << __func__ << " doesn't support file_type = kBoth." << endl;
+      exit(-1);
+    }
+  } else if (mode == kFuzzer) {
+    unique_ptr<FuzzerCodeGenBase> fuzzer_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        {
+          fuzzer_generator = make_unique<HalHidlFuzzerCodeGen>(message);
+          break;
+        }
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    if (file_type == kHeader) {
+      fuzzer_generator->GenerateHeaderFile(out);
+    } else if (file_type == kSource){
+      fuzzer_generator->GenerateSourceFile(out);
+    } else {
+      cerr << __func__ << " doesn't support file_type = kBoth." << endl;
+      exit(-1);
+    }
+  } else if (mode == kProfiler) {
+    unique_ptr<ProfilerCodeGenBase> profiler_generator;
+    switch (message.component_class()) {
+      case HAL_HIDL:
+        profiler_generator.reset(
+            new HalHidlProfilerCodeGen(input_vts_file_path));
+        break;
+      default:
+        cerr << "not yet supported component_class "
+             << message.component_class();
+        exit(-1);
+    }
+    if (file_type == kHeader) {
+      profiler_generator->GenerateHeaderFile(out, message);
+    } else if (file_type == kSource){
+      profiler_generator->GenerateSourceFile(out, message);
     } else {
       cerr << __func__ << " doesn't support file_type = kBoth." << endl;
       exit(-1);
