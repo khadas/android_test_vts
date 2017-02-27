@@ -43,7 +43,13 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         DEVICE_TMP_DIR: string, temp location for storing binary
         TAG_DELIMITER: string, separator used to separate tag and path
         _skip_all_testcases: boolean - True to skip all test cases.
+        SYSPROP_VTS_NATIVE_SERVER: string, the name of a system property which
+                                   tells whether to stop properly configured
+                                   native servers where properly configured
+                                   means a server's init.rc is configured to
+                                   stop when that property's value is 1.
     '''
+    SYSPROP_VTS_NATIVE_SERVER = "vts.native_server.on"
 
     DEVICE_TMP_DIR = '/data/local/tmp'
     TAG_DELIMITER = '::'
@@ -68,6 +74,7 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATHS,
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS,
             keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
+            keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -165,6 +172,12 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
                    False):
             self._dut.stop()
 
+        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                   False):
+            # Stops all (properly configured) native servers.
+            results = self._dut.setProp(
+                self.SYSPROP_VTS_NATIVE_SERVER, "1")
+
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
         source_list = list(map(self.ParseTestSource, self.binary_test_sources))
@@ -235,6 +248,12 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def tearDownClass(self):
         '''Perform clean-up tasks'''
+        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                   False):
+            # Restarts all (properly configured) native servers.
+            results = self._dut.setProp(
+                self.SYSPROP_VTS_NATIVE_SERVER, "0")
+
         # Restart Android runtime.
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
