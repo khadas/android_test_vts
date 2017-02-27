@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Serving Plan for HIDL HAL Systracing (Staging)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
@@ -23,5 +23,4 @@
   <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
   <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>
