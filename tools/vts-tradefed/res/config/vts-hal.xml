@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS HAL Test Plan">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts" />
 
@@ -24,5 +24,4 @@
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

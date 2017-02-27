@@ -14,11 +14,10 @@
      limitations under the License.
 -->
 <configuration description="VTS Camera ITS (Image Test Suite) Test Plan">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
   <option name="compatibility:include-filter" value="CameraITSTest" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

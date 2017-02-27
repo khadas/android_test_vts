@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Performance Profiling Plan">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
@@ -29,5 +29,4 @@
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>
