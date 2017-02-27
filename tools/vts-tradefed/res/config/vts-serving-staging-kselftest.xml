@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Serving Plan for Linux kselftest (Staging)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts" />
 
@@ -22,5 +22,4 @@
   <option name="compatibility:include-filter" value="LinuxKselftestTest" />
   <option name="compatibility:include-filter" value="LinuxKselftestTestStaging" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

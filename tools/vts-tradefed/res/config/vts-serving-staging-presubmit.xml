@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Serving Plan for Presubmit (Staging)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
@@ -38,5 +38,4 @@
   <!-- option name="compatibility:include-filter" value="LibcTest" / -->
   <!-- option name="compatibility:include-filter" value="SyscallExistenceTest" / -->
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

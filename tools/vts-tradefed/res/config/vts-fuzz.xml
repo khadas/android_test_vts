@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Fuzz Test Plan">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
@@ -23,5 +23,4 @@
   <option name="compatibility:include-filter" value="IPowerIfaceFuzzTest" />
   <option name="compatibility:include-filter" value="ISensorsIfaceFuzzTest" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>
