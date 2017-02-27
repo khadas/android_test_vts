@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS GCE (Google Compute Engine) Test Plan (Experimental)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="gce-device" value="true" />
 
   <build_provider class="com.google.android.tradefed.build.DeviceLaunchControlProvider">
@@ -35,5 +35,4 @@
 
   <option name="compatibility:include-filter" value="SampleShellTest" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

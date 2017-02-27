@@ -14,11 +14,10 @@
      limitations under the License.
 -->
 <configuration description="VTS VNDK (Vendor NDK) Test Plan (Staging)">
-    <include name="everything" />
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts" />
+  <include name="vts-base" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts" />
 
-    <option name="compatibility:include-filter" value="VtsVndkDependencyTest" />
+  <option name="compatibility:include-filter" value="VtsVndkDependencyTest" />
 
-    <template-include name="reporters" default="basic-reporters" />
 </configuration>

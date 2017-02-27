@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Serving Plan for Coverage (Staging)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
@@ -37,5 +37,4 @@
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>

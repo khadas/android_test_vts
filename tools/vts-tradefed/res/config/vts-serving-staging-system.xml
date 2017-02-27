@@ -14,12 +14,11 @@
      limitations under the License.
 -->
 <configuration description="VTS Serving Plan for System (Staging)">
-  <include name="everything" />
+  <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
   <option name="compatibility:include-filter" value="CameraITSTest" />
   <option name="compatibility:include-filter" value="MemorySystemStressTest" />
 
-  <template-include name="reporters" default="basic-reporters" />
 </configuration>
