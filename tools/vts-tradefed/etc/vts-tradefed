@@ -90,8 +90,7 @@ for JAR in $JARS; do
 done
 
 # to run in the lab.
-OPTIONAL_JARS="
-  android-vts/tools/google-tradefed-vts-prebuilt"
+OPTIONAL_JARS=""
 
 for JAR in $OPTIONAL_JARS; do
     if [ -f "${VTS_ROOT}/${JAR}.jar" ]; then
