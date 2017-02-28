@@ -18,7 +18,7 @@ namespace vts {
 
 static string target_func;
 
-extern "C" int LLVMFuzzerTestInitialize(int *argc, char ***argv) {
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
     FuncFuzzerParams params{ExtractFuncFuzzerParams(*argc, *argv)};
     target_func = params.target_func_;
     return 0;
@@ -1010,7 +1010,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "allocationGetPointer") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0, auto arg1){};
+        auto hidl_cb = [](void* arg0, uint64_t arg1){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
@@ -1044,7 +1044,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "elementGetNativeMetadata") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0){};
+        auto hidl_cb = [](const ::android::hardware::hidl_vec<uint32_t>& arg0){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
@@ -1057,7 +1057,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "elementGetSubElements") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0, auto arg1, auto arg2){};
+        auto hidl_cb = [](const ::android::hardware::hidl_vec<uint64_t>& arg0, const ::android::hardware::hidl_vec<::android::hardware::hidl_string>& arg1, const ::android::hardware::hidl_vec<uint64_t>& arg2){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
@@ -1132,7 +1132,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "typeGetNativeMetadata") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0){};
+        auto hidl_cb = [](const ::android::hardware::hidl_vec<uint64_t>& arg0){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
@@ -1200,7 +1200,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "contextGetMessage") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0, auto arg1){};
+        auto hidl_cb = [](::android::hardware::renderscript::V1_0::MessageToClientType arg0, uint64_t arg1){};
 
         size_t type_size0 = sizeof(void*);
         if (size < type_size0) { return 0; }
@@ -1220,7 +1220,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "contextPeekMessage") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0, auto arg1, auto arg2){};
+        auto hidl_cb = [](::android::hardware::renderscript::V1_0::MessageToClientType arg0, uint64_t arg1, uint32_t arg2){};
 
         renderscript->contextPeekMessage(hidl_cb);
         return 0;
@@ -1292,7 +1292,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "getName") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0){};
+        auto hidl_cb = [](const ::android::hardware::hidl_string& arg0){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
@@ -1999,7 +1999,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         return 0;
     } else if (target_func == "scriptGetVarV") {
         // No-op. Only need this to make HAL function call.
-        auto hidl_cb = [](auto arg0){};
+        auto hidl_cb = [](const ::android::hardware::hidl_vec<uint8_t>& arg0){};
 
         size_t type_size0 = sizeof(uint64_t);
         if (size < type_size0) { return 0; }
