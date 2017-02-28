@@ -15,9 +15,9 @@
 # limitations under the License.
 
 function vts_multidevice_create_image {
+  rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/automotive/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/nfc/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/sensors/ -rf
-  rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vehicle/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vibrator/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/vr/ -rf
   rm ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/tv_cec/ -rf
@@ -26,9 +26,9 @@ function vts_multidevice_create_image {
   cd ${ANDROID_BUILD_TOP}/test/vts; mma -j 32 && cd ${ANDROID_BUILD_TOP}; make vts adb -j 32
   mkdir ${ANDROID_BUILD_TOP}/test/vts/testcases/hal -p
   touch ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/__init__.py
+  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/automotive ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/nfc ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/sensors ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
-  cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vehicle ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vibrator ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/vr ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
   cp ${ANDROID_BUILD_TOP}/test/vts-testcase/hal/tv ${ANDROID_BUILD_TOP}/test/vts/testcases/hal/ -rf
