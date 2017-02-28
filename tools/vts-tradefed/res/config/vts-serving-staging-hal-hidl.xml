@@ -21,7 +21,7 @@
   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" />
+  <!-- option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" / --><!-- not supported in O -->
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4Target" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Host" /><!-- need runtime stopped -->
   <!-- option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" / -->
