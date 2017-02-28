@@ -21,6 +21,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.audio.common.vts.driver@2.0 \
   android.hardware.audio.effect.vts.driver@2.0 \
   android.hardware.automotive.vehicle.vts.driver@2.0 \
+  android.hardware.automotive.vehicle.vts.driver@2.1 \
   android.hardware.biometrics.fingerprint.vts.driver@2.1 \
   android.hardware.bluetooth.vts.driver@1.0 \
   android.hardware.boot.vts.driver@1.0 \
@@ -65,6 +66,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.audio.common@2.0-vts.profiler \
   android.hardware.audio.effect@2.0-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
+  android.hardware.automotive.vehicle@2.1-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
   android.hardware.bluetooth@1.0-vts.profiler \
   android.hardware.boot@1.0-vts.profiler \
