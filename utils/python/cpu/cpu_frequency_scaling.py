@@ -136,7 +136,7 @@ class CpuFrequencyScalingController(object):
         if throttling and retry_delay_secs > 0:
             logging.info("Wait for %s seconds for the target to cool down.",
                          retry_delay_secs)
-            time.delay(retry_delay_secs)
+            time.sleep(retry_delay_secs)
             throttling = self.IsUnderThermalThrottling()
         asserts.skipIf(throttling, "Thermal throttling")
 
