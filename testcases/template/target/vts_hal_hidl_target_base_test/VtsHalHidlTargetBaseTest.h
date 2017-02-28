@@ -33,7 +33,7 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
   /*
    * Get value of system property as string on target
    */
-  static const std::string PropertyGet(const char* name);
+  static std::string PropertyGet(const char* name);
 
   /*
    * Call interface's getService and use passthrough mode if set from host.
