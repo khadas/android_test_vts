@@ -24,7 +24,7 @@ from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 from vts.utils.python.coverage.parser import FileFormatError
 
-TARGET_COVERAGE_PATH = "/data/local/tmp/"
+TARGET_COVERAGE_PATH = "/data/misc/gcov/"
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"
 
 GCNO_SUFFIX = ".gcno"
