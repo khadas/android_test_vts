@@ -55,6 +55,7 @@ class CpuFrequencyScalingController(object):
                 self._theoretical_max_frequency[cpu_no] = results[
                     const.STDOUT][0].split()[-1].strip()
             else:
+                self._theoretical_max_frequency[cpu_no] = None
                 logging.warn("cpufreq/scaling_available_frequencies for cpu %s"
                              " not set.", cpu_no)
         self._init = True
@@ -119,7 +120,8 @@ class CpuFrequencyScalingController(object):
                     "CPU%s: Configurable max frequency %s != current frequency %s",
                     cpu_no, configurable_max_frequency, current_frequency)
                 return True
-            if self._theoretical_max_frequency[cpu_no] != current_frequency:
+            if (self._theoretical_max_frequency[cpu_no] is not None and
+                self._theoretical_max_frequency[cpu_no] != current_frequency):
                 logging.error(
                     "CPU%s, Theoretical max frequency %s != scaling current frequency %s",
                     cpu_no, self._theoretical_max_frequency[cpu_no], current_frequency)
