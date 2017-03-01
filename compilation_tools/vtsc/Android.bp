@@ -21,6 +21,7 @@ cc_library_host_shared {
     srcs: [
         "VtsCompilerUtils.cpp",
         "code_gen/CodeGenBase.cpp",
+        "code_gen/common/HalHidlCodeGenUtils.cpp",
         "code_gen/driver/DriverCodeGenBase.cpp",
         "code_gen/driver/HalCodeGen.cpp",
         "code_gen/driver/HalSubmoduleCodeGen.cpp",
