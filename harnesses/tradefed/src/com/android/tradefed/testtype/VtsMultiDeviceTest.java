@@ -755,14 +755,17 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
         CommandResult commandResult = mRunUtil.runTimedCmd(mTestTimeout, cmd);
 
-        if (commandResult != null && commandResult.getStatus() !=
-                CommandStatus.SUCCESS) {
-            CLog.e("Python process failed");
-            CLog.e("Python path: %s", mPythonPath);
-            CLog.e("Stderr: %s", commandResult.getStderr());
-            CLog.e("Stdout: %s", commandResult.getStdout());
-            printVtsLogs(vtsRunnerLogDir);
-            throw new RuntimeException("Failed to run VTS test");
+        if (commandResult != null) {
+            CommandStatus commandStatus = commandResult.getStatus();
+            if (commandStatus != CommandStatus.SUCCESS
+                && commandStatus != CommandStatus.TIMED_OUT) {
+                CLog.e("Python process failed");
+                CLog.e("Python path: %s", mPythonPath);
+                CLog.e("Stderr: %s", commandResult.getStderr());
+                CLog.e("Stdout: %s", commandResult.getStdout());
+                printVtsLogs(vtsRunnerLogDir);
+                throw new RuntimeException("Failed to run VTS test");
+            }
         }
         if (commandResult != null){
             CLog.i("Standard output is: %s", commandResult.getStdout());
