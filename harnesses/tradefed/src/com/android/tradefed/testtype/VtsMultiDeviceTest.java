@@ -94,6 +94,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
     static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
     static final String BINARY_TEST_TYPE_HAL_HIDL_REPLAY_TEST = "hal_hidl_replay_test";
+    static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
@@ -110,6 +111,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
     static final String TEMPLATE_HAL_HIDL_GTEST_PATH = "vts/testcases/template/hal_hidl_gtest/hal_hidl_gtest";
     static final String TEMPLATE_HAL_HIDL_REPLAY_TEST_PATH = "vts/testcases/template/hal_hidl_replay_test/hal_hidl_replay_test";
+    static final String TEMPLATE_HOST_BINARY_TEST_PATH = "vts/testcases/template/host_binary_test/host_binary_test";
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -414,6 +416,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                         break;
                     case BINARY_TEST_TYPE_HAL_HIDL_GTEST:
                         template = TEMPLATE_HAL_HIDL_GTEST_PATH;
+                        break;
+                    case BINARY_TEST_TYPE_HOST_BINARY_TEST:
+                        template = TEMPLATE_HOST_BINARY_TEST_PATH;
                         break;
                     default:
                         template = TEMPLATE_BINARY_TEST_PATH;
