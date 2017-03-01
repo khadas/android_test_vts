@@ -16,6 +16,7 @@
 
 #include "HalHidlFuzzerCodeGen.h"
 #include "VtsCompilerUtils.h"
+#include "code_gen/common/HalHidlCodeGenUtils.h"
 #include "utils/InterfaceSpecUtil.h"
 #include "utils/StringUtil.h"
 
@@ -62,7 +63,7 @@ void HalHidlFuzzerCodeGen::GenerateGlobalVars(Formatter &out) {
 }
 
 void HalHidlFuzzerCodeGen::GenerateLLVMFuzzerInitialize(Formatter &out) {
-  out << "extern \"C\" int LLVMFuzzerTestInitialize(int *argc, char ***argv) "
+  out << "extern \"C\" int LLVMFuzzerInitialize(int *argc, char ***argv) "
          "{\n";
   out.indent();
   out << "FuncFuzzerParams params{ExtractFuncFuzzerParams(*argc, *argv)};\n";
@@ -102,7 +103,9 @@ void HalHidlFuzzerCodeGen::GenerateLLVMFuzzerTestOneInput(Formatter &out) {
 
 string HalHidlFuzzerCodeGen::GetHalPointerName() {
   string prefix = "android.hardware.";
-  return comp_spec_.package().substr(prefix.size());
+  string hal_pointer_name = comp_spec_.package().substr(prefix.size());
+  ReplaceSubString(hal_pointer_name, ".", "_");
+  return hal_pointer_name;
 }
 
 void HalHidlFuzzerCodeGen::GenerateReturnCallback(
@@ -114,7 +117,10 @@ void HalHidlFuzzerCodeGen::GenerateReturnCallback(
   out << "auto " << return_cb_name << " = [](";
   size_t num_cb_arg = func_spec.return_type_hidl_size();
   for (size_t i = 0; i < num_cb_arg; ++i) {
-    out << "auto arg" << i << ((i != num_cb_arg - 1) ? ", " : "");
+    const auto &return_val = func_spec.return_type_hidl(i);
+    out << GetCppVariableType(return_val, nullptr,
+                              IsConstType(return_val.type()));
+    out << " arg" << i << ((i != num_cb_arg - 1) ? ", " : "");
   }
   out << "){};\n\n";
 }
@@ -155,17 +161,18 @@ void HalHidlFuzzerCodeGen::GenerateHalFunctionCall(
 
 bool HalHidlFuzzerCodeGen::CanElideCallback(
     const FunctionSpecificationMessage &func_spec) {
-  // Can't elide callback for void or tuple-returning methods.
-  if (func_spec.return_type_hidl_size() > 1) {
+  if (func_spec.return_type_hidl_size() == 0) {
+    return true;
+  }
+  // Can't elide callback for void or tuple-returning methods
+  if (func_spec.return_type_hidl_size() != 1) {
     return false;
   }
-  if (func_spec.return_type_hidl_size() == 1 &&
-      func_spec.return_type_hidl(0).type() != TYPE_HIDL_INTERFACE &&
-      func_spec.return_type_hidl(0).type() != TYPE_SCALAR &&
-      func_spec.return_type_hidl(0).type() != TYPE_ENUM) {
+  const VariableType &type = func_spec.return_type_hidl(0).type();
+  if (type == TYPE_ARRAY || type == TYPE_VECTOR || type == TYPE_REF) {
     return false;
   }
-  return true;
+  return IsElidableType(type);
 }
 
 vector<string> HalHidlFuzzerCodeGen::GetFuncArgTypes(

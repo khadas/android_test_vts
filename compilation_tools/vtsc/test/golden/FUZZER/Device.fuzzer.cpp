@@ -18,7 +18,7 @@ namespace vts {
 
 static string target_func;
 
-extern "C" int LLVMFuzzerTestInitialize(int *argc, char ***argv) {
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
     FuncFuzzerParams params{ExtractFuncFuzzerParams(*argc, *argv)};
     target_func = params.target_func_;
     return 0;
