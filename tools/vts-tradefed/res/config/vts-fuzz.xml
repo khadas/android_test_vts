@@ -17,10 +17,4 @@
   <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
-
-  <!-- For HIDL HALs -->
-  <option name="compatibility:include-filter" value="ILightIfaceFuzzTest" />
-  <option name="compatibility:include-filter" value="IPowerIfaceFuzzTest" />
-  <option name="compatibility:include-filter" value="ISensorsIfaceFuzzTest" />
-
 </configuration>
