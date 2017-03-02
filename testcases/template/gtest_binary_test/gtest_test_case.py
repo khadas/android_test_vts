@@ -73,7 +73,7 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
         Args:
             output_file_path: string, intended path of output xml file
         """
-        output_file_path = os.path.normpath(output_file_path)
+        output_file_path = os.path.normpath(output_file_path.strip())
 
         if len(ntpath.basename(output_file_path)) > utils.MAX_FILENAME_LEN:
             logging.error(

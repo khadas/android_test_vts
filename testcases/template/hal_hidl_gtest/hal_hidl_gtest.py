@@ -36,7 +36,6 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         _dut: AndroidDevice, the device under test as config
         _skip_all_testcases: boolean - to skip all test cases. set when a target
                              device does not have a required HIDL service.
-        _passthrough_mode: boolean, used to toggle between passthrough/binderized mode.
     '''
 
     def setUpClass(self):
@@ -51,21 +50,16 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         ]
         self.getUserParams(opt_param_names=opt_params)
 
-        self._passthrough_mode = self.getUserParam(
-            keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
-        if self._passthrough_mode and self.testcases:
-            for test_case in self.testcases:
-                envp = '%s=true' % const.VTS_HAL_HIDL_GET_STUB
-                if test_case.envp:
-                    test_case.envp += ' %s' % envp
-                else:
-                    test_case.envp = envp
+        if self.getUserParam(
+                keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False):
+            self._EnablePassthroughMode()
 
         self._cpu_freq = None
         self._skip_all_testcases = False
 
-        hwbinder_service_name = str(getattr(
-            self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE, ""))
+        hwbinder_service_name = str(
+            getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
+                    ""))
         if hwbinder_service_name:
             if not hwbinder_service_name.startswith("android.hardware."):
                 logging.error("The given hwbinder service name %s is invalid.",
@@ -73,15 +67,15 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             else:
                 cmd_results = self.shell.Execute("ps -A")
                 hwbinder_service_name += "@"
-                if (any(cmd_results[const.EXIT_CODE])
-                    or hwbinder_service_name not in cmd_results[const.STDOUT][0]):
+                if (any(cmd_results[const.EXIT_CODE]) or hwbinder_service_name
+                        not in cmd_results[const.STDOUT][0]):
                     logging.warn("The required hwbinder service %s not found.",
                                  hwbinder_service_name)
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
-            feature = str(getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
+            feature = str(
+                getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
             if feature:
                 if not feature.startswith("android.hardware."):
                     logging.error(
@@ -89,15 +83,16 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                         feature)
                 else:
                     cmd_results = self.shell.Execute("pm list features")
-                    if (any(cmd_results[const.EXIT_CODE])
-                        or feature not in cmd_results[const.STDOUT][0]):
+                    if (any(cmd_results[const.EXIT_CODE]) or
+                            feature not in cmd_results[const.STDOUT][0]):
                         logging.warn("The required feature %s not found.",
                                      feature)
                         self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
-            file_path_prefix = str(getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
+            file_path_prefix = str(
+                getattr(self, keys.ConfigKeys.
+                        IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
             if file_path_prefix:
                 cmd_results = self.shell.Execute("ls %s*" % file_path_prefix)
                 if any(cmd_results[const.EXIT_CODE]):
@@ -106,18 +101,35 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
-            feature = str(getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
+            feature = str(
+                getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
             if feature:
                 cmd_results = self.shell.Execute("lshal -itpc")
                 if (feature not in cmd_results[const.STDOUT][0]):
-                    logging.warn("The required feature %s not found.",
-                                 feature)
+                    logging.warn("The required feature %s not found.", feature)
                     self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
-            self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(self._dut)
+            self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
+                self._dut)
             self._cpu_freq.DisableCpuScaling()
+
+    def _EnablePassthroughMode(self):
+        """Enable passthrough mode by setting getStub to true.
+
+        This funciton should be called after super class' setupClass method.
+        If called before setupClass, user_params will be changed in order to
+        trigger setupClass method to invoke this method again.
+        """
+        if self.testcases:
+            for test_case in self.testcases:
+                envp = ' %s=true' % const.VTS_HAL_HIDL_GET_STUB
+                test_case.envp += envp
+        else:
+            logging.warn('No test cases are defined yet. Maybe setupClass '
+                         'has not been called. Changing user_params to '
+                         'enable passthrough mode option.')
+            self.user_params[keys.ConfigKeys.IKEY_PASSTHROUGH_MODE] = True
 
     def setUpTest(self):
         """Skips the test case if thermal throttling lasts for 30 seconds."""

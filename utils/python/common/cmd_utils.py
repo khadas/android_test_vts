@@ -16,9 +16,9 @@
 import logging
 import subprocess
 
-STDOUT = 0
-STDERR = 1
-EXIT_CODE = 2
+STDOUT = 'stdouts'
+STDERR = 'stderrs'
+EXIT_CODE = 'return_codes'
 
 
 def RunCommand(command):
