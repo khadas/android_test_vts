@@ -3517,6 +3517,32 @@ public final class VtsReportMessage {
      */
     com.android.vts.proto.VtsReportMessage.SystraceReportMessageOrBuilder getSystraceOrBuilder(
         int index);
+
+    // optional .android.vts.HostLogMessage host_log = 101;
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    boolean hasHostLog();
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog();
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder();
   }
   /**
    * Protobuf type {@code android.vts.TestCaseReportMessage}
@@ -3621,6 +3647,19 @@ public final class VtsReportMessage {
                 mutable_bitField0_ |= 0x00000040;
               }
               systrace_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.SystraceReportMessage.PARSER, extensionRegistry));
+              break;
+            }
+            case 810: {
+              com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                subBuilder = hostLog_.toBuilder();
+              }
+              hostLog_ = input.readMessage(com.android.vts.proto.VtsReportMessage.HostLogMessage.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(hostLog_);
+                hostLog_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000010;
               break;
             }
           }
@@ -3928,6 +3967,40 @@ public final class VtsReportMessage {
       return systrace_.get(index);
     }
 
+    // optional .android.vts.HostLogMessage host_log = 101;
+    public static final int HOST_LOG_FIELD_NUMBER = 101;
+    private com.android.vts.proto.VtsReportMessage.HostLogMessage hostLog_;
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    public boolean hasHostLog() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog() {
+      return hostLog_;
+    }
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+     *
+     * <pre>
+     * host log for each test case.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder() {
+      return hostLog_;
+    }
+
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
       testResult_ = com.android.vts.proto.VtsReportMessage.TestCaseResult.UNKNOWN_RESULT;
@@ -3936,6 +4009,7 @@ public final class VtsReportMessage {
       coverage_ = java.util.Collections.emptyList();
       profiling_ = java.util.Collections.emptyList();
       systrace_ = java.util.Collections.emptyList();
+      hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -3969,6 +4043,9 @@ public final class VtsReportMessage {
       }
       for (int i = 0; i < systrace_.size(); i++) {
         output.writeMessage(42, systrace_.get(i));
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeMessage(101, hostLog_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -4006,6 +4083,10 @@ public final class VtsReportMessage {
       for (int i = 0; i < systrace_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(42, systrace_.get(i));
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(101, hostLog_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -4122,6 +4203,7 @@ public final class VtsReportMessage {
           getCoverageFieldBuilder();
           getProfilingFieldBuilder();
           getSystraceFieldBuilder();
+          getHostLogFieldBuilder();
         }
       }
       private static Builder create() {
@@ -4156,6 +4238,12 @@ public final class VtsReportMessage {
         } else {
           systraceBuilder_.clear();
         }
+        if (hostLogBuilder_ == null) {
+          hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+        } else {
+          hostLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -4226,6 +4314,14 @@ public final class VtsReportMessage {
           result.systrace_ = systrace_;
         } else {
           result.systrace_ = systraceBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        if (hostLogBuilder_ == null) {
+          result.hostLog_ = hostLog_;
+        } else {
+          result.hostLog_ = hostLogBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -4332,6 +4428,9 @@ public final class VtsReportMessage {
               systraceBuilder_.addAllMessages(other.systrace_);
             }
           }
+        }
+        if (other.hasHostLog()) {
+          mergeHostLog(other.getHostLog());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -5480,6 +5579,159 @@ public final class VtsReportMessage {
           systrace_ = null;
         }
         return systraceBuilder_;
+      }
+
+      // optional .android.vts.HostLogMessage host_log = 101;
+      private com.android.vts.proto.VtsReportMessage.HostLogMessage hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder> hostLogBuilder_;
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public boolean hasHostLog() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog() {
+        if (hostLogBuilder_ == null) {
+          return hostLog_;
+        } else {
+          return hostLogBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public Builder setHostLog(com.android.vts.proto.VtsReportMessage.HostLogMessage value) {
+        if (hostLogBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          hostLog_ = value;
+          onChanged();
+        } else {
+          hostLogBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public Builder setHostLog(
+          com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder builderForValue) {
+        if (hostLogBuilder_ == null) {
+          hostLog_ = builderForValue.build();
+          onChanged();
+        } else {
+          hostLogBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public Builder mergeHostLog(com.android.vts.proto.VtsReportMessage.HostLogMessage value) {
+        if (hostLogBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) == 0x00000080) &&
+              hostLog_ != com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance()) {
+            hostLog_ =
+              com.android.vts.proto.VtsReportMessage.HostLogMessage.newBuilder(hostLog_).mergeFrom(value).buildPartial();
+          } else {
+            hostLog_ = value;
+          }
+          onChanged();
+        } else {
+          hostLogBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000080;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public Builder clearHostLog() {
+        if (hostLogBuilder_ == null) {
+          hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+          onChanged();
+        } else {
+          hostLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000080);
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder getHostLogBuilder() {
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return getHostLogFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder() {
+        if (hostLogBuilder_ != null) {
+          return hostLogBuilder_.getMessageOrBuilder();
+        } else {
+          return hostLog_;
+        }
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 101;</code>
+       *
+       * <pre>
+       * host log for each test case.
+       * </pre>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder> 
+          getHostLogFieldBuilder() {
+        if (hostLogBuilder_ == null) {
+          hostLogBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder>(
+                  hostLog_,
+                  getParentForChildren(),
+                  isClean());
+          hostLog_ = null;
+        }
+        return hostLogBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:android.vts.TestCaseReportMessage)
@@ -9370,6 +9622,816 @@ public final class VtsReportMessage {
     // @@protoc_insertion_point(class_scope:android.vts.CoverageReportMessage)
   }
 
+  public interface HostLogMessageOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes url = 1;
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URLs of the produced host log
+     * </pre>
+     */
+    boolean hasUrl();
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URLs of the produced host log
+     * </pre>
+     */
+    com.google.protobuf.ByteString getUrl();
+
+    // optional bytes stdout = 11;
+    /**
+     * <code>optional bytes stdout = 11;</code>
+     *
+     * <pre>
+     * Stdout of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    boolean hasStdout();
+    /**
+     * <code>optional bytes stdout = 11;</code>
+     *
+     * <pre>
+     * Stdout of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    com.google.protobuf.ByteString getStdout();
+
+    // optional bytes stderr = 12;
+    /**
+     * <code>optional bytes stderr = 12;</code>
+     *
+     * <pre>
+     * Stderr of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    boolean hasStderr();
+    /**
+     * <code>optional bytes stderr = 12;</code>
+     *
+     * <pre>
+     * Stderr of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    com.google.protobuf.ByteString getStderr();
+
+    // optional int32 ret = 13;
+    /**
+     * <code>optional int32 ret = 13;</code>
+     *
+     * <pre>
+     * Return code for a test case. This field should only be used for
+     * per-test-case log message
+     * </pre>
+     */
+    boolean hasRet();
+    /**
+     * <code>optional int32 ret = 13;</code>
+     *
+     * <pre>
+     * Return code for a test case. This field should only be used for
+     * per-test-case log message
+     * </pre>
+     */
+    int getRet();
+  }
+  /**
+   * Protobuf type {@code android.vts.HostLogMessage}
+   *
+   * <pre>
+   * To specify host log report. This can be used either for per-test-module
+   * log message or per-test-case log message.
+   * </pre>
+   */
+  public static final class HostLogMessage extends
+      com.google.protobuf.GeneratedMessage
+      implements HostLogMessageOrBuilder {
+    // Use HostLogMessage.newBuilder() to construct.
+    private HostLogMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private HostLogMessage(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final HostLogMessage defaultInstance;
+    public static HostLogMessage getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public HostLogMessage getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private HostLogMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              url_ = input.readBytes();
+              break;
+            }
+            case 90: {
+              bitField0_ |= 0x00000002;
+              stdout_ = input.readBytes();
+              break;
+            }
+            case 98: {
+              bitField0_ |= 0x00000004;
+              stderr_ = input.readBytes();
+              break;
+            }
+            case 104: {
+              bitField0_ |= 0x00000008;
+              ret_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_HostLogMessage_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_HostLogMessage_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.android.vts.proto.VtsReportMessage.HostLogMessage.class, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<HostLogMessage> PARSER =
+        new com.google.protobuf.AbstractParser<HostLogMessage>() {
+      public HostLogMessage parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new HostLogMessage(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<HostLogMessage> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes url = 1;
+    public static final int URL_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString url_;
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URLs of the produced host log
+     * </pre>
+     */
+    public boolean hasUrl() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URLs of the produced host log
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getUrl() {
+      return url_;
+    }
+
+    // optional bytes stdout = 11;
+    public static final int STDOUT_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString stdout_;
+    /**
+     * <code>optional bytes stdout = 11;</code>
+     *
+     * <pre>
+     * Stdout of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    public boolean hasStdout() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes stdout = 11;</code>
+     *
+     * <pre>
+     * Stdout of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getStdout() {
+      return stdout_;
+    }
+
+    // optional bytes stderr = 12;
+    public static final int STDERR_FIELD_NUMBER = 12;
+    private com.google.protobuf.ByteString stderr_;
+    /**
+     * <code>optional bytes stderr = 12;</code>
+     *
+     * <pre>
+     * Stderr of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    public boolean hasStderr() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes stderr = 12;</code>
+     *
+     * <pre>
+     * Stderr of host log. Caution: do not put too much log in protobuf message,
+     * as bigtable recommends &lt; 10 mb for each record cell
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getStderr() {
+      return stderr_;
+    }
+
+    // optional int32 ret = 13;
+    public static final int RET_FIELD_NUMBER = 13;
+    private int ret_;
+    /**
+     * <code>optional int32 ret = 13;</code>
+     *
+     * <pre>
+     * Return code for a test case. This field should only be used for
+     * per-test-case log message
+     * </pre>
+     */
+    public boolean hasRet() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int32 ret = 13;</code>
+     *
+     * <pre>
+     * Return code for a test case. This field should only be used for
+     * per-test-case log message
+     * </pre>
+     */
+    public int getRet() {
+      return ret_;
+    }
+
+    private void initFields() {
+      url_ = com.google.protobuf.ByteString.EMPTY;
+      stdout_ = com.google.protobuf.ByteString.EMPTY;
+      stderr_ = com.google.protobuf.ByteString.EMPTY;
+      ret_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, url_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(11, stdout_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(12, stderr_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(13, ret_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, url_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, stdout_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(12, stderr_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(13, ret_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.HostLogMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.android.vts.proto.VtsReportMessage.HostLogMessage prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code android.vts.HostLogMessage}
+     *
+     * <pre>
+     * To specify host log report. This can be used either for per-test-module
+     * log message or per-test-case log message.
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_HostLogMessage_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_HostLogMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.android.vts.proto.VtsReportMessage.HostLogMessage.class, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder.class);
+      }
+
+      // Construct using com.android.vts.proto.VtsReportMessage.HostLogMessage.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        url_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        stdout_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        stderr_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        ret_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_HostLogMessage_descriptor;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage getDefaultInstanceForType() {
+        return com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+      }
+
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage build() {
+        com.android.vts.proto.VtsReportMessage.HostLogMessage result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage buildPartial() {
+        com.android.vts.proto.VtsReportMessage.HostLogMessage result = new com.android.vts.proto.VtsReportMessage.HostLogMessage(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.url_ = url_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.stdout_ = stdout_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.stderr_ = stderr_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.ret_ = ret_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.android.vts.proto.VtsReportMessage.HostLogMessage) {
+          return mergeFrom((com.android.vts.proto.VtsReportMessage.HostLogMessage)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.android.vts.proto.VtsReportMessage.HostLogMessage other) {
+        if (other == com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance()) return this;
+        if (other.hasUrl()) {
+          setUrl(other.getUrl());
+        }
+        if (other.hasStdout()) {
+          setStdout(other.getStdout());
+        }
+        if (other.hasStderr()) {
+          setStderr(other.getStderr());
+        }
+        if (other.hasRet()) {
+          setRet(other.getRet());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.android.vts.proto.VtsReportMessage.HostLogMessage parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.android.vts.proto.VtsReportMessage.HostLogMessage) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes url = 1;
+      private com.google.protobuf.ByteString url_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URLs of the produced host log
+       * </pre>
+       */
+      public boolean hasUrl() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URLs of the produced host log
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getUrl() {
+        return url_;
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URLs of the produced host log
+       * </pre>
+       */
+      public Builder setUrl(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        url_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URLs of the produced host log
+       * </pre>
+       */
+      public Builder clearUrl() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        url_ = getDefaultInstance().getUrl();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes stdout = 11;
+      private com.google.protobuf.ByteString stdout_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes stdout = 11;</code>
+       *
+       * <pre>
+       * Stdout of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public boolean hasStdout() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes stdout = 11;</code>
+       *
+       * <pre>
+       * Stdout of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getStdout() {
+        return stdout_;
+      }
+      /**
+       * <code>optional bytes stdout = 11;</code>
+       *
+       * <pre>
+       * Stdout of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public Builder setStdout(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        stdout_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes stdout = 11;</code>
+       *
+       * <pre>
+       * Stdout of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public Builder clearStdout() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        stdout_ = getDefaultInstance().getStdout();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes stderr = 12;
+      private com.google.protobuf.ByteString stderr_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes stderr = 12;</code>
+       *
+       * <pre>
+       * Stderr of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public boolean hasStderr() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes stderr = 12;</code>
+       *
+       * <pre>
+       * Stderr of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getStderr() {
+        return stderr_;
+      }
+      /**
+       * <code>optional bytes stderr = 12;</code>
+       *
+       * <pre>
+       * Stderr of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public Builder setStderr(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        stderr_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes stderr = 12;</code>
+       *
+       * <pre>
+       * Stderr of host log. Caution: do not put too much log in protobuf message,
+       * as bigtable recommends &lt; 10 mb for each record cell
+       * </pre>
+       */
+      public Builder clearStderr() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        stderr_ = getDefaultInstance().getStderr();
+        onChanged();
+        return this;
+      }
+
+      // optional int32 ret = 13;
+      private int ret_ ;
+      /**
+       * <code>optional int32 ret = 13;</code>
+       *
+       * <pre>
+       * Return code for a test case. This field should only be used for
+       * per-test-case log message
+       * </pre>
+       */
+      public boolean hasRet() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 ret = 13;</code>
+       *
+       * <pre>
+       * Return code for a test case. This field should only be used for
+       * per-test-case log message
+       * </pre>
+       */
+      public int getRet() {
+        return ret_;
+      }
+      /**
+       * <code>optional int32 ret = 13;</code>
+       *
+       * <pre>
+       * Return code for a test case. This field should only be used for
+       * per-test-case log message
+       * </pre>
+       */
+      public Builder setRet(int value) {
+        bitField0_ |= 0x00000008;
+        ret_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 ret = 13;</code>
+       *
+       * <pre>
+       * Return code for a test case. This field should only be used for
+       * per-test-case log message
+       * </pre>
+       */
+      public Builder clearRet() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        ret_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:android.vts.HostLogMessage)
+    }
+
+    static {
+      defaultInstance = new HostLogMessage(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:android.vts.HostLogMessage)
+  }
+
   public interface TestReportMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -9757,6 +10819,32 @@ public final class VtsReportMessage {
      */
     com.android.vts.proto.VtsReportMessage.CoverageReportMessageOrBuilder getCoverageOrBuilder(
         int index);
+
+    // optional .android.vts.HostLogMessage host_log = 1001;
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    boolean hasHostLog();
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog();
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder();
   }
   /**
    * Protobuf type {@code android.vts.TestReportMessage}
@@ -9916,6 +11004,19 @@ public final class VtsReportMessage {
                 mutable_bitField0_ |= 0x00001000;
               }
               coverage_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.CoverageReportMessage.PARSER, extensionRegistry));
+              break;
+            }
+            case 8010: {
+              com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000080) == 0x00000080)) {
+                subBuilder = hostLog_.toBuilder();
+              }
+              hostLog_ = input.readMessage(com.android.vts.proto.VtsReportMessage.HostLogMessage.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(hostLog_);
+                hostLog_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000080;
               break;
             }
           }
@@ -10471,6 +11572,40 @@ public final class VtsReportMessage {
       return coverage_.get(index);
     }
 
+    // optional .android.vts.HostLogMessage host_log = 1001;
+    public static final int HOST_LOG_FIELD_NUMBER = 1001;
+    private com.android.vts.proto.VtsReportMessage.HostLogMessage hostLog_;
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    public boolean hasHostLog() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog() {
+      return hostLog_;
+    }
+    /**
+     * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+     *
+     * <pre>
+     * host log for a test module. May contains host log for each test case.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder() {
+      return hostLog_;
+    }
+
     private void initFields() {
       testSuite_ = com.google.protobuf.ByteString.EMPTY;
       test_ = com.google.protobuf.ByteString.EMPTY;
@@ -10485,6 +11620,7 @@ public final class VtsReportMessage {
       startTimestamp_ = 0L;
       endTimestamp_ = 0L;
       coverage_ = java.util.Collections.emptyList();
+      hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -10536,6 +11672,9 @@ public final class VtsReportMessage {
       }
       for (int i = 0; i < coverage_.size(); i++) {
         output.writeMessage(103, coverage_.get(i));
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeMessage(1001, hostLog_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -10602,6 +11741,10 @@ public final class VtsReportMessage {
       for (int i = 0; i < coverage_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(103, coverage_.get(i));
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1001, hostLog_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -10722,6 +11865,7 @@ public final class VtsReportMessage {
           getProfilingFieldBuilder();
           getSystraceFieldBuilder();
           getCoverageFieldBuilder();
+          getHostLogFieldBuilder();
         }
       }
       private static Builder create() {
@@ -10784,6 +11928,12 @@ public final class VtsReportMessage {
         } else {
           coverageBuilder_.clear();
         }
+        if (hostLogBuilder_ == null) {
+          hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+        } else {
+          hostLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00002000);
         return this;
       }
 
@@ -10897,6 +12047,14 @@ public final class VtsReportMessage {
           result.coverage_ = coverage_;
         } else {
           result.coverage_ = coverageBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00002000) == 0x00002000)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        if (hostLogBuilder_ == null) {
+          result.hostLog_ = hostLog_;
+        } else {
+          result.hostLog_ = hostLogBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -11074,6 +12232,9 @@ public final class VtsReportMessage {
               coverageBuilder_.addAllMessages(other.coverage_);
             }
           }
+        }
+        if (other.hasHostLog()) {
+          mergeHostLog(other.getHostLog());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -13306,6 +14467,159 @@ public final class VtsReportMessage {
         return coverageBuilder_;
       }
 
+      // optional .android.vts.HostLogMessage host_log = 1001;
+      private com.android.vts.proto.VtsReportMessage.HostLogMessage hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder> hostLogBuilder_;
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public boolean hasHostLog() {
+        return ((bitField0_ & 0x00002000) == 0x00002000);
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage getHostLog() {
+        if (hostLogBuilder_ == null) {
+          return hostLog_;
+        } else {
+          return hostLogBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public Builder setHostLog(com.android.vts.proto.VtsReportMessage.HostLogMessage value) {
+        if (hostLogBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          hostLog_ = value;
+          onChanged();
+        } else {
+          hostLogBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public Builder setHostLog(
+          com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder builderForValue) {
+        if (hostLogBuilder_ == null) {
+          hostLog_ = builderForValue.build();
+          onChanged();
+        } else {
+          hostLogBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public Builder mergeHostLog(com.android.vts.proto.VtsReportMessage.HostLogMessage value) {
+        if (hostLogBuilder_ == null) {
+          if (((bitField0_ & 0x00002000) == 0x00002000) &&
+              hostLog_ != com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance()) {
+            hostLog_ =
+              com.android.vts.proto.VtsReportMessage.HostLogMessage.newBuilder(hostLog_).mergeFrom(value).buildPartial();
+          } else {
+            hostLog_ = value;
+          }
+          onChanged();
+        } else {
+          hostLogBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00002000;
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public Builder clearHostLog() {
+        if (hostLogBuilder_ == null) {
+          hostLog_ = com.android.vts.proto.VtsReportMessage.HostLogMessage.getDefaultInstance();
+          onChanged();
+        } else {
+          hostLogBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00002000);
+        return this;
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder getHostLogBuilder() {
+        bitField0_ |= 0x00002000;
+        onChanged();
+        return getHostLogFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder getHostLogOrBuilder() {
+        if (hostLogBuilder_ != null) {
+          return hostLogBuilder_.getMessageOrBuilder();
+        } else {
+          return hostLog_;
+        }
+      }
+      /**
+       * <code>optional .android.vts.HostLogMessage host_log = 1001;</code>
+       *
+       * <pre>
+       * host log for a test module. May contains host log for each test case.
+       * </pre>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder> 
+          getHostLogFieldBuilder() {
+        if (hostLogBuilder_ == null) {
+          hostLogBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.android.vts.proto.VtsReportMessage.HostLogMessage, com.android.vts.proto.VtsReportMessage.HostLogMessage.Builder, com.android.vts.proto.VtsReportMessage.HostLogMessageOrBuilder>(
+                  hostLog_,
+                  getParentForChildren(),
+                  isClean());
+          hostLog_ = null;
+        }
+        return hostLogBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:android.vts.TestReportMessage)
     }
 
@@ -13353,6 +14667,11 @@ public final class VtsReportMessage {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_android_vts_CoverageReportMessage_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_android_vts_HostLogMessage_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_android_vts_HostLogMessage_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_android_vts_TestReportMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -13376,61 +14695,65 @@ public final class VtsReportMessage {
       "Info\022\n\n\002id\030\001 \001(\014\022\014\n\004name\030\013 \001(\014\022\022\n\nbuild_" +
       "type\030\014 \001(\014\022\016\n\006branch\030\r \001(\014\022\025\n\rbuild_summ" +
       "ary\030\025 \001(\014\"\037\n\013VtsHostInfo\022\020\n\010hostname\030\001 \001",
-      "(\014\"\253\002\n\025TestCaseReportMessage\022\014\n\004name\030\001 \001" +
+      "(\014\"\332\002\n\025TestCaseReportMessage\022\014\n\004name\030\001 \001" +
       "(\014\0220\n\013test_result\030\013 \001(\0162\033.android.vts.Te" +
       "stCaseResult\022\027\n\017start_timestamp\030\025 \001(\003\022\025\n" +
       "\rend_timestamp\030\026 \001(\003\0224\n\010coverage\030\037 \003(\0132\"" +
       ".android.vts.CoverageReportMessage\0226\n\tpr" +
       "ofiling\030) \003(\0132#.android.vts.ProfilingRep" +
       "ortMessage\0224\n\010systrace\030* \003(\0132\".android.v" +
-      "ts.SystraceReportMessage\"\240\002\n\026ProfilingRe" +
-      "portMessage\022\014\n\004name\030\001 \001(\014\022+\n\004type\030\002 \001(\0162" +
-      "\035.android.vts.VtsProfilingType\022@\n\017regres",
-      "sion_mode\030\003 \001(\0162\'.android.vts.VtsProfili" +
-      "ngRegressionMode\022\027\n\017start_timestamp\030\013 \001(" +
-      "\003\022\025\n\rend_timestamp\030\014 \001(\003\022\r\n\005label\030\025 \003(\014\022" +
-      "\r\n\005value\030\026 \003(\003\022\024\n\014x_axis_label\030\037 \001(\014\022\024\n\014" +
-      "y_axis_label\030  \001(\014\022\017\n\007options\030) \003(\014\"H\n\025S" +
-      "ystraceReportMessage\022\024\n\014process_name\030\001 \001" +
-      "(\014\022\014\n\004html\030\013 \003(\014\022\013\n\003url\030\025 \003(\014\"\345\001\n\025Covera" +
-      "geReportMessage\022\021\n\tfile_path\030\013 \001(\014\022\024\n\014pr" +
-      "oject_name\030\014 \001(\014\022\020\n\010revision\030\r \001(\014\022\034\n\024li" +
-      "ne_coverage_vector\030\027 \003(\005\022\030\n\020total_line_c",
-      "ount\030e \001(\005\022\032\n\022covered_line_count\030f \001(\005\022\024" +
-      "\n\010dir_path\030\001 \001(\014B\002\030\001\022\025\n\tfile_name\030\002 \001(\014B" +
-      "\002\030\001\022\020\n\004html\030\003 \001(\014B\002\030\001\"\243\004\n\021TestReportMess" +
-      "age\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014\022+\n" +
-      "\ttest_type\030\003 \001(\0162\030.android.vts.VtsTestTy" +
-      "pe\022:\n\013device_info\030\004 \003(\0132%.android.vts.An" +
-      "droidDeviceInfoMessage\0221\n\nbuild_info\030\005 \001" +
-      "(\0132\035.android.vts.AndroidBuildInfo\022\030\n\020sub" +
-      "scriber_email\030\006 \003(\014\022+\n\thost_info\030\007 \001(\0132\030" +
-      ".android.vts.VtsHostInfo\0225\n\ttest_case\030\013 ",
-      "\003(\0132\".android.vts.TestCaseReportMessage\022" +
-      "6\n\tprofiling\030\025 \003(\0132#.android.vts.Profili" +
-      "ngReportMessage\0224\n\010systrace\030\026 \003(\0132\".andr" +
-      "oid.vts.SystraceReportMessage\022\027\n\017start_t" +
-      "imestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003\0224\n" +
-      "\010coverage\030g \003(\0132\".android.vts.CoverageRe" +
-      "portMessage*\263\001\n\016TestCaseResult\022\022\n\016UNKNOW" +
-      "N_RESULT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n" +
-      "\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RE" +
-      "SULT_SKIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTIO",
-      "N\020\004\022\034\n\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013Vt" +
-      "sTestType\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032V" +
-      "TS_HOST_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_" +
-      "DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTES" +
-      "T\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZING\020\004*\243\001\n\032Vts" +
-      "ProfilingRegressionMode\022\033\n\027UNKNOWN_REGRE" +
-      "SSION_MODE\020\000\022 \n\034VTS_REGRESSION_MODE_DISA" +
-      "BLED\020\001\022\"\n\036VTS_REGRESSION_MODE_INCREASING" +
-      "\020\002\022\"\n\036VTS_REGRESSION_MODE_DECREASING\020\003*\244" +
-      "\001\n\020VtsProfilingType\022\036\n\032UNKNOWN_VTS_PROFI",
-      "LING_TYPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMEST" +
-      "AMP\020\001\022%\n!VTS_PROFILING_TYPE_LABELED_VECT" +
-      "OR\020\002\022\'\n#VTS_PROFILING_TYPE_UNLABELED_VEC" +
-      "TOR\020\003B)\n\025com.android.vts.protoB\020VtsRepor" +
-      "tMessage"
+      "ts.SystraceReportMessage\022-\n\010host_log\030e \001" +
+      "(\0132\033.android.vts.HostLogMessage\"\240\002\n\026Prof" +
+      "ilingReportMessage\022\014\n\004name\030\001 \001(\014\022+\n\004type",
+      "\030\002 \001(\0162\035.android.vts.VtsProfilingType\022@\n" +
+      "\017regression_mode\030\003 \001(\0162\'.android.vts.Vts" +
+      "ProfilingRegressionMode\022\027\n\017start_timesta" +
+      "mp\030\013 \001(\003\022\025\n\rend_timestamp\030\014 \001(\003\022\r\n\005label" +
+      "\030\025 \003(\014\022\r\n\005value\030\026 \003(\003\022\024\n\014x_axis_label\030\037 " +
+      "\001(\014\022\024\n\014y_axis_label\030  \001(\014\022\017\n\007options\030) \003" +
+      "(\014\"H\n\025SystraceReportMessage\022\024\n\014process_n" +
+      "ame\030\001 \001(\014\022\014\n\004html\030\013 \003(\014\022\013\n\003url\030\025 \003(\014\"\345\001\n" +
+      "\025CoverageReportMessage\022\021\n\tfile_path\030\013 \001(" +
+      "\014\022\024\n\014project_name\030\014 \001(\014\022\020\n\010revision\030\r \001(",
+      "\014\022\034\n\024line_coverage_vector\030\027 \003(\005\022\030\n\020total" +
+      "_line_count\030e \001(\005\022\032\n\022covered_line_count\030" +
+      "f \001(\005\022\024\n\010dir_path\030\001 \001(\014B\002\030\001\022\025\n\tfile_name" +
+      "\030\002 \001(\014B\002\030\001\022\020\n\004html\030\003 \001(\014B\002\030\001\"J\n\016HostLogM" +
+      "essage\022\013\n\003url\030\001 \001(\014\022\016\n\006stdout\030\013 \001(\014\022\016\n\006s" +
+      "tderr\030\014 \001(\014\022\013\n\003ret\030\r \001(\005\"\323\004\n\021TestReportM" +
+      "essage\022\022\n\ntest_suite\030\001 \001(\014\022\014\n\004test\030\002 \001(\014" +
+      "\022+\n\ttest_type\030\003 \001(\0162\030.android.vts.VtsTes" +
+      "tType\022:\n\013device_info\030\004 \003(\0132%.android.vts" +
+      ".AndroidDeviceInfoMessage\0221\n\nbuild_info\030",
+      "\005 \001(\0132\035.android.vts.AndroidBuildInfo\022\030\n\020" +
+      "subscriber_email\030\006 \003(\014\022+\n\thost_info\030\007 \001(" +
+      "\0132\030.android.vts.VtsHostInfo\0225\n\ttest_case" +
+      "\030\013 \003(\0132\".android.vts.TestCaseReportMessa" +
+      "ge\0226\n\tprofiling\030\025 \003(\0132#.android.vts.Prof" +
+      "ilingReportMessage\0224\n\010systrace\030\026 \003(\0132\".a" +
+      "ndroid.vts.SystraceReportMessage\022\027\n\017star" +
+      "t_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f \001(\003" +
+      "\0224\n\010coverage\030g \003(\0132\".android.vts.Coverag" +
+      "eReportMessage\022.\n\010host_log\030\351\007 \001(\0132\033.andr",
+      "oid.vts.HostLogMessage*\263\001\n\016TestCaseResul" +
+      "t\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_CASE_RESUL" +
+      "T_PASS\020\001\022\031\n\025TEST_CASE_RESULT_FAIL\020\002\022\031\n\025T" +
+      "EST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST_CASE_RESU" +
+      "LT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RESULT_TIMEO" +
+      "UT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOWN_VTS_TEST" +
+      "TYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRUCTURAL\020\001\022\033" +
+      "\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n\025VTS_TARGE" +
+      "T_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_FUZZIN" +
+      "G\020\004*\243\001\n\032VtsProfilingRegressionMode\022\033\n\027UN",
+      "KNOWN_REGRESSION_MODE\020\000\022 \n\034VTS_REGRESSIO" +
+      "N_MODE_DISABLED\020\001\022\"\n\036VTS_REGRESSION_MODE" +
+      "_INCREASING\020\002\022\"\n\036VTS_REGRESSION_MODE_DEC" +
+      "REASING\020\003*\244\001\n\020VtsProfilingType\022\036\n\032UNKNOW" +
+      "N_VTS_PROFILING_TYPE\020\000\022 \n\034VTS_PROFILING_" +
+      "TYPE_TIMESTAMP\020\001\022%\n!VTS_PROFILING_TYPE_L" +
+      "ABELED_VECTOR\020\002\022\'\n#VTS_PROFILING_TYPE_UN" +
+      "LABELED_VECTOR\020\003B)\n\025com.android.vts.prot" +
+      "oB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -13460,7 +14783,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_TestCaseReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestCaseReportMessage_descriptor,
-              new java.lang.String[] { "Name", "TestResult", "StartTimestamp", "EndTimestamp", "Coverage", "Profiling", "Systrace", });
+              new java.lang.String[] { "Name", "TestResult", "StartTimestamp", "EndTimestamp", "Coverage", "Profiling", "Systrace", "HostLog", });
           internal_static_android_vts_ProfilingReportMessage_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_android_vts_ProfilingReportMessage_fieldAccessorTable = new
@@ -13479,12 +14802,18 @@ public final class VtsReportMessage {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_CoverageReportMessage_descriptor,
               new java.lang.String[] { "FilePath", "ProjectName", "Revision", "LineCoverageVector", "TotalLineCount", "CoveredLineCount", "DirPath", "FileName", "Html", });
-          internal_static_android_vts_TestReportMessage_descriptor =
+          internal_static_android_vts_HostLogMessage_descriptor =
             getDescriptor().getMessageTypes().get(7);
+          internal_static_android_vts_HostLogMessage_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_android_vts_HostLogMessage_descriptor,
+              new java.lang.String[] { "Url", "Stdout", "Stderr", "Ret", });
+          internal_static_android_vts_TestReportMessage_descriptor =
+            getDescriptor().getMessageTypes().get(8);
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestReportMessage_descriptor,
-              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "HostInfo", "TestCase", "Profiling", "Systrace", "StartTimestamp", "EndTimestamp", "Coverage", });
+              new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "HostInfo", "TestCase", "Profiling", "Systrace", "StartTimestamp", "EndTimestamp", "Coverage", "HostLog", });
           return null;
         }
       };

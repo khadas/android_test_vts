@@ -139,6 +139,9 @@ message TestCaseReportMessage {
 
   // systrace report message per file
   repeated SystraceReportMessage systrace = 42;
+
+  // host log for each test case.
+  optional HostLogMessage host_log = 101;
 }
 
 
@@ -212,6 +215,24 @@ message CoverageReportMessage {
   optional bytes html = 3 [deprecated=true];
 }
 
+// To specify host log report. This can be used either for per-test-module
+// log message or per-test-case log message.
+message HostLogMessage {
+  // URLs of the produced host log
+  optional bytes url = 1;
+
+  // Stdout of host log. Caution: do not put too much log in protobuf message,
+  // as bigtable recommends < 10 mb for each record cell
+  optional bytes stdout = 11;
+
+  // Stderr of host log. Caution: do not put too much log in protobuf message,
+  // as bigtable recommends < 10 mb for each record cell
+  optional bytes stderr = 12;
+
+  // Return code for a test case. This field should only be used for
+  // per-test-case log message
+  optional int32 ret = 13;
+}
 
 // To specify a test execution report.
 message TestReportMessage {
@@ -251,4 +272,7 @@ message TestReportMessage {
 
   // coverage report per file
   repeated CoverageReportMessage coverage = 103;
+
+  // host log for a test module. May contains host log for each test case.
+  optional HostLogMessage host_log = 1001;
 }
