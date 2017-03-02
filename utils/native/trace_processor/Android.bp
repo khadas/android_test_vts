@@ -14,16 +14,14 @@
 // limitations under the License.
 //
 
-cc_library_shared {
+cc_library_host_shared {
     name: "libvts_traceparser",
-    host_supported: true,
 
     srcs: ["VtsTraceParser.cpp"],
 
     shared_libs: [
         "libbase",
         "libcutils",
-        "liblog",
         "libprotobuf-cpp-full",
         "libvts_multidevice_proto",
     ],
