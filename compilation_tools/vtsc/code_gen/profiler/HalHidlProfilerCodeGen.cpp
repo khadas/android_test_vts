@@ -367,7 +367,7 @@ void HalHidlProfilerCodeGen::GenerateLocalVariableDefinition(Formatter& out,
   const ComponentSpecificationMessage&) {
   // generate the name of file to store the trace.
   out << "char trace_file[PATH_MAX];\n";
-  out << "sprintf(trace_file, \"%s/%s@%s\", TRACEFILEPREFIX, package, version);"
+  out << "sprintf(trace_file, \"%s/%s_%s\", TRACEFILEPREFIX, package, version);"
       << "\n";
 
   // create and initialize the VTS profiler interface.
