@@ -19,5 +19,5 @@ __Table of Contents__
 
 1. [VTS User Manual](doc/user_manual.md)
 2. [Where to find VTS test cases](testcases/README.md)
-3. [VTS Test Developer Manual](doc/test_developer_manual.md)
+3. [VTS Test Developer Manual](doc/testcase_develop_manual/index.md)
 4. [VTS Framework Developer Manual](doc/framework_developer_manual.md)

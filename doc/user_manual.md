@@ -101,20 +101,7 @@ Then select `device_logcat_<timestamp>.zip` and device_logcat.txt in that zip fi
 
 ### 3.1. List of VTS Plans
 
-* __vts__: All default VTS tests (To be finalized before Android O release).
-* __vts-camera-its__: For camera ITS (Image Test Suite) tests ported to VTS.
-* __vts-codelab__: For VTS codelab.
-* __vts-coverage__: For VTS code coverage tests.
-* __vts-fuzz__: For VTS Fuzz tests.
-* __vts-gce__: For VTS tests which can be run on Google Compute Engine (GCE).
-* __vts-hal-hidl-profiling__: For VTS HIDL HAL profiling tasks.
-* __vts-hal-hidl__: For VTS HIDL HAL tests.
-* __vts-host__: For VTS host-driven tests.
-* __vts-kernel__: For VTS kernel tests.
-* __vts-library__: For VTS native library tests.
-* __vts-presubmit__: For VTS pre-submit tests.
-* __vts-security__: For VTS security tests.
-* __vts-system__: For VTS system tests.
+Documented at [here](../tools/vts-tradefed/res/config/plans.md).
 
 ### 3.2. Run kernel test cases
 
