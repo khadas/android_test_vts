@@ -24,6 +24,7 @@ include $(LOCAL_PATH)/list/vts_test_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_trace_list.mk
+include external/ltp/android/ltp_package_list.mk
 
 # Packaging rule for android-vts.zip
 test_suite_name := vts
@@ -39,6 +40,8 @@ $(call dist-for-goals, vts, $(compatibility_zip))
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 
 my_modules := \
+    ltp \
+    $(ltp_packages) \
     $(vts_apk_packages) \
     $(vts_bin_packages) \
     $(vts_lib_packages) \
@@ -46,6 +49,8 @@ my_modules := \
     $(vts_test_lib_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
+
+VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 
 my_copy_pairs :=
   $(foreach m,$(my_modules),\
