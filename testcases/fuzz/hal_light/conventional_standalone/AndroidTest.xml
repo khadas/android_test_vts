@@ -15,7 +15,7 @@
 -->
 <configuration description="Config for VTS conventional light HAL standalone fuzz test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
-        <option name="push-group" value="HidlHalTest.push" />
+        <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
         <option name="push" value="spec/test/vts/specification/hal_conventional/LightHalV1.vts->/data/local/tmp/spec/LightHalV1.vts" />
     </target_preparer>
