@@ -109,7 +109,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             feature = str(getattr(
                 self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
             if feature:
-                cmd_results = self.shell.Execute("lshal")
+                cmd_results = self.shell.Execute("lshal -itpc")
                 if (feature not in cmd_results[const.STDOUT][0]):
                     logging.warn("The required feature %s not found.",
                                  feature)
