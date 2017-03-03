@@ -179,7 +179,7 @@ class VtscTester(unittest.TestCase):
             output_header_file = os.path.join(self._output_dir, mode,
                                               header_file_name)
             self.CompareOutputFile(output_header_file, canonical_header_file)
-        elif (file_type == "SOURCE" or file_type == "BOTH"):
+        if (file_type == "SOURCE" or file_type == "BOTH"):
             canonical_source_file = os.path.join(self._canonical_dir, mode,
                                                  source_file_name)
             output_source_file = os.path.join(self._output_dir, mode,
