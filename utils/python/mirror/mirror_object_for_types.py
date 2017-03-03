@@ -17,6 +17,7 @@
 import copy
 import logging
 import random
+import sys
 
 from google.protobuf import text_format
 
@@ -28,6 +29,17 @@ from vts.utils.python.mirror import py2pb
 class MirrorObjectError(Exception):
     """Raised when there is a general error in manipulating a mirror object."""
     pass
+
+
+class EnumMirror(object):
+    """Enum's host-side mirror instance."""
+
+    def __init__(self, attribute):
+        logging.info(attribute)
+        for enumerator, scalar_value in zip(attribute.enum_value.enumerator,
+                                            attribute.enum_value.scalar_value):
+            setattr(self, enumerator,
+                    getattr(scalar_value, attribute.enum_value.scalar_type))
 
 
 class MirrorObjectForTypes(object):
@@ -129,18 +141,16 @@ class MirrorObjectForTypes(object):
                 for attribute in self._if_spec_msg.interface.attribute:
                     if attribute.is_const and attribute.name == type_name:
                         return copy.copy(attribute)
-                    elif attribute.type == CompSpecMsg.TYPE_ENUM:
-                        for enumerator in attribute.enum_value.enumerator:
-                            if enumerator == type_name:
-                                return copy.copy(attribute)
+                    elif (attribute.type == CompSpecMsg.TYPE_ENUM and
+                          attribute.name.endswith(type_name)):
+                        return attribute
             if self._if_spec_msg.attribute:
                 for attribute in self._if_spec_msg.attribute:
                     if attribute.is_const and attribute.name == type_name:
                         return copy.copy(attribute)
-                    elif attribute.type == CompSpecMsg.TYPE_ENUM:
-                        for enumerator in attribute.enum_value.enumerator:
-                            if enumerator == type_name:
-                                return copy.copy(attribute)
+                    elif (attribute.type == CompSpecMsg.TYPE_ENUM and
+                          attribute.name.endswith(type_name)):
+                        return attribute
             return None
         except AttributeError as e:
             # TODO: check in advance whether self._if_spec_msg Interface
@@ -212,6 +222,9 @@ class MirrorObjectForTypes(object):
                     logging.debug("for %s", fp_value.function_name)
                     fp_value.id = self.GetFunctionPointerID(given_value)
                     logging.debug("fp %s", fp_value)
+            else:
+                logging.error("arg_msg.type %s", arg_msg.type)
+                sys.exit(-1)
             logging.debug("generated %s", arg_msg)
             return arg_msg
 
@@ -230,12 +243,7 @@ class MirrorObjectForTypes(object):
             elif arg_msg.type == CompSpecMsg.TYPE_STRING:
                 return arg_msg.string_value.message
             elif arg_msg.type == CompSpecMsg.TYPE_ENUM:
-                for enumerator, scalar_value in zip(
-                        arg_msg.enum_value.enumerator,
-                        arg_msg.enum_value.scalar_value):
-                    if enumerator == api_name:
-                      return getattr(scalar_value,
-                                     arg_msg.enum_value.scalar_type)
+                return EnumMirror(arg_msg)
             raise MirrorObjectError("const %s not found" % api_name)
 
         struct_msg = self.GetSubStruct(api_name)
