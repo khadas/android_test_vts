@@ -29,7 +29,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfc(
     }
 
     char trace_file[PATH_MAX];
-    sprintf(trace_file, "%s/%s@%s", TRACEFILEPREFIX, package, version);
+    sprintf(trace_file, "%s/%s_%s", TRACEFILEPREFIX, package, version);
     VtsProfilingInterface& profiler = VtsProfilingInterface::getInstance(trace_file);
     profiler.Init();
 
