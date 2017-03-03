@@ -24,7 +24,7 @@ include $(LOCAL_PATH)/list/vts_test_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_trace_list.mk
-include external/ltp/android/ltp_package_list.mk
+-include external/ltp/android/ltp_package_list.mk
 
 # Packaging rule for android-vts.zip
 test_suite_name := vts
