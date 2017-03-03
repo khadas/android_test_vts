@@ -2,7 +2,7 @@
 
 A VTS test plan consists of a set of VTS tests. Typically the tests within a
 plan are for the same target component or testing the same or similar aspect
-(e.g., functionality, performance, robustness, or power). There are two kinds
+(e.g., functionality, performance, robustness, or power). There are three kinds
 of plans in VTS:
 
 ## 1. Official Plans
