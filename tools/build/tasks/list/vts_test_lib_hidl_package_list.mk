@@ -20,6 +20,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.audio.vts.driver@2.0 \
   android.hardware.audio.common.vts.driver@2.0 \
   android.hardware.audio.effect.vts.driver@2.0 \
+  android.hardware.automotive.evs.vts.driver@1.0 \
   android.hardware.automotive.vehicle.vts.driver@2.0 \
   android.hardware.automotive.vehicle.vts.driver@2.1 \
   android.hardware.biometrics.fingerprint.vts.driver@2.1 \
@@ -35,7 +36,6 @@ vts_test_lib_hidl_packages := \
   android.hardware.contexthub.vts.driver@1.0 \
   android.hardware.drm.vts.driver@1.0 \
   android.hardware.dumpstate.vts.driver@1.0 \
-  android.hardware.evs.vts.driver@1.0 \
   android.hardware.gatekeeper.vts.driver@1.0 \
   android.hardware.gnss.vts.driver@1.0 \
   android.hardware.graphics.common.vts.driver@1.0 \
@@ -80,7 +80,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
   android.hardware.dumpstate@1.0-vts.profiler \
-  android.hardware.evs@1.0-vts.profiler \
+  android.hardware.automotive.evs@1.0-vts.profiler \
   android.hardware.gatekeeper@1.0-vts.profiler \
   android.hardware.gnss@1.0-vts.profiler \
   android.hardware.graphics.allocator@2.0-vts.profiler \

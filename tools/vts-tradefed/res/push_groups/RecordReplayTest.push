@@ -6,6 +6,12 @@ DATA/lib64/android.hardware.audio@2.0-vts.profiler.so->system/lib64/android.hard
 DATA/lib/android.hardware.audio.effect@2.0-vts.profiler.so->system/lib/android.hardware.audio.effect@2.0-vts.profiler.so
 DATA/lib64/android.hardware.audio.effect@2.0-vts.profiler.so->system/lib64/android.hardware.audio.effect@2.0-vts.profiler.so
 
+DATA/lib/android.hardware.automotive.evs@1.0-vts.profiler.so->system/lib/android.hardware.automotive.evs@1.0-vts.profiler.so
+DATA/lib64/android.hardware.automotive.evs@1.0-vts.profiler.so->system/lib64/android.hardware.automotive.evs@1.0-vts.profiler.so
+
+DATA/lib/android.hardware.automotive.vehicle@2.0-vts.profiler.so->system/lib/android.hardware.automotive.vehicle@2.0-vts.profiler.so
+DATA/lib64/android.hardware.automotive.vehicle@2.0-vts.profiler.so->system/lib64/android.hardware.autotmotive.vehicle@2.0-vts.profiler.so
+
 DATA/lib/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so->system/lib/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so
 DATA/lib64/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so->system/lib64/android.hardware.biometrics.fingerprint@2.1-vts.profiler.so
 
@@ -38,9 +44,6 @@ DATA/lib64/android.hardware.drm@1.0-vts.profiler.so->system/lib64/android.hardwa
 
 DATA/lib/android.hardware.dumpstate@1.0-vts.profiler.so->system/lib/android.hardware.dumpstate@1.0-vts.profiler.so
 DATA/lib64/android.hardware.dumpstate@1.0-vts.profiler.so->system/lib64/android.hardware.dumpstate@1.0-vts.profiler.so
-
-DATA/lib/android.hardware.evs@1.0-vts.profiler.so->system/lib/android.hardware.evs@1.0-vts.profiler.so
-DATA/lib64/android.hardware.evs@1.0-vts.profiler.so->system/lib64/android.hardware.evs@1.0-vts.profiler.so
 
 DATA/lib/android.hardware.gatekeeper@1.0-vts.profiler.so->system/lib/android.hardware.gatekeeper@1.0-vts.profiler.so
 DATA/lib64/android.hardware.gatekeeper@1.0-vts.profiler.so->system/lib64/android.hardware.gatekeeper@1.0-vts.profiler.so
@@ -102,9 +105,6 @@ DATA/lib64/android.hardware.tv.input@1.0-vts.profiler.so->system/lib64/android.h
 DATA/lib/android.hardware.usb@1.0-vts.profiler.so->system/lib/android.hardware.usb@1.0-vts.profiler.so
 DATA/lib64/android.hardware.usb@1.0-vts.profiler.so->system/lib64/android.hardware.usb@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.automotive.vehicle@2.0-vts.profiler.so->system/lib/android.hardware.automotive.vehicle@2.0-vts.profiler.so
-DATA/lib64/android.hardware.automotive.vehicle@2.0-vts.profiler.so->system/lib64/android.hardware.autotmotive.vehicle@2.0-vts.profiler.so
-
 DATA/lib/android.hardware.vibrator@1.0-vts.profiler.so->system/lib/android.hardware.vibrator@1.0-vts.profiler.so
 DATA/lib64/android.hardware.vibrator@1.0-vts.profiler.so->system/lib64/android.hardware.vibrator@1.0-vts.profiler.so
 
@@ -160,8 +160,8 @@ DATA/lib64/android.hardware.drm@1.0-vts.profiler.so->system/lib64/hw/android.har
 DATA/lib/android.hardware.dumpstate@1.0-vts.profiler.so->system/lib/hw/android.hardware.dumpstate@1.0-vts.profiler.so
 DATA/lib64/android.hardware.dumpstate@1.0-vts.profiler.so->system/lib64/hw/android.hardware.dumpstate@1.0-vts.profiler.so
 
-DATA/lib/android.hardware.evs@1.0-vts.profiler.so->system/lib/hw/android.hardware.evs@1.0-vts.profiler.so
-DATA/lib64/android.hardware.evs@1.0-vts.profiler.so->system/lib64/hw/android.hardware.evs@1.0-vts.profiler.so
+DATA/lib/android.hardware.automotive.evs@1.0-vts.profiler.so->system/lib/hw/android.hardware.automotive.evs@1.0-vts.profiler.so
+DATA/lib64/android.hardware.automotive.evs@1.0-vts.profiler.so->system/lib64/hw/android.hardware.automotive.evs@1.0-vts.profiler.so
 
 DATA/lib/android.hardware.gatekeeper@1.0-vts.profiler.so->system/lib/hw/android.hardware.gatekeeper@1.0-vts.profiler.so
 DATA/lib64/android.hardware.gatekeeper@1.0-vts.profiler.so->system/lib64/hw/android.hardware.gatekeeper@1.0-vts.profiler.so
