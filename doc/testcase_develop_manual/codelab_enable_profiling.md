@@ -11,15 +11,13 @@ By enable profiling for your VTS HIDL HAL test, you are expected to get:
 ## 1. Add profiler library to VTS
 
 To enable profiling for your HAL testing, we need to add the corresponding
-profiler library in two places:
+profiler library in:
 
 * [vts_test_lib_hidl_package_list.mk](../../tools/build/tasks/list/vts_test_lib_hidl_package_list.mk).
 
-* [HidlHalTest.push](../../tools/vts-tradefed/res/push_groups/HidlHalTest.push).
-
 The name of the profiling library follow the pattern as:
-`package_name@version-interface-vts-profiler.so`.
-For example, the library name for NFC HAL is `android.hardware.nfc@1.0-INfc-vts.profiler.so`.
+`package_name@version-vts-profiler.so`.
+For example, the library name for NFC HAL is `android.hardware.nfc@1.0-vts.profiler.so`.
 
 ## 2. Modify Your VTS Test Case
 
@@ -35,36 +33,41 @@ This subsection describes how to enable profiling for target-side tests.
 
 * Copy an existing test directory
 
-  `$ cd hardware/interfaces/<HAL Name>/<version>/vts/functional/vts/testcases/hal/<HAL Name>/hidl/`
+  `$ cd test/vts-testcase/hal/<HAL_NAME>/<HAL_VERSION>/`
 
   `$ cp target target_profiling -rf`
 
-  Then rename the test name from <HAL Name>HidlTargetTest to <HAL Name>HidlTargetProfilingTest everywhere.
+  where `<HAL_NAME>` is the name of your HAL and `<HAL_VERSION>` is the version of your HAL with format `V<MAJOR_VERSION>_<MINOR_VERSION>>` e.g. `V1_0`.
+  Then rename the test name from VtsHal<HAL_NAME><HAL_VERSION>Target to VtsHal<HAL_NAME><HAL_VERSION>TargetProfiling everywhere.
 
 * Set `enable-profiling` flag
 
   Add `<option name="enable-profiling" value="true" />` to the corresponding
 `AndroidTest.xml` file under the `target_profiling` directory.
 
-  An [example AndroidTest.xml file](../../../../hardware/interfaces/vibrator/1.0/vts/functional/vts/testcases/hal/vibrator/hidl/target_profiling/AndroidTest.xml)  
+  An [example AndroidTest.xml file](../../../../test/vts-testcase/hal/vibrator/V1_0/target_profiling/AndroidTest.xml)
 looks like:
 
 ---
 ```
-<configuration description="Config for VTS VIBRATOR HIDL HAL's target-side test cases">
+<configuration description="Config for VTS VtsHalVibratorV1_0TargetProfiling test cases">
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
-        <option name="push-group" value="HidlHalTest.push" />
+        <option name="push-group" value="HalHidlTargetProfilingTest.push" />
+        <option name="cleanup" value="true"/>
+        <option name="push" value="DATA/lib/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/32/android.hardware.vibrator@1.0-vts.profiler.so"/>
+        <option name="push" value="DATA/lib64/android.hardware.vibrator@1.0-vts.profiler.so->/data/local/tmp/64/android.hardware.vibrator@1.0-vts.profiler.so"/>
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-module-name" value="VibratorHidlTargetProfilingTest" />
+        <option name="test-module-name" value="VtsHalVibratorV1_0TargetProfiling" />
         <option name="binary-test-sources" value="
-            _32bit::DATA/nativetest/vibrator_hidl_hal_test/vibrator_hidl_hal_test,
-            _64bit::DATA/nativetest64/vibrator_hidl_hal_test/vibrator_hidl_hal_test,
+            _32bit::DATA/nativetest/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest,
+            _64bit::DATA/nativetest64/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest,
             "/>
-        <option name="binary-test-type" value="gtest" />
-        <option name="test-timeout" value="1m" />
+        <option name="binary-test-type" value="hal_hidl_gtest" />
         <option name="enable-profiling" value="true" />
+        <option name="precondition-lshal" value="android.hardware.vibrator@1.0"/>
+        <option name="test-timeout" value="1m" />
     </test>
 </configuration>
 ```
@@ -74,18 +77,16 @@ looks like:
 
   Add the following line to [vts-serving-staging-hal-hidl-profiling.xml](../../tools/vts-tradefed/res/config/vts-serving-staging-hal-hidl-profiling.xml):
 
-  `<option name="compatibility:include-filter" value="<HAL Name>HidlTargetProfilingTest" />`
-  where `<HAL NAME>` is the name of your HAL.
+  `<option name="compatibility:include-filter" value="VtsHal<HAL_NAME><HAL_VERSION>TargetProfiling" />`
 
 * Subscribe the notification alert emails
 
   Please check (notification page)[../web/notification_samples.md] for the detailed instructions.
 
   Basically, now it is all set so let's wait for a day or so and then visit your VTS Dashboard.
-  At that time, you should be able to add `<HAL Name>HidlTargetProfilingTest` to your favorite list.
+  At that time, you should be able to add `VtsHal<HAL_NAME><HAL_VERSION>TargetProfiling` to your favorite list.
   That is all you need to do in order to subscribe alert emails which will sent if any notably performance degradations are found by your profiling tests.
-  Also if you click `<HAL Name>HidlTargetProfilingTest` in the dashboard main page,
-  the test result page shows up where the top-left side shows the list of APIs which have some measured performance data.
+  Also if you click `VtsHal<HAL_NAME><HAL_VERSION>TargetProfiling` in the dashboard main page, the test result page shows up where the top-left side shows the list of APIs which have some measured performance data.
 
 ### 2.2. Host-Driven Tests
 
@@ -93,11 +94,11 @@ This subsection describes how to enable profiling for host-driven tests.
 
 * Copy an existing test directory
 
-  `$ cd hardware/interfaces/<HAL Name>/<version>/vts/functional/vts/testcases/hal/<HAL Name>/hidl/`
+  `$ cd test/vts-testcase/hal/<HAL_NAME>/<HAL_VERSION>/`
 
   `$ cp host host_profiling -rf`
 
-  Then rename the test name from <HAL Name>HidlHostTest to <HAL Name>HidlHostProfilingTest everywhere.
+  Then rename the test name from VtsHal<HAL_NAME><HAL_VERSION>Host to VtsHal<HAL_NAME><HAL_VERSION>HostProfiling everywhere.
 
 * Update the configs
 
