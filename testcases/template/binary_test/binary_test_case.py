@@ -87,6 +87,7 @@ class BinaryTestCase(object):
         envp = 'env %s' % self.envp if self.envp else ''
         ld_library_path = ('LD_LIBRARY_PATH=%s ' % self.ld_library_path
                            if self.ld_library_path else '')
+
         if ld_library_path:
             envp = ('{}{}'.format(envp, ld_library_path)
                     if envp else 'env %s' % ld_library_path)
@@ -107,7 +108,7 @@ class BinaryTestCase(object):
     @test_suite.setter
     def test_suite(self, test_suite):
         '''Set test_suite'''
-        self._test_suite = test_suite
+        self._test_suite = test_suite.strip()
 
     @property
     def test_name(self):
@@ -117,7 +118,7 @@ class BinaryTestCase(object):
     @test_name.setter
     def test_name(self, test_name):
         '''Set test_name'''
-        self._test_name = test_name
+        self._test_name = test_name.strip()
 
     @property
     def path(self):
@@ -127,7 +128,7 @@ class BinaryTestCase(object):
     @path.setter
     def path(self, path):
         '''Set path'''
-        self._path = path
+        self._path = path.strip()
 
     @property
     def cmd(self):
@@ -140,7 +141,7 @@ class BinaryTestCase(object):
     @cmd.setter
     def cmd(self, cmd):
         '''Set path'''
-        self._cmd = cmd
+        self._cmd = cmd.strip()
 
     @property
     def tag(self):
@@ -150,7 +151,7 @@ class BinaryTestCase(object):
     @tag.setter
     def tag(self, tag):
         '''Set tag'''
-        self._tag = tag
+        self._tag = tag.strip()
 
     @property
     def working_directory(self):
@@ -160,7 +161,7 @@ class BinaryTestCase(object):
     @working_directory.setter
     def working_directory(self, working_directory):
         '''Set working_directory'''
-        self._working_directory = working_directory
+        self._working_directory = working_directory.strip()
 
     @property
     def ld_library_path(self):
@@ -170,7 +171,7 @@ class BinaryTestCase(object):
     @ld_library_path.setter
     def ld_library_path(self, ld_library_path):
         '''Set ld_library_path'''
-        self._ld_library_path = ld_library_path
+        self._ld_library_path = ld_library_path.strip()
 
     @property
     def envp(self):
@@ -180,7 +181,7 @@ class BinaryTestCase(object):
     @envp.setter
     def envp(self, envp):
         '''Set env'''
-        self._envp = envp
+        self._envp = envp.strip()
 
     @property
     def args(self):
@@ -190,4 +191,4 @@ class BinaryTestCase(object):
     @args.setter
     def args(self, args):
         '''Set args'''
-        self._args = args
+        self._args = args.strip()
