@@ -22,6 +22,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test_with_webdb
 from vts.runners.host import keys
 from vts.runners.host import test_runner
+from vts.utils.python.common import cmd_utils
 
 
 class HostBinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
@@ -35,9 +36,7 @@ class HostBinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
     def setUpClass(self):
         """Retrieves the required param."""
-        required_params = [
-            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES,
-        ]
+        required_params = [keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES]
         self.getUserParams(req_param_names=required_params)
 
     def testHostBinary(self):
@@ -51,15 +50,11 @@ class HostBinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             binary_test_source = str(binary_test_source)
             binary_path = os.path.join(android_build_top, binary_test_source)
 
-            p = subprocess.Popen(
-                [binary_path],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            cmd_stdout, cmd_stderr = p.communicate()
-
-            asserts.assertEqual(
-                0, p.returncode,
+            cmd_result = cmd_utils.ExecuteShellCommand(binary_path)
+            asserts.assertFalse(
+                any(results[cmd_utils.EXIT_CODE]),
                 "Test failed with the following results:\n "
-                "stdout: %s\n stdedrr: %s" % (cmd_stdout, cmd_stderr))
+                "command result: %s" % results)
 
 
 if __name__ == "__main__":
