@@ -24,6 +24,7 @@ include $(LOCAL_PATH)/list/vts_test_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_trace_list.mk
+include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
 -include external/ltp/android/ltp_package_list.mk
 
 # Packaging rule for android-vts.zip
@@ -49,6 +50,7 @@ my_modules := \
     $(vts_test_lib_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
+    $(vts_func_fuzzer_packages) \
 
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
 
