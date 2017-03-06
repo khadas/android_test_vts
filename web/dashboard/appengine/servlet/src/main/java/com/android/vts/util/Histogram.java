@@ -130,11 +130,13 @@ public class Histogram extends Graph {
             if (max == null || value > max) max = value;
             if (min == null || value < min) min = value;
         }
-        if (profilingReport.getStartTimestamp() != profilingReport.getEndTimestamp() &&
-            profilingReport.getStartTimestamp() < profilingReport.getEndTimestamp()) {
-            values.add((double) profilingReport.getEndTimestamp() -
-                       profilingReport.getStartTimestamp());
+        if (profilingReport.getStartTimestamp() < profilingReport.getEndTimestamp()) {
+            double value = ((double) profilingReport.getEndTimestamp() -
+                            profilingReport.getStartTimestamp());
+            values.add(value);
             ids.add(id);
+            if (max == null || value > max) max = value;
+            if (min == null || value < min) min = value;
         }
     }
 
