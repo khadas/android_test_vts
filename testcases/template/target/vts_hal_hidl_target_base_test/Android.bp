@@ -28,4 +28,5 @@ cc_library_static {
 
     static_libs : ["libgtest"],
     export_include_dirs: ["."],
+    export_static_lib_headers: ["libgtest"],
 }
