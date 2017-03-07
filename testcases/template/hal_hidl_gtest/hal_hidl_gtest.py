@@ -50,8 +50,12 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         ]
         self.getUserParams(opt_param_names=opt_params)
 
-        if self.getUserParam(
-                keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False):
+        passthrough_opt = self.getUserParam(
+                keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
+
+        # Enable coverage if specified in the configuration or coverage enabled.
+        # TODO(ryanjcampbell@) support binderized mode
+        if passthrough_opt or self.coverage.enabled:
             self._EnablePassthroughMode()
 
         self._cpu_freq = None
