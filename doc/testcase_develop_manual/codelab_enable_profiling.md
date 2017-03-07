@@ -108,16 +108,14 @@ This subsection describes how to enable profiling for host-driven tests.
   Second, add the following code to the `setUpClass` function in your test script
 
 ```
-if self.enable_profiling:
-    profiling_utils.EnableVTSProfiling(self.dut.shell.one)
+if self.profiling.enabled:
+    self.profiling.EnableVTSProfiling(self.dut.shell.one)
 ```
 
    Also, add the following code to the `tearDownClass` function in your test script
 
 ```
-if self.enable_profiling:
-    profiling_trace_path = getattr(
-        self, self.VTS_PROFILING_TRACING_PATH, "")
-    self.ProcessAndUploadTraceData(self.dut, profiling_trace_path)
-    profiling_utils.DisableVTSProfiling(self.dut.shell.one)
+if self.profiling.enabled:
+    self.profiling.ProcessAndUploadTraceData(self.dut)
+    self.profiling.DisableVTSProfiling(self.dut.shell.one)
 ```
