@@ -23,6 +23,7 @@ from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.utils.python.web import feature_utils
+from vts.utils.python.common import cmd_utils
 
 LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
 TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/"
@@ -68,7 +69,10 @@ class ProfilingFeature(feature_utils.Feature):
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_PROFILING
-    _OPTIONAL_PARAMS = [keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH]
+    _OPTIONAL_PARAMS = [
+        keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH,
+        keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME
+    ]
 
     def __init__(self, user_params, web=None):
         """Initializes the profiling feature.
@@ -77,8 +81,10 @@ class ProfilingFeature(feature_utils.Feature):
             user_params: A dictionary from parameter name (String) to parameter value.
             web: (optional) WebFeature, object storing web feature util for test run
         """
-        self.ParseParameters(self._TOGGLE_PARAM, optional_param_names=self._OPTIONAL_PARAMS,
-                             user_params=user_params)
+        self.ParseParameters(
+            self._TOGGLE_PARAM,
+            optional_param_names=self._OPTIONAL_PARAMS,
+            user_params=user_params)
         self.web = web
         logging.info("Profiling enabled: %s", self.enabled)
 
@@ -90,22 +96,22 @@ class ProfilingFeature(feature_utils.Feature):
         return True
 
     @staticmethod
-    def GetTraceFiles(dut, host_profiling_trace_path):
+    def GetTraceFiles(dut, host_profiling_trace_path, trace_file_tool):
         """Pulls the trace file and save it under the profiling trace path.
 
         Args:
             dut: the testing device.
             host_profiling_trace_path: directory that stores trace files on host.
+            trace_file_tool: tools that used to store the trace file.
 
         Returns:
             Name list of trace files that stored on host.
         """
+        if not os.path.exists(LOCAL_PROFILING_TRACE_PATH):
+            os.makedirs(LOCAL_PROFILING_TRACE_PATH)
+
         if not host_profiling_trace_path:
             host_profiling_trace_path = LOCAL_PROFILING_TRACE_PATH
-        if not os.path.exists(host_profiling_trace_path):
-            os.makedirs(host_profiling_trace_path)
-        logging.info("Saving profiling traces under: %s",
-                     host_profiling_trace_path)
 
         dut.shell.InvokeTerminal("profiling_shell")
         results = dut.shell.profiling_shell.Execute("ls " + os.path.join(
@@ -116,10 +122,19 @@ class ProfilingFeature(feature_utils.Feature):
         trace_files = []
         for line in stdout_lines:
             if line:
-                file_name = os.path.join(host_profiling_trace_path,
-                                         os.path.basename(line.strip()))
-                dut.adb.pull("%s %s" % (line, file_name))
-                trace_files.append(file_name)
+                temp_file_name = os.path.join(LOCAL_PROFILING_TRACE_PATH,
+                                              os.path.basename(line.strip()))
+                dut.adb.pull("%s %s" % (line, temp_file_name))
+                trace_file_name = os.path.join(host_profiling_trace_path,
+                                               os.path.basename(line.strip()))
+                logging.info("Saving profiling traces: %s" % trace_file_name)
+                if temp_file_name != trace_file_name:
+                    file_cmd = trace_file_tool + " cp " + temp_file_name + " " + trace_file_name
+                    results = cmd_utils.ExecuteShellCommand(file_cmd)
+                    if results[const.EXIT_CODE][0] != 0:
+                        logging.error(results[const.STDERR][0])
+                        logging.error("Fail to execute command: %s" % file_cmd)
+            trace_files.append(temp_file_name)
         return trace_files
 
     @staticmethod
@@ -244,10 +259,8 @@ class ProfilingFeature(feature_utils.Feature):
         start_timestamp = host_profiling_data[name]
         end_timestamp = feature_utils.GetTimestamp()
         if self.web and self.web.enabled:
-            self.web.AddProfilingDataTimestamp(
-                name,
-                start_timestamp,
-                end_timestamp)
+            self.web.AddProfilingDataTimestamp(name, start_timestamp,
+                                               end_timestamp)
         return True
 
     def ProcessTraceDataForTestCase(self, dut):
@@ -269,7 +282,9 @@ class ProfilingFeature(feature_utils.Feature):
         profiling_data = getattr(self, _PROFILING_DATA)
 
         trace_files = self.GetTraceFiles(
-            dut, getattr(self, keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH, None))
+            dut,
+            getattr(self, keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH, None),
+            getattr(self, keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME, None))
         for file in trace_files:
             logging.info("parsing trace file: %s.", file)
             data = self._ParseTraceData(file)
