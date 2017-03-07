@@ -975,6 +975,15 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     }
     case TYPE_VECTOR:
     {
+      out << "if (" << actual_result << ".vector_value_size() != "
+          << expected_result << ".vector_value_size()) {\n";
+      out.indent();
+      out << "cerr << \"Verification failed for vector size. expected: \" << "
+             << expected_result << ".vector_value_size() << \" actual: \" << "
+             << actual_result << ".vector_value_size();\n";
+      out << "return false;\n";
+      out.unindent();
+      out << "}\n";
       out << "for (int i = 0; i <" << expected_result
           << ".vector_value_size(); i++) {\n";
       out.indent();
@@ -987,6 +996,15 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     }
     case TYPE_ARRAY:
     {
+      out << "if (" << actual_result << ".vector_value_size() != "
+          << expected_result << ".vector_value_size()) {\n";
+      out.indent();
+      out << "cerr << \"Verification failed for vector size. expected: \" << "
+          << expected_result << ".vector_value_size() << \" actual: \" << "
+          << actual_result << ".vector_value_size();\n";
+      out << "return false;\n";
+      out.unindent();
+      out << "}\n";
       out << "for (int i = 0; i < " << expected_result
           << ".vector_value_size(); i++) {\n";
       out.indent();
