@@ -18,7 +18,7 @@ import logging
 import os
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
@@ -28,7 +28,7 @@ from vts.utils.python.common import list_utils
 
 from vts.testcases.template.llvmfuzzer_test import llvmfuzzer_test_config as config
 
-class LLVMFuzzerTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class LLVMFuzzerTest(base_test.BaseTestClass):
     """Runs fuzzer tests on target.
 
     Attributes:

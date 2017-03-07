@@ -19,13 +19,13 @@ import os
 import subprocess
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.common import cmd_utils
 
 
-class HostBinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class HostBinaryTest(base_test.BaseTestClass):
     """Base class to run a host-side, native binary test.
 
     Note that a host-side binary test is not highly recommended because

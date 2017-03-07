@@ -18,15 +18,14 @@ import logging
 import os
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
-from vts.utils.python.coverage import coverage_utils
 
 
-class HalHidlReplayTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class HalHidlReplayTest(base_test.BaseTestClass):
     """Base class to run a HAL HIDL replay test on a target device.
 
     Attributes:
@@ -64,8 +63,9 @@ class HalHidlReplayTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
 
-        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
-            coverage_utils.InitializeDeviceCoverage(self._dut)
+        if self.coverage.enabled:
+            self.coverage.LoadArtifacts()
+            self.coverage.InitializeDeviceCoverage(self._dut)
 
         self.shell.Execute("setenforce 0")  # SELinux permissive mode
 
@@ -122,9 +122,8 @@ class HalHidlReplayTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self._dut.start()
 
         # Retrieve coverage if applicable
-        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
-            gcda_dict = coverage_utils.GetGcdaDict(self._dut)
-            self.SetCoverageData(gcda_dict, True)
+        if self.coverage.enabled:
+            self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
         # Delete the pushed file.
         cmd_results = self.shell.Execute(

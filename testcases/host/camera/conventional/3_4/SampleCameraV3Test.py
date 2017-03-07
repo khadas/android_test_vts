@@ -19,12 +19,12 @@ import logging
 import time
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class SampleCameraV3Test(base_test_with_webdb.BaseTestWithWebDbClass):
+class SampleCameraV3Test(base_test.BaseTestClass):
     """A sample testcase for the non-HIDL, conventional Camera HAL."""
     # Camera HAL version value (v3.4).
     VERSION_3_4 = 0x1000304

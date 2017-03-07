@@ -32,7 +32,7 @@ _DEFAULT_CONFIG_TEMPLATE = {
     },
     "log_path": "/tmp/logs",
     "test_paths": ["./"],
-    "use_gae_db": False,
+    "enable_web": False,
 }
 
 
