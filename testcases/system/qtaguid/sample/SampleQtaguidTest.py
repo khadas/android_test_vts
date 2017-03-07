@@ -17,12 +17,12 @@
 
 import logging
 
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class SampleQtaguidTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class SampleQtaguidTest(base_test.BaseTestClass):
     """A sample testcase for the libcutil's qtaguid module."""
 
     def setUpClass(self):
