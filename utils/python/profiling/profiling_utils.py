@@ -269,7 +269,7 @@ class ProfilingFeature(feature_utils.Feature):
         profiling_data = getattr(self, _PROFILING_DATA)
 
         trace_files = self.GetTraceFiles(
-            dut, getattr(self, keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH))
+            dut, getattr(self, keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH, None))
         for file in trace_files:
             logging.info("parsing trace file: %s.", file)
             data = self._ParseTraceData(file)
