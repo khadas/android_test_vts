@@ -72,6 +72,7 @@ class ConfigKeys(object):
     IKEY_ENABLE_PROFILING = "enable_profiling"
     IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths"
     IKEY_PROFILING_TRACING_PATH = "profiling_trace_path"
+    IKEY_TRACE_FILE_TOOL_NAME = "trace_file_tool_name"
 
     # Keys for systrace (for hal tests)
     IKEY_ENABLE_SYSTRACE = "enable_systrace"
