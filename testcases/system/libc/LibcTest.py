@@ -18,13 +18,13 @@
 import logging
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.runners.host import const
 
 
-class LibcTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class LibcTest(base_test.BaseTestClass):
     """A basic test of the libc API."""
 
     def setUpClass(self):

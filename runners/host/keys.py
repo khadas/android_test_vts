@@ -55,6 +55,7 @@ class ConfigKeys(object):
     IKEY_DATA_FILE_PATH = "data_file_path"
 
     # sub fields of test_bed
+    IKEY_ANDROID_DEVICE = "AndroidDevice"
     IKEY_PRODUCT_TYPE = "product_type"
     IKEY_PRODUCT_VARIANT = "product_variant"
     IKEY_BUILD_FLAVOR = "build_flavor"
@@ -64,9 +65,13 @@ class ConfigKeys(object):
     IKEY_API_LEVEL = "api_level"
     IKEY_SERIAL = "serial"
 
+    # Keys for web
+    IKEY_ENABLE_WEB = "enable_web"
+
     # Keys for profiling
     IKEY_ENABLE_PROFILING = "enable_profiling"
     IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths"
+    IKEY_PROFILING_TRACING_PATH = "profiling_trace_path"
 
     # Keys for systrace (for hal tests)
     IKEY_ENABLE_SYSTRACE = "enable_systrace"

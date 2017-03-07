@@ -19,19 +19,18 @@ import os
 import ntpath
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
-from vts.utils.python.coverage import coverage_utils
-from vts.utils.python.profiling import profiling_utils
+from vts.utils.python.web import feature_utils
 
 from vts.testcases.template.binary_test import binary_test_case
 
 
-class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class BinaryTest(base_test.BaseTestClass):
     '''Base class to run binary tests on target.
 
     Attributes:
@@ -148,8 +147,10 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         self._dut = self.registerController(android_device)[0]
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
-        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
-            coverage_utils.InitializeDeviceCoverage(self._dut)
+        if self.coverage.enabled:
+            self.coverage.LoadArtifacts()
+            self.coverage.InitializeDeviceCoverage(self._dut)
+
         # TODO: only set permissive mode for userdebug and eng build.
         self.shell.Execute("setenforce 0")  # SELinux permissive mode
         self.testcases = []
@@ -259,9 +260,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
             self._dut.start()
 
         # Retrieve coverage if applicable
-        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_COVERAGE, False):
-            gcda_dict = coverage_utils.GetGcdaDict(self._dut)
-            self.SetCoverageData(gcda_dict, True)
+        if self.coverage.enabled:
+            self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
         # Clean up the pushed binaries
         logging.info('Start class cleaning up jobs.')
@@ -286,8 +286,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning('Failed to remove: %s', cmd_results)
 
-        if self.enable_profiling:
-            self.ProcessAndUploadTraceData()
+        if self.profiling.enabled:
+            self.profiling.ProcessAndUploadTraceData()
 
         logging.info('Finished class cleaning up jobs.')
 
@@ -379,9 +379,8 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
         if self._skip_all_testcases:
             asserts.skip("All test cases skipped")
 
-        if self.enable_profiling:
-            profiling_utils.EnableVTSProfiling(
-                self.shell, test_case.profiling_library_path)
+        if self.profiling.enabled:
+            self.profiling.EnableVTSProfiling(self.shell, test_case.profiling_library_path)
 
         cmd = test_case.GetRunCommand()
         logging.info("Executing binary test command: %s", cmd)
@@ -389,11 +388,9 @@ class BinaryTest(base_test_with_webdb.BaseTestWithWebDbClass):
 
         self.VerifyTestResult(test_case, command_results)
 
-        if self.enable_profiling:
-            profiling_trace_path = getattr(self,
-                                           self.VTS_PROFILING_TRACING_PATH, "")
-            self.ProcessTraceDataForTestCase(self._dut, profiling_trace_path)
-            profiling_utils.DisableVTSProfiling(self.shell)
+        if self.profiling.enabled:
+            self.profiling.ProcessTraceDataForTestCase(self._dut)
+            self.profiling.DisableVTSProfiling(self.shell)
 
     def generateAllTests(self):
         '''Runs all binary tests.'''

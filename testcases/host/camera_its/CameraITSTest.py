@@ -23,13 +23,13 @@ import subprocess
 import sys
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 
 
-class CameraITSTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class CameraITSTest(base_test.BaseTestClass):
     """Running CameraITS tests in VTS"""
 
     # TODO: use config file to pass in:

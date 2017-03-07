@@ -20,13 +20,13 @@ import logging
 import random
 import time
 
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.utils.python.controllers import android_device
 from vts.utils.python.fuzzer import GenePool
 
 
-class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class StandaloneLightFuzzTest(base_test.BaseTestClass):
     """A standalone fuzz testcase for the conventional lights HAL."""
 
     def setUpClass(self):
@@ -42,6 +42,11 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             [self.dut.hal.light.LIGHT_ID_BACKLIGHT,
              self.dut.hal.light.LIGHT_ID_NOTIFICATIONS,
              self.dut.hal.light.LIGHT_ID_ATTENTION])
+
+        if self.coverage.enabled:
+            self.coverage.LoadArtifacts()
+            self.coverage.InitializeDeviceCoverage(self.dut)
+
         # TODO: broken on bullhead
         #   self.dut.hal.light.LIGHT_ID_KEYBOARD
         #   self.dut.hal.light.LIGHT_ID_BUTTONS
@@ -111,7 +116,9 @@ class StandaloneLightFuzzTest(base_test_with_webdb.BaseTestWithWebDbClass):
             genes = evolution.Evolve(genes,
                                      self.dut.hal.light.light_state_t_fuzz,
                                      coverages=coverages)
-        self.SetCoverageData(last_coverage_data)
+
+        if self.coverage.enabled:
+            self.coverage.SetCoverageData(last_coverage_data)
 
 
 if __name__ == "__main__":

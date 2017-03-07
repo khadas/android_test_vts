@@ -18,14 +18,14 @@
 import logging
 
 from vts.runners.host import asserts
-from vts.runners.host import base_test_with_webdb
+from vts.runners.host import base_test
 from vts.runners.host import test_runner
 from vts.runners.host import utils
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 
 
-class RebootRootRemountTest(base_test_with_webdb.BaseTestWithWebDbClass):
+class RebootRootRemountTest(base_test.BaseTestClass):
     """Tests if device can root and remount /system partition after reboot.
 
     Attributes:
