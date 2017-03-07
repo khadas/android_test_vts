@@ -31,6 +31,8 @@
 
         ONE_DAY = 86400000000;
         MICRO_PER_MILLI = 1000;
+        N_BUCKETS = 200;
+
         var graphs = ${graphs};
 
         $(function() {
@@ -143,6 +145,7 @@
             }, []);
 
             var data = google.visualization.arrayToDataTable(histogramData, true);
+            var bucketSize = (max - min) / N_BUCKETS;
 
             var options = {
                 title: title,
@@ -180,9 +183,10 @@
                 },
                 bar: { gap: 0 },
                 histogram: {
-                    maxNumBuckets: 200,
                     minValue: min,
-                    maxValue: max
+                    maxValue: max,
+                    maxNumBuckets: N_BUCKETS,
+                    bucketSize: bucketSize
                 },
                 chartArea: {
                     width: '100%',
