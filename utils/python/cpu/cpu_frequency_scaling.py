@@ -24,13 +24,20 @@ from vts.runners.host import const
 class CpuFrequencyScalingController(object):
     """CPU Frequency Scaling Controller.
 
+    The implementation is based on the special files in
+    /sys/devices/system/cpu/. CPU availability is shown in multiple files,
+    including online, present, and possible. This class assumes that a CPU may
+    be present but offline. If a CPU is online, its frequency scaling can be
+    adjusted by reading/writing to the files in cpuX/cpufreq/ where X is the
+    CPU number.
+
     Attributes:
         _dut: the target device DUT instance.
         _shell: Shell mirror object for communication with a target.
         _min_cpu_number: integer, the min CPU number.
         _max_cpu_number; integer, the max CPU number.
         _theoretical_max_frequency: a dict where its key is the CPU number and
-                                    its value is a string containing the
+                                    its value is an integer containing the
                                     theoretical max CPU frequency.
     """
 
@@ -52,8 +59,8 @@ class CpuFrequencyScalingController(object):
                 "cpufreq/scaling_available_frequencies" % cpu_no)
             asserts.assertEqual(1, len(results[const.STDOUT]))
             if results[const.STDOUT][0]:
-                self._theoretical_max_frequency[cpu_no] = results[
-                    const.STDOUT][0].split()[-1].strip()
+                freq = [int(x) for x in results[const.STDOUT][0].split()]
+                self._theoretical_max_frequency[cpu_no] = max(freq)
             else:
                 self._theoretical_max_frequency[cpu_no] = None
                 logging.warn("cpufreq/scaling_available_frequencies for cpu %s"
@@ -64,16 +71,19 @@ class CpuFrequencyScalingController(object):
         """Returns the min and max CPU numbers.
 
         Returns:
-            integer: min CPU number
-            integer: max CPU number
+            integer: min CPU number (inclusive)
+            integer: max CPU number (exclusive)
         """
         results = self._shell.Execute(
-            "cat /sys/devices/system/cpu/possible")
+            "cat /sys/devices/system/cpu/online")
         asserts.assertEqual(len(results[const.STDOUT]), 1)
         stdout_lines = results[const.STDOUT][0].split("\n")
-        (low, high) = stdout_lines[0].split('-')
-        logging.info("possible cpus: %s : %s" % (low, high))
-        return int(low), int(high)
+        stdout_split = stdout_lines[0].split('-')
+        asserts.assertLess(len(stdout_split), 3)
+        low = stdout_split[0]
+        high = stdout_split[1] if len(stdout_split) == 2 else low
+        logging.info("online cpus: %s : %s" % (low, high))
+        return int(low), int(high) + 1
 
     def ChangeCpuGoverner(self, mode):
         """Changes the CPU governer mode of all the CPUs on the device.
@@ -121,9 +131,9 @@ class CpuFrequencyScalingController(object):
                     cpu_no, configurable_max_frequency, current_frequency)
                 return True
             if (self._theoretical_max_frequency[cpu_no] is not None and
-                self._theoretical_max_frequency[cpu_no] != current_frequency):
+                self._theoretical_max_frequency[cpu_no] != int(current_frequency)):
                 logging.error(
-                    "CPU%s, Theoretical max frequency %s != scaling current frequency %s",
+                    "CPU%s, Theoretical max frequency %d != scaling current frequency %s",
                     cpu_no, self._theoretical_max_frequency[cpu_no], current_frequency)
                 return True
         return False
