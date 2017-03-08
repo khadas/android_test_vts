@@ -34,6 +34,10 @@ vts_func_fuzzer_packages := \
   android.hardware.audio.effect@2.0-vts.func_fuzzer.PresetReverbEffect \
   android.hardware.audio.effect@2.0-vts.func_fuzzer.VirtualizerEffect \
   android.hardware.audio.effect@2.0-vts.func_fuzzer.VisualizerEffect \
+  android.hardware.automotive.evs@1.0-vts.func_fuzzer.EvsCamera \
+  android.hardware.automotive.evs@1.0-vts.func_fuzzer.EvsCameraStream \
+  android.hardware.automotive.evs@1.0-vts.func_fuzzer.EvsDisplay \
+  android.hardware.automotive.evs@1.0-vts.func_fuzzer.EvsEnumerator \
   android.hardware.automotive.vehicle@2.0-vts.func_fuzzer.Vehicle \
   android.hardware.automotive.vehicle@2.1-vts.func_fuzzer.Vehicle \
   android.hardware.benchmarks.msgq@1.0-vts.func_fuzzer.BenchmarkMsgQ \
@@ -58,10 +62,6 @@ vts_func_fuzzer_packages := \
   android.hardware.drm@1.0-vts.func_fuzzer.DrmPlugin \
   android.hardware.drm@1.0-vts.func_fuzzer.DrmPluginListener \
   android.hardware.dumpstate@1.0-vts.func_fuzzer.DumpstateDevice \
-  android.hardware.evs@1.0-vts.func_fuzzer.EvsCamera \
-  android.hardware.evs@1.0-vts.func_fuzzer.EvsCameraStream \
-  android.hardware.evs@1.0-vts.func_fuzzer.EvsDisplay \
-  android.hardware.evs@1.0-vts.func_fuzzer.EvsEnumerator \
   android.hardware.gatekeeper@1.0-vts.func_fuzzer.Gatekeeper \
   android.hardware.gnss@1.0-vts.func_fuzzer.AGnss \
   android.hardware.gnss@1.0-vts.func_fuzzer.AGnssRil \
