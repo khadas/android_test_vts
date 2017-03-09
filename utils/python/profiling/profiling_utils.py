@@ -129,12 +129,15 @@ class ProfilingFeature(feature_utils.Feature):
                                                os.path.basename(line.strip()))
                 logging.info("Saving profiling traces: %s" % trace_file_name)
                 if temp_file_name != trace_file_name:
-                    file_cmd = trace_file_tool + " cp " + temp_file_name + " " + trace_file_name
+                    file_cmd = ""
+                    if trace_file_tool:
+                        file_cmd += trace_file_tool
+                    file_cmd += " cp " + temp_file_name + " " + trace_file_name
                     results = cmd_utils.ExecuteShellCommand(file_cmd)
                     if results[const.EXIT_CODE][0] != 0:
                         logging.error(results[const.STDERR][0])
                         logging.error("Fail to execute command: %s" % file_cmd)
-            trace_files.append(temp_file_name)
+                trace_files.append(temp_file_name)
         return trace_files
 
     @staticmethod
