@@ -605,6 +605,8 @@ class AndroidDevice(object):
                           "should not be None. No property is set.")
             return
 
+        value = str(value)
+
         if "'" in value or "\"" in value:
             logging.error("Quotes in value of system property "
                           "is not yet supported. No property is set.")
