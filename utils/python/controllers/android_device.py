@@ -592,26 +592,45 @@ class AndroidDevice(object):
         """Calls setprop shell command.
 
         Args:
-            name: string, the name of a system property to set.
-            value: any type, str(value) will be called to convert value to string.
-                   value will also be wrapped with double quote '"', and any existing
-                   '"' inside str(value) will be replaced with '\"'
+            name: string, the name of a system property to set
+            value: any type, value will be converted to string. Quotes in value
+                   is not supported at this time; if value contains a quote,
+                   this method will log an error and return.
+
+        Raises:
+            AdbError, if name contains invalid character
         """
-        value = str(value)
-        value.replace("\"", "\\\"")
-        self.adb.shell("setprop %s \"%s\"" % (name, value))
+        if name is None or value is None:
+            logging.error("name or value of system property "
+                          "should not be None. No property is set.")
+            return
+
+        if "'" in value or "\"" in value:
+            logging.error("Quotes in value of system property "
+                          "is not yet supported. No property is set.")
+            return
+
+        self.adb.shell("\'setprop %s \"%s\"\'" % (name, value))
 
     def getProp(self, name):
         """Calls getprop shell command.
 
         Args:
-            name: string, the name of a system property to get.
+            name: string, the name of a system property to get
 
         Returns:
-            string, value of the property. If name does not exist, an empty
+            string, value of the property. If name does not exist; an empty
             string will be returned. decode("utf-8") and strip() will be called
-            on the output before returning.
+            on the output before returning; None will be returned if input
+            name is None
+
+        Raises:
+            AdbError, if name contains invalid character
         """
+        if name is None:
+            logging.error("name of system property should not be None.")
+            return None
+
         out = self.adb.shell("getprop %s" % name)
         return out.decode("utf-8").strip()
 
