@@ -125,5 +125,6 @@ vts_test_lib_packages += \
     libclang_rt.asan-arm-android \
     libclang_rt.asan-aarch64-android \
     libclang_rt.asan-i686-android \
+    libvts_func_fuzzer_utils \
     libvts_proto_fuzzer \
     libvts_proto_fuzzer_proto \
