@@ -88,11 +88,7 @@ class BaseTestClass(object):
                        keys.ConfigKeys.KEY_EXCLUDE_FILTER]
             for filter in filters:
                 if filter in test_suite:
-                    filter_expanded = list_utils.ExpandItemDelimiters(
-                        test_suite[filter],
-                        const.LIST_ITEM_DELIMITER,
-                        strip=True)
-                    setattr(self, filter, filter_expanded)
+                    setattr(self, filter, test_suite[filter])
 
         # TODO: get abi information differently for multi-device support.
         # Set other optional parameters

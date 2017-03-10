@@ -36,7 +36,7 @@ class HostBinaryTest(base_test.BaseTestClass):
 
     def setUpClass(self):
         """Retrieves the required param."""
-        required_params = [keys.ConfigKeys.IKEY_BINARY_TEST_SOURCES]
+        required_params = [keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE]
         self.getUserParams(req_param_names=required_params)
 
     def testHostBinary(self):
@@ -46,7 +46,7 @@ class HostBinaryTest(base_test.BaseTestClass):
             android_build_top,
             "$ANDROID_BUILD_TOP is not set. Please run lunch <build target>")
 
-        for binary_test_source in self.binary_test_sources:
+        for binary_test_source in self.binary_test_source:
             binary_test_source = str(binary_test_source)
             binary_path = os.path.join(android_build_top, binary_test_source)
 

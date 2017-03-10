@@ -35,9 +35,9 @@ class ConfigKeys(object):
     KEY_EXCLUDE_FILTER = "exclude_filter"
 
     # Keys for binary tests
-    IKEY_BINARY_TEST_SOURCES = "binary_test_sources"
-    IKEY_BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories"
-    IKEY_BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths"
+    IKEY_BINARY_TEST_SOURCE = "binary_test_source"
+    IKEY_BINARY_TEST_WORKING_DIRECTORY = "binary_test_working_directory"
+    IKEY_BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path"
     IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
     IKEY_BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers"
 
@@ -70,7 +70,7 @@ class ConfigKeys(object):
 
     # Keys for profiling
     IKEY_ENABLE_PROFILING = "enable_profiling"
-    IKEY_BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths"
+    IKEY_BINARY_TEST_PROFILING_LIBRARY_PATH = "binary_test_profiling_library_path"
     IKEY_PROFILING_TRACING_PATH = "profiling_trace_path"
     IKEY_TRACE_FILE_TOOL_NAME = "trace_file_tool_name"
 
