@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __VTS_HAL_HIDL_TARGET_BASE_TEST_H
-#define __VTS_HAL_HIDL_TARGET_BASE_TEST_H
+#ifndef __VTS_HAL_HIDL_TARGET_TEST_BASE_H
+#define __VTS_HAL_HIDL_TARGET_TEST_BASE_H
 
 #include <gtest/gtest.h>
 #include <hidl/HidlSupport.h>
@@ -28,7 +28,7 @@ namespace testing {
 using ::android::sp;
 
 // VTS target side test template
-class VtsHalHidlTargetBaseTest : public ::testing::Test {
+class VtsHalHidlTargetTestBase : public ::testing::Test {
  public:
   /*
    * Get value of system property as string on target
@@ -40,7 +40,7 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
    */
   template <class T>
   static sp<T> getService(const std::string& serviceName = "default") {
-    return T::getService(serviceName, VtsHalHidlTargetBaseTest::VtsGetStub());
+    return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
   }
 
   /*
@@ -48,7 +48,7 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
    */
   template <class T>
   static sp<T> getService(const char serviceName[]) {
-    return T::getService(serviceName, VtsHalHidlTargetBaseTest::VtsGetStub());
+    return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
   }
 
   /*
@@ -56,7 +56,7 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
    */
   template <class T>
   static sp<T> getService(const ::android::hardware::hidl_string& serviceName) {
-    return T::getService(serviceName, VtsHalHidlTargetBaseTest::VtsGetStub());
+    return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
   }
 
  private:
@@ -71,4 +71,4 @@ class VtsHalHidlTargetBaseTest : public ::testing::Test {
 }  // namespace testing
 
 
-#endif  // __VTS_HAL_HIDL_TARGET_BASE_TEST_H
+#endif  // __VTS_HAL_HIDL_TARGET_TEST_BASE_H

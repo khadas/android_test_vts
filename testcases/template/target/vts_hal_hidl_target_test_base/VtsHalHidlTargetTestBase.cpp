@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include "VtsHalHidlTargetBaseTest.h"
+#include "VtsHalHidlTargetTestBase.h"
 
 #include <sys/system_properties.h>
 
 namespace testing {
 
-std::string VtsHalHidlTargetBaseTest::PropertyGet(const char* name) {
+std::string VtsHalHidlTargetTestBase::PropertyGet(const char* name) {
   char value[PROP_VALUE_MAX] = {0};
   __system_property_get(name, value);
   return value;
 }
 
-bool VtsHalHidlTargetBaseTest::VtsGetStub() {
+bool VtsHalHidlTargetTestBase::VtsGetStub() {
   const char* env_value = getenv(VTS_HAL_HIDL_GET_STUB);
   if (env_value == NULL) {
     // VTS_HAL_HIDL_GET_STUB is not set in environment
