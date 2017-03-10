@@ -16,6 +16,6 @@ subdirs = [
      "drivers",
      "proto",
      "compilation_tools",
-     "testcases/template/target/vts_hal_hidl_target_base_test",
+     "testcases/template/target/vts_hal_hidl_target_test_base",
      "utils",
 ]
