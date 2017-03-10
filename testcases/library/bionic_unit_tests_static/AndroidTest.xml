@@ -22,50 +22,47 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="BionicUnitTestsStatic" />
-        <option name="binary-test-sources" value="
-            _32bit::DATA/nativetest/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest/bionic-unit-tests-static/bionic-unit-tests-static,
-            _64bit::DATA/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static
-            "/>
+        <option name="binary-test-source" value="_32bit::DATA/nativetest/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest/bionic-unit-tests-static/bionic-unit-tests-static" />
+        <option name="binary-test-source" value="_64bit::DATA/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static" />
         <option name="binary-test-type" value="gtest" />
-        <option name="exclude-filter" value="
-            pthread.big_enough_signal_stack_for_64bit_arch,
-            semaphore.sem_wait_no_EINTR_in_sdk_less_equal_than_23,
-            semaphore.sem_wait_EINTR_in_sdk_greater_than_23,
-            stack_unwinding.easy,
-            stack_unwinding.unwind_through_signal_frame,
-            stack_unwinding.unwind_through_signal_frame_SA_SIGINFO,
-            stdio_nofortify.xfail_fmemopen_NULL,
-            sys_msg.smoke,
-            sys_msg.msgctl_failure,
-            sys_msg.msgget_failure,
-            sys_msg.msgrcv_failure,
-            sys_msg.msgsnd_failure,
-            sys_personality.current_persona,
-            sys_sem.smoke,
-            sys_sem.semget_failure,
-            sys_sem.semctl_failure,
-            sys_sem.semop_failure,
-            sys_sem.semtimedop_failure,
-            sys_shm.smoke,
-            sys_shm.shmat_failure,
-            sys_shm.shmctl_failure,
-            sys_shm.shmdt_failure,
-            sys_shm.shmget_failure,
-            wctype.iswalnum,
-            wctype.iswalpha,
-            wctype.iswblank,
-            wctype.iswcntrl,
-            wctype.iswdigit,
-            wctype.iswgraph,
-            wctype.iswlower,
-            wctype.iswprint,
-            wctype.iswpunct,
-            wctype.iswspace,
-            wctype.iswupper,
-            wctype.iswxdigit,
-            wctype.towlower,
-            wctype.towlower_l,
-            wctype.towupper,
-            wctype.towupper_l" />
+        <option name="exclude-filter" value="pthread.big_enough_signal_stack_for_64bit_arch" />
+        <option name="exclude-filter" value="semaphore.sem_wait_no_EINTR_in_sdk_less_equal_than_23" />
+        <option name="exclude-filter" value="semaphore.sem_wait_EINTR_in_sdk_greater_than_23" />
+        <option name="exclude-filter" value="stack_unwinding.easy" />
+        <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame" />
+        <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame_SA_SIGINFO" />
+        <option name="exclude-filter" value="stdio_nofortify.xfail_fmemopen_NULL" />
+        <option name="exclude-filter" value="sys_msg.smoke" />
+        <option name="exclude-filter" value="sys_msg.msgctl_failure" />
+        <option name="exclude-filter" value="sys_msg.msgget_failure" />
+        <option name="exclude-filter" value="sys_msg.msgrcv_failure" />
+        <option name="exclude-filter" value="sys_msg.msgsnd_failure" />
+        <option name="exclude-filter" value="sys_personality.current_persona" />
+        <option name="exclude-filter" value="sys_sem.smoke" />
+        <option name="exclude-filter" value="sys_sem.semget_failure" />
+        <option name="exclude-filter" value="sys_sem.semctl_failure" />
+        <option name="exclude-filter" value="sys_sem.semop_failure" />
+        <option name="exclude-filter" value="sys_sem.semtimedop_failure" />
+        <option name="exclude-filter" value="sys_shm.smoke" />
+        <option name="exclude-filter" value="sys_shm.shmat_failure" />
+        <option name="exclude-filter" value="sys_shm.shmctl_failure" />
+        <option name="exclude-filter" value="sys_shm.shmdt_failure" />
+        <option name="exclude-filter" value="sys_shm.shmget_failure" />
+        <option name="exclude-filter" value="wctype.iswalnum" />
+        <option name="exclude-filter" value="wctype.iswalpha" />
+        <option name="exclude-filter" value="wctype.iswblank" />
+        <option name="exclude-filter" value="wctype.iswcntrl" />
+        <option name="exclude-filter" value="wctype.iswdigit" />
+        <option name="exclude-filter" value="wctype.iswgraph" />
+        <option name="exclude-filter" value="wctype.iswlower" />
+        <option name="exclude-filter" value="wctype.iswprint" />
+        <option name="exclude-filter" value="wctype.iswpunct" />
+        <option name="exclude-filter" value="wctype.iswspace" />
+        <option name="exclude-filter" value="wctype.iswupper" />
+        <option name="exclude-filter" value="wctype.iswxdigit" />
+        <option name="exclude-filter" value="wctype.towlower" />
+        <option name="exclude-filter" value="wctype.towlower_l" />
+        <option name="exclude-filter" value="wctype.towupper" />
+        <option name="exclude-filter" value="wctype.towupper_l" />
     </test>
 </configuration>
