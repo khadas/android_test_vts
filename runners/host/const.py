@@ -19,8 +19,6 @@ STDOUT = cmd_utils.STDOUT
 STDERR = cmd_utils.STDERR
 EXIT_CODE = cmd_utils.EXIT_CODE
 
-LIST_ITEM_DELIMITER = ','
-
 # Note: filterOneTest method in base_test.py assumes SUFFIX_32BIT and SUFFIX_64BIT
 # are in lower cases.
 SUFFIX_32BIT = "32bit"

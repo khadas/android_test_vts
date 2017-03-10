@@ -13,9 +13,7 @@ Let's assume your test's AndroidTest.xml looks like following.
 ```xml
 <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
     <option name="test-module-name" value="HalMyHidlTargetTest"/>
-    <option name="binary-test-sources" value="
-        ...
-        "/>
+    <option name="binary-test-source" value="..." />
 ...
 ```
 ---
