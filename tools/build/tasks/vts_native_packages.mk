@@ -25,6 +25,8 @@ include $(LOCAL_PATH)/list/vts_test_lib_hal_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_lib_hidl_trace_list.mk
 include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
+include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
+include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
 -include external/ltp/android/ltp_package_list.mk
 
 # Packaging rule for android-vts.zip
@@ -88,6 +90,8 @@ my_spec_copy_pairs +=
     $(if $(wildcard $(m)),\
       $(eval my_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/spec/$(m))))\
 
+# Packaging rule for android-vts.zip's testcases dir (hal-hidl-trace subdir).
+
 my_trace_modules := \
     $(vts_test_lib_hidl_trace_list) \
 
@@ -96,5 +100,28 @@ my_trace_copy_pairs :=
     $(if $(wildcard $(m)),\
       $(eval my_trace_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/hal-hidl-trace/$(m))))\
 
-$(compatibility_zip): $(call copy-many-files,$(my_copy_pairs)) $(call copy-many-files,$(my_spec_copy_pairs)) $(call copy-many-files,$(my_trace_copy_pairs))
+# Packaging rule for android-vts.zip's testcases dir (host subdir).
 
+my_host_modules := \
+  $(vts_test_host_lib_packages) \
+  $(vts_test_host_bin_packages) \
+
+my_host_copy_pairs :=
+  $(foreach m,$(my_host_modules),\
+    $(eval _built_files := $(strip $(ALL_MODULES.$(m).BUILT_INSTALLED)\
+    $(ALL_MODULES.$(m)$(HOST_2ND_ARCH_MODULE_SUFFIX).BUILT_INSTALLED)))\
+    $(foreach i, $(_built_files),\
+      $(eval bui_ins := $(subst :,$(space),$(i)))\
+      $(eval ins := $(word 2,$(bui_ins)))\
+      $(if $(filter $(HOST_OUT)/%,$(ins)),\
+        $(eval bui := $(word 1,$(bui_ins)))\
+        $(eval my_built_modules += $(bui))\
+        $(eval my_copy_dest := $(patsubst $(HOST_OUT)/%,%,$(ins)))\
+        $(eval my_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/host/$(my_copy_dest)))\
+    ))
+
+$(compatibility_zip): \
+  $(call copy-many-files,$(my_copy_pairs)) \
+  $(call copy-many-files,$(my_spec_copy_pairs)) \
+  $(call copy-many-files,$(my_trace_copy_pairs)) \
+  $(call copy-many-files,$(my_host_copy_pairs))
