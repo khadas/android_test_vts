@@ -22,27 +22,24 @@
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="BionicUnitTests" />
-        <option name="binary-test-sources" value="
-            _32bit::DATA/nativetest/bionic-unit-tests/bionic-unit-tests->/data/nativetest/bionic-unit-tests/bionic-unit-tests,
-            _64bit::DATA/nativetest64/bionic-unit-tests/bionic-unit-tests->/data/nativetest64/bionic-unit-tests/bionic-unit-tests
-            "/>
+        <option name="binary-test-source" value="_32bit::DATA/nativetest/bionic-unit-tests/bionic-unit-tests->/data/nativetest/bionic-unit-tests/bionic-unit-tests" />
+        <option name="binary-test-source" value="_64bit::DATA/nativetest64/bionic-unit-tests/bionic-unit-tests->/data/nativetest64/bionic-unit-tests/bionic-unit-tests" />
         <option name="binary-test-type" value="gtest" />
-        <option name="exclude-filter" value="
-            sys_msg.smoke,
-            sys_msg.msgctl_failure,
-            sys_msg.msgget_failure,
-            sys_msg.msgrcv_failure,
-            sys_msg.msgsnd_failure,
-            sys_personality.current_persona,
-            sys_sem.smoke,
-            sys_sem.semget_failure,
-            sys_sem.semctl_failure,
-            sys_sem.semop_failure,
-            sys_sem.semtimedop_failure,
-            sys_shm.smoke,
-            sys_shm.shmat_failure,
-            sys_shm.shmctl_failure,
-            sys_shm.shmdt_failure,
-            sys_shm.shmget_failure" />
+        <option name="exclude-filter" value="sys_msg.smoke" />
+        <option name="exclude-filter" value="sys_msg.msgctl_failure" />
+        <option name="exclude-filter" value="sys_msg.msgget_failure" />
+        <option name="exclude-filter" value="sys_msg.msgrcv_failure" />
+        <option name="exclude-filter" value="sys_msg.msgsnd_failure" />
+        <option name="exclude-filter" value="sys_personality.current_persona" />
+        <option name="exclude-filter" value="sys_sem.smoke" />
+        <option name="exclude-filter" value="sys_sem.semget_failure" />
+        <option name="exclude-filter" value="sys_sem.semctl_failure" />
+        <option name="exclude-filter" value="sys_sem.semop_failure" />
+        <option name="exclude-filter" value="sys_sem.semtimedop_failure" />
+        <option name="exclude-filter" value="sys_shm.smoke" />
+        <option name="exclude-filter" value="sys_shm.shmat_failure" />
+        <option name="exclude-filter" value="sys_shm.shmctl_failure" />
+        <option name="exclude-filter" value="sys_shm.shmdt_failure" />
+        <option name="exclude-filter" value="sys_shm.shmget_failure" />
     </test>
 </configuration>

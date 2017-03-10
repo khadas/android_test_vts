@@ -84,10 +84,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
-    static final String BINARY_TEST_SOURCES = "binary_test_sources";
-    static final String BINARY_TEST_WORKING_DIRECTORIES = "binary_test_working_directories";
-    static final String BINARY_TEST_LD_LIBRARY_PATHS = "binary_test_ld_library_paths";
-    static final String BINARY_TEST_PROFILING_LIBRARY_PATHS = "binary_test_profiling_library_paths";
+    static final String BINARY_TEST_SOURCE = "binary_test_source";
+    static final String BINARY_TEST_WORKING_DIRECTORY = "binary_test_working_directory";
+    static final String BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path";
+    static final String BINARY_TEST_PROFILING_LIBRARY_PATH = "binary_test_profiling_library_path";
     static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
     static final String BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
@@ -200,7 +200,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             description = "Whether to run 32bit tests on 64bit ABI.")
     private boolean mRun32bBitOn64BitAbi = false;
 
-    @Option(name = "binary-test-sources",
+    @Option(name = "binary-test-source",
             description = "Binary test source paths relative to vts testcase directory on host."
                     + "Format of tags:"
                     + "    <source>: source without tag."
@@ -232,30 +232,30 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     + "          override the binary test runner's CreateTestCase method in python."
                     + "    If you wish to push a source file to a specific destination and not"
                     + "    create a test case from it, please use VtsFilePusher.")
-    private Collection<String> mBinaryTestSources = new ArrayList<>();
+    private Collection<String> mBinaryTestSource = new ArrayList<>();
 
-    @Option(name = "binary-test-working-directories", description = "Working directories for binary "
+    @Option(name = "binary-test-working-directory", description = "Working directories for binary "
             + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
             + "Multiple directories can be separated by ','. However, each tag should only has "
             + "one working directory. This option is optional for binary tests. If not specified, "
             + "different directories will be used for files with different tags.")
-    private Collection<String> mBinaryTestWorkingDirectories = new ArrayList<>();
+    private Collection<String> mBinaryTestWorkingDirectory = new ArrayList<>();
 
-    @Option(name = "binary-test-ld-library-paths", description = "LD_LIBRARY_PATH for binary "
+    @Option(name = "binary-test-ld-library-path", description = "LD_LIBRARY_PATH for binary "
             + "tests. Tags can be added to the front of each instance using '::' as delimiter. "
             + "Multiple directories can be added under a same tag using ':' as delimiter. "
-            + "Multiple instances of ld-library-paths rule can be separated by ','. "
-            + "There can be multiple instances of ld-library-paths for a same tag, which will "
+            + "Multiple instances of ld-library-path rule can be separated by ','. "
+            + "There can be multiple instances of ld-library-path for a same tag, which will "
             + "later automatically be combined using ':' as delimiter. Paths without a tag "
             + "will only used for binaries without tag. This option is optional for binary tests.")
-    private Collection<String> mBinaryTestLdLibraryPaths = new ArrayList<>();
+    private Collection<String> mBinaryTestLdLibraryPath = new ArrayList<>();
 
-    @Option(name = "binary-test-profiling-library-paths", description = "Path to lookup and load "
+    @Option(name = "binary-test-profiling-library-path", description = "Path to lookup and load "
             + "profiling libraries for tests with profiling enabled. Tags can be added to the "
             + "front of each directory using '::' as delimiter. Only one directory could be "
             + "specified for the same tag. This option is optional for binary tests. If not "
             + "specified, default directories will be used for files with different tags.")
-    private Collection<String> mBinaryTestProfilingLibraryPaths = new ArrayList<>();
+    private Collection<String> mBinaryTestProfilingLibraryPath = new ArrayList<>();
 
     @Option(name = "binary-test-disable-framework", description = "Adb stop/start before/after test.")
     private boolean mBinaryTestDisableFramework = false;
@@ -408,7 +408,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         }
 
         if (mTestCasePath == null) {
-            if (!mBinaryTestSources.isEmpty()) {
+            if (!mBinaryTestSource.isEmpty()) {
                 String template;
                 switch (mBinaryTestType) {
                     case BINARY_TEST_TYPE_GTEST:
@@ -605,19 +605,19 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Added %s to the Json object", RUN_32BIT_ON_64BIT_ABI);
         }
 
-        if (!mBinaryTestSources.isEmpty()) {
-            jsonObject.put(BINARY_TEST_SOURCES, new JSONArray(mBinaryTestSources));
-            CLog.i("Added %s to the Json object", BINARY_TEST_SOURCES);
+        if (!mBinaryTestSource.isEmpty()) {
+            jsonObject.put(BINARY_TEST_SOURCE, new JSONArray(mBinaryTestSource));
+            CLog.i("Added %s to the Json object", BINARY_TEST_SOURCE);
         }
-        if (!mBinaryTestWorkingDirectories.isEmpty()) {
-            jsonObject.put(BINARY_TEST_WORKING_DIRECTORIES,
-                    new JSONArray(mBinaryTestWorkingDirectories));
-            CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORIES);
+        if (!mBinaryTestWorkingDirectory.isEmpty()) {
+            jsonObject.put(BINARY_TEST_WORKING_DIRECTORY,
+                    new JSONArray(mBinaryTestWorkingDirectory));
+            CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORY);
         }
-        if (!mBinaryTestLdLibraryPaths.isEmpty()) {
-            jsonObject.put(BINARY_TEST_LD_LIBRARY_PATHS,
-                    new JSONArray(mBinaryTestLdLibraryPaths));
-            CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATHS);
+        if (!mBinaryTestLdLibraryPath.isEmpty()) {
+            jsonObject.put(BINARY_TEST_LD_LIBRARY_PATH,
+                    new JSONArray(mBinaryTestLdLibraryPath));
+            CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATH);
         }
 
         if (mEnableProfiling) {
@@ -657,10 +657,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Added %s to the Json object", PRECONDITION_LSHAL);
         }
 
-        if (!mBinaryTestProfilingLibraryPaths.isEmpty()) {
-            jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATHS,
-                    new JSONArray(mBinaryTestProfilingLibraryPaths));
-            CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATHS);
+        if (!mBinaryTestProfilingLibraryPath.isEmpty()) {
+            jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATH,
+                    new JSONArray(mBinaryTestProfilingLibraryPath));
+            CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATH);
         }
 
         if (mBinaryTestType.equals(BINARY_TEST_TYPE_HAL_HIDL_GTEST)) {

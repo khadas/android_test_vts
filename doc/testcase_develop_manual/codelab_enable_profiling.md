@@ -60,10 +60,8 @@ looks like:
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer" />
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsHalVibratorV1_0TargetProfiling" />
-        <option name="binary-test-sources" value="
-            _32bit::DATA/nativetest/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest,
-            _64bit::DATA/nativetest64/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest,
-            "/>
+        <option name="binary-test-source" value="_32bit::DATA/nativetest/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest" />
+        <option name="binary-test-source" value="_64bit::DATA/nativetest64/VtsHalVibratorV1_0TargetTest/VtsHalVibratorV1_0TargetTest" />
         <option name="binary-test-type" value="hal_hidl_gtest" />
         <option name="enable-profiling" value="true" />
         <option name="precondition-lshal" value="android.hardware.vibrator@1.0"/>
