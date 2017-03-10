@@ -15,8 +15,8 @@
 //
 
 cc_library_static {
-    name: "VtsHalHidlTargetBaseTest",
-    srcs : ["VtsHalHidlTargetBaseTest.cpp"],
+    name: "VtsHalHidlTargetTestBase",
+    srcs : ["VtsHalHidlTargetTestBase.cpp"],
 
     shared_libs: [
         "libbase",
