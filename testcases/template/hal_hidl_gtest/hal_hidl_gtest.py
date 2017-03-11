@@ -21,6 +21,13 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.utils.python.cpu import cpu_frequency_scaling
+from xml.etree import ElementTree
+
+_HWBINDER = "hwbinder"
+_NAME = "name"
+_PASSTHROUGH = "passthrough"
+_TRANSPORT = "transport"
+_VERSION = "version"
 
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
@@ -112,15 +119,63 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             feature = str(
                 getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
             if feature:
-                cmd_results = self.shell.Execute("lshal -itpc")
-                if (feature not in cmd_results[const.STDOUT][0]):
-                    logging.warn("The required feature %s not found.", feature)
-                    self._skip_all_testcases = True
-
+                cmd_results = self.shell.Execute(
+                    "lshal --init-vintf 2> /dev/null")
+                if cmd_results[const.EXIT_CODE][0] == 0:
+                    if cmd_results[const.STDOUT][0]:
+                        try:
+                            hwbinder_hals, passthrough_hals = self.ParseVintfXml(
+                                cmd_results[const.STDOUT][0])
+                            if (feature not in hwbinder_hals and
+                                feature not in passthrough_hals):
+                                logging.warn("The required feature %s not found.",
+                                             feature)
+                                self._skip_all_testcases = True
+                        except ElementTree.ParseError as e:
+                            logging.exception(e)
+                            logging.error("can't check precondition due to a "
+                                          "lshal output format error: %s",
+                                          cmd_results[const.STDOUT][0])
         if not self._skip_all_testcases:
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
             self._cpu_freq.DisableCpuScaling()
+
+    @staticmethod
+    def ParseVintfXml(vintf_xml):
+      """Parses a vintf xml string.
+
+      Args:
+          vintf_xml: string, containing a vintf.xml file content.
+
+      Returns:
+          a list containing the package names of hwbinder HALs,
+          a list containing the package names of passthrough HALs.
+      """
+      xml_root = ElementTree.fromstring(vintf_xml)
+
+      hwbinder_hals = []
+      passthrough_hals = []
+
+      for xml_hal in xml_root:
+          hal_name = None
+          hal_transport = None
+          hal_version = None
+          for xml_hal_item in xml_hal:
+              if str(xml_hal_item.tag) == _NAME:
+                  hal_name = str(xml_hal_item.text)
+              elif str(xml_hal_item.tag) == _TRANSPORT:
+                  hal_transport = str(xml_hal_item.text)
+              elif str(xml_hal_item.tag) == _VERSION:
+                  hal_version = str(xml_hal_item.text)
+          hal_package_name = "%s@%s" % (hal_name, hal_version)
+          if hal_transport == _HWBINDER:
+              hwbinder_hals.append(hal_package_name)
+          elif hal_transport == _PASSTHROUGH:
+              passthrough_hals.append(hal_package_name)
+          else:
+              logging.error("Unknown transport type %s", hal_transport)
+      return hwbinder_hals, passthrough_hals
 
     def _EnablePassthroughMode(self):
         """Enable passthrough mode by setting getStub to true.
