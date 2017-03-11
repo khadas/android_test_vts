@@ -47,11 +47,15 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
             keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
             keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
+            keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING
         ]
         self.getUserParams(opt_param_names=opt_params)
 
         passthrough_opt = self.getUserParam(
                 keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
+        self._skip_if_thermal_throttling = self.getUserParam(
+                keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
+                default_value=False)
 
         # Enable coverage if specified in the configuration or coverage enabled.
         # TODO(ryanjcampbell@) support binderized mode
@@ -139,7 +143,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         """Skips the test case if thermal throttling lasts for 30 seconds."""
         super(HidlHalGTest, self).setUpTest()
         if not self._skip_all_testcases:
-            if self._cpu_freq:
+            if self._cpu_freq and self._skip_if_thermal_throttling:
                 self._cpu_freq.SkipIfThermalThrottling(retry_delay_secs=30)
         else:
             logging.info("Skip a test case.")
@@ -147,7 +151,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     def tearDownTest(self):
         """Skips the test case if there is thermal throttling."""
         if not self._skip_all_testcases:
-            if self._cpu_freq:
+            if self._cpu_freq and self._skip_if_thermal_throttling:
                 self._cpu_freq.SkipIfThermalThrottling()
 
         super(HidlHalGTest, self).tearDownTest()
