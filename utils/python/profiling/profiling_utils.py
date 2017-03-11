@@ -22,8 +22,8 @@ from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.runners.host import keys
-from vts.utils.python.web import feature_utils
 from vts.utils.python.common import cmd_utils
+from vts.utils.python.web import feature_utils
 
 LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
 TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/"
@@ -31,6 +31,7 @@ HAL_INSTRUMENTATION_LIB_PATH = "/data/local/tmp/64/"
 
 _PROFILING_DATA = "profiling_data"
 _HOST_PROFILING_DATA = "host_profiling_data"
+
 
 class VTSProfilingData(object):
     """Class to store the VTS profiling data.
@@ -69,6 +70,7 @@ class ProfilingFeature(feature_utils.Feature):
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_PROFILING
+    _REQUIRED_PARAMS = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH,
         keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME
@@ -81,10 +83,8 @@ class ProfilingFeature(feature_utils.Feature):
             user_params: A dictionary from parameter name (String) to parameter value.
             web: (optional) WebFeature, object storing web feature util for test run
         """
-        self.ParseParameters(
-            self._TOGGLE_PARAM,
-            optional_param_names=self._OPTIONAL_PARAMS,
-            user_params=user_params)
+        self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS,
+                             self._OPTIONAL_PARAMS, user_params)
         self.web = web
         logging.info("Profiling enabled: %s", self.enabled)
 
@@ -168,8 +168,7 @@ class ProfilingFeature(feature_utils.Feature):
         shell.Execute("setprop hal.instrumentation.lib.path \"\"")
         shell.Execute("setprop hal.instrumentation.enable false")
 
-    @classmethod
-    def _ParseTraceData(cls, trace_file):
+    def _ParseTraceData(self, trace_file):
         """Parses the data stored in trace_file, calculates the avg/max/min
         latency for each API.
 
@@ -184,38 +183,38 @@ class ProfilingFeature(feature_utils.Feature):
         api_timestamps = {}
         api_latencies = {}
 
-        myfile = open(trace_file, "r")
-        new_entry = True
-        profiling_record_str = ""
-        for line in myfile.readlines():
-            if not line.strip():
-                new_entry = False
-            if new_entry:
-                profiling_record_str += line
+        data_file_path = getattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH)
+        trace_processor_binary = os.path.join(data_file_path,
+                                              "host", "bin", "trace_processor")
+        trace_processor_lib = os.path.join(data_file_path, "host", "lib64")
+        trace_processor_cmd = [
+            "chmod a+x %s" % trace_processor_binary,
+            "LD_LIBRARY_PATH=%s %s --profiling %s" %
+            (trace_processor_lib, trace_processor_binary, trace_file)
+        ]
+
+        results = cmd_utils.ExecuteShellCommand(trace_processor_cmd)
+        if results[const.EXIT_CODE][0] != 0:
+            logging.error(results[const.STDERR][0])
+            logging.error("Fail to execute command: %s" % trace_processor_cmd)
+            return profiling_data
+
+        stdout_lines = results[const.STDOUT][0].split("\n")
+        first_line = True
+        for line in stdout_lines:
+            if not line:
+                continue
+            if first_line:
+                _, mode = line.split(":")
+                profiling_data.options.add("hidl_hal_mode=%s" % mode)
+                first_line = False
             else:
-                vts_profiling_record = VtsProfilingMsg.VtsProfilingRecord()
-                text_format.Merge(profiling_record_str, vts_profiling_record)
-
-                if cls._IsEventFromBinderizedHal(vts_profiling_record.event):
-                    profiling_data.options.add("hidl_hal_mode=binder")
+                api, latency = line.split(":")
+                if profiling_data.values.get(api):
+                    profiling_data.values[api].append(long(latency))
                 else:
-                    profiling_data.options.add("hidl_hal_mode=passthrough")
+                    profiling_data.values[api] = [long(latency)]
 
-                api = vts_profiling_record.func_msg.name
-                timestamp = vts_profiling_record.timestamp
-                if api_timestamps.get(api):
-                    api_timestamps[api].append(timestamp)
-                else:
-                    api_timestamps[api] = [timestamp]
-                new_entry = True
-        for api, time_stamps in api_timestamps.items():
-            latencies = []
-            # TODO(zhuoyao): figure out a way to get the latencies, e.g based on the
-            # event type of each entry.
-            for index in range(1, len(time_stamps), 2):
-                latencies.append(
-                    long(time_stamps[index]) - long(time_stamps[index - 1]))
-            profiling_data.values[api] = latencies
         return profiling_data
 
     def StartHostProfiling(self, name):
@@ -291,7 +290,8 @@ class ProfilingFeature(feature_utils.Feature):
         for file in trace_files:
             logging.info("parsing trace file: %s.", file)
             data = self._ParseTraceData(file)
-            profiling_data.append(data)
+            if data:
+                profiling_data.append(data)
 
     def ProcessAndUploadTraceData(self):
         """Process and upload profiling trace data.
