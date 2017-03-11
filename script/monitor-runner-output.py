@@ -62,25 +62,25 @@ def StartMonitoring(path_only):
             print log_path_latest
             return
 
-        if log_path_latest is None:  #Case: cannot find any runner log
+        if log_path_latest is None:  # Case: cannot find any runner log
             time.sleep(2)
             continue
 
         if last_log_path == log_path_latest:
             text_new = text_latest[len(last_text):]
             last_text = text_latest
-            if text_new:  #Case: runner log file changed
+            if text_new:  # Case: runner log file changed
                 if is_first_time:
                     is_first_time = False
                     print text_new
                     continue
-                lines = test_new.split('\n')
+                lines = text_new.split('\n')
                 for l in lines:
                     print l
                     time.sleep(0.6 / len(lines))
-            else:  #Case: runner log file didn't change
+            else:  # Case: runner log file didn't change
                 time.sleep(1)
-        else:  #Case: found a new runner log file
+        else:  # Case: found a new runner log file
             last_text = ''
             last_log_path = log_path_latest
             print '\n' * 6 + '=' * 24 + 'new file' + '=' * 24 + '\n' * 6
