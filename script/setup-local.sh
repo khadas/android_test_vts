@@ -81,20 +81,15 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1.vts /data/local/tmp/spec/BluetoothHalV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts /data/local/tmp/spec/BluetoothHalV1bt_interface_t.vts
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.nfc@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/nfc/1.0/*.vts /data/local/tmp/spec/
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vr@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/vr/1.0/Vr.vts /data/local/tmp/spec/Vr.vts
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.nfc@1.0
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vr@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.automotive.vehicle@2.0
-  adb push ${ANDROID_BUILD_TOP}/output/android/hardware/automotive/vehicle/2.0/*.vts /data/local/tmp/spec/
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.sensors@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/sensors/1.0/*.vts /data/local/tmp/spec/
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.tv.cec@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/tv/cec/1.0/*.vts /data/local/tmp/spec/
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vibrator@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/vibrator/1.0/*.vts /data/local/tmp/spec/
-  # hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.contexthub@1.0
-  # adb push ${ANDROID_BUILD_TOP}/output/android/hardware/contexthub/1.0/*.vts /data/local/tmp/spec/
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.automotive.vehicle@2.1
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.sensors@1.0
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.tv.cec@1.0
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vibrator@1.0
+  hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.contexthub@1.0
+  adb push ${ANDROID_BUILD_TOP}/output/android/hardware/ /data/local/tmp/spec/android/hardware/
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
