@@ -23,6 +23,10 @@ using namespace std;
 namespace android {
 namespace vts {
 
+bool endsWith(const string& s, const string& suffix) {
+  return s.size() >= suffix.size() && s.rfind(suffix) == (s.size() - suffix.size());
+}
+
 void ReplaceSubString(string& original, const string& from, const string& to) {
   size_t index = 0;
   int from_len = from.length();
