@@ -14,7 +14,7 @@
 # limitations under the License.
 
 vts_test_bin_packages := \
-    mq_benchmark_service \
+    android.hardware.tests.msgq@1.0-service-benchmark \
     mq_benchmark_client \
     libhwbinder_benchmark \
     libbinder_benchmark \
