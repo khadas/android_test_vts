@@ -21,7 +21,5 @@
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
 
 </configuration>
