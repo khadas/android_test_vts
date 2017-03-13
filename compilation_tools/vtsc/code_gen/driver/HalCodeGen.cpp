@@ -190,46 +190,46 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
           out << "var_msg" << primitive_type_index << "->mutable_scalar_value()";
           if (arg.scalar_type() == "bool_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().bool_t() << ");" << "\n";
+                << arg.scalar_value().bool_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int8_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int8_t() << ");" << "\n";
+                << arg.scalar_value().int8_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint8_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint8_t() << ");" << "\n";
+                << arg.scalar_value().uint8_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int16_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int16_t() << ");" << "\n";
+                << arg.scalar_value().int16_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint16_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint16_t() << ");" << "\n";
+                << arg.scalar_value().uint16_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int32_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int32_t() << ");" << "\n";
+                << arg.scalar_value().int32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint32_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint32_t() << ");" << "\n";
+                << arg.scalar_value().uint32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "size_t") {
             out << "->set_uint32_t("
-                   << arg.scalar_value().uint32_t() << ");" << "\n";
+                << arg.scalar_value().uint32_t() << ");" << "\n";
           } else if (arg.scalar_type() == "int64_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().int64_t() << ");" << "\n";
+                << arg.scalar_value().int64_t() << ");" << "\n";
           } else if (arg.scalar_type() == "uint64_t") {
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uint64_t() << ");" << "\n";
+                << arg.scalar_value().uint64_t() << ");" << "\n";
           } else if (arg.scalar_type() == "char_pointer") {
             // pointer value is not meaning when it is passed to another machine.
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().char_pointer() << ");" << "\n";
+                << arg.scalar_value().char_pointer() << ");" << "\n";
           } else if (arg.scalar_type() == "uchar_pointer") {
             // pointer value is not meaning when it is passed to another machine.
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().uchar_pointer() << ");" << "\n";
+                << arg.scalar_value().uchar_pointer() << ");" << "\n";
           } else if (arg.scalar_type() == "void_pointer") {
             // pointer value is not meaning when it is passed to another machine.
             out << "->set_" << arg.scalar_type() << "("
-                   << arg.scalar_value().void_pointer() << ");" << "\n";
+                << arg.scalar_value().void_pointer() << ");" << "\n";
           } else {
             cerr << __func__ << " unsupported scalar type " << arg.scalar_type()
                  << "\n";
@@ -237,7 +237,7 @@ void HalCodeGen::GenerateCppBodyCallbackFunction(
           }
         } else if (arg.type() == TYPE_PREDEFINED) {
           out << "var_msg" << primitive_type_index << "->set_type("
-                 << "TYPE_PREDEFINED);" << "\n";
+              << "TYPE_PREDEFINED);" << "\n";
           // TODO: actually handle such case.
         } else {
           cerr << __func__ << " unsupported type" << "\n";
