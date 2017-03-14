@@ -31,7 +31,6 @@ namespace vts {
 void HalHidlFuzzerCodeGen::GenerateSourceIncludeFiles(Formatter &out) {
   out << "#include <iostream>\n\n";
   out << "#include \"FuncFuzzerUtils.h\"\n";
-  out << "#include <FuzzerInterface.h>\n";
 
   string package_path = comp_spec_.package();
   ReplaceSubString(package_path, ".", "/");
