@@ -40,10 +40,6 @@ using namespace std;
 namespace android {
 namespace vts {
 
-bool endsWith(const string& s, const string& suffix) {
-  return s.size() >= suffix.size() && s.rfind(suffix) == (s.size() - suffix.size());
-}
-
 string ComponentClassToString(int component_class) {
   switch (component_class) {
     case UNKNOWN_CLASS:

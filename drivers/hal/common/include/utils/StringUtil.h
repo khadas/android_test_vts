@@ -24,6 +24,10 @@ using namespace std;
 namespace android {
 namespace vts {
 
+// returns true if s ends with suffix.
+bool endsWith(const string& s, const string& suffix);
+
+
 // custom util function to replace all occurrences of a substring.
 extern void ReplaceSubString(
     string& original, const string& from, const string& to);
