@@ -116,15 +116,13 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             if feature:
                 vintf_xml = self._dut.getVintfXml()
                 if vintf_xml:
-                    hal_name, hal_version = feature.split('@')
-                    hal_target = (hal_name, hal_version)
-                    hwbinder_hals, passthrough_hals = vintf_utils.GetHalNamesAndVersions(
+                    hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
                         vintf_xml)
                     if (not hwbinder_hals) or (not passthrough_hals):
                         logging.error("can't check precondition due to a "
                                       "lshal output format error.")
-                    if (hal_target not in hwbinder_hals and
-                        hal_target not in passthrough_hals):
+                    if (feature not in hwbinder_hals and
+                        feature not in passthrough_hals):
                         logging.warn("The required feature %s not found.",
                                      feature)
                         self._skip_all_testcases = True
