@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "FuncFuzzerUtils.h"
-#include <FuzzerInterface.h>
 #include <android/hardware/renderscript/1.0/IDevice.h>
 
 using std::cerr;
