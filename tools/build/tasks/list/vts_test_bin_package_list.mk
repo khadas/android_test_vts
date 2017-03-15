@@ -33,6 +33,10 @@ vts_test_bin_packages += \
     CtsAccelerationTestCases \
     CtsSensorTestCases \
 
+# APKs for app stress tests
+vts_test_bin_packages += \
+    GoogleCameraTests \
+
 # Proto fuzzer executable
 vts_test_bin_packages += \
     vts_proto_fuzzer \
