@@ -96,6 +96,8 @@ class SpecificationBuilder {
   FuzzerWrapper wrapper_;
   // the path of a dir which contains interface specification ASCII proto files.
   const string dir_path_;
+  // the exact sub path of dir_path_ which keeps the spec(s) of a loaded module.
+  string target_dir_path_;
   // the total number of epochs
   const int epoch_count_;
   // fuzzing job queue.
