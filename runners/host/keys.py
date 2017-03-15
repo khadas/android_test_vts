@@ -101,6 +101,9 @@ class ConfigKeys(object):
     IKEY_HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths"
     IKEY_HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name"
 
+    # Keys for special test cases
+    IKEY_FFMPEG_BINARY_PATH = "ffmpeg_binary_path"
+
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
