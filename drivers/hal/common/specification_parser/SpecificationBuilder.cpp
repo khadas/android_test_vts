@@ -18,9 +18,11 @@
 
 #include <dirent.h>
 
+#include <iomanip>
 #include <iostream>
 #include <queue>
 #include <string>
+#include <sstream>
 
 #include <cutils/properties.h>
 
@@ -28,6 +30,7 @@
 #include "fuzz_tester/FuzzerWrapper.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "utils/InterfaceSpecUtil.h"
+#include "utils/StringUtil.h"
 
 #include <google/protobuf/text_format.h>
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -39,6 +42,7 @@ SpecificationBuilder::SpecificationBuilder(const string dir_path,
                                            int epoch_count,
                                            const string& callback_socket_name)
     : dir_path_(dir_path),
+      target_dir_path_(""),
       epoch_count_(epoch_count),
       if_spec_msg_(NULL),
       module_name_(NULL),
@@ -55,46 +59,62 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
   DIR* dir;
   struct dirent* ent;
 
-  if (!(dir = opendir(dir_path_.c_str()))) {
-    cerr << __FUNCTION__ << ": Can't opendir " << dir_path_ << endl;
+  // Derive the package-specific dir which contains .vts files
+  target_dir_path_ = dir_path_;
+  if (!endsWith(target_dir_path_, "/")) {
+    target_dir_path_ += "/";
+  }
+  string target_subdir_path = package;
+  ReplaceSubString(target_subdir_path, ".", "/");
+  target_dir_path_ += target_subdir_path + "/";
+
+  stringstream stream;
+  stream << fixed << setprecision(1) << target_version;
+  target_dir_path_ += stream.str();
+
+  if (!(dir = opendir(target_dir_path_.c_str()))) {
+    cerr << __func__ << ": Can't opendir " << target_dir_path_ << endl;
+    target_dir_path_ = "";
     return NULL;
   }
 
   while ((ent = readdir(dir))) {
-    if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
-      cout << __FUNCTION__ << ": Checking a file " << ent->d_name << endl;
-      const string file_path = string(dir_path_) + "/" + string(ent->d_name);
-      vts::ComponentSpecificationMessage* message =
-          new vts::ComponentSpecificationMessage();
-      if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
-        if (message->component_class() != target_class) continue;
+    if (ent->d_type == DT_REG) {
+      if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
+        cout << __func__ << ": Checking a file " << ent->d_name << endl;
+        const string file_path = target_dir_path_ + "/" + string(ent->d_name);
+        vts::ComponentSpecificationMessage* message =
+            new vts::ComponentSpecificationMessage();
+        if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
+          if (message->component_class() != target_class) continue;
 
-        if (message->component_class() != HAL_HIDL) {
-          if (message->component_type() == target_type &&
-              message->component_type_version() == target_version) {
-            if (submodule_name.length() > 0) {
-              if (message->component_class() != HAL_CONVENTIONAL_SUBMODULE ||
-                  message->original_data_structure_name() != submodule_name) {
-                continue;
+          if (message->component_class() != HAL_HIDL) {
+            if (message->component_type() == target_type &&
+                message->component_type_version() == target_version) {
+              if (submodule_name.length() > 0) {
+                if (message->component_class() != HAL_CONVENTIONAL_SUBMODULE ||
+                    message->original_data_structure_name() != submodule_name) {
+                  continue;
+                }
               }
+              closedir(dir);
+              return message;
             }
-            closedir(dir);
-            return message;
-          }
-        } else {
-          if (message->package() == package &&
-              message->component_type_version() == target_version) {
-            if (component_name.length() > 0) {
-              if (message->component_name() != component_name) {
-                continue;
+          } else {
+            if (message->package() == package &&
+                message->component_type_version() == target_version) {
+              if (component_name.length() > 0) {
+                if (message->component_name() != component_name) {
+                  continue;
+                }
               }
+              closedir(dir);
+              return message;
             }
-            closedir(dir);
-            return message;
           }
         }
+        delete message;
       }
-      delete message;
     }
   }
   closedir(dir);
@@ -106,15 +126,16 @@ SpecificationBuilder::FindComponentSpecification(const string& component_name) {
   DIR* dir;
   struct dirent* ent;
 
-  if (!(dir = opendir(dir_path_.c_str()))) {
-    cerr << __FUNCTION__ << ": Can't opendir " << dir_path_ << endl;
+  if (target_dir_path_.length() == 0 ||
+      !(dir = opendir(target_dir_path_.c_str()))) {
+    cerr << __func__ << ": Can't opendir " << target_dir_path_ << endl;
     return NULL;
   }
 
   while ((ent = readdir(dir))) {
     if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
-      cout << __FUNCTION__ << ": Checking a file " << ent->d_name << endl;
-      const string file_path = string(dir_path_) + "/" + string(ent->d_name);
+      cout << __func__ << ": Checking a file " << ent->d_name << endl;
+      const string file_path = string(target_dir_path_) + "/" + string(ent->d_name);
       vts::ComponentSpecificationMessage* message =
           new vts::ComponentSpecificationMessage();
       if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
@@ -284,7 +305,7 @@ bool SpecificationBuilder::LoadTargetComponent(
                                  module_name, target_package,
                                  target_component_name);
   if (!if_spec_msg_) {
-    cerr << __FUNCTION__ << ": no interface specification file found for "
+    cerr << __func__ << ": no interface specification file found for "
          << "class " << target_class << " type " << target_type << " version "
          << target_version << endl;
     return false;
@@ -650,8 +671,8 @@ bool SpecificationBuilder::Process(const char* dll_file_name,
   cout << "ifspec addr " << interface_specification_message << endl;
 
   if (!interface_specification_message) {
-    cerr << __FUNCTION__ << ": no interface specification file found for "
-         << "class " << target_class << " type " << target_type << " version "
+    cerr << __func__ << ": no interface specification file found for class "
+         << target_class << " type " << target_type << " version "
          << target_version << endl;
     return false;
   }
