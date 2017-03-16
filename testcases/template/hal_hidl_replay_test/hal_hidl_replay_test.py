@@ -22,6 +22,7 @@ from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
+from vts.utils.python.common import vintf_utils
 from vts.utils.python.controllers import android_device
 
 
@@ -50,9 +51,7 @@ class HalHidlReplayTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_HAL_HIDL_PACKAGE_NAME,
             keys.ConfigKeys.IKEY_ABI_BITNESS
         ]
-        opt_params = [
-            keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
-        ]
+        opt_params = [keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
 
@@ -74,45 +73,68 @@ class HalHidlReplayTest(base_test.BaseTestClass):
                    False):
             self._dut.stop()
 
+    def getServiceName(self):
+        """Get service name(s) for the given hal."""
+        service_names = set()
+        vintf_xml = self._dut.getVintfXml()
+        if not vintf_xml:
+            logging.error("fail to get vintf xml file")
+            return service_names
+        hwbinder_hals, _ = vintf_utils.GetHalDescriptions(vintf_xml)
+        if not hwbinder_hals:
+            logging.error("fail to get hal descriptions")
+            return service_names
+        hal_info = hwbinder_hals.get(self.hal_hidl_package_name)
+        if not hal_info:
+            logging.error("hal %s does not exit", self.hal_hidl_package_name)
+            return service_names
+        for hal_interface in hal_info.hal_interfaces:
+            for hal_interface_instance in hal_interface.hal_interface_instances:
+                service_names.add(hal_interface_instance)
+        return service_names
+
     def testReplay(self):
         """Replays the given trace(s)."""
         # TODO(yim): Use the InitHidlHal host-side stub and a stateful session
         #            to control the VTS driver (replayer mode).
-
         target_package, target_version = self.hal_hidl_package_name.split("@")
         for trace_path in self.hal_hidl_replay_test_trace_paths:
             trace_path = str(trace_path)
             self._dut.adb.push(
-                os.path.join(self.data_file_path, "hal-hidl-trace", trace_path),
+                os.path.join(self.data_file_path, "hal-hidl-trace",
+                             trace_path),
                 "/data/local/tmp/vts_replay_trace/trace_file.vts.trace")
 
-            custom_ld_library_path = os.path.join(self.DEVICE_TMP_DIR, self.abi_bitness)
-            driver_binary_path = os.path.join(
-                self.DEVICE_TMP_DIR, self.abi_bitness, "fuzzer%s" % self.abi_bitness)
+            custom_ld_library_path = os.path.join(self.DEVICE_TMP_DIR,
+                                                  self.abi_bitness)
+            driver_binary_path = os.path.join(self.DEVICE_TMP_DIR,
+                                              self.abi_bitness,
+                                              "fuzzer%s" % self.abi_bitness)
             target_vts_driver_file_path = os.path.join(
                 self.DEVICE_TMP_DIR, self.abi_bitness,
                 "%s.vts.driver@%s.so" % (target_package, target_version))
+            service_names = self.getServiceName()
+            for service_name in service_names:
+                cmd = ("LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH "
+                       "%s "
+                       "--mode=replay "
+                       "--trace_path=%s "
+                       "--spec_path=%s "
+                       "--target_package=%s "
+                       "--hal_service_name=%s "
+                       "%s" % (custom_ld_library_path, driver_binary_path,
+                               self.DEVICE_TRACE_FILE_PATH,
+                               self.DEVICE_VTS_SPEC_FILE_PATH, target_package,
+                               service_name, target_vts_driver_file_path))
 
-            cmd = ("LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH "
-                   "%s "
-                   "--mode=replay "
-                   "--trace_path=%s "
-                   "--spec_path=%s "
-                   "--target_package=%s "
-                   "%s" % (custom_ld_library_path,
-                           driver_binary_path,
-                           self.DEVICE_TRACE_FILE_PATH,
-                           self.DEVICE_VTS_SPEC_FILE_PATH,
-                           target_package,
-                           target_vts_driver_file_path))
+                logging.info("Executing replay test command: %s", cmd)
+                command_results = self.shell.Execute(cmd)
 
-            logging.info("Executing replay test command: %s", cmd)
-            command_results = self.shell.Execute(cmd)
-
-            asserts.assertTrue(command_results, "Empty command response.")
-            asserts.assertFalse(
-                any(command_results[const.EXIT_CODE]),
-                "Test failed with the following results: %s" % command_results)
+                asserts.assertTrue(command_results, "Empty command response.")
+                asserts.assertFalse(
+                    any(command_results[const.EXIT_CODE]),
+                    "Test failed with the following results: %s" %
+                    command_results)
 
     def tearDownClass(self):
         """Performs clean-up tasks."""
@@ -126,8 +148,8 @@ class HalHidlReplayTest(base_test.BaseTestClass):
             self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
         # Delete the pushed file.
-        cmd_results = self.shell.Execute(
-            "rm -f %s" % self.DEVICE_TRACE_FILE_PATH)
+        cmd_results = self.shell.Execute("rm -f %s" %
+                                         self.DEVICE_TRACE_FILE_PATH)
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning("Failed to remove: %s", cmd_results)
 
