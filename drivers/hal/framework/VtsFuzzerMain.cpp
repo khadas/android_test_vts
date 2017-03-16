@@ -225,11 +225,10 @@ int main(int argc, char* const argv[]) {
     }
     bool success;
     if (mode == "replay") {
-      android::vts::VtsHidlHalReplayer replayer(spec_path.c_str(),
-                                                callback_socket_name.c_str());
-      success = replayer.ReplayTrace(argv[optind], trace_path.c_str(),
-                                     target_package.c_str(),
-                                     hal_service_name.c_str());
+      android::vts::VtsHidlHalReplayer replayer(spec_path,
+                                                callback_socket_name);
+      success = replayer.ReplayTrace(argv[optind], trace_path,
+                                     hal_service_name);
     } else {
       success = spec_builder.Process(argv[optind],INTERFACE_SPEC_LIB_FILENAME,
                                      target_class, target_type, target_version,
