@@ -100,6 +100,7 @@ int main(int argc, char* const argv[]) {
       {"mode", optional_argument, NULL, 'm'},
       {"trace_path", optional_argument, NULL, 'r'},
       {"spec_path", optional_argument, NULL, 'a'},
+      {"hal_service_name", optional_argument, NULL, 'j'},
       {NULL, 0, NULL, 0}};
   int target_class;
   int target_type;
@@ -117,7 +118,8 @@ int main(int argc, char* const argv[]) {
   string callback_socket_name;
   string mode;
   string trace_path;
-  string spec_path;;
+  string spec_path;
+  string hal_service_name = "default";
 
   while (true) {
     int optionIndex = 0;
@@ -203,6 +205,9 @@ int main(int argc, char* const argv[]) {
       case 'a':
         spec_path = string(optarg);
         break;
+      case 'j':
+        hal_service_name = string(optarg);
+        break;
       default:
         if (ic != '?') {
           fprintf(stderr, "getopt_long returned unexpected value 0x%x\n", ic);
@@ -222,8 +227,9 @@ int main(int argc, char* const argv[]) {
     if (mode == "replay") {
       android::vts::VtsHidlHalReplayer replayer(spec_path.c_str(),
                                                 callback_socket_name.c_str());
-      success = replayer.ReplayTrace(
-          argv[optind], trace_path.c_str(), target_package.c_str());
+      success = replayer.ReplayTrace(argv[optind], trace_path.c_str(),
+                                     target_package.c_str(),
+                                     hal_service_name.c_str());
     } else {
       success = spec_builder.Process(argv[optind],INTERFACE_SPEC_LIB_FILENAME,
                                      target_class, target_type, target_version,
