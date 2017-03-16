@@ -41,7 +41,7 @@ class HalHidlReplayTest(base_test.BaseTestClass):
 
     DEVICE_TMP_DIR = "/data/local/tmp"
     DEVICE_TRACE_FILE_PATH = "/data/local/tmp/vts_replay_trace/trace_file.vts.trace"
-    DEVICE_VTS_SPEC_FILE_PATH = "/data/local/tmp/spec/target.vts"
+    DEVICE_VTS_SPEC_FILE_PATH = "/data/local/tmp/spec"
 
     def setUpClass(self):
         """Prepares class and initializes a target device."""
@@ -80,17 +80,24 @@ class HalHidlReplayTest(base_test.BaseTestClass):
         if not vintf_xml:
             logging.error("fail to get vintf xml file")
             return service_names
-        hwbinder_hals, _ = vintf_utils.GetHalDescriptions(vintf_xml)
-        if not hwbinder_hals:
+        hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
+            vintf_xml)
+        if not hwbinder_hals and not passthrough_hals:
             logging.error("fail to get hal descriptions")
             return service_names
-        hal_info = hwbinder_hals.get(self.hal_hidl_package_name)
-        if not hal_info:
+        hwbinder_hal_info = hwbinder_hals.get(self.hal_hidl_package_name)
+        passthrough_hal_info = passthrough_hals.get(self.hal_hidl_package_name)
+        if not hwbinder_hal_info and not passthrough_hal_info:
             logging.error("hal %s does not exit", self.hal_hidl_package_name)
             return service_names
-        for hal_interface in hal_info.hal_interfaces:
-            for hal_interface_instance in hal_interface.hal_interface_instances:
-                service_names.add(hal_interface_instance)
+        if hwbinder_hal_info:
+            for hal_interface in hwbinder_hal_info.hal_interfaces:
+                for hal_interface_instance in hal_interface.hal_interface_instances:
+                    service_names.add(hal_interface_instance)
+        if passthrough_hal_info:
+            for hal_interface in passthrough_hal_info.hal_interfaces:
+                for hal_interface_instance in hal_interface.hal_interface_instances:
+                    service_names.add(hal_interface_instance)
         return service_names
 
     def testReplay(self):
@@ -120,12 +127,11 @@ class HalHidlReplayTest(base_test.BaseTestClass):
                        "--mode=replay "
                        "--trace_path=%s "
                        "--spec_path=%s "
-                       "--target_package=%s "
                        "--hal_service_name=%s "
                        "%s" % (custom_ld_library_path, driver_binary_path,
                                self.DEVICE_TRACE_FILE_PATH,
-                               self.DEVICE_VTS_SPEC_FILE_PATH, target_package,
-                               service_name, target_vts_driver_file_path))
+                               self.DEVICE_VTS_SPEC_FILE_PATH, service_name,
+                               target_vts_driver_file_path))
 
                 logging.info("Executing replay test command: %s", cmd)
                 command_results = self.shell.Execute(cmd)

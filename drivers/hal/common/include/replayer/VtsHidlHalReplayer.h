@@ -17,7 +17,7 @@
 #define __VTS_SYSFUZZER_COMMON_REPLAYER_VTSHIDLHALREPLAYER_H__
 
 #include "fuzz_tester/FuzzerWrapper.h"
-#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
+#include "test/vts/proto/VtsProfilingMessage.pb.h"
 
 namespace android {
 namespace vts {
@@ -30,30 +30,33 @@ namespace vts {
 // 3) Verify the return results of each API calls.
 class VtsHidlHalReplayer {
  public:
-  VtsHidlHalReplayer(const char* spec_path, const char* callback_socket_name);
+  VtsHidlHalReplayer(const std::string& spec_path,
+      const std::string& callback_socket_name);
 
   // Loads the given interface specification (.vts file) and parses it to
   // ComponentSpecificationMessage.
-  bool LoadComponentSpecification(const char* package,
+  bool LoadComponentSpecification(const std::string& package,
+                                  float version,
+                                  const std::string& interface_name,
                                   ComponentSpecificationMessage* message);
 
   // Parses the trace file, stores the parsed sequence of API calls in
   // func_msgs and the corresponding return results in result_msgs.
-  bool ParseTrace(const char* trace_file,
-                  vector<FunctionSpecificationMessage>* func_msgs,
-                  vector<FunctionSpecificationMessage>* result_msgs);
+  bool ParseTrace(const std::string& trace_file,
+      vector<VtsProfilingRecord>* call_msgs,
+      vector<VtsProfilingRecord>* result_msgs);
 
   // Replays the API call sequence parsed from the trace file.
-  bool ReplayTrace(const char* spec_lib_file_path, const char* trace_file,
-                   const char* package, const char* hal_service_name);
+  bool ReplayTrace(const std::string& spec_lib_file_path,
+      const std::string& trace_file, const std::string& hal_service_name);
 
  private:
   // A FuzzerWrapper instance.
   FuzzerWrapper wrapper_;
   // The interface specification ASCII proto file.
-  const char* spec_path_;
+  std::string spec_path_;
   // The server socket port # of the agent.
-  const char* callback_socket_name_;
+  std::string callback_socket_name_;
 };
 
 }  // namespace vts
