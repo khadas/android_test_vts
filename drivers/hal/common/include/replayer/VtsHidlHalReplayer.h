@@ -45,7 +45,7 @@ class VtsHidlHalReplayer {
 
   // Replays the API call sequence parsed from the trace file.
   bool ReplayTrace(const char* spec_lib_file_path, const char* trace_file,
-                   const char* package);
+                   const char* package, const char* hal_service_name);
 
  private:
   // A FuzzerWrapper instance.

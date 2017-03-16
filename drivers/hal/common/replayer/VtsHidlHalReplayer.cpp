@@ -107,7 +107,8 @@ bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
 
 bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
                                      const char* trace_file,
-                                     const char* package) {
+                                     const char* package,
+                                     const char* hal_service_name) {
   ComponentSpecificationMessage interface_specification_message;
   if (!LoadComponentSpecification(package, &interface_specification_message)) {
     cerr << __func__ << ": can not load component spec: " << spec_path_
@@ -135,14 +136,9 @@ bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
     }
   }
 
-  if (!fuzzer->GetService(get_stub, "default")) {
+  if (!fuzzer->GetService(get_stub, hal_service_name)) {
     cerr << __func__ << ": couldn't get service (default)" << endl;
-    const char* service_name = interface_specification_message.package().substr(
-        interface_specification_message.package().find_last_of(".") + 1).c_str();
-    if (!fuzzer->GetService(get_stub, service_name)) {
-      cerr << __func__ << ": couldn't get service " << service_name << endl;
       return false;
-    }
   }
 
   // Parse the trace file to get the sequence of function calls.
