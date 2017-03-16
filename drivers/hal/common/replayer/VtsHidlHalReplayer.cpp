@@ -16,7 +16,9 @@
 #include "replayer/VtsHidlHalReplayer.h"
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <cutils/properties.h>
@@ -29,16 +31,19 @@
 #include "test/vts/proto/VtsProfilingMessage.pb.h"
 #include "utils/StringUtil.h"
 
+using namespace std;
+
 namespace android {
 namespace vts {
 
-VtsHidlHalReplayer::VtsHidlHalReplayer(const char* spec_path,
-                                       const char* callback_socket_name)
+VtsHidlHalReplayer::VtsHidlHalReplayer(const string& spec_path,
+                                       const string& callback_socket_name)
     : spec_path_(spec_path), callback_socket_name_(callback_socket_name) {}
 
-bool VtsHidlHalReplayer::LoadComponentSpecification(
-    const char* package, ComponentSpecificationMessage* message) {
-  if (!spec_path_ || !spec_path_[0]) {
+bool VtsHidlHalReplayer::LoadComponentSpecification(const string& package,
+    float version, const string& interface_name,
+    ComponentSpecificationMessage* message) {
+  if (spec_path_.empty()) {
     cerr << __func__ << "spec file not specified. " << endl;
     return false;
   }
@@ -46,35 +51,46 @@ bool VtsHidlHalReplayer::LoadComponentSpecification(
     cerr << __func__ << "message could not be NULL. " << endl;
     return false;
   }
-  if (InterfaceSpecificationParser::parse(spec_path_, message)) {
+  string package_name = package;
+  ReplaceSubString(package_name, ".", "/");
+  stringstream stream;
+  stream << fixed << setprecision(1) << version;
+  string version_str = stream.str();
+  string spec_file = spec_path_ + '/' + package_name + '/'
+      + version_str + '/' + interface_name.substr(1) + ".vts";
+  cout << "spec_file: " << spec_file << endl;
+  if (InterfaceSpecificationParser::parse(spec_file.c_str(), message)) {
     if (message->component_class() != HAL_HIDL) {
       cerr << __func__ << ": only support Hidl Hal. " << endl;
       return false;
     }
 
-    if (message->package() != package) {
-      cerr << __func__
-           << ": spec file mismatch. "
-           << "expected package: " << package
-           << ", actual: package: " << message->package();
+    if (message->package() != package
+        || message->component_type_version() != version
+        || message->component_name() != interface_name) {
+      cerr << __func__ << ": spec file mismatch. " << "expected package: "
+           << package << " version: " << version << " interface_name: "
+           << interface_name << ", actual: package: " << message->package()
+           << " version: " << message->component_type_version()
+           << " interface_name: " << message->component_name();
       return false;
     }
   } else {
-    cerr << __func__ << ": can not parse spec: " << spec_path_ << endl;
+    cerr << __func__ << ": can not parse spec: " << spec_file << endl;
     return false;
   }
   return true;
 }
 
-bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
-    vector<FunctionSpecificationMessage>* func_msgs,
-    vector<FunctionSpecificationMessage>* result_msgs) {
+bool VtsHidlHalReplayer::ParseTrace(const string& trace_file,
+    vector<VtsProfilingRecord>* call_msgs,
+    vector<VtsProfilingRecord>* result_msgs) {
   std::ifstream in(trace_file, std::ios::in);
   bool new_record = true;
-  std::string record_str;
-  std::string line;
+  string record_str;
+  string line;
 
-  while (std::getline(in, line)) {
+  while (getline(in, line)) {
     // Assume records are separated by '\n'.
     if (line.empty()) {
       new_record = false;
@@ -94,9 +110,9 @@ bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
           || record->event() == InstrumentationEventType::SYNC_CALLBACK_ENTRY
           || record->event() == InstrumentationEventType::ASYNC_CALLBACK_ENTRY
           || record->event() == InstrumentationEventType::PASSTHROUGH_ENTRY) {
-        func_msgs->push_back(record->func_msg());
+        call_msgs->push_back(*record);
       } else {
-        result_msgs->push_back(record->func_msg());
+        result_msgs->push_back(*record);
       }
       new_record = true;
       record_str.clear();
@@ -105,66 +121,72 @@ bool VtsHidlHalReplayer::ParseTrace(const char* trace_file,
   return true;
 }
 
-bool VtsHidlHalReplayer::ReplayTrace(const char* spec_lib_file_path,
-                                     const char* trace_file,
-                                     const char* package,
-                                     const char* hal_service_name) {
-  ComponentSpecificationMessage interface_specification_message;
-  if (!LoadComponentSpecification(package, &interface_specification_message)) {
-    cerr << __func__ << ": can not load component spec: " << spec_path_
-         << " for package: " << package << endl;
+bool VtsHidlHalReplayer::ReplayTrace(const string& spec_lib_file_path,
+    const string& trace_file, const string& hal_service_name) {
+  if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path.c_str())) {
     return false;
   }
 
-  if (!wrapper_.LoadInterfaceSpecificationLibrary(spec_lib_file_path)) {
-    return false;
-  }
-
-  FuzzerBase* fuzzer = wrapper_.GetFuzzer(interface_specification_message);
-  if (!fuzzer) {
-    cerr << __func__ << ": couldn't get a fuzzer base class" << endl;
-    return false;
-  }
-
-  // Get service for Hidl Hal.
+  // Determine the binder/passthrough mode based on system property.
   char get_sub_property[PROPERTY_VALUE_MAX];
-  bool get_stub = false;  /* default is binderized */
+  bool get_stub = false; /* default is binderized */
   if (property_get("vts.hidl.get_stub", get_sub_property, "") > 0) {
-    if (!strcmp(get_sub_property, "true") ||
-        !strcmp(get_sub_property, "True") || !strcmp(get_sub_property, "1")) {
+    if (!strcmp(get_sub_property, "true") || !strcmp(get_sub_property, "True")
+        || !strcmp(get_sub_property, "1")) {
       get_stub = true;
     }
   }
 
-  if (!fuzzer->GetService(get_stub, hal_service_name)) {
-    cerr << __func__ << ": couldn't get service (default)" << endl;
-      return false;
-  }
-
   // Parse the trace file to get the sequence of function calls.
-  vector<FunctionSpecificationMessage> func_msgs;
-  vector<FunctionSpecificationMessage> result_msgs;
-  if (!ParseTrace(trace_file, &func_msgs, &result_msgs)) {
-    cerr << __func__ << ": couldn't parse trace file: " << trace_file
-         << endl;
+  vector<VtsProfilingRecord> call_msgs;
+  vector<VtsProfilingRecord> result_msgs;
+  if (!ParseTrace(trace_file, &call_msgs, &result_msgs)) {
+    cerr << __func__ << ": couldn't parse trace file: " << trace_file << endl;
     return false;
   }
   // Replay each function call from the trace and verify the results.
-  for (size_t i = 0; i < func_msgs.size(); i++) {
-    vts::FunctionSpecificationMessage func_msg = func_msgs[i];
-    vts::FunctionSpecificationMessage expected_result_msg = result_msgs[i];
-    cout << __func__ << ": replay function: " << func_msg.DebugString();
+  string interface = "";
+  FuzzerBase* fuzzer = NULL;
+  for (size_t i = 0; i < call_msgs.size(); i++) {
+    VtsProfilingRecord call_msg = call_msgs[i];
+    VtsProfilingRecord expected_result_msg = result_msgs[i];
+    cout << __func__ << ": replay function: " << call_msg.DebugString();
+
+    // Load spec file and get fuzzer.
+    if (interface != call_msg.interface()) {
+      interface = call_msg.interface();
+      ComponentSpecificationMessage interface_specification_message;
+      if (!LoadComponentSpecification(call_msg.package(), call_msg.version(),
+                                      call_msg.interface(),
+                                      &interface_specification_message)) {
+        cerr << __func__ << ": can not load component spec: " << spec_path_;
+        return false;
+      }
+      fuzzer = wrapper_.GetFuzzer(interface_specification_message);
+      if (!fuzzer) {
+        cerr << __func__ << ": couldn't get a fuzzer base class" << endl;
+        return false;
+      }
+
+      if (!fuzzer->GetService(get_stub, hal_service_name.c_str())) {
+        cerr << __func__ << ": couldn't get service: " << hal_service_name
+             << endl;
+        return false;
+      }
+    }
+
     vts::FunctionSpecificationMessage result_msg;
-    if (!fuzzer->CallFunction(func_msg, callback_socket_name_, &result_msg)) {
+    if (!fuzzer->CallFunction(call_msg.func_msg(), callback_socket_name_,
+                              &result_msg)) {
       cerr << __func__ << ": replay function fail." << endl;
       return false;
     }
-    if (!fuzzer->VerifyResults(expected_result_msg, result_msg)) {
+    if (!fuzzer->VerifyResults(expected_result_msg.func_msg(), result_msg)) {
       // Verification is not strict, i.e. if fail, output error message and
       // continue the process.
       cerr << __func__ << ": verification fail.\nexpected_result: "
-           << expected_result_msg.DebugString() << "\nactual_result: "
-           << result_msg.DebugString() << endl;
+          << expected_result_msg.func_msg().DebugString() << "\nactual_result: "
+          << result_msg.DebugString() << endl;
     }
   }
   return true;
