@@ -36,6 +36,7 @@
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalRenderscriptV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0Host" /><!-- need runtime stopped -->
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0Target" /><!-- need runtime stopped -->
   <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0Target" />
