@@ -154,6 +154,9 @@ class ProfilingFeature(feature_utils.Feature):
                                            "*.vts.trace"))
         logging.info("enable VTS profiling.")
 
+        # give permission to write the trace file.
+        shell.Execute("chmod 777 " + TARGET_PROFILING_TRACE_PATH)
+
         shell.Execute("setprop hal.instrumentation.lib.path " +
                       hal_instrumentation_lib_path)
         shell.Execute("setprop hal.instrumentation.enable true")
