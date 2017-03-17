@@ -78,7 +78,8 @@ void VtsProfilingInterface::Init() {
   if (!trace_output_) {
     LOG(ERROR) << "Can not open trace file: " << file_path << ": "
                << std::strerror(errno);
-    exit(1);
+    initialized_ = false;
+    return;
   }
   initialized_ = true;
 }
