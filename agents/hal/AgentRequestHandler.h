@@ -67,7 +67,8 @@ class AgentRequestHandler : public VtsDriverCommUtil {
       const AndroidSystemControlCommandMessage& command_msg);
 
   // for the VTS_AGENT_COMMAND_READ_SPECIFICATION`
-  bool ReadSpecification(const string& component_name);
+  bool ReadSpecification(
+      const AndroidSystemControlCommandMessage& command_message);
 
   // for the LIST_APIS command
   bool ListApis();

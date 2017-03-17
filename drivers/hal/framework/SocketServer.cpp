@@ -87,10 +87,14 @@ int32_t VtsDriverHalSocketServer::Status(int32_t type) {
   return 0;
 }
 
-const char* VtsDriverHalSocketServer::ReadSpecification(const string& name) {
+const char* VtsDriverHalSocketServer::ReadSpecification(
+    const string& name, int target_class, int target_type, float target_version,
+    const string& target_package) {
   printf("VtsFuzzerServer::ReadSpecification(%s)\n", name.c_str());
   ComponentSpecificationMessage* msg =
-      spec_builder_.FindComponentSpecification(name);
+      spec_builder_.FindComponentSpecification(
+          target_class, target_type, target_version,
+          "", target_package, name);
   string* result = new string();
   google::protobuf::TextFormat::PrintToString(*msg, result);
   return result->c_str();
@@ -186,7 +190,12 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case VTS_DRIVER_COMMAND_READ_SPECIFICATION: {
-      const char* result = ReadSpecification(command_message.module_name());
+      const char* result = ReadSpecification(
+          command_message.module_name(),
+          command_message.target_class(),
+          command_message.target_type(),
+          command_message.target_version(),
+          command_message.target_package());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_message(result);
