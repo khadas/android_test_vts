@@ -128,6 +128,7 @@ vts_test_lib_hidl_packages += \
   VtsHalNfcV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalRadioV1_0TargetTest \
+  VtsHalRenderscriptV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
   VtsHalSoundtriggerV2_0TargetTest \
   VtsHalThermalV1_0TargetTest \
