@@ -347,8 +347,14 @@ class VtsTcpClient(object):
         return False
 
     def ReadSpecification(self, interface_name, target_class, target_type,
-                          target_version, target_package):
-        """RPC to VTS_AGENT_COMMAND_READ_SPECIFICATION."""
+                          target_version, target_package, recursive = False):
+        """RPC to VTS_AGENT_COMMAND_READ_SPECIFICATION.
+
+        Args:
+            other args: see SendCommand
+            recursive: boolean, set to recursively read the imported
+                       specification(s) and return the merged one.
+        """
         self.SendCommand(
             SysMsg_pb2.VTS_AGENT_COMMAND_READ_SPECIFICATION,
             service_name=interface_name,
@@ -370,6 +376,19 @@ class VtsTcpClient(object):
         except text_format.ParseError as e:
             logging.exception(e)
             logging.error("Paring error\n%s", resp.result)
+
+        if recursive and hasattr(result, "import"):
+            for imported_interface in getattr(result, "import"):
+                imported_result = self.ReadSpecification(
+                    imported_interface.split("::")[1],
+                    # TODO(yim): derive target_class and
+                    # target_type from package path or remove them
+                    msg.component_class if target_class is None else target_class,
+                    msg.component_type if target_type is None else target_type,
+                    float(imported_interface.split("@")[1].split("::")[0]),
+                    imported_interface.split("@")[0])
+                result.CopyFrom(imported_result)
+
         return result
 
     def SendCommand(self,
