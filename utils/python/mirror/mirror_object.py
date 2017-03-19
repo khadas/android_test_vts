@@ -161,6 +161,7 @@ class MirrorObject(object):
         var_msg = CompSpecMsg.VariableSpecificationMessage()
         var_msg.name = interface_name
         var_msg.type = CompSpecMsg.TYPE_FUNCTION_POINTER
+        var_msg.is_callback = True
 
         msg = self._if_spec_msg
         specification = self._client.ReadSpecification(
