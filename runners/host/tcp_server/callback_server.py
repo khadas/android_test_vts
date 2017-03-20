@@ -22,6 +22,7 @@ import threading
 from vts.runners.host import errors
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
+from vts.utils.python.mirror import pb2py
 
 _functions = dict()  # Dictionary to hold function pointers
 
@@ -60,13 +61,7 @@ class CallbackRequestHandler(socketserver.StreamRequestHandler):
         if request_message.id in _functions:
             callback_args = []
             for arg in request_message.arg:
-                if arg.type == CompSpecMsg.TYPE_SCALAR:
-                    callback_args.append(getattr(arg.scalar_value, arg.scalar_type))
-                elif arg.type == CompSpecMsg.TYPE_PREDEFINED:
-                    callback_args.append("not-supported")
-                else:
-                    raise VtsCallbackServerError(
-                        "Got unsupported callback arg type %s" % arg.type)
+                callback_args.append(pb2py.Convert(arg))
             args = tuple(callback_args)
             _functions[request_message.id](*args)
             response_message.response_code = SysMsg.SUCCESS
