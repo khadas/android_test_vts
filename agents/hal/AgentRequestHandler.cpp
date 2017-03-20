@@ -297,7 +297,8 @@ bool AgentRequestHandler::LaunchDriverService(
   return VtsSocketSendMessage(response_msg);
 }
 
-bool AgentRequestHandler::ReadSpecification(const string& component_name) {
+bool AgentRequestHandler::ReadSpecification(
+    const AndroidSystemControlCommandMessage& command_message) {
   cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
@@ -310,7 +311,12 @@ bool AgentRequestHandler::ReadSpecification(const string& component_name) {
     return false;
   }
 
-  const char* result = client->ReadSpecification(component_name);
+  const char* result = client->ReadSpecification(
+      command_message.service_name(),
+      command_message.target_class(),
+      command_message.target_type(),
+      command_message.target_version() / 100.0,
+      command_message.target_package());
 
   AndroidSystemControlResponseMessage response_msg;
   if (result != NULL && strlen(result) > 0) {
@@ -517,7 +523,7 @@ bool AgentRequestHandler::ProcessOneCommand() {
     case LAUNCH_DRIVER_SERVICE:
       return LaunchDriverService(command_msg);
     case VTS_AGENT_COMMAND_READ_SPECIFICATION:
-      return ReadSpecification(command_msg.service_name());
+      return ReadSpecification(command_msg);
     case LIST_APIS:
       return ListApis();
     case CALL_API:

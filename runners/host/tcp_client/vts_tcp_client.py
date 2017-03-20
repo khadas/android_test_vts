@@ -346,11 +346,16 @@ class VtsTcpClient(object):
             return True
         return False
 
-    def ReadSpecification(self, interface_name):
+    def ReadSpecification(self, interface_name, target_class, target_type,
+                          target_version, target_package):
         """RPC to VTS_AGENT_COMMAND_READ_SPECIFICATION."""
         self.SendCommand(
             SysMsg_pb2.VTS_AGENT_COMMAND_READ_SPECIFICATION,
-            service_name=interface_name)
+            service_name=interface_name,
+            target_class=target_class,
+            target_type=target_type,
+            target_version=target_version,
+            target_package=target_package)
         resp = self.RecvResponse(retries=2)
         logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_READ_INTERFACE: %s",
                      resp)
