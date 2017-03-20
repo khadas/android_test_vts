@@ -89,7 +89,7 @@ function vts_multidevice_target_setup {
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.tv.cec@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vibrator@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.contexthub@1.0
-  adb push ${ANDROID_BUILD_TOP}/output/android/hardware/ /data/local/tmp/spec/android/hardware/
+  adb push ${ANDROID_BUILD_TOP}/output/android/hardware /data/local/tmp/spec/android/
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
   adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
