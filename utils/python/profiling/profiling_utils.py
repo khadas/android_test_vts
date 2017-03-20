@@ -23,6 +23,7 @@ from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.utils.python.common import cmd_utils
+from vts.utils.python.os import path_utils
 from vts.utils.python.web import feature_utils
 
 LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
@@ -114,8 +115,9 @@ class ProfilingFeature(feature_utils.Feature):
             host_profiling_trace_path = LOCAL_PROFILING_TRACE_PATH
 
         dut.shell.InvokeTerminal("profiling_shell")
-        results = dut.shell.profiling_shell.Execute("ls " + os.path.join(
-            TARGET_PROFILING_TRACE_PATH, "*.vts.trace"))
+        target_trace_file = path_utils.JoinTargetPath(
+            TARGET_PROFILING_TRACE_PATH, "*.vts.trace")
+        results = dut.shell.profiling_shell.Execute("ls " + target_trace_file)
         asserts.assertTrue(results, "failed to find trace file")
         stdout_lines = results[const.STDOUT][0].split("\n")
         logging.info("stdout: %s", stdout_lines)

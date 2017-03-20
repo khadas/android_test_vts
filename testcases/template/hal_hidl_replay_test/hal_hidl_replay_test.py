@@ -24,6 +24,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.common import vintf_utils
 from vts.utils.python.controllers import android_device
+from vts.utils.python.os import path_utils
 
 
 class HalHidlReplayTest(base_test.BaseTestClass):
@@ -112,12 +113,12 @@ class HalHidlReplayTest(base_test.BaseTestClass):
                              trace_path),
                 "/data/local/tmp/vts_replay_trace/trace_file.vts.trace")
 
-            custom_ld_library_path = os.path.join(self.DEVICE_TMP_DIR,
-                                                  self.abi_bitness)
-            driver_binary_path = os.path.join(self.DEVICE_TMP_DIR,
-                                              self.abi_bitness,
-                                              "fuzzer%s" % self.abi_bitness)
-            target_vts_driver_file_path = os.path.join(
+            custom_ld_library_path = path_utils.JoinTargetPath(
+                self.DEVICE_TMP_DIR, self.abi_bitness)
+            driver_binary_path = path_utils.JoinTargetPath(
+                self.DEVICE_TMP_DIR, self.abi_bitness,
+                "fuzzer%s" % self.abi_bitness)
+            target_vts_driver_file_path = path_utils.JoinTargetPath(
                 self.DEVICE_TMP_DIR, self.abi_bitness,
                 "%s.vts.driver@%s.so" % (target_package, target_version))
             service_names = self.getServiceName()
