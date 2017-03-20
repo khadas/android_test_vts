@@ -111,13 +111,22 @@ const char* VtsDriverSocketClient::GetFunctions() {
 }
 
 const char* VtsDriverSocketClient::ReadSpecification(
-    const string& component_name) {
+    const string& component_name,
+    int target_class,
+    int target_type,
+    float target_version,
+    const string& target_package) {
   cout << "[agent->driver] LIST_FUNCTIONS" << endl;
 
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(
       VTS_DRIVER_COMMAND_READ_SPECIFICATION);
   command_message.set_module_name(component_name);
+  command_message.set_target_class(target_class);
+  command_message.set_target_type(target_type);
+  command_message.set_target_version(target_version);
+  command_message.set_target_package(target_package);
+
   if (!VtsSocketSendMessage(command_message)) return NULL;
 
   VtsDriverControlResponseMessage response_message;

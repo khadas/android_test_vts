@@ -42,7 +42,6 @@ SpecificationBuilder::SpecificationBuilder(const string dir_path,
                                            int epoch_count,
                                            const string& callback_socket_name)
     : dir_path_(dir_path),
-      target_dir_path_(""),
       epoch_count_(epoch_count),
       if_spec_msg_(NULL),
       module_name_(NULL),
@@ -60,21 +59,21 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
   struct dirent* ent;
 
   // Derive the package-specific dir which contains .vts files
-  target_dir_path_ = dir_path_;
-  if (!endsWith(target_dir_path_, "/")) {
-    target_dir_path_ += "/";
+  string target_dir_path = dir_path_;
+  if (!endsWith(target_dir_path, "/")) {
+    target_dir_path += "/";
   }
   string target_subdir_path = package;
   ReplaceSubString(target_subdir_path, ".", "/");
-  target_dir_path_ += target_subdir_path + "/";
+  target_dir_path += target_subdir_path + "/";
 
   stringstream stream;
   stream << fixed << setprecision(1) << target_version;
-  target_dir_path_ += stream.str();
+  target_dir_path += stream.str();
 
-  if (!(dir = opendir(target_dir_path_.c_str()))) {
-    cerr << __func__ << ": Can't opendir " << target_dir_path_ << endl;
-    target_dir_path_ = "";
+  if (!(dir = opendir(target_dir_path.c_str()))) {
+    cerr << __func__ << ": Can't opendir " << target_dir_path << endl;
+    target_dir_path = "";
     return NULL;
   }
 
@@ -82,7 +81,7 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
     if (ent->d_type == DT_REG) {
       if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
         cout << __func__ << ": Checking a file " << ent->d_name << endl;
-        const string file_path = target_dir_path_ + "/" + string(ent->d_name);
+        const string file_path = target_dir_path + "/" + string(ent->d_name);
         vts::ComponentSpecificationMessage* message =
             new vts::ComponentSpecificationMessage();
         if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
@@ -115,36 +114,6 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
         }
         delete message;
       }
-    }
-  }
-  closedir(dir);
-  return NULL;
-}
-
-vts::ComponentSpecificationMessage*
-SpecificationBuilder::FindComponentSpecification(const string& component_name) {
-  DIR* dir;
-  struct dirent* ent;
-
-  if (target_dir_path_.length() == 0 ||
-      !(dir = opendir(target_dir_path_.c_str()))) {
-    cerr << __func__ << ": Can't opendir " << target_dir_path_ << endl;
-    return NULL;
-  }
-
-  while ((ent = readdir(dir))) {
-    if (string(ent->d_name).find(SPEC_FILE_EXT) != std::string::npos) {
-      cout << __func__ << ": Checking a file " << ent->d_name << endl;
-      const string file_path = string(target_dir_path_) + "/" + string(ent->d_name);
-      vts::ComponentSpecificationMessage* message =
-          new vts::ComponentSpecificationMessage();
-      if (InterfaceSpecificationParser::parse(file_path.c_str(), message)) {
-        if (message->component_name() == component_name) {
-          closedir(dir);
-          return message;
-        }
-      }
-      delete message;
     }
   }
   closedir(dir);
