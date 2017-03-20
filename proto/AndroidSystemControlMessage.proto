@@ -162,6 +162,9 @@ message AndroidSystemCallbackRequestMessage {
   // callback id for the message sent to the TCP Server.
   optional bytes id = 1;
 
+  // the name of a callback (e.g., <class name>::<method name>).
+  optional bytes name = 2;
+
   // args
   repeated VariableSpecificationMessage arg = 11;
 }
