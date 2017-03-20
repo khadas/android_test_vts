@@ -162,7 +162,13 @@ class MirrorObject(object):
         var_msg.name = interface_name
         var_msg.type = CompSpecMsg.TYPE_FUNCTION_POINTER
 
-        specification = self._client.ReadSpecification(interface_name)
+        msg = self._if_spec_msg
+        specification = self._client.ReadSpecification(
+            interface_name,
+            msg.component_class,
+            msg.component_type,
+            msg.component_type_version,
+            msg.package)
         logging.info("specification: %s", specification)
         interface = getattr(specification, INTERFACE, None)
         apis = getattr(interface, API, [])
@@ -209,7 +215,9 @@ class MirrorObject(object):
             msg.component_class if target_class is None else target_class,
             msg.component_type if target_type is None else target_type,
             msg.component_type_version if version is None else version,
-            msg.package if package is None else package)
+            msg.package if package is None else package,
+            recursive=True)
+
         logging.info("result %s", result)
         return mirror_object_for_types.MirrorObjectForTypes(result)
 
