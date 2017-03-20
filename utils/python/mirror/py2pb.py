@@ -60,7 +60,7 @@ def PyValue2PbScalar(message, pb_spec, py_value):
     setattr(message.scalar_value, pb_spec.scalar_type, py_value)
 
 
-def PyStringPbString(message, pb_spec, py_value):
+def PyString2PbString(message, pb_spec, py_value):
     """Converts Python string to VTS VariableSecificationMessage (String).
 
     Args:
@@ -106,7 +106,7 @@ def PyList2PbVector(message, pb_spec, py_value):
             PyValue2PbScalar(new_vector_message, vector_spec, curr_value)
         else:
             logging.error("unsupported type %s", message.type)
-            exit(0)
+            sys.exit(-1)
     message.vector_size = len(py_value)
     return message
 
@@ -153,7 +153,7 @@ def PyDict2PbStruct(message, pb_spec, py_value):
             elif attr.type == CompSpecMsg.TYPE_SCALAR:
                 PyValue2PbScalar(attr_msg, attr, curr_value)
             elif attr.type == CompSpecMsg.TYPE_STRING:
-                PyStringPbString(attr_msg, attr, curr_value)
+                PyString2PbString(attr_msg, attr, curr_value)
             elif attr.type == CompSpecMsg.TYPE_VECTOR:
                 PyList2PbVector(attr_msg, attr, curr_value)
             elif attr.type == CompSpecMsg.TYPE_STRUCT:
@@ -162,16 +162,16 @@ def PyDict2PbStruct(message, pb_spec, py_value):
                     PyDict2PbStruct(attr_msg, sub_attr, curr_value)
                 else:
                     logging.error("PyDict2PbStruct: substruct not found.")
-                    exit(-1)
+                    sys.exit(-1)
             else:
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
-                exit(-1)
+                sys.exit(-1)
     if len(provided_attrs) > 0:
         logging.error("PyDict2PbStruct: provided dictionary included elements" +
                       " not part of the type being converted to: %s",
                       provided_attrs)
-        exit(-1)
+        sys.exit(-1)
     return message
 
 
@@ -200,12 +200,12 @@ def Convert(pb_spec, py_value):
     elif pb_spec.type == CompSpecMsg.TYPE_SCALAR:
         PyValue2PbScalar(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_STRING:
-        PyStringPbString(attr_msg, attr, curr_value)
+        PyString2PbString(attr_msg, attr, curr_value)
     elif pb_spec.type == CompSpecMsg.TYPE_VECTOR:
         PyList2PbVector(message, pb_spec, py_value)
     else:
         logging.error("py2pb.Convert: unsupported type %s",
                       pb_spec.type)
-        exit(-1)
+        sys.exit(-1)
 
     return message
