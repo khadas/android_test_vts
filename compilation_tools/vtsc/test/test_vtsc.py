@@ -80,20 +80,19 @@ class VtscTester(unittest.TestCase):
     def TestDriver(self):
         """Run tests for DRIVER mode. """
         logging.info("Running TestDriver test case.")
-        #Tests for Hidl Hals.
+        # Tests for Hidl Hals.
         self.GenerateVtsFile("android.hardware.nfc@1.0")
         for component_name in ["Nfc", "types", "NfcClientCallback"]:
             self.RunTest("DRIVER",
                          os.path.join(self._temp_dir, component_name + ".vts"),
                          "%s.driver.cpp" % component_name)
-        #Tests for conventional Hals.
-        for component_name in [
-                "BluetoothHalV1", "BluetoothHalV1bt_interface_t", "WifiHalV1"
-        ]:
+        # Tests for conventional Hals.
+        for component_name in ["CameraHalV2", "BluetoothHalV1",
+                               "BluetoothHalV1bt_interface_t", "WifiHalV1"]:
             self.RunTest("DRIVER",
                          "test/vts/specification/hal_conventional/%s.vts" %
                          component_name, "%s.driver.cpp" % component_name)
-        #Tests for shared libraries.
+        # Tests for shared libraries.
         for component_name in ["libcV1"]:
             self.RunTest("DRIVER", "test/vts/specification/lib_bionic/%s.vts" %
                          component_name, "%s.driver.cpp" % component_name)
