@@ -23,6 +23,19 @@
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
 
+  <!-- From vts-hal.xml: Internal Only -->
+  <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGraphicsAllocatorV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalThermalV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalUsbV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
+
   <!-- From vts-kernel.xml -->
   <option name="compatibility:include-filter" value="LinuxKselftestTest" />
   <option name="compatibility:include-filter" value="LinuxKselftestTestPresubmit" />
