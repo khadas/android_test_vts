@@ -27,6 +27,7 @@ include $(LOCAL_PATH)/list/vts_test_lib_hidl_trace_list.mk
 include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
+-include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
 
 # Packaging rule for android-vts.zip
@@ -43,6 +44,7 @@ $(call dist-for-goals, vts, $(compatibility_zip))
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 
 my_modules := \
+    $(kselftest_modules) \
     ltp \
     $(ltp_packages) \
     $(vts_apk_packages) \
