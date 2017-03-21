@@ -13,6 +13,8 @@
 #include <fuzz_tester/FuzzerBase.h>
 #include <fuzz_tester/FuzzerCallbackBase.h>
 
+#include <VtsDriverCommUtil.h>
+
 #include <android/hardware/nfc/1.0/INfcClientCallback.h>
 #include <hidl/HidlSupport.h>
 #include <android/hardware/nfc/1.0/types.h>
@@ -24,9 +26,10 @@ using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
 
-class Vts_android_hardware_nfc_V1_0_INfcClientCallback: public ::android::hardware::nfc::V1_0::INfcClientCallback {
+class Vts_android_hardware_nfc_V1_0_INfcClientCallback : public ::android::hardware::nfc::V1_0::INfcClientCallback, public FuzzerCallbackBase {
  public:
-    Vts_android_hardware_nfc_V1_0_INfcClientCallback() {};
+    Vts_android_hardware_nfc_V1_0_INfcClientCallback(const string& callback_socket_name)
+        : callback_socket_name_(callback_socket_name) {};
 
     virtual ~Vts_android_hardware_nfc_V1_0_INfcClientCallback() = default;
 
@@ -37,6 +40,9 @@ class Vts_android_hardware_nfc_V1_0_INfcClientCallback: public ::android::hardwa
     ::android::hardware::Return<void> sendData(
         const ::android::hardware::hidl_vec<uint8_t>& arg0) override;
 
+
+ private:
+    const string& callback_socket_name_;
 };
 
 sp<::android::hardware::nfc::V1_0::INfcClientCallback> VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(const string& callback_socket_name);
