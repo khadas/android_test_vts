@@ -612,7 +612,7 @@ class AndroidDevice(object):
                           "is not yet supported. No property is set.")
             return
 
-        self.adb.shell("\'setprop %s \"%s\"\'" % (name, value))
+        self.adb.shell("setprop %s \"%s\"" % (name, value))
 
     def getProp(self, name):
         """Calls getprop shell command.
