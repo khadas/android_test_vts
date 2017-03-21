@@ -179,6 +179,11 @@ void DriverCodeGenBase::GenerateHeaderIncludeFiles(Formatter& out,
   out << "#include <fuzz_tester/FuzzerBase.h>" << "\n";
   out << "#include <fuzz_tester/FuzzerCallbackBase.h>" << "\n";
   out << "\n";
+  if (message.component_class() == HAL_HIDL &&
+      endsWith(message.component_name(), "Callback")) {
+    out << "#include <VtsDriverCommUtil.h>" << "\n";
+    out << "\n";
+  }
 }
 
 void DriverCodeGenBase::GenerateSourceIncludeFiles(Formatter& out,

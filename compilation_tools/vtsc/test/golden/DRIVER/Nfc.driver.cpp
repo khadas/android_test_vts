@@ -42,6 +42,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionS
     if (!strcmp(func_name, "open")) {
         sp<::android::hardware::nfc::V1_0::INfcClientCallback> arg0;
         arg0 = VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(callback_socket_name);
+        static_cast<Vts_android_hardware_nfc_V1_0_INfcClientCallback*>(arg0.get())->Register(func_msg.arg(0));
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
         cout << "Call an API" << endl;

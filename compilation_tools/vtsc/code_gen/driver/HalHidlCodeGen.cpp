@@ -51,8 +51,9 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
         out << "::android::hardware::Return<void> ";
       }
       // Generate function call.
-      out << "Vts_" << component_fq_name.tokenName() << "::" << api.name()
-          << "(\n";
+      string full_method_name = "Vts_" + component_fq_name.tokenName() + "::"
+          + api.name();
+      out << full_method_name << "(\n";
       out.indent();
       for (int index = 0; index < api.arg_size(); index++) {
         const auto& arg = api.arg(index);
@@ -84,6 +85,18 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
         out << ")>) {" << "\n";
       }
       out << "cout << \"" << api.name() << " called\" << endl;" << "\n";
+      out << "AndroidSystemCallbackRequestMessage callback_message;" << "\n";
+      out << "callback_message.set_id(GetCallbackID(\"" << api.name() << "\"));" << "\n";
+      out << "callback_message.set_name(\"" << full_method_name << "\");" << "\n";
+      for (int index = 0; index < api.arg_size(); index++) {
+        out << "VariableSpecificationMessage* var_msg" << index << " = "
+            << "callback_message.add_arg();\n";
+        GenerateSetResultCodeForTypedVariable(out, api.arg(index),
+                                              "var_msg" + std::to_string(index),
+                                              "arg" + std::to_string(index));
+      }
+      out << "RpcCallToAgent(callback_message, callback_socket_name_);" << "\n";
+
       if (api.return_type_hidl_size() == 0
           || api.return_type_hidl(0).type() == TYPE_VOID) {
         out << "return ::android::hardware::Void();" << "\n";
@@ -101,7 +114,8 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
     out << " {" << "\n";
     out.indent();
     out << "sp<" << component_fq_name.cppName() << "> result;\n";
-    out << "result = new " << component_name_token << "();\n";
+    out << "result = new " << component_name_token << "(callback_socket_name);"
+        << "\n";
     out << "return result;\n";
     out.unindent();
     out << "}" << "\n" << "\n";
@@ -368,11 +382,12 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     out << "\n";
     FQName component_fq_name = GetFQName(message);
     string component_name_token = "Vts_" + component_fq_name.tokenName();;
-    out << "class " << component_name_token << ": public "
-        << component_fq_name.cppName() << " {" << "\n";
+    out << "class " << component_name_token << " : public "
+        << component_fq_name.cppName() << ", public FuzzerCallbackBase {" << "\n";
     out << " public:" << "\n";
     out.indent();
-    out << component_name_token << "() {};" << "\n";
+    out << component_name_token << "(const string& callback_socket_name)\n"
+        << "    : callback_socket_name_(callback_socket_name) {};" << "\n";
     out << "\n";
     out << "virtual ~" << component_name_token << "()"
         << " = default;" << "\n";
@@ -419,6 +434,11 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
       }
       out.unindent();
     }
+    out << "\n";
+    out.unindent();
+    out << " private:" << "\n";
+    out.indent();
+    out << "const string& callback_socket_name_;" << "\n";
     out.unindent();
     out << "};" << "\n";
     out << "\n";
@@ -850,6 +870,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
 
       out << arg_name << " = VtsFuzzerCreateVts" << type_name
           << "(callback_socket_name);\n";
+      out << "static_cast<" << "Vts" + type_name << "*>(" << arg_name
+          << ".get())->Register(" << arg_value_name << ");\n";
       break;
     }
     case TYPE_HANDLE:

@@ -549,7 +549,6 @@ void HalCodeGen::GenerateCppBodyFuzzFunction(
     out.indent();
     out << "cerr << \"both device_ and hmi_ are NULL.\" << endl;"
         << "\n";
-    out.indent();
     out << "return false;" << "\n";
     out.unindent();
     out << "}" << "\n";
