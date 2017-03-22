@@ -36,7 +36,8 @@ class StandaloneLightFuzzTest(base_test.BaseTestClass):
         self.dut.hal.InitConventionalHal(target_type="light",
                                          target_basepaths=["/system/lib64/hw"],
                                          target_version=1.0,
-                                         bits=64)
+                                         bits=64,
+                                         target_package="hal.conventional.light")
         self.dut.hal.light.OpenConventionalHal("backlight")
         module_name = random.choice(
             [self.dut.hal.light.LIGHT_ID_BACKLIGHT,

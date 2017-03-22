@@ -103,6 +103,7 @@ class HalMirror(object):
     def InitConventionalHal(self,
                             target_type,
                             target_version,
+                            target_package="",
                             target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                             handler_name=None,
                             bits=64):
@@ -116,6 +117,8 @@ class HalMirror(object):
             target_version: float, the target component version (e.g., 1.0).
             target_basepaths: list of strings, the paths to look for target
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
+            target_package: . separated string (e.g., a.b.c) to denote the
+                            package name of target component.
             handler_name: string, the name of the handler. target_type is used
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
@@ -123,6 +126,7 @@ class HalMirror(object):
         self._CreateMirrorObject("hal_conventional",
                                  target_type,
                                  target_version,
+                                 target_package=target_package,
                                  target_basepaths=target_basepaths,
                                  handler_name=handler_name,
                                  bits=bits)

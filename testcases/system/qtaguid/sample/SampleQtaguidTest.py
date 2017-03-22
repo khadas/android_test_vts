@@ -32,7 +32,8 @@ class SampleQtaguidTest(base_test.BaseTestClass):
                                    target_version=1.0,
                                    target_filename="libcutils.so",
                                    bits=64,
-                                   handler_name="libcutils")
+                                   handler_name="libcutils",
+                                   target_packege="lib.ndk.bionic")
 
     def testCall(self):
         """A simple testcase which just calls a function."""
