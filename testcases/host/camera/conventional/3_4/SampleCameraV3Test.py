@@ -35,7 +35,8 @@ class SampleCameraV3Test(base_test.BaseTestClass):
         self.dut.hal.InitConventionalHal(target_type="camera",
                                          target_version=3.4,
                                          target_basepaths=["/system/lib/hw"],
-                                         bits=32)
+                                         bits=32,
+                                         target_package="hal.conventional.camera")
 
     def setUpTest(self):
         self.call_count_camera_device_status_change = 0

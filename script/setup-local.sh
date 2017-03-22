@@ -71,16 +71,8 @@ function vts_multidevice_target_setup {
   # adb push images/${DEVICE}/64/libhwbinder.so /data/local/tmp/64/libhwbinder.so
 
   adb shell mkdir -p /data/local/tmp/spec
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/CameraHalV2.vts /data/local/tmp/spec/CameraHalV2.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/CameraHalV2hw_device_t.vts /data/local/tmp/spec/CameraHalV2hw_device_t.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/CameraHalV3.vts /data/local/tmp/spec/CameraHalV3.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/CameraHalV3camera3_device_ops_t.vts /data/local/tmp/spec/CameraHalV3camera3_device_ops_t.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/GpsHalV1.vts /data/local/tmp/spec/GpsHalV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/GpsHalV1GpsInterface.vts /data/local/tmp/spec/GpsHalV1GpsInterface.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/LightHalV1.vts /data/local/tmp/spec/LightHalV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/WifiHalV1.vts /data/local/tmp/spec/WifiHalV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1.vts /data/local/tmp/spec/BluetoothHalV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal_conventional/BluetoothHalV1bt_interface_t.vts /data/local/tmp/spec/BluetoothHalV1bt_interface_t.vts
+  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/hal/conventional /data/local/tmp/spec/hal/conventional
+  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib /data/local/tmp/spec/lib
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.nfc@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vr@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.automotive.vehicle@2.0
@@ -90,9 +82,6 @@ function vts_multidevice_target_setup {
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.vibrator@1.0
   hidl-gen -o ${ANDROID_BUILD_TOP}/output -L vts -r android.hardware:hardware/interfaces -r android.hidl:system/libhidl/transport android.hardware.contexthub@1.0
   adb push ${ANDROID_BUILD_TOP}/output/android/hardware /data/local/tmp/spec/android/
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libmV1.vts /data/local/tmp/spec/libmV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcV1.vts /data/local/tmp/spec/libcV1.vts
-  adb push ${ANDROID_BUILD_TOP}/test/vts/specification/lib_bionic/libcutilsV1.vts /data/local/tmp/spec/libcutilsV1.vts
 
   echo "install asan packages"
   # asan

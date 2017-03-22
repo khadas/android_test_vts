@@ -17,19 +17,19 @@
 LOCAL_PATH := $(call my-dir)
 
 vtslib_interfacespec_srcfiles := \
-  hal_conventional/CameraHalV2.vts \
-  hal_conventional/CameraHalV2hw_device_t.vts \
-  hal_conventional/CameraHalV3.vts \
-  hal_conventional/CameraHalV3camera3_device_ops_t.vts \
-  hal_conventional/GpsHalV1.vts \
-  hal_conventional/GpsHalV1GpsInterface.vts \
-  hal_conventional/LightHalV1.vts \
-  hal_conventional/WifiHalV1.vts \
-  hal_conventional/BluetoothHalV1.vts \
-  hal_conventional/BluetoothHalV1bt_interface_t.vts \
-  lib_bionic/libmV1.vts \
-  lib_bionic/libcV1.vts \
-  lib_bionic/libcutilsV1.vts \
+  hal/conventional/camera/2.1/CameraHalV2.vts \
+  hal/conventional/camera/2.1/CameraHalV2hw_device_t.vts \
+  hal/conventional/camera/3.4/CameraHalV3.vts \
+  hal/conventional/camera/3.4/CameraHalV3camera3_device_ops_t.vts \
+  hal/conventional/gps/1.0/GpsHalV1.vts \
+  hal/conventional/gps/1.0/GpsHalV1GpsInterface.vts \
+  hal/conventional/light/1.0/LightHalV1.vts \
+  hal/conventional/wifi/1.0/WifiHalV1.vts \
+  hal/conventional/bluetooth/1.0/BluetoothHalV1.vts \
+  hal/conventional/bluetooth/1.0/BluetoothHalV1bt_interface_t.vts \
+  lib/ndk/bionic/1.0/libmV1.vts \
+  lib/ndk/bionic/1.0/libcV1.vts \
+  lib/ndk/bionic/1.0/libcutilsV1.vts \
 
 vtslib_interfacespec_includes := \
   $(LOCAL_PATH) \
