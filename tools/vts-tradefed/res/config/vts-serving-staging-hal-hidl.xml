@@ -39,13 +39,4 @@
   <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiNanV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
-  <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
-  <option name="compatibility:include-filter" value="BinderPerformanceTest" />
-  <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputTest" />
-  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
-  <option name="compatibility:include-filter" value="FmqPerformanceTest" />
-  <option name="compatibility:include-filter" value="HidlTraceRecorder" />
-
 </configuration>
