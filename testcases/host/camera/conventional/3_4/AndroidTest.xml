@@ -17,8 +17,8 @@
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="push-group" value="HostDrivenTest.push" />
         <option name="cleanup" value="true" />
-        <option name="push" value="spec/test/vts/specification/hal_conventional/CameraHalV3.vts->/data/local/tmp/spec/CameraHalV3.vts" />
-        <option name="push" value="spec/test/vts/specification/hal_conventional/CameraHalV3camera3_device_ops_t.vts->/data/local/tmp/spec/CameraHalV3camera3_device_ops_t.vts" />
+        <option name="push" value="spec/test/vts/specification/hal/conventional/camera/3.4/CameraHalV3.vts->/data/local/tmp/spec/hal/conventional/camera/3.4/CameraHalV3.vts" />
+        <option name="push" value="spec/test/vts/specification/hal/conventional/camera/3.4/CameraHalV3camera3_device_ops_t.vts->/data/local/tmp/spec/hal/conventional/camera/3.4/CameraHalV3camera3_device_ops_t.vts" />
     </target_preparer>
     <!-- TODO: copy camera HAL so files -->
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">

@@ -105,6 +105,18 @@ def PbStruct2PyDict(var):
     return result
 
 
+def PbPredefined2PyValue(var):
+    """Converts VariableSecificationMessage (PREDEFINED_TYPE) to Python value.
+
+    Args:
+        var: VariableSpecificationMessage to convert.
+
+    Returns:
+        a converted value.
+    """
+    return var.predefined_type
+
+
 def Convert(var):
     """Converts VariableSecificationMessage to Python native data structure.
 
@@ -114,7 +126,9 @@ def Convert(var):
     Returns:
         A list containing the converted Python values.
     """
-    if var.type == CompSpecMsg.TYPE_SCALAR:
+    if var.type == CompSpecMsg.TYPE_PREDEFINED:
+        return PbPredefined2PyValue(var)
+    elif var.type == CompSpecMsg.TYPE_SCALAR:
         return PbScalar2PyValue(var)
     elif var.type == CompSpecMsg.TYPE_VECTOR:
         return PbVector2PyList(var)

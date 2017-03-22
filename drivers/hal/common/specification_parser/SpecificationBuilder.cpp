@@ -57,6 +57,7 @@ SpecificationBuilder::FindComponentSpecification(const int target_class,
                                                  const string component_name) {
   DIR* dir;
   struct dirent* ent;
+  cerr << __func__ << ": component " << component_name << endl;
 
   // Derive the package-specific dir which contains .vts files
   string target_dir_path = dir_path_;
