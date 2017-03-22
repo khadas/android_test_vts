@@ -34,7 +34,8 @@ class LibcTest(base_test.BaseTestClass):
                                    target_version=1.0,
                                    target_filename="libc.so",
                                    bits=64,
-                                   handler_name="libc")
+                                   handler_name="libc",
+                                   target_package="lib.ndk.bionic")
 
     def testOpenCloseLocalSocketStream(self):
         """Tests open and close socket operations for local communication.

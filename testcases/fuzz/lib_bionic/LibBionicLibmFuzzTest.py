@@ -32,7 +32,8 @@ class LibBionicLibmFuzzTest(base_test.BaseTestClass):
                                    target_version=1.0,
                                    target_filename="libm.so",
                                    bits=64,
-                                   handler_name="libm")
+                                   handler_name="libm",
+                                   target_package="lib.ndk.bionic")
 
     def testFabs(self):
         """A simple testcase which just calls the fabs function."""
