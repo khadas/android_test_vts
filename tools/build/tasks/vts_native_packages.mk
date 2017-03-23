@@ -29,6 +29,7 @@ include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
+-include vendor/google_vts/tools/build/tasks/list/vts_apk_package_list_vendor.mk
 
 # Packaging rule for android-vts.zip
 test_suite_name := vts
@@ -102,6 +103,14 @@ my_trace_copy_pairs :=
     $(if $(wildcard $(m)),\
       $(eval my_trace_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/hal-hidl-trace/$(m))))\
 
+my_prebuilt_apk_modules := \
+    $(vts_prebuilt_apk_packages) \
+
+my_prebuilt_apk_copy_pairs :=
+  $(foreach m,$(my_prebuilt_apk_modules),\
+    $(if $(wildcard $(m)),\
+      $(eval my_prebuilt_apk_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/prebuilt-apk/$(m))))\
+
 # Packaging rule for android-vts.zip's testcases dir (host subdir).
 
 my_host_modules := \
@@ -126,4 +135,6 @@ $(compatibility_zip): \
   $(call copy-many-files,$(my_copy_pairs)) \
   $(call copy-many-files,$(my_spec_copy_pairs)) \
   $(call copy-many-files,$(my_trace_copy_pairs)) \
-  $(call copy-many-files,$(my_host_copy_pairs))
+  $(call copy-many-files,$(my_host_copy_pairs)) \
+  $(call copy-many-files,$(my_prebuilt_apk_copy_pairs)) \
+
