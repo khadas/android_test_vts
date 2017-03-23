@@ -138,4 +138,5 @@ vts_test_lib_hidl_packages += \
   VtsHalVibratorV1_0TargetTest \
   VtsHalVrV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
+  VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
