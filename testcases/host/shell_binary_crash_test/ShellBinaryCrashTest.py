@@ -24,7 +24,7 @@ from vts.utils.python.controllers import android_device
 from vts.runners.host import const
 
 
-class ShellBinaryCrashTest(base_test.BaseTest):
+class ShellBinaryCrashTest(base_test.BaseTestClass):
     """A binary crash test case for the shell driver."""
 
     EXIT_CODE_CRASH = 133
