@@ -26,10 +26,10 @@ class CpuFrequencyScalingController(object):
 
     The implementation is based on the special files in
     /sys/devices/system/cpu/. CPU availability is shown in multiple files,
-    including online, present, and possible. This class assumes that a CPU may
-    be present but offline. If a CPU is online, its frequency scaling can be
-    adjusted by reading/writing to the files in cpuX/cpufreq/ where X is the
-    CPU number.
+    including online, present, and possible. This class assumes that a present
+    CPU may dynamically switch its online status. If a CPU is online, its
+    frequency scaling can be adjusted by reading/writing the files in
+    cpuX/cpufreq/ where X is the CPU number.
 
     Attributes:
         _dut: the target device DUT instance.
@@ -53,18 +53,6 @@ class CpuFrequencyScalingController(object):
         self._shell = self._dut.shell.cpu_frequency_scaling
         self._min_cpu_number, self._max_cpu_number = self._GetMinAndMaxCpuNo()
         self._theoretical_max_frequency = {}
-        for cpu_no in range(self._min_cpu_number, self._max_cpu_number):
-            results = self._shell.Execute(
-                "cat /sys/devices/system/cpu/cpu%s/"
-                "cpufreq/scaling_available_frequencies" % cpu_no)
-            asserts.assertEqual(1, len(results[const.STDOUT]))
-            if results[const.STDOUT][0]:
-                freq = [int(x) for x in results[const.STDOUT][0].split()]
-                self._theoretical_max_frequency[cpu_no] = max(freq)
-            else:
-                self._theoretical_max_frequency[cpu_no] = None
-                logging.warn("cpufreq/scaling_available_frequencies for cpu %s"
-                             " not set.", cpu_no)
         self._init = True
 
     def _GetMinAndMaxCpuNo(self):
@@ -75,35 +63,68 @@ class CpuFrequencyScalingController(object):
             integer: max CPU number (exclusive)
         """
         results = self._shell.Execute(
-            "cat /sys/devices/system/cpu/online")
+            "cat /sys/devices/system/cpu/present")
         asserts.assertEqual(len(results[const.STDOUT]), 1)
         stdout_lines = results[const.STDOUT][0].split("\n")
         stdout_split = stdout_lines[0].split('-')
         asserts.assertLess(len(stdout_split), 3)
         low = stdout_split[0]
         high = stdout_split[1] if len(stdout_split) == 2 else low
-        logging.info("online cpus: %s : %s" % (low, high))
+        logging.info("present cpus: %s : %s" % (low, high))
         return int(low), int(high) + 1
 
-    def ChangeCpuGoverner(self, mode):
-        """Changes the CPU governer mode of all the CPUs on the device.
+    def _GetTheoreticalMaxFrequency(self, cpu_no):
+        """Reads max value from cpufreq/scaling_available_frequencies.
+
+        If the read operation is successful, the return value is kept in
+        _theoretical_max_frequency as a cache.
 
         Args:
-            mode: expected CPU governer mode, e.g., 'performance' or 'interactive'.
+            cpu_no: integer, the CPU number.
+
+        Returns:
+            An integer which is the max frequency read from the file.
+            None if the file cannot be read.
+        """
+        if cpu_no in self._theoretical_max_frequency:
+            return self._theoretical_max_frequency[cpu_no]
+        results = self._shell.Execute(
+            "cat /sys/devices/system/cpu/cpu%s/"
+            "cpufreq/scaling_available_frequencies" % cpu_no)
+        asserts.assertEqual(1, len(results[const.EXIT_CODE]))
+        if not results[const.EXIT_CODE][0]:
+            freq = [int(x) for x in results[const.STDOUT][0].split()]
+            self._theoretical_max_frequency[cpu_no] = max(freq)
+            return self._theoretical_max_frequency[cpu_no]
+        else:
+            logging.warn("cpufreq/scaling_available_frequencies for cpu %s"
+                         " not set.", cpu_no)
+            return None
+
+    def ChangeCpuGovernor(self, mode):
+        """Changes the CPU governor mode of all the CPUs on the device.
+
+        Args:
+            mode: expected CPU governor mode, e.g., 'performance' or 'interactive'.
         """
         self.Init()
         for cpu_no in range(self._min_cpu_number, self._max_cpu_number):
-            self._shell.Execute(
+            results = self._shell.Execute(
                 "echo %s > /sys/devices/system/cpu/cpu%s/"
                 "cpufreq/scaling_governor" % (mode, cpu_no))
+            asserts.assertEqual(1, len(results[const.EXIT_CODE]))
+            if results[const.EXIT_CODE][0]:
+                logging.warn("Can't change CPU governor.")
+                logging.warn("Stderr for scaling_governor: %s",
+                    results[const.STDERR][0])
 
     def DisableCpuScaling(self):
         """Disable CPU frequency scaling on the device."""
-        self.ChangeCpuGoverner("performance")
+        self.ChangeCpuGovernor("performance")
 
     def EnableCpuScaling(self):
         """Enable CPU frequency scaling on the device."""
-        self.ChangeCpuGoverner("interactive")
+        self.ChangeCpuGovernor("interactive")
 
     def IsUnderThermalThrottling(self):
         """Checks whether a target device is under thermal throttling.
@@ -119,10 +140,10 @@ class CpuFrequencyScalingController(object):
                  "cat /sys/devices/system/cpu/cpu%s/cpufreq/scaling_cur_freq" % cpu_no])
             asserts.assertEqual(2, len(results[const.STDOUT]))
             if any(results[const.EXIT_CODE]):
-                logging.error("Can't check the current and/or max CPU frequency.")
-                logging.error("Stderr for scaling_max_freq: %s", results[const.STDERR][0])
-                logging.error("Stderr for scaling_cur_freq: %s", results[const.STDERR][1])
-                return True
+                logging.warn("Can't check the current and/or max CPU frequency.")
+                logging.warn("Stderr for scaling_max_freq: %s", results[const.STDERR][0])
+                logging.warn("Stderr for scaling_cur_freq: %s", results[const.STDERR][1])
+                return False
             configurable_max_frequency = results[const.STDOUT][0].strip()
             current_frequency = results[const.STDOUT][1].strip()
             if configurable_max_frequency != current_frequency:
@@ -130,11 +151,12 @@ class CpuFrequencyScalingController(object):
                     "CPU%s: Configurable max frequency %s != current frequency %s",
                     cpu_no, configurable_max_frequency, current_frequency)
                 return True
-            if (self._theoretical_max_frequency[cpu_no] is not None and
-                self._theoretical_max_frequency[cpu_no] != int(current_frequency)):
+            theoretical_max_frequency = self._GetTheoreticalMaxFrequency(cpu_no)
+            if (theoretical_max_frequency is not None and
+                theoretical_max_frequency != int(current_frequency)):
                 logging.error(
                     "CPU%s, Theoretical max frequency %d != scaling current frequency %s",
-                    cpu_no, self._theoretical_max_frequency[cpu_no], current_frequency)
+                    cpu_no, theoretical_max_frequency, current_frequency)
                 return True
         return False
 
