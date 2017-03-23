@@ -45,6 +45,12 @@ $(VTS_PYTHON_ZIP): $(SOONG_ZIP)
 	@rm -f $@.list
 	$(hide)unzip -o $@ -d $(VTS_TESTCASES_OUT)/vts/testcases/
 	#
+	@echo "build vendor-specific vts python testcases"
+	$(hide) find vendor/google_vts/testcases -name '*.py' -or -name '*.config' -or -name '*.push' | sort > $@.list
+	$(hide) $(SOONG_ZIP) -d -o $@ -C vendor/google_vts/testcases -l $@.list
+	@rm -f $@.list
+	$(hide)unzip -o $@ -d $(VTS_TESTCASES_OUT)/vts/testcases/
+	#
 	$(hide) touch -f $(VTS_TESTCASES_OUT)/vts/__init__.py
 
 $(VTS_CAMERAITS_ZIP): $(SOONG_ZIP)
