@@ -16,5 +16,8 @@
 vts_apk_packages := \
   VtsAgentApp \
   CtsVerifier \
-  sl4a
+  sl4a \
+
+
+vts_prebuilt_apk_packages := \
 
