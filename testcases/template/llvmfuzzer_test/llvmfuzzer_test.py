@@ -25,6 +25,7 @@ from vts.runners.host import test_runner
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
+from vts.utils.python.os import path_utils
 
 from vts.testcases.template.llvmfuzzer_test import llvmfuzzer_test_config as config
 
@@ -93,11 +94,10 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
             # vts_spec_files is a string list, will be serialized like this:
             # [a, b, c] -> "a:b:c"
             vts_spec_files = params.get(VTS_SPEC_FILES, {})
-            flags = "--%s=\"%s\" " % (
-                VTS_SPEC_FILES,
-                DELIMITER.join(map(
-                    lambda x: os.path.join(config.FUZZER_SPEC_DIR, x),
-                    vts_spec_files)))
+            target_vts_spec_files = DELIMITER.join(map(
+                lambda x: path_utils.JoinTargetPath(config.FUZZER_SPEC_DIR, x),
+                vts_spec_files))
+            flags = "--%s=\"%s\" " % (VTS_SPEC_FILES, target_vts_spec_files)
 
             vts_exec_size = params.get(VTS_EXEC_SIZE, {})
             flags += "--%s=%s" % (VTS_EXEC_SIZE, vts_exec_size)
@@ -136,12 +136,14 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
             string, path to corpus directory on the target.
         """
         corpus = fuzzer_config.get("corpus", [])
-        corpus_dir = os.path.join(config.FUZZER_TEST_DIR, "%s_corpus" % fuzzer)
+        corpus_dir = path_utils.JoinTargetPath(
+            config.FUZZER_TEST_DIR, "%s_corpus" % fuzzer)
 
         self._dut.adb.shell("mkdir %s -p" % corpus_dir)
         for idx, corpus_entry in enumerate(corpus):
             corpus_entry = corpus_entry.replace("x", "\\x")
-            corpus_entry_file = os.path.join(corpus_dir, "input%s" % idx)
+            corpus_entry_file = path_utils.JoinTargetPath(
+                corpus_dir, "input%s" % idx)
             cmd = "echo -ne '%s' > %s" % (str(corpus_entry), corpus_entry_file)
             # Vts shell drive doesn't play nicely with escape characters,
             # so we use adb shell.
@@ -161,7 +163,8 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
         test_flags = self.CreateFuzzerFlags(fuzzer_config)
         corpus_dir = self.CreateCorpus(fuzzer, fuzzer_config)
 
-        chmod_cmd = "chmod -R 755 %s" % os.path.join(config.FUZZER_TEST_DIR, fuzzer)
+        chmod_cmd = "chmod -R 755 %s" % path_utils.JoinTargetPath(
+            config.FUZZER_TEST_DIR, fuzzer)
         self._dut.adb.shell(chmod_cmd)
 
         cd_cmd = "cd %s" % config.FUZZER_TEST_DIR
