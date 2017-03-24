@@ -140,8 +140,9 @@ message TestCaseReportMessage {
   // systrace report message per file
   repeated SystraceReportMessage systrace = 42;
 
-  // host log for each test case.
-  optional HostLogMessage host_log = 101;
+  // log for each test case. May contain multiple logs such as logcat, host log,
+  // etc.
+  repeated LogMessage log = 101;
 }
 
 
@@ -215,64 +216,61 @@ message CoverageReportMessage {
   optional bytes html = 3 [deprecated=true];
 }
 
-// To specify host log report. This can be used either for per-test-module
+// To specify log report. This can be used either for per-test-module
 // log message or per-test-case log message.
-message HostLogMessage {
-  // URLs of the produced host log
+message LogMessage {
+  // URLs of the produced log files. May contains multiple files such as stdout,
+  // stderr, etc.
   optional bytes url = 1;
 
-  // Stdout of host log. Caution: do not put too much log in protobuf message,
-  // as bigtable recommends < 10 mb for each record cell
-  optional bytes stdout = 11;
+  // Name of log.
+  optional bytes name = 2;
 
-  // Stderr of host log. Caution: do not put too much log in protobuf message,
+  // content of log. Caution: do not put too much log in protobuf message,
   // as bigtable recommends < 10 mb for each record cell
-  optional bytes stderr = 12;
-
-  // Return code for a test case. This field should only be used for
-  // per-test-case log message
-  optional int32 ret = 13;
+  optional bytes content = 3;
 }
 
 // To specify a test execution report.
 message TestReportMessage {
-  // the test suite name..
+  // The test suite name..
   optional bytes test_suite = 1;
 
-  // the test name.
+  // The test name.
   optional bytes test = 2;
 
-  // the test type
+  // The test type
   optional VtsTestType test_type = 3;
 
-  // target device info
+  // Target device info
   repeated AndroidDeviceInfoMessage device_info = 4;
 
-  // build info
+  // Build info
   optional AndroidBuildInfo build_info = 5;
 
-  // email addresses of subscribers to the test results
+  // Email addresses of subscribers to the test results
   repeated bytes subscriber_email = 6;
 
-  // info about the host computer
+  // Info about the host computer
   optional VtsHostInfo host_info = 7;
 
-  // test case reports
+  // Test case reports
   repeated TestCaseReportMessage test_case = 11;
 
-  // profiling reports
+  // Profiling reports
   repeated ProfilingReportMessage profiling = 21;
 
-  // systrace report per file
+  // Systrace report per file
   repeated SystraceReportMessage systrace = 22;
 
-  // execution start and end time stamp.
+  // Execution start and end time stamp.
   optional int64 start_timestamp = 101;
   optional int64 end_timestamp = 102;
 
-  // coverage report per file
+  // Coverage report per file
   repeated CoverageReportMessage coverage = 103;
 
-  // host log for a test module. May contains host log for each test case.
-  optional HostLogMessage host_log = 1001;
+  // Log for a test module. May contain multiple logs such as logcat, host log,
+  // etc.
+  repeated LogMessage log = 1001;
 }
