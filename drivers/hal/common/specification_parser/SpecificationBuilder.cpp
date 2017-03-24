@@ -282,7 +282,7 @@ bool SpecificationBuilder::LoadTargetComponent(
   }
 
   if (target_class == HAL_HIDL) {
-    asprintf(&spec_lib_file_path_, "%s.vts.driver@%s.so", target_package,
+    asprintf(&spec_lib_file_path_, "%s@%s-vts.driver.so", target_package,
              GetVersionString(target_version).c_str());
     cout << __func__ << " spec lib path " << spec_lib_file_path_ << endl;
   } else {
