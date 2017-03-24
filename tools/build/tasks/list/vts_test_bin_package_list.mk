@@ -15,7 +15,11 @@
 
 vts_test_bin_packages := \
     android.hardware.tests.msgq@1.0-service-benchmark \
+    android.hardware.tests.msgq@1.0-service-test \
+    fmq_test \
+    hidl_test_helper \
     mq_benchmark_client \
+    mq_test_client \
     libhwbinder_benchmark \
     libbinder_benchmark \
     vts_test_binary_crash_app \
