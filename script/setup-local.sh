@@ -49,8 +49,8 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/libprotobuf-cpp-full.so /data/local/tmp/64/
 
   echo "install vts drivers for hidl"
-  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib/android.hardware.*.vts.driver@*.so /data/local/tmp/32/
-  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.*.vts.driver@*.so /data/local/tmp/64/
+  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib/android.hardware.*@*-vts.driver.so /data/local/tmp/32/
+  adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.*@*-vts.driver.so /data/local/tmp/64/
 
   echo "install hal packages"
   adb shell mkdir -p /data/local/tmp/32/hw
@@ -65,8 +65,8 @@ function vts_multidevice_target_setup {
   adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/obj/EXECUTABLES/libhwbinder_benchmark_intermediates/LINKED/libhwbinder_benchmark64 /data/local/tmp/64/
 
   # uncomment for hidl in non-treble devices
-  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc.vts.driver@1.0.so /data/local/tmp/32/hw/
-  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc.vts.driver@1.0.so /data/local/tmp/64/hw/
+  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib/android.hardware.nfc@1.0-vts.driver.so /data/local/tmp/32/hw/
+  # adb push ${ANDROID_BUILD_TOP}/out/target/product/${DEVICE}/system/lib64/android.hardware.nfc@1.0-vts.driver.so /data/local/tmp/64/hw/
   # adb push images/${DEVICE}/32/libhwbinder.so /data/local/tmp/32/libhwbinder.so
   # adb push images/${DEVICE}/64/libhwbinder.so /data/local/tmp/64/libhwbinder.so
 
