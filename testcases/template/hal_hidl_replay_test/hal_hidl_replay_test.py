@@ -120,7 +120,7 @@ class HalHidlReplayTest(base_test.BaseTestClass):
                 "fuzzer%s" % self.abi_bitness)
             target_vts_driver_file_path = path_utils.JoinTargetPath(
                 self.DEVICE_TMP_DIR, self.abi_bitness,
-                "%s.vts.driver@%s.so" % (target_package, target_version))
+                "%s@%s-vts.driver.so" % (target_package, target_version))
             service_names = self.getServiceName()
             for service_name in service_names:
                 cmd = ("LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH "
