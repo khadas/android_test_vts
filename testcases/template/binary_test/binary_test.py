@@ -130,9 +130,13 @@ class BinaryTest(base_test.BaseTestClass):
                 if self.TAG_DELIMITER in token:
                     tag, path = token.split(self.TAG_DELIMITER)
                 self.profiling_library_path[tag] = path
-        self._dut = self.registerController(android_device)[0]
+
+        if not hasattr(self, "_dut"):
+            self._dut = self.registerController(android_device)[0]
+
         self._dut.shell.InvokeTerminal("one")
         self.shell = self._dut.shell.one
+
         if self.coverage.enabled:
             self.coverage.LoadArtifacts()
             self.coverage.InitializeDeviceCoverage(self._dut)

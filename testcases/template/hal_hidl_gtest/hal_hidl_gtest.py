@@ -21,6 +21,7 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.utils.python.common import vintf_utils
+from vts.utils.python.controllers import android_device
 from vts.utils.python.cpu import cpu_frequency_scaling
 from xml.etree import ElementTree
 
@@ -41,8 +42,10 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     '''
 
     def setUpClass(self):
-        """Turns on CPU frequency scaling."""
-        super(HidlHalGTest, self).setUpClass()
+        """Checks precondition."""
+        self._dut = self.registerController(android_device)[0]
+        self._dut.shell.InvokeTerminal("hal_hidl_gtest")
+        shell = self._dut.shell.hal_hidl_gtest
 
         opt_params = [
             keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
@@ -75,7 +78,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 logging.error("The given hwbinder service name %s is invalid.",
                               hwbinder_service_name)
             else:
-                cmd_results = self.shell.Execute("ps -A")
+                cmd_results = shell.Execute("ps -A")
                 hwbinder_service_name += "@"
                 if (any(cmd_results[const.EXIT_CODE]) or hwbinder_service_name
                         not in cmd_results[const.STDOUT][0]):
@@ -92,7 +95,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                         "The given feature name %s is invalid for HIDL HAL.",
                         feature)
                 else:
-                    cmd_results = self.shell.Execute("pm list features")
+                    cmd_results = shell.Execute("pm list features")
                     if (any(cmd_results[const.EXIT_CODE]) or
                             feature not in cmd_results[const.STDOUT][0]):
                         logging.warn("The required feature %s not found.",
@@ -104,7 +107,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 getattr(self, keys.ConfigKeys.
                         IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
             if file_path_prefix:
-                cmd_results = self.shell.Execute("ls %s*" % file_path_prefix)
+                cmd_results = shell.Execute("ls %s*" % file_path_prefix)
                 if any(cmd_results[const.EXIT_CODE]):
                     logging.warn("The required file (prefix: %s) not found.",
                                  file_path_prefix)
@@ -130,6 +133,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
             self._cpu_freq.DisableCpuScaling()
+
+        super(HidlHalGTest, self).setUpClass()
 
     def _EnablePassthroughMode(self):
         """Enable passthrough mode by setting getStub to true.
