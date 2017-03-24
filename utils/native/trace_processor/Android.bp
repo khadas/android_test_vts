@@ -15,9 +15,9 @@
 //
 
 cc_library_host_shared {
-    name: "libvts_traceparser",
+    name: "libvts_traceprocessor",
 
-    srcs: ["VtsTraceParser.cpp"],
+    srcs: ["VtsTraceProcessor.cpp"],
 
     shared_libs: [
         "libbase",
@@ -40,7 +40,7 @@ cc_binary_host {
         "libbase",
         "libprotobuf-cpp-full",
         "libvts_multidevice_proto",
-        "libvts_traceparser",
+        "libvts_traceprocessor",
     ],
     cflags: [
         "-Wall",
