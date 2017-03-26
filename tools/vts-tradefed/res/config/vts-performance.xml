@@ -19,14 +19,11 @@
   <option name="test-tag" value="vts-*" />
 
   <!-- For Kernel HwBinder and Binder Profiling -->
-  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
-  <option name="compatibility:include-filter" value="HwBinderThroughputBenchmark" />
-  <option name="compatibility:include-filter" value="BinderPerformanceTest" />
   <option name="compatibility:include-filter" value="BinderThroughputBenchmark" />
-
-  <!-- For HIDL HAL Profiling -->
-  <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
-  <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
-
+  <option name="compatibility:include-filter" value="BinderPerformanceTest" />
+  <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputTest" />
+  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceTest" />
+  <option name="compatibility:include-filter" value="FmqPerformanceTest" />
 </configuration>
