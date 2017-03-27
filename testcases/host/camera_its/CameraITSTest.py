@@ -42,7 +42,10 @@ class CameraITSTest(base_test.BaseTestClass):
         self.dut = self.registerController(android_device)[0]
         self.device_arg = "device=%s" % (self.dut.serial)
         # data_file_path is unicode so convert it to ascii
-        self.its_path = str(os.path.join(self.data_file_path, 'CameraITS'))
+        self.its_path = str(os.path.abspath(os.path.join(
+            self.data_file_path, 'CameraITS')))
+        logging.info("cwd: %s", os.getcwd())
+        logging.info("its_path: %s", self.its_path)
         self.out_path = logging.log_path
         os.environ["CAMERA_ITS_TOP"] = self.its_path
         # Below module check code assumes tradefed is running python 2.7
@@ -88,11 +91,12 @@ class CameraITSTest(base_test.BaseTestClass):
                 asserts.fail("Cannot import python module %s: %s" % (m, str(e)))
 
         # Add ITS module path to path
-        its_path = "%s/pymodules" % (self.its_path)
+        its_path = os.path.join(self.its_path, "pymodules")
         env_python_path = os.environ["PYTHONPATH"]
         self.pythonpath = env_python_path if its_path in env_python_path else \
                 "%s:%s" % (its_path, env_python_path)
         os.environ["PYTHONPATH"] = self.pythonpath
+        logging.info("new PYTHONPATH: %s", self.pythonpath)
 
     def RunTestcase(self, testpath):
         """Runs the given testcase and asserts the result.
@@ -106,6 +110,10 @@ class CameraITSTest(base_test.BaseTestClass):
         outdir = self.out_path
         outpath = os.path.join(outdir, testname + "_stdout.txt")
         errpath = os.path.join(outdir, testname + "_stderr.txt")
+        logging.info("cwd: %s", os.getcwd())
+        logging.info("cmd: %s", cmd)
+        logging.info("outpath: %s", outpath)
+        logging.info("errpath: %s", errpath)
         with open(outpath, "w") as fout, open(errpath, "w") as ferr:
             retcode = subprocess.call(
                 cmd, stderr=ferr, stdout=fout, cwd=outdir)
