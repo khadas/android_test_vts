@@ -44,3 +44,7 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     vts_proto_fuzzer \
 
+# VTS Treble VINTF Test
+vts_test_bin_packages += \
+    vts_treble_vintf_test \
+
