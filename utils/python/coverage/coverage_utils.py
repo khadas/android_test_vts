@@ -394,7 +394,9 @@ class CoverageFeature(feature_utils.Feature):
             logging.error("Could not read device information.")
             return
 
-        build_flavor = "{0}_coverage".format(str(build_flavor))
+        build_flavor = str(build_flavor)
+        if not "coverage" in build_flavor:
+            build_flavor = "{0}_coverage".format(build_flavor)
         product = str(product)
         build_id = str(device_build_id)
 
