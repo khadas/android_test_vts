@@ -121,14 +121,19 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 if vintf_xml:
                     hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
                         vintf_xml)
-                    if (not hwbinder_hals) or (not passthrough_hals):
+                    if not hwbinder_hals or not passthrough_hals:
                         logging.error("can't check precondition due to a "
                                       "lshal output format error.")
-                    if (feature not in hwbinder_hals and
-                        feature not in passthrough_hals):
-                        logging.warn("The required feature %s not found.",
-                                     feature)
+                    elif (feature not in hwbinder_hals and
+                          feature not in passthrough_hals):
+                        logging.warn(
+                            "The required feature %s not found by lshal.",
+                            feature)
                         self._skip_all_testcases = True
+                    else:
+                        logging.info(
+                            "The feature %s found in lshal-emitted vintf xml",
+                            feature)
         if not self._skip_all_testcases:
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
