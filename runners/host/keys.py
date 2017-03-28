@@ -80,6 +80,7 @@ class ConfigKeys(object):
     IKEY_SYSTRACE_PROCESS_NAME = "systrace_process_name"
     IKEY_SYSTRACE_REPORT_PATH = "systrace_report_path"
     IKEY_SYSTRACE_REPORT_URL_PREFIX = "systrace_report_url_prefix"
+    IKEY_SYSTRACE_REPORT_USE_DATE_DIRECTORY = "systrace_report_path_use_date_directory"
     IKEY_SYSTRACE_UPLAD_TO_DASHBOARD = "systrace_upload_to_dashboard"
 
     # Keys for coverage
@@ -103,6 +104,12 @@ class ConfigKeys(object):
 
     # Keys for special test cases
     IKEY_FFMPEG_BINARY_PATH = "ffmpeg_binary_path"
+
+    # Keys for log uploading
+    IKEY_ENABLE_LOG_UPLOADING = "enable_log_uploading"
+    IKEY_LOG_UPLOADING_PATH = "log_uploading_path"
+    IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY = "log_uploading_use_date_directory"
+    IKEY_LOG_UPLOADING_URL_PREFIX = "log_uploading_url_prefix"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
