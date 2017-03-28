@@ -25,6 +25,7 @@
   <script type='text/javascript'>
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
+      google.charts.setOnLoadCallback(activateLogLinks);
       google.charts.setOnLoadCallback(drawProfilingTable);
       google.charts.setOnLoadCallback(drawPieChart);
       google.charts.setOnLoadCallback(function() {
@@ -47,7 +48,7 @@
                           .change(verify);
           $('#refresh').click(refresh);
           $('#help-icon').click(function() {
-              $('#help-modal').openModal()
+              $('#help-modal').openModal();
           });
           $('#input-box').keypress(function(e) {
               if (e.which == 13) {
@@ -65,6 +66,35 @@
           $('#newer-button').click(prev);
           $('#older-button').click(next);
       });
+
+      // Actives the log links to display the log info modal when clicked.
+      function activateLogLinks() {
+          $('.info-btn').click(function(e) {
+              showLog(${logInfoMap}[$(this).data('col')]);
+          });
+      }
+
+      /** Displays a modal window with the specified log entries.
+       *
+       * @param logEntries Array of string arrays. Each entry in the outer array
+       *                   must contain (1) name string, and (2) url string.
+       */
+      function showLog(logEntries) {
+          if (!logEntries || logEntries.length == 0) return;
+
+          var logList = $('<ul class="collection"></ul>');
+          var entries = logEntries.reduce(function(acc, entry) {
+              if (!entry || entry.length == 0) return acc;
+              var link = '<a href="' + entry[1] + '"';
+              link += 'class="collection-item">' + entry[0] + '</li>';
+              return acc + link;
+          }, '');
+          logList.html(entries);
+          var infoContainer = $('#info-modal>.modal-content>.info-container');
+          infoContainer.empty();
+          logList.appendTo(infoContainer);
+          $('#info-modal').openModal();
+      }
 
       // refresh the page to see the selected test types (pre-/post-submit)
       function refresh() {
@@ -336,6 +366,15 @@
       <div class="modal-content">
         <h4>${searchHelpHeader}</h4>
         <p>${searchHelpBody}</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect btn-flat">Close</a>
+      </div>
+    </div>
+    <div id="info-modal" class="modal">
+      <div class="modal-content">
+        <h4>Logs</h4>
+        <div class="info-container"></div>
       </div>
       <div class="modal-footer">
         <a href="#!" class="modal-action modal-close waves-effect btn-flat">Close</a>
