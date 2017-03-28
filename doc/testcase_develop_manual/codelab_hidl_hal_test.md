@@ -22,6 +22,9 @@ The following option is needed to use the HIDL HAL gtest template.
 
 `<option name="binary-test-type" value="hal_hidl_gtest" />`
 
+Also note that the test module name can be no more than 43 characters in
+length.
+
 You can now use one of the following four preconditions to describe when your
 HIDL HAL test should be run.
 
