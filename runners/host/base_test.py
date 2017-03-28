@@ -29,6 +29,7 @@ from vts.runners.host import const
 from vts.utils.python.common import list_utils
 from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.profiling import profiling_utils
+from vts.utils.python.reporting import log_uploading_utils
 from vts.utils.python.systrace import systrace_utils
 from vts.utils.python.web import feature_utils
 from vts.utils.python.web import web_utils
@@ -99,9 +100,14 @@ class BaseTestClass(object):
                            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI]
         self.getUserParams(opt_param_names=opt_param_names)
         self.web = web_utils.WebFeature(self.user_params)
-        self.coverage = coverage_utils.CoverageFeature(self.user_params, web=self.web)
-        self.profiling = profiling_utils.ProfilingFeature(self.user_params, web=self.web)
-        self.systrace = systrace_utils.SystraceFeature(self.user_params, web=self.web)
+        self.coverage = coverage_utils.CoverageFeature(
+            self.user_params, web=self.web)
+        self.profiling = profiling_utils.ProfilingFeature(
+            self.user_params, web=self.web)
+        self.systrace = systrace_utils.SystraceFeature(
+            self.user_params, web=self.web)
+        self.log_uploading = log_uploading_utils.LogUploadingFeature(
+            self.user_params, web=self.web)
 
     def __enter__(self):
         return self
@@ -217,6 +223,8 @@ class BaseTestClass(object):
         is called.
         """
         ret = self.tearDownClass()
+        if self.log_uploading.enabled:
+            self.log_uploading.UploadLogs()
         if self.web.enabled:
             self.web.Upload(self.results.requested, self.results.executed)
         return ret
@@ -474,12 +482,12 @@ class BaseTestClass(object):
                 self, keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, False)
 
             asserts.skipIf(
-                ((skip_on_32bit_abi is True) and bitness == "32") or
-                ((skip_on_64bit_abi is True) and bitness == "64") or
+                ((skip_on_32bit_abi is True) and bitness == "32") or (
+                    (skip_on_64bit_abi is True) and bitness == "64") or
                 (test_name.lower().endswith(const.SUFFIX_32BIT) and
-                 bitness != "32") or
-                (test_name.lower().endswith(const.SUFFIX_64BIT) and
-                 bitness != "64" and not run_32bit_on_64bit_abi),
+                 bitness != "32") or (
+                     test_name.lower().endswith(const.SUFFIX_64BIT) and
+                     bitness != "64" and not run_32bit_on_64bit_abi),
                 "Test case '{}' excluded as ABI bitness is {}.".format(
                     test_name, bitness))
 
