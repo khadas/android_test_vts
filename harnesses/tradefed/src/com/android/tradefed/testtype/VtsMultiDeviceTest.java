@@ -116,6 +116,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
+    static final int MAX_TEST_NAME_LENGTH = 43;
 
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;
@@ -561,6 +562,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     throw new RuntimeException(
                         "Failed to derive test module name; use --test-module-name option");
                 }
+            }
+            if (testName.length() > MAX_TEST_NAME_LENGTH) {
+                throw new RuntimeException(
+                    "Test module name is too long: " + testName + ". (" +
+                    testName.length() + ">" +   MAX_TEST_NAME_LENGTH + ")");
             }
             CLog.logAndDisplay(LogLevel.INFO, "Setting test name as %s", testName);
             device.put(NAME, testName);
