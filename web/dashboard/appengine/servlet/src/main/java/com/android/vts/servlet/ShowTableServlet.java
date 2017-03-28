@@ -28,6 +28,7 @@ import com.android.vts.proto.VtsReportMessage.VtsHostInfo;
 import com.android.vts.util.BigtableHelper;
 import com.android.vts.util.FilterUtil;
 import com.android.vts.util.FilterUtil.Key;
+import com.android.vts.util.UrlUtil;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.TableName;
@@ -38,10 +39,6 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +61,6 @@ import javax.servlet.http.HttpServletResponse;
 public class ShowTableServlet extends BaseServlet {
 
     private static final String TABLE_JSP = "WEB-INF/jsp/show_table.jsp";
-    private static final String HTTPS = "https";
     // Error message displayed on the webpage is tableName passed is null.
     private static final String TABLE_NAME_ERROR = "Error : Table name must be passed!";
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
@@ -79,7 +75,8 @@ public class ShowTableServlet extends BaseServlet {
 
     // Row labels for the test summary grid.
     private static final String[] SUMMARY_NAMES = {
-            "Total", "Passing #", "Non-Passing #", "Passing %", "Covered Lines", "Coverage %"};
+            "Total", "Passing #", "Non-Passing #", "Passing %", "Covered Lines", "Coverage %",
+            "Logs"};
 
     // Row labels for the device summary information in the table header.
     private static final String[] HEADER_NAMES = {
@@ -208,6 +205,9 @@ public class ShowTableServlet extends BaseServlet {
 
         // set to hold orderings of each test case (testcase name to index)
         Map<String, Integer> testCaseNameMap = new HashMap<>();
+
+        // map to hold log names for tests
+        Map<String, List<String[]>> logInfoMap = new HashMap<>();
 
         // set to hold the name of profiling tests to maintain uniqueness
         Set<String> profilingPointNameSet = new HashSet<>();
@@ -419,21 +419,11 @@ public class ShowTableServlet extends BaseServlet {
                     }
                     // Validate the url
                     String urlString = systraceReport.getUrlList().get(0).toStringUtf8();
-                    try {
-                        URL url = new URL(urlString);
-                        String scheme = url.getProtocol();
-                        String userInfo = url.getUserInfo();
-                        String host = url.getHost();
-                        int port = url.getPort();
-                        String path = url.getPath();
-                        String query = url.getQuery();
-                        String fragment = url.getRef();
-                        if (!url.getProtocol().equals(HTTPS)) throw new MalformedURLException();
-                        URI uri = new URI(scheme, userInfo, host, port, path, query, fragment);
-                        systraceUrl = uri.toString();
-                        break;
-                    } catch (MalformedURLException | URISyntaxException e) {
-                        logger.log(Level.WARNING, "Invalid systrace URL: " + urlString);
+                    String validatedUrl = UrlUtil.validateUrl(urlString);
+                    if (validatedUrl != null) {
+                        systraceUrl = validatedUrl;
+                    } else {
+                        logger.log(Level.WARNING, "Invalid systrace URL : " + urlString);
                     }
                 }
 
@@ -477,6 +467,34 @@ public class ShowTableServlet extends BaseServlet {
                 coveragePctInfo = " - ";
                 coverageInfo = " - ";
             }
+
+            // Process log information
+            String logSummary = " - ";
+            int logCount = 0;
+            List<String[]> logEntries = new ArrayList<>();
+            logInfoMap.put(Integer.toString(j), logEntries);
+            for (VtsReportMessage.LogMessage log : report.getLogList()) {
+                if (!log.hasName() || !log.hasUrl()) continue;
+                String rawUrl = log.getUrl().toStringUtf8();
+                String validatedUrl = UrlUtil.validateUrl(rawUrl);
+                if (validatedUrl == null) {
+                    logger.log(Level.WARNING, "Invalid logging URL : " + rawUrl);
+                    continue;
+                }
+                String[] logInfo = new String[]{
+                        log.getName().toStringUtf8(), log.getUrl().toStringUtf8()
+                    };
+                logEntries.add(logInfo);
+                logCount++;
+            }
+            if (logCount > 0) {
+                logSummary = Integer.toString(logCount);
+                logSummary += "<i class=\"waves-effect waves-light btn red right inline-btn"
+                        + " info-btn material-icons inline-icon\""
+                        + " data-col=\"" + Integer.toString(j) + "\""
+                        + ">launch</i>";
+            }
+
             String icon = "<div class='status-icon " + aggregateStatus.toString() + "'>&nbsp</div>";
             VtsHostInfo hostInfo = report.getHostInfo();
             String hostname = hostInfo == null ? "" : hostInfo.getHostname().toStringUtf8();
@@ -494,6 +512,7 @@ public class ShowTableServlet extends BaseServlet {
             summaryGrid[3][j + 1] = passInfo;
             summaryGrid[4][j + 1] = coverageInfo;
             summaryGrid[5][j + 1] = coveragePctInfo;
+            summaryGrid[6][j + 1] = logSummary;
         }
 
         String[] profilingPointNameArray = profilingPointNameSet.
@@ -525,6 +544,7 @@ public class ShowTableServlet extends BaseServlet {
         request.setAttribute("profilingPointNameJson", new Gson().toJson(profilingPointNameArray));
         request.setAttribute("resultNames", resultNames);
         request.setAttribute("resultNamesJson", new Gson().toJson(resultNames));
+        request.setAttribute("logInfoMap", new Gson().toJson(logInfoMap));
 
         // data for pie chart
         request.setAttribute("topBuildResultCounts", new Gson().toJson(topBuildResultCounts));
