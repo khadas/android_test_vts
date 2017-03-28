@@ -45,10 +45,14 @@ class CallbackRequestHandler(socketserver.StreamRequestHandler):
         try:
             len = int(header)
         except ValueError:
-            logging.exception(("Unable to convert '%s' into an integer, which "
-                               "is required for reading the next message.") %
-                              header)
-            raise
+            if header:
+                logging.exception("Unable to convert '%s' into an integer, which "
+                                  "is required for reading the next message." %
+                                  header)
+                raise
+            else:
+                logging.error('CallbackRequestHandler received empty message header. Skipping...')
+                return
         # Read the request message.
         received_data = self.rfile.read(len)
         logging.debug("Received callback message: %s", received_data)
