@@ -65,9 +65,9 @@ class BinaryTest(base_test.BaseTestClass):
         '''Prepare class, push binaries, set permission, create test cases.'''
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE,
         ]
         opt_params = [
+            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE,
             keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORY,
             keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATH,
@@ -81,12 +81,12 @@ class BinaryTest(base_test.BaseTestClass):
         self.getUserParam(
             keys.ConfigKeys.KEY_TESTBED_NAME, error_if_not_found=True)
 
-        self.binary_test_source = map(str, self.binary_test_source)
-
         logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                      self.data_file_path)
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE,
-                     self.binary_test_source)
+
+        self.binary_test_source = self.getUserParam(
+            keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE, default_value=[])
+
         self.working_directory = {}
         if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORY):
             self.binary_test_working_directory = map(
