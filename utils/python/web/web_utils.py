@@ -28,6 +28,7 @@ from vts.utils.python.web import feature_utils
 _STATUS_TABLE = "vts_status_table"
 _PROFILING_POINTS = "profiling_points"
 
+
 class WebFeature(feature_utils.Feature):
     """Feature object for web functionality.
 
@@ -39,13 +40,14 @@ class WebFeature(feature_utils.Feature):
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_WEB
     _REQUIRED_PARAMS = [
-            keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL,
-            keys.ConfigKeys.KEY_TESTBED_NAME,
-            keys.ConfigKeys.IKEY_BUILD,
-            keys.ConfigKeys.IKEY_ANDROID_DEVICE,
-            keys.ConfigKeys.IKEY_ABI_NAME,
-            keys.ConfigKeys.IKEY_ABI_BITNESS
-        ]
+        keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL,
+        keys.ConfigKeys.KEY_TESTBED_NAME,
+        keys.ConfigKeys.IKEY_BUILD,
+        keys.ConfigKeys.IKEY_ANDROID_DEVICE,
+        keys.ConfigKeys.IKEY_ABI_NAME,
+        keys.ConfigKeys.IKEY_ABI_BITNESS,
+    ]
+    _OPTIONAL_PARAMS = []
 
     def __init__(self, user_params):
         """Initializes the web feature.
@@ -55,16 +57,22 @@ class WebFeature(feature_utils.Feature):
         Args:
             user_params: A dictionary from parameter name (String) to parameter value.
         """
-        self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS, user_params=user_params)
+        self.ParseParameters(
+            toggle_param_name=self._TOGGLE_PARAM,
+            required_param_names=self._REQUIRED_PARAMS,
+            optional_param_names=self._OPTIONAL_PARAMS,
+            user_params=user_params)
         if not self.enabled:
             return
         self.report_msg = ReportMsg.TestReportMessage()
-        self.report_msg.test = str(getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME))
+        self.report_msg.test = str(
+            getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME))
         self.report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
         self.report_msg.start_timestamp = feature_utils.GetTimestamp()
         self.report_msg.host_info.hostname = socket.gethostname()
 
-        android_devices = getattr(self, keys.ConfigKeys.IKEY_ANDROID_DEVICE, None)
+        android_devices = getattr(self, keys.ConfigKeys.IKEY_ANDROID_DEVICE,
+                                  None)
         if not android_devices or not isinstance(android_devices, list):
             logging.warn("android device information not available")
             return
@@ -119,10 +127,18 @@ class WebFeature(feature_utils.Feature):
             return
         self.current_test_report_msg = self.report_msg.test_case.add()
         self.current_test_report_msg.name = test_name
-        self.current_test_report_msg.start_timestamp = feature_utils.GetTimestamp()
+        self.current_test_report_msg.start_timestamp = feature_utils.GetTimestamp(
+        )
 
-    def AddCoverageReport(self, coverage_vec, src_file_path, git_project_name, git_project_path,
-                          revision, covered_count, line_count, isGlobal=True):
+    def AddCoverageReport(self,
+                          coverage_vec,
+                          src_file_path,
+                          git_project_name,
+                          git_project_path,
+                          revision,
+                          covered_count,
+                          line_count,
+                          isGlobal=True):
         """Adds a coverage report to the VtsReportMessage.
 
         Processes the source information, git project information, and processed
@@ -315,6 +331,24 @@ class WebFeature(feature_utils.Feature):
         systrace_msg = self.current_test_report_msg.systrace.add()
         systrace_msg.url.append(url)
 
+    def AddLogUrls(self, urls):
+        """Creates a log message with log file URLs.
+
+        Adds a log message to the current test module report and supplies the
+        url to the log files.
+
+        Requires the feature to be enabled; no-op otherwise.
+
+        Args:
+            urls: list of string, the URLs of the logs.
+        """
+        if not self.enabled or urls is None:
+            return
+
+        for url in urls:
+            log_msg = self.report_msg.log.add()
+            log_msg.url = url
+            log_msg.name = os.path.basename(url)
 
     def Upload(self, requested, executed):
         """Uploads the result to the web service.
@@ -344,7 +378,9 @@ class WebFeature(feature_utils.Feature):
             msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
 
         self.report_msg.end_timestamp = feature_utils.GetTimestamp()
-        logging.info("_tearDownClass hook: start (username: %s)", getpass.getuser())
+
+        logging.info("_tearDownClass hook: start (username: %s)",
+                     getpass.getuser())
         if len(self.report_msg.test_case) > 0:
             bt_url = getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL)
             bt_client = bigtable_rest_client.HbaseRestClient(
@@ -363,7 +399,8 @@ class WebFeature(feature_utils.Feature):
             logging.info("_tearDownClass hook: report msg proto %s",
                          self.report_msg)
 
-            bt_client = bigtable_rest_client.HbaseRestClient(_STATUS_TABLE, bt_url)
+            bt_client = bigtable_rest_client.HbaseRestClient(_STATUS_TABLE,
+                                                             bt_url)
             bt_client.CreateTable("status")
 
             bt_client.PutRow("result_%s" % self.report_msg.test,
@@ -373,5 +410,4 @@ class WebFeature(feature_utils.Feature):
             logging.info("_tearDownClass hook: status upload time stamp %s",
                          str(self.report_msg.start_timestamp))
         else:
-            logging.info(
-                "_tearDownClass hook: skip uploading (no test case)")
+            logging.info("_tearDownClass hook: skip uploading (no test case)")
