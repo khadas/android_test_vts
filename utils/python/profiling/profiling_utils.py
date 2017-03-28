@@ -89,15 +89,13 @@ class ProfilingFeature(feature_utils.Feature):
         self.web = web
         logging.info("Profiling enabled: %s", self.enabled)
 
-    @staticmethod
-    def _IsEventFromBinderizedHal(event_type):
+    def _IsEventFromBinderizedHal(self, event_type):
         """Returns True if the event type is from a binderized HAL."""
         if event_type in [8, 9]:
             return False
         return True
 
-    @staticmethod
-    def GetTraceFiles(dut, host_profiling_trace_path, trace_file_tool):
+    def GetTraceFiles(self, dut, host_profiling_trace_path, trace_file_tool):
         """Pulls the trace file and save it under the profiling trace path.
 
         Args:
@@ -142,9 +140,8 @@ class ProfilingFeature(feature_utils.Feature):
                 trace_files.append(temp_file_name)
         return trace_files
 
-    @staticmethod
     def EnableVTSProfiling(
-            shell, hal_instrumentation_lib_path=HAL_INSTRUMENTATION_LIB_PATH):
+            self, shell, hal_instrumentation_lib_path=HAL_INSTRUMENTATION_LIB_PATH):
         """ Enable profiling by setting the system property.
 
         Args:
@@ -163,8 +160,7 @@ class ProfilingFeature(feature_utils.Feature):
                       hal_instrumentation_lib_path)
         shell.Execute("setprop hal.instrumentation.enable true")
 
-    @staticmethod
-    def DisableVTSProfiling(shell):
+    def DisableVTSProfiling(self, shell):
         """ Disable profiling by resetting the system property.
 
         Args:
