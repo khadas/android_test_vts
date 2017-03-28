@@ -235,15 +235,15 @@ class BaseTestClass(object):
         if self.web.enabled:
             self.web.AddTestReport(test_name)
 
-    def _setUpTest(self, test_name):
-        """Proxy function to guarantee the base implementation of setUpTest is
+    def _setUp(self, test_name):
+        """Proxy function to guarantee the base implementation of setUp is
         called.
         """
         if self.systrace.enabled:
             self.systrace.StartSystrace()
-        return self.setUpTest()
+        return self.setUp()
 
-    def setUpTest(self):
+    def setUp(self):
         """Setup function that will be called every time before executing each
         test case in the test class.
 
@@ -258,15 +258,15 @@ class BaseTestClass(object):
         """Internal function to be called upon exit of a test."""
         self.currentTestName = None
 
-    def _tearDownTest(self, test_name):
-        """Proxy function to guarantee the base implementation of tearDownTest
+    def _tearDown(self, test_name):
+        """Proxy function to guarantee the base implementation of tearDown
         is called.
         """
         if self.systrace.enabled:
             self.systrace.ProcessAndUploadSystrace(test_name)
-        self.tearDownTest()
+        self.tearDown()
 
-    def tearDownTest(self):
+    def tearDown(self):
         """Teardown function that will be called every time a test case has
         been executed.
 
@@ -507,7 +507,7 @@ class BaseTestClass(object):
                                "Setup test entry for %s failed." % test_name)
             self.filterOneTest(test_name)
             try:
-                ret = self._setUpTest(test_name)
+                ret = self._setUp(test_name)
                 asserts.assertTrue(ret is not False,
                                    "Setup for %s failed." % test_name)
 
@@ -516,7 +516,7 @@ class BaseTestClass(object):
                 else:
                     verdict = test_func()
             finally:
-                self._tearDownTest(test_name)
+                self._tearDown(test_name)
         except (signals.TestFailure, AssertionError) as e:
             tr_record.testFail(e)
             self._exec_procedure_func(self._onFail, tr_record)
