@@ -75,8 +75,7 @@ class CoverageFeature(feature_utils.Feature):
         self.web = web
         logging.info("Coverage enabled: %s", self.enabled)
 
-    @staticmethod
-    def _ExtractSourceName(gcno_summary, file_name):
+    def _ExtractSourceName(self, gcno_summary, file_name):
         """Gets the source name from the GCNO summary object.
 
         Gets the original source file name from the FileSummary object describing
@@ -104,8 +103,7 @@ class CoverageFeature(feature_utils.Feature):
                 break
         return src_file_path
 
-    @staticmethod
-    def _GetChecksumGcnoDict(cov_zip):
+    def _GetChecksumGcnoDict(self, cov_zip):
         """Generates a dictionary from gcno checksum to GCNOParser object.
 
         Processes the gcnodir files in the zip file to produce a mapping from gcno
@@ -137,8 +135,7 @@ class CoverageFeature(feature_utils.Feature):
                 checksum_gcno_dict[gcno_file_parser.checksum] = gcno_file_parser
         return checksum_gcno_dict
 
-    @staticmethod
-    def InitializeDeviceCoverage(dut):
+    def InitializeDeviceCoverage(self, dut):
         """Initializes the device for coverage before tests run.
 
         Finds and removes all gcda files under TARGET_COVERAGE_PATH before tests
@@ -151,8 +148,7 @@ class CoverageFeature(feature_utils.Feature):
         gcda_files = dut.adb.shell("find %s -name \"*.gcda\" -type f -delete" %
                                    TARGET_COVERAGE_PATH)
 
-    @staticmethod
-    def GetGcdaDict(dut, local_coverage_path=None):
+    def GetGcdaDict(self, dut, local_coverage_path=None):
         """Retrieves GCDA files from device and creates a dictionary of files.
 
         Find all GCDA files on the target device, copy them to the host using
