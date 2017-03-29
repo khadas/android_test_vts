@@ -15,36 +15,3 @@
  */
 
 #include "VtsHalHidlTargetCallbackBase.h"
-
-#include <chrono>
-#include <condition_variable>
-#include <iostream>
-#include <mutex>
-
-using namespace ::std;
-
-namespace testing {
-
-bool VtsHalHidlTargetCallbackBase::waitForCallback(
-    chrono::milliseconds timeout) {
-  unique_lock<mutex> lock(cb_mtx_);
-  auto expiration = chrono::system_clock::now() + timeout;
-
-  while (cb_count_ == 0) {
-    cv_status status = cb_cv_.wait_until(lock, expiration);
-    if (status == cv_status::timeout) {
-      cerr << "Timed out waiting for callback" << endl;
-      return false;
-    }
-  }
-  cb_count_--;
-  return true;
-}
-
-void VtsHalHidlTargetCallbackBase::notifyFromCallback() {
-  unique_lock<mutex> lock(cb_mtx_);
-  cb_count_++;
-  cb_cv_.notify_one();
-}
-
-}  // namespace testing
