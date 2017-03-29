@@ -83,7 +83,13 @@ void FuzzerCallbackBase::RpcCallToAgent(
     const AndroidSystemCallbackRequestMessage& message,
     const string& callback_socket_name) {
   cout << __func__ << ":" << __LINE__ << " id = '" << message.id() << "'"
-      << endl;
+       << endl;
+  if (message.id().empty() || callback_socket_name.empty()) {
+    cerr << "Message ID: " << message.id() << endl
+         << "Callback socket name: " << callback_socket_name << endl
+         << "Abort callback forwarding." << endl;
+    return;
+  }
   VtsDriverCommUtil util;
   if (!util.Connect(callback_socket_name)) exit(-1);
   util.VtsSocketSendMessage(message);
