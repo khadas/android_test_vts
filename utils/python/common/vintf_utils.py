@@ -18,6 +18,7 @@ import logging
 
 from xml.etree import ElementTree
 
+_ARCH = "arch"
 _HWBINDER = "hwbinder"
 _NAME = "name"
 _PASSTHROUGH = "passthrough"
@@ -47,12 +48,15 @@ class HalDescription(object):
         hal_name: hal name e.g. android.hardware.nfc.
         hal_version: hal version e.g. 1.0.
         hal_interfaces: a list of HalInterfaceDescription within the hal.
+        hal_archs: a list of strings where each string indicates the supported
+                   client bitness (e.g,. ["32", "64"]).
     """
 
-    def __init__(self, hal_name, hal_version, hal_interfaces):
+    def __init__(self, hal_name, hal_version, hal_interfaces, hal_archs):
         self.hal_name = hal_name
         self.hal_version = hal_version
         self.hal_interfaces = hal_interfaces
+        self.hal_archs = hal_archs
 
 
 def GetHalDescriptions(vintf_xml):
@@ -80,12 +84,15 @@ def GetHalDescriptions(vintf_xml):
         hal_transport = None
         hal_version = None
         hal_interfaces = []
+        hal_archs = ["32", "64"]
         for xml_hal_item in xml_hal:
             tag = str(xml_hal_item.tag)
             if tag == _NAME:
                 hal_name = str(xml_hal_item.text)
             elif tag == _TRANSPORT:
                 hal_transport = str(xml_hal_item.text)
+                if _ARCH in xml_hal_item.attrib:
+                    hal_archs = xml_hal_item.attrib[_ARCH].split("+")
             elif tag == _VERSION:
                 hal_version = str(xml_hal_item.text)
             elif tag == _INTERFACE:
@@ -101,7 +108,8 @@ def GetHalDescriptions(vintf_xml):
                 hal_interfaces.append(
                     HalInterfaceDescription(hal_interface_name,
                                             hal_interface_instances))
-        hal_info = HalDescription(hal_name, hal_version, hal_interfaces)
+        hal_info = HalDescription(hal_name, hal_version, hal_interfaces,
+                                  hal_archs)
         hal_key = "%s@%s" % (hal_name, hal_version)
         if hal_transport == _HWBINDER:
             hwbinder_hals[hal_key] = hal_info
