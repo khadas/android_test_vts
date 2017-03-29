@@ -75,7 +75,7 @@ fi;
 
 if [ -z ${VTS_ROOT} ]; then
     # assume we're in an extracted vts install
-    VTS_ROOT="$(dirname $0)/../.."
+    VTS_ROOT="$(dirname $(readlink -e $0))/../.."
 fi;
 
 TRADEFED_JAR="tradefed"
