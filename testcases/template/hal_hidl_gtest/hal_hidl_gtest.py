@@ -48,6 +48,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         shell = self._dut.shell.hal_hidl_gtest
 
         opt_params = [
+            keys.ConfigKeys.IKEY_ABI_BITNESS,
             keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
             keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
             keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
@@ -130,6 +131,19 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                             "The required feature %s not found by lshal.",
                             feature)
                         self._skip_all_testcases = True
+                    elif (feature not in hwbinder_hals and
+                          feature in passthrough_hals):
+                        if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
+                            bitness = getattr(self,
+                                              keys.ConfigKeys.IKEY_ABI_BITNESS)
+                            if (bitness not in
+                                passthrough_hals[feature].hal_archs):
+                                logging.warn(
+                                    "The required feature %s found as a "
+                                    "passthrough hal but the client bitness %s "
+                                    "not supported",
+                                    feature, self.bitness)
+                                self._skip_all_testcases = True
                     else:
                         logging.info(
                             "The feature %s found in lshal-emitted vintf xml",
