@@ -85,7 +85,7 @@ void FuzzerCallbackBase::RpcCallToAgent(
   cout << __func__ << ":" << __LINE__ << " id = '" << message.id() << "'"
        << endl;
   if (message.id().empty() || callback_socket_name.empty()) {
-    cerr << "Message ID: " << message.id() << endl
+    cout << "Message ID: " << message.id() << endl
          << "Callback socket name: " << callback_socket_name << endl
          << "Abort callback forwarding." << endl;
     return;
