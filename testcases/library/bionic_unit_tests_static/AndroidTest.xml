@@ -25,29 +25,14 @@
         <option name="binary-test-source" value="_32bit::DATA/nativetest/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest/bionic-unit-tests-static/bionic-unit-tests-static" />
         <option name="binary-test-source" value="_64bit::DATA/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static->/data/nativetest64/bionic-unit-tests-static/bionic-unit-tests-static" />
         <option name="binary-test-type" value="gtest" />
+        <option name="exclude-filter" value="pthread.big_enough_signal_stack" />
         <option name="exclude-filter" value="pthread.big_enough_signal_stack_for_64bit_arch" />
         <option name="exclude-filter" value="semaphore.sem_wait_no_EINTR_in_sdk_less_equal_than_23" />
         <option name="exclude-filter" value="semaphore.sem_wait_EINTR_in_sdk_greater_than_23" />
         <option name="exclude-filter" value="stack_unwinding.easy" />
         <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame" />
         <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame_SA_SIGINFO" />
-        <option name="exclude-filter" value="stdio_nofortify.xfail_fmemopen_NULL" />
-        <option name="exclude-filter" value="sys_msg.smoke" />
-        <option name="exclude-filter" value="sys_msg.msgctl_failure" />
-        <option name="exclude-filter" value="sys_msg.msgget_failure" />
-        <option name="exclude-filter" value="sys_msg.msgrcv_failure" />
-        <option name="exclude-filter" value="sys_msg.msgsnd_failure" />
         <option name="exclude-filter" value="sys_personality.current_persona" />
-        <option name="exclude-filter" value="sys_sem.smoke" />
-        <option name="exclude-filter" value="sys_sem.semget_failure" />
-        <option name="exclude-filter" value="sys_sem.semctl_failure" />
-        <option name="exclude-filter" value="sys_sem.semop_failure" />
-        <option name="exclude-filter" value="sys_sem.semtimedop_failure" />
-        <option name="exclude-filter" value="sys_shm.smoke" />
-        <option name="exclude-filter" value="sys_shm.shmat_failure" />
-        <option name="exclude-filter" value="sys_shm.shmctl_failure" />
-        <option name="exclude-filter" value="sys_shm.shmdt_failure" />
-        <option name="exclude-filter" value="sys_shm.shmget_failure" />
         <option name="exclude-filter" value="wctype.iswalnum" />
         <option name="exclude-filter" value="wctype.iswalpha" />
         <option name="exclude-filter" value="wctype.iswblank" />
