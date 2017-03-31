@@ -59,10 +59,10 @@ class BinaryTest(base_test.BaseTestClass):
     DEFAULT_PROFILING_LIBRARY_PATH_32 = '/data/local/tmp/32/'
     DEFAULT_PROFILING_LIBRARY_PATH_64 = '/data/local/tmp/64/'
 
+    _skip_all_testcases = False
+
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
-        self._skip_all_testcases = False
-
         required_params = [
             keys.ConfigKeys.IKEY_DATA_FILE_PATH,
         ]
