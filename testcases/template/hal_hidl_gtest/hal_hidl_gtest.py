@@ -172,22 +172,22 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                          'enable passthrough mode option.')
             self.user_params[keys.ConfigKeys.IKEY_PASSTHROUGH_MODE] = True
 
-    def setUpTest(self):
+    def setUp(self):
         """Skips the test case if thermal throttling lasts for 30 seconds."""
-        super(HidlHalGTest, self).setUpTest()
+        super(HidlHalGTest, self).setUp()
         if not self._skip_all_testcases:
             if self._cpu_freq and self._skip_if_thermal_throttling:
                 self._cpu_freq.SkipIfThermalThrottling(retry_delay_secs=30)
         else:
             logging.info("Skip a test case.")
 
-    def tearDownTest(self):
+    def tearDown(self):
         """Skips the test case if there is thermal throttling."""
         if not self._skip_all_testcases:
             if self._cpu_freq and self._skip_if_thermal_throttling:
                 self._cpu_freq.SkipIfThermalThrottling()
 
-        super(HidlHalGTest, self).tearDownTest()
+        super(HidlHalGTest, self).tearDown()
 
     def tearDownClass(self):
         """Turns off CPU frequency scaling."""

@@ -38,7 +38,7 @@ class SampleCameraV3Test(base_test.BaseTestClass):
                                          bits=32,
                                          target_package="hal.conventional.camera")
 
-    def setUpTest(self):
+    def setUp(self):
         self.call_count_camera_device_status_change = 0
         self.call_count_torch_mode_status_change = 0
 
