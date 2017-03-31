@@ -1,4 +1,4 @@
-#include "test/vts/specification/lib_bionic/libcV1.vts.h"
+#include "test/vts/specification/lib/ndk/bionic/1.0/libcV1.vts.h"
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/types.h>
