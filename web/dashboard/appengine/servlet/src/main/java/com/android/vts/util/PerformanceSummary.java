@@ -45,6 +45,7 @@ public class PerformanceSummary {
         this.summaryMap = new HashMap<>();
         this.devices = new HashSet<>();
         this.deviceFilter = null;
+        this.optionSplitKeys = new HashSet<>();
     }
 
     /**
