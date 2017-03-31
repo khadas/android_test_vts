@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,8 +66,9 @@ public class BigtableApiServlet extends HttpServlet {
                 payload += line;
             }
             payloadJson = new JSONObject(payload);
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            logger.log(Level.WARNING, "Invalid JSON: " + payload);
             return;
         }
 
