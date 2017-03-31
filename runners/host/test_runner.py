@@ -216,8 +216,7 @@ class TestRunner(object):
                             test_classes[member_name] = test_class
         return test_classes
 
-    @staticmethod
-    def verifyControllerModule(module):
+    def verifyControllerModule(self, module):
         """Verifies a module object follows the required interface for
         controllers.
 
@@ -264,7 +263,7 @@ class TestRunner(object):
         """
         logging.info("cwd: %s", os.getcwd())
         logging.info("adb devices: %s", module.list_adb_devices())
-        TestRunner.verifyControllerModule(module)
+        self.verifyControllerModule(module)
         module_ref_name = module.__name__.split('.')[-1]
         if module_ref_name in self.controller_registry:
             raise signals.ControllerError(
