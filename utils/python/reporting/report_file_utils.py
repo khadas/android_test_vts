@@ -19,6 +19,9 @@ import logging
 import os
 import shutil
 
+def NotNoneStr(item):
+    '''Convert a veriable to string only if it is not None'''
+    return str(item) if item is not None else None
 
 class ReportFileUtil(object):
     '''Utility class for report file saving.
@@ -45,17 +48,14 @@ class ReportFileUtil(object):
                  source_dir=None,
                  destination_dir=None,
                  url_prefix=None):
+        source_dir = NotNoneStr(source_dir)
+        destination_dir = NotNoneStr(destination_dir)
+        url_prefix = NotNoneStr(url_prefix)
 
         self._flatten_source_dir = flatten_source_dir
         self._use_destination_date_dir = use_destination_date_dir
-        if source_dir:
-            source_dir = str(source_dir)
         self._source_dir = source_dir
-        if destination_dir:
-            destination_dir = str(destination_dir)
         self._destination_dir = destination_dir
-        if url_prefix:
-            url_prefix = str(url_prefix)
         self._url_prefix = url_prefix
 
     def _ConvertReportPath(self,
@@ -75,15 +75,18 @@ class ReportFileUtil(object):
         Returns:
             tuple(string, string), containing destination path and url
         '''
+        root_dir = NotNoneStr(root_dir)
+        new_file_name = NotNoneStr(new_file_name)
+        file_name_prefix = NotNoneStr(file_name_prefix)
+
         dir_path = os.path.dirname(src_path)
 
         relative_path = os.path.basename(src_path)
         if new_file_name:
-            relative_path = str(new_file_name)
+            relative_path = new_file_name
         if file_name_prefix:
-            relative_path = str(file_name_prefix) + relative_path
+            relative_path = file_name_prefix + relative_path
         if not self._flatten_source_dir and root_dir:
-            root_dir = str(root_dir)
             relative_path = os.path.join(
                 os.path.relpath(dir_path, root_dir), relative_path)
         if self._use_destination_date_dir:
@@ -106,10 +109,9 @@ class ReportFileUtil(object):
             src_path: string, source path of report file
             dest_path: string, destination path of report file
         '''
-        if src_path:
-            src_path = str(src_path)
-        if dest_path:
-            dest_path = str(dest_path)
+        src_path = NotNoneStr(src_path)
+        dest_path = NotNoneStr(dest_path)
+
         parent_dir = os.path.dirname(dest_path)
         if not os.path.exists(parent_dir):
             try:
@@ -134,12 +136,10 @@ class ReportFileUtil(object):
             report files. If error happens during read or write operation,
             this method will return None.
         '''
-        if src_path:
-            src_path = str(src_path)
-        if new_file_name:
-            new_file_name = str(new_file_name)
-        if file_name_prefix:
-            file_name_prefix = str(file_name_prefix)
+        src_path = NotNoneStr(src_path)
+        new_file_name = NotNoneStr(new_file_name)
+        file_name_prefix = NotNoneStr(file_name_prefix)
+
         try:
             dest_path, url = self._ConvertReportPath(
                 src_path,
@@ -166,12 +166,10 @@ class ReportFileUtil(object):
             report files. If error happens during read or write operation,
             this method will return None.
         '''
-        if source_dir:
-            source_dir = str(source_dir)
-        else:
+        source_dir = NotNoneStr(source_dir)
+        file_name_prefix = NotNoneStr(file_name_prefix)
+        if not source_dir:
             source_dir = self._source_dir
-        if file_name_prefix:
-            file_name_prefix = str(file_name_prefix)
 
         try:
             urls = []
