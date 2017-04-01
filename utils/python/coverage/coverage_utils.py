@@ -383,17 +383,16 @@ class CoverageFeature(feature_utils.Feature):
 
         device_spec = android_devices[0]
         build_flavor = device_spec.get(keys.ConfigKeys.IKEY_BUILD_FLAVOR)
-        product = device_spec.get(keys.ConfigKeys.IKEY_PRODUCT_VARIANT)
         device_build_id = device_spec.get(keys.ConfigKeys.IKEY_BUILD_ID)
 
-        if not build_flavor or not product or not device_build_id:
+        if not build_flavor or not device_build_id:
             logging.error("Could not read device information.")
             return
 
         build_flavor = str(build_flavor)
         if not "coverage" in build_flavor:
             build_flavor = "{0}_coverage".format(build_flavor)
-        product = str(product)
+        product = build_flavor.split("-", 1)[0]
         build_id = str(device_build_id)
 
         # Get service json path
