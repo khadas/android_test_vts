@@ -1,4 +1,4 @@
-#include "test/vts/specification/hal_conventional/CameraHalV2.vts.h"
+#include "test/vts/specification/hal/conventional/camera/2.1/CameraHalV2.vts.h"
 #include <hardware/hardware.h>
 #include <hardware/camera_common.h>
 #include <hardware/camera.h>
