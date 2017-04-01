@@ -13,119 +13,120 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
-import json
 import logging
-import subprocess
 
-from oauth2client import service_account
+import base64
+from collections import OrderedDict
+import json
+import requests
 
-_OPENID_SCOPE = 'openid'
-
-class BigtableClient(object):
-    """Instance of the Dashboard Bigtable REST client.
+class HbaseRestClient(object):
+    """Instance of an Hbase REST client.
 
     Attributes:
-        table_name: String, The name of the table.
-        post_cmd: String, The command-line string to post data to the dashboard,
-                  e.g. 'wget <url> --post-data '
-        service_json_path: String, The path to the service account keyfile
-                           created from Google App Engine settings.
-        auth_token: ServiceAccountCredentials object or None if not
-                    initialized.
+        base_url: The hostname and port of the Hbase REST server.
+                  e.g 'http://130.211.170.242:8080'
+        table_name: The name of the table.
+        column_family: The selected column family.
     """
 
-    def __init__(self, table_name, post_cmd, service_json_path):
-        self.post_cmd = post_cmd
+    def __init__(self, table_name, base_url):
+        self.base_url = base_url
         self.table_name = table_name
-        self.service_json_path = service_json_path
-        self.auth_token = None
+        self.column_family = None
 
-    def _GetToken(self):
-        """Gets an OAuth2 token using from a service account json keyfile.
-
-        Uses the service account keyfile located at 'service_json_path', provided
-        to the constructor, to request an OAuth2 token.
-
-        Returns:
-            String, an OAuth2 token using the service account credentials.
-            None if authentication fails.
-        """
-        if not self.auth_token:
-            try:
-                self.auth_token = service_account.ServiceAccountCredentials.from_json_keyfile_name(
-                    self.service_json_path, [_OPENID_SCOPE])
-            except IOError as e:
-                logging.error("Error reading service json keyfile: %s", e)
-                return None
-            except (ValueError, KeyError) as e:
-                logging.error("Invalid service json keyfile: %s", e)
-                return None
-        return str(self.auth_token.get_access_token().access_token)
-
-    def PutRow(self, row_key, family, qualifier, value):
+    def PutRow(self, row_key, column, value):
         """Puts a value into an HBase cell via REST.
 
-        Puts a value in the cell specified by the row, family, and qualifier.
-        This assumes that the table has already been created with the column
-        family in its schema.
+        This puts a value in the fully qualified column name. This assumes
+        that the table has already been created with the column family in its
+        schema. If it doesn't exist, you can use create_table() to do so.
 
         Args:
-            row_key: String, The name of the row in which to insert data
-            family: String, The column family in which to insert data
-            qualifier: String, The column qualifier in which to insert data
-            value: String, The data to insert into the row cell specified
+            row_key: The row we want to put a value into.
+            column: The column qualifier
+            value: A string representing the sequence of bytes we want to
+                   put into the cell
 
         Returns:
             True if successful, False otherwise
         """
-        token = self._GetToken()
-        if not token:
+        if not self.column_family:
             return False
+        row_key_encoded = base64.b64encode(row_key)
+        column_encoded = base64.b64encode(self.column_family + ":" + column)
+        value_encoded = base64.b64encode(value)
 
-        data = {
-            "accessToken" : token,
-            "verb" : "insertRow",
-            "tableName" : self.table_name,
-            "rowKey" : row_key,
-            "family" : family,
-            "qualifier" : qualifier,
-            "value" : base64.b64encode(value)
-        }
-        p = subprocess.Popen(
-            self.post_cmd.format(data=json.dumps(data)),
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        output, err = p.communicate()
-
-        if p.returncode or err:
-            logging.error("Row insertion failed: %s", err)
+        cell = OrderedDict([
+            ("key", row_key_encoded),
+            ("Cell", [{"column": column_encoded, "$": value_encoded}])
+        ])
+        rows = [cell]
+        json_output = {"Row": rows}
+        r = requests.post(
+            self.base_url + "/" + self.table_name + "/" + row_key,
+            data=json.dumps(json_output),
+            headers={
+               "Content-Type": "application/json",
+               "Accept": "application/json",
+            })
+        if r.status_code != 200:
+            logging.error("got status code %d when putting", r.status_code)
             return False
         return True
 
-    def CreateTable(self, families):
-        """Creates a table with the provided column family names.
+    def GetRow(self, row_key):
+        """Returns a value from the first column in a row.
 
-        Safe to call if the table already exists, it will just fail
+        Args:
+            row_key: The row to return the value from
+
+        Returns:
+            The bytes in the cell represented as a Python string.
+        """
+        request = requests.get(self.base_url + "/" + self.table_name + "/" +
+                               row_key,
+                               headers={"Accept": "application/json"})
+        if request.status_code != 200:
+            return None
+        text = json.loads(request.text)
+        value = base64.b64decode(text['Row'][0]['Cell'][0]['$'])
+        return value
+
+    def DeleteRow(self, row_key):
+        """Deletes a row.
+
+        Args:
+            row_key: The row key of the row to delete
+        """
+        requests.delete(self.base_url + "/" + self.table_name + "/" + row_key)
+
+    def CreateTable(self, column_family):
+        """Creates a table with a single column family.
+
+        It's safe to call if the table already exists, it will just fail
         silently.
 
         Args:
-            families: list, The list of column family names with which to create
-                      the table
+            column_family: The column family to create the table with.
         """
-        token = self._GetToken()
-        if not token:
-            return
+        json_output = {"name": self.table_name,
+                       "ColumnSchema": [{"name": column_family}]}
+        requests.post(self.base_url + '/' + self.table_name + '/schema',
+                      data=json.dumps(json_output),
+                      headers={
+                          "Content-Type": "application/json",
+                          "Accept": "application/json"
+                      })
+        self.column_family = column_family
 
-        data = {
-            "accessToken" : token,
-            "verb": "createTable",
-            "tableName": self.table_name,
-            "familyNames": families
-        }
-        p = subprocess.Popen(
-            self.post_cmd.format(data=json.dumps(data)),
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+    def GetTables(self):
+        """Returns a list of the tables in Hbase.
+
+        Returns:
+            A list of the table names as strings
+        """
+        r = requests.get(self.base_url)
+        tables = r.text.split('\n')
+        return tables
+

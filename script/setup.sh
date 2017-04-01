@@ -37,7 +37,6 @@ sudo pip install protobuf
 sudo pip install setuptools
 sudo pip install requests
 sudo pip install httplib2
-sudo pip install oauth2client
 sudo pip install google-api-python-client
 sudo pip install google-cloud-pubsub
 
