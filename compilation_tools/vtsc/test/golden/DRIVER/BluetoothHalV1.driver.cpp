@@ -1,4 +1,4 @@
-#include "test/vts/specification/hal_conventional/BluetoothHalV1.vts.h"
+#include "test/vts/specification/hal/conventional/bluetooth/1.0/BluetoothHalV1.vts.h"
 #include <hardware/hardware.h>
 #include <hardware/bluetooth.h>
 #include "vts_datatype.h"
