@@ -57,16 +57,9 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         ]
         self.getUserParams(opt_param_names=opt_params)
 
-        passthrough_opt = self.getUserParam(
-                keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
         self._skip_if_thermal_throttling = self.getUserParam(
                 keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
                 default_value=False)
-
-        # Enable coverage if specified in the configuration or coverage enabled.
-        # TODO(ryanjcampbell@) support binderized mode
-        if passthrough_opt or self.coverage.enabled:
-            self._EnablePassthroughMode()
 
         self._cpu_freq = None
         self._skip_all_testcases = False
@@ -154,6 +147,23 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             self._cpu_freq.DisableCpuScaling()
 
         super(HidlHalGTest, self).setUpClass()
+
+    def CreateTestCases(self):
+        """Create testcases and conditionally enable passthrough mode.
+
+        Create testcases as defined in HidlHalGtest. If the passthrough option
+        is provided in the configuration or if coverage is enabled, enable
+        passthrough mode on the test environment.
+        """
+        super(HidlHalGTest, self).CreateTestCases()
+
+        passthrough_opt = self.getUserParam(
+            keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
+
+        # Enable coverage if specified in the configuration or coverage enabled.
+        # TODO(ryanjcampbell@) support binderized mode
+        if passthrough_opt or self.coverage.enabled:
+            self._EnablePassthroughMode()
 
     def _EnablePassthroughMode(self):
         """Enable passthrough mode by setting getStub to true.
