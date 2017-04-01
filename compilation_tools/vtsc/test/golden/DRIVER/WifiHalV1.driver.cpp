@@ -1,4 +1,4 @@
-#include "test/vts/specification/hal_conventional/WifiHalV1.vts.h"
+#include "test/vts/specification/hal/conventional/wifi/1.0/WifiHalV1.vts.h"
 #include <hardware/hardware.h>
 #include <hardware_legacy/wifi_hal.h>
 #include "vts_datatype.h"
