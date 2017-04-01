@@ -106,9 +106,11 @@ class GtestBinaryTest(binary_test.BinaryTest):
         asserts.assertTrue(command_results, 'Empty command response.')
         asserts.assertEqual(len(command_results), 3, 'Abnormal command response.')
         for item in command_results[const.STDOUT]:
-            logging.info(item)
+            if item and item.strip():
+                logging.info(item)
         for item in command_results[const.STDERR]:
-            logging.error(item)
+            if item and item.strip():
+                logging.error(item)
 
         asserts.assertFalse(
             any(command_results[const.EXIT_CODE]),
