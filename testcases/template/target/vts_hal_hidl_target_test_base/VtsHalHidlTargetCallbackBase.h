@@ -27,7 +27,8 @@
 
 using namespace ::std;
 
-constexpr char DEFAULT_CALLBACK_FUNCTION_NAME[] = "";
+constexpr char kVtsHalHidlTargetCallbackDefaultName[] =
+    "VtsHalHidlTargetCallbackDefaultName";
 constexpr chrono::milliseconds DEFAULT_CALLBACK_WAIT_TIMEOUT_INITIAL =
     chrono::minutes(1);
 
@@ -66,9 +67,11 @@ namespace testing {
  *   CallApi1();
  *   CallApi2();
  *   pair<bool, shared_ptr<CallbackArgs>> result;
- *   result = cb_.WaitForCallback("CallbackApi1"); // cb_ as an instance of MyCallback object
+ *   result = cb_.WaitForCallback("CallbackApi1"); // cb_ as an instance
+ *                                                    of MyCallback object
  *   EXPECT_TRUE(result.first); // Check wait did not time out
- *   EXPECT_TRUE(result.second); // Check CallbackArgs is received (not nullptr). This is optional.
+ *   EXPECT_TRUE(result.second); // Check CallbackArgs is received (not
+ *                                  nullptr). This is optional.
  *   // Here check value of args using the pointer result.second;
  *   result = cb_.WaitForCallback("CallbackApi2");
  *   EXPECT_TRUE(result.first);
@@ -82,7 +85,7 @@ template <class CallbackArgsTemplateClass>
 class VtsHalHidlTargetCallbackBase {
  public:
   VtsHalHidlTargetCallbackBase()
-      : default_wait_timeout(DEFAULT_CALLBACK_WAIT_TIMEOUT_INITIAL) {}
+      : cb_default_wait_timeout_(DEFAULT_CALLBACK_WAIT_TIMEOUT_INITIAL) {}
 
   virtual ~VtsHalHidlTargetCallbackBase() {
     for (auto it : cb_lock_map_) {
@@ -90,98 +93,84 @@ class VtsHalHidlTargetCallbackBase {
     }
   }
 
-  // Wait for a callback function in a test.
-  // Returns a pair of a boolean and a shared pointer to args data class.
-  // Boolean will be false if wait operation timed out. Pointer will be nullptr
-  // if no args are pushed from notify function.
+  /*
+   * Wait for a callback function in a test.
+   * Returns a pair of a boolean and a shared pointer to args data class.
+   * Boolean will be false if wait operation timed out. Pointer will be nullptr
+   * if no args are pushed from notify function. If function name is not set,
+   * a default name will be used.
+   */
   pair<bool, shared_ptr<CallbackArgsTemplateClass>> WaitForCallback(
-      const string& callback_function_name = DEFAULT_CALLBACK_FUNCTION_NAME) {
-    return WaitForCallback(callback_function_name,
-                           GetWaitTimeout(callback_function_name));
-  }
-
-  // Wait for a callback function in a test.
-  // Returns a pair of a boolean and a shared pointer to args data class.
-  // Boolean will be false if wait operation timed out. Pointer will be nullptr
-  // if no args are pushed from notify function.
-  pair<bool, shared_ptr<CallbackArgsTemplateClass>> WaitForCallback(
-      chrono::milliseconds timeout) {
-    return WaitForCallback(DEFAULT_CALLBACK_FUNCTION_NAME, timeout);
-  }
-
-  // Wait for a callback function in a test.
-  // Returns a pair of a boolean and a shared pointer to args data class.
-  // Boolean will be false if wait operation timed out. Pointer will be nullptr
-  // if no args are pushed from notify function.
-  pair<bool, shared_ptr<CallbackArgsTemplateClass>> WaitForCallback(
-      const string& callback_function_name, chrono::milliseconds timeout) {
+      const string& callback_function_name =
+          kVtsHalHidlTargetCallbackDefaultName,
+      chrono::milliseconds timeout = chrono::milliseconds(-1)) {
     return GetCallbackLock(callback_function_name)->WaitForCallback(timeout);
   }
 
-  // Notify a waiting test when a callback is invoked.
-  void NotifyFromCallback(
-      const string& callback_function_name = DEFAULT_CALLBACK_FUNCTION_NAME) {
+  /* Notify a waiting test when a callback is invoked. */
+  void NotifyFromCallback(const string& callback_function_name =
+                              kVtsHalHidlTargetCallbackDefaultName) {
     GetCallbackLock(callback_function_name)->NotifyFromCallback();
   }
 
-  // Notify a waiting test when a callback is invoked.
+  /* Notify a waiting test when a callback is invoked. */
   void NotifyFromCallback(const CallbackArgsTemplateClass& data) {
-    NotifyFromCallback(DEFAULT_CALLBACK_FUNCTION_NAME, data);
+    NotifyFromCallback(kVtsHalHidlTargetCallbackDefaultName, data);
   }
 
-  // Notify a waiting test when a callback is invoked.
+  /* Notify a waiting test when a callback is invoked. */
   void NotifyFromCallback(const string& callback_function_name,
                           const CallbackArgsTemplateClass& data) {
     GetCallbackLock(callback_function_name)->NotifyFromCallback(data);
   }
 
-  // Clear lock and data for a callback function.
-  void ClearForCallback(
-      const string& callback_function_name = DEFAULT_CALLBACK_FUNCTION_NAME) {
+  /* Clear lock and data for a callback function. */
+  void ClearForCallback(const string& callback_function_name =
+                            kVtsHalHidlTargetCallbackDefaultName) {
     GetCallbackLock(callback_function_name, true);
   }
 
-  // Get wait timeout for a specific callback function
+  /* Get wait timeout for a specific callback function. */
   chrono::milliseconds GetWaitTimeout(
-      const string& callback_function_name = DEFAULT_CALLBACK_FUNCTION_NAME) {
-    unique_lock<mutex> lock(cb_timeout_map_mtx_);
-    auto found = cb_timeout_map_.find(callback_function_name);
-    if (found == cb_timeout_map_.end()) {
-      return default_wait_timeout;
-    } else {
-      return found->second;
-    }
+      const string& callback_function_name =
+          kVtsHalHidlTargetCallbackDefaultName) {
+    return GetCallbackLock(callback_function_name)->GetWaitTimeout();
   }
 
-  // Set default wait timeout for a callback function
-  void SetWaitTimeoutDefault(chrono::milliseconds timeout) {
-    SetWaitTimeout(DEFAULT_CALLBACK_FUNCTION_NAME, timeout);
-  }
-
-  // Set default wait timeout for a specific callback function
+  /* Set wait timeout for a specific callback function. */
   void SetWaitTimeout(const string& callback_function_name,
                       chrono::milliseconds timeout) {
-    unique_lock<mutex> lock(cb_timeout_map_mtx_);
-    auto found = cb_timeout_map_.find(callback_function_name);
-    if (found == cb_timeout_map_.end()) {
-      cb_timeout_map_.insert({callback_function_name, timeout});
-    } else {
-      found->second = timeout;
-    }
+    GetCallbackLock(callback_function_name)->SetWaitTimeout(timeout);
+  }
+
+  /* Get default wait timeout for a callback function. */
+  chrono::milliseconds GetWaitTimeoutDefault() {
+    return cb_default_wait_timeout_;
+  }
+
+  /* Set default wait timeout for a callback function. */
+  void SetWaitTimeoutDefault(chrono::milliseconds timeout) {
+    cb_default_wait_timeout_ = timeout;
   }
 
  private:
   class CallbackLock {
    public:
-    CallbackLock() : wait_count_(0) {}
+    CallbackLock(VtsHalHidlTargetCallbackBase& parent)
+        : wait_count_(0), parent_(parent), timeout_(chrono::milliseconds(-1)) {}
 
-    // Wait for a callback function in a test.
-    // Returns a pair of a boolean and a shared pointer to args data class.
-    // Boolean will be false if wait operation timed out. Pointer will be
-    // nullptr if no args are pushed from notify function.
+    /*
+     * Wait for a callback function in a test.
+     * Returns a pair of a boolean and a shared pointer to args data class.
+     * Boolean will be false if wait operation timed out. Pointer will be
+     * nullptr if no args are pushed from notify function.
+     */
     pair<bool, shared_ptr<CallbackArgsTemplateClass>> WaitForCallback(
-        chrono::milliseconds timeout) {
+        chrono::milliseconds timeout = chrono::milliseconds(-1)) {
       unique_lock<mutex> lock(wait_mtx_);
+      if (timeout < chrono::milliseconds(0)) {
+        timeout = GetWaitTimeout();
+      }
       auto expiration = chrono::system_clock::now() + timeout;
 
       while (wait_count_ == 0) {
@@ -193,7 +182,6 @@ class VtsHalHidlTargetCallbackBase {
         }
       }
       wait_count_--;
-      unique_lock<mutex> queue_lock(queue_mtx_);
       shared_ptr<CallbackArgsTemplateClass> data;
       if (!arg_data_.empty()) {
         data = arg_data_.front();
@@ -202,32 +190,37 @@ class VtsHalHidlTargetCallbackBase {
       return pair<bool, shared_ptr<CallbackArgsTemplateClass>>(true, data);
     }
 
-    // Notify a waiting test when a callback is invoked.
+    /* Set default wait timeout for a callback function. */
     void NotifyFromCallback() {
       unique_lock<mutex> lock(wait_mtx_);
       Notify();
     }
 
-    // Notify a waiting test when a callback is invoked.
+    /* Set default wait timeout for a callback function. */
     void NotifyFromCallback(const CallbackArgsTemplateClass& data) {
-      unique_lock<mutex> wait_lock(wait_mtx_, defer_lock);
-      unique_lock<mutex> queue_lock(queue_mtx_, defer_lock);
-      std::lock(wait_lock, queue_lock);
-
+      unique_lock<mutex> wait_lock(wait_mtx_);
       arg_data_.push(make_shared<CallbackArgsTemplateClass>(data));
       Notify();
     }
 
+    /* Set wait timeout. */
+    void SetWaitTimeout(chrono::milliseconds timeout) { timeout_ = timeout; }
+
+    /* Get wait timeout. */
+    chrono::milliseconds GetWaitTimeout() {
+      if (timeout_ < chrono::milliseconds(0)) {
+        return parent_.GetWaitTimeoutDefault();
+      }
+      return timeout_;
+    }
+
    private:
-    // Notify a waiting test when a callback is invoked.
+    /* Set default wait timeout for a callback function. */
     void Notify() {
       wait_count_++;
       wait_cv_.notify_one();
     }
 
-    // Mutex for protecting operations on callback arg data queue
-    // Queue mutex should be locked AFTER wait mutex in a function
-    mutex queue_mtx_;
     // Mutex for protecting operations on wait count and conditional variable
     mutex wait_mtx_;
     // Conditional variable for callback wait and notify
@@ -236,21 +229,25 @@ class VtsHalHidlTargetCallbackBase {
     unsigned int wait_count_;
     // A queue of callback arg data
     queue<shared_ptr<CallbackArgsTemplateClass>> arg_data_;
+    // Pointer to parent class
+    VtsHalHidlTargetCallbackBase& parent_;
+    // Wait time out
+    chrono::milliseconds timeout_;
   };
 
-  // Get CallbackLock using callback function name.
+  /* Get CallbackLock using callback function name. */
   CallbackLock* GetCallbackLock(const string& callback_function_name,
                                 bool auto_clear = false) {
     unique_lock<mutex> lock(cb_lock_map_mtx_);
     auto found = cb_lock_map_.find(callback_function_name);
     if (found == cb_lock_map_.end()) {
-      CallbackLock* result = new CallbackLock();
+      CallbackLock* result = new CallbackLock(*this);
       cb_lock_map_.insert({callback_function_name, result});
       return result;
     } else {
       if (auto_clear) {
         delete (found->second);
-        found->second = new CallbackLock();
+        found->second = new CallbackLock(*this);
       }
       return found->second;
     }
@@ -258,14 +255,10 @@ class VtsHalHidlTargetCallbackBase {
 
   // A map of function name and CallbackLock object pointers
   unordered_map<string, CallbackLock*> cb_lock_map_;
-  // A map of function name and wait timeouts
-  unordered_map<string, chrono::milliseconds> cb_timeout_map_;
   // Mutex for protecting operations on function name-CallbackLock pointer map
   mutex cb_lock_map_mtx_;
-  // Mutex for protecting operations on function name-wait timeouts map
-  mutex cb_timeout_map_mtx_;
   // Default wait timeout
-  chrono::milliseconds default_wait_timeout;
+  chrono::milliseconds cb_default_wait_timeout_;
 };
 
 }  // namespace testing
