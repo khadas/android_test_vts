@@ -117,6 +117,7 @@ vts_test_lib_hidl_packages += \
   VtsHalBroadcastradioV1_0TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalContexthubV1_0TargetTest \
+  VtsHalDrmV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsAllocatorV2_0TargetTest \
@@ -140,3 +141,6 @@ vts_test_lib_hidl_packages += \
   VtsHalWifiV1_0TargetTest \
   VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
+
+vts_test_lib_hidl_packages += \
+  libvtswidevine_prebuilt \
