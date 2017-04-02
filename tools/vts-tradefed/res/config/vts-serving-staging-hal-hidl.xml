@@ -24,6 +24,7 @@
   <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4Target" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Host" /><!-- need runtime stopped -->
+  <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostBinderize" />
