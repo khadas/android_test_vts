@@ -120,14 +120,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
         Log.d(LOG_TAG, String.format("Target Profiling Library Path: %s",
                                      mTargetProfilingLibraryPath));
 
-        // Enables VTS Profiling
-        // TODO(yim,smoreland): deprecate this when that toggle is gone.
-        // this requires a reboot and thus is mainly for development.
         String result =
-            device.executeShellCommand("setprop persist.hal.binderization true");
-        Log.d(LOG_TAG, String.format("setprop: %s", result));
-
-        result =
             device.executeShellCommand("setenforce 0");
         Log.d(LOG_TAG, String.format("setenforce: %s", result));
 
