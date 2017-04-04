@@ -41,4 +41,5 @@
   <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiNanV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsTrebleVintfTest" />
 </configuration>
