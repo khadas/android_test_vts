@@ -120,6 +120,10 @@ vts_test_lib_packages += \
     libnstest_public \
     libnstest_public_internal \
 
+# for drm tests
+vts_test_lib_packages += \
+    libvtswidevine \
+
 # for fuzz tests
 vts_test_lib_packages += \
     libclang_rt.asan-arm-android \
