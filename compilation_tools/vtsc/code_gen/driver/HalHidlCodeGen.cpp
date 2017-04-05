@@ -97,11 +97,27 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
       }
       out << "RpcCallToAgent(callback_message, callback_socket_name_);" << "\n";
 
-      if (api.return_type_hidl_size() == 0
-          || api.return_type_hidl(0).type() == TYPE_VOID) {
-        out << "return ::android::hardware::Void();" << "\n";
+      // TODO(zhuoyao): return the received results from host.
+      if (CanElideCallback(api)) {
+        const auto& return_val = api.return_type_hidl(0);
+        const auto& type = return_val.type();
+        if (type == TYPE_SCALAR) {
+          out << "return static_cast<"
+              << GetCppVariableType(return_val.scalar_type()) << ">(0);\n";
+        } else if (type == TYPE_ENUM || type == TYPE_MASK) {
+          if (return_val.has_predefined_type()) {
+            std::string predefined_type_name = return_val.predefined_type();
+            ReplaceSubString(predefined_type_name, "::", "__");
+            out << "return Random" << predefined_type_name << "();\n";
+          } else {
+            cerr << __func__ << " ENUM doesn't have predefined type" << endl;
+            exit(-1);
+          }
+        } else {
+          out << "return nullptr;\n";
+        }
       } else {
-        out << "return hardware::Status::ok();" << "\n";
+        out << "return ::android::hardware::Void();\n";
       }
       out.unindent();
       out << "}" << "\n";
