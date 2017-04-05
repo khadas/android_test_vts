@@ -85,6 +85,8 @@ You may run your test using VTS TradeFed console. First, start VTS TradeFed cons
 
 `$ vts-tradefed`
 
+> Though building Android on Windows is not supported, you can [run VTS on Windows](../user_manual.md#run_vts).
+
 Then, use run command to start your test plan:
 
 `> run vts-codelab`

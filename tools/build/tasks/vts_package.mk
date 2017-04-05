@@ -34,6 +34,7 @@ include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
 
 VTS_OUT_ROOT := $(HOST_OUT)/vts
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+VTS_TOOLS_OUT := $(VTS_OUT_ROOT)/android-vts/tools
 
 # Packaging rule for android-vts.zip
 test_suite_name := vts
@@ -130,6 +131,11 @@ $(foreach m,$(target_hostdriven_modules),\
       $(eval target_hostdriven_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/host/$(my_copy_dest)))\
   ))
 
+host_additional_deps_copy_pairs := \
+  test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTS_TOOLS_OUT)/vts-tradefed_win.bat \
+  $(foreach d,$(ADDITIONAL_VTS_JARS),\
+    $(d):$(VTS_TOOLS_OUT)/$(notdir $(d)))
+
 # Packaging rule for host-side Python logic, configs, and data files
 
 host_framework_files := \
@@ -173,6 +179,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
   $(call copy-many-files,$(target_prebuilt_apk_copy_pairs)) \
+  $(call copy-many-files,$(host_additional_deps_copy_pairs)) \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
