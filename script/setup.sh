@@ -32,7 +32,6 @@ echo "Install Python modules for VTS Runner"
 sudo pip install future
 sudo pip install futures
 sudo pip install enum
-sudo pip install concurrent
 sudo pip install protobuf
 sudo pip install setuptools
 sudo pip install requests
