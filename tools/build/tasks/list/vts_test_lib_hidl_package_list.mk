@@ -124,6 +124,7 @@ vts_test_lib_hidl_packages += \
   VtsHalGraphicsComposerV2_1TargetTest \
   VtsHalGraphicsMapperV2_0TargetTest \
   VtsHalIrV1_0TargetTest \
+  VtsHalKeymasterV3_0TargetTest \
   VtsHalLightV2_0TargetTest \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
