@@ -49,3 +49,11 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     vts_treble_vintf_test \
 
+# VTS security PoC tests
+vts_test_bin_packages += \
+    30149612 \
+    28838221 \
+    32219453 \
+    31707909 \
+    32402310
+
