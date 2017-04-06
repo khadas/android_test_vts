@@ -23,6 +23,8 @@ vts_test_lib_hal_packages := \
   android.hardware.tests.baz@1.0-impl \
   android.hardware.tests.foo@1.0 \
   android.hardware.tests.foo@1.0-impl \
+  android.hardware.tests.hash@1.0 \
+  android.hardware.tests.hash@1.0-impl \
   android.hardware.tests.inheritance@1.0 \
   android.hardware.tests.inheritance@1.0-impl \
   android.hardware.tests.memory@1.0 \
@@ -30,4 +32,6 @@ vts_test_lib_hal_packages := \
   android.hardware.tests.msgq@1.0 \
   android.hardware.tests.pointer@1.0 \
   android.hardware.tests.pointer@1.0-impl \
+  libfootest \
+  libpointertest \
   lights.vts \
