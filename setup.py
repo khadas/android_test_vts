@@ -22,7 +22,6 @@ import sys
 install_requires = [
     'future',
     'futures',
-    'concurrent',
 ]
 
 if sys.version_info < (3,):
