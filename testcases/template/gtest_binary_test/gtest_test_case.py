@@ -36,18 +36,23 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
     '''
 
     # @Override
-    def GetRunCommand(self, output_file_path=None):
+    def GetRunCommand(self, output_file_path=None, test_name=None):
         '''Get the command to run the test.
 
+        Args:
+            output_file_path: file to store the gtest results.
+            test_name: name of the gtest test case.
         Returns:
             List of strings
         '''
         if output_file_path:
             self.output_file_path = output_file_path
+        if not test_name:
+            test_name = self.GetFullName()
         return [('{cmd} --gtest_filter={test} '
                  '--gtest_output=xml:{output_file_path}').format(
                      cmd=super(GtestTestCase, self).GetRunCommand(),
-                     test=self.GetFullName(),
+                     test=test_name,
                      output_file_path=self.output_file_path),
                 'cat {output} && rm -rf {output}'.format(
                     output=self.output_file_path)]
