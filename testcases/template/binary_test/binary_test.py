@@ -63,12 +63,12 @@ class BinaryTest(base_test.BaseTestClass):
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
-        required_params = [
-            keys.ConfigKeys.IKEY_DATA_FILE_PATH,
-        ]
+        required_params = [keys.ConfigKeys.IKEY_DATA_FILE_PATH, ]
         opt_params = [
             keys.ConfigKeys.IKEY_BINARY_TEST_SOURCE,
             keys.ConfigKeys.IKEY_BINARY_TEST_WORKING_DIRECTORY,
+            keys.ConfigKeys.IKEY_BINARY_TEST_ENVP,
+            keys.ConfigKeys.IKEY_BINARY_TEST_ARGS,
             keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
@@ -97,6 +97,32 @@ class BinaryTest(base_test.BaseTestClass):
                 if self.TAG_DELIMITER in token:
                     tag, path = token.split(self.TAG_DELIMITER)
                 self.working_directory[tag] = path
+
+        self.envp = {}
+        if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_ENVP):
+            self.binary_test_envp = map(str, self.binary_test_envp)
+            for token in self.binary_test_envp:
+                tag = ''
+                path = token
+                if self.TAG_DELIMITER in token:
+                    tag, path = token.split(self.TAG_DELIMITER)
+                if tag in self.envp:
+                    self.envp[tag] += ' %s' % path
+                else:
+                    self.envp[tag] = path
+
+        self.args = {}
+        if hasattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_ARGS):
+            self.binary_test_args = map(str, self.binary_test_args)
+            for token in self.binary_test_args:
+                tag = ''
+                arg = token
+                if self.TAG_DELIMITER in token:
+                    tag, arg = token.split(self.TAG_DELIMITER)
+                if tag in self.args:
+                    self.args[tag] += ' %s' % arg
+                else:
+                    self.args[tag] = arg
 
         self.ld_library_path = {
             self.DEFAULT_TAG_32: self.DEFAULT_LD_LIBRARY_PATH_32,
@@ -316,10 +342,9 @@ class BinaryTest(base_test.BaseTestClass):
                 dst = path_utils.JoinTargetPath(self.working_directory[tag],
                                                 os.path.basename(src))
             else:
-                dst = path_utils.JoinTargetPath(self.DEVICE_TMP_DIR,
-                                                'binary_test_temp_%s' %
-                                                self.__class__.__name__, tag,
-                                                os.path.basename(src))
+                dst = path_utils.JoinTargetPath(
+                    self.DEVICE_TMP_DIR, 'binary_test_temp_%s' %
+                    self.__class__.__name__, tag, os.path.basename(src))
 
         if push_only:
             tag = None
@@ -338,14 +363,24 @@ class BinaryTest(base_test.BaseTestClass):
         '''
         working_directory = self.working_directory[
             tag] if tag in self.working_directory else None
+        envp = self.envp[tag] if tag in self.envp else ''
+        args = self.args[tag] if tag in self.args else ''
         ld_library_path = self.ld_library_path[
             tag] if tag in self.ld_library_path else None
         profiling_library_path = self.profiling_library_path[
             tag] if tag in self.profiling_library_path else None
 
         return binary_test_case.BinaryTestCase(
-            '', path_utils.TargetBaseName(path), path, tag, self.PutTag,
-            working_directory, ld_library_path, profiling_library_path)
+            '',
+            path_utils.TargetBaseName(path),
+            path,
+            tag,
+            self.PutTag,
+            working_directory,
+            ld_library_path,
+            profiling_library_path,
+            envp=envp,
+            args=args)
 
     def VerifyTestResult(self, test_case, command_results):
         '''Parse command result.
