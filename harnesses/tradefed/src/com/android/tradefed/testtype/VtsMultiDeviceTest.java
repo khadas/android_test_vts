@@ -87,6 +87,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String EXCLUDE_FILTER = "exclude_filter";
     static final String BINARY_TEST_SOURCE = "binary_test_source";
     static final String BINARY_TEST_WORKING_DIRECTORY = "binary_test_working_directory";
+    static final String BINARY_TEST_ENVP = "binary_test_envp";
+    static final String BINARY_TEST_ARGS = "binary_test_args";
     static final String BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path";
     static final String BINARY_TEST_PROFILING_LIBRARY_PATH = "binary_test_profiling_library_path";
     static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
@@ -242,15 +244,26 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
     @Option(name = "binary-test-working-directory", description = "Working directories for binary "
             + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
-            + "Multiple directories can be separated by ','. However, each tag should only has "
-            + "one working directory. This option is optional for binary tests. If not specified, "
-            + "different directories will be used for files with different tags.")
+            + "However, each tag should only has one working directory. This option is optional for "
+            + "binary tests. If not specified, different directories will be used for files with "
+            + "different tags.")
     private Collection<String> mBinaryTestWorkingDirectory = new ArrayList<>();
+
+    @Option(name = "binary-test-envp", description = "Additional environment path for binary "
+        + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
+        + "There can be multiple instances of binary-test-envp for a same tag, which will "
+        + "later automatically be combined.")
+    private Collection<String> mBinaryTestEnvp = new ArrayList<>();
+
+    @Option(name = "binary-test-args", description = "Additional args or flags for binary "
+        + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
+        + "There can be multiple instances of binary-test-args for a same tag, which will "
+        + "later automatically be combined.")
+    private Collection<String> mBinaryTestArgs = new ArrayList<>();
 
     @Option(name = "binary-test-ld-library-path", description = "LD_LIBRARY_PATH for binary "
             + "tests. Tags can be added to the front of each instance using '::' as delimiter. "
             + "Multiple directories can be added under a same tag using ':' as delimiter. "
-            + "Multiple instances of ld-library-path rule can be separated by ','. "
             + "There can be multiple instances of ld-library-path for a same tag, which will "
             + "later automatically be combined using ':' as delimiter. Paths without a tag "
             + "will only used for binaries without tag. This option is optional for binary tests.")
@@ -616,8 +629,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Added %s to the Json object", RUN_32BIT_ON_64BIT_ABI);
         }
         if (mSkipIfThermalThrottling) {
-          jsonObject.put(SKIP_IF_THERMAL_THROTTLING, mSkipIfThermalThrottling);
-          CLog.i("Added %s to the Json object", SKIP_IF_THERMAL_THROTTLING);
+            jsonObject.put(SKIP_IF_THERMAL_THROTTLING, mSkipIfThermalThrottling);
+            CLog.i("Added %s to the Json object", SKIP_IF_THERMAL_THROTTLING);
         }
 
         if (!mBinaryTestSource.isEmpty()) {
@@ -628,6 +641,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             jsonObject.put(BINARY_TEST_WORKING_DIRECTORY,
                     new JSONArray(mBinaryTestWorkingDirectory));
             CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORY);
+        }
+        if (!mBinaryTestEnvp.isEmpty()) {
+            jsonObject.put(BINARY_TEST_ENVP, new JSONArray(mBinaryTestEnvp));
+            CLog.i("Added %s to the Json object", BINARY_TEST_ENVP);
+        }
+        if (!mBinaryTestArgs.isEmpty()) {
+            jsonObject.put(BINARY_TEST_ARGS, new JSONArray(mBinaryTestArgs));
+            CLog.i("Added %s to the Json object", BINARY_TEST_ARGS);
         }
         if (!mBinaryTestLdLibraryPath.isEmpty()) {
             jsonObject.put(BINARY_TEST_LD_LIBRARY_PATH,
