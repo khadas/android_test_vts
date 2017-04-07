@@ -20,6 +20,7 @@
 
   <option name="compatibility:include-filter" value="LinuxKselftestTestStaging" />
   <option name="compatibility:include-filter" value="KernelLtpStagingTest" />
+  <option name="compatibility:include-filter" value="VtsKernelNetdTest" />
   <option name="compatibility:include-filter" value="VtsKernelLibcutilsTest" />
 
 </configuration>

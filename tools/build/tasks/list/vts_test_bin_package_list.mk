@@ -49,6 +49,10 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     vts_treble_vintf_test \
 
+# Netd tests
+vts_test_bin_packages += \
+    netd_integration_test \
+
 # VTS security PoC tests
 vts_test_bin_packages += \
     30149612 \
