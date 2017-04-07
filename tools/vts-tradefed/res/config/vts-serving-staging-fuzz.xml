@@ -18,6 +18,7 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-*" />
 
+  <option name="compatibility:primary-abi-only" value="true" />
   <option name="compatibility:include-filter" value="VtsHalAudioV2_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1IfaceFuzzer" />
