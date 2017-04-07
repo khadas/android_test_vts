@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "VtsTraceParser.h"
+#include "VtsTraceProcessor.h"
 // Usage examples:
 //   To cleanup trace, <binary> --cleanup <trace file>
-//   To profile, <binary> --profiling <trace file>
+//   To profile trace, <binary> --profiling <trace file>
+//   To dedup traces, <binary> --dedup <trace file directory>
 // Cleanup trace is used to generate trace for replay test, it will replace the
 // old trace file with a new one of the same format (VtsProfilingRecord).
+//
 // Profile trace will calculate the latency of each API recorded in the trace
 // and print them out with the format api:latency. e.g.
 //   open:150231474
 //   write:842604
 //   coreInitialized:30466722
+//
+// Dedup trace is used to remove all duplicate traces under the given directory.
+// A trace is considered duplicated if there exists a trace that contains the
+// same API call sequence as the given trace and the input parameters for each
+// API call are all the same.
 int main(int argc, char* argv[]) {
-  std::string trace_file = "";
   if (argc == 3) {
-    trace_file = argv[2];
-    android::vts::VtsTraceParser trace_parser;
-    if (!strcmp(argv[1],"--cleanup")) {
-      trace_parser.CleanupTraceForReplay(trace_file);
-    } else if(!strcmp(argv[1], "--profiling")) {
-      trace_parser.ProcessTraceForLatencyProfiling(trace_file);
+    android::vts::VtsTraceProcessor trace_processor;
+    if (!strcmp(argv[1], "--cleanup")) {
+      trace_processor.CleanupTraceForReplay(argv[2]);
+    } else if (!strcmp(argv[1], "--profiling")) {
+      trace_processor.ProcessTraceForLatencyProfiling(argv[2]);
+    } else if (!strcmp(argv[1], "--dedup")) {
+      trace_processor.DedupTraces(argv[2]);
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
