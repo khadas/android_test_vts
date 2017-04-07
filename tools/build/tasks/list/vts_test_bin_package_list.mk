@@ -53,6 +53,14 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     netd_integration_test \
 
+# Binder tests.
+vts_test_bin_packages += \
+    binderDriverInterfaceTest \
+    binderValueTypeTest \
+    binderLibTest \
+    binderTextOutputTest \
+    binderSafeInterfaceTest \
+
 # VTS security PoC tests
 vts_test_bin_packages += \
     30149612 \
