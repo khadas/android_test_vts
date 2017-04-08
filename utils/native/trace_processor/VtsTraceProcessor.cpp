@@ -125,7 +125,7 @@ void VtsTraceProcessor::ProcessTraceForLatencyProfiling(
     cout << "hidl_hal_mode:binder" << endl;
   }
 
-  for (int i = 0; i < profiling_msg.records_size(); i += 2) {
+  for (int i = 0; i < profiling_msg.records_size() - 1; i += 2) {
     string api = profiling_msg.records(i).func_msg().name();
     int64_t start_timestamp = profiling_msg.records(i).timestamp();
     int64_t end_timestamp = profiling_msg.records(i + 1).timestamp();
