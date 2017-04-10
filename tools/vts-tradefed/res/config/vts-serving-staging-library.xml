@@ -22,5 +22,6 @@
   <option name="compatibility:include-filter" value="BionicUnitTests" />
   <option name="compatibility:include-filter" value="BionicUnitTestsStatic" />
   <option name="compatibility:include-filter" value="VtsFmqUnitTests" />
+  <option name="compatibility:include-filter" value="VtsHidlUnitTests" />
 
 </configuration>
