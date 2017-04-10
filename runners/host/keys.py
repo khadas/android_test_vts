@@ -89,7 +89,7 @@ class ConfigKeys(object):
     IKEY_ENABLE_COVERAGE = "enable_coverage"
     IKEY_MODULES = "modules"
     IKEY_SERVICE_JSON_PATH = "service_key_json_path"
-    IKEY_BIGTABLE_BASE_URL = "bigtable_base_url"
+    IKEY_DASHBOARD_POST_COMMAND = "dashboard_post_command"
 
     # Keys for the HAL HIDL GTest type (see VtsMultiDeviceTest.java).
     IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
