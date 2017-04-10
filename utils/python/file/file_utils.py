@@ -61,31 +61,32 @@ def ReadFileContent(filepath, shell):
 
     return results[const.STDOUT][0]
 
-def GetPermission(filepath, shell):
-    """Read the file permission bits of a file and perform assertions.
+def GetPermission(path, shell):
+    """Read the file permission bits of a path.
 
     Args:
-        filepath: string, path to file
+        filepath: string, path to a file or directory
         shell: an instance of the VTS shell
 
     Returns:
-        String, octal permission bits for the file
+        String, octal permission bits for the path
 
     Raises:
-        IOError if the file does not exist or has invalid permission bits."""
-    cmd = "stat -c %%a %s" % filepath
+        IOError if the path does not exist or has invalid permission bits.
+    """
+    cmd = "stat -c %%a %s" % path
     results = shell.Execute(cmd)
-    logging.info("%s: Shell command '%s' results: %s", filepath, cmd,
+    logging.info("%s: Shell command '%s' results: %s", path, cmd,
                  results)
 
     # checks the exit code
     if results[const.EXIT_CODE][0] != 0:
         raise IOError(results[const.STDERR][0])
 
-    accessBits = results[const.STDOUT][0]
+    accessBits = results[const.STDOUT][0].strip()
     if len(accessBits) != 3:
         raise IOError("%s: Wrong number of access bits (%s)" %
-                      (filepath, accessBits))
+                      (path, accessBits))
     return accessBits
 
 def _HasPermission(permission_bits, groupIndex, permission):
