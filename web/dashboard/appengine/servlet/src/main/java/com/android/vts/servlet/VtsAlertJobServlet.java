@@ -129,6 +129,7 @@ public class VtsAlertJobServlet extends BaseServlet {
         }
         ResultScanner scanner = table.getScanner(scan);
         TestReportMessage mostRecentReport = null;
+        Set<ByteString> passingTestcases = new HashSet<>();
         Set<ByteString> failingTestcases = new HashSet<>();
         Set<String> fixedTestcases = new HashSet<>();
         Set<String> newTestcaseFailures = new HashSet<>();
@@ -188,8 +189,11 @@ public class VtsAlertJobServlet extends BaseServlet {
                 if (previouslyFailed) {
                     failingTestcases.add(testCaseReportMessage.getName());
                     skippedTestcaseFailures.add(name);
+                } else {
+                    passingTestcases.add(testCaseReportMessage.getName());
                 }
             } else if (mostRecentResult == TestCaseResult.TEST_CASE_RESULT_PASS) {
+                passingTestcases.add(testCaseReportMessage.getName());
                 // Test case most recently passed.
                 if (previouslyFailed && !transientTestcaseFailures.contains(name)) {
                     // Test case fixed since last update and did not fail transiently.
@@ -310,6 +314,7 @@ public class VtsAlertJobServlet extends BaseServlet {
         Builder builder = VtsWebStatusMessage.TestStatusMessage.newBuilder();
         builder.setStatusTimestamp(lastUploadTimestamp);
         builder.setStatus(newStatus);
+        builder.addAllPassedTestcases(passingTestcases);
         builder.addAllFailedTestcases(failingTestcases);
         return builder.build().toByteArray();
     }
