@@ -35,7 +35,7 @@ def Exists(filepath, shell):
     if results[const.EXIT_CODE][0] != 0:
         return False
 
-    out_str = str(results[const.STDOUT])
+    out_str = str(results[const.STDOUT][0]).strip()
     return out_str.find(filepath) == 0
 
 def ReadFileContent(filepath, shell):
