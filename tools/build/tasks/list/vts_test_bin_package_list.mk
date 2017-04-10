@@ -35,6 +35,7 @@ vts_test_bin_packages := \
     bionic-unit-tests-static \
     stressapptest \
     libcutils_test \
+    vts_test_binary_qtaguid_module \
 
 # some CTS packages for record-and-replay test development purpose
 vts_test_bin_packages += \
