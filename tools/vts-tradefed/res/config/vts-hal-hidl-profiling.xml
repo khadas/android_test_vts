@@ -16,7 +16,7 @@
 <configuration description="VTS HIDL HAL Profiling Plan">
   <include name="vts-base" />
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-*" />
+  <option name="test-tag" value="vts-star" />
 
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetProfiling" />
