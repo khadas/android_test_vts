@@ -42,5 +42,8 @@ message TestStatusMessage {
 
   // failed tests
   repeated bytes failed_testcases = 5;
+
+  // passed tests
+  repeated bytes passed_testcases = 6;
 }
 
