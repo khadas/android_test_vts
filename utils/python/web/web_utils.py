@@ -40,12 +40,13 @@ class WebFeature(feature_utils.Feature):
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_WEB
     _REQUIRED_PARAMS = [
-        keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL,
+        keys.ConfigKeys.IKEY_DASHBOARD_POST_COMMAND,
+        keys.ConfigKeys.IKEY_SERVICE_JSON_PATH,
         keys.ConfigKeys.KEY_TESTBED_NAME,
         keys.ConfigKeys.IKEY_BUILD,
         keys.ConfigKeys.IKEY_ANDROID_DEVICE,
         keys.ConfigKeys.IKEY_ABI_NAME,
-        keys.ConfigKeys.IKEY_ABI_BITNESS,
+        keys.ConfigKeys.IKEY_ABI_BITNESS
     ]
     _OPTIONAL_PARAMS = []
 
@@ -379,34 +380,42 @@ class WebFeature(feature_utils.Feature):
 
         self.report_msg.end_timestamp = feature_utils.GetTimestamp()
 
+        build = getattr(self, keys.ConfigKeys.IKEY_BUILD)
+        if keys.ConfigKeys.IKEY_BUILD_ID in build:
+            build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
+            self.report_msg.build_info.id = build_id
+
         logging.info("_tearDownClass hook: start (username: %s)",
                      getpass.getuser())
+
         if len(self.report_msg.test_case) > 0:
-            bt_url = getattr(self, keys.ConfigKeys.IKEY_BIGTABLE_BASE_URL)
-            bt_client = bigtable_rest_client.HbaseRestClient(
-                "result_%s" % self.report_msg.test, bt_url)
-            bt_client.CreateTable("test")
+            post_cmd = getattr(self, keys.ConfigKeys.IKEY_DASHBOARD_POST_COMMAND)
+            table_name = "result_%s" % str(self.report_msg.test)
+            service_json_path = str(getattr(self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH))
 
-            build = getattr(self, keys.ConfigKeys.IKEY_BUILD)
-            if keys.ConfigKeys.IKEY_BUILD_ID in build:
-                build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
-                self.report_msg.build_info.id = build_id
+            # Create test table with required column families or fail silently.
+            bt_client = bigtable_rest_client.BigtableClient(table_name, post_cmd, service_json_path)
+            bt_client.CreateTable(families=["test"])
 
+            # Post new data to the test table
             bt_client.PutRow(
-                str(self.report_msg.start_timestamp), "data",
-                self.report_msg.SerializeToString())
+                row_key=str(self.report_msg.start_timestamp),
+                family="test",
+                qualifier="data",
+                value=self.report_msg.SerializeToString())
 
-            logging.info("_tearDownClass hook: report msg proto %s",
-                         self.report_msg)
+            # Create status table with required column families or fail silently.
+            bt_client = bigtable_rest_client.BigtableClient(
+                _STATUS_TABLE, post_cmd, service_json_path)
+            bt_client.CreateTable(
+                families=["status", "email_to_test", "test_to_email"])
 
-            bt_client = bigtable_rest_client.HbaseRestClient(_STATUS_TABLE,
-                                                             bt_url)
-            bt_client.CreateTable("status")
-
-            bt_client.PutRow("result_%s" % self.report_msg.test,
-                             "upload_timestamp",
-                             str(self.report_msg.start_timestamp))
-
+            # Post upload timestamp to the status table
+            bt_client.PutRow(
+                row_key=table_name,
+                family="status",
+                qualifier="upload_timestamp",
+                value=str(self.report_msg.start_timestamp))
             logging.info("_tearDownClass hook: status upload time stamp %s",
                          str(self.report_msg.start_timestamp))
         else:
