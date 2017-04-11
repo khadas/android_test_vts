@@ -22,8 +22,6 @@
         <option name="push" value="spec/test/vts/specification/hal/conventional/light/1.0/LightHalV1.vts->/data/local/tmp/spec/hal/conventional/light/1.0/LightHalV1.vts" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-        <option name="script-file" value="/google/data/ro/teams/android-vts/google-cloud-sdk/completion.bash.inc" />
-        <option name="script-file" value="/google/data/ro/teams/android-vts/google-cloud-sdk/path.bash.inc" />
         <option name="dep-module" value="six" />
         <option name="dep-module" value="requests" />
     </target_preparer>
