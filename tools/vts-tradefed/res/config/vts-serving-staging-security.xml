@@ -16,7 +16,7 @@
 <configuration description="VTS Serving Plan for Security (Staging)">
   <include name="vts-base" />
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-*" />
+  <option name="test-tag" value="vts-star" />
 
   <option name="compatibility:include-filter" value="SecurityPoCKernelTestStaging" />
 
