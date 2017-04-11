@@ -31,7 +31,7 @@
   <target_preparer class="com.android.tradefed.targetprep.InstallApkSetup" />
 
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-*" />
+  <option name="test-tag" value="vts-star" />
 
   <option name="compatibility:include-filter" value="SampleShellTest" />
 
