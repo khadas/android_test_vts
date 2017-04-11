@@ -243,10 +243,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     private Collection<String> mBinaryTestSource = new ArrayList<>();
 
     @Option(name = "binary-test-working-directory", description = "Working directories for binary "
-            + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
-            + "However, each tag should only has one working directory. This option is optional for "
-            + "binary tests. If not specified, different directories will be used for files with "
-            + "different tags.")
+                    + "tests. Tags can be added to the front of each directory using '::' as delimiter. "
+                    + "However, each tag should only has one working directory. This option is optional for "
+                    + "binary tests. If not specified, different directories will be used for files with "
+                    + "different tags.")
     private Collection<String> mBinaryTestWorkingDirectory = new ArrayList<>();
 
     @Option(name = "binary-test-envp", description = "Additional environment path for binary "
@@ -262,11 +262,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     private Collection<String> mBinaryTestArgs = new ArrayList<>();
 
     @Option(name = "binary-test-ld-library-path", description = "LD_LIBRARY_PATH for binary "
-            + "tests. Tags can be added to the front of each instance using '::' as delimiter. "
-            + "Multiple directories can be added under a same tag using ':' as delimiter. "
-            + "There can be multiple instances of ld-library-path for a same tag, which will "
-            + "later automatically be combined using ':' as delimiter. Paths without a tag "
-            + "will only used for binaries without tag. This option is optional for binary tests.")
+                    + "tests. Tags can be added to the front of each instance using '::' as delimiter. "
+                    + "Multiple directories can be added under a same tag using ':' as delimiter. "
+                    + "There can be multiple instances of ld-library-path for a same tag, which will "
+                    + "later automatically be combined using ':' as delimiter. Paths without a tag "
+                    + "will only used for binaries without tag. This option is optional for binary tests.")
     private Collection<String> mBinaryTestLdLibraryPath = new ArrayList<>();
 
     @Option(name = "binary-test-profiling-library-path", description = "Path to lookup and load "
@@ -697,13 +697,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATH,
                     new JSONArray(mBinaryTestProfilingLibraryPath));
             CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATH);
-        }
-
-        if (mBinaryTestType.equals(BINARY_TEST_TYPE_HAL_HIDL_GTEST)) {
-            CLog.i("Set flags to stop the framework and native servers for %s",
-                   BINARY_TEST_TYPE_HAL_HIDL_GTEST);
-            mBinaryTestDisableFramework = true;
-            mBinaryTestStopNativeServers = true;
         }
 
         if (mBinaryTestDisableFramework) {
