@@ -79,7 +79,13 @@ if [ -z ${VTS_ROOT} ]; then
 fi;
 
 JAR_DIR=${VTS_ROOT}/android-vts/tools
-JARS="tradefed
+
+TRADEFED_JAR="tradefed"
+if [ ! -f ${JAR_DIR}/${TRADEFED_JAR}.jar ]; then
+  TRADEFED_JAR="tradefed-prebuilt"
+fi;
+
+JARS="${TRADEFED_JAR}
   hosttestlib
   compatibility-host-util
   vts-tradefed"
