@@ -23,5 +23,6 @@
   <option name="compatibility:include-filter" value="SyscallExistenceTest" />
   <option name="compatibility:include-filter" value="KernelProcFileApiTest" />
   <option name="compatibility:include-filter" value="KernelLtpTest" />
+  <option name="compatibility:include-filter" value="VtsKernelHwBinder" />
 
 </configuration>
