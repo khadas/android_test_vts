@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsWebStatusMessage.proto',
   package='android.vts',
-  serialized_pb='\n\x19VtsWebStatusMessage.proto\x12\x0b\x61ndroid.vts\"\x92\x01\n\x11TestStatusMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12\x18\n\x10status_timestamp\x18\x03 \x01(\x03\x12\'\n\x06status\x18\x04 \x01(\x0e\x32\x17.android.vts.TestStatus\x12\x18\n\x10\x66\x61iled_testcases\x18\x05 \x03(\x0c*:\n\nTestStatus\x12\x10\n\x0cTEST_UNKNOWN\x10\x00\x12\x0b\n\x07TEST_OK\x10\x01\x12\r\n\tTEST_FAIL\x10\x02\x42,\n\x15\x63om.android.vts.protoB\x13VtsWebStatusMessage')
+  serialized_pb='\n\x19VtsWebStatusMessage.proto\x12\x0b\x61ndroid.vts\"\xac\x01\n\x11TestStatusMessage\x12\x12\n\ntest_suite\x18\x01 \x01(\x0c\x12\x0c\n\x04test\x18\x02 \x01(\x0c\x12\x18\n\x10status_timestamp\x18\x03 \x01(\x03\x12\'\n\x06status\x18\x04 \x01(\x0e\x32\x17.android.vts.TestStatus\x12\x18\n\x10\x66\x61iled_testcases\x18\x05 \x03(\x0c\x12\x18\n\x10passed_testcases\x18\x06 \x03(\x0c*:\n\nTestStatus\x12\x10\n\x0cTEST_UNKNOWN\x10\x00\x12\x0b\n\x07TEST_OK\x10\x01\x12\r\n\tTEST_FAIL\x10\x02\x42,\n\x15\x63om.android.vts.protoB\x13VtsWebStatusMessage')
 
 _TESTSTATUS = _descriptor.EnumDescriptor(
   name='TestStatus',
@@ -37,8 +37,8 @@ _TESTSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=191,
-  serialized_end=249,
+  serialized_start=217,
+  serialized_end=275,
 )
 
 TestStatus = enum_type_wrapper.EnumTypeWrapper(_TESTSTATUS)
@@ -90,6 +90,13 @@ _TESTSTATUSMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='passed_testcases', full_name='android.vts.TestStatusMessage.passed_testcases', index=5,
+      number=6, type=12, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -100,7 +107,7 @@ _TESTSTATUSMESSAGE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=43,
-  serialized_end=189,
+  serialized_end=215,
 )
 
 _TESTSTATUSMESSAGE.fields_by_name['status'].enum_type = _TESTSTATUS
