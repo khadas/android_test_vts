@@ -52,11 +52,14 @@ class GtestBinaryTest(binary_test.BinaryTest):
         '''
         working_directory = self.working_directory[
             tag] if tag in self.working_directory else None
+        envp = self.envp[tag] if tag in self.envp else ''
+        args = self.args[tag] if tag in self.args else ''
         ld_library_path = self.ld_library_path[
             tag] if tag in self.ld_library_path else None
         profiling_library_path = self.profiling_library_path[
             tag] if tag in self.ld_library_path else None
 
+        args += " --gtest_list_tests"
         list_test_case = binary_test_case.BinaryTestCase(
             'gtest_list_tests',
             path,
@@ -66,11 +69,13 @@ class GtestBinaryTest(binary_test.BinaryTest):
             working_directory,
             ld_library_path,
             profiling_library_path,
-            args="--gtest_list_tests")
+            envp=envp,
+            args=args)
         cmd = ['chmod 755 %s' % path, list_test_case.GetRunCommand()]
         cmd_results = self.shell.Execute(cmd)
-        if any(cmd_results[const.EXIT_CODE]
-               ):  # gtest binary doesn't exist or is corrupted
+        if any(cmd_results[
+                const.
+                EXIT_CODE]):  # gtest binary doesn't exist or is corrupted
             logging.error('Failed to list test cases from binary %s' % path)
 
         test_cases = []
@@ -104,7 +109,8 @@ class GtestBinaryTest(binary_test.BinaryTest):
             command_results: dict of lists, shell command result
         '''
         asserts.assertTrue(command_results, 'Empty command response.')
-        asserts.assertEqual(len(command_results), 3, 'Abnormal command response.')
+        asserts.assertEqual(
+            len(command_results), 3, 'Abnormal command response.')
         for item in command_results[const.STDOUT]:
             if item and item.strip():
                 logging.info(item)

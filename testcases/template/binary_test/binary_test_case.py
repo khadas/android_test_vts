@@ -32,6 +32,7 @@ def _SafeStrip(value):
         return value
     return value.strip()
 
+
 class BinaryTestCase(object):
     '''A class to represent a binary test case.
 
