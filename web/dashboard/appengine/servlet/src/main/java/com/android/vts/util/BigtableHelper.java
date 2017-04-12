@@ -116,6 +116,50 @@ public class BigtableHelper {
     }
 
     /**
+     * Checks if the table corresponding to the table name exists.
+     * @param tableName Describes the table name.
+     * @return true if the table exists, false otherwise.
+     */
+    public static boolean hasTable(TableName tableName) {
+        try {
+            // Instantiating HBaseAdmin object
+            Admin admin = getConnection().getAdmin();
+            // Determine if table exists
+            return admin.tableExists(tableName);
+        } catch (IOException e) {
+            logger.info("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
+                            + "getTables() ",
+                    e);
+        }
+        return false;
+    }
+
+    /**
+     * Creates a table with the specified descriptor.
+     *
+     * If a table already exists with the same name, fail.
+     * @param tableDescriptor Descriptor of the table to be created.
+     * @return true if the table is created, false otherwise.
+     */
+    public static boolean createTable(HTableDescriptor tableDescriptor) {
+        try {
+            // Instantiating HBaseAdmin object
+            Admin admin = getConnection().getAdmin();
+            // Check if table already exists
+            if (admin.tableExists(tableDescriptor.getTableName()))
+                return false;
+
+            admin.createTable(tableDescriptor);
+            return true;
+        } catch (IOException | IllegalArgumentException e) {
+            logger.info("Exception occurred in com.google.android.vts.servlet.BigtableHelper."
+                            + "getTables() ",
+                    e);
+        }
+        return false;
+    }
+
+    /**
      * Returns true if there are data points newer than lowerBound in the table.
      * This method assumes the row key is a time stamp.
      * @param table An instance of org.apache.hadoop.hbase.client.Table with a long time stamp as
