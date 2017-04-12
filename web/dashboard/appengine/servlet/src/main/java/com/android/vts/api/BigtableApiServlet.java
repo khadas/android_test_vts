@@ -17,19 +17,15 @@
 package com.android.vts.api;
 
 import com.android.vts.util.BigtableHelper;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -46,7 +42,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Represents the servlet that is invoked on loading the first page of dashboard.
+ * REST endpoint for posting data to the dashboard.
  */
 @WebServlet(name = "bigtable", urlPatterns = {"/api/bigtable"})
 public class BigtableApiServlet extends HttpServlet {
@@ -134,8 +130,7 @@ public class BigtableApiServlet extends HttpServlet {
         for (int i = 0; i < familyArray.length(); i++) {
             tableDescriptor.addFamily(new HColumnDescriptor(familyArray.getString(i).trim()));
         }
-        Admin admin = BigtableHelper.getConnection().getAdmin();
-        admin.createTable(tableDescriptor);
+        BigtableHelper.createTable(tableDescriptor);
     }
 
     /**
