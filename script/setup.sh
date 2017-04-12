@@ -40,6 +40,9 @@ sudo pip install oauth2client
 sudo pip install google-api-python-client
 sudo pip install google-cloud-pubsub
 
+echo "Install packages for Kernel tests"
+sudo pip install ply
+
 echo "Install packages for Camera ITS tests"
 sudo apt-get -y install python-tk
 sudo pip install numpy
