@@ -763,6 +763,7 @@ class AndroidDevice(object):
             try:
                 self.vts_agent_process = utils.start_standing_subprocess(
                     cmd, check_health_delay=1)
+                break
             except utils.VTSUtilsError as e:
                 logging.exception(e)
                 with open(vts_agent_log_path, 'r') as log_file:
