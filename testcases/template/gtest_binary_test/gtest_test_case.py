@@ -14,10 +14,11 @@
 # limitations under the License.
 #
 
-import os
+import logging
 import ntpath
-import uuid
+import os
 import re
+import uuid
 
 from vts.runners.host import utils
 from vts.testcases.template.binary_test import binary_test_case
