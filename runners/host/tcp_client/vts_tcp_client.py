@@ -387,7 +387,7 @@ class VtsTcpClient(object):
                     msg.component_type if target_type is None else target_type,
                     float(imported_interface.split("@")[1].split("::")[0]),
                     imported_interface.split("@")[0])
-                result.CopyFrom(imported_result)
+                result.MergeFrom(imported_result)
 
         return result
 
