@@ -19,6 +19,8 @@
   <option name="test-tag" value="vts" />
 
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
 
