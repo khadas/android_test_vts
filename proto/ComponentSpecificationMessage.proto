@@ -90,6 +90,8 @@ enum ComponentType {
   CONTEXTHUB = 22;
   // For a graphics composer submodule.
   GRAPHICS_COMPOSER = 23;
+  // For a media omx submodule.
+  MEDIA_OMX = 24;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
