@@ -39,6 +39,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.gatekeeper@1.0-vts.driver \
   android.hardware.gnss@1.0-vts.driver \
   android.hardware.graphics.common@1.0-vts.driver \
+  android.hardware.graphics.bufferqueue@1.0-vts.driver \
   android.hardware.graphics.allocator@2.0-vts.driver \
   android.hardware.graphics.composer@2.1-vts.driver \
   android.hardware.graphics.mapper@2.0-vts.driver \
@@ -125,6 +126,7 @@ vts_test_lib_hidl_packages += \
   VtsHalIrV1_0TargetTest \
   VtsHalKeymasterV3_0TargetTest \
   VtsHalLightV2_0TargetTest \
+  VtsHalMediaOmxV1_0TargetComponentTest \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
