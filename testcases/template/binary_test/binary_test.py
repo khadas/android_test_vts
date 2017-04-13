@@ -160,7 +160,7 @@ class BinaryTest(base_test.BaseTestClass):
         if not hasattr(self, "_dut"):
             self._dut = self.registerController(android_device)[0]
 
-        self._dut.shell.InvokeTerminal("one")
+        self._dut.shell.InvokeTerminal("one", int(self.abi_bitness))
         self.shell = self._dut.shell.one
 
         if self.coverage.enabled:
