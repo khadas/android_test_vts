@@ -40,7 +40,6 @@ class BinaryTest(base_test.BaseTestClass):
         tags: all the tags that appeared in binary list
         DEVICE_TMP_DIR: string, temp location for storing binary
         TAG_DELIMITER: string, separator used to separate tag and path
-        _skip_all_testcases: boolean - True to skip all test cases.
         SYSPROP_VTS_NATIVE_SERVER: string, the name of a system property which
                                    tells whether to stop properly configured
                                    native servers where properly configured
@@ -58,8 +57,6 @@ class BinaryTest(base_test.BaseTestClass):
     DEFAULT_LD_LIBRARY_PATH_64 = '/data/local/tmp/64/'
     DEFAULT_PROFILING_LIBRARY_PATH_32 = '/data/local/tmp/32/'
     DEFAULT_PROFILING_LIBRARY_PATH_64 = '/data/local/tmp/64/'
-
-    _skip_all_testcases = False
 
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
@@ -400,9 +397,6 @@ class BinaryTest(base_test.BaseTestClass):
         Args:
             test_case: BinaryTestCase object
         '''
-        if self._skip_all_testcases:
-            asserts.skip("All test cases skipped")
-
         if self.profiling.enabled:
             self.profiling.EnableVTSProfiling(self.shell,
                                               test_case.profiling_library_path)
