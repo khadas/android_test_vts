@@ -755,7 +755,7 @@ class AndroidDevice(object):
                 'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                 '{path}/{bitness}/vts_hal_agent{bitness}'
                 ' {path}/32/fuzzer32 {path}/64/fuzzer64 {path}/spec'
-                ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log}'
+                ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log} 2>&1'
             ).format(s=self.serial,
                      bitness=bitness,
                      path=DEFAULT_AGENT_BASE_DIR,
