@@ -28,7 +28,8 @@ from vts.utils.python.web import feature_utils
 
 LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
 TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/"
-HAL_INSTRUMENTATION_LIB_PATH = "/data/local/tmp/64/"
+HAL_INSTRUMENTATION_LIB_PATH_32 = "/data/local/tmp/32/"
+HAL_INSTRUMENTATION_LIB_PATH_64 = "/data/local/tmp/64/"
 
 _PROFILING_DATA = "profiling_data"
 _HOST_PROFILING_DATA = "host_profiling_data"
@@ -74,7 +75,8 @@ class ProfilingFeature(feature_utils.Feature):
     _REQUIRED_PARAMS = [keys.ConfigKeys.IKEY_DATA_FILE_PATH]
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.IKEY_PROFILING_TRACING_PATH,
-        keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME
+        keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME,
+        keys.ConfigKeys.IKEY_ABI_BITNESS,
     ]
 
     def __init__(self, user_params, web=None):
@@ -140,14 +142,24 @@ class ProfilingFeature(feature_utils.Feature):
                 trace_files.append(temp_file_name)
         return trace_files
 
-    def EnableVTSProfiling(
-            self, shell, hal_instrumentation_lib_path=HAL_INSTRUMENTATION_LIB_PATH):
+    def EnableVTSProfiling(self, shell, hal_instrumentation_lib_path=None):
         """ Enable profiling by setting the system property.
 
         Args:
             shell: shell to control the testing device.
             hal_instrumentation_lib_path: directory that stores profiling libraries.
         """
+        if not hal_instrumentation_lib_path:
+            bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS, None)
+            if bitness == '64':
+                hal_instrumentation_lib_path = HAL_INSTRUMENTATION_LIB_PATH_64
+            elif bitness == '32':
+                hal_instrumentation_lib_path = HAL_INSTRUMENTATION_LIB_PATH_32
+            else:
+                logging.error('Unknown abi bitness "%s". Using 64bit hal '
+                              'instrumentation lib path.', bitness)
+                hal_instrumentation_lib_path = HAL_INSTRUMENTATION_LIB_PATH_64
+
         # cleanup any existing traces.
         shell.Execute("rm " + os.path.join(TARGET_PROFILING_TRACE_PATH,
                                            "*.vts.trace"))
