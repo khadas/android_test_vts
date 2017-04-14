@@ -25,6 +25,5 @@
         <option name="binary-test-source" value="_32bit::DATA/nativetest/bionic-unit-tests/bionic-unit-tests->/data/nativetest/bionic-unit-tests/bionic-unit-tests" />
         <option name="binary-test-source" value="_64bit::DATA/nativetest64/bionic-unit-tests/bionic-unit-tests->/data/nativetest64/bionic-unit-tests/bionic-unit-tests" />
         <option name="binary-test-type" value="gtest" />
-        <option name="exclude-filter" value="sys_personality.current_persona" />
     </test>
 </configuration>

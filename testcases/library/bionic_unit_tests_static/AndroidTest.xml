@@ -32,7 +32,6 @@
         <option name="exclude-filter" value="stack_unwinding.easy" />
         <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame" />
         <option name="exclude-filter" value="stack_unwinding.unwind_through_signal_frame_SA_SIGINFO" />
-        <option name="exclude-filter" value="sys_personality.current_persona" />
         <option name="exclude-filter" value="wctype.iswalnum" />
         <option name="exclude-filter" value="wctype.iswalpha" />
         <option name="exclude-filter" value="wctype.iswblank" />
