@@ -31,7 +31,7 @@
   <option name="compatibility:include-filter" value="VtsHalGraphicsAllocatorV2_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0IfaceFuzzer" />
-  <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0IfaceFuzzer" />
+  <!--option name="compatibility:include-filter" value="VtsHalKeymasterV3_0IfaceFuzzer" /--><!-- can brick device -->
   <option name="compatibility:include-filter" value="VtsHalLightV2_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalMediaOmxV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0IfaceFuzzer" />
