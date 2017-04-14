@@ -1,0 +1,53 @@
+# Required packages for VTS Runner
+future
+futures
+enum
+protobuf; python_version <= "2.7"
+setuptools
+requests
+httplib2
+google-api-python-client
+google-cloud-pubsub
+
+# Required packages for Camera ITS tests
+numpy
+scipy
+matplotlib
+Pillow
+
+# Required packages for Kernel tests
+parse
+ply
+
+
+#############################################################################
+# Packages installed as dependencies of the packages listed above
+#############################################################################
+# (Package: dependency of)
+# six: protobuf
+# appdirs: setuptools
+# packaging: setuptools
+# uritemplate: google-api-python-client
+# oauth2client: google-api-python-client
+# gapic-google-cloud-pubsub-v1: google-cloud-pubsub
+# google-cloud-core: google-cloud-pubsub
+# grpcio: google-cloud-pubsub
+# subprocess32: matplotlib
+# cycler: matplotlib
+# python-dateutil: matplotlib
+# functools32: matplotlib
+# pytz: matplotlib
+# pyparsing: matplotlib
+# olefile: Pillow
+# rsa: oauth2client
+# pyasn1-modules: oauth2client
+# pyasn1: oauth2client
+# google-gax: gapic-google-cloud-pubsub-v1 -> google-cloud-pubsub
+# proto-google-cloud-pubsub-v1: gapic-google-cloud-pubsub-v1 -> google-cloud-pubsub
+# googleapis-common-protos: gapic-google-cloud-pubsub-v1 -> google-cloud-pubsub
+# grpc-google-iam-v1: gapic-google-cloud-pubsub-v1 -> google-cloud-pubsub
+# google-auth-httplib2: google-cloud-core -> google-cloud-pubsub
+# google-auth: google-cloud-core -> google-cloud-pubsub
+# enum34: grpcio -> google-cloud-pubsub
+# dill: google-gax -> gapic-google-cloud-pubsub-v1 -> google-cloud-pubsub
+# cachetools: google-auth -> google-cloud-core -> google-cloud-pubsub
