@@ -24,5 +24,7 @@
   <option name="compatibility:include-filter" value="VtsKernelLibcutilsTest" />
   <option name="compatibility:include-filter" value="VtsKernelBinderTest" />
   <option name="compatibility:include-filter" value="VtsKernelTunTest" />
+  <option name="compatibility:include-filter" value="VtsQtaguidTest" />
+  <option name="compatibility:include-filter" value="VtsKernelApiSysfsTest" />
 
 </configuration>
