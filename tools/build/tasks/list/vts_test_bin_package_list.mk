@@ -54,6 +54,10 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     netd_integration_test \
 
+# Tun device tests.
+vts_test_bin_packages += \
+    vts_kernel_tun_test \
+
 # Binder tests.
 vts_test_bin_packages += \
     binderDriverInterfaceTest \
