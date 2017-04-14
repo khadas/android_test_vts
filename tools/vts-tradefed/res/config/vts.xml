@@ -45,6 +45,7 @@
   <option name="compatibility:include-filter" value="KernelProcFileApiTest" />
   <option name="compatibility:include-filter" value="KernelLtpTest" />
   <option name="compatibility:include-filter" value="VtsKernelHwBinder" />
+  <option name="compatibility:include-filter" value="VtsKernelSelinuxFileApi" />
 
   <!--  From vts-vndk.xml -->
   <option name="compatibility:include-filter" value="VtsVndkDependencyTest" />
