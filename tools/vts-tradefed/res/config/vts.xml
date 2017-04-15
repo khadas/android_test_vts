@@ -20,6 +20,7 @@
 
   <!-- For Treble-specific validations -->
   <option name="compatibility:include-filter" value="VtsTreblePlatformVersionTest" />
+  <option name="compatibility:include-filter" value="VtsTrebleVintfTest" />
 
   <!-- From vts-hal.xml -->
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
