@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+from vts.runners.host import asserts
 from vts.runners.host import const
 
 _PERMISSION_GROUPS = 3  # 3 permission groups: owner, group, all users
@@ -216,3 +217,24 @@ def IsReadWrite(permission_bits):
     Raises:
         ValueError if the group or permission bits are invalid"""
     return IsReadable(permission_bits) and IsWritable(permission_bits)
+
+def assertPermissionsAndExistence(shell, path, check_permission):
+    """Asserts that the specified path exists and has the correct permission.
+
+    Args:
+        path: string, path to validate existence and permissions
+        check_permission: function which takes unix permissions in octal
+                          format and returns True if the permissions are
+                          correct, False otherwise.
+    """
+    asserts.assertTrue(
+        Exists(path, shell),
+        "%s: File does not exist." % path)
+    try:
+        permission = GetPermission(path, shell)
+        asserts.assertTrue(
+            check_permission(permission),
+            "%s: File has invalid permissions (%s)" %
+            (path, permission))
+    except (ValueError, IOError) as e:
+        asserts.fail("Failed to assert permissions: %s" % str(e))
