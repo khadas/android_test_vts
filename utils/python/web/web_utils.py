@@ -36,6 +36,7 @@ class WebFeature(feature_utils.Feature):
         enabled: boolean, True if systrace is enabled, False otherwise
         report_msg: TestReportMessage, Proto summarizing the test run
         current_test_report_msg: TestCaseReportMessage, Proto summarizing the current test case
+        bt_client: BigtableClient, client to which data will be posted
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_WEB
@@ -65,6 +66,14 @@ class WebFeature(feature_utils.Feature):
             user_params=user_params)
         if not self.enabled:
             return
+
+        # Initialize the bigtable client
+        post_cmd = getattr(self, keys.ConfigKeys.IKEY_DASHBOARD_POST_COMMAND)
+        service_json_path = str(getattr(self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH))
+        self.bt_client = bigtable_rest_client.BigtableClient(post_cmd, service_json_path)
+        if not self.bt_client.Initialize():
+            self.enabled = False
+
         self.report_msg = ReportMsg.TestReportMessage()
         self.report_msg.test = str(
             getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME))
@@ -389,29 +398,29 @@ class WebFeature(feature_utils.Feature):
                      getpass.getuser())
 
         if len(self.report_msg.test_case) > 0:
-            post_cmd = getattr(self, keys.ConfigKeys.IKEY_DASHBOARD_POST_COMMAND)
             table_name = "result_%s" % str(self.report_msg.test)
-            service_json_path = str(getattr(self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH))
 
             # Create test table with required column families or fail silently.
-            bt_client = bigtable_rest_client.BigtableClient(table_name, post_cmd, service_json_path)
-            bt_client.CreateTable(families=["test"])
+            self.bt_client.CreateTable(
+                table_name=table_name,
+                families=["test"])
 
             # Post new data to the test table
-            bt_client.PutRow(
+            self.bt_client.PutRow(
+                table_name=table_name,
                 row_key=str(self.report_msg.start_timestamp),
                 family="test",
                 qualifier="data",
                 value=self.report_msg.SerializeToString())
 
             # Create status table with required column families or fail silently.
-            bt_client = bigtable_rest_client.BigtableClient(
-                _STATUS_TABLE, post_cmd, service_json_path)
-            bt_client.CreateTable(
+            self.bt_client.CreateTable(
+                table_name=_STATUS_TABLE,
                 families=["status", "email_to_test", "test_to_email"])
 
             # Post upload timestamp to the status table
-            bt_client.PutRow(
+            self.bt_client.PutRow(
+                table_name=_STATUS_TABLE,
                 row_key=table_name,
                 family="status",
                 qualifier="upload_timestamp",
