@@ -19,6 +19,10 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
           cout << "  - service name: " << service_name << endl;
         }
         hw_binder_proxy_ = ::android::hardware::nfc::V1_0::INfc::getService(service_name, get_stub);
+        if (hw_binder_proxy_ == nullptr) {
+            cerr << "getService() returned a null pointer." << endl;
+            return false;
+        }
         cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }
