@@ -26,7 +26,6 @@ class BigtableClient(object):
     """Instance of the Dashboard Bigtable REST client.
 
     Attributes:
-        table_name: String, The name of the table.
         post_cmd: String, The command-line string to post data to the dashboard,
                   e.g. 'wget <url> --post-data '
         service_json_path: String, The path to the service account keyfile
@@ -35,11 +34,29 @@ class BigtableClient(object):
                     initialized.
     """
 
-    def __init__(self, table_name, post_cmd, service_json_path):
+    def __init__(self, post_cmd, service_json_path):
         self.post_cmd = post_cmd
-        self.table_name = table_name
         self.service_json_path = service_json_path
         self.auth_token = None
+
+    def Initialize(self):
+        """Initializes the client with an auth token and access token.
+
+        Returns:
+            True if the client is initialized successfully, False otherwise.
+        """
+        try:
+            self.auth_token = service_account.ServiceAccountCredentials.from_json_keyfile_name(
+                self.service_json_path, [_OPENID_SCOPE])
+            self.auth_token.get_access_token()
+        except IOError as e:
+            logging.error("Error reading service json keyfile: %s", e)
+            return False
+        except (ValueError, KeyError) as e:
+            logging.error("Invalid service json keyfile: %s", e)
+            return False
+        return True
+
 
     def _GetToken(self):
         """Gets an OAuth2 token using from a service account json keyfile.
@@ -51,19 +68,9 @@ class BigtableClient(object):
             String, an OAuth2 token using the service account credentials.
             None if authentication fails.
         """
-        if not self.auth_token:
-            try:
-                self.auth_token = service_account.ServiceAccountCredentials.from_json_keyfile_name(
-                    self.service_json_path, [_OPENID_SCOPE])
-            except IOError as e:
-                logging.error("Error reading service json keyfile: %s", e)
-                return None
-            except (ValueError, KeyError) as e:
-                logging.error("Invalid service json keyfile: %s", e)
-                return None
         return str(self.auth_token.get_access_token().access_token)
 
-    def PutRow(self, row_key, family, qualifier, value):
+    def PutRow(self, table_name, row_key, family, qualifier, value):
         """Puts a value into an HBase cell via REST.
 
         Puts a value in the cell specified by the row, family, and qualifier.
@@ -71,6 +78,7 @@ class BigtableClient(object):
         family in its schema.
 
         Args:
+            table_name: String, The name of the table.
             row_key: String, The name of the row in which to insert data
             family: String, The column family in which to insert data
             qualifier: String, The column qualifier in which to insert data
@@ -86,7 +94,7 @@ class BigtableClient(object):
         data = {
             "accessToken" : token,
             "verb" : "insertRow",
-            "tableName" : self.table_name,
+            "tableName" : table_name,
             "rowKey" : row_key,
             "family" : family,
             "qualifier" : qualifier,
@@ -104,13 +112,14 @@ class BigtableClient(object):
             return False
         return True
 
-    def CreateTable(self, families):
+    def CreateTable(self, table_name, families):
         """Creates a table with the provided column family names.
 
         Safe to call if the table already exists, it will just fail
         silently.
 
         Args:
+            table_name: String, The name of the table.
             families: list, The list of column family names with which to create
                       the table
         """
@@ -121,7 +130,7 @@ class BigtableClient(object):
         data = {
             "accessToken" : token,
             "verb": "createTable",
-            "tableName": self.table_name,
+            "tableName": table_name,
             "familyNames": families
         }
         p = subprocess.Popen(
