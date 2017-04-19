@@ -766,6 +766,12 @@ void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
   FQName fqname = GetFQName(message);
   out << kInstanceVariableName << " = " << fqname.cppName() << "::getService("
       << "service_name, get_stub);" << "\n";
+  out << "if (" << kInstanceVariableName << " == nullptr) {\n";
+  out.indent();
+  out << "cerr << \"getService() returned a null pointer.\" << endl;\n";
+  out << "return false;\n";
+  out.unindent();
+  out << "}\n";
   out << "cout << \"[agent:hal] " << kInstanceVariableName << " = \" << "
       << kInstanceVariableName << ".get() << endl;" << "\n";
   out << "initialized = true;" << "\n";
