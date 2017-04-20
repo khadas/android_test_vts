@@ -19,6 +19,7 @@
 
 #include <android-base/macros.h>
 #include <test/vts/proto/VtsProfilingMessage.pb.h>
+#include <test/vts/proto/VtsReportMessage.pb.h>
 
 namespace android {
 namespace vts {
@@ -39,6 +40,9 @@ class VtsTraceProcessor {
   // Parses all trace files under the the given trace directory and remove
   // duplicate trace file.
   void DedupTraces(const std::string& trace_dir);
+  // Selects a subset of trace files from a give trace set based on their
+  // corresponding coverage data that maximize the total coverage.
+  void SelectTraces(const std::string& coverage_file_dir);
 
  private:
   // Reads the trace file and parse each trace event into VtsProfilingRecord.
@@ -47,6 +51,17 @@ class VtsTraceProcessor {
   // Writes the given list of VtsProfilingRecord into an output file.
   bool WriteRecords(const std::string& output_file,
       const std::vector<VtsProfilingRecord>& records);
+  // Reads a test report file that contains the coverage data and parse it into
+  // TestReportMessage.
+  bool ParseCoverageData(const std::string& coverage_file,
+                         TestReportMessage* report_msg);
+  // Updates msg_to_be_updated by removing all the covered lines in ref_msg
+  // and recalculates the count of covered lines accordingly.
+  void UpdateCoverageData(const CoverageReportMessage& ref_msg,
+                          CoverageReportMessage* msg_to_be_updated);
+  // Helper method to calculate the total coverage line in the given report
+  // message.
+  long GetTotalCoverageLine(const TestReportMessage& msg);
 
   DISALLOW_COPY_AND_ASSIGN (VtsTraceProcessor);
 };
