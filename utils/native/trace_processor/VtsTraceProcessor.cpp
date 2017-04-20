@@ -23,6 +23,7 @@
 
 #include <google/protobuf/text_format.h>
 #include <test/vts/proto/ComponentSpecificationMessage.pb.h>
+#include <test/vts/proto/VtsReportMessage.pb.h>
 #include "VtsTraceProcessor.h"
 
 using namespace std;
@@ -75,7 +76,7 @@ bool VtsTraceProcessor::WriteRecords(const string& output_file,
   for (const auto& record : records) {
     string record_str;
     if (!TextFormat::PrintToString(record, &record_str)) {
-      cerr << "Can't print the message" << endl;
+      cerr << __func__ << ": Can't print the message" << endl;
       return false;
     }
     output << record_str << "\n";
@@ -87,7 +88,7 @@ bool VtsTraceProcessor::WriteRecords(const string& output_file,
 void VtsTraceProcessor::CleanupTraceForReplay(const string& trace_file) {
   VtsProfilingMessage profiling_msg;
   if (!ParseTrace(trace_file, false, false, &profiling_msg)) {
-    cerr << "Failed to parse trace file: " << trace_file << endl;
+    cerr << __func__ << ": Failed to parse trace file: " << trace_file << endl;
     return;
   }
   vector<VtsProfilingRecord> clean_records;
@@ -99,11 +100,13 @@ void VtsTraceProcessor::CleanupTraceForReplay(const string& trace_file) {
   }
   string tmp_file = trace_file + "_tmp";
   if (!WriteRecords(tmp_file, clean_records)) {
-    cerr << "Failed to write new trace file: " << tmp_file << endl;
+    cerr << __func__ << ": Failed to write new trace file: " << tmp_file
+         << endl;
     return;
   }
   if (rename(tmp_file.c_str(), trace_file.c_str())) {
-    cerr << "Failed to replace old trace file: " << trace_file << endl;
+    cerr << __func__ << ": Failed to replace old trace file: " << trace_file
+         << endl;
     return;
   }
 }
@@ -112,7 +115,7 @@ void VtsTraceProcessor::ProcessTraceForLatencyProfiling(
     const string& trace_file) {
   VtsProfilingMessage profiling_msg;
   if (!ParseTrace(trace_file, false, false, &profiling_msg)) {
-    cerr << ": Failed to parse trace file: " << trace_file << endl;
+    cerr << __func__ << ": Failed to parse trace file: " << trace_file << endl;
     return;
   }
   if (!profiling_msg.records_size()) return;
@@ -148,7 +151,11 @@ void VtsTraceProcessor::DedupTraces(const string& trace_dir) {
   while ((file = readdir(dir)) != NULL) {
     if (file->d_type == DT_REG) {
       total_trace_num++;
-      string trace_file = trace_dir + file->d_name;
+      string trace_file = trace_dir;
+      if (trace_dir.substr(trace_dir.size() - 1) != "/") {
+        trace_file += "/";
+      }
+      trace_file += file->d_name;
       VtsProfilingMessage profiling_msg;
       if (!ParseTrace(trace_file, true, true, &profiling_msg)) {
         cerr << "Failed to parse trace file: " << trace_file << endl;
@@ -184,6 +191,133 @@ void VtsTraceProcessor::DedupTraces(const string& trace_dir) {
   cout << "Num of duplicate trace deleted: " << duplicat_trace_num << endl;
   cout << "Duplicate percentage: "
        << float(duplicat_trace_num) / total_trace_num << endl;
+}
+
+bool VtsTraceProcessor::ParseCoverageData(const string& coverage_file,
+                                          TestReportMessage* report_msg) {
+  ifstream in(coverage_file, std::ios::in);
+  string msg_str((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+  if (!TextFormat::MergeFromString(msg_str, report_msg)) {
+    cerr << __func__ << ": Can't parse a given record: " << msg_str << endl;
+    return false;
+  }
+  return true;
+}
+
+void VtsTraceProcessor::UpdateCoverageData(
+    const CoverageReportMessage& ref_msg,
+    CoverageReportMessage* msg_to_be_updated) {
+  if (ref_msg.file_path() == msg_to_be_updated->file_path()) {
+    for (int line = 0; line < ref_msg.line_coverage_vector_size(); line++) {
+      if (line < msg_to_be_updated->line_coverage_vector_size()) {
+        if (ref_msg.line_coverage_vector(line) > 0 &&
+            msg_to_be_updated->line_coverage_vector(line) > 0) {
+          msg_to_be_updated->set_line_coverage_vector(line, 0);
+          msg_to_be_updated->set_covered_line_count(
+              msg_to_be_updated->covered_line_count() - 1);
+        }
+      } else {
+        cout << "Reached the end of line_coverage_vector." << endl;
+        break;
+      }
+    }
+    // sanity check.
+    if (msg_to_be_updated->covered_line_count() < 0) {
+      cerr << __func__ << ": covered_line_count should not be negative."
+           << endl;
+      exit(-1);
+    }
+  }
+}
+
+void VtsTraceProcessor::SelectTraces(const string& coverage_file_dir) {
+  DIR* dir = opendir(coverage_file_dir.c_str());
+  if (dir == 0) {
+    cerr << __func__ << ": " << coverage_file_dir << " does not exist." << endl;
+    return;
+  }
+  map<string, TestReportMessage> original_coverage_msgs;
+  vector<string> selected_coverage;
+
+  long max_coverage_line = 0;
+  string coverage_file_with_max_coverage_line = "";
+  struct dirent* file;
+  // Parse all the coverage files and store them into original_coverage_msgs.
+  while ((file = readdir(dir)) != NULL) {
+    if (file->d_type == DT_REG) {
+      string coverage_file = coverage_file_dir;
+      if (coverage_file_dir.substr(coverage_file_dir.size() - 1) != "/") {
+        coverage_file += "/";
+      }
+      coverage_file += file->d_name;
+      TestReportMessage coverage_msg;
+      if (!ParseCoverageData(coverage_file, &coverage_msg)) {
+        cerr << "Failed to parse coverage file: " << coverage_file << endl;
+        return;
+      }
+      original_coverage_msgs[coverage_file] = coverage_msg;
+      long total_coverage_line = GetTotalCoverageLine(coverage_msg);
+      cout << "Processed coverage file: " << coverage_file
+           << " with total_coverage_line: " << total_coverage_line << endl;
+      if (total_coverage_line > max_coverage_line) {
+        max_coverage_line = total_coverage_line;
+        coverage_file_with_max_coverage_line = coverage_file;
+      }
+    }
+  }
+  // Greedy algorithm that selects coverage files with the maximal code coverage
+  // delta at each iteration.
+  // TODO(zhuoyao): selects the coverage by taking trace file size into
+  // consideration. e.g. picks the one with maximum delta/size.
+  // Note: Not guaranteed to generate the optimal set.
+  // Example (*: covered, -: not_covered)
+  // line#\coverage_file   cov1 cov2 cov3
+  //          1              *   -    -
+  //          2              *   *    -
+  //          3              -   *    *
+  //          4              -   *    *
+  //          5              -   -    *
+  // This algorithm will select cov2, cov1, cov3 while optimal solution is:
+  // cov1, cov3.
+  while (max_coverage_line > 0) {
+    selected_coverage.push_back(coverage_file_with_max_coverage_line);
+    TestReportMessage selected_coverage_msg =
+        original_coverage_msgs[coverage_file_with_max_coverage_line];
+    // Remove the coverage file from original_coverage_msgs.
+    original_coverage_msgs.erase(coverage_file_with_max_coverage_line);
+
+    max_coverage_line = 0;
+    coverage_file_with_max_coverage_line = "";
+    // Update the remaining coverage file in original_coverage_msgs.
+    for (auto it = original_coverage_msgs.begin();
+         it != original_coverage_msgs.end(); ++it) {
+      for (const auto ref_coverage : selected_coverage_msg.coverage()) {
+        for (int i = 0; i < it->second.coverage_size(); i++) {
+          CoverageReportMessage* coverage_to_be_updated =
+              it->second.mutable_coverage(i);
+          UpdateCoverageData(ref_coverage, coverage_to_be_updated);
+        }
+      }
+      long total_coverage_line = GetTotalCoverageLine(it->second);
+      if (total_coverage_line > max_coverage_line) {
+        max_coverage_line = total_coverage_line;
+        coverage_file_with_max_coverage_line = it->first;
+      }
+    }
+  }
+  // TODO(zhuoyao): find out the trace files corresponding to the selected
+  // coverage file.
+  for (auto coverage : selected_coverage) {
+    cout << "select coverage file: " << coverage << endl;
+  }
+}
+
+long VtsTraceProcessor::GetTotalCoverageLine(const TestReportMessage& msg) {
+  long total_coverage_line = 0;
+  for (const auto coverage : msg.coverage()) {
+    total_coverage_line += coverage.covered_line_count();
+  }
+  return total_coverage_line;
 }
 
 }  // namespace vts

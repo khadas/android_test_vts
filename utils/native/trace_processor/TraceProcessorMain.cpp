@@ -18,6 +18,8 @@
 //   To cleanup trace, <binary> --cleanup <trace file>
 //   To profile trace, <binary> --profiling <trace file>
 //   To dedup traces, <binary> --dedup <trace file directory>
+//   To select traces based on coverage data,
+//       <binary> --trace_selection <covreage file directory>
 // Cleanup trace is used to generate trace for replay test, it will replace the
 // old trace file with a new one of the same format (VtsProfilingRecord).
 //
@@ -31,6 +33,10 @@
 // A trace is considered duplicated if there exists a trace that contains the
 // same API call sequence as the given trace and the input parameters for each
 // API call are all the same.
+//
+// Select trace is used to select a subset of trace files from a give trace set
+// based on their corresponding coverage data, the goal is to pick up the
+// minimal num of trace files that to maximize the total coverage.
 int main(int argc, char* argv[]) {
   if (argc == 3) {
     android::vts::VtsTraceProcessor trace_processor;
@@ -40,6 +46,8 @@ int main(int argc, char* argv[]) {
       trace_processor.ProcessTraceForLatencyProfiling(argv[2]);
     } else if (!strcmp(argv[1], "--dedup")) {
       trace_processor.DedupTraces(argv[2]);
+    } else if (!strcmp(argv[1], "--trace_selection")) {
+      trace_processor.SelectTraces(argv[2]);
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
