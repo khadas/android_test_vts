@@ -68,6 +68,8 @@ class BaseTestClass(object):
         web: WebFeature, object storing web feature util for test run
         coverage: CoverageFeature, object storing coverage feature util for test run
         profiling: ProfilingFeature, object storing profiling feature util for test run
+        _skip_all_testcases: A boolean, can be set by a subclass in
+                             setUpClass() to skip all test cases.
     """
 
     TAG = None
@@ -108,6 +110,7 @@ class BaseTestClass(object):
             self.user_params, web=self.web)
         self.log_uploading = log_uploading_utils.LogUploadingFeature(
             self.user_params, web=self.web)
+        self._skip_all_testcases = False
 
     def __enter__(self):
         return self
@@ -443,19 +446,24 @@ class BaseTestClass(object):
         if include filter is empty, only tests not in exclude filter will be
         executed.
 
-        The second layer of filter is checking abi bitness:
+        The second layer of filter is checking _skip_all_testcases flag:
+        the subclass may set _skip_all_testcases to True in its implementation
+        of setUpClass. If the flag is set, this method raises signals.TestSkip.
+
+        The third layer of filter is checking abi bitness:
         if a test has a suffix indicating the intended architecture bitness,
         and the current abi bitness information is available, non matching tests
         will be skipped. By our convention, this function will look for bitness in suffix
         formated as "32bit", "32Bit", "32BIT", or 64 bit equivalents.
 
-        This method assumes  const.SUFFIX_32BIT and const.SUFFIX_64BIT are in lower cases.
+        This method assumes const.SUFFIX_32BIT and const.SUFFIX_64BIT are in lower cases.
 
         Args:
             test_name: string, name of a test
 
         Raises:
             signals.TestSilent if a test should not be executed
+            signals.TestSkip if a test should be logged but not be executed
         """
         if (hasattr(self, keys.ConfigKeys.KEY_INCLUDE_FILTER) and
                 getattr(self, keys.ConfigKeys.KEY_INCLUDE_FILTER)):
@@ -470,6 +478,9 @@ class BaseTestClass(object):
             logging.info("Test case '%s' in exclude filter." % test_name)
             raise signals.TestSilent("Test case '%s' in exclude filter." %
                                      test_name)
+
+        if self._skip_all_testcases:
+            raise signals.TestSkip("All test cases skipped.")
 
         if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
             bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
@@ -721,7 +732,6 @@ class BaseTestClass(object):
         self.results.requested = [test_name for test_name in test_names
                                   if test_name.startswith(STR_TEST)]
         tests = self._get_test_funcs(test_names)
-
         # Setup for the class.
         try:
             if self._setUpClass() is False:
