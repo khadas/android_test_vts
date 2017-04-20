@@ -20,10 +20,9 @@ from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.testcases.template.gtest_binary_test import gtest_binary_test
-from vts.utils.python.common import vintf_utils
 from vts.utils.python.controllers import android_device
 from vts.utils.python.cpu import cpu_frequency_scaling
-from xml.etree import ElementTree
+from vts.utils.python.precondition import precondition_utils
 
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
@@ -32,119 +31,34 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     Attributes:
         DEVICE_TEST_DIR: string, temp location for storing binary
         TAG_PATH_SEPARATOR: string, separator used to separate tag and path
-        shell: ShellMirrorObject, shell mirror
         tags: all the tags that appeared in binary list
         testcases: list of GtestTestCase objects, list of test cases to run
         _cpu_freq: CpuFrequencyScalingController instance of a target device.
         _dut: AndroidDevice, the device under test as config
-        _skip_all_testcases: boolean - to skip all test cases. set when a target
-                             device does not have a required HIDL service.
     '''
 
     def setUpClass(self):
         """Checks precondition."""
-        self._dut = self.registerController(android_device)[0]
-        self._dut.shell.InvokeTerminal("hal_hidl_gtest")
-        shell = self._dut.shell.hal_hidl_gtest
+        if not hasattr(self, "_dut"):
+            self._dut = self.registerController(android_device)[0]
 
-        opt_params = [
-            keys.ConfigKeys.IKEY_ABI_BITNESS,
-            keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
-            keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
-            keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
-            keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
-            keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING
-        ]
+        opt_params = [keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING]
         self.getUserParams(opt_param_names=opt_params)
 
         self._skip_if_thermal_throttling = self.getUserParam(
                 keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
                 default_value=False)
 
-        self._cpu_freq = None
-        self._skip_all_testcases = False
-
-        hwbinder_service_name = str(
-            getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE,
-                    ""))
-        if hwbinder_service_name:
-            if not hwbinder_service_name.startswith("android.hardware."):
-                logging.error("The given hwbinder service name %s is invalid.",
-                              hwbinder_service_name)
-            else:
-                cmd_results = shell.Execute("ps -A")
-                hwbinder_service_name += "@"
-                if (any(cmd_results[const.EXIT_CODE]) or hwbinder_service_name
-                        not in cmd_results[const.STDOUT][0]):
-                    logging.warn("The required hwbinder service %s not found.",
-                                 hwbinder_service_name)
-                    self._skip_all_testcases = True
+        if not precondition_utils.CanRunHidlHalTest(self, self._dut):
+            self._skip_all_testcases = True
 
         if not self._skip_all_testcases:
-            feature = str(
-                getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
-            if feature:
-                if not feature.startswith("android.hardware."):
-                    logging.error(
-                        "The given feature name %s is invalid for HIDL HAL.",
-                        feature)
-                else:
-                    cmd_results = shell.Execute("pm list features")
-                    if (any(cmd_results[const.EXIT_CODE]) or
-                            feature not in cmd_results[const.STDOUT][0]):
-                        logging.warn("The required feature %s not found.",
-                                     feature)
-                        self._skip_all_testcases = True
-
-        if not self._skip_all_testcases:
-            file_path_prefix = str(
-                getattr(self, keys.ConfigKeys.
-                        IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
-            if file_path_prefix:
-                cmd_results = shell.Execute("ls %s*" % file_path_prefix)
-                if any(cmd_results[const.EXIT_CODE]):
-                    logging.warn("The required file (prefix: %s) not found.",
-                                 file_path_prefix)
-                    self._skip_all_testcases = True
-
-        if not self._skip_all_testcases:
-            feature = str(
-                getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
-            if feature:
-                vintf_xml = self._dut.getVintfXml()
-                if vintf_xml:
-                    hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
-                        vintf_xml)
-                    if not hwbinder_hals or not passthrough_hals:
-                        logging.error("can't check precondition due to a "
-                                      "lshal output format error.")
-                    elif (feature not in hwbinder_hals and
-                          feature not in passthrough_hals):
-                        logging.warn(
-                            "The required feature %s not found by lshal.",
-                            feature)
-                        self._skip_all_testcases = True
-                    elif (feature not in hwbinder_hals and
-                          feature in passthrough_hals):
-                        if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
-                            bitness = getattr(self,
-                                              keys.ConfigKeys.IKEY_ABI_BITNESS)
-                            if (bitness not in
-                                passthrough_hals[feature].hal_archs):
-                                logging.warn(
-                                    "The required feature %s found as a "
-                                    "passthrough hal but the client bitness %s "
-                                    "not supported",
-                                    feature, self.bitness)
-                                self._skip_all_testcases = True
-                    else:
-                        logging.info(
-                            "The feature %s found in lshal-emitted vintf xml",
-                            feature)
-        if not self._skip_all_testcases:
+            logging.info("Disable CPU frequency scaling")
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
             self._cpu_freq.DisableCpuScaling()
+        else:
+            self._cpu_freq = None
 
         super(HidlHalGTest, self).setUpClass()
 
@@ -185,25 +99,22 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     def setUp(self):
         """Skips the test case if thermal throttling lasts for 30 seconds."""
         super(HidlHalGTest, self).setUp()
-        if not self._skip_all_testcases:
-            if self._cpu_freq and self._skip_if_thermal_throttling:
-                self._cpu_freq.SkipIfThermalThrottling(retry_delay_secs=30)
-        else:
-            logging.info("Skip a test case.")
+
+        if self._skip_if_thermal_throttling:
+            self._cpu_freq.SkipIfThermalThrottling(retry_delay_secs=30)
 
     def tearDown(self):
         """Skips the test case if there is thermal throttling."""
-        if not self._skip_all_testcases:
-            if self._cpu_freq and self._skip_if_thermal_throttling:
-                self._cpu_freq.SkipIfThermalThrottling()
+        if self._skip_if_thermal_throttling:
+            self._cpu_freq.SkipIfThermalThrottling()
 
         super(HidlHalGTest, self).tearDown()
 
     def tearDownClass(self):
         """Turns off CPU frequency scaling."""
         if not self._skip_all_testcases:
-            if self._cpu_freq:
-                self._cpu_freq.EnableCpuScaling()
+            logging.info("Enable CPU frequency scaling")
+            self._cpu_freq.EnableCpuScaling()
 
         super(HidlHalGTest, self).tearDownClass()
 
