@@ -42,6 +42,7 @@ class ConfigKeys(object):
     IKEY_BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path"
     IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
     IKEY_BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers"
+    IKEY_NATIVE_SERVER_PROCESS_NAME = "native_server_process_name"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"

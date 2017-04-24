@@ -100,6 +100,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
+    static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
     static final String PRECONDITION_FEATURE = "precondition_feature";
@@ -282,6 +283,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "binary-test-stop-native-servers",
             description = "Set to stop all properly configured native servers during the testing.")
     private boolean mBinaryTestStopNativeServers = false;
+
+    @Option(name = "native-server-process-name",
+            description = "Name of a native server process. The runner checks to make sure "
+                    + "each specified native server process is not running after the framework stop.")
+    private Collection<String> mNativeServerProcessName = new ArrayList<>();
 
     @Option(name = "binary-test-type", description = "Binary test type. Only specify this when "
             + "running an extended binary test without a python test file. Available options: gtest")
@@ -707,6 +713,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mBinaryTestStopNativeServers) {
             jsonObject.put(BINARY_TEST_STOP_NATIVE_SERVERS, mBinaryTestStopNativeServers);
             CLog.i("Added %s to the Json object", BINARY_TEST_STOP_NATIVE_SERVERS);
+        }
+
+        if (!mNativeServerProcessName.isEmpty()) {
+            jsonObject.put(NATIVE_SERVER_PROCESS_NAME, new JSONArray(mNativeServerProcessName));
+            CLog.i("Added %s to the Json object", NATIVE_SERVER_PROCESS_NAME);
         }
 
         if (!mHalHidlReplayTestTracePaths.isEmpty()) {
