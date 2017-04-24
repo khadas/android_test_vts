@@ -16,10 +16,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
-include $(call all-subdir-makefiles)
-
 include $(CLEAR_VARS)
-
 LOCAL_MODULE := BionicUnitTests
 VTS_CONFIG_SRC_DIR := testcases/library/bionic_unit_tests
 include test/vts/tools/build/Android.host_config.mk
