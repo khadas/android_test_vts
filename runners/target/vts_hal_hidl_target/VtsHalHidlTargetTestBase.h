@@ -70,5 +70,4 @@ class VtsHalHidlTargetTestBase : public ::testing::Test {
 
 }  // namespace testing
 
-
 #endif  // __VTS_HAL_HIDL_TARGET_TEST_BASE_H
