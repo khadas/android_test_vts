@@ -59,6 +59,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         BUILD_KEYS.put("cts:build_version_base_os", "ro.build.version.base_os");
         BUILD_KEYS.put("cts:build_version_security_patch", "ro.build.version.security_patch");
         BUILD_KEYS.put("cts:build_reference_fingerprint", "ro.build.reference.fingerprint");
+        BUILD_KEYS.put("cts:build_vendor_fingerprint", "ro.vendor.build.fingerprint");
     }
 
     @Override
