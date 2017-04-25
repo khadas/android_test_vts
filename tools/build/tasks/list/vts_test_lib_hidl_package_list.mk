@@ -53,6 +53,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.nfc@1.0-vts.driver \
   android.hardware.power@1.0-vts.driver \
   android.hardware.radio@1.0-vts.driver \
+  android.hardware.radio.deprecated@1.0-vts.driver \
   android.hardware.renderscript@1.0-vts.driver \
   android.hardware.sensors@1.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
@@ -99,6 +100,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.nfc@1.0-vts.profiler \
   android.hardware.power@1.0-vts.profiler \
   android.hardware.radio@1.0-vts.profiler \
+  android.hardware.radio.deprecated@1.0-vts.profiler \
   android.hardware.renderscript@1.0-vts.profiler \
   android.hardware.sensors@1.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
