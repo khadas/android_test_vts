@@ -48,9 +48,10 @@ namespace vts {
 }
 
 sp<::android::hardware::nfc::V1_0::INfcClientCallback> VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(const string& callback_socket_name) {
-    sp<::android::hardware::nfc::V1_0::INfcClientCallback> result;
-    result = new Vts_android_hardware_nfc_V1_0_INfcClientCallback(callback_socket_name);
-    return result;
+  static sp<::android::hardware::nfc::V1_0::INfcClientCallback> result;
+  result = new Vts_android_hardware_nfc_V1_0_INfcClientCallback(
+      callback_socket_name);
+  return result;
 }
 
 }  // namespace vts
