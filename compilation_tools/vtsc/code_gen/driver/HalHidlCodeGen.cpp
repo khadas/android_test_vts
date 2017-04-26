@@ -129,7 +129,7 @@ void HalHidlCodeGen::GenerateCppBodyCallbackFunction(Formatter& out,
         << component_name_token << "(const string& callback_socket_name)";
     out << " {" << "\n";
     out.indent();
-    out << "sp<" << component_fq_name.cppName() << "> result;\n";
+    out << "static sp<" << component_fq_name.cppName() << "> result;\n";
     out << "result = new " << component_name_token << "(callback_socket_name);"
         << "\n";
     out << "return result;\n";
