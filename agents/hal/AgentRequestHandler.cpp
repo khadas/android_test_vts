@@ -293,7 +293,7 @@ bool AgentRequestHandler::LaunchDriverService(
         "Failed to fork a child process to start a driver.");
   }
   response_msg.set_response_code(FAIL);
-  cerr << "can't fork a child process to run the fuzzer." << endl;
+  cerr << "can't fork a child process to run the vts_hal_driver." << endl;
   return VtsSocketSendMessage(response_msg);
 }
 
