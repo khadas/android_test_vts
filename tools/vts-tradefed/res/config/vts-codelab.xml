@@ -20,5 +20,6 @@
 
   <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
   <option name="compatibility:include-filter" value="VtsCodelabHelloWorldStagingTest" />
+  <option name="compatibility:include-filter" value="VtsCodelabTargetBinary" />
 
 </configuration>
