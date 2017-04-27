@@ -128,6 +128,10 @@ vts_test_lib_hidl_packages += \
   VtsHalKeymasterV3_0TargetTest \
   VtsHalLightV2_0TargetTest \
   VtsHalMediaOmxV1_0TargetComponentTest \
+  VtsHalMediaOmxV1_0TargetAudioEncTest \
+  VtsHalMediaOmxV1_0TargetAudioDecTest \
+  VtsHalMediaOmxV1_0TargetVideoEncTest \
+  VtsHalMediaOmxV1_0TargetVideoDecTest \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
