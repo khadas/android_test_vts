@@ -32,6 +32,7 @@
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4Target" />
   <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
