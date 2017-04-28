@@ -20,6 +20,7 @@
 //   To dedup traces, <binary> --dedup <trace file directory>
 //   To select traces based on coverage data,
 //       <binary> --trace_selection <covreage file directory>
+//   To parse trace, <binary> --parse <trace file>
 // Cleanup trace is used to generate trace for replay test, it will replace the
 // old trace file with a new one of the same format (VtsProfilingRecord).
 //
@@ -37,6 +38,9 @@
 // Select trace is used to select a subset of trace files from a give trace set
 // based on their corresponding coverage data, the goal is to pick up the
 // minimal num of trace files that to maximize the total coverage.
+//
+// Parse trace is used to parse a binary trace file and print the text format of
+// the proto (used of for debug).
 int main(int argc, char* argv[]) {
   if (argc == 3) {
     android::vts::VtsTraceProcessor trace_processor;
@@ -48,6 +52,8 @@ int main(int argc, char* argv[]) {
       trace_processor.DedupTraces(argv[2]);
     } else if (!strcmp(argv[1], "--trace_selection")) {
       trace_processor.SelectTraces(argv[2]);
+    } else if (!strcmp(argv[1], "--parse")) {
+      trace_processor.ParseTrace(argv[2]);
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
