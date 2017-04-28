@@ -23,6 +23,11 @@
   <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalRadioV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalRenderscriptV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiNanV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
 
   <!-- For HIDL HAL Target-Side Test: Internal Only -->
   <option name="compatibility:include-filter" value="VtsHalAudioV2_0Target" />
@@ -34,12 +39,18 @@
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGnssV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalSensorsV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalThermalV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
 
 </configuration>
