@@ -24,6 +24,7 @@ cc_library_shared {
         "libbase",
         "libcutils",
         "libhidlbase",
+        "libvts_common",
         "libvts_multidevice_proto",
         "libprotobuf-cpp-full",
     ],

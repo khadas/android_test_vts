@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "VtsTraceProcessor.h"
 
 #include <dirent.h>
+#include <fcntl.h>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 #include <test/vts/proto/ComponentSpecificationMessage.pb.h>
 #include <test/vts/proto/VtsReportMessage.pb.h>
-#include "VtsTraceProcessor.h"
+
+#include "utils/VtsProfilingUtil.h"
 
 using namespace std;
 using google::protobuf::TextFormat;
@@ -35,54 +39,60 @@ namespace vts {
 bool VtsTraceProcessor::ParseTrace(const string& trace_file,
     bool ignore_timestamp, bool entry_only,
     VtsProfilingMessage* profiling_msg) {
-  ifstream in(trace_file, std::ios::in);
-  bool new_record = true;
-  string record_str, line;
-
-  while (getline(in, line)) {
-    // Assume records are separated by '\n'.
-    if (line.empty()) {
-      new_record = false;
+  int fd =
+      open(trace_file.c_str(), O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  if (fd < 0) {
+    cerr << "Can not open trace file: " << trace_file
+         << "error: " << std::strerror(errno);
+    return false;
+  }
+  google::protobuf::io::FileInputStream input(fd);
+  VtsProfilingRecord record;
+  while (readOneDelimited(&record, &input)) {
+    if (ignore_timestamp) {
+      record.clear_timestamp();
     }
-    if (new_record) {
-      record_str += line + "\n";
-    } else {
-      VtsProfilingRecord record;
-      if (!TextFormat::MergeFromString(record_str, &record)) {
-        cerr << "Can't parse a given record: " << record_str << endl;
-        return false;
-      }
-      if (ignore_timestamp) {
-        record.clear_timestamp();
-      }
-      if (entry_only) {
-        if (record.event() == InstrumentationEventType::SERVER_API_ENTRY
-            || record.event() == InstrumentationEventType::CLIENT_API_ENTRY
-            || record.event() == InstrumentationEventType::PASSTHROUGH_ENTRY)
-          *profiling_msg->add_records() = record;
-      } else {
+    if (entry_only) {
+      if (record.event() == InstrumentationEventType::SERVER_API_ENTRY ||
+          record.event() == InstrumentationEventType::CLIENT_API_ENTRY ||
+          record.event() == InstrumentationEventType::PASSTHROUGH_ENTRY)
         *profiling_msg->add_records() = record;
-      }
-      new_record = true;
-      record_str.clear();
+    } else {
+      *profiling_msg->add_records() = record;
     }
+    record.Clear();
   }
   return true;
 }
 
 bool VtsTraceProcessor::WriteRecords(const string& output_file,
     const std::vector<VtsProfilingRecord>& records) {
-  ofstream output = std::ofstream(output_file, std::fstream::out);
-  for (const auto& record : records) {
-    string record_str;
-    if (!TextFormat::PrintToString(record, &record_str)) {
-      cerr << __func__ << ": Can't print the message" << endl;
-      return false;
-    }
-    output << record_str << "\n";
+  int fd = open(output_file.c_str(), O_WRONLY,
+                S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  if (fd < 0) {
+    cerr << "Can not open trace file: " << output_file
+         << "error: " << std::strerror(errno);
+    return false;
   }
-  output.close();
+  google::protobuf::io::FileOutputStream output(fd);
+  for (const auto& record : records) {
+    if (!writeOneDelimited(record, &output)) {
+      cerr << "Failed to write record";
+    }
+  }
+  output.Close();
   return true;
+}
+
+void VtsTraceProcessor::ParseTrace(const string& trace_file) {
+  VtsProfilingMessage profiling_msg;
+  if (!ParseTrace(trace_file, false, false, &profiling_msg)) {
+    cerr << __func__ << ": Failed to parse trace file: " << trace_file << endl;
+    return;
+  }
+  for (auto record : profiling_msg.records()) {
+    cout << record.DebugString();
+  }
 }
 
 void VtsTraceProcessor::CleanupTraceForReplay(const string& trace_file) {
