@@ -16,6 +16,7 @@
 #include "VtsProfilingInterface.h"
 
 #include <cutils/properties.h>
+#include <fcntl.h>
 #include <fstream>
 #include <string>
 
@@ -24,6 +25,7 @@
 
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include "test/vts/proto/VtsProfilingMessage.pb.h"
+#include "utils/VtsProfilingUtil.h"
 
 using namespace std;
 
@@ -42,7 +44,7 @@ VtsProfilingInterface::VtsProfilingInterface(const string& trace_file_path)
 
 VtsProfilingInterface::~VtsProfilingInterface() {
   if (trace_output_) {
-    trace_output_.close();
+    trace_output_->Close();
   }
 }
 
@@ -74,13 +76,14 @@ void VtsProfilingInterface::Init() {
       + to_string(NanoTime()) + ".vts.trace";
 
   LOG(INFO) << "Creating new profiler instance with file path: " << file_path;
-  trace_output_ = std::ofstream(file_path, std::fstream::out);
-  if (!trace_output_) {
-    LOG(ERROR) << "Can not open trace file: " << file_path << ": "
-               << std::strerror(errno);
-    initialized_ = false;
+  int fd = open(file_path.c_str(), O_RDWR | O_CREAT | O_EXCL,
+                S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  if (fd < 0) {
+    LOG(ERROR) << "Can not open trace file: " << file_path
+               << " error: " << std::strerror(errno);
     return;
   }
+  trace_output_.reset(new google::protobuf::io::FileOutputStream(fd));
   initialized_ = true;
 }
 
@@ -92,8 +95,6 @@ bool VtsProfilingInterface::AddTraceEvent(
     LOG(ERROR) << "Profiler not initialized. ";
     return false;
   }
-  if (stop_trace_recording_)
-    return true;
 
   // Build the VTSProfilingRecord and print it to string.
   VtsProfilingRecord record;
@@ -103,25 +104,14 @@ bool VtsProfilingInterface::AddTraceEvent(
   record.set_version(stof(version));
   record.set_interface(interface);
   *record.mutable_func_msg() = message;
-  string record_str;
-  if (!google::protobuf::TextFormat::PrintToString(record, &record_str)) {
-    LOG(ERROR) << "Can't print the message";
-    return false;
-  }
 
   // Write the record string to trace file.
   mutex_.lock();
-  if ((static_cast<std::string::size_type>(trace_output_.tellp())
-       + record_str.size()) > kTraceFileSizeLimit
-      && (static_cast<std::string::size_type>(trace_output_.tellp())
-          + record_str.size()) >= record_str.size()) {
-    LOG(WARNING) << "Trace file too big, stop recording the trace";
-    trace_output_.close();
-    stop_trace_recording_ = true;
+  if (!writeOneDelimited(record, trace_output_.get())) {
+    LOG(ERROR) << "Failed to write record";
   }
-  if (!stop_trace_recording_) {
-    trace_output_ << record_str << "\n";
-    trace_output_.flush();
+  if (!trace_output_->Flush()) {
+    LOG(ERROR) << "Failed to flush: " << std::strerror(errno);
   }
   mutex_.unlock();
 

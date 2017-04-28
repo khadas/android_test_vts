@@ -43,6 +43,8 @@ class VtsTraceProcessor {
   // Selects a subset of trace files from a give trace set based on their
   // corresponding coverage data that maximize the total coverage.
   void SelectTraces(const std::string& coverage_file_dir);
+  // Reads the trace file, parse each trace event and print the proto string.
+  void ParseTrace(const std::string& trace_file);
 
  private:
   // Reads the trace file and parse each trace event into VtsProfilingRecord.
