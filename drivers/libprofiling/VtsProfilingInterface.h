@@ -18,9 +18,10 @@
 #define __VTS_DRIVER_PROFILING_INTERFACE_H_
 
 #include <android-base/macros.h>
-#include <fstream>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <hidl/HidlSupport.h>
 #include <utils/Condition.h>
+#include <fstream>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
@@ -56,12 +57,10 @@ class VtsProfilingInterface {
 
  private:
   string trace_file_path_;  // Path of the trace file.
-  std::ofstream trace_output_;  // Writer to the trace file.
+  // Writer to the trace file.
+  std::unique_ptr<google::protobuf::io::FileOutputStream> trace_output_;
   Mutex mutex_;  // Mutex used to synchronize the writing to the trace file.
   bool initialized_;
-  bool stop_trace_recording_ = false;
-  const size_t kTraceFileSizeLimit =
-      50 * 1024 * 1024; /* limit trace file to 50MB */
 
   DISALLOW_COPY_AND_ASSIGN (VtsProfilingInterface);
 };

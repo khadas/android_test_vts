@@ -4,6 +4,7 @@ vts_test_host_lib_packages := \
     libcutils \
     liblog \
     libprotobuf-cpp-full \
+    libvts_common \
     libvts_multidevice_proto \
     libvts_traceprocessor \
     libz-host \
