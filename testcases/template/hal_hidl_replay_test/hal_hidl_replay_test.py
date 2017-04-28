@@ -25,6 +25,7 @@ from vts.testcases.template.hal_hidl_replay_test import hal_hidl_replay_test_cas
 from vts.utils.python.common import vintf_utils
 from vts.utils.python.controllers import android_device
 from vts.utils.python.os import path_utils
+from vts.utils.python.precondition import precondition_utils
 
 
 class HalHidlReplayTest(binary_test.BinaryTest):
@@ -39,7 +40,16 @@ class HalHidlReplayTest(binary_test.BinaryTest):
 
     def setUpClass(self):
         """Prepares class and initializes a target device."""
+        if not hasattr(self, "_dut"):
+            self._dut = self.registerController(android_device)[0]
+        if not precondition_utils.CanRunHidlHalTest(self, self._dut):
+            self._skip_all_testcases = True
+
         super(HalHidlReplayTest, self).setUpClass()
+
+        if self._skip_all_testcases:
+            return
+
         # TODO(zhuoyao): consider to push trace just before each test case.
         for trace_path in self.trace_paths:
             trace_path = str(trace_path)
@@ -102,15 +112,21 @@ class HalHidlReplayTest(binary_test.BinaryTest):
             self.DEVICE_TMP_DIR, self.abi_bitness,
             "%s@%s-vts.driver.so" % (target_package, target_version))
 
+        if not self._skip_all_testcases:
+            service_names = self.getServiceName()
+        else:
+            service_names = [""]
+
         test_suite = ''
         for trace_path in self.trace_paths:
             logging.info("trace_path: %s", trace_path)
             trace_file_name = str(os.path.basename(trace_path))
             trace_path = path_utils.JoinTargetPath(
                 self.DEVICE_TMP_DIR, "vts_replay_trace", trace_file_name)
-            service_names = self.getServiceName()
             for service_name in service_names:
-                test_name = "replay_test_" + trace_file_name + "_" + service_name
+                test_name = "replay_test_" + trace_file_name
+                if service_name:
+                    test_name += "_" + service_name
                 test_case = hal_hidl_replay_test_case.HalHidlReplayTestCase(
                     trace_path,
                     target_vts_driver_file_path,
@@ -124,13 +140,14 @@ class HalHidlReplayTest(binary_test.BinaryTest):
     def tearDownClass(self):
         """Performs clean-up tasks."""
         # Delete the pushed file.
-        for trace_path in self.trace_paths:
-            trace_file_name = str(os.path.basename(trace_path))
-            cmd_results = self.shell.Execute(
-                "rm -f %s" % path_utils.JoinTargetPath(
-                    self.DEVICE_TMP_DIR, "vts_replay_trace", trace_file_name))
-            if not cmd_results or any(cmd_results[const.EXIT_CODE]):
-                logging.warning("Failed to remove: %s", cmd_results)
+        if not self._skip_all_testcases:
+            for trace_path in self.trace_paths:
+                trace_file_name = str(os.path.basename(trace_path))
+                target_trace_path = path_utils.JoinTargetPath(
+                    self.DEVICE_TMP_DIR, "vts_replay_trace", trace_file_name)
+                cmd_results = self.shell.Execute("rm -f %s" % target_trace_path)
+                if not cmd_results or any(cmd_results[const.EXIT_CODE]):
+                    logging.warning("Failed to remove: %s", cmd_results)
 
         super(HalHidlReplayTest, self).tearDownClass()
 
