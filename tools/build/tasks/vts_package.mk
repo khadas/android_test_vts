@@ -27,6 +27,7 @@ include $(LOCAL_PATH)/list/vts_test_lib_hidl_package_list.mk
 include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
+include $(LOCAL_PATH)/list/vts_test_hidl_hal_hash_list.mk
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
 -include vendor/google_vts/tools/build/tasks/list/vts_apk_package_list_vendor.mk
@@ -108,6 +109,14 @@ $(foreach m,$(target_prebuilt_apk_modules),\
   $(if $(wildcard $(m)),\
     $(eval target_prebuilt_apk_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/prebuilt-apk/$(m))))
 
+target_hal_hash_modules := \
+    $(vts_test_hidl_hal_hash_list) \
+
+target_hal_hash_copy_pairs :=
+$(foreach m,$(target_hal_hash_modules),\
+  $(if $(wildcard $(m)),\
+    $(eval target_hal_hash_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/hal-hidl-hash/$(m))))
+
 
 # Packaging rule for host-side test native packages
 
@@ -178,6 +187,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
   $(call copy-many-files,$(target_prebuilt_apk_copy_pairs)) \
+  $(call copy-many-files,$(target_hal_hash_copy_pairs)) \
   $(call copy-many-files,$(host_additional_deps_copy_pairs)) \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
