@@ -88,20 +88,19 @@ class VtscTester(unittest.TestCase):
                          "%s.driver.cpp" % component_name)
         # Tests for conventional Hals.
         for package_path, component_name in zip(
-            ["camera/2.1", "bluetooth/1.0", "bluetooth/1.0", "wifi/1.0"],
-            ["CameraHalV2", "BluetoothHalV1",
-             "BluetoothHalV1bt_interface_t", "WifiHalV1"]):
-            self.RunTest(
-                "DRIVER",
-                "test/vts/specification/hal/conventional/%s/%s.vts" % (
-                    package_path, component_name),
-                "%s.driver.cpp" % component_name)
+            ["camera/2.1", "bluetooth/1.0", "bluetooth/1.0", "wifi/1.0"], [
+                "CameraHalV2", "BluetoothHalV1",
+                "BluetoothHalV1bt_interface_t", "WifiHalV1"
+            ]):
+            self.RunTest("DRIVER",
+                         "test/vts/specification/hal/conventional/%s/%s.vts" %
+                         (package_path,
+                          component_name), "%s.driver.cpp" % component_name)
         # Tests for shared libraries.
         for component_name in ["libcV1"]:
-            self.RunTest(
-                "DRIVER",
-                "test/vts/specification/lib/ndk/bionic/1.0/%s.vts" % component_name,
-                "%s.driver.cpp" % component_name)
+            self.RunTest("DRIVER",
+                         "test/vts/specification/lib/ndk/bionic/1.0/%s.vts" %
+                         component_name, "%s.driver.cpp" % component_name)
 
     def TestProfiler(self):
         """Run tests for PROFILER mode. """
@@ -231,7 +230,14 @@ class VtscTester(unittest.TestCase):
         if os.path.exists(self._output_dir):
             logging.info("rm -rf %s", self._output_dir)
             shutil.rmtree(self._output_dir)
-        logging.info("temp_dir %s not cleared", self._temp_dir)
+        if os.path.exists(self._temp_dir):
+            if os.path.exists(os.path.join(self._temp_dir, "android")):
+                shutil.rmtree(os.path.join(self._temp_dir, "android"))
+            filelist = [
+                f for f in os.listdir(self._temp_dir) if f.endswith(".vts")
+            ]
+            for f in filelist:
+                os.remove(os.path.join(self._temp_dir, f))
 
 
 if __name__ == "__main__":
