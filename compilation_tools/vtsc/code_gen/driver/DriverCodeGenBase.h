@@ -35,9 +35,8 @@ namespace vts {
 
 class DriverCodeGenBase : public CodeGenBase {
  public:
-  explicit DriverCodeGenBase(
-      const char* input_vts_file_path, const string& vts_name) :
-      CodeGenBase(input_vts_file_path, vts_name) {}
+  explicit DriverCodeGenBase(const char* input_vts_file_path)
+      : CodeGenBase(input_vts_file_path) {}
 
   // Generate both a C/C++ file and its header file.
   virtual void GenerateAll(Formatter& header_out, Formatter& source_out,
