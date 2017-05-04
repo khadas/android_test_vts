@@ -16,6 +16,7 @@
 
 import logging
 import os
+import time
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
@@ -70,6 +71,7 @@ class BinaryTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
             keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+            keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -180,15 +182,39 @@ class BinaryTest(base_test.BaseTestClass):
         self.include_filter = self.ExpandListItemTags(self.include_filter)
         self.exclude_filter = self.ExpandListItemTags(self.exclude_filter)
 
-        # Stop Android runtime to reduce interference.
+        stop_requested = False
+
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
+            # Stop Android runtime to reduce interference.
             self._dut.stop()
+            stop_requested = True
 
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
                    False):
             # Stops all (properly configured) native servers.
             results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
+            stop_requested = True
+
+        if stop_requested:
+            native_server_process_names = getattr(
+                self, keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME, [])
+            if native_server_process_names:
+                for native_server_process_name in native_server_process_names:
+                    while True:
+                        cmd_result = self.shell.Execute("ps -A")
+                        if cmd_result[const.EXIT_CODE][0] != 0:
+                            logging.error("ps command failed (exit code: %s",
+                                          cmd_result[const.EXIT_CODE][0])
+                            break
+                        if (native_server_process_name not in
+                            cmd_result[const.STDOUT][0]):
+                            logging.info("Process %s not running",
+                                         native_server_process_name)
+                            break
+                        logging.info("Checking process %s",
+                                     native_server_process_name)
+                        time.sleep(1)
 
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
