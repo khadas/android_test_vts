@@ -220,7 +220,7 @@ message FunctionSpecificationMessage {
 
 // To keep the value of a scalar variable.
 message ScalarDataValueMessage {
-  optional int32 bool_t = 1;
+  optional bool bool_t = 1;
 
   optional int32 int8_t = 11;
   optional uint32 uint8_t = 12;
