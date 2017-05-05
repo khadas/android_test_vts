@@ -33,6 +33,8 @@
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalHealthV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
