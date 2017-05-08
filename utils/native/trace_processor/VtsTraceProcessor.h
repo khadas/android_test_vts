@@ -93,6 +93,13 @@ class VtsTraceProcessor {
   // Helper method to extract the trace file name from the given coverage file
   // name.
   std::string GetTraceFileName(const std::string& coverage_file_name);
+  // Helper method to check whether the given event is an entry event.
+  bool isEntryEvent(const InstrumentationEventType& event);
+  // Helper method to check whether the given two records are paired records.
+  // Paired records means the two records are for the same hal interface, and
+  // have corresponding entry/exit events.
+  bool isPairedRecord(const VtsProfilingRecord& entry_record,
+                      const VtsProfilingRecord& exit_record);
 
   // Struct to store the coverage data.
   struct CoverageInfo {
