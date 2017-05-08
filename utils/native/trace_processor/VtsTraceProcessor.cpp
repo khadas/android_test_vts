@@ -54,10 +54,9 @@ bool VtsTraceProcessor::ParseBinaryTrace(const string& trace_file,
       record.clear_timestamp();
     }
     if (entry_only) {
-      if (record.event() == InstrumentationEventType::SERVER_API_ENTRY ||
-          record.event() == InstrumentationEventType::CLIENT_API_ENTRY ||
-          record.event() == InstrumentationEventType::PASSTHROUGH_ENTRY)
+      if (isEntryEvent(record.event())) {
         *profiling_msg->add_records() = record;
+      }
     } else {
       *profiling_msg->add_records() = record;
     }
@@ -255,12 +254,43 @@ void VtsTraceProcessor::ProcessTraceForLatencyProfiling(
     cout << "hidl_hal_mode:binder" << endl;
   }
 
-  for (int i = 0; i < profiling_msg.records_size() - 1; i += 2) {
-    string api = profiling_msg.records(i).func_msg().name();
-    int64_t start_timestamp = profiling_msg.records(i).timestamp();
-    int64_t end_timestamp = profiling_msg.records(i + 1).timestamp();
-    int64_t latency = end_timestamp - start_timestamp;
-    cout << api << ":" << latency << endl;
+  // stack to store all seen records.
+  vector<VtsProfilingRecord> seen_records;
+  // stack to store temp records that not processed.
+  vector<VtsProfilingRecord> pending_records;
+  for (auto record : profiling_msg.records()) {
+    if (isEntryEvent(record.event())) {
+      seen_records.emplace_back(record);
+    } else {
+      while (!seen_records.empty() &&
+             !isPairedRecord(seen_records.back(), record)) {
+        pending_records.emplace_back(seen_records.back());
+        seen_records.pop_back();
+      }
+      if (seen_records.empty()) {
+        cerr << "Could not found entry record for record: "
+             << record.DebugString() << endl;
+        continue;
+      } else {
+        // Found the paired entry record, calculate the latency.
+        VtsProfilingRecord entry_record = seen_records.back();
+        seen_records.pop_back();
+        string api = record.func_msg().name();
+        int64_t start_timestamp = entry_record.timestamp();
+        int64_t end_timestamp = record.timestamp();
+        int64_t latency = end_timestamp - start_timestamp;
+        // sanity check.
+        if (latency < 0) {
+          cerr << __func__ << ": got negative latency for " << api << endl;
+          exit(-1);
+        }
+        cout << api << ":" << latency << endl;
+        while (!pending_records.empty()) {
+          seen_records.emplace_back(pending_records.back());
+          pending_records.pop_back();
+        }
+      }
+    }
   }
 }
 
@@ -504,6 +534,47 @@ string VtsTraceProcessor::GetTraceFileName(const string& coverage_file_name) {
   std::size_t start = coverage_file_name.find("android.hardware");
   std::size_t end = coverage_file_name.find("vts.trace") + sizeof("vts.trace");
   return coverage_file_name.substr(start, end - start - 1);
+}
+
+bool VtsTraceProcessor::isEntryEvent(const InstrumentationEventType& event) {
+  if (event == InstrumentationEventType::SERVER_API_ENTRY ||
+      event == InstrumentationEventType::CLIENT_API_ENTRY ||
+      event == InstrumentationEventType::PASSTHROUGH_ENTRY) {
+    return true;
+  }
+  return false;
+}
+
+bool VtsTraceProcessor::isPairedRecord(const VtsProfilingRecord& entry_record,
+                                       const VtsProfilingRecord& exit_record) {
+  if (entry_record.package() != exit_record.package() ||
+      entry_record.version() != exit_record.version() ||
+      entry_record.interface() != exit_record.interface() ||
+      entry_record.func_msg().name() != exit_record.func_msg().name()) {
+    return false;
+  }
+  switch (entry_record.event()) {
+    case InstrumentationEventType::SERVER_API_ENTRY: {
+      if (exit_record.event() == InstrumentationEventType::SERVER_API_EXIT) {
+        return true;
+      }
+      break;
+    }
+    case InstrumentationEventType::CLIENT_API_ENTRY: {
+      if (exit_record.event() == InstrumentationEventType::CLIENT_API_EXIT)
+        return true;
+      break;
+    }
+    case InstrumentationEventType::PASSTHROUGH_ENTRY: {
+      if (exit_record.event() == InstrumentationEventType::PASSTHROUGH_EXIT)
+        return true;
+      break;
+    }
+    default:
+      cout << "Unsupported event: " << entry_record.event() << endl;
+      return false;
+  }
+  return false;
 }
 
 }  // namespace vts
