@@ -752,6 +752,9 @@ class BaseTestClass(object):
                     logging.info("Finished '%s'", test_name)
                 else:
                     self.execOneTest(test_name, test_func, None)
+            if self._skip_all_testcases and not self.results.executed:
+                self.results.skipClass(self.TAG,
+                    "All test cases skipped; unable to find any test case.")
             return self.results
         except signals.TestAbortClass:
             logging.info("Received TestAbortClass signal")
