@@ -32,6 +32,7 @@
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalRadioDeprecatedV1_0IfaceFuzzer" />
+  <option name="compatibility:include-filter" value="VtsHalRenderscriptV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0IfaceFuzzer" />
