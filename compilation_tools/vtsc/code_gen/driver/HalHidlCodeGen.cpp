@@ -454,7 +454,7 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     out.unindent();
     out << " private:" << "\n";
     out.indent();
-    out << "const string& callback_socket_name_;" << "\n";
+    out << "string callback_socket_name_;\n";
     out.unindent();
     out << "};" << "\n";
     out << "\n";
