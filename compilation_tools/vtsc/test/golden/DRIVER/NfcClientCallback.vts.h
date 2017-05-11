@@ -42,7 +42,7 @@ class Vts_android_hardware_nfc_V1_0_INfcClientCallback : public ::android::hardw
 
 
  private:
-    const string& callback_socket_name_;
+    string callback_socket_name_;
 };
 
 sp<::android::hardware::nfc::V1_0::INfcClientCallback> VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(const string& callback_socket_name);
