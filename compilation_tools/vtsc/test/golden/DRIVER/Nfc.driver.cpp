@@ -37,8 +37,8 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::Fuzz(
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetAttribute(
     FunctionSpecificationMessage* func_msg,
     void** result) {
-  cerr << "attribute not found" << endl;
-  return false;
+    cerr << "attribute not found" << endl;
+    return false;
 }
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
