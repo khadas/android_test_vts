@@ -112,13 +112,11 @@ public class DatastoreHelper {
     /**
      * Get all of the target product names.
      *
-     * @param testName the name of the test whose runs to query.
      * @return a list of all device product names.
      */
-    public static List<String> getAllProducts(String testName) {
+    public static List<String> getAllProducts() {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Query query = new Query(DeviceInfoEntity.KIND)
-                              .setAncestor(KeyFactory.createKey(TestEntity.KIND, testName))
                               .addProjection(new PropertyProjection(
                                       DeviceInfoEntity.PRODUCT, String.class))
                               .setDistinct(true);

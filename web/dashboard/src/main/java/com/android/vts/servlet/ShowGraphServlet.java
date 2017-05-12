@@ -33,7 +33,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PropertyProjection;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.gson.Gson;
@@ -126,11 +125,7 @@ public class ShowGraphServlet extends BaseServlet {
         List<String> buildInfos = new ArrayList<>();
         Query deviceQuery =
                 new Query(DeviceInfoEntity.KIND)
-                        .setAncestor(testRun.getKey())
-                        .addProjection(
-                                new PropertyProjection(DeviceInfoEntity.BUILD_ID, String.class))
-                        .addProjection(
-                                new PropertyProjection(DeviceInfoEntity.PRODUCT, String.class));
+                        .setAncestor(testRun.getKey());
         boolean isSelectedDevice = selectedDevice == null;
         for (Entity device : datastore.prepare(deviceQuery).asIterable()) {
             String product = (String) device.getProperty(DeviceInfoEntity.PRODUCT);
@@ -165,7 +160,7 @@ public class ShowGraphServlet extends BaseServlet {
         Long startTime = endTime - TimeUnit.DAYS.toMicros(1);
 
         // Set of device names
-        List<String> devices = DatastoreHelper.getAllProducts(testName);
+        List<String> devices = DatastoreHelper.getAllProducts();
         if (!devices.contains(selectedDevice))
             selectedDevice = null;
 
