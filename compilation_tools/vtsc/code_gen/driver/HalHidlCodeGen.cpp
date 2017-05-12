@@ -166,7 +166,6 @@ void HalHidlCodeGen::GenerateScalarTypeInC(Formatter& out, const string& type) {
   }
 }
 
-
 void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     Formatter& out, const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
@@ -338,10 +337,11 @@ void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
     out << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << "\n";
     out << "    FunctionSpecificationMessage* func_msg," << "\n";
     out << "    void** result) {" << "\n";
-
+    out.indent();
     // TOOD: impl
-    out << "  cerr << \"attribute not found\" << endl;" << "\n";
-    out << "  return false;" << "\n";
+    out << "cerr << \"attribute not found\" << endl;\n"
+        << "return false;\n";
+    out.unindent();
     out << "}" << "\n";
   }
 }
