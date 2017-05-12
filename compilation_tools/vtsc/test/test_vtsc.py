@@ -81,19 +81,24 @@ class VtscTester(unittest.TestCase):
         """Run tests for DRIVER mode. """
         logging.info("Running TestDriver test case.")
         # Tests for Hidl Hals.
-        self.GenerateVtsFile("android.hardware.nfc@1.0")
-        for component_name in ["Nfc", "types", "NfcClientCallback"]:
-            self.RunTest(
-                "DRIVER",
-                os.path.join(self._temp_dir, component_name + ".vts"),
-                "%s.vts.h" % component_name,
-                header_file_name="%s.vts.h" % component_name,
-                file_type="HEADER")
-            self.RunTest(
-                "DRIVER",
-                os.path.join(self._temp_dir, component_name + ".vts"),
-                "%s.driver.cpp" % component_name,
-                file_type="SOURCE")
+        for package_path, component_names in zip(
+            ["android.hardware.nfc@1.0",
+             "android.hardware.tests.bar@1.0"],
+            [["Nfc", "NfcClientCallback", "types"],
+             ["Bar"]]):
+            self.GenerateVtsFile(package_path)
+            for component_name in component_names:
+                self.RunTest(
+                    "DRIVER",
+                    os.path.join(self._temp_dir, component_name + ".vts"),
+                    "%s.vts.h" % component_name,
+                    header_file_name="%s.vts.h" % component_name,
+                    file_type="HEADER")
+                self.RunTest(
+                    "DRIVER",
+                    os.path.join(self._temp_dir, component_name + ".vts"),
+                    "%s.driver.cpp" % component_name,
+                    file_type="SOURCE")
         # Tests for conventional Hals.
         for package_path, component_name in zip(
             ["camera/2.1", "bluetooth/1.0", "bluetooth/1.0", "wifi/1.0"], [

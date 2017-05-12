@@ -356,6 +356,16 @@ void HalHidlCodeGen::GenerateClassConstructionFunction(Formatter& out,
     out << "HAL_HIDL)";
   }
   out << " {}" << "\n";
+  out << "\n";
+
+  FQName fqname = GetFQName(message);
+  out << "explicit " << fuzzer_extended_class_name << "(" << fqname.cppName()
+      << "* hw_binder_proxy) : FuzzerBase("
+      << "HAL_HIDL)";
+  if (message.component_name() != "types") {
+    out << ", " << kInstanceVariableName << "(hw_binder_proxy)";
+  }
+  out << " {}\n";
 }
 
 void HalHidlCodeGen::GenerateHeaderGlobalFunctionDeclarations(Formatter& out,
@@ -1314,7 +1324,16 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HIDL_INTERFACE:
     {
       out << result_msg << "->set_type(TYPE_HIDL_INTERFACE);\n";
-      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
+      if (!val.has_predefined_type()) {
+        cerr << __func__ << ":" << __LINE__
+             << " HIDL interface is a return type"
+             << "but predefined_type is unset." << endl;
+        exit(-1);
+      }
+      out << result_msg << "->set_hidl_interface_pointer("
+          << "reinterpret_cast<uintptr_t>(" << result_value << ".get()));\n";
+      out << result_msg << "->set_predefined_type(\"" << val.predefined_type()
+          << "\");\n";
       break;
     }
     case TYPE_HIDL_MEMORY:
