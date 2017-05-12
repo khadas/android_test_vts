@@ -262,7 +262,7 @@ public class ShowPerformanceDigestServlet extends BaseServlet {
         request.setAttribute("tableSubtitles", tableSubtitles);
         request.setAttribute("startTime", Long.toString(startTime));
         request.setAttribute("selectedDevice", selectedDevice);
-        request.setAttribute("devices", DatastoreHelper.getAllProducts(testName));
+        request.setAttribute("devices", DatastoreHelper.getAllProducts());
 
         dispatcher = request.getRequestDispatcher(PERF_DIGEST_JSP);
         try {

@@ -39,6 +39,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -85,14 +86,16 @@ public class ShowTableServlet extends BaseServlet {
         }
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        List<Entity> testCases = new ArrayList<>();
+        List<Key> gets = new ArrayList<>();
         for (long testCaseId : testRunEntity.testCaseIds) {
-            try {
-                Entity testCaseRun =
-                        datastore.get(KeyFactory.createKey(TestCaseRunEntity.KIND, testCaseId));
-                testCases.add(testCaseRun);
-            } catch (EntityNotFoundException e) {
-                // not found
+            gets.add(KeyFactory.createKey(TestCaseRunEntity.KIND, testCaseId));
+        }
+
+        List<Entity> testCases = new ArrayList<>();
+        Map<Key, Entity> entityMap = datastore.get(gets);
+        for (Key key : gets) {
+            if (entityMap.containsKey(key)) {
+                testCases.add(entityMap.get(key));
             }
         }
 
