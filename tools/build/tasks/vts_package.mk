@@ -73,8 +73,7 @@ $(foreach m,$(target_native_modules),\
       $(eval my_built_modules += $(bui))\
       $(eval my_copy_dest := $(patsubst data/%,DATA/%,\
                                $(patsubst system/%,DATA/%,\
-                                 $(patsubst vendor/%,DATA/%,\
-                                   $(patsubst $(PRODUCT_OUT)/%,%,$(ins))))))\
+                                   $(patsubst $(PRODUCT_OUT)/%,%,$(ins)))))\
       $(eval target_native_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/$(my_copy_dest)))\
   ))
 
