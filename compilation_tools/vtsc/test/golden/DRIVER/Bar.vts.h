@@ -41,6 +41,9 @@ class FuzzerExtended_android_hardware_tests_bar_V1_0_IBar : public FuzzerBase {
     FuzzerExtended_android_hardware_tests_bar_V1_0_IBar() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
 
     explicit FuzzerExtended_android_hardware_tests_bar_V1_0_IBar(::android::hardware::tests::bar::V1_0::IBar* hw_binder_proxy) : FuzzerBase(HAL_HIDL), hw_binder_proxy_(hw_binder_proxy) {}
+    uint64_t GetHidlInterfaceProxy() const {
+        return reinterpret_cast<uintptr_t>(hw_binder_proxy_.get());
+    }
  protected:
     bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
     bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);

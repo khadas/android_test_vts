@@ -119,6 +119,7 @@ void DriverCodeGenBase::GenerateClassHeader(Formatter& out,
 
   out.indent();
   GenerateClassConstructionFunction(out, message, fuzzer_extended_class_name);
+  GeneratePublicFunctionDeclarations(out, message);
   out.unindent();
 
   out << " protected:" << "\n";

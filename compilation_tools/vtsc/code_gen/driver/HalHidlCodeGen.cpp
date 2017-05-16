@@ -571,6 +571,15 @@ void HalHidlCodeGen::GenerateAdditionalFuctionDeclarations(Formatter& out,
   }
 }
 
+void HalHidlCodeGen::GeneratePublicFunctionDeclarations(
+    Formatter& out, const ComponentSpecificationMessage& /*message*/) {
+  out << "uint64_t GetHidlInterfaceProxy() const {\n";
+  out.indent();
+  out << "return reinterpret_cast<uintptr_t>(hw_binder_proxy_.get());\n";
+  out.unindent();
+  out << "}\n";
+}
+
 void HalHidlCodeGen::GeneratePrivateMemberDeclarations(Formatter& out,
     const ComponentSpecificationMessage& message) {
   FQName fqname = GetFQName(message);
