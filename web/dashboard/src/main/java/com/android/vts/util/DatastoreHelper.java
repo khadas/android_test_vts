@@ -160,6 +160,8 @@ public class DatastoreHelper {
         long coveredLineCount = 0;
         long totalLineCount = 0;
 
+        List<Entity> testCasePuts = new ArrayList<>();
+
         // Process test cases
         for (TestCaseReportMessage testCase : report.getTestCaseList()) {
             String testCaseName = testCase.getName().toStringUtf8();
@@ -200,8 +202,9 @@ public class DatastoreHelper {
             testCaseIds.add(keys.getStart().getId());
             TestCaseRunEntity testCaseRunEntity = new TestCaseRunEntity(
                     keys.getStart(), testCaseName, result.getNumber(), systraceLink);
-            datastore.put(testCaseRunEntity.toEntity());
+            testCasePuts.add(testCaseRunEntity.toEntity());
         }
+        datastore.put(testCasePuts);
 
         // Process device information
         for (AndroidDeviceInfoMessage device : report.getDeviceInfoList()) {
