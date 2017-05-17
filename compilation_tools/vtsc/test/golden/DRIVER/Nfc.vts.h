@@ -28,6 +28,11 @@ namespace vts {
 class FuzzerExtended_android_hardware_nfc_V1_0_INfc : public FuzzerBase {
  public:
     FuzzerExtended_android_hardware_nfc_V1_0_INfc() : FuzzerBase(HAL_HIDL), hw_binder_proxy_() {}
+
+    explicit FuzzerExtended_android_hardware_nfc_V1_0_INfc(::android::hardware::nfc::V1_0::INfc* hw_binder_proxy) : FuzzerBase(HAL_HIDL), hw_binder_proxy_(hw_binder_proxy) {}
+    uint64_t GetHidlInterfaceProxy() const {
+        return reinterpret_cast<uintptr_t>(hw_binder_proxy_.get());
+    }
  protected:
     bool Fuzz(FunctionSpecificationMessage* func_msg, void** result, const string& callback_socket_name);
     bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);
