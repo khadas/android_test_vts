@@ -9880,8 +9880,7 @@ public final class VtsReportMessage {
      * <code>optional bytes url = 1;</code>
      *
      * <pre>
-     * URLs of the produced log files. May contains multiple files such as stdout,
-     * stderr, etc.
+     * URL of a produced log file (e.g., stdout, stderr).
      * </pre>
      */
     boolean hasUrl();
@@ -9889,8 +9888,7 @@ public final class VtsReportMessage {
      * <code>optional bytes url = 1;</code>
      *
      * <pre>
-     * URLs of the produced log files. May contains multiple files such as stdout,
-     * stderr, etc.
+     * URL of a produced log file (e.g., stdout, stderr).
      * </pre>
      */
     com.google.protobuf.ByteString getUrl();
@@ -9900,7 +9898,7 @@ public final class VtsReportMessage {
      * <code>optional bytes name = 2;</code>
      *
      * <pre>
-     * Name of log.
+     * Name of a log file.
      * </pre>
      */
     boolean hasName();
@@ -9908,7 +9906,7 @@ public final class VtsReportMessage {
      * <code>optional bytes name = 2;</code>
      *
      * <pre>
-     * Name of log.
+     * Name of a log file.
      * </pre>
      */
     com.google.protobuf.ByteString getName();
@@ -9918,8 +9916,8 @@ public final class VtsReportMessage {
      * <code>optional bytes content = 3;</code>
      *
      * <pre>
-     * content of log. Caution: do not put too much log in protobuf message,
-     * as bigtable recommends &lt; 10 mb for each record cell
+     * Content of log. Caution: do not put too much log in protobuf message,
+     * as BigTable for example recommends &lt; 10 MB for each record cell.
      * </pre>
      */
     boolean hasContent();
@@ -9927,8 +9925,8 @@ public final class VtsReportMessage {
      * <code>optional bytes content = 3;</code>
      *
      * <pre>
-     * content of log. Caution: do not put too much log in protobuf message,
-     * as bigtable recommends &lt; 10 mb for each record cell
+     * Content of log. Caution: do not put too much log in protobuf message,
+     * as BigTable for example recommends &lt; 10 MB for each record cell.
      * </pre>
      */
     com.google.protobuf.ByteString getContent();
@@ -10051,8 +10049,7 @@ public final class VtsReportMessage {
      * <code>optional bytes url = 1;</code>
      *
      * <pre>
-     * URLs of the produced log files. May contains multiple files such as stdout,
-     * stderr, etc.
+     * URL of a produced log file (e.g., stdout, stderr).
      * </pre>
      */
     public boolean hasUrl() {
@@ -10062,8 +10059,7 @@ public final class VtsReportMessage {
      * <code>optional bytes url = 1;</code>
      *
      * <pre>
-     * URLs of the produced log files. May contains multiple files such as stdout,
-     * stderr, etc.
+     * URL of a produced log file (e.g., stdout, stderr).
      * </pre>
      */
     public com.google.protobuf.ByteString getUrl() {
@@ -10077,7 +10073,7 @@ public final class VtsReportMessage {
      * <code>optional bytes name = 2;</code>
      *
      * <pre>
-     * Name of log.
+     * Name of a log file.
      * </pre>
      */
     public boolean hasName() {
@@ -10087,7 +10083,7 @@ public final class VtsReportMessage {
      * <code>optional bytes name = 2;</code>
      *
      * <pre>
-     * Name of log.
+     * Name of a log file.
      * </pre>
      */
     public com.google.protobuf.ByteString getName() {
@@ -10101,8 +10097,8 @@ public final class VtsReportMessage {
      * <code>optional bytes content = 3;</code>
      *
      * <pre>
-     * content of log. Caution: do not put too much log in protobuf message,
-     * as bigtable recommends &lt; 10 mb for each record cell
+     * Content of log. Caution: do not put too much log in protobuf message,
+     * as BigTable for example recommends &lt; 10 MB for each record cell.
      * </pre>
      */
     public boolean hasContent() {
@@ -10112,8 +10108,8 @@ public final class VtsReportMessage {
      * <code>optional bytes content = 3;</code>
      *
      * <pre>
-     * content of log. Caution: do not put too much log in protobuf message,
-     * as bigtable recommends &lt; 10 mb for each record cell
+     * Content of log. Caution: do not put too much log in protobuf message,
+     * as BigTable for example recommends &lt; 10 MB for each record cell.
      * </pre>
      */
     public com.google.protobuf.ByteString getContent() {
@@ -10392,8 +10388,7 @@ public final class VtsReportMessage {
        * <code>optional bytes url = 1;</code>
        *
        * <pre>
-       * URLs of the produced log files. May contains multiple files such as stdout,
-       * stderr, etc.
+       * URL of a produced log file (e.g., stdout, stderr).
        * </pre>
        */
       public boolean hasUrl() {
@@ -10403,8 +10398,7 @@ public final class VtsReportMessage {
        * <code>optional bytes url = 1;</code>
        *
        * <pre>
-       * URLs of the produced log files. May contains multiple files such as stdout,
-       * stderr, etc.
+       * URL of a produced log file (e.g., stdout, stderr).
        * </pre>
        */
       public com.google.protobuf.ByteString getUrl() {
@@ -10414,8 +10408,7 @@ public final class VtsReportMessage {
        * <code>optional bytes url = 1;</code>
        *
        * <pre>
-       * URLs of the produced log files. May contains multiple files such as stdout,
-       * stderr, etc.
+       * URL of a produced log file (e.g., stdout, stderr).
        * </pre>
        */
       public Builder setUrl(com.google.protobuf.ByteString value) {
@@ -10431,8 +10424,7 @@ public final class VtsReportMessage {
        * <code>optional bytes url = 1;</code>
        *
        * <pre>
-       * URLs of the produced log files. May contains multiple files such as stdout,
-       * stderr, etc.
+       * URL of a produced log file (e.g., stdout, stderr).
        * </pre>
        */
       public Builder clearUrl() {
@@ -10448,7 +10440,7 @@ public final class VtsReportMessage {
        * <code>optional bytes name = 2;</code>
        *
        * <pre>
-       * Name of log.
+       * Name of a log file.
        * </pre>
        */
       public boolean hasName() {
@@ -10458,7 +10450,7 @@ public final class VtsReportMessage {
        * <code>optional bytes name = 2;</code>
        *
        * <pre>
-       * Name of log.
+       * Name of a log file.
        * </pre>
        */
       public com.google.protobuf.ByteString getName() {
@@ -10468,7 +10460,7 @@ public final class VtsReportMessage {
        * <code>optional bytes name = 2;</code>
        *
        * <pre>
-       * Name of log.
+       * Name of a log file.
        * </pre>
        */
       public Builder setName(com.google.protobuf.ByteString value) {
@@ -10484,7 +10476,7 @@ public final class VtsReportMessage {
        * <code>optional bytes name = 2;</code>
        *
        * <pre>
-       * Name of log.
+       * Name of a log file.
        * </pre>
        */
       public Builder clearName() {
@@ -10500,8 +10492,8 @@ public final class VtsReportMessage {
        * <code>optional bytes content = 3;</code>
        *
        * <pre>
-       * content of log. Caution: do not put too much log in protobuf message,
-       * as bigtable recommends &lt; 10 mb for each record cell
+       * Content of log. Caution: do not put too much log in protobuf message,
+       * as BigTable for example recommends &lt; 10 MB for each record cell.
        * </pre>
        */
       public boolean hasContent() {
@@ -10511,8 +10503,8 @@ public final class VtsReportMessage {
        * <code>optional bytes content = 3;</code>
        *
        * <pre>
-       * content of log. Caution: do not put too much log in protobuf message,
-       * as bigtable recommends &lt; 10 mb for each record cell
+       * Content of log. Caution: do not put too much log in protobuf message,
+       * as BigTable for example recommends &lt; 10 MB for each record cell.
        * </pre>
        */
       public com.google.protobuf.ByteString getContent() {
@@ -10522,8 +10514,8 @@ public final class VtsReportMessage {
        * <code>optional bytes content = 3;</code>
        *
        * <pre>
-       * content of log. Caution: do not put too much log in protobuf message,
-       * as bigtable recommends &lt; 10 mb for each record cell
+       * Content of log. Caution: do not put too much log in protobuf message,
+       * as BigTable for example recommends &lt; 10 MB for each record cell.
        * </pre>
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
@@ -10539,8 +10531,8 @@ public final class VtsReportMessage {
        * <code>optional bytes content = 3;</code>
        *
        * <pre>
-       * content of log. Caution: do not put too much log in protobuf message,
-       * as bigtable recommends &lt; 10 mb for each record cell
+       * Content of log. Caution: do not put too much log in protobuf message,
+       * as BigTable for example recommends &lt; 10 MB for each record cell.
        * </pre>
        */
       public Builder clearContent() {
@@ -10561,26 +10553,711 @@ public final class VtsReportMessage {
     // @@protoc_insertion_point(class_scope:android.vts.LogMessage)
   }
 
+  public interface UrlResourceMessageOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes url = 1;
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URL of a resource file.
+     * </pre>
+     */
+    boolean hasUrl();
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URL of a resource file.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getUrl();
+
+    // optional bytes name = 2;
+    /**
+     * <code>optional bytes name = 2;</code>
+     *
+     * <pre>
+     * Name of a resource file representing its type and does not have to be
+     * the same as the exact file name.
+     * </pre>
+     */
+    boolean hasName();
+    /**
+     * <code>optional bytes name = 2;</code>
+     *
+     * <pre>
+     * Name of a resource file representing its type and does not have to be
+     * the same as the exact file name.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getName();
+
+    // optional bytes content = 3;
+    /**
+     * <code>optional bytes content = 3;</code>
+     *
+     * <pre>
+     * Raw content of a resource file. Used if the file is small.
+     * </pre>
+     */
+    boolean hasContent();
+    /**
+     * <code>optional bytes content = 3;</code>
+     *
+     * <pre>
+     * Raw content of a resource file. Used if the file is small.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getContent();
+  }
+  /**
+   * Protobuf type {@code android.vts.UrlResourceMessage}
+   *
+   * <pre>
+   * To specify a resource object (reachable via a URL or contained in the
+   * message). This can be used to store a log file or an XML (or HTML) report
+   * file kept in a Google Cloud Storage (GCS) bucket or partner's network file
+   * system, or hosted by a HTTP server.
+   * </pre>
+   */
+  public static final class UrlResourceMessage extends
+      com.google.protobuf.GeneratedMessage
+      implements UrlResourceMessageOrBuilder {
+    // Use UrlResourceMessage.newBuilder() to construct.
+    private UrlResourceMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UrlResourceMessage(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UrlResourceMessage defaultInstance;
+    public static UrlResourceMessage getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UrlResourceMessage getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UrlResourceMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              url_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              name_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              content_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_UrlResourceMessage_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_UrlResourceMessage_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.android.vts.proto.VtsReportMessage.UrlResourceMessage.class, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UrlResourceMessage> PARSER =
+        new com.google.protobuf.AbstractParser<UrlResourceMessage>() {
+      public UrlResourceMessage parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UrlResourceMessage(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UrlResourceMessage> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes url = 1;
+    public static final int URL_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString url_;
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URL of a resource file.
+     * </pre>
+     */
+    public boolean hasUrl() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes url = 1;</code>
+     *
+     * <pre>
+     * URL of a resource file.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getUrl() {
+      return url_;
+    }
+
+    // optional bytes name = 2;
+    public static final int NAME_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString name_;
+    /**
+     * <code>optional bytes name = 2;</code>
+     *
+     * <pre>
+     * Name of a resource file representing its type and does not have to be
+     * the same as the exact file name.
+     * </pre>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes name = 2;</code>
+     *
+     * <pre>
+     * Name of a resource file representing its type and does not have to be
+     * the same as the exact file name.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getName() {
+      return name_;
+    }
+
+    // optional bytes content = 3;
+    public static final int CONTENT_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString content_;
+    /**
+     * <code>optional bytes content = 3;</code>
+     *
+     * <pre>
+     * Raw content of a resource file. Used if the file is small.
+     * </pre>
+     */
+    public boolean hasContent() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes content = 3;</code>
+     *
+     * <pre>
+     * Raw content of a resource file. Used if the file is small.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getContent() {
+      return content_;
+    }
+
+    private void initFields() {
+      url_ = com.google.protobuf.ByteString.EMPTY;
+      name_ = com.google.protobuf.ByteString.EMPTY;
+      content_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, url_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, name_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, content_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, url_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, name_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, content_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.UrlResourceMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.android.vts.proto.VtsReportMessage.UrlResourceMessage prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code android.vts.UrlResourceMessage}
+     *
+     * <pre>
+     * To specify a resource object (reachable via a URL or contained in the
+     * message). This can be used to store a log file or an XML (or HTML) report
+     * file kept in a Google Cloud Storage (GCS) bucket or partner's network file
+     * system, or hosted by a HTTP server.
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_UrlResourceMessage_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_UrlResourceMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.android.vts.proto.VtsReportMessage.UrlResourceMessage.class, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder.class);
+      }
+
+      // Construct using com.android.vts.proto.VtsReportMessage.UrlResourceMessage.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        url_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        content_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_UrlResourceMessage_descriptor;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage getDefaultInstanceForType() {
+        return com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance();
+      }
+
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage build() {
+        com.android.vts.proto.VtsReportMessage.UrlResourceMessage result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage buildPartial() {
+        com.android.vts.proto.VtsReportMessage.UrlResourceMessage result = new com.android.vts.proto.VtsReportMessage.UrlResourceMessage(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.url_ = url_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.name_ = name_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.content_ = content_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.android.vts.proto.VtsReportMessage.UrlResourceMessage) {
+          return mergeFrom((com.android.vts.proto.VtsReportMessage.UrlResourceMessage)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.android.vts.proto.VtsReportMessage.UrlResourceMessage other) {
+        if (other == com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance()) return this;
+        if (other.hasUrl()) {
+          setUrl(other.getUrl());
+        }
+        if (other.hasName()) {
+          setName(other.getName());
+        }
+        if (other.hasContent()) {
+          setContent(other.getContent());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.android.vts.proto.VtsReportMessage.UrlResourceMessage parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.android.vts.proto.VtsReportMessage.UrlResourceMessage) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes url = 1;
+      private com.google.protobuf.ByteString url_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URL of a resource file.
+       * </pre>
+       */
+      public boolean hasUrl() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URL of a resource file.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getUrl() {
+        return url_;
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URL of a resource file.
+       * </pre>
+       */
+      public Builder setUrl(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        url_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes url = 1;</code>
+       *
+       * <pre>
+       * URL of a resource file.
+       * </pre>
+       */
+      public Builder clearUrl() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        url_ = getDefaultInstance().getUrl();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes name = 2;
+      private com.google.protobuf.ByteString name_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes name = 2;</code>
+       *
+       * <pre>
+       * Name of a resource file representing its type and does not have to be
+       * the same as the exact file name.
+       * </pre>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes name = 2;</code>
+       *
+       * <pre>
+       * Name of a resource file representing its type and does not have to be
+       * the same as the exact file name.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getName() {
+        return name_;
+      }
+      /**
+       * <code>optional bytes name = 2;</code>
+       *
+       * <pre>
+       * Name of a resource file representing its type and does not have to be
+       * the same as the exact file name.
+       * </pre>
+       */
+      public Builder setName(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes name = 2;</code>
+       *
+       * <pre>
+       * Name of a resource file representing its type and does not have to be
+       * the same as the exact file name.
+       * </pre>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes content = 3;
+      private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes content = 3;</code>
+       *
+       * <pre>
+       * Raw content of a resource file. Used if the file is small.
+       * </pre>
+       */
+      public boolean hasContent() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes content = 3;</code>
+       *
+       * <pre>
+       * Raw content of a resource file. Used if the file is small.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getContent() {
+        return content_;
+      }
+      /**
+       * <code>optional bytes content = 3;</code>
+       *
+       * <pre>
+       * Raw content of a resource file. Used if the file is small.
+       * </pre>
+       */
+      public Builder setContent(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        content_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes content = 3;</code>
+       *
+       * <pre>
+       * Raw content of a resource file. Used if the file is small.
+       * </pre>
+       */
+      public Builder clearContent() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        content_ = getDefaultInstance().getContent();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:android.vts.UrlResourceMessage)
+    }
+
+    static {
+      defaultInstance = new UrlResourceMessage(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:android.vts.UrlResourceMessage)
+  }
+
   public interface TestReportMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional bytes test_suite = 1;
+    // optional bytes test_suite = 1 [deprecated = true];
     /**
-     * <code>optional bytes test_suite = 1;</code>
+     * <code>optional bytes test_suite = 1 [deprecated = true];</code>
      *
      * <pre>
      * The test suite name..
      * </pre>
      */
-    boolean hasTestSuite();
+    @java.lang.Deprecated boolean hasTestSuite();
     /**
-     * <code>optional bytes test_suite = 1;</code>
+     * <code>optional bytes test_suite = 1 [deprecated = true];</code>
      *
      * <pre>
      * The test suite name..
      * </pre>
      */
-    com.google.protobuf.ByteString getTestSuite();
+    @java.lang.Deprecated com.google.protobuf.ByteString getTestSuite();
 
     // optional bytes test = 2;
     /**
@@ -11228,27 +11905,27 @@ public final class VtsReportMessage {
     }
 
     private int bitField0_;
-    // optional bytes test_suite = 1;
+    // optional bytes test_suite = 1 [deprecated = true];
     public static final int TEST_SUITE_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString testSuite_;
     /**
-     * <code>optional bytes test_suite = 1;</code>
+     * <code>optional bytes test_suite = 1 [deprecated = true];</code>
      *
      * <pre>
      * The test suite name..
      * </pre>
      */
-    public boolean hasTestSuite() {
+    @java.lang.Deprecated public boolean hasTestSuite() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes test_suite = 1;</code>
+     * <code>optional bytes test_suite = 1 [deprecated = true];</code>
      *
      * <pre>
      * The test suite name..
      * </pre>
      */
-    public com.google.protobuf.ByteString getTestSuite() {
+    @java.lang.Deprecated public com.google.protobuf.ByteString getTestSuite() {
       return testSuite_;
     }
 
@@ -12465,36 +13142,36 @@ public final class VtsReportMessage {
       }
       private int bitField0_;
 
-      // optional bytes test_suite = 1;
+      // optional bytes test_suite = 1 [deprecated = true];
       private com.google.protobuf.ByteString testSuite_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes test_suite = 1;</code>
+       * <code>optional bytes test_suite = 1 [deprecated = true];</code>
        *
        * <pre>
        * The test suite name..
        * </pre>
        */
-      public boolean hasTestSuite() {
+      @java.lang.Deprecated public boolean hasTestSuite() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes test_suite = 1;</code>
+       * <code>optional bytes test_suite = 1 [deprecated = true];</code>
        *
        * <pre>
        * The test suite name..
        * </pre>
        */
-      public com.google.protobuf.ByteString getTestSuite() {
+      @java.lang.Deprecated public com.google.protobuf.ByteString getTestSuite() {
         return testSuite_;
       }
       /**
-       * <code>optional bytes test_suite = 1;</code>
+       * <code>optional bytes test_suite = 1 [deprecated = true];</code>
        *
        * <pre>
        * The test suite name..
        * </pre>
        */
-      public Builder setTestSuite(com.google.protobuf.ByteString value) {
+      @java.lang.Deprecated public Builder setTestSuite(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -12504,13 +13181,13 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>optional bytes test_suite = 1;</code>
+       * <code>optional bytes test_suite = 1 [deprecated = true];</code>
        *
        * <pre>
        * The test suite name..
        * </pre>
        */
-      public Builder clearTestSuite() {
+      @java.lang.Deprecated public Builder clearTestSuite() {
         bitField0_ = (bitField0_ & ~0x00000001);
         testSuite_ = getDefaultInstance().getTestSuite();
         onChanged();
@@ -15010,6 +15687,1291 @@ public final class VtsReportMessage {
     // @@protoc_insertion_point(class_scope:android.vts.TestReportMessage)
   }
 
+  public interface TestPlanReportMessageOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated bytes test_module_name = 1;
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    java.util.List<com.google.protobuf.ByteString> getTestModuleNameList();
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    int getTestModuleNameCount();
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getTestModuleName(int index);
+
+    // repeated int64 test_module_start_timestamp = 2;
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    java.util.List<java.lang.Long> getTestModuleStartTimestampList();
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    int getTestModuleStartTimestampCount();
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    long getTestModuleStartTimestamp(int index);
+
+    // optional bytes test_plan_name = 11;
+    /**
+     * <code>optional bytes test_plan_name = 11;</code>
+     *
+     * <pre>
+     * The test plan name.
+     * </pre>
+     */
+    boolean hasTestPlanName();
+    /**
+     * <code>optional bytes test_plan_name = 11;</code>
+     *
+     * <pre>
+     * The test plan name.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getTestPlanName();
+
+    // repeated .android.vts.UrlResourceMessage partner_report = 21;
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> 
+        getPartnerReportList();
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.UrlResourceMessage getPartnerReport(int index);
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    int getPartnerReportCount();
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    java.util.List<? extends com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> 
+        getPartnerReportOrBuilderList();
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder getPartnerReportOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code android.vts.TestPlanReportMessage}
+   *
+   * <pre>
+   * To specify a test execution report.
+   * </pre>
+   */
+  public static final class TestPlanReportMessage extends
+      com.google.protobuf.GeneratedMessage
+      implements TestPlanReportMessageOrBuilder {
+    // Use TestPlanReportMessage.newBuilder() to construct.
+    private TestPlanReportMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private TestPlanReportMessage(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final TestPlanReportMessage defaultInstance;
+    public static TestPlanReportMessage getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public TestPlanReportMessage getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TestPlanReportMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                testModuleName_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              testModuleName_.add(input.readBytes());
+              break;
+            }
+            case 16: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                testModuleStartTimestamp_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              testModuleStartTimestamp_.add(input.readInt64());
+              break;
+            }
+            case 18: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
+                testModuleStartTimestamp_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                testModuleStartTimestamp_.add(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 90: {
+              bitField0_ |= 0x00000001;
+              testPlanName_ = input.readBytes();
+              break;
+            }
+            case 170: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                partnerReport_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.UrlResourceMessage>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              partnerReport_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.UrlResourceMessage.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          testModuleName_ = java.util.Collections.unmodifiableList(testModuleName_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          testModuleStartTimestamp_ = java.util.Collections.unmodifiableList(testModuleStartTimestamp_);
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          partnerReport_ = java.util.Collections.unmodifiableList(partnerReport_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_TestPlanReportMessage_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_TestPlanReportMessage_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.class, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<TestPlanReportMessage> PARSER =
+        new com.google.protobuf.AbstractParser<TestPlanReportMessage>() {
+      public TestPlanReportMessage parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TestPlanReportMessage(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TestPlanReportMessage> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // repeated bytes test_module_name = 1;
+    public static final int TEST_MODULE_NAME_FIELD_NUMBER = 1;
+    private java.util.List<com.google.protobuf.ByteString> testModuleName_;
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getTestModuleNameList() {
+      return testModuleName_;
+    }
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    public int getTestModuleNameCount() {
+      return testModuleName_.size();
+    }
+    /**
+     * <code>repeated bytes test_module_name = 1;</code>
+     *
+     * <pre>
+     * Keys used to find all TestReportMessage messages of test modules in
+     * this plan.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getTestModuleName(int index) {
+      return testModuleName_.get(index);
+    }
+
+    // repeated int64 test_module_start_timestamp = 2;
+    public static final int TEST_MODULE_START_TIMESTAMP_FIELD_NUMBER = 2;
+    private java.util.List<java.lang.Long> testModuleStartTimestamp_;
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    public java.util.List<java.lang.Long>
+        getTestModuleStartTimestampList() {
+      return testModuleStartTimestamp_;
+    }
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    public int getTestModuleStartTimestampCount() {
+      return testModuleStartTimestamp_.size();
+    }
+    /**
+     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     */
+    public long getTestModuleStartTimestamp(int index) {
+      return testModuleStartTimestamp_.get(index);
+    }
+
+    // optional bytes test_plan_name = 11;
+    public static final int TEST_PLAN_NAME_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString testPlanName_;
+    /**
+     * <code>optional bytes test_plan_name = 11;</code>
+     *
+     * <pre>
+     * The test plan name.
+     * </pre>
+     */
+    public boolean hasTestPlanName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes test_plan_name = 11;</code>
+     *
+     * <pre>
+     * The test plan name.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getTestPlanName() {
+      return testPlanName_;
+    }
+
+    // repeated .android.vts.UrlResourceMessage partner_report = 21;
+    public static final int PARTNER_REPORT_FIELD_NUMBER = 21;
+    private java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> partnerReport_;
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    public java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> getPartnerReportList() {
+      return partnerReport_;
+    }
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    public java.util.List<? extends com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> 
+        getPartnerReportOrBuilderList() {
+      return partnerReport_;
+    }
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    public int getPartnerReportCount() {
+      return partnerReport_.size();
+    }
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.UrlResourceMessage getPartnerReport(int index) {
+      return partnerReport_.get(index);
+    }
+    /**
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     *
+     * <pre>
+     * Report resource flies.
+     * </pre>
+     */
+    public com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder getPartnerReportOrBuilder(
+        int index) {
+      return partnerReport_.get(index);
+    }
+
+    private void initFields() {
+      testModuleName_ = java.util.Collections.emptyList();
+      testModuleStartTimestamp_ = java.util.Collections.emptyList();
+      testPlanName_ = com.google.protobuf.ByteString.EMPTY;
+      partnerReport_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < testModuleName_.size(); i++) {
+        output.writeBytes(1, testModuleName_.get(i));
+      }
+      for (int i = 0; i < testModuleStartTimestamp_.size(); i++) {
+        output.writeInt64(2, testModuleStartTimestamp_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(11, testPlanName_);
+      }
+      for (int i = 0; i < partnerReport_.size(); i++) {
+        output.writeMessage(21, partnerReport_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < testModuleName_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(testModuleName_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getTestModuleNameList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < testModuleStartTimestamp_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(testModuleStartTimestamp_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getTestModuleStartTimestampList().size();
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, testPlanName_);
+      }
+      for (int i = 0; i < partnerReport_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(21, partnerReport_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.android.vts.proto.VtsReportMessage.TestPlanReportMessage prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code android.vts.TestPlanReportMessage}
+     *
+     * <pre>
+     * To specify a test execution report.
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_TestPlanReportMessage_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_TestPlanReportMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.class, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder.class);
+      }
+
+      // Construct using com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getPartnerReportFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        testModuleName_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        testModuleStartTimestamp_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        testPlanName_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (partnerReportBuilder_ == null) {
+          partnerReport_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          partnerReportBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.android.vts.proto.VtsReportMessage.internal_static_android_vts_TestPlanReportMessage_descriptor;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage getDefaultInstanceForType() {
+        return com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.getDefaultInstance();
+      }
+
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage build() {
+        com.android.vts.proto.VtsReportMessage.TestPlanReportMessage result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage buildPartial() {
+        com.android.vts.proto.VtsReportMessage.TestPlanReportMessage result = new com.android.vts.proto.VtsReportMessage.TestPlanReportMessage(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          testModuleName_ = java.util.Collections.unmodifiableList(testModuleName_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.testModuleName_ = testModuleName_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          testModuleStartTimestamp_ = java.util.Collections.unmodifiableList(testModuleStartTimestamp_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.testModuleStartTimestamp_ = testModuleStartTimestamp_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.testPlanName_ = testPlanName_;
+        if (partnerReportBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            partnerReport_ = java.util.Collections.unmodifiableList(partnerReport_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.partnerReport_ = partnerReport_;
+        } else {
+          result.partnerReport_ = partnerReportBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.android.vts.proto.VtsReportMessage.TestPlanReportMessage) {
+          return mergeFrom((com.android.vts.proto.VtsReportMessage.TestPlanReportMessage)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.android.vts.proto.VtsReportMessage.TestPlanReportMessage other) {
+        if (other == com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.getDefaultInstance()) return this;
+        if (!other.testModuleName_.isEmpty()) {
+          if (testModuleName_.isEmpty()) {
+            testModuleName_ = other.testModuleName_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureTestModuleNameIsMutable();
+            testModuleName_.addAll(other.testModuleName_);
+          }
+          onChanged();
+        }
+        if (!other.testModuleStartTimestamp_.isEmpty()) {
+          if (testModuleStartTimestamp_.isEmpty()) {
+            testModuleStartTimestamp_ = other.testModuleStartTimestamp_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureTestModuleStartTimestampIsMutable();
+            testModuleStartTimestamp_.addAll(other.testModuleStartTimestamp_);
+          }
+          onChanged();
+        }
+        if (other.hasTestPlanName()) {
+          setTestPlanName(other.getTestPlanName());
+        }
+        if (partnerReportBuilder_ == null) {
+          if (!other.partnerReport_.isEmpty()) {
+            if (partnerReport_.isEmpty()) {
+              partnerReport_ = other.partnerReport_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensurePartnerReportIsMutable();
+              partnerReport_.addAll(other.partnerReport_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.partnerReport_.isEmpty()) {
+            if (partnerReportBuilder_.isEmpty()) {
+              partnerReportBuilder_.dispose();
+              partnerReportBuilder_ = null;
+              partnerReport_ = other.partnerReport_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              partnerReportBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getPartnerReportFieldBuilder() : null;
+            } else {
+              partnerReportBuilder_.addAllMessages(other.partnerReport_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.android.vts.proto.VtsReportMessage.TestPlanReportMessage parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.android.vts.proto.VtsReportMessage.TestPlanReportMessage) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // repeated bytes test_module_name = 1;
+      private java.util.List<com.google.protobuf.ByteString> testModuleName_ = java.util.Collections.emptyList();
+      private void ensureTestModuleNameIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          testModuleName_ = new java.util.ArrayList<com.google.protobuf.ByteString>(testModuleName_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getTestModuleNameList() {
+        return java.util.Collections.unmodifiableList(testModuleName_);
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public int getTestModuleNameCount() {
+        return testModuleName_.size();
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getTestModuleName(int index) {
+        return testModuleName_.get(index);
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public Builder setTestModuleName(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTestModuleNameIsMutable();
+        testModuleName_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public Builder addTestModuleName(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTestModuleNameIsMutable();
+        testModuleName_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public Builder addAllTestModuleName(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureTestModuleNameIsMutable();
+        super.addAll(values, testModuleName_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes test_module_name = 1;</code>
+       *
+       * <pre>
+       * Keys used to find all TestReportMessage messages of test modules in
+       * this plan.
+       * </pre>
+       */
+      public Builder clearTestModuleName() {
+        testModuleName_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      // repeated int64 test_module_start_timestamp = 2;
+      private java.util.List<java.lang.Long> testModuleStartTimestamp_ = java.util.Collections.emptyList();
+      private void ensureTestModuleStartTimestampIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          testModuleStartTimestamp_ = new java.util.ArrayList<java.lang.Long>(testModuleStartTimestamp_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public java.util.List<java.lang.Long>
+          getTestModuleStartTimestampList() {
+        return java.util.Collections.unmodifiableList(testModuleStartTimestamp_);
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public int getTestModuleStartTimestampCount() {
+        return testModuleStartTimestamp_.size();
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public long getTestModuleStartTimestamp(int index) {
+        return testModuleStartTimestamp_.get(index);
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public Builder setTestModuleStartTimestamp(
+          int index, long value) {
+        ensureTestModuleStartTimestampIsMutable();
+        testModuleStartTimestamp_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public Builder addTestModuleStartTimestamp(long value) {
+        ensureTestModuleStartTimestampIsMutable();
+        testModuleStartTimestamp_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public Builder addAllTestModuleStartTimestamp(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureTestModuleStartTimestampIsMutable();
+        super.addAll(values, testModuleStartTimestamp_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       */
+      public Builder clearTestModuleStartTimestamp() {
+        testModuleStartTimestamp_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+
+      // optional bytes test_plan_name = 11;
+      private com.google.protobuf.ByteString testPlanName_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes test_plan_name = 11;</code>
+       *
+       * <pre>
+       * The test plan name.
+       * </pre>
+       */
+      public boolean hasTestPlanName() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes test_plan_name = 11;</code>
+       *
+       * <pre>
+       * The test plan name.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getTestPlanName() {
+        return testPlanName_;
+      }
+      /**
+       * <code>optional bytes test_plan_name = 11;</code>
+       *
+       * <pre>
+       * The test plan name.
+       * </pre>
+       */
+      public Builder setTestPlanName(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        testPlanName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes test_plan_name = 11;</code>
+       *
+       * <pre>
+       * The test plan name.
+       * </pre>
+       */
+      public Builder clearTestPlanName() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        testPlanName_ = getDefaultInstance().getTestPlanName();
+        onChanged();
+        return this;
+      }
+
+      // repeated .android.vts.UrlResourceMessage partner_report = 21;
+      private java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> partnerReport_ =
+        java.util.Collections.emptyList();
+      private void ensurePartnerReportIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          partnerReport_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.UrlResourceMessage>(partnerReport_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.UrlResourceMessage, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder, com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> partnerReportBuilder_;
+
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> getPartnerReportList() {
+        if (partnerReportBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(partnerReport_);
+        } else {
+          return partnerReportBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public int getPartnerReportCount() {
+        if (partnerReportBuilder_ == null) {
+          return partnerReport_.size();
+        } else {
+          return partnerReportBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage getPartnerReport(int index) {
+        if (partnerReportBuilder_ == null) {
+          return partnerReport_.get(index);
+        } else {
+          return partnerReportBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder setPartnerReport(
+          int index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage value) {
+        if (partnerReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartnerReportIsMutable();
+          partnerReport_.set(index, value);
+          onChanged();
+        } else {
+          partnerReportBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder setPartnerReport(
+          int index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder builderForValue) {
+        if (partnerReportBuilder_ == null) {
+          ensurePartnerReportIsMutable();
+          partnerReport_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          partnerReportBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder addPartnerReport(com.android.vts.proto.VtsReportMessage.UrlResourceMessage value) {
+        if (partnerReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartnerReportIsMutable();
+          partnerReport_.add(value);
+          onChanged();
+        } else {
+          partnerReportBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder addPartnerReport(
+          int index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage value) {
+        if (partnerReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensurePartnerReportIsMutable();
+          partnerReport_.add(index, value);
+          onChanged();
+        } else {
+          partnerReportBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder addPartnerReport(
+          com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder builderForValue) {
+        if (partnerReportBuilder_ == null) {
+          ensurePartnerReportIsMutable();
+          partnerReport_.add(builderForValue.build());
+          onChanged();
+        } else {
+          partnerReportBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder addPartnerReport(
+          int index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder builderForValue) {
+        if (partnerReportBuilder_ == null) {
+          ensurePartnerReportIsMutable();
+          partnerReport_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          partnerReportBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder addAllPartnerReport(
+          java.lang.Iterable<? extends com.android.vts.proto.VtsReportMessage.UrlResourceMessage> values) {
+        if (partnerReportBuilder_ == null) {
+          ensurePartnerReportIsMutable();
+          super.addAll(values, partnerReport_);
+          onChanged();
+        } else {
+          partnerReportBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder clearPartnerReport() {
+        if (partnerReportBuilder_ == null) {
+          partnerReport_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          partnerReportBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public Builder removePartnerReport(int index) {
+        if (partnerReportBuilder_ == null) {
+          ensurePartnerReportIsMutable();
+          partnerReport_.remove(index);
+          onChanged();
+        } else {
+          partnerReportBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder getPartnerReportBuilder(
+          int index) {
+        return getPartnerReportFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder getPartnerReportOrBuilder(
+          int index) {
+        if (partnerReportBuilder_ == null) {
+          return partnerReport_.get(index);  } else {
+          return partnerReportBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public java.util.List<? extends com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> 
+           getPartnerReportOrBuilderList() {
+        if (partnerReportBuilder_ != null) {
+          return partnerReportBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(partnerReport_);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder addPartnerReportBuilder() {
+        return getPartnerReportFieldBuilder().addBuilder(
+            com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder addPartnerReportBuilder(
+          int index) {
+        return getPartnerReportFieldBuilder().addBuilder(
+            index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       *
+       * <pre>
+       * Report resource flies.
+       * </pre>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder> 
+           getPartnerReportBuilderList() {
+        return getPartnerReportFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.UrlResourceMessage, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder, com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> 
+          getPartnerReportFieldBuilder() {
+        if (partnerReportBuilder_ == null) {
+          partnerReportBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.android.vts.proto.VtsReportMessage.UrlResourceMessage, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder, com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder>(
+                  partnerReport_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          partnerReport_ = null;
+        }
+        return partnerReportBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:android.vts.TestPlanReportMessage)
+    }
+
+    static {
+      defaultInstance = new TestPlanReportMessage(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:android.vts.TestPlanReportMessage)
+  }
+
   public interface DashboardPostMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -15940,10 +17902,20 @@ public final class VtsReportMessage {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_android_vts_LogMessage_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_android_vts_UrlResourceMessage_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_android_vts_UrlResourceMessage_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_android_vts_TestReportMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_android_vts_TestReportMessage_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_android_vts_TestPlanReportMessage_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_android_vts_TestPlanReportMessage_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_android_vts_DashboardPostMessage_descriptor;
   private static
@@ -15992,42 +17964,48 @@ public final class VtsReportMessage {
       "nt\030e \001(\005\022\032\n\022covered_line_count\030f \001(\005\022\024\n\010" +
       "dir_path\030\001 \001(\014B\002\030\001\022\025\n\tfile_name\030\002 \001(\014B\002\030" +
       "\001\022\020\n\004html\030\003 \001(\014B\002\030\001\"8\n\nLogMessage\022\013\n\003url" +
-      "\030\001 \001(\014\022\014\n\004name\030\002 \001(\014\022\017\n\007content\030\003 \001(\014\"\312\004" +
-      "\n\021TestReportMessage\022\022\n\ntest_suite\030\001 \001(\014\022" +
-      "\014\n\004test\030\002 \001(\014\022+\n\ttest_type\030\003 \001(\0162\030.andro" +
-      "id.vts.VtsTestType\022:\n\013device_info\030\004 \003(\0132" +
-      "%.android.vts.AndroidDeviceInfoMessage\0221" +
-      "\n\nbuild_info\030\005 \001(\0132\035.android.vts.Android",
-      "BuildInfo\022\030\n\020subscriber_email\030\006 \003(\014\022+\n\th" +
-      "ost_info\030\007 \001(\0132\030.android.vts.VtsHostInfo" +
-      "\0225\n\ttest_case\030\013 \003(\0132\".android.vts.TestCa" +
-      "seReportMessage\0226\n\tprofiling\030\025 \003(\0132#.and" +
-      "roid.vts.ProfilingReportMessage\0224\n\010systr" +
-      "ace\030\026 \003(\0132\".android.vts.SystraceReportMe" +
-      "ssage\022\027\n\017start_timestamp\030e \001(\003\022\025\n\rend_ti" +
-      "mestamp\030f \001(\003\0224\n\010coverage\030g \003(\0132\".androi" +
-      "d.vts.CoverageReportMessage\022%\n\003log\030\351\007 \003(" +
-      "\0132\027.android.vts.LogMessage\"a\n\024DashboardP",
+      "\030\001 \001(\014\022\014\n\004name\030\002 \001(\014\022\017\n\007content\030\003 \001(\014\"@\n" +
+      "\022UrlResourceMessage\022\013\n\003url\030\001 \001(\014\022\014\n\004name" +
+      "\030\002 \001(\014\022\017\n\007content\030\003 \001(\014\"\316\004\n\021TestReportMe" +
+      "ssage\022\026\n\ntest_suite\030\001 \001(\014B\002\030\001\022\014\n\004test\030\002 " +
+      "\001(\014\022+\n\ttest_type\030\003 \001(\0162\030.android.vts.Vts" +
+      "TestType\022:\n\013device_info\030\004 \003(\0132%.android.",
+      "vts.AndroidDeviceInfoMessage\0221\n\nbuild_in" +
+      "fo\030\005 \001(\0132\035.android.vts.AndroidBuildInfo\022" +
+      "\030\n\020subscriber_email\030\006 \003(\014\022+\n\thost_info\030\007" +
+      " \001(\0132\030.android.vts.VtsHostInfo\0225\n\ttest_c" +
+      "ase\030\013 \003(\0132\".android.vts.TestCaseReportMe" +
+      "ssage\0226\n\tprofiling\030\025 \003(\0132#.android.vts.P" +
+      "rofilingReportMessage\0224\n\010systrace\030\026 \003(\0132" +
+      "\".android.vts.SystraceReportMessage\022\027\n\017s" +
+      "tart_timestamp\030e \001(\003\022\025\n\rend_timestamp\030f " +
+      "\001(\003\0224\n\010coverage\030g \003(\0132\".android.vts.Cove",
+      "rageReportMessage\022%\n\003log\030\351\007 \003(\0132\027.androi" +
+      "d.vts.LogMessage\"\247\001\n\025TestPlanReportMessa" +
+      "ge\022\030\n\020test_module_name\030\001 \003(\014\022#\n\033test_mod" +
+      "ule_start_timestamp\030\002 \003(\003\022\026\n\016test_plan_n" +
+      "ame\030\013 \001(\014\0227\n\016partner_report\030\025 \003(\0132\037.andr" +
+      "oid.vts.UrlResourceMessage\"a\n\024DashboardP" +
       "ostMessage\022\024\n\014access_token\030\001 \001(\t\0223\n\013test" +
       "_report\030\002 \003(\0132\036.android.vts.TestReportMe" +
       "ssage*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESU" +
-      "LT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_" +
+      "LT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_",
       "CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_S" +
       "KIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n" +
       "\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestT" +
       "ype\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOS" +
       "T_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN" +
-      "_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n",
+      "_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n" +
       "\027VTS_TARGET_SIDE_FUZZING\020\004*\243\001\n\032VtsProfil" +
       "ingRegressionMode\022\033\n\027UNKNOWN_REGRESSION_" +
       "MODE\020\000\022 \n\034VTS_REGRESSION_MODE_DISABLED\020\001" +
-      "\022\"\n\036VTS_REGRESSION_MODE_INCREASING\020\002\022\"\n\036" +
+      "\022\"\n\036VTS_REGRESSION_MODE_INCREASING\020\002\022\"\n\036",
       "VTS_REGRESSION_MODE_DECREASING\020\003*\244\001\n\020Vts" +
       "ProfilingType\022\036\n\032UNKNOWN_VTS_PROFILING_T" +
       "YPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022" +
       "%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020\002\022\'" +
       "\n#VTS_PROFILING_TYPE_UNLABELED_VECTOR\020\003B" +
-      ")\n\025com.android.vts.protoB\020VtsReportMessa",
+      ")\n\025com.android.vts.protoB\020VtsReportMessa" +
       "ge"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
@@ -16083,14 +18061,26 @@ public final class VtsReportMessage {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_LogMessage_descriptor,
               new java.lang.String[] { "Url", "Name", "Content", });
-          internal_static_android_vts_TestReportMessage_descriptor =
+          internal_static_android_vts_UrlResourceMessage_descriptor =
             getDescriptor().getMessageTypes().get(8);
+          internal_static_android_vts_UrlResourceMessage_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_android_vts_UrlResourceMessage_descriptor,
+              new java.lang.String[] { "Url", "Name", "Content", });
+          internal_static_android_vts_TestReportMessage_descriptor =
+            getDescriptor().getMessageTypes().get(9);
           internal_static_android_vts_TestReportMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_TestReportMessage_descriptor,
               new java.lang.String[] { "TestSuite", "Test", "TestType", "DeviceInfo", "BuildInfo", "SubscriberEmail", "HostInfo", "TestCase", "Profiling", "Systrace", "StartTimestamp", "EndTimestamp", "Coverage", "Log", });
+          internal_static_android_vts_TestPlanReportMessage_descriptor =
+            getDescriptor().getMessageTypes().get(10);
+          internal_static_android_vts_TestPlanReportMessage_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_android_vts_TestPlanReportMessage_descriptor,
+              new java.lang.String[] { "TestModuleName", "TestModuleStartTimestamp", "TestPlanName", "PartnerReport", });
           internal_static_android_vts_DashboardPostMessage_descriptor =
-            getDescriptor().getMessageTypes().get(9);
+            getDescriptor().getMessageTypes().get(11);
           internal_static_android_vts_DashboardPostMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_DashboardPostMessage_descriptor,
