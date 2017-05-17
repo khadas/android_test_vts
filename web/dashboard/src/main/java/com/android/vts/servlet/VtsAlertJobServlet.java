@@ -154,16 +154,18 @@ public class VtsAlertJobServlet extends BaseServlet {
             if (mostRecentRun == null) {
                 mostRecentRun = testRunEntity;
             }
+            List<Key> testCaseKeys = new ArrayList<>();
             for (long testCaseId : testRunEntity.testCaseIds) {
-                Entity testCaseRun;
-                try {
-                    testCaseRun =
-                            datastore.get(KeyFactory.createKey(TestCaseRunEntity.KIND, testCaseId));
-                } catch (EntityNotFoundException e) {
+                testCaseKeys.add(KeyFactory.createKey(TestCaseRunEntity.KIND, testCaseId));
+            }
+            Map<Key, Entity> entityMap = datastore.get(testCaseKeys);
+            for (Key testCaseKey : testCaseKeys) {
+                if (!entityMap.containsKey(testCaseKey)) {
                     logger.log(Level.WARNING,
-                            "Test case \"" + testCaseId + "\" from test " + testName);
+                            "Test case missing from test: " + testCaseKey);
                     continue;
                 }
+                Entity testCaseRun = entityMap.get(testCaseKey);
                 TestCaseRunEntity testCaseRunEntity = TestCaseRunEntity.fromEntity(testCaseRun);
                 if (testCaseRunEntity == null) {
                     logger.log(Level.WARNING, "Invalid test case run: " + testCaseRun.getKey());
