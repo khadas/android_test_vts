@@ -88,6 +88,9 @@ class HalHidlCodeGen : public DriverCodeGenBase {
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name) override;
 
+  void GeneratePublicFunctionDeclarations(
+      Formatter& out, const ComponentSpecificationMessage& message) override;
+
   void GeneratePrivateMemberDeclarations(Formatter& out,
       const ComponentSpecificationMessage& message) override;
 
