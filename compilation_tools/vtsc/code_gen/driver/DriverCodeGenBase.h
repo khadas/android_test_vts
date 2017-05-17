@@ -116,6 +116,10 @@ class DriverCodeGenBase : public CodeGenBase {
       const ComponentSpecificationMessage& message,
       const string& fuzzer_extended_class_name);
 
+  // Generates header code for public function declarations if any.
+  virtual void GeneratePublicFunctionDeclarations(
+      Formatter& /*out*/, const ComponentSpecificationMessage& /*message*/) {};
+
   // Generates header code for private member declarations if any.
   virtual void GeneratePrivateMemberDeclarations(Formatter& /*out*/,
       const ComponentSpecificationMessage& /*message*/) {};
