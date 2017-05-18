@@ -15690,9 +15690,9 @@ public final class VtsReportMessage {
   public interface TestPlanReportMessageOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // repeated bytes test_module_name = 1;
+    // repeated bytes test_module_name = 11;
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15701,7 +15701,7 @@ public final class VtsReportMessage {
      */
     java.util.List<com.google.protobuf.ByteString> getTestModuleNameList();
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15710,7 +15710,7 @@ public final class VtsReportMessage {
      */
     int getTestModuleNameCount();
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15719,23 +15719,23 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getTestModuleName(int index);
 
-    // repeated int64 test_module_start_timestamp = 2;
+    // repeated int64 test_module_start_timestamp = 12;
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     java.util.List<java.lang.Long> getTestModuleStartTimestampList();
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     int getTestModuleStartTimestampCount();
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     long getTestModuleStartTimestamp(int index);
 
-    // optional bytes test_plan_name = 11;
+    // optional bytes test_plan_name = 21;
     /**
-     * <code>optional bytes test_plan_name = 11;</code>
+     * <code>optional bytes test_plan_name = 21;</code>
      *
      * <pre>
      * The test plan name.
@@ -15743,7 +15743,7 @@ public final class VtsReportMessage {
      */
     boolean hasTestPlanName();
     /**
-     * <code>optional bytes test_plan_name = 11;</code>
+     * <code>optional bytes test_plan_name = 21;</code>
      *
      * <pre>
      * The test plan name.
@@ -15751,9 +15751,9 @@ public final class VtsReportMessage {
      */
     com.google.protobuf.ByteString getTestPlanName();
 
-    // repeated .android.vts.UrlResourceMessage partner_report = 21;
+    // repeated .android.vts.UrlResourceMessage partner_report = 31;
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -15762,7 +15762,7 @@ public final class VtsReportMessage {
     java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> 
         getPartnerReportList();
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -15770,7 +15770,7 @@ public final class VtsReportMessage {
      */
     com.android.vts.proto.VtsReportMessage.UrlResourceMessage getPartnerReport(int index);
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -15778,7 +15778,7 @@ public final class VtsReportMessage {
      */
     int getPartnerReportCount();
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -15787,7 +15787,7 @@ public final class VtsReportMessage {
     java.util.List<? extends com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> 
         getPartnerReportOrBuilderList();
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -15851,7 +15851,7 @@ public final class VtsReportMessage {
               }
               break;
             }
-            case 10: {
+            case 90: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
                 testModuleName_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
                 mutable_bitField0_ |= 0x00000001;
@@ -15859,7 +15859,7 @@ public final class VtsReportMessage {
               testModuleName_.add(input.readBytes());
               break;
             }
-            case 16: {
+            case 96: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
                 testModuleStartTimestamp_ = new java.util.ArrayList<java.lang.Long>();
                 mutable_bitField0_ |= 0x00000002;
@@ -15867,7 +15867,7 @@ public final class VtsReportMessage {
               testModuleStartTimestamp_.add(input.readInt64());
               break;
             }
-            case 18: {
+            case 98: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
@@ -15880,12 +15880,12 @@ public final class VtsReportMessage {
               input.popLimit(limit);
               break;
             }
-            case 90: {
+            case 170: {
               bitField0_ |= 0x00000001;
               testPlanName_ = input.readBytes();
               break;
             }
-            case 170: {
+            case 250: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 partnerReport_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.UrlResourceMessage>();
                 mutable_bitField0_ |= 0x00000008;
@@ -15942,11 +15942,11 @@ public final class VtsReportMessage {
     }
 
     private int bitField0_;
-    // repeated bytes test_module_name = 1;
-    public static final int TEST_MODULE_NAME_FIELD_NUMBER = 1;
+    // repeated bytes test_module_name = 11;
+    public static final int TEST_MODULE_NAME_FIELD_NUMBER = 11;
     private java.util.List<com.google.protobuf.ByteString> testModuleName_;
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15958,7 +15958,7 @@ public final class VtsReportMessage {
       return testModuleName_;
     }
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15969,7 +15969,7 @@ public final class VtsReportMessage {
       return testModuleName_.size();
     }
     /**
-     * <code>repeated bytes test_module_name = 1;</code>
+     * <code>repeated bytes test_module_name = 11;</code>
      *
      * <pre>
      * Keys used to find all TestReportMessage messages of test modules in
@@ -15980,34 +15980,34 @@ public final class VtsReportMessage {
       return testModuleName_.get(index);
     }
 
-    // repeated int64 test_module_start_timestamp = 2;
-    public static final int TEST_MODULE_START_TIMESTAMP_FIELD_NUMBER = 2;
+    // repeated int64 test_module_start_timestamp = 12;
+    public static final int TEST_MODULE_START_TIMESTAMP_FIELD_NUMBER = 12;
     private java.util.List<java.lang.Long> testModuleStartTimestamp_;
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     public java.util.List<java.lang.Long>
         getTestModuleStartTimestampList() {
       return testModuleStartTimestamp_;
     }
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     public int getTestModuleStartTimestampCount() {
       return testModuleStartTimestamp_.size();
     }
     /**
-     * <code>repeated int64 test_module_start_timestamp = 2;</code>
+     * <code>repeated int64 test_module_start_timestamp = 12;</code>
      */
     public long getTestModuleStartTimestamp(int index) {
       return testModuleStartTimestamp_.get(index);
     }
 
-    // optional bytes test_plan_name = 11;
-    public static final int TEST_PLAN_NAME_FIELD_NUMBER = 11;
+    // optional bytes test_plan_name = 21;
+    public static final int TEST_PLAN_NAME_FIELD_NUMBER = 21;
     private com.google.protobuf.ByteString testPlanName_;
     /**
-     * <code>optional bytes test_plan_name = 11;</code>
+     * <code>optional bytes test_plan_name = 21;</code>
      *
      * <pre>
      * The test plan name.
@@ -16017,7 +16017,7 @@ public final class VtsReportMessage {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes test_plan_name = 11;</code>
+     * <code>optional bytes test_plan_name = 21;</code>
      *
      * <pre>
      * The test plan name.
@@ -16027,11 +16027,11 @@ public final class VtsReportMessage {
       return testPlanName_;
     }
 
-    // repeated .android.vts.UrlResourceMessage partner_report = 21;
-    public static final int PARTNER_REPORT_FIELD_NUMBER = 21;
+    // repeated .android.vts.UrlResourceMessage partner_report = 31;
+    public static final int PARTNER_REPORT_FIELD_NUMBER = 31;
     private java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> partnerReport_;
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -16041,7 +16041,7 @@ public final class VtsReportMessage {
       return partnerReport_;
     }
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -16052,7 +16052,7 @@ public final class VtsReportMessage {
       return partnerReport_;
     }
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -16062,7 +16062,7 @@ public final class VtsReportMessage {
       return partnerReport_.size();
     }
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -16072,7 +16072,7 @@ public final class VtsReportMessage {
       return partnerReport_.get(index);
     }
     /**
-     * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+     * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
      *
      * <pre>
      * Report resource flies.
@@ -16102,16 +16102,16 @@ public final class VtsReportMessage {
                         throws java.io.IOException {
       getSerializedSize();
       for (int i = 0; i < testModuleName_.size(); i++) {
-        output.writeBytes(1, testModuleName_.get(i));
+        output.writeBytes(11, testModuleName_.get(i));
       }
       for (int i = 0; i < testModuleStartTimestamp_.size(); i++) {
-        output.writeInt64(2, testModuleStartTimestamp_.get(i));
+        output.writeInt64(12, testModuleStartTimestamp_.get(i));
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(11, testPlanName_);
+        output.writeBytes(21, testPlanName_);
       }
       for (int i = 0; i < partnerReport_.size(); i++) {
-        output.writeMessage(21, partnerReport_.get(i));
+        output.writeMessage(31, partnerReport_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -16142,11 +16142,11 @@ public final class VtsReportMessage {
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(11, testPlanName_);
+          .computeBytesSize(21, testPlanName_);
       }
       for (int i = 0; i < partnerReport_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(21, partnerReport_.get(i));
+          .computeMessageSize(31, partnerReport_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -16424,7 +16424,7 @@ public final class VtsReportMessage {
       }
       private int bitField0_;
 
-      // repeated bytes test_module_name = 1;
+      // repeated bytes test_module_name = 11;
       private java.util.List<com.google.protobuf.ByteString> testModuleName_ = java.util.Collections.emptyList();
       private void ensureTestModuleNameIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
@@ -16433,7 +16433,7 @@ public final class VtsReportMessage {
          }
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16445,7 +16445,7 @@ public final class VtsReportMessage {
         return java.util.Collections.unmodifiableList(testModuleName_);
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16456,7 +16456,7 @@ public final class VtsReportMessage {
         return testModuleName_.size();
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16467,7 +16467,7 @@ public final class VtsReportMessage {
         return testModuleName_.get(index);
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16485,7 +16485,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16502,7 +16502,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16517,7 +16517,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated bytes test_module_name = 1;</code>
+       * <code>repeated bytes test_module_name = 11;</code>
        *
        * <pre>
        * Keys used to find all TestReportMessage messages of test modules in
@@ -16531,7 +16531,7 @@ public final class VtsReportMessage {
         return this;
       }
 
-      // repeated int64 test_module_start_timestamp = 2;
+      // repeated int64 test_module_start_timestamp = 12;
       private java.util.List<java.lang.Long> testModuleStartTimestamp_ = java.util.Collections.emptyList();
       private void ensureTestModuleStartTimestampIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -16540,26 +16540,26 @@ public final class VtsReportMessage {
          }
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public java.util.List<java.lang.Long>
           getTestModuleStartTimestampList() {
         return java.util.Collections.unmodifiableList(testModuleStartTimestamp_);
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public int getTestModuleStartTimestampCount() {
         return testModuleStartTimestamp_.size();
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public long getTestModuleStartTimestamp(int index) {
         return testModuleStartTimestamp_.get(index);
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public Builder setTestModuleStartTimestamp(
           int index, long value) {
@@ -16569,7 +16569,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public Builder addTestModuleStartTimestamp(long value) {
         ensureTestModuleStartTimestampIsMutable();
@@ -16578,7 +16578,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public Builder addAllTestModuleStartTimestamp(
           java.lang.Iterable<? extends java.lang.Long> values) {
@@ -16588,7 +16588,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated int64 test_module_start_timestamp = 2;</code>
+       * <code>repeated int64 test_module_start_timestamp = 12;</code>
        */
       public Builder clearTestModuleStartTimestamp() {
         testModuleStartTimestamp_ = java.util.Collections.emptyList();
@@ -16597,10 +16597,10 @@ public final class VtsReportMessage {
         return this;
       }
 
-      // optional bytes test_plan_name = 11;
+      // optional bytes test_plan_name = 21;
       private com.google.protobuf.ByteString testPlanName_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes test_plan_name = 11;</code>
+       * <code>optional bytes test_plan_name = 21;</code>
        *
        * <pre>
        * The test plan name.
@@ -16610,7 +16610,7 @@ public final class VtsReportMessage {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional bytes test_plan_name = 11;</code>
+       * <code>optional bytes test_plan_name = 21;</code>
        *
        * <pre>
        * The test plan name.
@@ -16620,7 +16620,7 @@ public final class VtsReportMessage {
         return testPlanName_;
       }
       /**
-       * <code>optional bytes test_plan_name = 11;</code>
+       * <code>optional bytes test_plan_name = 21;</code>
        *
        * <pre>
        * The test plan name.
@@ -16636,7 +16636,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>optional bytes test_plan_name = 11;</code>
+       * <code>optional bytes test_plan_name = 21;</code>
        *
        * <pre>
        * The test plan name.
@@ -16649,7 +16649,7 @@ public final class VtsReportMessage {
         return this;
       }
 
-      // repeated .android.vts.UrlResourceMessage partner_report = 21;
+      // repeated .android.vts.UrlResourceMessage partner_report = 31;
       private java.util.List<com.android.vts.proto.VtsReportMessage.UrlResourceMessage> partnerReport_ =
         java.util.Collections.emptyList();
       private void ensurePartnerReportIsMutable() {
@@ -16663,7 +16663,7 @@ public final class VtsReportMessage {
           com.android.vts.proto.VtsReportMessage.UrlResourceMessage, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.Builder, com.android.vts.proto.VtsReportMessage.UrlResourceMessageOrBuilder> partnerReportBuilder_;
 
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16677,7 +16677,7 @@ public final class VtsReportMessage {
         }
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16691,7 +16691,7 @@ public final class VtsReportMessage {
         }
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16705,7 +16705,7 @@ public final class VtsReportMessage {
         }
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16726,7 +16726,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16744,7 +16744,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16764,7 +16764,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16785,7 +16785,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16803,7 +16803,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16821,7 +16821,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16839,7 +16839,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16856,7 +16856,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16873,7 +16873,7 @@ public final class VtsReportMessage {
         return this;
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16884,7 +16884,7 @@ public final class VtsReportMessage {
         return getPartnerReportFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16898,7 +16898,7 @@ public final class VtsReportMessage {
         }
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16913,7 +16913,7 @@ public final class VtsReportMessage {
         }
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16924,7 +16924,7 @@ public final class VtsReportMessage {
             com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance());
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -16936,7 +16936,7 @@ public final class VtsReportMessage {
             index, com.android.vts.proto.VtsReportMessage.UrlResourceMessage.getDefaultInstance());
       }
       /**
-       * <code>repeated .android.vts.UrlResourceMessage partner_report = 21;</code>
+       * <code>repeated .android.vts.UrlResourceMessage partner_report = 31;</code>
        *
        * <pre>
        * Report resource flies.
@@ -17026,6 +17026,31 @@ public final class VtsReportMessage {
      */
     com.android.vts.proto.VtsReportMessage.TestReportMessageOrBuilder getTestReportOrBuilder(
         int index);
+
+    // repeated .android.vts.TestPlanReportMessage test_plan_report = 3;
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> 
+        getTestPlanReportList();
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    com.android.vts.proto.VtsReportMessage.TestPlanReportMessage getTestPlanReport(int index);
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    int getTestPlanReportCount();
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    java.util.List<? extends com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder> 
+        getTestPlanReportOrBuilderList();
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder getTestPlanReportOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code android.vts.DashboardPostMessage}
@@ -17095,6 +17120,14 @@ public final class VtsReportMessage {
               testReport_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.TestReportMessage.PARSER, extensionRegistry));
               break;
             }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                testPlanReport_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              testPlanReport_.add(input.readMessage(com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -17105,6 +17138,9 @@ public final class VtsReportMessage {
       } finally {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           testReport_ = java.util.Collections.unmodifiableList(testReport_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          testPlanReport_ = java.util.Collections.unmodifiableList(testPlanReport_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -17229,9 +17265,46 @@ public final class VtsReportMessage {
       return testReport_.get(index);
     }
 
+    // repeated .android.vts.TestPlanReportMessage test_plan_report = 3;
+    public static final int TEST_PLAN_REPORT_FIELD_NUMBER = 3;
+    private java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> testPlanReport_;
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    public java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> getTestPlanReportList() {
+      return testPlanReport_;
+    }
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    public java.util.List<? extends com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder> 
+        getTestPlanReportOrBuilderList() {
+      return testPlanReport_;
+    }
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    public int getTestPlanReportCount() {
+      return testPlanReport_.size();
+    }
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage getTestPlanReport(int index) {
+      return testPlanReport_.get(index);
+    }
+    /**
+     * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+     */
+    public com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder getTestPlanReportOrBuilder(
+        int index) {
+      return testPlanReport_.get(index);
+    }
+
     private void initFields() {
       accessToken_ = "";
       testReport_ = java.util.Collections.emptyList();
+      testPlanReport_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -17251,6 +17324,9 @@ public final class VtsReportMessage {
       for (int i = 0; i < testReport_.size(); i++) {
         output.writeMessage(2, testReport_.get(i));
       }
+      for (int i = 0; i < testPlanReport_.size(); i++) {
+        output.writeMessage(3, testPlanReport_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -17267,6 +17343,10 @@ public final class VtsReportMessage {
       for (int i = 0; i < testReport_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, testReport_.get(i));
+      }
+      for (int i = 0; i < testPlanReport_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, testPlanReport_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -17381,6 +17461,7 @@ public final class VtsReportMessage {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getTestReportFieldBuilder();
+          getTestPlanReportFieldBuilder();
         }
       }
       private static Builder create() {
@@ -17396,6 +17477,12 @@ public final class VtsReportMessage {
           bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           testReportBuilder_.clear();
+        }
+        if (testPlanReportBuilder_ == null) {
+          testPlanReport_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          testPlanReportBuilder_.clear();
         }
         return this;
       }
@@ -17437,6 +17524,15 @@ public final class VtsReportMessage {
           result.testReport_ = testReport_;
         } else {
           result.testReport_ = testReportBuilder_.build();
+        }
+        if (testPlanReportBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            testPlanReport_ = java.util.Collections.unmodifiableList(testPlanReport_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.testPlanReport_ = testPlanReport_;
+        } else {
+          result.testPlanReport_ = testPlanReportBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -17482,6 +17578,32 @@ public final class VtsReportMessage {
                    getTestReportFieldBuilder() : null;
             } else {
               testReportBuilder_.addAllMessages(other.testReport_);
+            }
+          }
+        }
+        if (testPlanReportBuilder_ == null) {
+          if (!other.testPlanReport_.isEmpty()) {
+            if (testPlanReport_.isEmpty()) {
+              testPlanReport_ = other.testPlanReport_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureTestPlanReportIsMutable();
+              testPlanReport_.addAll(other.testPlanReport_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.testPlanReport_.isEmpty()) {
+            if (testPlanReportBuilder_.isEmpty()) {
+              testPlanReportBuilder_.dispose();
+              testPlanReportBuilder_ = null;
+              testPlanReport_ = other.testPlanReport_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              testPlanReportBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getTestPlanReportFieldBuilder() : null;
+            } else {
+              testPlanReportBuilder_.addAllMessages(other.testPlanReport_);
             }
           }
         }
@@ -17850,6 +17972,246 @@ public final class VtsReportMessage {
         return testReportBuilder_;
       }
 
+      // repeated .android.vts.TestPlanReportMessage test_plan_report = 3;
+      private java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> testPlanReport_ =
+        java.util.Collections.emptyList();
+      private void ensureTestPlanReportIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          testPlanReport_ = new java.util.ArrayList<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage>(testPlanReport_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.TestPlanReportMessage, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder, com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder> testPlanReportBuilder_;
+
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> getTestPlanReportList() {
+        if (testPlanReportBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(testPlanReport_);
+        } else {
+          return testPlanReportBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public int getTestPlanReportCount() {
+        if (testPlanReportBuilder_ == null) {
+          return testPlanReport_.size();
+        } else {
+          return testPlanReportBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage getTestPlanReport(int index) {
+        if (testPlanReportBuilder_ == null) {
+          return testPlanReport_.get(index);
+        } else {
+          return testPlanReportBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder setTestPlanReport(
+          int index, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage value) {
+        if (testPlanReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.set(index, value);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder setTestPlanReport(
+          int index, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder builderForValue) {
+        if (testPlanReportBuilder_ == null) {
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          testPlanReportBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder addTestPlanReport(com.android.vts.proto.VtsReportMessage.TestPlanReportMessage value) {
+        if (testPlanReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.add(value);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder addTestPlanReport(
+          int index, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage value) {
+        if (testPlanReportBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.add(index, value);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder addTestPlanReport(
+          com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder builderForValue) {
+        if (testPlanReportBuilder_ == null) {
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.add(builderForValue.build());
+          onChanged();
+        } else {
+          testPlanReportBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder addTestPlanReport(
+          int index, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder builderForValue) {
+        if (testPlanReportBuilder_ == null) {
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          testPlanReportBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder addAllTestPlanReport(
+          java.lang.Iterable<? extends com.android.vts.proto.VtsReportMessage.TestPlanReportMessage> values) {
+        if (testPlanReportBuilder_ == null) {
+          ensureTestPlanReportIsMutable();
+          super.addAll(values, testPlanReport_);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder clearTestPlanReport() {
+        if (testPlanReportBuilder_ == null) {
+          testPlanReport_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public Builder removeTestPlanReport(int index) {
+        if (testPlanReportBuilder_ == null) {
+          ensureTestPlanReportIsMutable();
+          testPlanReport_.remove(index);
+          onChanged();
+        } else {
+          testPlanReportBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder getTestPlanReportBuilder(
+          int index) {
+        return getTestPlanReportFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder getTestPlanReportOrBuilder(
+          int index) {
+        if (testPlanReportBuilder_ == null) {
+          return testPlanReport_.get(index);  } else {
+          return testPlanReportBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public java.util.List<? extends com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder> 
+           getTestPlanReportOrBuilderList() {
+        if (testPlanReportBuilder_ != null) {
+          return testPlanReportBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(testPlanReport_);
+        }
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder addTestPlanReportBuilder() {
+        return getTestPlanReportFieldBuilder().addBuilder(
+            com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder addTestPlanReportBuilder(
+          int index) {
+        return getTestPlanReportFieldBuilder().addBuilder(
+            index, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .android.vts.TestPlanReportMessage test_plan_report = 3;</code>
+       */
+      public java.util.List<com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder> 
+           getTestPlanReportBuilderList() {
+        return getTestPlanReportFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.android.vts.proto.VtsReportMessage.TestPlanReportMessage, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder, com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder> 
+          getTestPlanReportFieldBuilder() {
+        if (testPlanReportBuilder_ == null) {
+          testPlanReportBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.android.vts.proto.VtsReportMessage.TestPlanReportMessage, com.android.vts.proto.VtsReportMessage.TestPlanReportMessage.Builder, com.android.vts.proto.VtsReportMessage.TestPlanReportMessageOrBuilder>(
+                  testPlanReport_,
+                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  getParentForChildren(),
+                  isClean());
+          testPlanReport_ = null;
+        }
+        return testPlanReportBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:android.vts.DashboardPostMessage)
     }
 
@@ -17982,31 +18344,32 @@ public final class VtsReportMessage {
       "\001(\003\0224\n\010coverage\030g \003(\0132\".android.vts.Cove",
       "rageReportMessage\022%\n\003log\030\351\007 \003(\0132\027.androi" +
       "d.vts.LogMessage\"\247\001\n\025TestPlanReportMessa" +
-      "ge\022\030\n\020test_module_name\030\001 \003(\014\022#\n\033test_mod" +
-      "ule_start_timestamp\030\002 \003(\003\022\026\n\016test_plan_n" +
-      "ame\030\013 \001(\014\0227\n\016partner_report\030\025 \003(\0132\037.andr" +
-      "oid.vts.UrlResourceMessage\"a\n\024DashboardP" +
-      "ostMessage\022\024\n\014access_token\030\001 \001(\t\0223\n\013test" +
-      "_report\030\002 \003(\0132\036.android.vts.TestReportMe" +
-      "ssage*\263\001\n\016TestCaseResult\022\022\n\016UNKNOWN_RESU" +
-      "LT\020\000\022\031\n\025TEST_CASE_RESULT_PASS\020\001\022\031\n\025TEST_",
-      "CASE_RESULT_FAIL\020\002\022\031\n\025TEST_CASE_RESULT_S" +
-      "KIP\020\003\022\036\n\032TEST_CASE_RESULT_EXCEPTION\020\004\022\034\n" +
-      "\030TEST_CASE_RESULT_TIMEOUT\020\005*\234\001\n\013VtsTestT" +
-      "ype\022\030\n\024UNKNOWN_VTS_TESTTYPE\020\000\022\036\n\032VTS_HOS" +
-      "T_DRIVEN_STRUCTURAL\020\001\022\033\n\027VTS_HOST_DRIVEN" +
-      "_FUZZING\020\002\022\031\n\025VTS_TARGET_SIDE_GTEST\020\003\022\033\n" +
-      "\027VTS_TARGET_SIDE_FUZZING\020\004*\243\001\n\032VtsProfil" +
-      "ingRegressionMode\022\033\n\027UNKNOWN_REGRESSION_" +
-      "MODE\020\000\022 \n\034VTS_REGRESSION_MODE_DISABLED\020\001" +
-      "\022\"\n\036VTS_REGRESSION_MODE_INCREASING\020\002\022\"\n\036",
-      "VTS_REGRESSION_MODE_DECREASING\020\003*\244\001\n\020Vts" +
-      "ProfilingType\022\036\n\032UNKNOWN_VTS_PROFILING_T" +
-      "YPE\020\000\022 \n\034VTS_PROFILING_TYPE_TIMESTAMP\020\001\022" +
-      "%\n!VTS_PROFILING_TYPE_LABELED_VECTOR\020\002\022\'" +
-      "\n#VTS_PROFILING_TYPE_UNLABELED_VECTOR\020\003B" +
-      ")\n\025com.android.vts.protoB\020VtsReportMessa" +
-      "ge"
+      "ge\022\030\n\020test_module_name\030\013 \003(\014\022#\n\033test_mod" +
+      "ule_start_timestamp\030\014 \003(\003\022\026\n\016test_plan_n" +
+      "ame\030\025 \001(\014\0227\n\016partner_report\030\037 \003(\0132\037.andr" +
+      "oid.vts.UrlResourceMessage\"\237\001\n\024Dashboard" +
+      "PostMessage\022\024\n\014access_token\030\001 \001(\t\0223\n\013tes" +
+      "t_report\030\002 \003(\0132\036.android.vts.TestReportM" +
+      "essage\022<\n\020test_plan_report\030\003 \003(\0132\".andro" +
+      "id.vts.TestPlanReportMessage*\263\001\n\016TestCas",
+      "eResult\022\022\n\016UNKNOWN_RESULT\020\000\022\031\n\025TEST_CASE" +
+      "_RESULT_PASS\020\001\022\031\n\025TEST_CASE_RESULT_FAIL\020" +
+      "\002\022\031\n\025TEST_CASE_RESULT_SKIP\020\003\022\036\n\032TEST_CAS" +
+      "E_RESULT_EXCEPTION\020\004\022\034\n\030TEST_CASE_RESULT" +
+      "_TIMEOUT\020\005*\234\001\n\013VtsTestType\022\030\n\024UNKNOWN_VT" +
+      "S_TESTTYPE\020\000\022\036\n\032VTS_HOST_DRIVEN_STRUCTUR" +
+      "AL\020\001\022\033\n\027VTS_HOST_DRIVEN_FUZZING\020\002\022\031\n\025VTS" +
+      "_TARGET_SIDE_GTEST\020\003\022\033\n\027VTS_TARGET_SIDE_" +
+      "FUZZING\020\004*\243\001\n\032VtsProfilingRegressionMode" +
+      "\022\033\n\027UNKNOWN_REGRESSION_MODE\020\000\022 \n\034VTS_REG",
+      "RESSION_MODE_DISABLED\020\001\022\"\n\036VTS_REGRESSIO" +
+      "N_MODE_INCREASING\020\002\022\"\n\036VTS_REGRESSION_MO" +
+      "DE_DECREASING\020\003*\244\001\n\020VtsProfilingType\022\036\n\032" +
+      "UNKNOWN_VTS_PROFILING_TYPE\020\000\022 \n\034VTS_PROF" +
+      "ILING_TYPE_TIMESTAMP\020\001\022%\n!VTS_PROFILING_" +
+      "TYPE_LABELED_VECTOR\020\002\022\'\n#VTS_PROFILING_T" +
+      "YPE_UNLABELED_VECTOR\020\003B)\n\025com.android.vt" +
+      "s.protoB\020VtsReportMessage"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -18084,7 +18447,7 @@ public final class VtsReportMessage {
           internal_static_android_vts_DashboardPostMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_android_vts_DashboardPostMessage_descriptor,
-              new java.lang.String[] { "AccessToken", "TestReport", });
+              new java.lang.String[] { "AccessToken", "TestReport", "TestPlanReport", });
           return null;
         }
       };
