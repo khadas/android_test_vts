@@ -51,6 +51,11 @@ Copyright 2016 Google Inc. All Rights Reserved.
 </servlet>
 
 <servlet>
+  <servlet-name>bigtable_legacy</servlet-name>
+  <servlet-class>com.android.vts.api.BigtableLegacyJsonServlet</servlet-class>
+</servlet>
+
+<servlet>
   <servlet-name>vts_alert_job</servlet-name>
   <servlet-class>com.android.vts.servlet.VtsAlertJobServlet</servlet-class>
 </servlet>
@@ -91,7 +96,7 @@ Copyright 2016 Google Inc. All Rights Reserved.
 </servlet-mapping>
 
 <servlet-mapping>
-  <servlet-name>datastore</servlet-name>
+  <servlet-name>bigtable_legacy</servlet-name>
   <url-pattern>/api/bigtable/*</url-pattern>
 </servlet-mapping>
 
