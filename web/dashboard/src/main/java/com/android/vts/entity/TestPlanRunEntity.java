@@ -20,6 +20,8 @@ import com.android.vts.entity.TestRunEntity.TestRunType;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,5 +120,15 @@ public class TestPlanRunEntity implements DashboardEntity {
             logger.log(Level.WARNING, "Error parsing test plan run entity.", exception);
         }
         return null;
+    }
+
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+        json.add(TEST_PLAN_NAME, new JsonPrimitive(this.testPlanName));
+        json.add(TEST_BUILD_ID, new JsonPrimitive(this.testBuildId));
+        json.add(PASS_COUNT, new JsonPrimitive(this.passCount));
+        json.add(FAIL_COUNT, new JsonPrimitive(this.failCount));
+        json.add(START_TIMESTAMP, new JsonPrimitive(this.startTimestamp));
+        return json;
     }
 }
