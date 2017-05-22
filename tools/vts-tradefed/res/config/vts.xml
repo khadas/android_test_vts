@@ -65,4 +65,7 @@
   <!--  From vts-vndk.xml -->
   <option name="compatibility:include-filter" value="VtsVndkDependencyTest" />
 
+  <!-- For Hidl Hal replay tests -->
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetReplay" />
+
 </configuration>
