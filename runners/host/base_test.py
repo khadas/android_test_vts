@@ -894,10 +894,11 @@ class BaseTestClass(object):
             raise e
         finally:
             self._exec_func(self._tearDownClass)
-            name, timestamp = self.web.GetTestModuleKeys()
-            self.results.setTestModuleKeys(name, timestamp)
-            logging.info("Summary for test class %s: %s",
-                         self.test_module_name, self.results.summary())
+            if self.web.enabled:
+                name, timestamp = self.web.GetTestModuleKeys()
+                self.results.setTestModuleKeys(name, timestamp)
+                logging.info("Summary for test class %s: %s",
+                             self.test_module_name, self.results.summary())
 
     def cleanUp(self):
         """A function that is executed upon completion of all tests cases
