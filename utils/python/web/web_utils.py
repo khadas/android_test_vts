@@ -25,7 +25,6 @@ from vts.runners.host import keys
 from vts.utils.python.web import dashboard_rest_client
 from vts.utils.python.web import feature_utils
 
-_STATUS_TABLE = "vts_status_table"
 _PROFILING_POINTS = "profiling_points"
 
 
@@ -399,12 +398,11 @@ class WebFeature(feature_utils.Feature):
                      getpass.getuser())
 
         if len(self.report_msg.test_case) > 0:
-            post_cmd = getattr(self, keys.ConfigKeys.IKEY_DASHBOARD_POST_COMMAND)
-            table_name = "result_%s" % str(self.report_msg.test)
-            service_json_path = str(getattr(self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH))
+            post_msg = ReportMsg.DashboardPostMessage()
+            post_msg.test_report.extend([self.report_msg])
 
             # Post new data to the dashboard
-            self.rest_client.PostData(self.report_msg.SerializeToString())
+            self.rest_client.PostData(post_msg)
 
             logging.info("_tearDownClass hook: status upload time stamp %s",
                          str(self.report_msg.start_timestamp))

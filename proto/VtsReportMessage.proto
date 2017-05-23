@@ -274,3 +274,11 @@ message TestReportMessage {
   // etc.
   repeated LogMessage log = 1001;
 }
+
+// Proto wrapper for posting data to the VTS Dashboard
+message DashboardPostMessage {
+  // oauth2.0 access token
+  optional string access_token = 1;
+
+  repeated TestReportMessage test_report = 2;
+}
