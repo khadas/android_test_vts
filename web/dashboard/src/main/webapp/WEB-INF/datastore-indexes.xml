@@ -28,4 +28,26 @@
     <property name="__key__" direction="desc"/>
   </datastore-index>
 
+  <datastore-index kind="TestRun" ancestor="false" source="manual">
+    <property name="testName" direction="asc"/>
+    <property name="startTimestamp" direction="asc"/>
+  </datastore-index>
+
+  <datastore-index kind="TestRun" ancestor="false" source="manual">
+    <property name="testName" direction="asc"/>
+    <property name="startTimestamp" direction="desc"/>
+  </datastore-index>
+
+  <datastore-index kind="TestRun" ancestor="false" source="manual">
+    <property name="testName" direction="asc"/>
+    <property name="type" direction="asc"/>
+    <property name="startTimestamp" direction="asc"/>
+  </datastore-index>
+
+  <datastore-index kind="TestRun" ancestor="false" source="manual">
+    <property name="testName" direction="asc"/>
+    <property name="type" direction="asc"/>
+    <property name="startTimestamp" direction="desc"/>
+  </datastore-index>
+
 </datastore-indexes>
