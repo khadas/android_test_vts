@@ -26,6 +26,7 @@
   <object type="vts-vendor-config" class="com.android.tradefed.util.VtsVendorConfigFileUtil" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
   <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 
