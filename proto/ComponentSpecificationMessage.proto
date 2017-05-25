@@ -172,6 +172,14 @@ message NativeCodeCoverageRawDataMessage {
 }
 
 
+// To specify an API call to an interface.
+message FunctionCallMessage {
+  // Name of the interface.
+  optional bytes hidl_interface_name = 1;
+  // Specifies API function and inputs.
+  optional FunctionSpecificationMessage api = 100;
+}
+
 // To specify a function.
 message FunctionSpecificationMessage {
   // the function name.
