@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
+import com.android.tradefed.config.Option;
+import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.util.StreamUtil;
 
@@ -29,10 +31,22 @@ import org.json.JSONObject;
 /**
  * Util to access a VTS config file.
  */
+@OptionClass(alias = "vts-vendor-config")
 public class VtsVendorConfigFileUtil {
     private static final String VENDOR_TEST_CONFIG_FILE_PATH =
             "/config/google-tradefed-vts-config.config";
     private JSONObject vendorConfigJson = null;
+
+    @Option(name = "vendor-config-file-path",
+            description = "The path of a VTS vendor config file (format: json).")
+    private String mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH;
+
+    /**
+     * Returns the specified vendor config file path.
+     */
+    public String GetVendorConfigFilePath() {
+        return mVendorConfigFilePath;
+    }
 
     /**
      * Loads a VTS vendor config file.
@@ -42,12 +56,12 @@ public class VtsVendorConfigFileUtil {
      */
     public boolean LoadVendorConfig(String configPath) throws RuntimeException {
         if (configPath == null) {
-            configPath = VENDOR_TEST_CONFIG_FILE_PATH;
+            configPath = mVendorConfigFilePath;
         }
         CLog.i("Loading vendor test config %s", configPath);
         InputStream config = getClass().getResourceAsStream(configPath);
         if (config == null) {
-            CLog.e("Vendor test config file %s does not exist", VENDOR_TEST_CONFIG_FILE_PATH);
+            CLog.e("Vendor test config file %s does not exist", mVendorConfigFilePath);
             return false;
         }
         try {
@@ -83,5 +97,12 @@ public class VtsVendorConfigFileUtil {
             CLog.e("Vendor config file does not define %s", varName);
             throw new NoSuchElementException("config parsing error");
         }
+    }
+
+    /**
+     * Returns the current vendor config json object.
+     */
+    public JSONObject GetVendorConfigJson() {
+        return vendorConfigJson;
     }
 }

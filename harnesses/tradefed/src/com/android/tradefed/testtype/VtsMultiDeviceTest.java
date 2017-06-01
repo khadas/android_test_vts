@@ -36,6 +36,7 @@ import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.StreamUtil;
+import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import com.android.tradefed.testtype.IAbi;
 
 import org.json.JSONArray;
@@ -547,20 +548,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
      */
     private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
-        CLog.i("Load vendor test config %s", "/config/google-tradefed-vts-config.config");
-        InputStream config = getClass().getResourceAsStream("/config/google-tradefed-vts-config.config");
-        if (config != null) {
-            try {
-                String content = StreamUtil.getStringFromStream(config);
-                CLog.i("Loaded vendor test config %s", content);
-                if (content != null) {
-                    JSONObject vendorConfigJson = new JSONObject(content);
-                    JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
-                }
-            } catch(IOException e) {
-                throw new RuntimeException("Failed to read vendor config json file");
-            } catch(JSONException e) {
-                throw new RuntimeException("Failed to build updated vendor config json data");
+        VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
+        if (configReader.LoadVendorConfig(null)) {
+            JSONObject vendorConfigJson = configReader.GetVendorConfigJson();
+            if (vendorConfigJson != null) {
+                JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
             }
         }
 
@@ -568,13 +560,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         String content = null;
 
         if (mTestConfigPath != null) {
-            content = FileUtil.readStringFromFile(new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+            content = FileUtil.readStringFromFile(
+                    new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+            CLog.i("Loaded original test config %s", content);
+            if (content != null) {
+                JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
+            }
         }
 
-        CLog.i("Loaded original test config %s", content);
-        if (content != null) {
-            JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
-        }
         populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
         CLog.i("Built a Json object using the loaded original test config");
 
