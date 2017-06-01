@@ -190,6 +190,13 @@ media_test_res_copy_pairs := \
   $(foreach f,$(media_test_res_files),\
     hardware/interfaces/media/res/$(f):$(VTS_TESTCASES_OUT)/DATA/media/res/$(f))
 
+audio_test_res_files := \
+  $(call find-files-in-subdirs,hardware/interfaces/audio,"*.xsd" -and -type f,.) \
+
+audio_test_res_copy_pairs := \
+  $(foreach f,$(audio_test_res_files),\
+    hardware/interfaces/audio/$(f):$(VTS_TESTCASES_OUT)/DATA/hardware/interfaces/audio/$(f))
+
 $(compatibility_zip): \
   $(call copy-many-files,$(target_native_copy_pairs)) \
   $(call copy-many-files,$(target_spec_copy_pairs)) \
@@ -202,7 +209,8 @@ $(compatibility_zip): \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
-  $(call copy-many-files,$(media_test_res_copy_pairs))
+  $(call copy-many-files,$(media_test_res_copy_pairs)) \
+  $(call copy-many-files,$(audio_test_res_copy_pairs))
 
 # vendor-specific host logic
 vendor_testcase_files := \
