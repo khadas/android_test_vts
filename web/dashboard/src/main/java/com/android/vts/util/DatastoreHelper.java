@@ -59,8 +59,8 @@ public class DatastoreHelper {
      * @return boolean True if there are newer data points.
      * @throws IOException
      */
-    public static boolean hasNewer(String testName, long lowerBound) throws IOException {
-        if (lowerBound <= 0)
+    public static boolean hasNewer(String testName, Long lowerBound) throws IOException {
+        if (lowerBound == null || lowerBound <= 0)
             return false;
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
@@ -82,8 +82,8 @@ public class DatastoreHelper {
      * @return boolean True if there are older data points.
      * @throws IOException
      */
-    public static boolean hasOlder(String testName, long upperBound) throws IOException {
-        if (upperBound <= 0)
+    public static boolean hasOlder(String testName, Long upperBound) throws IOException {
+        if (upperBound == null || upperBound <= 0)
             return false;
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
