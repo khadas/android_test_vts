@@ -131,10 +131,11 @@ $(foreach m,$(target_hostdriven_modules),\
   $(foreach i, $(_built_files),\
     $(eval bui_ins := $(subst :,$(space),$(i)))\
     $(eval ins := $(word 2,$(bui_ins)))\
-    $(if $(filter $(HOST_OUT)/%,$(ins)),\
+    $(if $(filter $(HOST_OUT)/% $(HOST_CROSS_OUT)/%,$(ins)),\
       $(eval bui := $(word 1,$(bui_ins)))\
       $(eval my_built_modules += $(bui))\
-      $(eval my_copy_dest := $(patsubst $(HOST_OUT)/%,%,$(ins)))\
+      $(eval my_copy_dest := $(patsubst $(HOST_OUT)/%,%,\
+                               $(patsubst $(HOST_CROSS_OUT)/%,%,$(ins))))\
       $(eval target_hostdriven_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/host/$(my_copy_dest)))\
   ))
 
