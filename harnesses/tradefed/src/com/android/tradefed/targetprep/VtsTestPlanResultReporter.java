@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Base64;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -146,7 +147,8 @@ public class VtsTestPlanResultReporter implements ITargetPreparer, ITargetCleane
         message.setAccessToken(GetToken());
         try {
             String commandTemplate = configReader.GetVendorConfigVariable("dashboard_post_command");
-            String filePath = WriteToTempFile(message.toByteArray());
+            String filePath = WriteToTempFile(
+                    Base64.getEncoder().encodeToString(message.toByteArray()).getBytes());
             commandTemplate = commandTemplate.replace("{path}", filePath);
             commandTemplate = commandTemplate.replace("'", "");
             CLog.i(String.format("Upload command: %s", commandTemplate));
