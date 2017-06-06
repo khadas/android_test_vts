@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.Set;
+import java.util.HashSet;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -71,16 +73,19 @@ public class ShowPlanReleaseServlet extends BaseServlet {
     private class TestPlanRunMetadata implements Comparable<TestPlanRunMetadata> {
         public final TestPlanRunEntity testPlanRun;
         public final List<String> devices;
+        public final Set<DeviceInfoEntity> deviceSet;
 
         public TestPlanRunMetadata(TestPlanRunEntity testPlanRun) {
             this.testPlanRun = testPlanRun;
             this.devices = new ArrayList<>();
+            this.deviceSet = new HashSet<>();
         }
 
         public void addDevice(DeviceInfoEntity device) {
-            if (device == null)
+            if (device == null || deviceSet.contains(device))
                 return;
             devices.add(device.branch + "/" + device.buildFlavor + " (" + device.buildId + ")");
+            deviceSet.add(device);
         }
 
         public JsonObject toJson() {
