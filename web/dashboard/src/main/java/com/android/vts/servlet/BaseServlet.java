@@ -45,11 +45,13 @@ public abstract class BaseServlet extends HttpServlet {
 
     public enum Page {
         HOME("VTS Dashboard Home", "/"),
-        PREFERENCES("Preferences", "/show_preferences"),
         TABLE("", "/show_table"),
         GRAPH("Profiling", "/show_graph"),
         COVERAGE("Coverage", "/show_coverage"),
-        PERFORMANCE("Performance Digest", "/show_performance_digest");
+        PERFORMANCE("Performance Digest", "/show_performance_digest"),
+        PLAN_RELEASE("", "/show_plan_release"),
+        PLAN_RUN("Run", "/show_plan_run"),
+        ;
 
         private final String name;
         private final String url;

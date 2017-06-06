@@ -60,46 +60,40 @@ public class DatastoreHelper {
     /**
      * Returns true if there are data points newer than lowerBound in the results table.
      *
-     * @param testName The test to check.
+     * @param parentKey The parent key to use in the query.
+     * @param kind The query entity kind.
      * @param lowerBound The (exclusive) lower time bound, long, microseconds.
      * @return boolean True if there are newer data points.
      * @throws IOException
      */
-    public static boolean hasNewer(String testName, Long lowerBound) throws IOException {
+    public static boolean hasNewer(Key parentKey, String kind, Long lowerBound) throws IOException {
         if (lowerBound == null || lowerBound <= 0)
             return false;
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
-        Key startKey = KeyFactory.createKey(testKey, TestRunEntity.KIND, lowerBound);
+        Key startKey = KeyFactory.createKey(parentKey, kind, lowerBound);
         Filter startFilter = new FilterPredicate(
                 Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, startKey);
-        Query q = new Query(TestRunEntity.KIND)
-                          .setAncestor(KeyFactory.createKey(TestEntity.KIND, testName))
-                          .setFilter(startFilter)
-                          .setKeysOnly();
+        Query q = new Query(kind).setAncestor(parentKey).setFilter(startFilter).setKeysOnly();
         return datastore.prepare(q).countEntities(FetchOptions.Builder.withLimit(1)) > 0;
     }
 
     /**
      * Returns true if there are data points older than upperBound in the table.
      *
-     * @param testName The test to check.
+     * @param parentKey The parent key to use in the query.
+     * @param kind The query entity kind.
      * @param upperBound The (exclusive) upper time bound, long, microseconds.
      * @return boolean True if there are older data points.
      * @throws IOException
      */
-    public static boolean hasOlder(String testName, Long upperBound) throws IOException {
+    public static boolean hasOlder(Key parentKey, String kind, Long upperBound) throws IOException {
         if (upperBound == null || upperBound <= 0)
             return false;
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
-        Key endKey = KeyFactory.createKey(testKey, TestRunEntity.KIND, upperBound);
+        Key endKey = KeyFactory.createKey(parentKey, kind, upperBound);
         Filter endFilter =
                 new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN, endKey);
-        Query q = new Query(TestRunEntity.KIND)
-                          .setAncestor(KeyFactory.createKey(TestEntity.KIND, testName))
-                          .setFilter(endFilter)
-                          .setKeysOnly();
+        Query q = new Query(kind).setAncestor(parentKey).setFilter(endFilter).setKeysOnly();
         return datastore.prepare(q).countEntities(FetchOptions.Builder.withLimit(1)) > 0;
     }
 
