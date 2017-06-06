@@ -18,13 +18,14 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-hidl-profiling-passthrough" />
+  <option name="vts-plan-result:default-type" value="staging" />
 
   <!--  Set passthrough-mode for all tests -->
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:passthrough-mode:true" />
   <!--  Include all profiling tests -->
   <option name="compatibility:include-filter" value="VtsHalAudioV2_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0TargetProfiling" />
-  <option name="compatibility:include-filter" value="VtsHalBioFingerprintV2_1TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalBootV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetProfiling" />
