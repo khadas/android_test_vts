@@ -110,6 +110,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String GTEST_BATCH_MODE = "gtest_match_mode";
     static final String SAVE_TRACE_FIEL_REMOTE = "save_trace_file_remote";
     static final String OUTPUT_COVERAGE_REPORT = "output_coverage_report";
+    static final String GLOBAL_COVERAGE = "global_coverage";
     static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
@@ -198,6 +199,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                           "ro.vts.coverage system must have value \"1\" to indicate the target " +
                           "build is coverage instrumented.")
     private boolean mEnableCoverage = true;
+
+    @Option(name = "global-coverage", description = "True to measure coverage for entire test, "
+                    + "measure coverage for each test case otherwise. Currently, only global "
+                    + "coverage is supported for binary tests")
+    private boolean mGlobalCoverage = true;
 
     @Option(name = "output-coverage-report", description = "Whether to store raw coverage report.")
     private boolean mOutputCoverageReport = false;
@@ -470,6 +476,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 }
                 CLog.i("Using default test case template at %s.", template);
                 setTestCasePath(template);
+                if (mEnableCoverage && !mGlobalCoverage) {
+                    CLog.e("Only global coverage is supported for test type %s.", mBinaryTestType);
+                    throw new RuntimeException("Failed to produce VTS runner test config");
+                }
             } else if (mBinaryTestType.equals(BINARY_TEST_TYPE_HAL_HIDL_REPLAY_TEST)) {
                 setTestCasePath(TEMPLATE_HAL_HIDL_REPLAY_TEST_PATH);
             } else if (mBinaryTestType.equals(BINARY_TEST_TYPE_LLVMFUZZER)) {
@@ -686,6 +696,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Added %s to the Json object", ENABLE_SYSTRACE);
         }
         if (mEnableCoverage) {
+            jsonObject.put(GLOBAL_COVERAGE, mGlobalCoverage);
             if (coverageBuild) {
                 jsonObject.put(ENABLE_COVERAGE, mEnableCoverage);
                 CLog.i("Added %s to the Json object", ENABLE_COVERAGE);
