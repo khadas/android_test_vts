@@ -33,18 +33,32 @@ import org.json.JSONObject;
  */
 @OptionClass(alias = "vts-vendor-config")
 public class VtsVendorConfigFileUtil {
-    private static final String VENDOR_TEST_CONFIG_FILE_PATH =
+    private static final String VENDOR_TEST_CONFIG_DEFAULT_TYPE = "prod";
+    private static final String VENDOR_TEST_CONFIG_FILE_PATH_PROD =
             "/config/google-tradefed-vts-config.config";
+    private static final String VENDOR_TEST_CONFIG_FILE_PATH_STAGING =
+            "/config/google-tradefed-vts-config-staging.config";
     private JSONObject vendorConfigJson = null;
 
-    @Option(name = "vendor-config-file-path",
+    @Option(name = "file-path",
             description = "The path of a VTS vendor config file (format: json).")
-    private String mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH;
+    private String mVendorConfigFilePath = null;
+
+    @Option(name = "default-type",
+            description = "The default config file type, e.g., `prod` or `staging`.")
+    private String mDefaultType = VENDOR_TEST_CONFIG_DEFAULT_TYPE;
 
     /**
      * Returns the specified vendor config file path.
      */
     public String GetVendorConfigFilePath() {
+        if (mVendorConfigFilePath == null) {
+            if (mDefaultType.toLowerCase().equals(VENDOR_TEST_CONFIG_DEFAULT_TYPE)) {
+                mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH_PROD;
+            } else {
+                mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH_STAGING;
+            }
+        }
         return mVendorConfigFilePath;
     }
 
@@ -56,12 +70,12 @@ public class VtsVendorConfigFileUtil {
      */
     public boolean LoadVendorConfig(String configPath) throws RuntimeException {
         if (configPath == null) {
-            configPath = mVendorConfigFilePath;
+            configPath = GetVendorConfigFilePath();
         }
         CLog.i("Loading vendor test config %s", configPath);
         InputStream config = getClass().getResourceAsStream(configPath);
         if (config == null) {
-            CLog.e("Vendor test config file %s does not exist", mVendorConfigFilePath);
+            CLog.e("Vendor test config file %s does not exist", configPath);
             return false;
         }
         try {
