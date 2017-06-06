@@ -74,6 +74,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     private String mHostProfilingTracePath = HOST_PROFILING_TRACE_PATH;
 
     private IAbi mAbi = null;
+    private IBuildInfo mBuildInfo = null;
 
     /**
      * Set mTargetProfilingTracePath.  Exposed for testing.
@@ -103,6 +104,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo) throws TargetSetupError, BuildError,
             DeviceNotAvailableException, RuntimeException {
+        mBuildInfo = buildInfo;
         readVtsTradeFedVendorConfig();
 
         // Cleanup any existing traces
@@ -192,7 +194,7 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
      */
     private void readVtsTradeFedVendorConfig() throws RuntimeException {
         VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
-        if (configReader.LoadVendorConfig(null)) {
+        if (configReader.LoadVendorConfig(mBuildInfo)) {
             try {
                 String tracePath =
                         configReader.GetVendorConfigVariable(HOST_PROFILING_TRACE_PATH_KEY);

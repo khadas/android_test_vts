@@ -81,6 +81,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
     private Collection<String> mDepModules = new TreeSet<>(Arrays.asList(DEFAULT_DEP_MODULES));
 
+    IBuildInfo mBuildInfo = null;
     IRunUtil mRunUtil = new RunUtil();
     String mPip = PIP;
     String mLocalPypiPath = null;
@@ -91,6 +92,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
+        mBuildInfo = buildInfo;
         startVirtualenv(buildInfo);
         setLocalPypiPath();
         installDeps(buildInfo);
@@ -122,7 +124,7 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
      */
     protected void setLocalPypiPath() throws RuntimeException {
         VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
-        if (configReader.LoadVendorConfig(null)) {
+        if (configReader.LoadVendorConfig(mBuildInfo)) {
             // First try to load local PyPI directory path from vendor config file
             try {
                 String pypiPath = configReader.GetVendorConfigVariable(LOCAL_PYPI_PATH_KEY);
