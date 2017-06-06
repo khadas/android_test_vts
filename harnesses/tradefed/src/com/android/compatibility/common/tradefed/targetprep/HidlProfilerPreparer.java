@@ -29,6 +29,7 @@ import com.android.tradefed.targetprep.BuildError;
 import com.android.tradefed.testtype.IAbi;
 import com.android.tradefed.testtype.IAbiReceiver;
 import com.android.tradefed.util.StreamUtil;
+import com.android.tradefed.util.VtsVendorConfigFileUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -53,9 +54,6 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     private static final String TARGET_PROFILING_LIBRARY_PATH = "/data/local/tmp/<bitness>/hw/";
     private static final String HOST_PROFILING_TRACE_PATH = "/tmp/vts-trace/record-replay/";
     private static final String HOST_PROFILING_TRACE_PATH_KEY = "profiling_trace_path";
-
-    private static final String VENDOR_TEST_CONFIG_FILE_PATH =
-            "/config/google-tradefed-vts-config.config";
 
     @Option(name="target-profiling-trace-path", description=
             "The target-side path to store the profiling trace file(s).")
@@ -190,45 +188,20 @@ public class HidlProfilerPreparer implements ITargetCleaner, IAbiReceiver {
     }
 
     /**
-     * Reads HOST_PROFILING_TRACE_PATH_KEY value from VENDOR_TEST_CONFIG_FILE_PATH.
+     * Reads HOST_PROFILING_TRACE_PATH_KEY value from a VTS vendor test config file.
      */
     private void readVtsTradeFedVendorConfig() throws RuntimeException {
-        Log.d(LOG_TAG, String.format("Load vendor test config %s",
-                                     VENDOR_TEST_CONFIG_FILE_PATH));
-        InputStream config = getClass().getResourceAsStream(
-                VENDOR_TEST_CONFIG_FILE_PATH);
-        if (config == null) {
-            Log.d(LOG_TAG,
-                  String.format("Vendor test config file %s does not exist.",
-                                VENDOR_TEST_CONFIG_FILE_PATH));
-            return;
-        }
-
-        try {
-            String content = StreamUtil.getStringFromStream(config);
-            Log.d(LOG_TAG, String.format("Loaded vendor test config %s",
-                                         content));
-            if (content != null) {
-                JSONObject vendorConfigJson = new JSONObject(content);
-                try {
-                    String tracePath = vendorConfigJson.getString(
-                            HOST_PROFILING_TRACE_PATH_KEY);
-                    if (tracePath.length() > 0) {
-                        mHostProfilingTracePath = tracePath;
-                    }
-                } catch (NoSuchElementException e) {
-                    Log.d(LOG_TAG,
-                          String.format(
-                                  "Vendor config does not define %s",
-                                  HOST_PROFILING_TRACE_PATH_KEY));
+        VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
+        if (configReader.LoadVendorConfig(null)) {
+            try {
+                String tracePath =
+                        configReader.GetVendorConfigVariable(HOST_PROFILING_TRACE_PATH_KEY);
+                if (tracePath.length() > 0) {
+                    mHostProfilingTracePath = tracePath;
                 }
+            } catch (NoSuchElementException e) {
+                /* use the default */
             }
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to read vendor config json file");
-        } catch (JSONException e) {
-            throw new RuntimeException(
-                    "Failed to build updated vendor config json data");
         }
     }
 }
