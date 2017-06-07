@@ -26,6 +26,7 @@
     card.appendTo(container);
     var div = $('<div class="hoverable card release-entry"></div>');
     var startTime = entry.testPlanRun.startTimestamp;
+    var endTime = entry.testPlanRun.endTimestamp;
     div.appendTo(card);
     var span = $('<span></span>');
     span.addClass('plan-run-metadata');
@@ -34,7 +35,10 @@
     span.append('<br>');
     $('<b></b>').text('VTS Build: ').appendTo(span);
     span.append(entry.testPlanRun.testBuildId).append('<br>');
-    var timeString = moment().renderTime(startTime, true);
+    var timeString = (
+      moment().renderTime(startTime, false) + ' - ' +
+      moment().renderTime(endTime, true) + ' (' +
+      moment().renderDuration(endTime - startTime) + ')');
     span.append(timeString);
     var counter = $('<span></span>');
     var color = entry.testPlanRun.failCount > 0 ? 'red' : 'green';
