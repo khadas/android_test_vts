@@ -545,7 +545,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
         VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
-        if (configReader.LoadVendorConfig(null)) {
+        if (configReader.LoadVendorConfig(mBuildInfo)) {
             JSONObject vendorConfigJson = configReader.GetVendorConfigJson();
             if (vendorConfigJson != null) {
                 JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
