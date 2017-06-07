@@ -325,6 +325,7 @@ public class DatastoreHelper {
         long passCount = 0;
         long failCount = 0;
         long startTimestamp = -1;
+        long endTimestamp = -1;
         String testBuildId = null;
         TestRunType type = null;
         Set<DeviceInfoEntity> devices = new HashSet<>();
@@ -337,6 +338,9 @@ public class DatastoreHelper {
             failCount += testRun.failCount;
             if (startTimestamp < 0 || testRunKey.getId() < startTimestamp) {
                 startTimestamp = testRunKey.getId();
+            }
+            if (endTimestamp < 0 || testRun.endTimestamp > endTimestamp) {
+                endTimestamp = testRun.endTimestamp;
             }
             if (type == null) {
                 type = testRun.type;
@@ -358,7 +362,7 @@ public class DatastoreHelper {
             return;
         }
         TestPlanRunEntity testPlanRun = new TestPlanRunEntity(testPlanEntity.getKey(), testPlanName,
-                type, startTimestamp, testBuildId, passCount, failCount, testRunKeys);
+                type, startTimestamp, endTimestamp, testBuildId, passCount, failCount, testRunKeys);
 
         // Create the device infos.
         for (DeviceInfoEntity device : devices) {
