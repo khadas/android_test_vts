@@ -37,9 +37,10 @@ public class VtsVendorConfigFileUtil {
     public static final String KEY_VENDOR_TEST_CONFIG_FILE_PATH = "vts-vendor-config:file-path";
     public static final String VENDOR_TEST_CONFIG_DEFAULT_TYPE = "prod";
     public static final String VENDOR_TEST_CONFIG_FILE_PATH_PROD =
-            "/config/google-tradefed-vts-config.config";
-    public static final String VENDOR_TEST_CONFIG_FILE_PATH_STAGING =
-            "/config/google-tradefed-vts-config-staging.config";
+            "/config/vts-tradefed-vendor-config-prod.json";
+    public static final String VENDOR_TEST_CONFIG_FILE_PATH_TEST =
+            "/config/vts-tradefed-vendor-config-test.json";
+
     private JSONObject vendorConfigJson = null;
 
     // The path of a VTS vendor config file (format: json).
@@ -56,7 +57,7 @@ public class VtsVendorConfigFileUtil {
             if (mDefaultType.toLowerCase().equals(VENDOR_TEST_CONFIG_DEFAULT_TYPE)) {
                 mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH_PROD;
             } else {
-                mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH_STAGING;
+                mVendorConfigFilePath = VENDOR_TEST_CONFIG_FILE_PATH_TEST;
             }
         }
         return mVendorConfigFilePath;
