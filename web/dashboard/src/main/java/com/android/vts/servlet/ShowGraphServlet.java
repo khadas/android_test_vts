@@ -65,24 +65,19 @@ public class ShowGraphServlet extends BaseServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
 
     @Override
-    public List<String[]> getNavbarLinks(HttpServletRequest request) {
-        List<String[]> links = new ArrayList<>();
-        Page root = Page.HOME;
-        String[] rootEntry = new String[] {root.getUrl(), root.getName()};
-        links.add(rootEntry);
+    public PageType getNavParentType() {
+        return PageType.TOT;
+    }
 
-        Page table = Page.TABLE;
+    @Override
+    public List<Page> getBreadcrumbLinks(HttpServletRequest request) {
+        List<Page> links = new ArrayList<>();
         String testName = request.getParameter("testName");
-        String name = table.getName() + testName;
-        String url = table.getUrl() + "?testName=" + testName;
-        String[] tableEntry = new String[] {url, name};
-        links.add(tableEntry);
+        links.add(new Page(PageType.TABLE, testName, "?testName=" + testName));
 
-        Page graph = Page.GRAPH;
         String profilingPointName = request.getParameter("profilingPoint");
-        url = graph.getUrl() + "?testName=" + testName + "&profilingPoint=" + profilingPointName;
-        String[] graphEntry = new String[] {url, graph.getName()};
-        links.add(graphEntry);
+        links.add(new Page(
+                PageType.GRAPH, "?testName=" + testName + "&profilingPoint=" + profilingPointName));
         return links;
     }
 
@@ -123,9 +118,7 @@ public class ShowGraphServlet extends BaseServlet {
     private static String getDeviceSummary(Entity testRun, String selectedDevice) {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         List<String> buildInfos = new ArrayList<>();
-        Query deviceQuery =
-                new Query(DeviceInfoEntity.KIND)
-                        .setAncestor(testRun.getKey());
+        Query deviceQuery = new Query(DeviceInfoEntity.KIND).setAncestor(testRun.getKey());
         boolean isSelectedDevice = selectedDevice == null;
         for (Entity device : datastore.prepare(deviceQuery).asIterable()) {
             String product = (String) device.getProperty(DeviceInfoEntity.PRODUCT);
