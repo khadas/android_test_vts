@@ -100,8 +100,13 @@ class BaseTestClass(object):
                 keys.ConfigKeys.KEY_EXCLUDE_FILTER
             ],
             default_value=[])
-        self.include_filter = list_utils.ItemsToStr(self.include_filter)
-        self.exclude_filter = list_utils.ItemsToStr(self.exclude_filter)
+
+        self.include_filter = self._ExpandFilterBitness(
+            list_utils.ExpandItemDelimiters(
+                list_utils.ItemsToStr(self.include_filter), ','))
+        self.exclude_filter = self._ExpandFilterBitness(
+            list_utils.ExpandItemDelimiters(
+                list_utils.ItemsToStr(self.exclude_filter), ','))
 
         # TODO: get abi information differently for multi-device support.
         # Set other optional parameters
@@ -468,6 +473,29 @@ class BaseTestClass(object):
                               func.__name__, self.currentTestName)
             tr_record.addError(func.__name__, e)
 
+    def _ExpandFilterBitness(self, input_list):
+        '''Expand filter items with bitness suffix.
+
+        If a filter item contains bitness suffix, only test name with that tag will be included
+        in output.
+        Otherwise, both 32bit and 64bit suffix will be paired to the test name in output
+        list.
+
+        Args:
+            input_list: list of string, the list to expand
+
+        Returns:
+            A list of string
+        '''
+        result = []
+        for item in input_list:
+            result.append(str(item))
+            if (not item.endswith(const.SUFFIX_32BIT) and
+                    not item.endswith(const.SUFFIX_64BIT)):
+                result.append("%s_%s" % (item, const.SUFFIX_32BIT))
+                result.append("%s_%s" % (item, const.SUFFIX_64BIT))
+        return list_utils.DeduplicateKeepOrder(result)
+
     def filterOneTest(self, test_name):
         """Check test filters for a test name.
 
@@ -498,14 +526,15 @@ class BaseTestClass(object):
         """
         if self.include_filter:
             if test_name not in self.include_filter:
-                logging.info(
-                    "Test case '%s' not in include filter." % test_name)
-                raise signals.TestSilent(
-                    "Test case '%s' not in include filter." % test_name)
+                msg = "Test case '%s' not in include filter %s." % (
+                    test_name, self.include_filter)
+                logging.info(msg)
+                raise signals.TestSilent(msg)
         elif test_name in self.exclude_filter:
-            logging.info("Test case '%s' in exclude filter." % test_name)
-            raise signals.TestSilent(
-                "Test case '%s' in exclude filter." % test_name)
+            msg = "Test case '%s' in exclude filter %s." % (
+                test_name, self.exclude_filter)
+            logging.info(msg)
+            raise signals.TestSilent(msg)
 
         if self._skip_all_testcases:
             raise signals.TestSkip("All test cases skipped.")
