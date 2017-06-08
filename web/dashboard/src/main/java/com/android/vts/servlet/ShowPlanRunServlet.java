@@ -49,8 +49,7 @@ public class ShowPlanRunServlet extends BaseServlet {
 
     @Override
     public PageType getNavParentType() {
-        // TODO(ryanjcampbell@): change to release when the page is ready
-        return PageType.TOT;
+        return PageType.RELEASE;
     }
 
     @Override
