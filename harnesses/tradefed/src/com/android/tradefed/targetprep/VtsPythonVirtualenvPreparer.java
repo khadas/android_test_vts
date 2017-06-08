@@ -167,13 +167,34 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
      * This method returns whether the given path is a dir that exists and the user has read access.
      */
     private boolean dirExistsAndHaveReadAccess(String path) {
-        CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
-        if (c.getStatus() != CommandStatus.SUCCESS) {
-            CLog.i(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s", path,
-                    c.getStatus(), c.getStdout(), c.getStderr()));
+        File pathDir = new File(path);
+        if (!pathDir.exists() || !pathDir.isDirectory()) {
+            CLog.i("Directory %s does not exist.", pathDir);
             return false;
         }
-        return true;
+
+        if (!isOnWindows()) {
+            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
+            if (c.getStatus() != CommandStatus.SUCCESS) {
+                CLog.i(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
+                        path, c.getStatus(), c.getStdout(), c.getStderr()));
+                return false;
+            }
+            return true;
+        } else {
+            try {
+                String[] pathDirList = pathDir.list();
+                if (pathDirList == null) {
+                    CLog.i("Failed to read dir: %s. Please check access permission.", pathDir);
+                    return false;
+                }
+            } catch (SecurityException e) {
+                CLog.i(String.format(
+                        "Failed to read dir %s with SecurityException %s", pathDir, e));
+                return false;
+            }
+            return true;
+        }
     }
 
     protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
