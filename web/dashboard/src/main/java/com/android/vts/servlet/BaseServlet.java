@@ -39,6 +39,7 @@ public abstract class BaseServlet extends HttpServlet {
 
     public enum PageType {
         TOT("ToT", "/"),
+        RELEASE("Release", "/show_release"),
         TABLE("", "/show_table"),
         TREE("", "/show_tree"),
         GRAPH("Profiling", "/show_graph"),
@@ -93,6 +94,7 @@ public abstract class BaseServlet extends HttpServlet {
     static {
         List<Page> links = new ArrayList<>();
         links.add(new Page(PageType.TOT));
+        links.add(new Page(PageType.RELEASE));
         navbarLinks = links;
     }
 
@@ -123,7 +125,9 @@ public abstract class BaseServlet extends HttpServlet {
         PageType parentType = getNavParentType();
         int activeIndex;
         switch (getNavParentType()) {
-            // TODO(ryanjcampbell@): when release list page is done, add other entries
+            case RELEASE:
+                activeIndex = 1;
+                break;
             default:
                 activeIndex = 0;
                 break;
