@@ -60,8 +60,7 @@ public class ShowGraphServlet extends BaseServlet {
 
     private static final String HIDL_HAL_OPTION = "hidl_hal_mode";
     private static final String[] splitKeysArray = new String[] {HIDL_HAL_OPTION};
-    private static final Set<String> splitKeySet =
-            new HashSet<String>(Arrays.asList(splitKeysArray));
+    private static final Set<String> splitKeySet = new HashSet<>(Arrays.asList(splitKeysArray));
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
 
     @Override
@@ -93,7 +92,7 @@ public class ShowGraphServlet extends BaseServlet {
         ProfilingPointRunEntity pt = ProfilingPointRunEntity.fromEntity(profilingRun);
         if (pt == null)
             return;
-        String name = PerformanceUtil.getOptionAlias(profilingRun, splitKeySet);
+        String name = PerformanceUtil.getOptionAlias(pt, splitKeySet);
         Graph g = null;
         if (pt.labels != null && pt.labels.size() == pt.values.size()) {
             g = new LineGraph(name);
