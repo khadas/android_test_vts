@@ -98,10 +98,10 @@ class BaseTestClass(object):
             ],
             default_value=[])
 
-        self.include_filter = self._ExpandFilterBitness(
+        self.include_filter = self.ExpandFilterBitness(
             list_utils.ExpandItemDelimiters(
                 list_utils.ItemsToStr(self.include_filter), ','))
-        self.exclude_filter = self._ExpandFilterBitness(
+        self.exclude_filter = self.ExpandFilterBitness(
             list_utils.ExpandItemDelimiters(
                 list_utils.ItemsToStr(self.exclude_filter), ','))
 
@@ -449,7 +449,7 @@ class BaseTestClass(object):
                               func.__name__, self.currentTestName)
             tr_record.addError(func.__name__, e)
 
-    def _ExpandFilterBitness(self, input_list):
+    def ExpandFilterBitness(self, input_list):
         '''Expand filter items with bitness suffix.
 
         If a filter item contains bitness suffix, only test name with that tag will be included
