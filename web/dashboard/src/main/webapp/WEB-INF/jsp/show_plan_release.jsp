@@ -21,46 +21,77 @@
   <%@ include file="header.jsp" %>
   <link rel='stylesheet' href='/css/show_plan_release.css'>
   <link rel='stylesheet' href='/css/plan_runs.css'>
+  <link rel='stylesheet' href='/css/search_header.css'>
   <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
   <script src='js/time.js'></script>
   <script src='js/plan_runs.js'></script>
+  <script src='js/search_header.js'></script>
   <script type='text/javascript'>
+      var search;
       $(document).ready(function() {
           // disable buttons on load
           if (!${hasNewer}) {
-              $('#newer-button').toggleClass('disabled');
+            $('#newer-button').toggleClass('disabled');
           }
           if (!${hasOlder}) {
-              $('#older-button').toggleClass('disabled');
+            $('#older-button').toggleClass('disabled');
           }
 
           $('#newer-button').click(prev);
           $('#older-button').click(next);
+          search = $('#filter-bar').createSearchHeader('Plan: ', '${plan}', refresh);
+          search.addFilter('Branch', 'branch', {
+            corpus: ${branches}
+          }, ${branch});
+          search.addFilter('Device', 'device', {
+            corpus: ${devices}
+          }, ${device});
+          search.addFilter('Device Build ID', 'deviceBuildId', {}, ${deviceBuildId});
+          search.addRunTypeCheckboxes(${showPresubmit}, ${showPostsubmit});
+          search.display();
           $('#release-container').showPlanRuns(${planRuns});
       });
 
       // view older data
       function next() {
-          if($(this).hasClass('disabled')) return;
-          var endTime = ${startTime};
-          var link = '${pageContext.request.contextPath}' +
-              '/show_plan_release?plan=${plan}&endTime=' + endTime;
-          window.open(link,'_self');
+        if($(this).hasClass('disabled')) return;
+        var endTime = ${startTime};
+        var link = '${pageContext.request.contextPath}' +
+            '/show_plan_release?plan=${plan}&endTime=' + endTime +
+            search.args();
+        if (${unfiltered}) {
+          link += '&unfiltered=';
+        }
+        window.open(link,'_self');
       }
 
       // view newer data
       function prev() {
-          if($(this).hasClass('disabled')) return;
-          var startTime = ${endTime};
-          var link = '${pageContext.request.contextPath}' +
-              '/show_plan_release?plan=${plan}&startTime=' + startTime;
-          window.open(link,'_self');
+        if($(this).hasClass('disabled')) return;
+        var startTime = ${endTime};
+        var link = '${pageContext.request.contextPath}' +
+            '/show_plan_release?plan=${plan}&startTime=' + startTime +
+            search.args();
+        if (${unfiltered}) {
+          link += '&unfiltered=';
         }
+        window.open(link,'_self');
+      }
+
+      // refresh the page to see the runs matching the specified filter
+      function refresh() {
+        var link = '${pageContext.request.contextPath}' +
+            '/show_plan_release?plan=${plan}' + search.args();
+        if (${unfiltered}) {
+          link += '&unfiltered=';
+        }
+        window.open(link,'_self');
+      }
   </script>
 
   <body>
     <div class='wide container'>
-      <h4 id='section-header'>${plan}</h4>
+      <div id='filter-bar'></div>
       <div class='row' id='release-container'></div>
       <div id='newer-wrapper' class='page-button-wrapper fixed-action-btn'>
         <a id='newer-button' class='btn-floating btn red waves-effect'>
