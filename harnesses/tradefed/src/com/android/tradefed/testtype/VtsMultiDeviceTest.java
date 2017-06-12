@@ -36,6 +36,7 @@ import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.StreamUtil;
+import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import com.android.tradefed.testtype.IAbi;
 
@@ -363,6 +364,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
+    private VtsVendorConfigFileUtil configReader = null;
+
     /**
      * @return the mRunUtil
      */
@@ -555,7 +558,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
      */
     private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
-        VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
+        configReader = new VtsVendorConfigFileUtil();
         if (configReader.LoadVendorConfig(mBuildInfo)) {
             JSONObject vendorConfigJson = configReader.GetVendorConfigJson();
             if (vendorConfigJson != null) {
@@ -1024,7 +1027,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.e("Cannot find report message proto file.");
         } else if (reportMsg.length() > 0) {
             CLog.i("Uploading report message. File size: %s", reportMsg.length());
-            //TODO upload report message from here
+            VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
+            dashboardUtil.Upload(reportMsg.getAbsolutePath());
         } else {
             CLog.i("Result uploading is not enabled.");
         }
