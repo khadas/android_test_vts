@@ -253,7 +253,9 @@ class BaseTestClass(object):
         if self.log_uploading.enabled:
             self.log_uploading.UploadLogs()
         if self.web.enabled:
-            self.web.Upload(self.results.requested, self.results.executed)
+            self.web.GenerateReportMessage(
+                self.results.requested,
+                self.results.executed)
         return ret
 
     def tearDownClass(self):

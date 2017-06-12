@@ -111,6 +111,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths";
     static final String HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name";
+    static final String REPORT_MESSAGE_FILE_NAME = "report_proto.msg";
     static final String RUN_AS_VTS_SELF_TEST = "run_as_vts_self_test";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
@@ -894,6 +895,25 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             parser.processJsonFile(object);
         }
         printVtsLogs(vtsRunnerLogDir);
+
+        File reportMsg;
+        int waitCount = 0;
+        // Wait python process to finish for 30 seconds at most
+        while ((reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME)) == null
+                && waitCount < 30) {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            waitCount++;
+        }
+
+        CLog.i("Report message path: %s", reportMsg);
+        if (reportMsg != null) {
+        } else {
+            CLog.e("Cannot find report message proto file.");
+        }
         FileUtil.recursiveDelete(vtsRunnerLogDir);
         CLog.i("Deleted the runner log dir, %s.", vtsRunnerLogDir);
         if (jsonFilePath != null) {
