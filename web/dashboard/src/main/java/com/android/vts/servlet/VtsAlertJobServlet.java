@@ -98,8 +98,8 @@ public class VtsAlertJobServlet extends HttpServlet {
             Date lastUpload = new Date(TimeUnit.MICROSECONDS.toMillis(test.timestamp));
             String uploadTimeString =
                     new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(lastUpload);
-            String subject = "Warning! Inactive test: " + test;
-            String body = "Hello,<br><br>Test \"" + test + "\" is inactive. "
+            String subject = "Warning! Inactive test: " + test.testName;
+            String body = "Hello,<br><br>Test \"" + test.testName + "\" is inactive. "
                     + "No new data has been uploaded since " + uploadTimeString + "."
                     + getFooter(link);
             try {
