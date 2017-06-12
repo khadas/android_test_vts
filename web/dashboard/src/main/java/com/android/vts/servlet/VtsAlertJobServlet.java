@@ -139,8 +139,8 @@ public class VtsAlertJobServlet extends HttpServlet {
         String testName = test.testName;
         Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
         Filter testTypeFilter = FilterUtil.getTestTypeFilter(false, true, false);
-        Filter runFilter =
-                FilterUtil.getTimeFilter(testKey, test.timestamp + 1, null, testTypeFilter);
+        Filter runFilter = FilterUtil.getTimeFilter(
+                testKey, TestRunEntity.KIND, test.timestamp + 1, null, testTypeFilter);
         Query q = new Query(TestRunEntity.KIND)
                           .setAncestor(testKey)
                           .setFilter(runFilter)
