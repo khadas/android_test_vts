@@ -72,6 +72,7 @@ public class VtsMultiDeviceTestResultParser {
     static final String FAIL = "FAIL";
     static final String TIMEOUT = "TIMEOUT";
     static final String SKIP = "SKIP";
+    static final String ERROR = "ERROR";
     static final String END_PATTERN = "<==========";
     static final String BEGIN_PATTERN = "==========>";
 
@@ -364,16 +365,26 @@ public class VtsMultiDeviceTestResultParser {
                     listener.testStarted(testIdentifier);
 
                     switch (result) {
+                        case ERROR:
+                            /* Error is reported by the VTS runner when an unexpected exception
+                               happened during test execution. It could be due to: a framework bug,
+                               an unhandled I/O, a TCP error, or a bug in test module or template
+                               execution code. Error thus does not necessarily indicate a test
+                               failure or a bug in device implementation. Since error is not yet
+                               recognized in TF, it is converted to FAIL. */
+                            listener.testFailed(
+                                    testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
                         case PASS :
                             listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
                             break;
                         case TIMEOUT :
-                            /* Timeout is not recognized in TF*/
+                            /* Timeout is not recognized in TF */
                             break;
                         case SKIP :
-                            /* Skip is not recognized in TF*/
+                            /* Skip is not recognized in TF */
                             break;
                         case FAIL:
+                            /* Indicates a test failure. */
                             listener.testFailed(
                                     testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
                         default:
