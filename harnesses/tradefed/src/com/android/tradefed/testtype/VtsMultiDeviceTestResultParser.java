@@ -87,6 +87,8 @@ public class VtsMultiDeviceTestResultParser {
 
     // default message for test failure
     static final String UNKNOWN_ERROR = "Unknown error.";
+    static final String UNKNOWN_FAILURE = "Unknown failure.";
+    static final String UNKNOWN_TIMEOUT = "Unknown timeout.";
 
     // Enumeration for parser state.
     static enum ParserState {
@@ -378,7 +380,9 @@ public class VtsMultiDeviceTestResultParser {
                             listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
                             break;
                         case TIMEOUT :
-                            /* Timeout is not recognized in TF */
+                            /* Timeout is not recognized in TF. Use FAIL instead. */
+                            listener.testFailed(
+                                    testIdentifier, details.isEmpty() ? UNKNOWN_TIMEOUT : details);
                             break;
                         case SKIP :
                             /* Skip is not recognized in TF */
@@ -386,7 +390,7 @@ public class VtsMultiDeviceTestResultParser {
                         case FAIL:
                             /* Indicates a test failure. */
                             listener.testFailed(
-                                    testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
+                                    testIdentifier, details.isEmpty() ? UNKNOWN_FAILURE : details);
                         default:
                             break;
                     }
