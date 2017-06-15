@@ -953,7 +953,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             waitCount++;
         }
 
-        CLog.i("Report message path: %s", reportMsg);
+        CLog.i("Report message path: %s, size: %s", reportMsg, reportMsg.length());
         if (reportMsg != null) {
             VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
             dashboardUtil.Upload(reportMsg.getAbsolutePath());
