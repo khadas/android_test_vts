@@ -52,7 +52,6 @@
 
 #include "binder/VtsFuzzerBinderService.h"
 #include "specification_parser/SpecificationBuilder.h"
-
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
@@ -69,11 +68,10 @@ int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
                                           const string& hw_binder_service_name,
                                           const string& module_name) {
   printf("VtsFuzzerServer::LoadHal(%s)\n", path.c_str());
-  bool success = spec_builder_.LoadTargetComponent(
+  bool success = driver_manager_->LoadTargetComponent(
       path.c_str(), lib_path_, target_class, target_type, target_version,
       target_package.c_str(), target_component_name.c_str(),
-      hw_binder_service_name.c_str(),
-      module_name.c_str());
+      hw_binder_service_name.c_str(), module_name.c_str());
   cout << "Result: " << success << std::endl;
   if (success) {
     return 0;
@@ -91,12 +89,12 @@ const char* VtsDriverHalSocketServer::ReadSpecification(
     const string& name, int target_class, int target_type, float target_version,
     const string& target_package) {
   printf("VtsFuzzerServer::ReadSpecification(%s)\n", name.c_str());
-  ComponentSpecificationMessage* msg =
-      spec_builder_.FindComponentSpecification(
-          target_class, target_type, target_version,
-          "", target_package, name);
+  ComponentSpecificationMessage msg;
+  driver_manager_->FindComponentSpecification(target_class, target_type,
+                                              target_version, "",
+                                              target_package, name, &msg);
   string* result = new string();
-  google::protobuf::TextFormat::PrintToString(*msg, result);
+  google::protobuf::TextFormat::PrintToString(msg, result);
   return result->c_str();
 }
 
@@ -106,7 +104,7 @@ const char* VtsDriverHalSocketServer::Call(const string& arg) {
   cout << __func__ << ":" << __LINE__ << endl;
   google::protobuf::TextFormat::MergeFromString(arg, func_msg);
   cout << __func__ << ":" << __LINE__ << endl;
-  const string& result = spec_builder_.CallFunction(func_msg);
+  const string& result = driver_manager_->CallFunction(func_msg);
   cout << __func__ << ":" << __LINE__ << endl;
   return result.c_str();
 }
@@ -115,7 +113,7 @@ const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
   printf("%s(%s)\n", __func__, arg.c_str());
   FunctionSpecificationMessage* func_msg = new FunctionSpecificationMessage();
   google::protobuf::TextFormat::MergeFromString(arg, func_msg);
-  const string& result = spec_builder_.GetAttribute(func_msg);
+  const string& result = driver_manager_->GetAttribute(func_msg);
   printf("%s: done\n", __func__);
   return result.c_str();
 }
@@ -123,7 +121,7 @@ const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
 string VtsDriverHalSocketServer::ListFunctions() const {
   cout << "VtsFuzzerServer::" << __func__ << endl;
   vts::ComponentSpecificationMessage* spec =
-      spec_builder_.GetComponentSpecification();
+      driver_manager_->GetComponentSpecification();
   string output;
   if (!spec) {
     return output;
@@ -231,7 +229,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
 
 // Starts to run a UNIX socket server (foreground).
 int StartSocketServer(const string& socket_port_file,
-                      android::vts::SpecificationBuilder& spec_builder,
+                      VtsHalDriverManager* driver_manager,
                       const char* lib_path) {
   int sockfd;
   socklen_t clilen;
@@ -277,7 +275,7 @@ int StartSocketServer(const string& socket_port_file,
       close(sockfd);
       cout << "[driver:hal] process for an agent - pid = " << getpid() << endl;
       VtsDriverHalSocketServer* server =
-          new VtsDriverHalSocketServer(spec_builder, lib_path);
+          new VtsDriverHalSocketServer(driver_manager, lib_path);
       server->SetSockfd(newsockfd);
       while (server->ProcessOneCommand())
         ;
