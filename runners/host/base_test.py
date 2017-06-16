@@ -608,7 +608,7 @@ class BaseTestClass(object):
             # Suppress test reporting.
             is_silenced = True
             self._exec_procedure_func(self._onSilent)
-            self.results.requested.remove(test_name)
+            self.results.removeRecord(tr_record)
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
@@ -676,7 +676,9 @@ class BaseTestClass(object):
                     logging.exception(("Failed to get test name from "
                                        "test_func. Fall back to default %s"),
                                       test_name)
-            self.results.requested.append(test_name)
+
+            tr_record = records.TestResultRecord(test_name, self.TAG)
+            self.results.requested.append(tr_record)
             if len(test_name) > utils.MAX_FILENAME_LEN:
                 test_name = test_name[:utils.MAX_FILENAME_LEN]
             previous_success_cnt = len(self.results.passed)
@@ -783,8 +785,8 @@ class BaseTestClass(object):
                 # No test case specified by user, execute all in the test class
                 test_names = self._get_all_test_names()
         self.results.requested = [
-            test_name for test_name in test_names
-            if test_name.startswith(STR_TEST)
+            records.TestResultRecord(test_name, self.TAG)
+            for test_name in test_names if test_name.startswith(STR_TEST)
         ]
         tests = self._get_test_funcs(test_names)
         # Setup for the class.
