@@ -28,6 +28,7 @@ from vts.utils.python.web import feature_utils
 _PROFILING_POINTS = "profiling_points"
 
 
+
 class WebFeature(feature_utils.Feature):
     """Feature object for web functionality.
 
@@ -375,8 +376,8 @@ class WebFeature(feature_utils.Feature):
         Requires the feature to be enabled; no-op otherwise.
 
         Args:
-            requested: list, A list of test case names requested to run
-            executed: list, A list of test case names that were executed
+            requested: list, A list of test case records requested to run
+            executed: list, A list of test case records that were executed
         """
         if not self.enabled:
             return
@@ -391,7 +392,7 @@ class WebFeature(feature_utils.Feature):
 
         for test in requested[start_index:]:
             msg = self.report_msg.test_case.add()
-            msg.name = test
+            msg.name = test.test_name
             msg.start_timestamp = feature_utils.GetTimestamp()
             msg.end_timestamp = msg.start_timestamp
             msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
