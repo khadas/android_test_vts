@@ -33,7 +33,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.gson.Gson;
@@ -61,14 +60,6 @@ public class ShowTreeServlet extends BaseServlet {
     private static final String PROFILING_DATA_ALERT = "No profiling data was found.";
     private static final int MAX_BUILD_IDS_PER_PAGE = 20;
     private static final int MAX_PREFETCH_COUNT = 10;
-
-    private static final String SEARCH_HELP_HEADER = "Search Help";
-    private static final String SEARCH_HELP = "Data can be queried using one or more filters. "
-            + "If more than one filter is provided, results will be returned that match <i>all</i>. "
-            + "<br><br>Filters are delimited by spaces; to specify a multi-word token, enclose it in "
-            + "double quotes. A query must be in the format: \"field:value\".<br><br>"
-            + "<b>Supported field qualifiers:</b> "
-            + StringUtils.join(FilterUtil.FilterKey.values(), ", ") + ".";
 
     @Override
     public PageType getNavParentType() {
@@ -170,8 +161,9 @@ public class ShowTreeServlet extends BaseServlet {
             dir = SortDirection.ASCENDING;
         }
         Key testKey = KeyFactory.createKey(TestEntity.KIND, testName);
-        Filter userTestFilter = FilterUtil.getUserTestFilter(searchString);
-        Filter userDeviceFilter = FilterUtil.getDeviceFilter(searchString);
+        Map<String, Object> parameterMap = request.getParameterMap();
+        Filter userTestFilter = FilterUtil.getUserTestFilter(parameterMap);
+        Filter userDeviceFilter = FilterUtil.getUserDeviceFilter(parameterMap);
 
         Filter typeFilter = FilterUtil.getTestTypeFilter(showPresubmit, showPostsubmit, unfiltered);
         Filter testFilter = FilterUtil.getTimeFilter(
@@ -194,47 +186,13 @@ public class ShowTreeServlet extends BaseServlet {
                 testRunMetadata.add(metadata);
             }
         } else {
-            List<Key> gets = new ArrayList<>();
-            Set<Key> matchingTestKeys = new HashSet<>();
             if (userTestFilter != null) {
-                testFilter = CompositeFilterOperator.and(userTestFilter, testFilter);
+                testFilter = Query.CompositeFilterOperator.and(userTestFilter, testFilter);
             }
-            Query testRunQuery = new Query(TestRunEntity.KIND)
-                                         .setAncestor(testKey)
-                                         .setFilter(testFilter)
-                                         .setKeysOnly();
-            for (Entity testRunKey : datastore.prepare(testRunQuery).asIterable()) {
-                matchingTestKeys.add(testRunKey.getKey());
-            }
-
-            Set<Key> allMatchingKeys;
-            if (userDeviceFilter == null) {
-                allMatchingKeys = matchingTestKeys;
-            } else {
-                allMatchingKeys = new HashSet<>();
-                Query deviceQuery = new Query(DeviceInfoEntity.KIND)
-                                            .setAncestor(testKey)
-                                            .setFilter(userDeviceFilter)
-                                            .setKeysOnly();
-                for (Entity device : datastore.prepare(deviceQuery).asIterable()) {
-                    if (matchingTestKeys.contains(device.getKey().getParent())) {
-                        allMatchingKeys.add(device.getKey().getParent());
-                    }
-                }
-            }
-            List<Key> allKeysSorted = new ArrayList<>(allMatchingKeys);
-            if (dir == SortDirection.DESCENDING) {
-                Collections.sort(allKeysSorted, Collections.reverseOrder());
-            } else {
-                Collections.sort(allKeysSorted);
-            }
-            allKeysSorted = allKeysSorted.subList(
-                    0, Math.min(allKeysSorted.size(), MAX_BUILD_IDS_PER_PAGE));
-            for (Key key : allKeysSorted) {
-                gets.add(key);
-            }
+            List<Key> gets = FilterUtil.getMatchingKeys(testKey, TestRunEntity.KIND, testFilter,
+                    userDeviceFilter, dir, MAX_BUILD_IDS_PER_PAGE);
             Map<Key, Entity> entityMap = datastore.get(gets);
-            for (Key key : allKeysSorted) {
+            for (Key key : gets) {
                 if (!entityMap.containsKey(key)) {
                     continue;
                 }
@@ -295,12 +253,11 @@ public class ShowTreeServlet extends BaseServlet {
         List<String> profilingPointNames = new ArrayList<>(profilingPoints);
         Collections.sort(profilingPointNames);
 
+        FilterUtil.setAttributes(request, parameterMap);
+
         request.setAttribute("testName", request.getParameter("testName"));
 
         request.setAttribute("error", profilingDataAlert);
-        request.setAttribute("searchString", searchString);
-        request.setAttribute("searchHelpHeader", SEARCH_HELP_HEADER);
-        request.setAttribute("searchHelpBody", SEARCH_HELP);
 
         request.setAttribute("profilingPointNames", profilingPointNames);
         request.setAttribute("resultNames", resultNames);
@@ -319,6 +276,9 @@ public class ShowTreeServlet extends BaseServlet {
         request.setAttribute("unfiltered", unfiltered);
         request.setAttribute("showPresubmit", showPresubmit);
         request.setAttribute("showPostsubmit", showPostsubmit);
+
+        request.setAttribute("branches", new Gson().toJson(DatastoreHelper.getAllBranches()));
+        request.setAttribute("devices", new Gson().toJson(DatastoreHelper.getAllBuildFlavors()));
 
         dispatcher = request.getRequestDispatcher(TABLE_JSP);
         try {
