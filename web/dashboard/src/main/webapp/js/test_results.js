@@ -218,7 +218,12 @@
         covered = metadata.testRun.coveredLineCount;
         total = metadata.testRun.totalLineCount;
         covPct = Math.round(covered / total * 1000) / 10;
-        var color = covPct < 70 ? 'red' : 'green';
+        var color = 'red';
+        if (covPct > 20 && covPct < 70) {
+          color = 'orange';
+        } else if (covPct >= 70) {
+          color = 'green';
+        }
         var coverage = (
           'Coverage: ' + covered + '/' + total + ' (' + covPct + '%)');
         createClickableIndicator(
