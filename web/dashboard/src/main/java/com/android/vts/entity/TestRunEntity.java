@@ -112,6 +112,7 @@ public class TestRunEntity implements DashboardEntity {
     public static final String FAIL_COUNT = "failCount";
     public static final String TEST_CASE_IDS = "testCaseIds";
     public static final String LOG_LINKS = "logLinks";
+    public static final String HAS_COVERAGE = "hasCoverage";
     public static final String TOTAL_LINE_COUNT = "totalLineCount";
     public static final String COVERED_LINE_COUNT = "coveredLineCount";
 
@@ -123,6 +124,7 @@ public class TestRunEntity implements DashboardEntity {
     public final String hostName;
     public final long passCount;
     public final long failCount;
+    public final boolean hasCoverage;
     public final long coveredLineCount;
     public final long totalLineCount;
     public final List<Long> testCaseIds;
@@ -160,6 +162,7 @@ public class TestRunEntity implements DashboardEntity {
         this.logLinks = logLinks;
         this.coveredLineCount = coveredLineCount;
         this.totalLineCount = totalLineCount;
+        this.hasCoverage = totalLineCount > 0;
     }
 
     /**
@@ -195,7 +198,9 @@ public class TestRunEntity implements DashboardEntity {
         testRunEntity.setProperty(PASS_COUNT, this.passCount);
         testRunEntity.setProperty(FAIL_COUNT, this.failCount);
         testRunEntity.setUnindexedProperty(TEST_CASE_IDS, this.testCaseIds);
-        if (this.totalLineCount > 0 && this.coveredLineCount >= 0) {
+        boolean hasCoverage = this.totalLineCount > 0 && this.coveredLineCount >= 0;
+        testRunEntity.setProperty(HAS_COVERAGE, hasCoverage);
+        if (hasCoverage) {
             testRunEntity.setProperty(COVERED_LINE_COUNT, this.coveredLineCount);
             testRunEntity.setProperty(TOTAL_LINE_COUNT, this.totalLineCount);
         }
