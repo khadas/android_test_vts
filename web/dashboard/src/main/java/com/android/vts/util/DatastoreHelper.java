@@ -132,6 +132,42 @@ public class DatastoreHelper {
     }
 
     /**
+     * Get all of the devices branches.
+     *
+     * @return a list of all branches.
+     */
+    public static List<String> getAllBranches() {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Query query = new Query(DeviceInfoEntity.KIND)
+                              .addProjection(
+                                      new PropertyProjection(DeviceInfoEntity.BRANCH, String.class))
+                              .setDistinct(true);
+        List<String> devices = new ArrayList<>();
+        for (Entity e : datastore.prepare(query).asIterable()) {
+            devices.add((String) e.getProperty(DeviceInfoEntity.BRANCH));
+        }
+        return devices;
+    }
+
+    /**
+     * Get all of the device build flavors.
+     *
+     * @return a list of all device build flavors.
+     */
+    public static List<String> getAllBuildFlavors() {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Query query = new Query(DeviceInfoEntity.KIND)
+                              .addProjection(new PropertyProjection(
+                                      DeviceInfoEntity.BUILD_FLAVOR, String.class))
+                              .setDistinct(true);
+        List<String> devices = new ArrayList<>();
+        for (Entity e : datastore.prepare(query).asIterable()) {
+            devices.add((String) e.getProperty(DeviceInfoEntity.BUILD_FLAVOR));
+        }
+        return devices;
+    }
+
+    /**
      * Upload data from a test report message
      *
      * @param report The test report containing data to upload.
