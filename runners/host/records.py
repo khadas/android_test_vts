@@ -22,6 +22,7 @@ import pprint
 
 from vts.runners.host import signals
 from vts.runners.host import utils
+from vts.utils.python.common import list_utils
 
 
 class TestResultEnums(object):
@@ -368,8 +369,11 @@ class TestResult(object):
         Returns:
             A json-format string representing the test results.
         """
+        records = list_utils.MergeUniqueKeepOrder(
+            self.executed, self.failed, self.passed, self.skipped, self.error)
+        executed = [record.getDict() for record in records]
+
         d = {}
-        executed = [record.getDict() for record in self.executed]
         d["Results"] = executed
         d["Summary"] = self.summaryDict()
         d["TestModule"] = self.testModuleDict()
