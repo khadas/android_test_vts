@@ -21,41 +21,42 @@
   <%@ include file="header.jsp" %>
   <link type='text/css' href='/css/show_table.css' rel='stylesheet'>
   <link type='text/css' href='/css/show_test_runs_common.css' rel='stylesheet'>
+  <link type='text/css' href='/css/search_header.css' rel='stylesheet'>
   <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
   <script src='https://www.gstatic.com/external_hosted/moment/min/moment-with-locales.min.js'></script>
+  <script src='js/search_header.js'></script>
   <script type='text/javascript'>
       google.charts.load('current', {'packages':['table', 'corechart']});
       google.charts.setOnLoadCallback(drawGridTable);
       google.charts.setOnLoadCallback(activateLogLinks);
-      google.charts.setOnLoadCallback(drawProfilingTable);
       google.charts.setOnLoadCallback(drawPieChart);
       google.charts.setOnLoadCallback(function() {
           $('.gradient').removeClass('gradient');
       });
 
+      var search;
+
       $(document).ready(function() {
-          function verify() {
-              var oneChecked = ($('#presubmit').prop('checked') ||
-                                $('#postsubmit').prop('checked'));
-              if (!oneChecked) {
-                  $('#refresh').addClass('disabled');
-              } else {
-                  $('#refresh').removeClass('disabled');
-              }
-          }
-          $('#presubmit').prop('checked', ${showPresubmit} || false)
-                         .change(verify);
-          $('#postsubmit').prop('checked', ${showPostsubmit} || false)
-                          .change(verify);
-          $('#refresh').click(refresh);
-          $('#help-icon').click(function() {
-              $('#help-modal').openModal();
-          });
-          $('#input-box').keypress(function(e) {
-              if (e.which == 13) {
-                  refresh();
-              }
-          });
+          search = $('#filter-bar').createSearchHeader('Module: ', '${testName}', refresh);
+          search.addFilter('Branch', 'branch', {
+            corpus: ${branches}
+          }, ${branch});
+          search.addFilter('Device', 'device', {
+            corpus: ${devices}
+          }, ${device});
+          search.addFilter('Device Build ID', 'deviceBuildId', {}, ${deviceBuildId});
+          search.addFilter('Test Build ID', 'testBuildId', {}, ${testBuildId});
+          search.addFilter('Host', 'hostname', {}, ${hostname});
+          search.addFilter('Passing Count', 'passing', {
+            type: 'number',
+            width: 's2'
+          }, ${passing});
+          search.addFilter('Non-Passing Count', 'nonpassing', {
+            type: 'number',
+            width: 's2'
+          }, ${nonpassing});
+          search.addRunTypeCheckboxes(${showPresubmit}, ${showPostsubmit});
+          search.display();
 
           // disable buttons on load
           if (!${hasNewer}) {
@@ -104,21 +105,9 @@
       function refresh() {
           if($(this).hasClass('disabled')) return;
           var link = '${pageContext.request.contextPath}' +
-              '/show_table?testName=${testName}';
-          var presubmit = $('#presubmit').prop('checked');
-          var postsubmit = $('#postsubmit').prop('checked');
-          if (presubmit) {
-              link += '&showPresubmit=';
-          }
-          if (postsubmit) {
-              link += '&showPostsubmit=';
-          }
-          if (${unfiltered} && postsubmit && presubmit) {
+              '/show_table?testName=${testName}' + search.args();
+          if (${unfiltered}) {
               link += '&unfiltered=';
-          }
-          var searchString = $('#input-box').val();
-          if (searchString) {
-              link += '&search=' + encodeURIComponent(searchString);
           }
           window.open(link,'_self');
       }
@@ -128,19 +117,10 @@
           if($(this).hasClass('disabled')) return;
           var endTime = ${startTime};
           var link = '${pageContext.request.contextPath}' +
-              '/show_table?testName=${testName}&endTime=' + endTime;
-          if ($('#presubmit').prop('checked')) {
-              link += '&showPresubmit=';
-          }
-          if ($('#postsubmit').prop('checked')) {
-              link += '&showPostsubmit=';
-          }
+              '/show_table?testName=${testName}&endTime=' + endTime +
+              search.args();
           if (${unfiltered}) {
               link += '&unfiltered=';
-          }
-          var searchString = '${searchString}';
-          if (searchString) {
-              link += '&search=' + encodeURIComponent(searchString);
           }
           window.open(link,'_self');
       }
@@ -150,27 +130,13 @@
           if($(this).hasClass('disabled')) return;
           var startTime = ${endTime};
           var link = '${pageContext.request.contextPath}' +
-              '/show_table?testName=${testName}&startTime=' + startTime;
-          if ($('#presubmit').prop('checked')) {
-              link += '&showPresubmit=';
-          }
-          if ($('#postsubmit').prop('checked')) {
-              link += '&showPostsubmit=';
-          }
+              '/show_table?testName=${testName}&startTime=' + startTime +
+              search.args();
           if (${unfiltered}) {
               link += '&unfiltered=';
           }
-          var searchString = '${searchString}';
-          if (searchString) {
-              link += '&search=' + encodeURIComponent(searchString);
-          }
           window.open(link,'_self');
         }
-
-      // table for profiling data
-      function drawProfilingTable() {
-
-      }
 
       // to draw pie chart
       function drawPieChart() {
@@ -279,27 +245,7 @@
               <li class='tab col s6' id='treeLink'><a>Tree</a></li>
             </ul>
           </div>
-          <div class='card' id='filter-wrapper'>
-            <div id='search-icon-wrapper'>
-              <i class='material-icons' id='search-icon'>search</i>
-            </div>
-            <div class='input-field' id='search-wrapper'>
-              <input value='${searchString}' type='text' id='input-box'>
-              <label for='input-box'>Search for test results</label>
-            </div>
-            <div id='help-icon-wrapper'>
-              <i class='material-icons' id='help-icon'>help</i>
-            </div>
-            <div id='build-type-div' class='right'>
-              <input type='checkbox' id='presubmit' />
-              <label for='presubmit'>Presubmit</label>
-              <input type='checkbox' id='postsubmit' />
-              <label for='postsubmit'>Postsubmit</label>
-              <a id='refresh' class='btn-floating btn-medium red right waves-effect waves-light'>
-                <i class='medium material-icons'>cached</i>
-              </a>
-            </div>
-          </div>
+          <div id='filter-bar'></div>
         </div>
         <div class='col s7'>
           <div class='col s12 card center-align'>

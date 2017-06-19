@@ -12,18 +12,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-#section-header {
-    cursor: default;
-    user-select: none;
-    color: #ee6e73;
-}
-#section-header:after {
-    border: 1px solid #ee6e73;
-    margin-top: 10px;
-    margin-bottom: 30px;
-    display: block;
-    content: " ";
-}
 .page-button-wrapper {
     top: 50%;
     bottom: auto;
