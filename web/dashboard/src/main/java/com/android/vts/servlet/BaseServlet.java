@@ -40,6 +40,7 @@ public abstract class BaseServlet extends HttpServlet {
     public enum PageType {
         TOT("ToT", "/"),
         RELEASE("Release", "/show_release"),
+        COVERAGE_OVERVIEW("Coverage", "/show_coverage_overview"),
         TABLE("", "/show_table"),
         TREE("", "/show_tree"),
         GRAPH("Profiling", "/show_graph"),
@@ -95,6 +96,7 @@ public abstract class BaseServlet extends HttpServlet {
         List<Page> links = new ArrayList<>();
         links.add(new Page(PageType.TOT));
         links.add(new Page(PageType.RELEASE));
+        links.add(new Page(PageType.COVERAGE_OVERVIEW));
         navbarLinks = links;
     }
 
@@ -125,6 +127,9 @@ public abstract class BaseServlet extends HttpServlet {
         PageType parentType = getNavParentType();
         int activeIndex;
         switch (getNavParentType()) {
+            case COVERAGE_OVERVIEW:
+                activeIndex = 2;
+                break;
             case RELEASE:
                 activeIndex = 1;
                 break;
