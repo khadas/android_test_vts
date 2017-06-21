@@ -15,8 +15,8 @@
 # limitations under the License.
 
 adb root
-adb push ${ANDROID_BUILD_TOP}/out/target/product/gce_x86/system/bin/fuzzer /data/local/tmp/fuzzer
+adb push ${ANDROID_BUILD_TOP}/out/target/product/gce_x86/system/bin/vts_hal_driver /data/local/tmp/vts_hal_driver
 adb push ${ANDROID_BUILD_TOP}/out/target/product/gce_x86/system/bin/vts_hal_agent /data/local/tmp/vts_hal_agent
-adb shell chmod 755 /data/local/tmp/fuzzer
+adb shell chmod 755 /data/local/tmp/vts_hal_driver
 adb shell chmod 755 /data/local/tmp/vts_hal_agent
 adb shell /data/local/tmp/vts_hal_agent
