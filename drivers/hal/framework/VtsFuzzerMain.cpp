@@ -42,10 +42,11 @@
 #include <iostream>
 #include <string>
 
+#include "VtsHidlHalReplayer.h"
 #include "binder/VtsFuzzerBinderService.h"
+#include "driver_manager/VtsHalDriverManager.h"
 #include "specification_parser/InterfaceSpecificationParser.h"
 #include "specification_parser/SpecificationBuilder.h"
-#include "replayer/VtsHidlHalReplayer.h"
 
 #include "BinderServer.h"
 #include "SocketServer.h"
@@ -53,6 +54,7 @@
 using namespace std;
 using namespace android;
 
+#define DEFAULT_SPEC_DIR_PATH "/data/local/tmp/spec/"
 #define INTERFACE_SPEC_LIB_FILENAME "libvts_interfacespecification.so"
 #define PASSED_MARKER "[  PASSED  ]"
 
@@ -216,8 +218,8 @@ int main(int argc, char* const argv[]) {
     }
   }
 
-  android::vts::SpecificationBuilder spec_builder(spec_dir_path, epoch_count,
-                                                  callback_socket_name);
+  android::vts::VtsHalDriverManager driver_manager(spec_dir_path, epoch_count,
+                                                   callback_socket_name);
   if (!server) {
     if (optind != argc - 1) {
       fprintf(stderr, "Must specify output file (see --help).\n");
@@ -225,14 +227,16 @@ int main(int argc, char* const argv[]) {
     }
     bool success;
     if (mode == "replay") {
-      android::vts::VtsHidlHalReplayer replayer(&spec_builder,
+      android::vts::VtsHidlHalReplayer replayer(&driver_manager,
                                                 callback_socket_name);
       success = replayer.ReplayTrace(trace_path, hal_service_name);
     } else {
-      success = spec_builder.Process(argv[optind],INTERFACE_SPEC_LIB_FILENAME,
-                                     target_class, target_type, target_version,
-                                     target_package.c_str(),
-                                     target_component_name.c_str());
+      android::vts::SpecificationBuilder spec_builder(
+          spec_dir_path, epoch_count, callback_socket_name);
+      success = spec_builder.Process(
+          argv[optind], INTERFACE_SPEC_LIB_FILENAME, target_class, target_type,
+          target_version, target_package.c_str(), target_component_name.c_str(),
+          hal_service_name.c_str());
     }
     cout << "Result: " << success << endl;
     if (success) {
@@ -240,10 +244,10 @@ int main(int argc, char* const argv[]) {
     }
   } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
-    android::vts::StartSocketServer(server_socket_path, spec_builder,
+    android::vts::StartSocketServer(server_socket_path, &driver_manager,
                                     INTERFACE_SPEC_LIB_FILENAME);
 #else  // binder
-    android::vts::StartBinderServer(service_name, spec_builder,
+    android::vts::StartBinderServer(service_name, &driver_manager,
                                     INTERFACE_SPEC_LIB_FILENAME);
 #endif
   }
