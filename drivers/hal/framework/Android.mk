@@ -26,6 +26,7 @@ LOCAL_CFLAGS += -Wall -Werror
 
 LOCAL_SRC_FILES := \
   VtsFuzzerMain.cpp \
+  VtsHidlHalReplayer.cpp \
   BinderServer.cpp \
   SocketServer.cpp \
 
