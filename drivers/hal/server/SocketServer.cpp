@@ -189,10 +189,8 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
     }
     case VTS_DRIVER_COMMAND_READ_SPECIFICATION: {
       const char* result = ReadSpecification(
-          command_message.module_name(),
-          command_message.target_class(),
-          command_message.target_type(),
-          command_message.target_version(),
+          command_message.module_name(), command_message.target_class(),
+          command_message.target_type(), command_message.target_version(),
           command_message.target_package());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
@@ -247,8 +245,8 @@ int StartSocketServer(const string& socket_port_file,
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_port_file.c_str());
 
-  cout << "[driver:hal] trying to bind (port file: " << socket_port_file
-       << ")" << endl;
+  cout << "[driver:hal] trying to bind (port file: " << socket_port_file << ")"
+       << endl;
 
   if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
     int error_save = errno;
