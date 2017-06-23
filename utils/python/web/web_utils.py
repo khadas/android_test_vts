@@ -27,7 +27,6 @@ from vts.utils.python.web import dashboard_rest_client
 from vts.utils.python.web import feature_utils
 
 _PROFILING_POINTS = "profiling_points"
-_REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 
 class WebFeature(feature_utils.Feature):
     """Feature object for web functionality.
@@ -360,19 +359,21 @@ class WebFeature(feature_utils.Feature):
             log_msg.url = url
             log_msg.name = os.path.basename(url)
 
-    def GenerateReportMessage(self,
-                              requested,
-                              executed):
+    def GenerateReportMessage(self, requested, executed):
         """Uploads the result to the web service.
 
         Requires the feature to be enabled; no-op otherwise.
 
         Args:
-            requested: list, A list of test case names requested to run
-            executed: list, A list of test case names that were executed
+            requested: list, A list of test case records requested to run
+            executed: list, A list of test case records that were executed
+
+        Returns:
+            binary string, serialized report message.
+            None if web is not enabled.
         """
         if not self.enabled:
-            return
+            return None
 
         # Handle case when runner fails, tests aren't executed
         if (executed and executed[-1].test_name == "setup_class"):
@@ -399,28 +400,25 @@ class WebFeature(feature_utils.Feature):
         logging.info("_tearDownClass hook: start (username: %s)",
                      getpass.getuser())
 
-        if len(self.report_msg.test_case) > 0:
-            post_msg = ReportMsg.DashboardPostMessage()
-            post_msg.test_report.extend([self.report_msg])
+        post_msg = ReportMsg.DashboardPostMessage()
+        post_msg.test_report.extend([self.report_msg])
 
-            # Post new data to the dashboard
-            # TODO this line should be removed when report is uploaded
-            # from java side
-            self.rest_client.PostData(post_msg)
+        # Post new data to the dashboard
+        # TODO this line should be removed when report is uploaded
+        # from java side
+        self.rest_client.PostData(post_msg)
 
-            report_proto_path = os.path.join(logging.log_path,
-                                             _REPORT_MESSAGE_FILE_NAME)
+        self.rest_client.AddAuthToken(post_msg)
 
-            self.rest_client.AddAuthToken(post_msg)
+        # Write the new address book back to disk.
+        logging.info('Result proto message path: %s', report_proto_path)
 
-            # Write the new address book back to disk.
-            logging.info('Result proto message path: %s',
-                         report_proto_path)
-            with open(report_proto_path, "wb") as f:
-                f.write(base64.b64encode(post_msg.SerializeToString()))
-            logging.info('Result proto message saved')
+        message_b = base64.b64encode(post_msg.SerializeToString())
 
-            logging.info("_tearDownClass hook: status upload time stamp %s",
-                         str(self.report_msg.start_timestamp))
-        else:
-            logging.info("_tearDownClass hook: skip uploading (no test case)")
+        logging.info('Result proto message generated. size: %s',
+                     len(message_b))
+
+        logging.info("_tearDownClass hook: status upload time stamp %s",
+                     str(self.report_msg.start_timestamp))
+
+        return message_b
