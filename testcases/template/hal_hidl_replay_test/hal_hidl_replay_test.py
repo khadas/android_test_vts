@@ -104,10 +104,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
             self.DEVICE_TMP_DIR, self.abi_bitness)
         driver_binary_path = path_utils.JoinTargetPath(
             self.DEVICE_TMP_DIR, self.abi_bitness,
-            "fuzzer%s" % self.abi_bitness)
-        target_vts_driver_file_path = path_utils.JoinTargetPath(
-            self.DEVICE_TMP_DIR, self.abi_bitness,
-            "%s@%s-vts.driver.so" % (target_package, target_version))
+            "vts_hal_replayer%s" % self.abi_bitness)
 
         if not self._skip_all_testcases:
             service_names = self.getServiceName()
@@ -125,7 +122,6 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                     test_name += "_" + service_name
                 test_case = hal_hidl_replay_test_case.HalHidlReplayTestCase(
                     trace_path,
-                    target_vts_driver_file_path,
                     service_name,
                     test_suite,
                     test_name,

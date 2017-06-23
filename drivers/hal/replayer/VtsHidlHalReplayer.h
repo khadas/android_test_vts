@@ -30,10 +30,8 @@ namespace vts {
 // 3) Verify the return results of each API calls.
 class VtsHidlHalReplayer {
  public:
-  VtsHidlHalReplayer(VtsHalDriverManager* driver_manager,
-                     std::string& callback_socket_name)
-      : driver_manager_(driver_manager),
-        callback_socket_name_(callback_socket_name) {}
+  VtsHidlHalReplayer(VtsHalDriverManager* driver_manager)
+      : driver_manager_(driver_manager) {}
 
   // Replays the API call sequence parsed from the trace file.
   bool ReplayTrace(const std::string& trace_file,
@@ -42,8 +40,6 @@ class VtsHidlHalReplayer {
  private:
   // Used to load the vts spec and driver library. Does not own.
   VtsHalDriverManager* driver_manager_;
-  // The server socket port # of the agent.
-  std::string callback_socket_name_;
 };
 
 }  // namespace vts
