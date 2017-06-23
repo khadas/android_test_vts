@@ -88,7 +88,7 @@ bool VtsHidlHalReplayer::ReplayTrace(const string& trace_file,
     }
 
     vts::FunctionSpecificationMessage result_msg;
-    if (!driver->CallFunction(call_msg.func_msg(), callback_socket_name_,
+    if (!driver->CallFunction(call_msg.func_msg(), "" /*callback_socket_name*/,
                               &result_msg)) {
       cerr << __func__ << ": replay function fail." << endl;
       return false;
