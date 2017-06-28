@@ -52,16 +52,6 @@ class VtsHalHidlTargetTestBase : public ::testing::Test {
   }
 
   /*
-   * Return test suite name as string.
-   */
-  string getTestSuiteName() const;
-
-  /*
-   * Return test case name as string.
-   */
-  string getTestCaseName() const;
-
-  /*
    * Return test case info as string.
    */
   virtual string getTestCaseInfo() const { return ""; }
@@ -102,6 +92,16 @@ class VtsHalHidlTargetTestBase : public ::testing::Test {
    * false.
    */
   static bool VtsGetStub();
+
+  /*
+   * Return test suite name as string.
+   */
+  string getTestSuiteName() const;
+
+  /*
+   * Return test case name as string.
+   */
+  string getTestCaseName() const;
 };
 
 }  // namespace testing
