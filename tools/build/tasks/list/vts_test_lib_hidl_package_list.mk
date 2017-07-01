@@ -65,6 +65,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.vibrator@1.0-vts.driver \
   android.hardware.vr@1.0-vts.driver \
   android.hardware.wifi@1.0-vts.driver \
+  android.hardware.wifi.offload@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.0-vts.driver \
   android.hardware.audio@2.0-vts.profiler \
   android.hardware.audio.common@2.0-vts.profiler \
@@ -114,6 +115,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.vibrator@1.0-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.wifi@1.0-vts.profiler \
+  android.hardware.wifi.offload@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
 
 vts_test_lib_hidl_packages += \
@@ -157,6 +159,7 @@ vts_test_lib_hidl_packages += \
   VtsHalVrV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
   VtsHalWifiNanV1_0TargetTest \
+  VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
 
 vts_test_lib_hidl_packages += \
