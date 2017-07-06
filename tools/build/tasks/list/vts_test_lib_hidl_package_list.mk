@@ -65,6 +65,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec@1.0-vts.driver \
   android.hardware.tv.input@1.0-vts.driver \
   android.hardware.usb@1.0-vts.driver \
+  android.hardware.usb@1.1-vts.driver \
   android.hardware.vibrator@1.0-vts.driver \
   android.hardware.vr@1.0-vts.driver \
   android.hardware.weaver@1.0-vts.driver \
@@ -119,6 +120,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.tv.cec@1.0-vts.profiler \
   android.hardware.tv.input@1.0-vts.profiler \
   android.hardware.usb@1.0-vts.profiler \
+  android.hardware.usb@1.1-vts.profiler \
   android.hardware.vibrator@1.0-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.weaver@1.0-vts.profiler \
@@ -166,6 +168,7 @@ vts_test_lib_hidl_packages += \
   thermal_hidl_stress_test \
   VtsHalTvInputV1_0TargetTest \
   VtsHalUsbV1_0TargetTest \
+  VtsHalUsbV1_1TargetTest \
   VtsHalVibratorV1_0TargetTest \
   VtsHalVrV1_0TargetTest \
   VtsHalWeaverV1_0TargetTest \
