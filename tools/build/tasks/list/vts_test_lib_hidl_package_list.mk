@@ -33,7 +33,6 @@ vts_test_lib_hidl_packages := \
   android.hardware.camera.metadata@3.2-vts.driver \
   android.hardware.camera.provider@2.4-vts.driver \
   android.hardware.configstore@1.0-vts.driver \
-  android.hardware.configstore@1.1-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
   android.hardware.drm@1.0-vts.driver \
   android.hardware.dumpstate@1.0-vts.driver \
@@ -88,7 +87,6 @@ vts_test_lib_hidl_packages := \
   android.hardware.camera.metadata@3.2-vts.profiler \
   android.hardware.camera.provider@2.4-vts.profiler \
   android.hardware.configstore@1.0-vts.profiler \
-  android.hardware.configstore@1.1-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
   android.hardware.dumpstate@1.0-vts.profiler \
@@ -141,7 +139,6 @@ vts_test_lib_hidl_packages += \
   VtsHalBroadcastradioV1_0TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
-  VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
