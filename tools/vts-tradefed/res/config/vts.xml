@@ -64,6 +64,7 @@
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
 
   <!-- From vts-kernel.xml -->
