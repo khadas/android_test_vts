@@ -23,6 +23,7 @@ import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
@@ -37,6 +38,7 @@ import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import com.android.tradefed.testtype.IAbi;
+import com.android.tradefed.testtype.IInvocationContextReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -64,9 +66,9 @@ import java.util.ArrayList;
  */
 
 @OptionClass(alias = "vtsmultidevicetest")
-public class VtsMultiDeviceTest implements IDeviceTest, IRemoteTest, ITestFilterReceiver,
-IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
-
+public class VtsMultiDeviceTest
+        implements IDeviceTest, IRemoteTest, ITestFilterReceiver, IRuntimeHintProvider,
+                   ITestCollector, IBuildReceiver, IAbiReceiver, IInvocationContextReceiver {
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
     static final String BUILD_ID = "build_id";
@@ -363,6 +365,24 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     private String mTestCaseDataDir = "./";
 
     private VtsVendorConfigFileUtil configReader = null;
+    private IInvocationContext mInvocationContext = null;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setInvocationContext(IInvocationContext context) {
+        mInvocationContext = context;
+        setDevice(context.getDevices().get(0));
+        setBuild(context.getBuildInfos().get(0));
+    }
+
+    /**
+     * @return the mInvocationContext
+     */
+    public IInvocationContext getInvocationContext() {
+        return mInvocationContext;
+    }
 
     /**
      * @return the mRunUtil
@@ -460,6 +480,29 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Override
     public void setCollectTestsOnly(boolean shouldCollectTest) {
         mCollectTestsOnly = shouldCollectTest;
+    }
+
+    /**
+     * Generate a device json object from ITestDevice object.
+     *
+     * @param device device object
+     * @throws RuntimeException
+     * @throws JSONException
+     */
+    private JSONObject generateJsonDeviceItem(ITestDevice device) throws JSONException {
+        JSONObject deviceItemObject = new JSONObject();
+        deviceItemObject.put(SERIAL, device.getSerialNumber());
+        try {
+            deviceItemObject.put("product_type", device.getProductType());
+            deviceItemObject.put("product_variant", device.getProductVariant());
+            deviceItemObject.put("build_alias", device.getBuildAlias());
+            deviceItemObject.put("build_id", device.getBuildId());
+            deviceItemObject.put("build_flavor", device.getBuildFlavor());
+        } catch (DeviceNotAvailableException e) {
+            CLog.e("Device %s not available.", device.getSerialNumber());
+            throw new RuntimeException("Failed to get device information");
+        }
+        return deviceItemObject;
     }
 
     /**
@@ -584,22 +627,27 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         CLog.i("Built a Json object using the loaded original test config");
 
         JSONArray deviceArray = new JSONArray();
-        JSONObject deviceItemObject = new JSONObject();
-        deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
+
         boolean coverageBuild = false;
-        try {
-            deviceItemObject.put("product_type", mDevice.getProductType());
-            deviceItemObject.put("product_variant", mDevice.getProductVariant());
-            deviceItemObject.put("build_alias", mDevice.getBuildAlias());
-            deviceItemObject.put("build_id", mDevice.getBuildId());
-            deviceItemObject.put("build_flavor", mDevice.getBuildFlavor());
-            String coverageProperty = mDevice.getProperty(COVERAGE_PROPERTY);
-            coverageBuild = coverageProperty != null && coverageProperty.equals("1");
-        } catch (DeviceNotAvailableException e) {
-            CLog.e("A device not available - continuing");
-            throw new RuntimeException("Failed to get device information");
+
+        for (ITestDevice device : mInvocationContext.getDevices()) {
+            deviceArray.put(generateJsonDeviceItem(device));
+
+            try {
+                String coverageProperty = device.getProperty(COVERAGE_PROPERTY);
+                if (coverageBuild
+                        && !(coverageBuild = coverageBuild
+                                           || (coverageProperty != null
+                                                      && coverageProperty.equals("1")))) {
+                    CLog.e("Device %s is not coverage build while others are.",
+                            device.getSerialNumber());
+                    throw new RuntimeException("Device build not the same.");
+                }
+            } catch (DeviceNotAvailableException e) {
+                CLog.e("Device %s not available.", device.getSerialNumber());
+                throw new RuntimeException("Failed to get device information");
+            }
         }
-        deviceArray.put(deviceItemObject);
 
         JSONArray testBedArray = (JSONArray) jsonObject.get("test_bed");
         if (testBedArray.length() == 0) {
