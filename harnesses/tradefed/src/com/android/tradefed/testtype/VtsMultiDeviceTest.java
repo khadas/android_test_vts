@@ -74,6 +74,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TEST_SUITE = "test_suite";
+    static final String TEST_MAX_TIMEOUT = "test_max_timeout";
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
@@ -116,6 +117,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String TEMPLATE_HAL_HIDL_GTEST_PATH = "vts/testcases/template/hal_hidl_gtest/hal_hidl_gtest";
     static final String TEMPLATE_HAL_HIDL_REPLAY_TEST_PATH = "vts/testcases/template/hal_hidl_replay_test/hal_hidl_replay_test";
     static final String TEMPLATE_HOST_BINARY_TEST_PATH = "vts/testcases/template/host_binary_test/host_binary_test";
+    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 15;
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
@@ -123,8 +125,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;
 
-    @Option(name = "test-timeout", description = "maximum amount of time"
-            + "(im milliseconds) tests are allowed to run",
+    @Option(name = "test-timeout",
+            description = "The amount of time (in milliseconds) for a test invocation. "
+                    + "If the test cannot finish before timeout, it should interrupt itself and "
+                    + "clean up in " + TEST_ABORT_TIMEOUT_MSECS + "ms. Hence the actual timeout "
+                    + "is the specified value + " + TEST_ABORT_TIMEOUT_MSECS + "ms.",
             isTimeVal = true)
     private long mTestTimeout = 1000 * 60 * 60 * 3;
 
@@ -611,6 +616,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
+        jsonObject.put(TEST_MAX_TIMEOUT, mTestTimeout);
+        CLog.i("Added %s to the Json object: %d", TEST_MAX_TIMEOUT, mTestTimeout);
+
         if (mAbi != null) {
             jsonObject.put(ABI_NAME, mAbi.getName());
             CLog.i("Added %s to the Json object", ABI_NAME);
@@ -805,7 +813,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
         printToDeviceLogcatAboutTestModuleStatus("BEGIN");
-        CommandResult commandResult = mRunUtil.runTimedCmd(mTestTimeout, cmd);
+        CommandResult commandResult =
+                mRunUtil.runTimedCmd(mTestTimeout + TEST_ABORT_TIMEOUT_MSECS, cmd);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
