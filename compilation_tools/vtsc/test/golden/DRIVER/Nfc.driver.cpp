@@ -34,19 +34,20 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
 }
 
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::Fuzz(
-    FunctionSpecificationMessage* func_msg,
-    void** result, const string& callback_socket_name) {
+    FunctionSpecificationMessage* /*func_msg*/,
+    void** /*result*/, const string& /*callback_socket_name*/) {
     return true;
 }
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetAttribute(
-    FunctionSpecificationMessage* func_msg,
-    void** result) {
+    FunctionSpecificationMessage* /*func_msg*/,
+    void** /*result*/) {
     cerr << "attribute not found" << endl;
     return false;
 }
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
     cout << "Function: " << __func__ << " " << func_name << endl;
+    cout << "Callback socket name: " << callback_socket_name << endl;
     if (!strcmp(func_name, "open")) {
         sp<::android::hardware::nfc::V1_0::INfcClientCallback> arg0;
         arg0 = VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(callback_socket_name);

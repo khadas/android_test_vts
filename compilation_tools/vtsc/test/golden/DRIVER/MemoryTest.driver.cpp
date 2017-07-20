@@ -32,19 +32,20 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
 }
 
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::Fuzz(
-    FunctionSpecificationMessage* func_msg,
-    void** result, const string& callback_socket_name) {
+    FunctionSpecificationMessage* /*func_msg*/,
+    void** /*result*/, const string& /*callback_socket_name*/) {
     return true;
 }
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetAttribute(
-    FunctionSpecificationMessage* func_msg,
-    void** result) {
+    FunctionSpecificationMessage* /*func_msg*/,
+    void** /*result*/) {
     cerr << "attribute not found" << endl;
     return false;
 }
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
     cout << "Function: " << __func__ << " " << func_name << endl;
+    cout << "Callback socket name: " << callback_socket_name << endl;
     if (!strcmp(func_name, "haveSomeMemory")) {
         ::android::hardware::hidl_memory arg0;
         sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");

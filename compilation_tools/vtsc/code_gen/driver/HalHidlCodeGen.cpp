@@ -170,8 +170,9 @@ void HalHidlCodeGen::GenerateCppBodyFuzzFunction(
     Formatter& out, const ComponentSpecificationMessage& /*message*/,
     const string& fuzzer_extended_class_name) {
     out << "bool " << fuzzer_extended_class_name << "::Fuzz(" << "\n";
-    out << "    FunctionSpecificationMessage* func_msg," << "\n";
-    out << "    void** result, const string& callback_socket_name) {\n";
+    out << "    FunctionSpecificationMessage* /*func_msg*/,"
+        << "\n";
+    out << "    void** /*result*/, const string& /*callback_socket_name*/) {\n";
     out.indent();
     out << "return true;\n";
     out.unindent();
@@ -191,6 +192,8 @@ void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
 
     out << "const char* func_name = func_msg.name().c_str();" << "\n";
     out << "cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
+        << "\n";
+    out << "cout << \"Callback socket name: \" << callback_socket_name << endl;"
         << "\n";
 
     for (auto const& api : message.interface().api()) {
@@ -356,8 +359,10 @@ void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
   if (message.component_name() != "types" &&
       !endsWith(message.component_name(), "Callback")) {
     out << "bool " << fuzzer_extended_class_name << "::GetAttribute(" << "\n";
-    out << "    FunctionSpecificationMessage* func_msg," << "\n";
-    out << "    void** result) {" << "\n";
+    out << "    FunctionSpecificationMessage* /*func_msg*/,"
+        << "\n";
+    out << "    void** /*result*/) {"
+        << "\n";
     out.indent();
     // TOOD: impl
     out << "cerr << \"attribute not found\" << endl;\n"
