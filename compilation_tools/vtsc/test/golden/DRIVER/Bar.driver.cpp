@@ -135,8 +135,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "doSomethingElse")) {
          ::android::hardware::hidl_array<int32_t,15> arg0;
-        for (int i = 0; i < func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().int32_t();
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().int32_t();
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -185,8 +185,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "mapThisVector")) {
          ::android::hardware::hidl_vec<int32_t> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().int32_t();
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().int32_t();
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -248,8 +248,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "haveAGooberVec")) {
          ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Goober> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0).vector_value(i), &(arg0[i]));
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0).vector_value(arg0_index), &(arg0[arg0_index]));
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -278,15 +278,15 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "haveAGooberArray")) {
          ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20> arg0;
-        for (int i = 0; i < func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i].q = func_msg.arg(0).vector_value(i).struct_value(0).scalar_value().int32_t();
-            arg0[i].name = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(i).struct_value(1).string_value().message());
-            arg0[i].address = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(i).struct_value(2).string_value().message());
-            for (int i = 0; i < func_msg.arg(0).vector_value(i).struct_value(3).vector_value_size(); i++) {
-                arg0[i].numbers[i] = func_msg.arg(0).vector_value(i).struct_value(3).vector_value(i).scalar_value().double_t();
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index].q = func_msg.arg(0).vector_value(arg0_index).struct_value(0).scalar_value().int32_t();
+            arg0[arg0_index].name = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(arg0_index).struct_value(1).string_value().message());
+            arg0[arg0_index].address = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(arg0_index).struct_value(2).string_value().message());
+            for (int arg0_arg0_index__numbers_index = 0; arg0_arg0_index__numbers_index < func_msg.arg(0).vector_value(arg0_index).struct_value(3).vector_value_size(); arg0_arg0_index__numbers_index++) {
+                arg0[arg0_index].numbers[arg0_arg0_index__numbers_index] = func_msg.arg(0).vector_value(arg0_index).struct_value(3).vector_value(arg0_arg0_index__numbers_index).scalar_value().double_t();
             }
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(i).struct_value(4), &(arg0[i].fumble));
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(i).struct_value(5), &(arg0[i].gumble));
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(4), &(arg0[arg0_index].fumble));
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(5), &(arg0[arg0_index].gumble));
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -315,8 +315,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "haveSomeStrings")) {
          ::android::hardware::hidl_array<::android::hardware::hidl_string,3> arg0;
-        for (int i = 0; i < func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(i).string_value().message());
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(arg0_index).string_value().message());
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -345,8 +345,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "haveAStringVec")) {
          ::android::hardware::hidl_vec<::android::hardware::hidl_string> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(i).string_value().message());
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(arg0_index).string_value().message());
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -374,9 +374,9 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "transposeMe")) {
          ::android::hardware::hidl_array<float, 3,5> arg0;
-        for (int i = 0; i < func_msg.arg(0).vector_value_size(); i++) {
-            for (int i = 0; i < func_msg.arg(0).vector_value(i).vector_value_size(); i++) {
-                arg0[i][i] = func_msg.arg(0).vector_value(i).vector_value(i).scalar_value().float_t();
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            for (int arg0_arg0_index__index = 0; arg0_arg0_index__index < func_msg.arg(0).vector_value(arg0_index).vector_value_size(); arg0_arg0_index__index++) {
+                arg0[arg0_index][arg0_arg0_index__index] = func_msg.arg(0).vector_value(arg0_index).vector_value(arg0_arg0_index__index).scalar_value().float_t();
             }
         }
         VtsMeasurement vts_measurement;
@@ -452,9 +452,9 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "transpose2")) {
          ::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3> arg0;
-        for (int i = 0; i < func_msg.arg(0).vector_value_size(); i++) {
-            for (int i = 0; i < func_msg.arg(0).vector_value(i).vector_value_size(); i++) {
-                arg0[i][i] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(i).vector_value(i).string_value().message());
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            for (int arg0_arg0_index__index = 0; arg0_arg0_index__index < func_msg.arg(0).vector_value(arg0_index).vector_value_size(); arg0_arg0_index__index++) {
+                arg0[arg0_index][arg0_arg0_index__index] = ::android::hardware::hidl_string(func_msg.arg(0).vector_value(arg0_index).vector_value(arg0_arg0_index__index).string_value().message());
             }
         }
         VtsMeasurement vts_measurement;
@@ -489,8 +489,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "sendVec")) {
          ::android::hardware::hidl_vec<uint8_t> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
-            arg0[i] = func_msg.arg(0).vector_value(i).scalar_value().uint8_t();
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
+            arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -549,7 +549,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "haveAVectorOfInterfaces")) {
          ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
         }
         VtsMeasurement vts_measurement;
@@ -584,7 +584,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "haveAVectorOfGenericInterfaces")) {
          ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
-        for (int i = 0; i <func_msg.arg(0).vector_value_size(); i++) {
+        for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
         }
         VtsMeasurement vts_measurement;

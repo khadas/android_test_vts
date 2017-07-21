@@ -90,6 +90,11 @@ string GetComponentName(const ComponentSpecificationMessage& message);
 // Generate the FQName of the given message..
 FQName GetFQName(const ComponentSpecificationMessage& message);
 
+// Generate a plain string from the name of given variable, replace any special
+// character (non alphabat or digital) with '_'
+// e.g. msg.test --> msg_test, msg[test] --> msg_test_
+string GetVarString(const string& var_name);
+
 }  // namespace vts
 }  // namespace android
 

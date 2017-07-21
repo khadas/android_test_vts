@@ -204,10 +204,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<int32_t,15> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t,15>*> ((*args)[0]);
                     arg_0->set_type(TYPE_ARRAY);
                     arg_0->set_vector_size(15);
-                    for (int i = 0; i < 15; i++) {
-                        auto *arg_0_array_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_array_i->set_type(TYPE_SCALAR);
-                        arg_0_array_i->mutable_scalar_value()->set_int32_t((*arg_val_0)[i]);
+                    for (int arg_0_index = 0; arg_0_index < 15; arg_0_index++) {
+                        auto *arg_0_array_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_array_arg_0_index->set_type(TYPE_SCALAR);
+                        arg_0_array_arg_0_index->mutable_scalar_value()->set_int32_t((*arg_val_0)[arg_0_index]);
                     }
                     break;
                 }
@@ -223,10 +223,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<int32_t,32> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t,32>*> ((*args)[0]);
                     result_0->set_type(TYPE_ARRAY);
                     result_0->set_vector_size(32);
-                    for (int i = 0; i < 32; i++) {
-                        auto *result_0_array_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_array_i->set_type(TYPE_SCALAR);
-                        result_0_array_i->mutable_scalar_value()->set_int32_t((*result_val_0)[i]);
+                    for (int result_0_index = 0; result_0_index < 32; result_0_index++) {
+                        auto *result_0_array_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_array_result_0_index->set_type(TYPE_SCALAR);
+                        result_0_array_result_0_index->mutable_scalar_value()->set_int32_t((*result_val_0)[result_0_index]);
                     }
                     break;
                 }
@@ -299,10 +299,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<int32_t> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<int32_t>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_SCALAR);
-                        arg_0_vector_i->mutable_scalar_value()->set_int32_t((*arg_val_0)[i]);
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_SCALAR);
+                        arg_0_vector_arg_0_index->mutable_scalar_value()->set_int32_t((*arg_val_0)[arg_0_index]);
                     }
                     break;
                 }
@@ -318,10 +318,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<int32_t> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<int32_t>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_SCALAR);
-                        result_0_vector_i->mutable_scalar_value()->set_int32_t((*result_val_0)[i]);
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_SCALAR);
+                        result_0_vector_result_0_index->mutable_scalar_value()->set_int32_t((*result_val_0)[result_0_index]);
                     }
                     break;
                 }
@@ -437,10 +437,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Goober> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Goober>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_STRUCT);
-                        profile____android__hardware__tests__foo__V1_0__IFoo__Goober(arg_0_vector_i, (*arg_val_0)[i]);
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_STRUCT);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__Goober(arg_0_vector_arg_0_index, (*arg_val_0)[arg_0_index]);
                     }
                     break;
                 }
@@ -522,34 +522,34 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20>*> ((*args)[0]);
                     arg_0->set_type(TYPE_ARRAY);
                     arg_0->set_vector_size(20);
-                    for (int i = 0; i < 20; i++) {
-                        auto *arg_0_array_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_array_i->set_type(TYPE_STRUCT);
-                        auto *arg_0_array_i_q __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_q->set_type(TYPE_SCALAR);
-                        arg_0_array_i_q->mutable_scalar_value()->set_int32_t((*arg_val_0)[i].q);
-                        auto *arg_0_array_i_name __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_name->set_type(TYPE_STRING);
-                        arg_0_array_i_name->mutable_string_value()->set_message((*arg_val_0)[i].name.c_str());
-                        arg_0_array_i_name->mutable_string_value()->set_length((*arg_val_0)[i].name.size());
-                        auto *arg_0_array_i_address __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_address->set_type(TYPE_STRING);
-                        arg_0_array_i_address->mutable_string_value()->set_message((*arg_val_0)[i].address.c_str());
-                        arg_0_array_i_address->mutable_string_value()->set_length((*arg_val_0)[i].address.size());
-                        auto *arg_0_array_i_numbers __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_numbers->set_type(TYPE_ARRAY);
-                        arg_0_array_i_numbers->set_vector_size(10);
-                        for (int i = 0; i < 10; i++) {
-                            auto *arg_0_array_i_numbers_array_i __attribute__((__unused__)) = arg_0_array_i_numbers->add_vector_value();
-                            arg_0_array_i_numbers_array_i->set_type(TYPE_SCALAR);
-                            arg_0_array_i_numbers_array_i->mutable_scalar_value()->set_double_t((*arg_val_0)[i].numbers[i]);
+                    for (int arg_0_index = 0; arg_0_index < 20; arg_0_index++) {
+                        auto *arg_0_array_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_array_arg_0_index->set_type(TYPE_STRUCT);
+                        auto *arg_0_array_arg_0_index_q __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_q->set_type(TYPE_SCALAR);
+                        arg_0_array_arg_0_index_q->mutable_scalar_value()->set_int32_t((*arg_val_0)[arg_0_index].q);
+                        auto *arg_0_array_arg_0_index_name __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_name->set_type(TYPE_STRING);
+                        arg_0_array_arg_0_index_name->mutable_string_value()->set_message((*arg_val_0)[arg_0_index].name.c_str());
+                        arg_0_array_arg_0_index_name->mutable_string_value()->set_length((*arg_val_0)[arg_0_index].name.size());
+                        auto *arg_0_array_arg_0_index_address __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_address->set_type(TYPE_STRING);
+                        arg_0_array_arg_0_index_address->mutable_string_value()->set_message((*arg_val_0)[arg_0_index].address.c_str());
+                        arg_0_array_arg_0_index_address->mutable_string_value()->set_length((*arg_val_0)[arg_0_index].address.size());
+                        auto *arg_0_array_arg_0_index_numbers __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_numbers->set_type(TYPE_ARRAY);
+                        arg_0_array_arg_0_index_numbers->set_vector_size(10);
+                        for (int arg_0_array_arg_0_index_numbers_index = 0; arg_0_array_arg_0_index_numbers_index < 10; arg_0_array_arg_0_index_numbers_index++) {
+                            auto *arg_0_array_arg_0_index_numbers_array_arg_0_array_arg_0_index_numbers_index __attribute__((__unused__)) = arg_0_array_arg_0_index_numbers->add_vector_value();
+                            arg_0_array_arg_0_index_numbers_array_arg_0_array_arg_0_index_numbers_index->set_type(TYPE_SCALAR);
+                            arg_0_array_arg_0_index_numbers_array_arg_0_array_arg_0_index_numbers_index->mutable_scalar_value()->set_double_t((*arg_val_0)[arg_0_index].numbers[arg_0_array_arg_0_index_numbers_index]);
                         }
-                        auto *arg_0_array_i_fumble __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_fumble->set_type(TYPE_STRUCT);
-                        profile____android__hardware__tests__foo__V1_0__IFoo__Fumble(arg_0_array_i_fumble, (*arg_val_0)[i].fumble);
-                        auto *arg_0_array_i_gumble __attribute__((__unused__)) = arg_0_array_i->add_struct_value();
-                        arg_0_array_i_gumble->set_type(TYPE_STRUCT);
-                        profile____android__hardware__tests__foo__V1_0__IFoo__Fumble(arg_0_array_i_gumble, (*arg_val_0)[i].gumble);
+                        auto *arg_0_array_arg_0_index_fumble __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_fumble->set_type(TYPE_STRUCT);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__Fumble(arg_0_array_arg_0_index_fumble, (*arg_val_0)[arg_0_index].fumble);
+                        auto *arg_0_array_arg_0_index_gumble __attribute__((__unused__)) = arg_0_array_arg_0_index->add_struct_value();
+                        arg_0_array_arg_0_index_gumble->set_type(TYPE_STRUCT);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__Fumble(arg_0_array_arg_0_index_gumble, (*arg_val_0)[arg_0_index].gumble);
                     }
                     break;
                 }
@@ -631,11 +631,11 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<::android::hardware::hidl_string,3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string,3>*> ((*args)[0]);
                     arg_0->set_type(TYPE_ARRAY);
                     arg_0->set_vector_size(3);
-                    for (int i = 0; i < 3; i++) {
-                        auto *arg_0_array_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_array_i->set_type(TYPE_STRING);
-                        arg_0_array_i->mutable_string_value()->set_message((*arg_val_0)[i].c_str());
-                        arg_0_array_i->mutable_string_value()->set_length((*arg_val_0)[i].size());
+                    for (int arg_0_index = 0; arg_0_index < 3; arg_0_index++) {
+                        auto *arg_0_array_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_array_arg_0_index->set_type(TYPE_STRING);
+                        arg_0_array_arg_0_index->mutable_string_value()->set_message((*arg_val_0)[arg_0_index].c_str());
+                        arg_0_array_arg_0_index->mutable_string_value()->set_length((*arg_val_0)[arg_0_index].size());
                     }
                     break;
                 }
@@ -651,11 +651,11 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<::android::hardware::hidl_string,2> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string,2>*> ((*args)[0]);
                     result_0->set_type(TYPE_ARRAY);
                     result_0->set_vector_size(2);
-                    for (int i = 0; i < 2; i++) {
-                        auto *result_0_array_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_array_i->set_type(TYPE_STRING);
-                        result_0_array_i->mutable_string_value()->set_message((*result_val_0)[i].c_str());
-                        result_0_array_i->mutable_string_value()->set_length((*result_val_0)[i].size());
+                    for (int result_0_index = 0; result_0_index < 2; result_0_index++) {
+                        auto *result_0_array_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_array_result_0_index->set_type(TYPE_STRING);
+                        result_0_array_result_0_index->mutable_string_value()->set_message((*result_val_0)[result_0_index].c_str());
+                        result_0_array_result_0_index->mutable_string_value()->set_length((*result_val_0)[result_0_index].size());
                     }
                     break;
                 }
@@ -687,11 +687,11 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<::android::hardware::hidl_string> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::hidl_string>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_STRING);
-                        arg_0_vector_i->mutable_string_value()->set_message((*arg_val_0)[i].c_str());
-                        arg_0_vector_i->mutable_string_value()->set_length((*arg_val_0)[i].size());
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_STRING);
+                        arg_0_vector_arg_0_index->mutable_string_value()->set_message((*arg_val_0)[arg_0_index].c_str());
+                        arg_0_vector_arg_0_index->mutable_string_value()->set_length((*arg_val_0)[arg_0_index].size());
                     }
                     break;
                 }
@@ -707,11 +707,11 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<::android::hardware::hidl_string> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::hidl_string>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_STRING);
-                        result_0_vector_i->mutable_string_value()->set_message((*result_val_0)[i].c_str());
-                        result_0_vector_i->mutable_string_value()->set_length((*result_val_0)[i].size());
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_STRING);
+                        result_0_vector_result_0_index->mutable_string_value()->set_message((*result_val_0)[result_0_index].c_str());
+                        result_0_vector_result_0_index->mutable_string_value()->set_length((*result_val_0)[result_0_index].size());
                     }
                     break;
                 }
@@ -743,14 +743,14 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<float, 3,5> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 3,5>*> ((*args)[0]);
                     arg_0->set_type(TYPE_ARRAY);
                     arg_0->set_vector_size(3);
-                    for (int i = 0; i < 3; i++) {
-                        auto *arg_0_array_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_array_i->set_type(TYPE_ARRAY);
-                        arg_0_array_i->set_vector_size(5);
-                        for (int i = 0; i < 5; i++) {
-                            auto *arg_0_array_i_array_i __attribute__((__unused__)) = arg_0_array_i->add_vector_value();
-                            arg_0_array_i_array_i->set_type(TYPE_SCALAR);
-                            arg_0_array_i_array_i->mutable_scalar_value()->set_float_t((*arg_val_0)[i][i]);
+                    for (int arg_0_index = 0; arg_0_index < 3; arg_0_index++) {
+                        auto *arg_0_array_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_array_arg_0_index->set_type(TYPE_ARRAY);
+                        arg_0_array_arg_0_index->set_vector_size(5);
+                        for (int arg_0_array_arg_0_index_index = 0; arg_0_array_arg_0_index_index < 5; arg_0_array_arg_0_index_index++) {
+                            auto *arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index __attribute__((__unused__)) = arg_0_array_arg_0_index->add_vector_value();
+                            arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index->set_type(TYPE_SCALAR);
+                            arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index->mutable_scalar_value()->set_float_t((*arg_val_0)[arg_0_index][arg_0_array_arg_0_index_index]);
                         }
                     }
                     break;
@@ -767,14 +767,14 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<float, 5,3> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 5,3>*> ((*args)[0]);
                     result_0->set_type(TYPE_ARRAY);
                     result_0->set_vector_size(5);
-                    for (int i = 0; i < 5; i++) {
-                        auto *result_0_array_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_array_i->set_type(TYPE_ARRAY);
-                        result_0_array_i->set_vector_size(3);
-                        for (int i = 0; i < 3; i++) {
-                            auto *result_0_array_i_array_i __attribute__((__unused__)) = result_0_array_i->add_vector_value();
-                            result_0_array_i_array_i->set_type(TYPE_SCALAR);
-                            result_0_array_i_array_i->mutable_scalar_value()->set_float_t((*result_val_0)[i][i]);
+                    for (int result_0_index = 0; result_0_index < 5; result_0_index++) {
+                        auto *result_0_array_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_array_result_0_index->set_type(TYPE_ARRAY);
+                        result_0_array_result_0_index->set_vector_size(3);
+                        for (int result_0_array_result_0_index_index = 0; result_0_array_result_0_index_index < 3; result_0_array_result_0_index_index++) {
+                            auto *result_0_array_result_0_index_array_result_0_array_result_0_index_index __attribute__((__unused__)) = result_0_array_result_0_index->add_vector_value();
+                            result_0_array_result_0_index_array_result_0_array_result_0_index_index->set_type(TYPE_SCALAR);
+                            result_0_array_result_0_index_array_result_0_array_result_0_index_index->mutable_scalar_value()->set_float_t((*result_val_0)[result_0_index][result_0_array_result_0_index_index]);
                         }
                     }
                     break;
@@ -895,15 +895,15 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3>*> ((*args)[0]);
                     arg_0->set_type(TYPE_ARRAY);
                     arg_0->set_vector_size(5);
-                    for (int i = 0; i < 5; i++) {
-                        auto *arg_0_array_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_array_i->set_type(TYPE_ARRAY);
-                        arg_0_array_i->set_vector_size(3);
-                        for (int i = 0; i < 3; i++) {
-                            auto *arg_0_array_i_array_i __attribute__((__unused__)) = arg_0_array_i->add_vector_value();
-                            arg_0_array_i_array_i->set_type(TYPE_STRING);
-                            arg_0_array_i_array_i->mutable_string_value()->set_message((*arg_val_0)[i][i].c_str());
-                            arg_0_array_i_array_i->mutable_string_value()->set_length((*arg_val_0)[i][i].size());
+                    for (int arg_0_index = 0; arg_0_index < 5; arg_0_index++) {
+                        auto *arg_0_array_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_array_arg_0_index->set_type(TYPE_ARRAY);
+                        arg_0_array_arg_0_index->set_vector_size(3);
+                        for (int arg_0_array_arg_0_index_index = 0; arg_0_array_arg_0_index_index < 3; arg_0_array_arg_0_index_index++) {
+                            auto *arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index __attribute__((__unused__)) = arg_0_array_arg_0_index->add_vector_value();
+                            arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index->set_type(TYPE_STRING);
+                            arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index->mutable_string_value()->set_message((*arg_val_0)[arg_0_index][arg_0_array_arg_0_index_index].c_str());
+                            arg_0_array_arg_0_index_array_arg_0_array_arg_0_index_index->mutable_string_value()->set_length((*arg_val_0)[arg_0_index][arg_0_array_arg_0_index_index].size());
                         }
                     }
                     break;
@@ -920,15 +920,15 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_array<::android::hardware::hidl_string, 3,5> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 3,5>*> ((*args)[0]);
                     result_0->set_type(TYPE_ARRAY);
                     result_0->set_vector_size(3);
-                    for (int i = 0; i < 3; i++) {
-                        auto *result_0_array_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_array_i->set_type(TYPE_ARRAY);
-                        result_0_array_i->set_vector_size(5);
-                        for (int i = 0; i < 5; i++) {
-                            auto *result_0_array_i_array_i __attribute__((__unused__)) = result_0_array_i->add_vector_value();
-                            result_0_array_i_array_i->set_type(TYPE_STRING);
-                            result_0_array_i_array_i->mutable_string_value()->set_message((*result_val_0)[i][i].c_str());
-                            result_0_array_i_array_i->mutable_string_value()->set_length((*result_val_0)[i][i].size());
+                    for (int result_0_index = 0; result_0_index < 3; result_0_index++) {
+                        auto *result_0_array_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_array_result_0_index->set_type(TYPE_ARRAY);
+                        result_0_array_result_0_index->set_vector_size(5);
+                        for (int result_0_array_result_0_index_index = 0; result_0_array_result_0_index_index < 5; result_0_array_result_0_index_index++) {
+                            auto *result_0_array_result_0_index_array_result_0_array_result_0_index_index __attribute__((__unused__)) = result_0_array_result_0_index->add_vector_value();
+                            result_0_array_result_0_index_array_result_0_array_result_0_index_index->set_type(TYPE_STRING);
+                            result_0_array_result_0_index_array_result_0_array_result_0_index_index->mutable_string_value()->set_message((*result_val_0)[result_0_index][result_0_array_result_0_index_index].c_str());
+                            result_0_array_result_0_index_array_result_0_array_result_0_index_index->mutable_string_value()->set_length((*result_val_0)[result_0_index][result_0_array_result_0_index_index].size());
                         }
                     }
                     break;
@@ -961,10 +961,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<uint8_t> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_SCALAR);
-                        arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_SCALAR);
+                        arg_0_vector_arg_0_index->mutable_scalar_value()->set_uint8_t((*arg_val_0)[arg_0_index]);
                     }
                     break;
                 }
@@ -980,10 +980,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<uint8_t> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_SCALAR);
-                        result_0_vector_i->mutable_scalar_value()->set_uint8_t((*result_val_0)[i]);
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_SCALAR);
+                        result_0_vector_result_0_index->mutable_scalar_value()->set_uint8_t((*result_val_0)[result_0_index]);
                     }
                     break;
                 }
@@ -1025,14 +1025,14 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<::android::hardware::hidl_vec<uint8_t>> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::hidl_vec<uint8_t>>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_VECTOR);
-                        result_0_vector_i->set_vector_size((*result_val_0)[i].size());
-                        for (int i = 0; i < (int)(*result_val_0)[i].size(); i++) {
-                            auto *result_0_vector_i_vector_i __attribute__((__unused__)) = result_0_vector_i->add_vector_value();
-                            result_0_vector_i_vector_i->set_type(TYPE_SCALAR);
-                            result_0_vector_i_vector_i->mutable_scalar_value()->set_uint8_t((*result_val_0)[i][i]);
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_VECTOR);
+                        result_0_vector_result_0_index->set_vector_size((*result_val_0)[result_0_index].size());
+                        for (int result_0_vector_result_0_index_index = 0; result_0_vector_result_0_index_index < (int)(*result_val_0)[result_0_index].size(); result_0_vector_result_0_index_index++) {
+                            auto *result_0_vector_result_0_index_vector_result_0_vector_result_0_index_index __attribute__((__unused__)) = result_0_vector_result_0_index->add_vector_value();
+                            result_0_vector_result_0_index_vector_result_0_vector_result_0_index_index->set_type(TYPE_SCALAR);
+                            result_0_vector_result_0_index_vector_result_0_vector_result_0_index_index->mutable_scalar_value()->set_uint8_t((*result_val_0)[result_0_index][result_0_vector_result_0_index_index]);
                         }
                     }
                     break;
@@ -1065,10 +1065,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_HIDL_INTERFACE);
-                        arg_0_vector_i->set_predefined_type("::android::hardware::tests::foo::V1_0::ISimple");
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_HIDL_INTERFACE);
+                        arg_0_vector_arg_0_index->set_predefined_type("::android::hardware::tests::foo::V1_0::ISimple");
                     }
                     break;
                 }
@@ -1084,10 +1084,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_HIDL_INTERFACE);
-                        result_0_vector_i->set_predefined_type("::android::hardware::tests::foo::V1_0::ISimple");
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_HIDL_INTERFACE);
+                        result_0_vector_result_0_index->set_predefined_type("::android::hardware::tests::foo::V1_0::ISimple");
                     }
                     break;
                 }
@@ -1119,10 +1119,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_HIDL_INTERFACE);
-                        arg_0_vector_i->set_predefined_type("::android::hidl::base::V1_0::IBase");
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_HIDL_INTERFACE);
+                        arg_0_vector_arg_0_index->set_predefined_type("::android::hidl::base::V1_0::IBase");
                     }
                     break;
                 }
@@ -1138,10 +1138,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_HIDL_INTERFACE);
-                        result_0_vector_i->set_predefined_type("::android::hidl::base::V1_0::IBase");
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_HIDL_INTERFACE);
+                        result_0_vector_result_0_index->set_predefined_type("::android::hidl::base::V1_0::IBase");
                     }
                     break;
                 }
@@ -1275,22 +1275,22 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     ::android::hardware::hidl_vec<::android::hardware::hidl_handle> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::hidl_handle>*> ((*args)[0]);
                     result_0->set_type(TYPE_VECTOR);
                     result_0->set_vector_size((*result_val_0).size());
-                    for (int i = 0; i < (int)(*result_val_0).size(); i++) {
-                        auto *result_0_vector_i __attribute__((__unused__)) = result_0->add_vector_value();
-                        result_0_vector_i->set_type(TYPE_HANDLE);
-                        auto result_0_vector_i_h = (*result_val_0)[i].getNativeHandle();
-                        if (!result_0_vector_i_h) {
+                    for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                        auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                        result_0_vector_result_0_index->set_type(TYPE_HANDLE);
+                        auto result_0_vector_result_0_index_h = (*result_val_0)[result_0_index].getNativeHandle();
+                        if (!result_0_vector_result_0_index_h) {
                             LOG(WARNING) << "null handle";
                             return;
                         }
-                        result_0_vector_i->mutable_handle_value()->set_version(result_0_vector_i_h->version);
-                        result_0_vector_i->mutable_handle_value()->set_num_ints(result_0_vector_i_h->numInts);
-                        result_0_vector_i->mutable_handle_value()->set_num_fds(result_0_vector_i_h->numFds);
-                        for (int i = 0; i < result_0_vector_i_h->numInts + result_0_vector_i_h->numFds; i++) {
-                            if(i < result_0_vector_i_h->numFds) {
-                                auto* fd_val_i = result_0_vector_i->mutable_handle_value()->add_fd_val();
+                        result_0_vector_result_0_index->mutable_handle_value()->set_version(result_0_vector_result_0_index_h->version);
+                        result_0_vector_result_0_index->mutable_handle_value()->set_num_ints(result_0_vector_result_0_index_h->numInts);
+                        result_0_vector_result_0_index->mutable_handle_value()->set_num_fds(result_0_vector_result_0_index_h->numFds);
+                        for (int i = 0; i < result_0_vector_result_0_index_h->numInts + result_0_vector_result_0_index_h->numFds; i++) {
+                            if(i < result_0_vector_result_0_index_h->numFds) {
+                                auto* fd_val_i = result_0_vector_result_0_index->mutable_handle_value()->add_fd_val();
                                 char filePath[PATH_MAX];
-                                string procPath = "/proc/self/fd/" + to_string(result_0_vector_i_h->data[i]);
+                                string procPath = "/proc/self/fd/" + to_string(result_0_vector_result_0_index_h->data[i]);
                                 ssize_t r = readlink(procPath.c_str(), filePath, sizeof(filePath));
                                 if (r == -1) {
                                     LOG(ERROR) << "Unable to get file path";
@@ -1299,17 +1299,17 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                                 filePath[r] = '\0';
                                 fd_val_i->set_file_name(filePath);
                                 struct stat statbuf;
-                                fstat(result_0_vector_i_h->data[i], &statbuf);
+                                fstat(result_0_vector_result_0_index_h->data[i], &statbuf);
                                 fd_val_i->set_mode(statbuf.st_mode);
                                 if(S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)){
                                     fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
-                                    int flags = fcntl(result_0_vector_i_h->data[i], F_GETFL);
+                                    int flags = fcntl(result_0_vector_result_0_index_h->data[i], F_GETFL);
                                     fd_val_i->set_flags(flags);
                                 }
                                 else if(S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)){
                                     fd_val_i->set_type(DEV_TYPE);
                                     if(strcmp(filePath, "/dev/ashmem") == 0) {
-                                        int size = ashmem_get_size_region(result_0_vector_i_h->data[i]);
+                                        int size = ashmem_get_size_region(result_0_vector_result_0_index_h->data[i]);
                                         fd_val_i->mutable_memory()->set_size(size);
                                     }
                                 }
@@ -1323,7 +1323,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                                     fd_val_i->set_type(LINK_TYPE);
                                 }
                             } else {
-                                result_0_vector_i->mutable_handle_value()->add_int_val(result_0_vector_i_h->data[i]);
+                                result_0_vector_result_0_index->mutable_handle_value()->add_int_val(result_0_vector_result_0_index_h->data[i]);
                             }
                         }
                     }
