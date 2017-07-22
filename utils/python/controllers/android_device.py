@@ -57,6 +57,7 @@ THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
 
+
 class AndroidDeviceError(signals.ControllerError):
     pass
 
@@ -200,17 +201,15 @@ def get_instances_with_configs(configs):
         try:
             serial = c.pop(keys.ConfigKeys.IKEY_SERIAL)
         except KeyError:
-            raise AndroidDeviceError(
-                ('Required value %s is missing in '
-                 'AndroidDevice config %s.') % (keys.ConfigKeys.IKEY_SERIAL,
-                                                c))
+            raise AndroidDeviceError(('Required value %s is missing in '
+                                      'AndroidDevice config %s.') %
+                                     (keys.ConfigKeys.IKEY_SERIAL, c))
         try:
             product_type = c.pop(keys.ConfigKeys.IKEY_PRODUCT_TYPE)
         except KeyError:
-            logging.error(
-                'Required value %s is missing in '
-                'AndroidDevice config %s.',
-                keys.ConfigKeys.IKEY_PRODUCT_TYPE, c)
+            logging.error('Required value %s is missing in '
+                          'AndroidDevice config %s.',
+                          keys.ConfigKeys.IKEY_PRODUCT_TYPE, c)
             product_type = ANDROID_PRODUCT_TYPE_UNKNOWN
 
         ad = AndroidDevice(serial, product_type)
@@ -350,7 +349,9 @@ class AndroidDevice(object):
                        known, ANDROID_PRODUCT_TYPE_UNKNOWN otherwise.
     """
 
-    def __init__(self, serial="", product_type=ANDROID_PRODUCT_TYPE_UNKNOWN,
+    def __init__(self,
+                 serial="",
+                 product_type=ANDROID_PRODUCT_TYPE_UNKNOWN,
                  device_callback_port=5010):
         self.serial = serial
         self._product_type = product_type
@@ -455,6 +456,42 @@ class AndroidDevice(object):
         return "64" in out
 
     @property
+    def total_memory(self):
+        """Total memory on device.
+
+        Returns:
+            long, total memory in bytes. -1 if cannot get memory information.
+        """
+        total_memory_command = 'cat /proc/meminfo | grep MemTotal'
+        out = self.adb.shell(total_memory_command)
+        value_unit = out.split(':')[-1].strip().split(' ')
+
+        if len(value_unit) != 2:
+            logging.error('Cannot get memory information. %s', out)
+            return -1
+
+        value, unit = value_unit
+
+        try:
+            value = int(value)
+        except ValueError:
+            logging.error('Unrecognized total memory value: %s', value_unit)
+            return -1
+
+        unit = unit.lower()
+        if unit == 'kb':
+            value *= 1024
+        elif unit == 'mb':
+            value *= 1024 * 1024
+        elif unit == 'b':
+            pass
+        else:
+            logging.error('Unrecognized total memory unit: %s', value_unit)
+            return -1
+
+        return value
+
+    @property
     def libPaths(self):
         """List of strings representing the paths to the native library directories."""
         paths_32 = ["/system/lib", "/vendor/lib"]
@@ -517,8 +554,9 @@ class AndroidDevice(object):
             extra_params = self.adb_logcat_param
         except AttributeError:
             extra_params = "-b all"
-        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (
-            self.serial, extra_params, logcat_file_path)
+        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (self.serial,
+                                                           extra_params,
+                                                           logcat_file_path)
         self.adb_logcat_process = utils.start_standing_subprocess(cmd)
         self.adb_logcat_file_path = logcat_file_path
 
@@ -696,7 +734,8 @@ class AndroidDevice(object):
             logging.info("device_command_port: %s", self.device_command_port)
             if not self.host_command_port:
                 self.host_command_port = adb.get_available_host_port()
-            self.adb.tcp_forward(self.host_command_port, self.device_command_port)
+            self.adb.tcp_forward(self.host_command_port,
+                                 self.device_command_port)
             self.hal = hal_mirror.HalMirror(self.host_command_port,
                                             self.host_callback_port)
             self.lib = lib_mirror.LibMirror(self.host_command_port)
@@ -721,18 +760,18 @@ class AndroidDevice(object):
         """
         self.log.info("Starting VTS agent")
         if self.vts_agent_process:
-            raise AndroidDeviceError("HAL agent is already running on %s." %
-                                     self.serial)
+            raise AndroidDeviceError(
+                "HAL agent is already running on %s." % self.serial)
 
         cleanup_commands = [
             "rm -f /data/local/tmp/vts_driver_*",
             "rm -f /data/local/tmp/vts_agent_callback*"
         ]
-        kill_commands = ["killall vts_hal_agent32", "killall vts_hal_agent64",
-                         "killall vts_hal_driver32",
-                         "killall vts_hal_driver64",
-                         "killall vts_shell_driver32",
-                         "killall vts_shell_driver64"]
+        kill_commands = [
+            "killall vts_hal_agent32", "killall vts_hal_agent64",
+            "killall vts_hal_driver32", "killall vts_hal_driver64",
+            "killall vts_shell_driver32", "killall vts_shell_driver64"
+        ]
         cleanup_commands.extend(kill_commands)
         chmod_commands = [
             "chmod 755 %s/32/vts_hal_agent32" % DEFAULT_AGENT_BASE_DIR,
@@ -754,16 +793,17 @@ class AndroidDevice(object):
         bits = ['64', '32'] if self.is64Bit else ['32']
         for bitness in bits:
             vts_agent_log_path = os.path.join(self.log_path,
-                     "vts_agent_" + bitness + ".log")
+                                              "vts_agent_" + bitness + ".log")
             cmd = (
                 'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                 '{path}/{bitness}/vts_hal_agent{bitness}'
                 ' {path}/32/vts_hal_driver32 {path}/64/vts_hal_driver64 {path}/spec'
                 ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log} 2>&1'
-            ).format(s=self.serial,
-                     bitness=bitness,
-                     path=DEFAULT_AGENT_BASE_DIR,
-                     log=vts_agent_log_path)
+            ).format(
+                s=self.serial,
+                bitness=bitness,
+                path=DEFAULT_AGENT_BASE_DIR,
+                log=vts_agent_log_path)
             try:
                 self.vts_agent_process = utils.start_standing_subprocess(
                     cmd, check_health_delay=1)
@@ -811,7 +851,8 @@ class AndroidDevice(object):
         """
         self._sl4a_sessions = {}
         self._sl4a_event_dispatchers = {}
-        if not self.sl4a_host_port or not adb.is_port_available(self.sl4a_host_port):
+        if not self.sl4a_host_port or not adb.is_port_available(
+                self.sl4a_host_port):
             self.sl4a_host_port = adb.get_available_host_port()
         self.adb.tcp_forward(self.sl4a_host_port, self.sl4a_target_port)
         try:
@@ -905,7 +946,8 @@ class AndroidDevice(object):
         """
         if session_id not in self._sl4a_sessions:
             raise DoesNotExistError("Session %d doesn't exist." % session_id)
-        droid = sl4a_client.Sl4aClient(port=self.sl4a_host_port, uid=session_id)
+        droid = sl4a_client.Sl4aClient(
+            port=self.sl4a_host_port, uid=session_id)
         droid.open(cmd=sl4a_client.Sl4aCommand.CONTINUE)
         return droid
 
