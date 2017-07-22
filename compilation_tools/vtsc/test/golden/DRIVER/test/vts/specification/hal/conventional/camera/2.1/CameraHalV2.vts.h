@@ -26,14 +26,14 @@ class FuzzerExtended_camera_module_t : public DriverBase {
     bool CallFunction(const FunctionSpecificationMessage& func_msg, const string& callback_socket_name, FunctionSpecificationMessage* result_msg);
     bool VerifyResults(const FunctionSpecificationMessage& expected_result, const FunctionSpecificationMessage& actual_result);
     bool GetAttribute(FunctionSpecificationMessage* func_msg, void** result);
-        bool Fuzz__common(FunctionSpecificationMessage* func_msg,
-                    void** result, const string& callback_socket_name);
-        bool GetAttribute__common(FunctionSpecificationMessage* /*func_msg*/,
-                    void** /*result*/);
-            bool Fuzz__common_methods(FunctionSpecificationMessage* func_msg,
-                        void** result, const string& callback_socket_name);
-            bool GetAttribute__common_methods(FunctionSpecificationMessage* /*func_msg*/,
-                        void** /*result*/);
+    bool Fuzz__common(FunctionSpecificationMessage* func_msg,
+        void** result, const string& callback_socket_name);
+    bool GetAttribute__common(FunctionSpecificationMessage* /*func_msg*/,
+        void** /*result*/);
+    bool Fuzz__common_methods(FunctionSpecificationMessage* func_msg,
+        void** result, const string& callback_socket_name);
+    bool GetAttribute__common_methods(FunctionSpecificationMessage* /*func_msg*/,
+        void** /*result*/);
  private:
 };
 

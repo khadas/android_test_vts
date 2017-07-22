@@ -243,23 +243,21 @@ void DriverCodeGenBase::GenerateCppBodyGlobalFunctions(
 void DriverCodeGenBase::GenerateFuzzFunctionForSubStruct(
     Formatter& out, const StructSpecificationMessage& message,
     const string& parent_path) {
-  out.indent();
   out << "bool Fuzz_" << parent_path << message.name()
       << "(FunctionSpecificationMessage* func_msg," << "\n";
-  out << "            void** result, const string& callback_socket_name);"
+  out << "    void** result, const string& callback_socket_name);"
       << "\n";
 
   out << "bool GetAttribute_" << parent_path << message.name()
       << "(FunctionSpecificationMessage* /*func_msg*/,"
       << "\n";
-  out << "            void** /*result*/);"
+  out << "    void** /*result*/);"
       << "\n";
 
   for (auto const& sub_struct : message.sub_struct()) {
     GenerateFuzzFunctionForSubStruct(out, sub_struct,
                                      parent_path + message.name() + "_");
   }
-  out.unindent();
 }
 
 void DriverCodeGenBase::GenerateDriverFunctionImpl(Formatter& out,
