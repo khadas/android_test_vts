@@ -100,10 +100,10 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_nfc_V1_0_INfcClientCallback(
                     ::android::hardware::hidl_vec<uint8_t> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<uint8_t>*> ((*args)[0]);
                     arg_0->set_type(TYPE_VECTOR);
                     arg_0->set_vector_size((*arg_val_0).size());
-                    for (int i = 0; i < (int)(*arg_val_0).size(); i++) {
-                        auto *arg_0_vector_i __attribute__((__unused__)) = arg_0->add_vector_value();
-                        arg_0_vector_i->set_type(TYPE_SCALAR);
-                        arg_0_vector_i->mutable_scalar_value()->set_uint8_t((*arg_val_0)[i]);
+                    for (int arg_0_index = 0; arg_0_index < (int)(*arg_val_0).size(); arg_0_index++) {
+                        auto *arg_0_vector_arg_0_index __attribute__((__unused__)) = arg_0->add_vector_value();
+                        arg_0_vector_arg_0_index->set_type(TYPE_SCALAR);
+                        arg_0_vector_arg_0_index->mutable_scalar_value()->set_uint8_t((*arg_val_0)[arg_0_index]);
                     }
                     break;
                 }
