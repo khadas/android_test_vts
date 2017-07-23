@@ -610,5 +610,15 @@ FQName GetFQName(const ComponentSpecificationMessage& message) {
                 GetComponentName(message));
 }
 
+string GetVarString(const string& var_name) {
+  string var_str = var_name;
+  for (size_t i = 0; i < var_name.length(); i++) {
+    if (!isdigit(var_str[i]) && !isalpha(var_str[i])) {
+      var_str[i] = '_';
+    }
+  }
+  return var_str;
+}
+
 }  // namespace vts
 }  // namespace android
