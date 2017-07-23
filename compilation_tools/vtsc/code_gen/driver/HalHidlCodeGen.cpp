@@ -919,24 +919,28 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     {
       out << arg_name << ".resize(" << arg_value_name
           << ".vector_value_size());\n";
-      out << "for (int i = 0; i <" << arg_value_name
-          << ".vector_value_size(); i++) {\n";
+      std::string index_name = GetVarString(arg_name) + "_index";
+      out << "for (int " << index_name << " = 0; " << index_name << " < "
+          << arg_value_name << ".vector_value_size(); " << index_name
+          << "++) {\n";
       out.indent();
-      GenerateDriverImplForTypedVariable(out, val.vector_value(0),
-                                         arg_name + "[i]",
-                                         arg_value_name + ".vector_value(i)");
+      GenerateDriverImplForTypedVariable(
+          out, val.vector_value(0), arg_name + "[" + index_name + "]",
+          arg_value_name + ".vector_value(" + index_name + ")");
       out.unindent();
       out << "}\n";
       break;
     }
     case TYPE_ARRAY:
     {
-      out << "for (int i = 0; i < " << arg_value_name
-          << ".vector_value_size(); i++) {\n";
+      std::string index_name = GetVarString(arg_name) + "_index";
+      out << "for (int " << index_name << " = 0; " << index_name << " < "
+          << arg_value_name << ".vector_value_size(); " << index_name
+          << "++) {\n";
       out.indent();
-      GenerateDriverImplForTypedVariable(out, val.vector_value(0),
-                                         arg_name + "[i]",
-                                         arg_value_name + ".vector_value(i)");
+      GenerateDriverImplForTypedVariable(
+          out, val.vector_value(0), arg_name + "[" + index_name + "]",
+          arg_value_name + ".vector_value(" + index_name + ")");
       out.unindent();
       out << "}\n";
       break;
