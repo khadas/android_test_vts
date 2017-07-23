@@ -64,14 +64,18 @@ void HalHidlProfilerCodeGen::GenerateProfilerForVectorVariable(
     const std::string& arg_name, const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_VECTOR);\n";
   out << arg_name << "->set_vector_size(" << arg_value << ".size());\n";
-  out << "for (int i = 0; i < (int)" << arg_value << ".size(); i++) {\n";
+  std::string index_name = GetVarString(arg_name) + "_index";
+  out << "for (int " << index_name << " = 0; " << index_name << " < (int)"
+      << arg_value << ".size(); " << index_name << "++) {\n";
   out.indent();
-  std::string vector_element_name = arg_name + "_vector_i";
+  std::string vector_element_name =
+      GetVarString(arg_name) + "_vector_" + index_name;
   out << "auto *" << vector_element_name
       << " __attribute__((__unused__)) = " << arg_name
       << "->add_vector_value();\n";
   GenerateProfilerForTypedVariable(out, val.vector_value(0),
-                                   vector_element_name, arg_value + "[i]");
+                                   vector_element_name,
+                                   arg_value + "[" + index_name + "]");
   out.unindent();
   out << "}\n";
 }
@@ -81,14 +85,17 @@ void HalHidlProfilerCodeGen::GenerateProfilerForArrayVariable(
     const std::string& arg_name, const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_ARRAY);\n";
   out << arg_name << "->set_vector_size(" << val.vector_size() << ");\n";
-  out << "for (int i = 0; i < " << val.vector_size() << "; i++) {\n";
+  std::string index_name = GetVarString(arg_name) + "_index";
+  out << "for (int " << index_name << " = 0; " << index_name << " < "
+      << val.vector_size() << "; " << index_name << "++) {\n";
   out.indent();
-  std::string array_element_name = arg_name + "_array_i";
+  std::string array_element_name =
+      GetVarString(arg_name) + "_array_" + index_name;
   out << "auto *" << array_element_name
       << " __attribute__((__unused__)) = " << arg_name
       << "->add_vector_value();\n";
   GenerateProfilerForTypedVariable(out, val.vector_value(0), array_element_name,
-                                   arg_value + "[i]");
+                                   arg_value + "[" + index_name + "]");
   out.unindent();
   out << "}\n";
 }
