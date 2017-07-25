@@ -51,6 +51,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.media.omx@1.0-vts.driver \
   android.hardware.memtrack@1.0-vts.driver \
   android.hardware.nfc@1.0-vts.driver \
+  android.hardware.oemlock@1.0-vts.driver \
   android.hardware.power@1.0-vts.driver \
   android.hardware.power@1.1-vts.driver \
   android.hardware.radio@1.0-vts.driver \
@@ -104,6 +105,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.media.omx@1.0-vts.profiler \
   android.hardware.memtrack@1.0-vts.profiler \
   android.hardware.nfc@1.0-vts.profiler \
+  android.hardware.oemlock@1.0-vts.profiler \
   android.hardware.power@1.0-vts.profiler \
   android.hardware.power@1.1-vts.profiler \
   android.hardware.radio@1.0-vts.profiler \
@@ -150,6 +152,7 @@ vts_test_lib_hidl_packages += \
   VtsHalMediaOmxV1_0TargetVideoDecTest \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
+  VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \
   VtsHalRadioV1_0TargetTest \
