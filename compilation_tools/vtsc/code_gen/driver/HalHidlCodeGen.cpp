@@ -723,7 +723,11 @@ void HalHidlCodeGen::GenerateRandomFunctionImplForAttribute(Formatter& out,
       } else if (attribute.enum_value().scalar_type() == "uint32_t") {
         out << attribute.enum_value().scalar_value(index).uint32_t() << "UL";
       } else if (attribute.enum_value().scalar_type() == "int64_t") {
-        out << attribute.enum_value().scalar_value(index).int64_t() << "LL";
+        if (attribute.enum_value().scalar_value(index).int64_t() == LLONG_MIN) {
+          out << "LLONG_MIN";
+        } else {
+          out << attribute.enum_value().scalar_value(index).int64_t() << "LL";
+        }
       } else if (attribute.enum_value().scalar_type() == "uint64_t") {
         out << attribute.enum_value().scalar_value(index).uint64_t() << "ULL";
       } else {
