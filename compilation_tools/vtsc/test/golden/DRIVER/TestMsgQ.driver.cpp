@@ -18,8 +18,8 @@ namespace vts {
 }
 ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits Random__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits() {
     uint32_t choice = (uint32_t) rand() / 2;
-    if (choice == (uint32_t) 1) return ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits::FMQ_NOT_EMPTY;
-    if (choice == (uint32_t) 2) return ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits::FMQ_NOT_FULL;
+    if (choice == (uint32_t) 1UL) return ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits::FMQ_NOT_EMPTY;
+    if (choice == (uint32_t) 2UL) return ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits::FMQ_NOT_FULL;
     return ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits::FMQ_NOT_EMPTY;
 }
 bool Verify__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const VariableSpecificationMessage& expected_result __attribute__((__unused__)), const VariableSpecificationMessage& actual_result __attribute__((__unused__))){
