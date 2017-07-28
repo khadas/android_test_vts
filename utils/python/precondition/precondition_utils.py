@@ -17,8 +17,10 @@
 import logging
 
 from vts.runners.host import const
+from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.utils.python.common import vintf_utils
+from vts.utils.python.file import target_file_utils
 
 
 def FindHalDescription(hal_desc, hal_package_name):
@@ -52,41 +54,33 @@ def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
     hal_version_major, hal_version_minor = vintf_utils.ParseHalVersion(
         hal_version)
 
-    hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
-        vintf_xml)
+    hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(vintf_xml)
     hwbinder_hal_desc = FindHalDescription(hwbinder_hals, hal_package)
     passthrough_hal_desc = FindHalDescription(passthrough_hals, hal_package)
     if not hwbinder_hals or not passthrough_hals:
         logging.error("can't check precondition due to a "
-                  "VINTF XML format error.")
+                      "VINTF XML format error.")
         # Assume it's satisfied.
         return True
     elif (hwbinder_hal_desc is None and passthrough_hal_desc is None):
-        logging.warn(
-            "The required HAL %s not found in VINTF XML.",
-            hal)
+        logging.warn("The required HAL %s not found in VINTF XML.", hal)
         return False
     elif (hwbinder_hal_desc is None and passthrough_hal_desc is not None):
-        if bitness:
-            if (bitness not in passthrough_hal_desc.hal_archs):
-                logging.warn(
-                    "The required feature %s found as a "
-                    "passthrough HAL but the client bitness %s "
-                    "unsupported",
-                    hal, bitness)
-                result = False
+        if (bitness and bitness not in passthrough_hal_desc.hal_archs):
+            logging.warn("The required feature %s found as a "
+                         "passthrough HAL but the client bitness %s "
+                         "unsupported", hal, bitness)
+            result = False
         hal_desc = passthrough_hal_desc
     else:
         hal_desc = hwbinder_hal_desc
-        logging.info(
-            "The feature %s found in VINTF XML", hal)
+        logging.info("The feature %s found in VINTF XML", hal)
     found_version_major = hal_desc.hal_version_major
     found_version_minor = hal_desc.hal_version_minor
     if (hal_version_major != found_version_major or
-        hal_version_minor > found_version_minor):
-        logging.warn(
-            "The found HAL version %s@%s is not relevant for %s",
-            found_version_major, found_version_minor, hal_version)
+            hal_version_minor > found_version_minor):
+        logging.warn("The found HAL version %s@%s is not relevant for %s",
+                     found_version_major, found_version_minor, hal_version)
         result = False
     return result
 
@@ -117,8 +111,11 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
     ]
     test_instance.getUserParams(opt_param_names=opt_params)
 
-    hwbinder_service_name = str(getattr(test_instance,
-        keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE, ""))
+    bitness = str(getattr(test_instance, keys.ConfigKeys.IKEY_ABI_BITNESS, ""))
+
+    hwbinder_service_name = str(
+        getattr(test_instance,
+                keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE, ""))
     if hwbinder_service_name:
         if not hwbinder_service_name.startswith("android.hardware."):
             logging.error("The given hwbinder service name %s is invalid.",
@@ -127,37 +124,51 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
             cmd_results = shell.Execute("ps -A")
             hwbinder_service_name += "@"
             if (any(cmd_results[const.EXIT_CODE]) or
-                hwbinder_service_name not in cmd_results[const.STDOUT][0]):
+                    hwbinder_service_name not in cmd_results[const.STDOUT][0]):
                 logging.warn("The required hwbinder service %s not found.",
                              hwbinder_service_name)
                 return False
 
-    feature = str(getattr(test_instance,
-        keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
+    feature = str(
+        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_FEATURE, ""))
     if feature:
         if not feature.startswith("android.hardware."):
-            logging.error(
-                "The given feature name %s is invalid for HIDL HAL.",
-                feature)
+            logging.error("The given feature name %s is invalid for HIDL HAL.",
+                          feature)
         else:
             cmd_results = shell.Execute("pm list features")
             if (any(cmd_results[const.EXIT_CODE]) or
-                feature not in cmd_results[const.STDOUT][0]):
-                logging.warn("The required feature %s not found.",
-                             feature)
+                    feature not in cmd_results[const.STDOUT][0]):
+                logging.warn("The required feature %s not found.", feature)
                 return False
 
-    file_path_prefix = str(getattr(test_instance,
-        keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX, ""))
-    if file_path_prefix:
-        cmd_results = shell.Execute("ls %s*" % file_path_prefix)
-        if any(cmd_results[const.EXIT_CODE]):
-            logging.warn("The required file (prefix: %s) not found.",
-                         file_path_prefix)
-            return False
+    file_path_prefix = getattr(test_instance, "file_path_prefix", "")
+    if file_path_prefix and bitness:
+        logging.info("FILE_PATH_PREFIX: %s", file_path_prefix)
+        logging.info("Test bitness: %s", bitness)
+        tag = "_" + bitness + "bit"
+        if tag in file_path_prefix:
+            for path_prefix in file_path_prefix[tag]:
+                if not target_file_utils.Exists(path_prefix, shell):
+                    msg = ("The required file (prefix: {}) for {}-bit testcase "
+                        "not found.").format(path_prefix, bitness)
+                    logging.warn(msg)
+                    return False
 
-    hal = str(getattr(test_instance,
-        keys.ConfigKeys.IKEY_PRECONDITION_VINTF, ""))
+    hidl_shim = str(
+        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
+    if hidl_shim and bitness:
+        logging.info("Test bitness: %s", bitness)
+        tag = "" if (bitness == "32") else "64"
+        shim_path = "/system/lib" + tag + "/" + hidl_shim + ".so"
+        if not target_file_utils.Exists(shim_path, shell):
+            msg = ("The HIDL shim (path: {0}) required for {1}-bit testcases "
+                "was not found on device. Therefore {1}-bit testcases will be "
+                "skipped.").format(shim_path, bitness)
+            raise errors.VtsError(msg)
+
+    hal = str(
+        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_VINTF, ""))
     vintf_xml = None
     if hal:
         use_lshal = False
@@ -165,8 +176,9 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
         logging.debug("precondition-vintf used to retrieve VINTF xml.")
     else:
         use_lshal = True
-        hal = str(getattr(test_instance,
-            keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
+        hal = str(
+            getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
+                    ""))
         if hal:
             vintf_xml = dut.getVintfXml(use_lshal=use_lshal)
             logging.debug("precondition-lshal used to retrieve VINTF xml.")
