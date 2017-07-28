@@ -21,6 +21,7 @@ import time
 from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import const
+from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.common import list_utils
@@ -74,6 +75,7 @@ class BinaryTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
             keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
             keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
+            keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -125,6 +127,28 @@ class BinaryTest(base_test.BaseTestClass):
                 else:
                     self.args[tag] = arg
 
+        if hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX):
+            self.file_path_prefix = {
+                self.DEFAULT_TAG_32: [],
+                self.DEFAULT_TAG_64: [],
+            }
+            self.precondition_file_path_prefix = map(
+                str, self.precondition_file_path_prefix)
+            for token in self.precondition_file_path_prefix:
+                tag = ''
+                path = token
+                if self.TAG_DELIMITER in token:
+                    tag, path = token.split(self.TAG_DELIMITER)
+                if tag == '':
+                    self.file_path_prefix[self.DEFAULT_TAG_32].append(path)
+                    self.file_path_prefix[self.DEFAULT_TAG_64].append(path)
+                elif tag in self.file_path_prefix:
+                    self.file_path_prefix[tag].append(path)
+                else:
+                    logging.warn(
+                        "Incorrect tag %s in precondition-file-path-prefix",
+                        tag)
+
         self.ld_library_path = {
             self.DEFAULT_TAG_32: self.DEFAULT_LD_LIBRARY_PATH_32,
             self.DEFAULT_TAG_64: self.DEFAULT_LD_LIBRARY_PATH_64,
@@ -168,11 +192,19 @@ class BinaryTest(base_test.BaseTestClass):
         # TODO: only set permissive mode for userdebug and eng build.
         self.shell.Execute("setenforce 0")  # SELinux permissive mode
 
-        if not precondition_utils.CanRunHidlHalTest(self, self._dut,
-                                                    self.shell):
-            self._skip_all_testcases = True
-
         self.testcases = []
+
+        try:
+            ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
+                                                       self.shell)
+        except errors.VtsError as e:
+            logging.warn('VtsError occurred: %s', e)
+            self._skip_all_testcases = True
+            return False
+        else:
+            if not ret:
+                self._skip_all_testcases = True
+
         self.tags = set()
         self.CreateTestCases()
         cmd = list(
@@ -220,7 +252,13 @@ class BinaryTest(base_test.BaseTestClass):
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
         source_list = list(map(self.ParseTestSource, self.binary_test_source))
-        source_list = filter(bool, source_list)
+        logging.info('self.abi_bitness: %s', self.abi_bitness)
+
+        # Only create test cases for appropriate abi_bitness
+        def isValidSource(source):
+            return source and (str(source[2]) == '_' + self.abi_bitness + 'bit')
+        source_list = filter(isValidSource, source_list)
+
         logging.info('Parsed test sources: %s', source_list)
 
         # Push source files first

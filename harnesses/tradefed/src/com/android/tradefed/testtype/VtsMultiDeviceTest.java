@@ -170,8 +170,14 @@ public class VtsMultiDeviceTest
     private String mPreconditionFeature = null;
 
     @Option(name = "precondition-file-path-prefix",
-        description = "The path prefix of a file (e.g., shared lib) needed to run the test.")
-    private String mPreconditionFilePathPrefix = null;
+            description = "The path prefix of a target-side file needed to run the test."
+                    + "Format of tags:"
+                    + "    <source>: source without tag."
+                    + "    <tag>::<source>: <tag> specifies bitness of testcase: _32bit or _64bit"
+                    + "    Note: multiple sources are ANDed"
+                    + "Format of each source string:"
+                    + "    <source>: absolute path of file prefix on device")
+    private Collection<String> mPreconditionFilePathPrefix = new ArrayList<>();
 
     @Option(name = "precondition-lshal",
         description = "The name of a `lshal`-listable feature needed to run the test.")
@@ -780,8 +786,9 @@ public class VtsMultiDeviceTest
             CLog.i("Added %s to the Json object", PRECONDITION_FEATURE);
         }
 
-        if (mPreconditionFilePathPrefix != null) {
-            jsonObject.put(PRECONDITION_FILE_PATH_PREFIX, mPreconditionFilePathPrefix);
+        if (!mPreconditionFilePathPrefix.isEmpty()) {
+            jsonObject.put(
+                    PRECONDITION_FILE_PATH_PREFIX, new JSONArray(mPreconditionFilePathPrefix));
             CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
         }
 
