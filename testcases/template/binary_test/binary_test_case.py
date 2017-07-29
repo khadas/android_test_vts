@@ -104,12 +104,12 @@ class BinaryTestCase(object):
                              if self.working_directory else '')
 
         envp = 'env %s ' % self.envp if self.envp else ''
-        ld_library_path = ('LD_LIBRARY_PATH=%s ' % self.ld_library_path
+        ld_library_path = ('LD_LIBRARY_PATH=%s' % self.ld_library_path
                            if self.ld_library_path else '')
 
         if ld_library_path:
             envp = ('{}{}'.format(envp, ld_library_path)
-                    if envp else 'env %s' % ld_library_path)
+                    if envp else 'env %s ' % ld_library_path)
 
         args = ' %s' % self.args if self.args else ''
 
