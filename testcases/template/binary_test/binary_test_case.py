@@ -95,11 +95,11 @@ class BinaryTestCase(object):
         Returns:
             String, a command to run the test.
         '''
-        working_directory = ('cd %s &&' % self.working_directory
+        working_directory = ('cd %s && ' % self.working_directory
                              if self.working_directory else '')
 
         envp = 'env %s ' % self.envp if self.envp else ''
-        ld_library_path = ('LD_LIBRARY_PATH=%s' % self.ld_library_path
+        ld_library_path = ('LD_LIBRARY_PATH=%s ' % self.ld_library_path
                            if self.ld_library_path else '')
 
         if ld_library_path:
