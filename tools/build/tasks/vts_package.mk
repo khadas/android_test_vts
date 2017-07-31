@@ -149,7 +149,8 @@ host_testcase_files := \
   $(call find-files-in-subdirs,test/vts-testcase,"*.py" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.config" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.push" -and -type f,.) \
-  $(call find-files-in-subdirs,test/vts-testcase,"android-base*.cfg" -and -type f,.)
+  $(call find-files-in-subdirs,test/vts-testcase,"android-base*.cfg" -and -type f,.) \
+  $(call find-files-in-subdirs,test/vts-testcase,"*.dump" -and -type f,.)
 
 host_testcase_copy_pairs := \
   $(foreach f,$(host_testcase_files),\

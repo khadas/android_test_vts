@@ -20,6 +20,6 @@
   <option name="vts-plan-result:plan-name" value="vts-serving-staging-vndk" />
   <option name="vts-plan-result:default-type" value="staging" />
 
-  <option name="compatibility:include-filter" value="VtsVndkDependencyTest" />
+  <option name="compatibility:include-filter" value="VtsVndkAbi" />
 
 </configuration>
