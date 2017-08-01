@@ -27,6 +27,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.bluetooth@1.0-vts.driver \
   android.hardware.boot@1.0-vts.driver \
   android.hardware.broadcastradio@1.0-vts.driver \
+  android.hardware.broadcastradio@1.1-vts.driver \
   android.hardware.camera.common@1.0-vts.driver \
   android.hardware.camera.device@1.0-vts.driver \
   android.hardware.camera.device@3.2-vts.driver \
@@ -137,12 +138,14 @@ vts_test_lib_hidl_packages += \
   VtsHalBluetoothV1_0TargetTest \
   VtsHalBootV1_0TargetTest \
   VtsHalBroadcastradioV1_0TargetTest \
+  VtsHalBroadcastradioV1_1TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDumpstateV1_0TargetTest \
+  VtsHalEvsV1_0Target \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
