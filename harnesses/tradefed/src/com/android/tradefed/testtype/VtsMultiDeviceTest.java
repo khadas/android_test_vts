@@ -101,6 +101,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String ENABLE_COVERAGE = "enable_coverage";
+    static final String LTP_NUMBER_OF_THREADS = "ltp_number_of_threads";
     static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
@@ -196,6 +197,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         + "Value true means use passthrough mode if available; false for binderized mode if "
         + "available. Default is false")
     private boolean mPassthroughMode = false;
+
+    @Option(name = "ltp-number-of-threads",
+            description = "Number of threads to run the LTP test cases. "
+                    + "0 means using number of avaiable CPU threads.")
+    private int mLtpNumberOfThreads = -1;
 
     @Option(name = "skip-on-32bit-abi",
         description = "Whether to skip tests on 32bit ABI.")
@@ -741,6 +747,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mPassthroughMode) {
             jsonObject.put(PASSTHROUGH_MODE, mPassthroughMode);
             CLog.i("Added %s to the Json object", PASSTHROUGH_MODE);
+        }
+
+        if (mLtpNumberOfThreads >= 0) {
+            jsonObject.put(LTP_NUMBER_OF_THREADS, mLtpNumberOfThreads);
+            CLog.i("Added %s to the Json object", LTP_NUMBER_OF_THREADS);
         }
     }
 
