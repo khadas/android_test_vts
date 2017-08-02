@@ -127,6 +127,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths";
     static final String HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name";
     static final String REPORT_MESSAGE_FILE_NAME = "report_proto.msg";
+    static final String RUN_AS_VTS_SELF_TEST = "run_as_vts_self_test";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -380,6 +381,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "python-binary", description = "python binary to use "
             + "(optional)")
     private String mPythonBin = null;
+
+    @Option(name = "run-as-vts-self-test",
+            description = "Run the module as vts-selftest. "
+                    + "When the value is set to true, only setUpClass and tearDownClass function "
+                    + "of the module will be called to ensure the framework is free of bug. "
+                    + "Note that exception in tearDownClass will not be reported as failure.")
+    private boolean mRunAsVtsSelfTest = false;
+
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
@@ -854,6 +863,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mLtpNumberOfThreads >= 0) {
             jsonObject.put(LTP_NUMBER_OF_THREADS, mLtpNumberOfThreads);
             CLog.i("Added %s to the Json object", LTP_NUMBER_OF_THREADS);
+        }
+
+        if (mRunAsVtsSelfTest) {
+            jsonObject.put(RUN_AS_VTS_SELF_TEST, mRunAsVtsSelfTest);
+            CLog.i("Added %s to the Json object", RUN_AS_VTS_SELF_TEST);
         }
     }
 
