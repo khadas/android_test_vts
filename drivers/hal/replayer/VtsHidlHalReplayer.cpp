@@ -37,8 +37,7 @@ namespace vts {
 bool VtsHidlHalReplayer::ReplayTrace(const string& trace_file,
                                      const string& hal_service_name) {
   // Parse the trace file to get the sequence of function calls.
-  int fd =
-      open(trace_file.c_str(), O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  int fd = open(trace_file.c_str(), O_RDONLY);
   if (fd < 0) {
     cerr << "Can not open trace file: " << trace_file
          << "error: " << std::strerror(errno);
