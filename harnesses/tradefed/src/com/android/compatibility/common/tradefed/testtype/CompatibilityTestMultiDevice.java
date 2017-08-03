@@ -17,11 +17,16 @@
 package com.android.compatibility.common.tradefed.testtype;
 
 import com.android.tradefed.build.IBuildInfo;
+import com.android.tradefed.config.ConfigurationException;
 import com.android.tradefed.config.OptionClass;
+import com.android.tradefed.config.OptionCopier;
+import com.android.tradefed.config.OptionSetter;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.IMultiDeviceTest;
 import com.android.tradefed.testtype.IInvocationContextReceiver;
+import com.android.tradefed.testtype.IRemoteTest;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
@@ -81,5 +86,24 @@ public class CompatibilityTestMultiDevice extends CompatibilityTest implements I
         }
 
         return modules;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IRemoteTest getTestShard(int shardCount, int shardIndex) {
+        CompatibilityTestMultiDevice test =
+                new CompatibilityTestMultiDevice(shardCount, getModuleRepo(), shardIndex);
+        OptionCopier.copyOptionsNoThrow(this, test);
+        // Set the shard count because the copy option on the previous line
+        // copies over the mShard value
+        try {
+            OptionSetter setter = new OptionSetter(test);
+            setter.setOptionValue("shards", "0");
+        } catch (ConfigurationException e) {
+            CLog.e(e);
+        }
+        return test;
     }
 }

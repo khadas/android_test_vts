@@ -27,6 +27,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.bluetooth@1.0-vts.driver \
   android.hardware.boot@1.0-vts.driver \
   android.hardware.broadcastradio@1.0-vts.driver \
+  android.hardware.broadcastradio@1.1-vts.driver \
   android.hardware.camera.common@1.0-vts.driver \
   android.hardware.camera.device@1.0-vts.driver \
   android.hardware.camera.device@3.2-vts.driver \
@@ -51,6 +52,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.media@1.0-vts.driver \
   android.hardware.media.omx@1.0-vts.driver \
   android.hardware.memtrack@1.0-vts.driver \
+  android.hardware.neuralnetworks@1.0-vts.driver \
   android.hardware.nfc@1.0-vts.driver \
   android.hardware.oemlock@1.0-vts.driver \
   android.hardware.power@1.0-vts.driver \
@@ -107,6 +109,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.media@1.0-vts.profiler \
   android.hardware.media.omx@1.0-vts.profiler \
   android.hardware.memtrack@1.0-vts.profiler \
+  android.hardware.neuralnetworks@1.0-vts.profiler \
   android.hardware.nfc@1.0-vts.profiler \
   android.hardware.oemlock@1.0-vts.profiler \
   android.hardware.power@1.0-vts.profiler \
@@ -137,12 +140,14 @@ vts_test_lib_hidl_packages += \
   VtsHalBluetoothV1_0TargetTest \
   VtsHalBootV1_0TargetTest \
   VtsHalBroadcastradioV1_0TargetTest \
+  VtsHalBroadcastradioV1_1TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDumpstateV1_0TargetTest \
+  VtsHalEvsV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
@@ -157,6 +162,7 @@ vts_test_lib_hidl_packages += \
   VtsHalMediaOmxV1_0TargetVideoEncTest \
   VtsHalMediaOmxV1_0TargetVideoDecTest \
   VtsHalMemtrackV1_0TargetTest \
+  VtsHalNeuralnetworksV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
