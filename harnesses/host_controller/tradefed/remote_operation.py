@@ -16,6 +16,8 @@
 
 import json
 
+from vts.harnesses.host_controller.tfc import device_info
+
 
 class RemoteOperationException(Exception):
     """Raised when remote operation fails."""
@@ -64,7 +66,12 @@ class RemoteOperation(object):
 
 
 def ListDevices():
-    """Creates an operation of listing devices.
+    """Creates an operation of listing devices."""
+    return RemoteOperation("LIST_DEVICES")
+
+
+def ParseListDevicesResponse(json_obj):
+    """Parses ListDevices response to a list of DeviceInfo.
 
     Sample response:
     {"serials": [
@@ -72,8 +79,31 @@ def ListDevices():
          "stub": True, "state": "Available", "build": "unknown",
          "serial": "emulator-5554", "sdk": "unknown"},
     ]}
+
+    Args:
+        json_obj: A JSON object, the response to ListDevices.
+
+    Returns:
+        A list of DeviceInfo object.
     """
-    return RemoteOperation("LIST_DEVICES")
+    dev_infos = []
+    for dev_obj in json_obj["serials"]:
+        if dev_obj["product"] == dev_obj["variant"]:
+            run_target = dev_obj["product"]
+        else:
+            run_target = dev_obj["product"] + ":" + dev_obj["variant"]
+        dev_info = device_info.DeviceInfo(
+                battery_level=dev_obj["battery"],
+                build_id=dev_obj["build"],
+                device_serial=dev_obj["serial"],
+                product=dev_obj["product"],
+                product_variant=dev_obj["variant"],
+                run_target=run_target,
+                sdk_version=dev_obj["sdk"],
+                state=dev_obj["state"],
+                stub=dev_obj["stub"])
+        dev_infos.append(dev_info)
+    return dev_infos
 
 
 def AllocateDevice(serial):
