@@ -1301,22 +1301,22 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                                 struct stat statbuf;
                                 fstat(result_0_vector_result_0_index_h->data[i], &statbuf);
                                 fd_val_i->set_mode(statbuf.st_mode);
-                                if(S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)){
+                                if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
                                     fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
                                     int flags = fcntl(result_0_vector_result_0_index_h->data[i], F_GETFL);
                                     fd_val_i->set_flags(flags);
                                 }
-                                else if(S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)){
+                                else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
                                     fd_val_i->set_type(DEV_TYPE);
-                                    if(strcmp(filePath, "/dev/ashmem") == 0) {
+                                    if (strcmp(filePath, "/dev/ashmem") == 0) {
                                         int size = ashmem_get_size_region(result_0_vector_result_0_index_h->data[i]);
                                         fd_val_i->mutable_memory()->set_size(size);
                                     }
                                 }
-                                else if(S_ISFIFO(statbuf.st_mode)){
+                                else if (S_ISFIFO(statbuf.st_mode)){
                                     fd_val_i->set_type(PIPE_TYPE);
                                 }
-                                else if(S_ISSOCK(statbuf.st_mode)){
+                                else if (S_ISSOCK(statbuf.st_mode)) {
                                     fd_val_i->set_type(SOCKET_TYPE);
                                 }
                                 else {
@@ -1451,22 +1451,22 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                             struct stat statbuf;
                             fstat(arg_0_h->data[i], &statbuf);
                             fd_val_i->set_mode(statbuf.st_mode);
-                            if(S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)){
+                            if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
                                 fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
                                 int flags = fcntl(arg_0_h->data[i], F_GETFL);
                                 fd_val_i->set_flags(flags);
                             }
-                            else if(S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)){
+                            else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
                                 fd_val_i->set_type(DEV_TYPE);
-                                if(strcmp(filePath, "/dev/ashmem") == 0) {
+                                if (strcmp(filePath, "/dev/ashmem") == 0) {
                                     int size = ashmem_get_size_region(arg_0_h->data[i]);
                                     fd_val_i->mutable_memory()->set_size(size);
                                 }
                             }
-                            else if(S_ISFIFO(statbuf.st_mode)){
+                            else if (S_ISFIFO(statbuf.st_mode)){
                                 fd_val_i->set_type(PIPE_TYPE);
                             }
-                            else if(S_ISSOCK(statbuf.st_mode)){
+                            else if (S_ISSOCK(statbuf.st_mode)) {
                                 fd_val_i->set_type(SOCKET_TYPE);
                             }
                             else {

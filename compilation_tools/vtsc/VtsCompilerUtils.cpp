@@ -194,11 +194,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     case TYPE_VECTOR:
     {
       string element_type = GetCppVariableType(arg.vector_value(0), message);
-      if (generate_const && arg.vector_value(0).type() == TYPE_REF) {
-        result = "::android::hardware::hidl_vec<const " + element_type + ">";
-      } else {
-        result = "::android::hardware::hidl_vec<" + element_type + ">";
-      }
+      result = "::android::hardware::hidl_vec<" + element_type + ">";
       break;
     }
     case TYPE_ARRAY:
@@ -290,7 +286,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     {
       result = "void*";
       if (generate_const) {
-        return "const " + result;
+        result = "const " + result;
       }
       return result;
     }
