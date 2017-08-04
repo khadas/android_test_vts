@@ -17,13 +17,13 @@ namespace vts {
 }
 ::android::hardware::nfc::V1_0::NfcEvent Random__android__hardware__nfc__V1_0__NfcEvent() {
     uint32_t choice = (uint32_t) rand() / 7;
-    if (choice == (uint32_t) 0) return ::android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
-    if (choice == (uint32_t) 1) return ::android::hardware::nfc::V1_0::NfcEvent::CLOSE_CPLT;
-    if (choice == (uint32_t) 2) return ::android::hardware::nfc::V1_0::NfcEvent::POST_INIT_CPLT;
-    if (choice == (uint32_t) 3) return ::android::hardware::nfc::V1_0::NfcEvent::PRE_DISCOVER_CPLT;
-    if (choice == (uint32_t) 4) return ::android::hardware::nfc::V1_0::NfcEvent::REQUEST_CONTROL;
-    if (choice == (uint32_t) 5) return ::android::hardware::nfc::V1_0::NfcEvent::RELEASE_CONTROL;
-    if (choice == (uint32_t) 6) return ::android::hardware::nfc::V1_0::NfcEvent::ERROR;
+    if (choice == (uint32_t) 0UL) return ::android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
+    if (choice == (uint32_t) 1UL) return ::android::hardware::nfc::V1_0::NfcEvent::CLOSE_CPLT;
+    if (choice == (uint32_t) 2UL) return ::android::hardware::nfc::V1_0::NfcEvent::POST_INIT_CPLT;
+    if (choice == (uint32_t) 3UL) return ::android::hardware::nfc::V1_0::NfcEvent::PRE_DISCOVER_CPLT;
+    if (choice == (uint32_t) 4UL) return ::android::hardware::nfc::V1_0::NfcEvent::REQUEST_CONTROL;
+    if (choice == (uint32_t) 5UL) return ::android::hardware::nfc::V1_0::NfcEvent::RELEASE_CONTROL;
+    if (choice == (uint32_t) 6UL) return ::android::hardware::nfc::V1_0::NfcEvent::ERROR;
     return ::android::hardware::nfc::V1_0::NfcEvent::OPEN_CPLT;
 }
 bool Verify__android__hardware__nfc__V1_0__NfcEvent(const VariableSpecificationMessage& expected_result __attribute__((__unused__)), const VariableSpecificationMessage& actual_result __attribute__((__unused__))){
@@ -42,11 +42,11 @@ void SetResult__android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMess
 }
 ::android::hardware::nfc::V1_0::NfcStatus Random__android__hardware__nfc__V1_0__NfcStatus() {
     uint32_t choice = (uint32_t) rand() / 5;
-    if (choice == (uint32_t) 0) return ::android::hardware::nfc::V1_0::NfcStatus::OK;
-    if (choice == (uint32_t) 1) return ::android::hardware::nfc::V1_0::NfcStatus::FAILED;
-    if (choice == (uint32_t) 2) return ::android::hardware::nfc::V1_0::NfcStatus::ERR_TRANSPORT;
-    if (choice == (uint32_t) 3) return ::android::hardware::nfc::V1_0::NfcStatus::ERR_CMD_TIMEOUT;
-    if (choice == (uint32_t) 4) return ::android::hardware::nfc::V1_0::NfcStatus::REFUSED;
+    if (choice == (uint32_t) 0UL) return ::android::hardware::nfc::V1_0::NfcStatus::OK;
+    if (choice == (uint32_t) 1UL) return ::android::hardware::nfc::V1_0::NfcStatus::FAILED;
+    if (choice == (uint32_t) 2UL) return ::android::hardware::nfc::V1_0::NfcStatus::ERR_TRANSPORT;
+    if (choice == (uint32_t) 3UL) return ::android::hardware::nfc::V1_0::NfcStatus::ERR_CMD_TIMEOUT;
+    if (choice == (uint32_t) 4UL) return ::android::hardware::nfc::V1_0::NfcStatus::REFUSED;
     return ::android::hardware::nfc::V1_0::NfcStatus::OK;
 }
 bool Verify__android__hardware__nfc__V1_0__NfcStatus(const VariableSpecificationMessage& expected_result __attribute__((__unused__)), const VariableSpecificationMessage& actual_result __attribute__((__unused__))){

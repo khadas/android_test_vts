@@ -713,19 +713,19 @@ void HalHidlCodeGen::GenerateRandomFunctionImplForAttribute(Formatter& out,
       if (attribute.enum_value().scalar_type() == "int8_t") {
         out << attribute.enum_value().scalar_value(index).int8_t();
       } else if (attribute.enum_value().scalar_type() == "uint8_t") {
-        out << attribute.enum_value().scalar_value(index).uint8_t();
+        out << attribute.enum_value().scalar_value(index).uint8_t() << "U";
       } else if (attribute.enum_value().scalar_type() == "int16_t") {
         out << attribute.enum_value().scalar_value(index).int16_t();
       } else if (attribute.enum_value().scalar_type() == "uint16_t") {
-        out << attribute.enum_value().scalar_value(index).uint16_t();
+        out << attribute.enum_value().scalar_value(index).uint16_t() << "U";
       } else if (attribute.enum_value().scalar_type() == "int32_t") {
-        out << attribute.enum_value().scalar_value(index).int32_t();
+        out << attribute.enum_value().scalar_value(index).int32_t() << "L";
       } else if (attribute.enum_value().scalar_type() == "uint32_t") {
-        out << attribute.enum_value().scalar_value(index).uint32_t();
+        out << attribute.enum_value().scalar_value(index).uint32_t() << "UL";
       } else if (attribute.enum_value().scalar_type() == "int64_t") {
-        out << attribute.enum_value().scalar_value(index).int64_t();
+        out << attribute.enum_value().scalar_value(index).int64_t() << "LL";
       } else if (attribute.enum_value().scalar_type() == "uint64_t") {
-        out << attribute.enum_value().scalar_value(index).uint64_t();
+        out << attribute.enum_value().scalar_value(index).uint64_t() << "ULL";
       } else {
         cerr << __func__ << ":" << __LINE__ << " ERROR unsupported enum type "
             << attribute.enum_value().scalar_type() << "\n";
