@@ -96,7 +96,9 @@ class GtestBinaryTest(binary_test.BinaryTest):
         cmd_results = self.shell.Execute(cmd)
         if any(cmd_results[const.EXIT_CODE]
                ):  # gtest binary doesn't exist or is corrupted
-            logging.error('Failed to list test cases from binary %s' % path)
+            logging.error(
+                'Failed to list test cases from %s. Command: %s, Result: %s.' %
+                (path, cmd, cmd_results))
 
         test_cases = []
 
@@ -176,7 +178,8 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 for line in stdout.split('\n'):
                     logging.info(line)
 
-        asserts.assertFalse(command_results[const.EXIT_CODE][1],
+        asserts.assertFalse(
+            command_results[const.EXIT_CODE][1],
             'Failed to show Gtest XML output: %s' % command_results)
 
         root = xml.etree.ElementTree.fromstring(xml_str)
