@@ -20,7 +20,6 @@
   <option name="vts-plan-result:plan-name" value="vts-serving-staging-system" />
   <option name="vts-plan-result:default-type" value="staging" />
 
-  <option name="compatibility:include-filter" value="CameraITSTest" />
   <option name="compatibility:include-filter" value="MemorySystemStressTest" />
   <option name="compatibility:include-filter" value="VtsAppCameraStressTest" />
 
