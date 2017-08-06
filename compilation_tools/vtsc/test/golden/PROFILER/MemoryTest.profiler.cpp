@@ -54,8 +54,12 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
                     ::android::hardware::hidl_memory *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_memory*> ((*args)[0]);
-                    arg_0->set_type(TYPE_HIDL_MEMORY);
-                    arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                    if (arg_val_0 != nullptr) {
+                        arg_0->set_type(TYPE_HIDL_MEMORY);
+                        arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                    } else {
+                        LOG(WARNING) << "argument 0 is null.";
+                    }
                     break;
                 }
                 case details::HidlInstrumentor::CLIENT_API_EXIT:
@@ -68,8 +72,12 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
                     ::android::hardware::hidl_memory *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_memory*> ((*args)[0]);
-                    result_0->set_type(TYPE_HIDL_MEMORY);
-                    result_0->mutable_hidl_memory_value()->set_size((*result_val_0).size());
+                    if (result_val_0 != nullptr) {
+                        result_0->set_type(TYPE_HIDL_MEMORY);
+                        result_0->mutable_hidl_memory_value()->set_size((*result_val_0).size());
+                    } else {
+                        LOG(WARNING) << "return value 0 is null.";
+                    }
                     break;
                 }
                 default:
@@ -98,12 +106,20 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
                     ::android::hardware::hidl_memory *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_memory*> ((*args)[0]);
-                    arg_0->set_type(TYPE_HIDL_MEMORY);
-                    arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                    if (arg_val_0 != nullptr) {
+                        arg_0->set_type(TYPE_HIDL_MEMORY);
+                        arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                    } else {
+                        LOG(WARNING) << "argument 0 is null.";
+                    }
                     auto *arg_1 __attribute__((__unused__)) = msg.add_arg();
                     uint8_t *arg_val_1 __attribute__((__unused__)) = reinterpret_cast<uint8_t*> ((*args)[1]);
-                    arg_1->set_type(TYPE_SCALAR);
-                    arg_1->mutable_scalar_value()->set_uint8_t((*arg_val_1));
+                    if (arg_val_1 != nullptr) {
+                        arg_1->set_type(TYPE_SCALAR);
+                        arg_1->mutable_scalar_value()->set_uint8_t((*arg_val_1));
+                    } else {
+                        LOG(WARNING) << "argument 1 is null.";
+                    }
                     break;
                 }
                 case details::HidlInstrumentor::CLIENT_API_EXIT:
