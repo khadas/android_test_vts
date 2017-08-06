@@ -279,6 +279,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQSyncVariable(
   std::string temp_result_name = arg_name + "_result";
   out << "MessageQueue<" << element_type << ", kSynchronizedReadWrite> "
       << queue_name << "(" << arg_value << ", false);\n";
+  out << "if (" << queue_name << ".isValid()) {\n";
+  out.indent();
   out << "for (int i = 0; i < (int)" << queue_name
       << ".availableToRead(); i++) {\n";
   out.indent();
@@ -292,6 +294,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQSyncVariable(
                                    temp_result_name);
   out.unindent();
   out << "}\n";
+  out.unindent();
+  out << "}\n";
 }
 
 void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
@@ -303,6 +307,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
   std::string temp_result_name = arg_name + "_result";
   out << "MessageQueue<" << element_type << ", kUnsynchronizedWrite> "
       << queue_name << "(" << arg_value << ");\n";
+  out << "if (" << queue_name << ".isValid()) {\n";
+  out.indent();
   out << "for (int i = 0; i < (int)" << queue_name
       << ".availableToRead(); i++) {\n";
   out.indent();
@@ -313,6 +319,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
   out << queue_name << ".read(&" << temp_result_name << ");\n";
   GenerateProfilerForTypedVariable(out, val.fmq_value(0), fmq_item_name,
                                    temp_result_name);
+  out.unindent();
+  out << "}\n";
   out.unindent();
   out << "}\n";
 }
@@ -354,8 +362,16 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     out << GetCppVariableType(arg, &message) << " *" << arg_value
         << " __attribute__((__unused__)) = reinterpret_cast<"
         << GetCppVariableType(arg, &message) << "*> ((*args)[" << i << "]);\n";
+    out << "if (" << arg_value << " != nullptr) {\n";
+    out.indent();
     GenerateProfilerForTypedVariable(out, arg, arg_name,
                                      "(*" + arg_value + ")");
+    out.unindent();
+    out << "} else {\n";
+    out.indent();
+    out << "LOG(WARNING) << \"argument " << i << " is null.\";\n";
+    out.unindent();
+    out << "}\n";
   }
   out << "break;\n";
   out.unindent();
@@ -385,8 +401,16 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     out << GetCppVariableType(arg, &message) << " *" << result_value
         << " __attribute__((__unused__)) = reinterpret_cast<"
         << GetCppVariableType(arg, &message) << "*> ((*args)[" << i << "]);\n";
+    out << "if (" << result_value << " != nullptr) {\n";
+    out.indent();
     GenerateProfilerForTypedVariable(out, arg, result_name,
                                      "(*" + result_value + ")");
+    out.unindent();
+    out << "} else {\n";
+    out.indent();
+    out << "LOG(WARNING) << \"return value " << i << " is null.\";\n";
+    out.unindent();
+    out << "}\n";
   }
   out << "break;\n";
   out.unindent();
