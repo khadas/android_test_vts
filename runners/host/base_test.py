@@ -130,6 +130,8 @@ class BaseTestClass(object):
             self.user_params, web=self.web)
         self.log_uploading = log_uploading_utils.LogUploadingFeature(
             self.user_params, web=self.web)
+        self.run_as_vts_self_test = self.getUserParam(
+            keys.ConfigKeys.RUN_AS_VTS_SELFTEST, default_value=False)
         self._skip_all_testcases = False
 
     @property
@@ -816,11 +818,14 @@ class BaseTestClass(object):
             else:
                 # No test case specified by user, execute all in the test class
                 test_names = self._get_all_test_names()
-        self.results.requested = [
-            records.TestResultRecord(test_name, self.TAG)
-            for test_name in test_names if test_name.startswith(STR_TEST)
-        ]
+
+        if not self.run_as_vts_self_test:
+            self.results.requested = [
+                records.TestResultRecord(test_name, self.TAG)
+                for test_name in test_names if test_name.startswith(STR_TEST)
+            ]
         tests = self._get_test_funcs(test_names)
+
         # Setup for the class.
         try:
             if self._setUpClass() is False:
@@ -830,8 +835,15 @@ class BaseTestClass(object):
             self.results.failClass(self.TAG, e)
             self._exec_func(self._tearDownClass)
             return self.results
+
         # Run tests in order.
         try:
+            # Check if module is running in self test mode.
+            if self.run_as_vts_self_test:
+                logging.info('setUpClass function was executed successfully.')
+                self.results.passClass(self.TAG)
+                return self.results
+
             for test_name, test_func in tests:
                 if test_name.startswith(STR_GENERATE):
                     logging.info(
