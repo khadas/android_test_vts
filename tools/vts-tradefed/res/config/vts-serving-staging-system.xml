@@ -24,4 +24,5 @@
   <option name="compatibility:include-filter" value="MemorySystemStressTest" />
   <option name="compatibility:include-filter" value="VtsAppCameraStressTest" />
 
+  <option name="compatibility:include-filter" value="VtsCodelabHelloWorldSl4aTest" />
 </configuration>
