@@ -80,6 +80,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TESTMODULE = "TestModule";
+    static final String TEST_BED = "test_bed";
     static final String TEST_PLAN_REPORT_FILE = "TEST_PLAN_REPORT_FILE";
     static final String TEST_SUITE = "test_suite";
     static final String TEST_MAX_TIMEOUT = "test_max_timeout";
@@ -622,7 +623,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         }
         deviceArray.put(deviceItemObject);
 
-        JSONArray testBedArray = (JSONArray) jsonObject.get("test_bed");
+        JSONArray testBedArray = (JSONArray) jsonObject.get(TEST_BED);
         if (testBedArray.length() == 0) {
             JSONObject testBedItemObject = new JSONObject();
             String testName;
@@ -646,7 +647,21 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             testBedArray.put(testBedItemObject);
         } else if (testBedArray.length() == 1) {
             JSONObject testBedItemObject = (JSONObject) testBedArray.get(0);
-            testBedItemObject.put(ANDROIDDEVICE, deviceArray);
+            JSONArray androidDeviceArray = (JSONArray) testBedItemObject.get(ANDROIDDEVICE);
+            int length;
+            length = (androidDeviceArray.length() > deviceArray.length())
+                    ? androidDeviceArray.length()
+                    : deviceArray.length();
+            for (int index = 0; index < length; index++) {
+                if (index < androidDeviceArray.length()) {
+                    if (index < deviceArray.length()) {
+                        JsonUtil.deepMergeJsonObjects((JSONObject) androidDeviceArray.get(index),
+                                (JSONObject) deviceArray.get(index));
+                    }
+                } else if (index < deviceArray.length()) {
+                    androidDeviceArray.put(index, deviceArray.get(index));
+                }
+            }
         } else {
             CLog.e("Multi-device not yet supported: %d devices requested",
                     testBedArray.length());
