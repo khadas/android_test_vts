@@ -16,6 +16,7 @@
 
 import logging
 import os
+import re
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -41,6 +42,8 @@ RESULT_LINE_TEMPLATE = TEST_CASE_TOKEN + " %s %s"
 STR_TEST = "test"
 STR_GENERATE = "generate"
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
+_BUG_REPORT_FILE_PREFIX = "bugreport"
+_BUG_REPORT_FILE_EXTENSION = ".zip"
 
 
 class BaseTestClass(object):
@@ -74,6 +77,8 @@ class BaseTestClass(object):
         profiling: ProfilingFeature, object storing profiling feature util for test run
         _skip_all_testcases: A boolean, can be set by a subclass in
                              setUpClass() to skip all test cases.
+        _bug_report_on_failure: bool, whether to catch bug report at the end
+                                of failed test cases.
     """
 
     TAG = None
@@ -131,6 +136,8 @@ class BaseTestClass(object):
         self.log_uploading = log_uploading_utils.LogUploadingFeature(
             self.user_params, web=self.web)
         self._skip_all_testcases = False
+        self._bug_report_on_failure = self.getUserParam(
+            keys.ConfigKeys.IKEY_BUG_REPORT_ON_FAILURE, default_value=False)
 
     @property
     def android_devices(self):
@@ -344,13 +351,14 @@ class BaseTestClass(object):
         called.
         """
         record = self._current_record
-        test_name = record.test_name
         logging.error(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
-        logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
+        logging.info(RESULT_LINE_TEMPLATE, record.test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
-        self.onFail(test_name, begin_time)
+        self.onFail(record.test_name, begin_time)
+        if self._bug_report_on_failure:
+            self.CatchBugReport('%s-%s' % (self.TAG, record.test_name))
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -442,6 +450,8 @@ class BaseTestClass(object):
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
         self.onException(test_name, begin_time)
+        if self._bug_report_on_failure:
+            self.CatchBugReport('%s-%s' % (self.TAG, record.test_name))
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -874,3 +884,23 @@ class BaseTestClass(object):
         This function should clean up objects initialized in the constructor by
         user.
         """
+
+    def CatchBugReport(self, prefix=''):
+        """Get device bugreport through adb command.
+
+        Args:
+            prefix: string, file name prefix. Usually in format of
+                    <test_module>-<test_case>
+        """
+        if prefix:
+            prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
+
+        for i in range(len(self.android_devices)):
+            device = self.android_devices[i]
+            bug_report_file_name = prefix + _BUG_REPORT_FILE_PREFIX + str(
+                i) + _BUG_REPORT_FILE_EXTENSION
+            bug_report_file_path = os.path.join(logging.log_path,
+                                                bug_report_file_name)
+
+            logging.info('Catching bugreport %s' % bug_report_file_path)
+            device.adb.bugreport(bug_report_file_path)
