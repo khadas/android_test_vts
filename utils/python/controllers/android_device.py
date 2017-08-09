@@ -865,6 +865,27 @@ class AndroidDevice(object):
             ed = self._getSl4aEventDispatcher(droid)
         self.sl4a_event = ed
 
+    @property
+    def sl4a(self):
+        """The default SL4A session to the device if exist, None otherwise."""
+        try:
+            return self._sl4a_sessions[sorted(self._sl4a_sessions)[0]][0]
+        except IndexError:
+            return None
+
+    @property
+    def sl4as(self):
+        """A list of the active SL4A sessions on this device.
+
+        If multiple connections exist for the same session, only one connection
+        is listed.
+        """
+        keys = sorted(self._sl4a_sessions)
+        results = []
+        for key in keys:
+            results.append(self._sl4a_sessions[key][0])
+        return results
+
     def getVintfXml(self, use_lshal=True):
         """Reads the vendor interface manifest Xml.
 
@@ -927,6 +948,7 @@ class AndroidDevice(object):
         if droid.uid in self._sl4a_sessions:
             raise sl4a_client.Error(
                 "SL4A returned an existing uid for a new session. Abort.")
+        logging.debug("set sl4a_session[%s]", droid.uid)
         self._sl4a_sessions[droid.uid] = [droid]
         return droid
 
