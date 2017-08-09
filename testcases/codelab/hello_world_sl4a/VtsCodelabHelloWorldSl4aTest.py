@@ -17,8 +17,10 @@
 
 import logging
 
+from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
+from vts.utils.python.controllers import sl4a_client
 
 
 class SampleSl4aTest(base_test.BaseTestClass):
@@ -28,10 +30,17 @@ class SampleSl4aTest(base_test.BaseTestClass):
         self.dut = self.android_devices[0]
 
     def testToast(self):
-        """A sample test controlling Android device with sl4a. This will make a
-        toast message on the device screen."""
+        """A sample test controlling Android device with sl4a.
+
+        Shows a toast message on the device screen.
+        """
         logging.info("A toast message should show up on the devce's screen.")
-        self.dut.sl4a.makeToast("Hello World!")
+        try:
+            self.dut.sl4a.makeToast("Hello World!")
+        except sl4a_client.ProtocolError as e:
+            asserts.fail("Protocol error in an SL4A operation")
+        except sl4a_client.ApiError as e:
+            asserts.fail("API error during an SL4A API call")
 
 
 if __name__ == "__main__":
