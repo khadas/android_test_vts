@@ -78,7 +78,9 @@ def start_sl4a(adb_proxy,
     if not is_sl4a_installed(adb_proxy):
         raise StartError("SL4A is not installed on %s" % adb_proxy.serial)
     MAX_SL4A_WAIT_TIME = 10
-    adb_proxy.shell(_SL4A_LAUNCH_CMD.format(device_side_port))
+    cmd = _SL4A_LAUNCH_CMD.format(device_side_port)
+    logging.debug("sl4a launch cmd: %s", cmd)
+    adb_proxy.shell(cmd)
     for _ in range(wait_time):
         time.sleep(1)
         if is_sl4a_running(adb_proxy):
