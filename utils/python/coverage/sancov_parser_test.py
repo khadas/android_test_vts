@@ -31,6 +31,7 @@ class SancovParserTest(unittest.TestCase):
     """
 
     GOLDEN_SANCOV_PATH = 'testdata/sample.sancov'
+    GOLDEN_EXPECTED_BITNESS = 64
     GOLDEN_EXPECTED_OFFSETS = (
         12115, 12219, 12463, 12527, 17123, 17311, 17507, 17771, 17975, 17987, 18107, 18167,
         18299, 18503, 18571, 18743, 18755, 18791, 18903, 19127, 19715, 21027, 21123, 21223,
@@ -72,11 +73,26 @@ class SancovParserTest(unittest.TestCase):
         self.assertEqual(64, p._bitness)
         self.assertEqual(values, s)
 
+    def testGetBitness32(self):
+        """Asserts that bitness is correctly determined from a 32-bit sancov file.
+        """
+        stream = io.BytesIO(struct.pack('L', sancov_parser.MAGIC32))
+        p = sancov_parser.SancovParser(stream)
+        self.assertEqual(32, p.GetBitness())
+
+    def testGetBitness64(self):
+        """Asserts that bitness is correctly determined from a 64-bit sancov file.
+        """
+        stream = io.BytesIO(struct.pack('L', sancov_parser.MAGIC64))
+        p = sancov_parser.SancovParser(stream)
+        self.assertEqual(64, p.GetBitness())
+
     def testGolden(self):
         """Asserts that offsets are correctly parsed from the golden file.
         """
-        s = sancov_parser.ParseSancovFile(self.GOLDEN_SANCOV_PATH)
-        self.assertEqual(self.GOLDEN_EXPECTED_OFFSETS, s)
+        bitness, offsets = sancov_parser.ParseSancovFile(self.GOLDEN_SANCOV_PATH)
+        self.assertEqual(self.GOLDEN_EXPECTED_BITNESS, bitness)
+        self.assertEqual(self.GOLDEN_EXPECTED_OFFSETS, offsets)
 
 
 
