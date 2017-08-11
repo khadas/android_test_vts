@@ -23,6 +23,7 @@ except ImportError:
     import mock
 
 from vts.harnesses.host_controller.tfc import tfc_client
+from vts.harnesses.host_controller.tfc import command_attempt
 from vts.harnesses.host_controller.tfc import device_info
 from vts.harnesses.host_controller.tfc import request
 
@@ -76,6 +77,48 @@ class TfcClientTest(unittest.TestCase):
         self._client.SubmitHostEvents(device_snapshots)
         self._service.assert_has_calls([
                 mock.call.host_events().submit().execute()])
+
+    def testCommandEvents(self):
+        """Tests command_events.submit."""
+        cmd = command_attempt.CommandAttempt(
+                task_id="321-0",
+                attempt_id="abcd-1234",
+                hostname="host0",
+                device_serial="ABCDEF")
+        expected_event = {
+                "task_id": "321-0",
+                "attempt_id": "abcd-1234",
+                "hostname": "host0",
+                "device_serial": "ABCDEF",
+                "time": 1}
+
+        normal_event = cmd.CreateCommandEvent(
+                command_attempt.EventType.INVOCATION_STARTED,
+                event_time=1)
+        expected_event["type"] = command_attempt.EventType.INVOCATION_STARTED
+        self.assertDictEqual(expected_event, normal_event)
+
+        error_event = cmd.CreateCommandEvent(
+                command_attempt.EventType.EXECUTE_FAILED,
+                error="unit test", event_time=1.1)
+        expected_event["type"] = command_attempt.EventType.EXECUTE_FAILED
+        expected_event["data"] = {"error":"unit test"}
+        self.assertDictEqual(expected_event, error_event)
+
+        complete_event = cmd.CreateInvocationCompletedEvent(
+                summary="complete", total_test_count=2, failed_test_count=1,
+                error="unit test")
+        expected_event["type"] = command_attempt.EventType.INVOCATION_COMPLETED
+        expected_event["data"] = {"summary": "complete", "error": "unit test",
+                                  "total_test_count": 2, "failed_test_count": 1}
+        del expected_event["time"]
+        self.assertDictContainsSubset(expected_event, complete_event)
+        self.assertIn("time", complete_event)
+
+        self._client.SubmitCommandEvents([
+                normal_event, error_event, complete_event])
+        self._service.assert_has_calls([
+                mock.call.command_events().submit().execute()])
 
     def testWrongParameter(self):
         """Tests raising exception for wrong parameter name."""
