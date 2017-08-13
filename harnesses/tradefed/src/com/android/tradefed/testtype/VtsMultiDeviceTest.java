@@ -110,6 +110,7 @@ public class VtsMultiDeviceTest
     static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
     static final String BINARY_TEST_TYPE_HAL_HIDL_REPLAY_TEST = "hal_hidl_replay_test";
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
+    static final String BUG_REPORT_ON_FAILURE = "bug_report_on_failure";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String GTEST_BATCH_MODE = "gtest_batch_mode";
@@ -335,6 +336,12 @@ public class VtsMultiDeviceTest
     @Option(name = "binary-test-stop-native-servers",
             description = "Set to stop all properly configured native servers during the testing.")
     private boolean mBinaryTestStopNativeServers = false;
+
+    @Option(name = "bug-report-on-failure",
+            description = "To catch bugreport zip file at the end of failed test cases. "
+                    + "If set to true, a report will be caught through adh shell command at the end of each failed "
+                    + "test cases.")
+    private boolean mBugReportOnFailure = false;
 
     @Option(name = "native-server-process-name",
             description = "Name of a native server process. The runner checks to make sure "
@@ -742,10 +749,12 @@ public class VtsMultiDeviceTest
             jsonObject.put(ABI_BITNESS, mAbi.getBitness());
             CLog.i("Added %s to the Json object", ABI_BITNESS);
         }
+
         if (mSkipOn32BitAbi) {
             jsonObject.put(SKIP_ON_32BIT_ABI, mSkipOn32BitAbi);
             CLog.i("Added %s to the Json object", SKIP_ON_32BIT_ABI);
         }
+
         if (mSkipOn64BitAbi) {
             jsonObject.put(SKIP_ON_64BIT_ABI, mSkipOn64BitAbi);
             CLog.i("Added %s to the Json object", SKIP_ON_64BIT_ABI);
@@ -753,6 +762,7 @@ public class VtsMultiDeviceTest
             jsonObject.put(RUN_32BIT_ON_64BIT_ABI, mRun32bBitOn64BitAbi);
             CLog.i("Added %s to the Json object", RUN_32BIT_ON_64BIT_ABI);
         }
+
         if (mSkipIfThermalThrottling) {
             jsonObject.put(SKIP_IF_THERMAL_THROTTLING, mSkipIfThermalThrottling);
             CLog.i("Added %s to the Json object", SKIP_IF_THERMAL_THROTTLING);
@@ -762,36 +772,49 @@ public class VtsMultiDeviceTest
             jsonObject.put(BINARY_TEST_SOURCE, new JSONArray(mBinaryTestSource));
             CLog.i("Added %s to the Json object", BINARY_TEST_SOURCE);
         }
+
         if (!mBinaryTestWorkingDirectory.isEmpty()) {
             jsonObject.put(BINARY_TEST_WORKING_DIRECTORY,
                     new JSONArray(mBinaryTestWorkingDirectory));
             CLog.i("Added %s to the Json object", BINARY_TEST_WORKING_DIRECTORY);
         }
+
         if (!mBinaryTestEnvp.isEmpty()) {
             jsonObject.put(BINARY_TEST_ENVP, new JSONArray(mBinaryTestEnvp));
             CLog.i("Added %s to the Json object", BINARY_TEST_ENVP);
         }
+
         if (!mBinaryTestArgs.isEmpty()) {
             jsonObject.put(BINARY_TEST_ARGS, new JSONArray(mBinaryTestArgs));
             CLog.i("Added %s to the Json object", BINARY_TEST_ARGS);
         }
+
         if (!mBinaryTestLdLibraryPath.isEmpty()) {
             jsonObject.put(BINARY_TEST_LD_LIBRARY_PATH,
                     new JSONArray(mBinaryTestLdLibraryPath));
             CLog.i("Added %s to the Json object", BINARY_TEST_LD_LIBRARY_PATH);
         }
+
+        if (mBugReportOnFailure) {
+            jsonObject.put(BUG_REPORT_ON_FAILURE, mBugReportOnFailure);
+            CLog.i("Added %s to the Json object", BUG_REPORT_ON_FAILURE);
+        }
+
         if (mEnableProfiling) {
             jsonObject.put(ENABLE_PROFILING, mEnableProfiling);
             CLog.i("Added %s to the Json object", ENABLE_PROFILING);
         }
+
         if (mSaveTraceFileRemote) {
             jsonObject.put(SAVE_TRACE_FIEL_REMOTE, mSaveTraceFileRemote);
             CLog.i("Added %s to the Json object", SAVE_TRACE_FIEL_REMOTE);
         }
+
         if (mEnableSystrace) {
             jsonObject.put(ENABLE_SYSTRACE, mEnableSystrace);
             CLog.i("Added %s to the Json object", ENABLE_SYSTRACE);
         }
+
         if (mEnableCoverage) {
             jsonObject.put(GLOBAL_COVERAGE, mGlobalCoverage);
             if (coverageBuild) {
@@ -801,6 +824,7 @@ public class VtsMultiDeviceTest
                 CLog.i("Device build has coverage disabled");
             }
         }
+
         if (mOutputCoverageReport) {
             jsonObject.put(OUTPUT_COVERAGE_REPORT, mOutputCoverageReport);
             CLog.i("Added %s to the Json object", OUTPUT_COVERAGE_REPORT);
