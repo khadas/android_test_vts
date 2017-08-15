@@ -26,6 +26,7 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
+import com.android.tradefed.targetprep.VtsSancovPreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -111,6 +112,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String BUG_REPORT_ON_FAILURE = "bug_report_on_failure";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String ENABLE_PROFILING = "enable_profiling";
+    static final String ENABLE_SANCOV = "enable_sancov";
     static final String GTEST_BATCH_MODE = "gtest_batch_mode";
     static final String SAVE_TRACE_FIEL_REMOTE = "save_trace_file_remote";
     static final String OUTPUT_COVERAGE_REPORT = "output_coverage_report";
@@ -227,6 +229,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     + "measure coverage for each test case otherwise. Currently, only global "
                     + "coverage is supported for binary tests")
     private boolean mGlobalCoverage = true;
+
+    @Option(name = "enable-sancov",
+            description = "Enable sanitizer coverage for the tests. In order for coverage to be "
+                    + "measured, the device must be a sancov build with its build info and "
+                    + "unstripped binaries available to the sancov preparer class.")
+    private boolean mEnableSancov = true;
 
     @Option(name = "output-coverage-report", description = "Whether to store raw coverage report.")
     private boolean mOutputCoverageReport = false;
@@ -616,12 +624,18 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         JSONObject deviceItemObject = new JSONObject();
         deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
         boolean coverageBuild = false;
+        boolean sancovBuild = false;
         try {
             deviceItemObject.put("product_type", mDevice.getProductType());
             deviceItemObject.put("product_variant", mDevice.getProductVariant());
             deviceItemObject.put("build_alias", mDevice.getBuildAlias());
             deviceItemObject.put("build_id", mDevice.getBuildId());
             deviceItemObject.put("build_flavor", mDevice.getBuildFlavor());
+            File sancovDir = mBuildInfo.getFile(VtsSancovPreparer.getSancovResourceDirKey(mDevice));
+            if (sancovDir != null) {
+                deviceItemObject.put("sancov_resources_path", sancovDir.getAbsolutePath());
+                sancovBuild = true;
+            }
             String coverageProperty = mDevice.getProperty(COVERAGE_PROPERTY);
             coverageBuild = coverageProperty != null && coverageProperty.equals("1");
         } catch (DeviceNotAvailableException e) {
@@ -774,6 +788,15 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                 CLog.i("Added %s to the Json object", ENABLE_COVERAGE);
             } else {
                 CLog.i("Device build has coverage disabled");
+            }
+        }
+
+        if (mEnableSancov) {
+            if (sancovBuild) {
+                jsonObject.put(ENABLE_SANCOV, mEnableSancov);
+                CLog.i("Added %s to the Json object", ENABLE_SANCOV);
+            } else {
+                CLog.i("Device build has sancov disabled");
             }
         }
 
