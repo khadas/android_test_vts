@@ -47,6 +47,7 @@ class SancovParser(object):
         self._sancov_file = sancov_file
         self._bitness = -1
         self._entry_type = None
+        self._size = 0
 
     def Parse(self):
         """Runs the parser to generate the unpacked binary offsets in the file.
@@ -57,11 +58,27 @@ class SancovParser(object):
         Raises:
             parser.FileFormatError: invalid file format or invalid counts.
         """
+        self.GetBitness()
+        return struct.unpack_from(
+            self._entry_type * (self._size * 8 / self._bitness),
+            self._sancov_file.read(self._size))
+
+    def GetBitness(self):
+        """Parses the magic header to determine the bitness.
+
+        Returns:
+            The sancov file bitness.
+
+        Raises:
+            parser.FileFormatError: invalid file format or invalid counts.
+        """
+        if self._bitness > 0:
+            return self._bitness
         self._sancov_file.seek(0, 2)
-        size = self._sancov_file.tell() - 8
+        self._size = self._sancov_file.tell() - 8
         self._sancov_file.seek(0, 0)
-        if size < 0:
-            return ()
+        if self._size < 0:
+            raise parser.FileFormatError('Empty file.')
         magic = struct.unpack('L', self._sancov_file.read(8))[0];
         if magic == MAGIC64:
             self._entry_type = 'L'
@@ -71,9 +88,7 @@ class SancovParser(object):
             self._bitness = 32
         else:
             raise parser.FileFormatError('Invalid magic.')
-        return struct.unpack_from(
-            self._entry_type * (size * 8 / self._bitness),
-            self._sancov_file.read(size))
+        return self._bitness
 
 def ParseSancovFile(file_name):
     """Parses the .sancov file specified by the input.
@@ -82,8 +97,9 @@ def ParseSancovFile(file_name):
         file_name: A string file path to a .sancov file
 
     Returns:
-        A tuple of offsets into the original binary..
+        A tuple of bitness, and the unpacked offsets into the original binary.
     """
     with open(file_name, 'rb') as stream:
         p = SancovParser(stream)
-        return p.Parse()
+        offsets = p.Parse()
+        return (p._bitness, offsets)
