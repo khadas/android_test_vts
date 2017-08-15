@@ -35,6 +35,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         testcases: list of GtestTestCase objects, list of test cases to run
         _cpu_freq: CpuFrequencyScalingController instance of a target device.
         _dut: AndroidDevice, the device under test as config
+        _hal_precondition: String, the name of the HAL preconditioned
     '''
 
     def setUpClass(self):
@@ -55,6 +56,17 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             self._cpu_freq.DisableCpuScaling()
         else:
             self._cpu_freq = None
+
+        self._hal_precondition = None
+        if hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL):
+            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL)
+        elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF):
+            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF)
+        elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE):
+            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE)
+
+        if self.sancov.enabled and self._hal_precondition is not None:
+            self.sancov.InitializeDeviceCoverage(self._dut, self._hal_precondition)
 
     def CreateTestCases(self):
         """Create testcases and conditionally enable passthrough mode.
@@ -212,6 +224,11 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if (not self._skip_all_testcases and getattr(self, "_cpu_freq", None)):
             logging.info("Enable CPU frequency scaling")
             self._cpu_freq.EnableCpuScaling()
+
+        if self.sancov.enabled and self._hal_precondition is not None:
+            self.sancov.FlushDeviceCoverage(self._dut, self._hal_precondition)
+            self.sancov.ProcessDeviceCoverage(self._dut, self._hal_precondition)
+            self.sancov.Upload()
 
         super(HidlHalGTest, self).tearDownClass()
 
