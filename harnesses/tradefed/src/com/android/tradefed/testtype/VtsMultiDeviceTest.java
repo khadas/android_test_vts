@@ -86,6 +86,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
+    static final String EXCLUDE_OVER_INCLUDE = "exclude_over_include";
     static final String BINARY_TEST_SOURCE = "binary_test_source";
     static final String BINARY_TEST_WORKING_DIRECTORY = "binary_test_working_directory";
     static final String BINARY_TEST_ENVP = "binary_test_envp";
@@ -175,6 +176,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     @Option(name = "exclude-filter",
             description = "The negative filter of the test names to run.")
     private Set<String> mExcludeFilters = new TreeSet<>();
+
+    @Option(name = "exclude-over-include",
+            description = "The negative filter of the test names to run.")
+    private boolean mExcludeOverInclude = false;
 
     @Option(name = "runtime-hint", description = "The hint about the test's runtime.",
             isTimeVal = true)
@@ -629,6 +634,12 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         CLog.i("Added include filter to test suite: %s", mIncludeFilters);
         suite.put(EXCLUDE_FILTER, new JSONArray(mExcludeFilters));
         CLog.i("Added exclude filter to test suite: %s", mExcludeFilters);
+
+        if (mExcludeOverInclude) {
+            jsonObject.put(EXCLUDE_OVER_INCLUDE, mExcludeOverInclude);
+            CLog.i("Added %s to the Json object", EXCLUDE_OVER_INCLUDE);
+        }
+
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
