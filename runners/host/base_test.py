@@ -30,6 +30,7 @@ from vts.runners.host import const
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import list_utils
 from vts.utils.python.coverage import coverage_utils
+from vts.utils.python.coverage import sancov_utils
 from vts.utils.python.profiling import profiling_utils
 from vts.utils.python.reporting import log_uploading_utils
 from vts.utils.python.systrace import systrace_utils
@@ -74,6 +75,7 @@ class BaseTestClass(object):
         abi_bitness: String, bitness of abi in use
         web: WebFeature, object storing web feature util for test run
         coverage: CoverageFeature, object storing coverage feature util for test run
+        sancov: SancovFeature, object storing sancov feature util for test run
         profiling: ProfilingFeature, object storing profiling feature util for test run
         _skip_all_testcases: A boolean, can be set by a subclass in
                              setUpClass() to skip all test cases.
@@ -128,6 +130,8 @@ class BaseTestClass(object):
             keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
         self.web = web_utils.WebFeature(self.user_params)
         self.coverage = coverage_utils.CoverageFeature(
+            self.user_params, web=self.web)
+        self.sancov = sancov_utils.SancovFeature(
             self.user_params, web=self.web)
         self.profiling = profiling_utils.ProfilingFeature(
             self.user_params, web=self.web)

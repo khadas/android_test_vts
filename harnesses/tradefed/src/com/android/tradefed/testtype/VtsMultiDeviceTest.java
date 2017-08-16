@@ -27,6 +27,7 @@ import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
+import com.android.tradefed.targetprep.VtsSancovPreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -113,6 +114,7 @@ public class VtsMultiDeviceTest
     static final String BUG_REPORT_ON_FAILURE = "bug_report_on_failure";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String ENABLE_PROFILING = "enable_profiling";
+    static final String ENABLE_SANCOV = "enable_sancov";
     static final String GTEST_BATCH_MODE = "gtest_batch_mode";
     static final String SAVE_TRACE_FIEL_REMOTE = "save_trace_file_remote";
     static final String OUTPUT_COVERAGE_REPORT = "output_coverage_report";
@@ -229,6 +231,12 @@ public class VtsMultiDeviceTest
                     + "measure coverage for each test case otherwise. Currently, only global "
                     + "coverage is supported for binary tests")
     private boolean mGlobalCoverage = true;
+
+    @Option(name = "enable-sancov",
+            description = "Enable sanitizer coverage for the tests. In order for coverage to be "
+                    + "measured, the device must be a sancov build with its build info and "
+                    + "unstripped binaries available to the sancov preparer class.")
+    private boolean mEnableSancov = true;
 
     @Option(name = "output-coverage-report", description = "Whether to store raw coverage report.")
     private boolean mOutputCoverageReport = false;
@@ -658,9 +666,10 @@ public class VtsMultiDeviceTest
         JSONArray deviceArray = new JSONArray();
 
         boolean coverageBuild = false;
+        boolean sancovBuild = false;
 
         for (ITestDevice device : mInvocationContext.getDevices()) {
-            deviceArray.put(generateJsonDeviceItem(device));
+            JSONObject deviceJson = generateJsonDeviceItem(device);
 
             try {
                 String coverageProperty = device.getProperty(COVERAGE_PROPERTY);
@@ -676,6 +685,13 @@ public class VtsMultiDeviceTest
                 CLog.e("Device %s not available.", device.getSerialNumber());
                 throw new RuntimeException("Failed to get device information");
             }
+
+            File sancovDir = mBuildInfo.getFile(VtsSancovPreparer.getSancovResourceDirKey(device));
+            if (sancovDir != null) {
+                deviceJson.put("sancov_resources_path", sancovDir.getAbsolutePath());
+                sancovBuild = true;
+            }
+            deviceArray.put(deviceJson);
         }
 
         JSONArray testBedArray = (JSONArray) jsonObject.get(TEST_BED);
@@ -822,6 +838,15 @@ public class VtsMultiDeviceTest
                 CLog.i("Added %s to the Json object", ENABLE_COVERAGE);
             } else {
                 CLog.i("Device build has coverage disabled");
+            }
+        }
+
+        if (mEnableSancov) {
+            if (sancovBuild) {
+                jsonObject.put(ENABLE_SANCOV, mEnableSancov);
+                CLog.i("Added %s to the Json object", ENABLE_SANCOV);
+            } else {
+                CLog.i("Device build has sancov disabled");
             }
         }
 
