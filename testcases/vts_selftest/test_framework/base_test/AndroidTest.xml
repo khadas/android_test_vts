@@ -37,6 +37,8 @@
         <option name="exclude-filter" value="suite1.test2_32bit"/>
         <option name="exclude-filter" value="r(suite2\..*2_.*)"/>
         <option name="exclude-filter" value="r(*)"/>
+        <option name="include-filter" value="-suite3.test1"/>
+        <option name="include-filter" value="-r(suite3\..*_32bit)"/>
     </test>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsSelfTestBaseTestFilterIncludeExclude"/>
