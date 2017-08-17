@@ -28,6 +28,7 @@ NEGATIVE_PATTERN_PREFIX = '-'
 _INCLUDE_FILTER = '_include_filter'
 _EXCLUDE_FILTER = '_exclude_filter'
 DEFAULT_EXCLUDE_OVER_INCLUDE = False
+_MODULE_NAME_PATTERN = '{module}.{test}'
 
 
 def ExpandBitness(input_list):
@@ -152,7 +153,7 @@ class Filter(object):
     be added before regex prefix, i.e., '-r(negative.pattern)'
 
     Attributes:
-        is_enabled_regex: bool, whether regex is enabled.
+        enable_regex: bool, whether regex is enabled.
         include_filter: list of string, input include filter
         exclude_filter: list of string, input exclude filter
         include_filter_exact: list of string, exact include filter
@@ -161,6 +162,12 @@ class Filter(object):
         exclude_filter_regex: list of string, exact exclude filter
         exclude_over_include: bool, False for include over exclude;
                               True for exclude over include.
+        enable_native_pattern: bool, whether to enable negative pattern
+                               processing in include_filter
+        enable_module_name_prefix_matching: bool, whether to perform auto
+                                            module name prefix matching
+        module_name: string, test module name for auto module name prefix
+                     matching
     '''
     include_filter_exact = []
     include_filter_regex = []
@@ -172,10 +179,13 @@ class Filter(object):
                  exclude_filter=[],
                  enable_regex=False,
                  exclude_over_include=None,
-                 enable_negative_pattern=True):
-        self.is_enabled_regex = enable_regex
+                 enable_negative_pattern=True,
+                 enable_module_name_prefix_matching=False,
+                 module_name=None):
+        self.enable_regex = enable_regex
 
-        if enable_negative_pattern:
+        self.enable_negative_pattern = enable_negative_pattern
+        if self.enable_negative_pattern:
             include_filter, include_filter_negative = SplitNegativePattern(
                 include_filter)
             exclude_filter.extend(include_filter_negative)
@@ -184,6 +194,8 @@ class Filter(object):
         if exclude_over_include is None:
             exclude_over_include = DEFAULT_EXCLUDE_OVER_INCLUDE
         self.exclude_over_include = exclude_over_include
+        self.enable_module_name_prefix_matching = enable_module_name_prefix_matching
+        self.module_name = module_name
 
     def ExpandBitness(self):
         '''Expand bitness from filter.
@@ -220,12 +232,86 @@ class Filter(object):
             return self.IsInIncludeFilter(item)
 
     def IsInIncludeFilter(self, item):
-        '''Check if item is in include filter.'''
+        '''Check if item is in include filter.
+
+        If enable_module_name_prefix_matching is set to True, module name
+        added to item as prefix will also be check from the include filter.
+
+        Args:
+            item: string, item to check filter
+
+        Returns:
+            bool, True if in include filter.
+        '''
+        return self._ModuleNamePrefixMatchingCheck(item,
+                                                   self._IsInIncludeFilter)
+
+    def IsInExcludeFilter(self, item):
+        '''Check if item is in exclude filter.
+
+        If enable_module_name_prefix_matching is set to True, module name
+        added to item as prefix will also be check from the exclude filter.
+
+        Args:
+            item: string, item to check filter
+
+        Returns:
+            bool, True if in exclude filter.
+        '''
+        return self._ModuleNamePrefixMatchingCheck(item,
+                                                   self._IsInExcludeFilter)
+
+    def _ModuleNamePrefixMatchingCheck(self, item, check_function):
+        '''Check item from filter after appending module name as prefix.
+
+        This function will first check whether enable_module_name_prefix_matching
+        is True and module_name is not empty. Then, the check_function will
+        be applied to the item. If the result is False and
+        enable_module_name_prefix_matching is True, module name will be added
+        as the prefix to the item, in format of '<module_name>.<item>', and
+        call the check_function again with the new resulting name.
+
+        This is mainly used for retry command where test module name are
+        automatically added to test case name.
+
+        Args:
+            item: string, test name for checking.
+            check_function: function to check item in filters.
+
+        Return:
+            bool, True if item pass the filter from the given check_function.
+        '''
+        res = check_function(item)
+
+        if (not res and self.enable_module_name_prefix_matching and
+                self.module_name):
+            res = check_function(
+                _MODULE_NAME_PATTERN.format(
+                    module=self.module_name, test=item))
+
+        return res
+
+    def _IsInIncludeFilter(self, item):
+        '''Internal function to check if item is in include filter.
+
+        Args:
+            item: string, item to check filter
+
+        Returns:
+            bool, True if in include filter.
+        '''
         return item in self.include_filter_exact or InRegexList(
             item, self.include_filter_regex)
 
-    def IsInExcludeFilter(self, item):
-        '''Check if item is in exclude filter.'''
+    def _IsInExcludeFilter(self, item):
+        '''Internal function to check if item is in exclude filter.
+
+        Args:
+            item: string, item to check filter
+
+        Returns:
+            bool, True if in exclude filter.
+        '''
         return item in self.exclude_filter_exact or InRegexList(
             item, self.exclude_filter_regex)
 
@@ -238,7 +324,7 @@ class Filter(object):
     def include_filter(self, include_filter):
         '''Setter method for include_filter'''
         setattr(self, _INCLUDE_FILTER, include_filter)
-        if self.is_enabled_regex:
+        if self.enable_regex:
             self.include_filter_exact, self.include_filter_regex = SplitFilterList(
                 include_filter)
         else:
@@ -253,21 +339,29 @@ class Filter(object):
     def exclude_filter(self, exclude_filter):
         '''Setter method for exclude_filter'''
         setattr(self, _EXCLUDE_FILTER, exclude_filter)
-        if self.is_enabled_regex:
+        if self.enable_regex:
             self.exclude_filter_exact, self.exclude_filter_regex = SplitFilterList(
                 exclude_filter)
         else:
             self.exclude_filter_exact = exclude_filter
 
     def __str__(self):
-        return ('Filter:\nis_enabled_regex: {is_enabled_regex}\n'
+        return ('Filter:\nenable_regex: {enable_regex}\n'
+                'enable_negative_pattern: {enable_negative_pattern}\n'
+                'enable_module_name_prefix_matching: '
+                '{enable_module_name_prefix_matching}\n'
+                'module_name: {module_name}\n'
                 'include_filter: {include_filter}\n'
                 'exclude_filter: {exclude_filter}\n'
                 'include_filter_exact: {include_filter_exact}\n'
                 'include_filter_regex: {include_filter_regex}\n'
                 'exclude_filter_exact: {exclude_filter_exact}\n'
                 'exclude_filter_regex: {exclude_filter_regex}'.format(
-                    is_enabled_regex=self.is_enabled_regex,
+                    enable_regex=self.enable_regex,
+                    enable_negative_pattern=self.enable_negative_pattern,
+                    enable_module_name_prefix_matching=
+                    self.enable_module_name_prefix_matching,
+                    module_name=self.module_name,
                     include_filter=self.include_filter,
                     exclude_filter=self.exclude_filter,
                     include_filter_exact=self.include_filter_exact,

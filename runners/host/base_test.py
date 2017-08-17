@@ -112,11 +112,16 @@ class BaseTestClass(object):
             list_utils.ItemsToStr(self.exclude_filter), ',')
         exclude_over_include = self.getUserParam(
             keys.ConfigKeys.KEY_EXCLUDE_OVER_INCLUDE, default_value=None)
+        self.test_module_name = self.getUserParam(keys.ConfigKeys.KEY_TESTBED_NAME,
+                                             default_value=None)
         self.test_filter = filter_utils.Filter(
             self.include_filter,
             self.exclude_filter,
             enable_regex=True,
-            exclude_over_include=exclude_over_include)
+            exclude_over_include=exclude_over_include,
+            enable_negative_pattern=True,
+            enable_module_name_prefix_matching=True,
+            module_name=self.test_module_name)
         self.test_filter.ExpandBitness()
         logging.info('Test filter: %s' % self.test_filter)
 
