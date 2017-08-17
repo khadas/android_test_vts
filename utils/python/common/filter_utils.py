@@ -24,6 +24,7 @@ from vts.utils.python.common import list_utils
 REGEX_PREFIX = 'r('
 REGEX_SUFFIX = ')'
 REGEX_PREFIX_ESCAPE = '\\r('
+NEGATIVE_PATTERN_PREFIX = '-'
 _INCLUDE_FILTER = '_include_filter'
 _EXCLUDE_FILTER = '_exclude_filter'
 DEFAULT_EXCLUDE_OVER_INCLUDE = False
@@ -57,14 +58,12 @@ def SplitFilterList(input_list):
     '''Split filter items into exact and regex lists.
 
     To specify a regex filter, the syntax is:
-      'suite.test' for exact matching
       'r(suite.test)' for regex matching of 'suite.test', where '.' means
           one of any char.
-      '\r(suite.test)' for exact matching of name 'r(suite.test)', where
-          '\r' is a two char string ('\\r' in code).
+    See Filter class docstring for details.
 
     Args:
-        input_list: list of string, the list to explit
+        input_list: list of string, the list to split
 
     Returns:
         A tuple of lists: two lists where the first one is exact matching
@@ -89,6 +88,30 @@ def SplitFilterList(input_list):
             exact.append(item)
 
     return (exact, regex)
+
+
+def SplitNegativePattern(input_list):
+    '''Split negative items out from an input filter list.
+
+    Items starting with the negative sign will be moved to the second returning
+    list.
+
+    Args:
+        input_list: list of string, the list to split
+
+    Returns:
+        A tuple of lists: two lists where the first one is positive patterns
+                          and second one is negative items whose negative sign
+                          is removed.
+    '''
+    positive = []
+    negative = []
+    for item in input_list:
+        if item.startswith(NEGATIVE_PATTERN_PREFIX):
+            negative.append(item[len(NEGATIVE_PATTERN_PREFIX):])
+        else:
+            positive.append(item)
+    return (positive, negative)
 
 
 def InRegexList(item, regex_list):
@@ -120,6 +143,13 @@ class Filter(object):
           one of any char.
       '\r(suite.test)' for exact matching of name 'r(suite.test)', where
           '\r' is a two char string ('\\r' in code).
+      Since test name is not expected to start with backslash, the exact
+      string matching of name '\r(suite.test)' is not supported here.
+
+    Negative pattern is supported. If a test name starts with the negative
+    sign in include_filter, the negative sign will be removed and item will
+    be moved from include_filter to exclude_filter. Negative sign should
+    be added before regex prefix, i.e., '-r(negative.pattern)'
 
     Attributes:
         is_enabled_regex: bool, whether regex is enabled.
@@ -141,8 +171,14 @@ class Filter(object):
                  include_filter=[],
                  exclude_filter=[],
                  enable_regex=False,
-                 exclude_over_include=None):
+                 exclude_over_include=None,
+                 enable_negative_pattern=True):
         self.is_enabled_regex = enable_regex
+
+        if enable_negative_pattern:
+            include_filter, include_filter_negative = SplitNegativePattern(
+                include_filter)
+            exclude_filter.extend(include_filter_negative)
         self.include_filter = include_filter
         self.exclude_filter = exclude_filter
         if exclude_over_include is None:
