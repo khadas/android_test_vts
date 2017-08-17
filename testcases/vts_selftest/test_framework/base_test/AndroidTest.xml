@@ -23,4 +23,34 @@
         <option name="test-module-name" value="VtsSelfTestBaseTest"/>
         <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/base_test/VtsSelfTestBaseTest" />
     </test>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsSelfTestBaseTestFilterInclude"/>
+        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/base_test/VtsSelfTestBaseTestFilterInclude" />
+        <option name="include-filter" value="suite1.test1"/>
+        <option name="include-filter" value="suite1.test2_32bit"/>
+        <option name="include-filter" value="r(suite2\..*)"/>
+    </test>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsSelfTestBaseTestFilterExclude"/>
+        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/base_test/VtsSelfTestBaseTestFilterExclude" />
+        <option name="exclude-filter" value="suite1.test1"/>
+        <option name="exclude-filter" value="suite1.test2_32bit"/>
+        <option name="exclude-filter" value="r(suite2\..*2_.*)"/>
+        <option name="exclude-filter" value="r(*)"/>
+    </test>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsSelfTestBaseTestFilterIncludeExclude"/>
+        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/base_test/VtsSelfTestBaseTestFilterIncludeExclude" />
+        <option name="include-filter" value="r(.*_32bit)"/>
+        <option name="include-filter" value="\r(fake.regex)"/>
+        <option name="exclude-filter" value="suite1.test1"/>
+    </test>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsSelfTestBaseTestFilterExcludeInclude"/>
+        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/base_test/VtsSelfTestBaseTestFilterExcludeInclude" />
+        <option name="include-filter" value="r(.*_32bit)"/>
+        <option name="include-filter" value="suite1.test1_64bit"/>
+        <option name="exclude-filter" value="suite1.test1"/>
+        <option name="exclude-over-include" value="true"/>
+    </test>
 </configuration>
