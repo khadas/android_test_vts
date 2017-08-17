@@ -92,18 +92,18 @@ void VtsHalHidlTargetTestEnvBase::addHalServiceInstance(
   // hal_service_instance follows the format:
   // package@version::interface/service_name e.g.:
   // android.hardware.vibrator@1.0::IVibrator/default
-  string instance_name =
+  string instanceName =
       halServiceInstance.substr(0, halServiceInstance.find('/'));
-  string service_name =
+  string serviceName =
       halServiceInstance.substr(halServiceInstance.find('/') + 1);
   // Fail the process if trying to pass multiple service names for the same
   // service instance.
-  if (halServiceInstances_.find(instance_name) != halServiceInstances_.end()) {
-    ALOGE("Exisitng instance %s with name %s", instance_name.c_str(),
-          halServiceInstances_[instance_name].c_str());
+  if (halServiceInstances_.find(instanceName) != halServiceInstances_.end()) {
+    ALOGE("Exisitng instance %s with name %s", instanceName.c_str(),
+          halServiceInstances_[instanceName].c_str());
     abort();
   }
-  halServiceInstances_[instance_name] = service_name;
+  halServiceInstances_[instanceName] = serviceName;
 }
 
 string VtsHalHidlTargetTestEnvBase::getServiceName(string instanceName) {
@@ -111,6 +111,7 @@ string VtsHalHidlTargetTestEnvBase::getServiceName(string instanceName) {
     return halServiceInstances_[instanceName];
   }
   // Could not find the instance.
+  ALOGE("Does not find service name for %s", instanceName.c_str());
   return "";
 }
 
@@ -118,6 +119,10 @@ void VtsHalHidlTargetTestEnvBase::registerTestService(string package,
                                                       string version,
                                                       string interfaceName) {
   string FQName = package + '@' + version + "::" + interfaceName;
+  registeredHalServices_.insert(FQName);
+}
+
+void VtsHalHidlTargetTestEnvBase::registerTestService(string FQName) {
   registeredHalServices_.insert(FQName);
 }
 
