@@ -34,10 +34,10 @@ _MODULE_NAME_PATTERN = '{module}.{test}'
 def ExpandBitness(input_list):
     '''Expand filter items with bitness suffix.
 
-    If a filter item contains bitness suffix, only test name with that tag will be included
-    in output.
-    Otherwise, both 32bit and 64bit suffix will be paired to the test name in output
-    list.
+    If a filter item contains bitness suffix, only test name with that tag
+    will be included in output.
+    Otherwise, both 32bit and 64bit suffix will be paired to the test name
+    in output list.
 
     Args:
         input_list: list of string, the list to expand
