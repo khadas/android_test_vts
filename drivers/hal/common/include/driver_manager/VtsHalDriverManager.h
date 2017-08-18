@@ -63,11 +63,17 @@ class VtsHalDriverManager {
   // package name, version and component (interface) name. If found, returns
   // the correponding driver instance, otherwise, creates a new driver instance
   // with the given info, registers it in hal_driver_map_ and returns the
-  // generated driver instance. This is used by Vts replay test.
-  DriverBase* GetDriverForHidlHalInterface(const string& package_name,
-                                           const float version,
-                                           const string& interface_name,
-                                           const string& hal_service_name);
+  // generated driver instance. This is used by VTS replay test.
+  DriverId GetDriverIdForHidlHalInterface(const string& package_name,
+                                          const float version,
+                                          const string& interface_name,
+                                          const string& hal_service_name);
+
+  // Verify the return result of a function call matches the expected result.
+  // This is used by VTS replay test.
+  bool VerifyResults(DriverId id,
+                     const FunctionSpecificationMessage& expected_result,
+                     const FunctionSpecificationMessage& actual_result);
 
   // Loads the specification message for component with given component info
   // such as component_class etc. Used to server the ReadSpecification request
@@ -100,7 +106,7 @@ class VtsHalDriverManager {
 
   // Internal method to get the HAL driver based on the driver id. Returns
   // nullptr if no driver instance existes with given id.
-  DriverBase* GetDriverById(const int32_t id);
+  DriverBase* GetDriverById(const DriverId id);
 
   // Internal method to get the HAL driver based on FunctionCallMessage.
   DriverBase* GetDriverWithCallMsg(const FunctionCallMessage& call_msg);
