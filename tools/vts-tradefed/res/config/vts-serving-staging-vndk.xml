@@ -21,5 +21,6 @@
   <option name="vts-plan-result:default-type" value="staging" />
 
   <option name="compatibility:include-filter" value="VtsVndkAbi" />
+  <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
 </configuration>
