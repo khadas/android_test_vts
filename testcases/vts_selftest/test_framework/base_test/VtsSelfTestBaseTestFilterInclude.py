@@ -38,12 +38,14 @@ class VtsSelfTestBaseTestFilterInclude(
         'suite1.test1_64bit',
         'suite1.test2_32bit',
         'suite2.any_matching_regex',
+        'suite3.test1',
     ]
 
     SHOULD_NOT_PASS_FILTER = [
         'suite1.test2',
         'suite2_any',
         'any.other',
+        'suite3.test2',
     ]
 
 
