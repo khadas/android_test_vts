@@ -38,6 +38,7 @@ class VtsSelfTestBaseTestFilterExclude(
         'suite1.test2_64bit',
         'suite2.test1_32bit',
         'suite2.test1_64bit',
+        'suite3.test2_64bit',
     ]
 
     SHOULD_NOT_PASS_FILTER = [
@@ -45,6 +46,10 @@ class VtsSelfTestBaseTestFilterExclude(
         'suite1.test2_32bit',
         'suite2.test2_32bit',
         'suite2.test2_64bit',
+        'suite3.test1',
+        'suite3.test1_32bit',
+        'suite3.test1_64bit',
+        'suite3.test2_32bit',
     ]
 
 
