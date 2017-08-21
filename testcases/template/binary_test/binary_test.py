@@ -111,10 +111,10 @@ class BinaryTest(base_test.BaseTestClass):
             for token in self.binary_test_envp:
                 tag = ''
                 path = token
-                if self.TAG_DELIMITER in token:
-                    split = token.find(self.TAG_DELIMITER)
-                    tag, arg = token[:split], token[split + len(
-                        self.TAG_DELIMITER):]
+                split = token.find(self.TAG_DELIMITER)
+                if split >= 0:
+                    tag, arg = token[:split], token[
+                        split + len(self.TAG_DELIMITER):]
                 if tag in self.envp:
                     self.envp[tag] += ' %s' % path
                 else:
@@ -126,10 +126,10 @@ class BinaryTest(base_test.BaseTestClass):
             for token in self.binary_test_args:
                 tag = ''
                 arg = token
-                if self.TAG_DELIMITER in token:
-                    split = token.find(self.TAG_DELIMITER)
-                    tag, arg = token[:split], token[split + len(
-                        self.TAG_DELIMITER):]
+                split = token.find(self.TAG_DELIMITER)
+                if split >= 0:
+                    tag, arg = token[:split], token[
+                        split + len(self.TAG_DELIMITER):]
                 if tag in self.args:
                     self.args[tag] += ' %s' % arg
                 else:
@@ -248,8 +248,8 @@ class BinaryTest(base_test.BaseTestClass):
                             logging.error("ps command failed (exit code: %s",
                                           cmd_result[const.EXIT_CODE][0])
                             break
-                        if (native_server_process_name not in
-                                cmd_result[const.STDOUT][0]):
+                        if (native_server_process_name not in cmd_result[
+                                const.STDOUT][0]):
                             logging.info("Process %s not running",
                                          native_server_process_name)
                             break
@@ -445,8 +445,8 @@ class BinaryTest(base_test.BaseTestClass):
         else:
             parent_path = self.DEVICE_TMP_DIR
 
-        return targetpath.join(parent_path, 'vts_binary_test_%s' %
-                               self.__class__.__name__, tag)
+        return targetpath.join(
+            parent_path, 'vts_binary_test_%s' % self.__class__.__name__, tag)
 
     def CreateTestCase(self, path, tag=''):
         '''Create a list of TestCase objects from a binary path.
