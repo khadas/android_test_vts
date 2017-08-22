@@ -20,7 +20,8 @@
     <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-hidl-auto" />
     <option name="vts-plan-result:default-type" value="staging" />
 
-    <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_1TargetTest" />
+    <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" />
+    <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_1Target" />
     <option name="compatibility:include-filter" value="VtsHalEvsV1_0Target" />
     <option name="compatibility:include-filter" value="VtsHalAutomotiveVehicleV2_0Host" />
     <option name="compatibility:include-filter" value="VtsHalAutomotiveVehicleV2_1Host" />
