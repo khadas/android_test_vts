@@ -144,8 +144,10 @@ class RemoteClientTest(unittest.TestCase):
     def testExecuteCommand(self):
         """Tests executing a command and waiting for result."""
         self._remote_mgr_thread.AddResponse('{}')
+        self._client.SendOperation(remote_operation.AllocateDevice("serial123"))
         self._remote_mgr_thread.AddResponse('{}')
-        self._client.RunCommand("serial123", "vts", "-m", "SampleShellTest")
+        self._client.SendOperation(remote_operation.ExecuteCommand(
+                "serial123", "vts", "-m", "SampleShellTest"))
 
         self._remote_mgr_thread.AddResponse('{"status": "EXECUTING"}')
         result = self._client.WaitForCommandResult("serial123",
@@ -154,9 +156,10 @@ class RemoteClientTest(unittest.TestCase):
 
         self._remote_mgr_thread.AddResponse('{"status": "EXECUTING"}')
         self._remote_mgr_thread.AddResponse('{"status": "INVOCATION_SUCCESS"}')
-        self._remote_mgr_thread.AddResponse('{}')
         result = self._client.WaitForCommandResult("serial123",
                                                    timeout=5, poll_interval=1)
+        self._remote_mgr_thread.AddResponse('{}')
+        self._client.SendOperation(remote_operation.FreeDevice("serial123"))
         self.assertIsNotNone(result, "Client doesn't return command result.")
 
     def testSocketError(self):
