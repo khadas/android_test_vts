@@ -56,6 +56,12 @@ class TfcClientTest(unittest.TestCase):
 
     def testLeaseHostTasks(self):
         """Tests tasks.leasehosttasks."""
+        tasks = {"tasks": [{"request_id": "2",
+                            "command_line": "vts-codelab --serial ABCDEF",
+                            "task_id": "1-0",
+                            "device_serials": ["ABCDEF"],
+                            "command_id": "1"}]}
+        self._service.tasks().leasehosttasks().execute.return_value = tasks
         self._client.LeaseHostTasks("cluster0", ["cluster1", "cluster2"],
                                     "host0", self._DEVICE_INFOS)
         self._service.assert_has_calls([
