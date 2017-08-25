@@ -31,6 +31,10 @@
 
 using namespace std;
 
+static constexpr const char* kErrorString = "error";
+static constexpr const char* kVoidString = "void";
+static constexpr const int kInvalidDriverId = -1;
+
 namespace android {
 namespace vts {
 
@@ -79,20 +83,29 @@ bool VtsHidlHalReplayer::ReplayTrace(const string& trace_file,
     string package_name = call_msg.package();
     float version = call_msg.version();
     string interface_name = call_msg.interface();
-    DriverBase* driver = driver_manager_->GetDriverForHidlHalInterface(
+    int32_t driver_id = driver_manager_->GetDriverIdForHidlHalInterface(
         package_name, version, interface_name, hal_service_name);
-    if (!driver) {
+    if (driver_id == kInvalidDriverId) {
       cerr << __func__ << ": couldn't get a driver base class" << endl;
       return false;
     }
 
-    vts::FunctionSpecificationMessage result_msg;
-    if (!driver->CallFunction(call_msg.func_msg(), "" /*callback_socket_name*/,
-                              &result_msg)) {
+    vts::FunctionCallMessage func_call_msg;
+    func_call_msg.set_component_class(HAL_HIDL);
+    func_call_msg.set_hal_driver_id(driver_id);
+    *func_call_msg.mutable_api() = call_msg.func_msg();
+    const string& result = driver_manager_->CallFunction(&func_call_msg);
+    if (result == kVoidString || result == kErrorString) {
       cerr << __func__ << ": replay function fail." << endl;
       return false;
     }
-    if (!driver->VerifyResults(expected_result_msg.func_msg(), result_msg)) {
+    vts::FunctionSpecificationMessage result_msg;
+    if (!google::protobuf::TextFormat::ParseFromString(result, &result_msg)) {
+      cerr << __func__ << ": failed to parse result msg." << endl;
+      return false;
+    }
+    if (!driver_manager_->VerifyResults(
+            driver_id, expected_result_msg.func_msg(), result_msg)) {
       // Verification is not strict, i.e. if fail, output error message and
       // continue the process.
       cerr << __func__ << ": verification fail." << endl;
