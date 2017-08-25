@@ -183,6 +183,17 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   return kVoidString;
 }
 
+bool VtsHalDriverManager::VerifyResults(
+    DriverId id, const FunctionSpecificationMessage& expected_result,
+    const FunctionSpecificationMessage& actual_result) {
+  DriverBase* driver = GetDriverById(id);
+  if (!driver) {
+    cerr << "can't find driver with id: " << id << endl;
+    return false;
+  }
+  return driver->VerifyResults(expected_result, actual_result);
+}
+
 string VtsHalDriverManager::GetAttribute(FunctionCallMessage* call_msg) {
   string output = "";
   DriverBase* driver = GetDriverWithCallMsg(*call_msg);
@@ -238,7 +249,7 @@ DriverId VtsHalDriverManager::RegisterDriver(
   return driver_id;
 }
 
-DriverBase* VtsHalDriverManager::GetDriverById(const int32_t id) {
+DriverBase* VtsHalDriverManager::GetDriverById(const DriverId id) {
   auto res = hal_driver_map_.find(id);
   if (res == hal_driver_map_.end()) {
     cerr << "Failed to find driver info with id: " << id << endl;
@@ -259,7 +270,7 @@ ComponentSpecificationMessage* VtsHalDriverManager::GetComponentSpecById(
   return &(res->second.spec_msg);
 }
 
-DriverBase* VtsHalDriverManager::GetDriverForHidlHalInterface(
+DriverId VtsHalDriverManager::GetDriverIdForHidlHalInterface(
     const string& package_name, const float version,
     const string& interface_name, const string& hal_service_name) {
   ComponentSpecificationMessage spec_msg;
@@ -267,14 +278,14 @@ DriverBase* VtsHalDriverManager::GetDriverForHidlHalInterface(
   spec_msg.set_package(package_name);
   spec_msg.set_component_type_version(version);
   spec_msg.set_component_name(interface_name);
-  int32_t driver_id = FindDriverIdInternal(spec_msg);
+  DriverId driver_id = FindDriverIdInternal(spec_msg);
   if (driver_id == kInvalidDriverId) {
     string driver_lib_path = GetHidlHalDriverLibName(package_name, version);
     driver_id =
         LoadTargetComponent("", driver_lib_path, HAL_HIDL, 0, version,
                             package_name, interface_name, hal_service_name, "");
   }
-  return GetDriverById(driver_id);
+  return driver_id;
 }
 
 bool VtsHalDriverManager::FindComponentSpecification(
