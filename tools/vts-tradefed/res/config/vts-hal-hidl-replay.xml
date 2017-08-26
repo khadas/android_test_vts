@@ -13,13 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS HIDL HAL Staging Replay Plan">
+<configuration description="VTS HIDL HAL Replay Test Plan">
   <include name="vts-base" />
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-star" />
-  <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-hidl-replay" />
+  <option name="test-tag" value="vts" />
+  <option name="vts-plan-result:plan-name" value="vts-hal-hidl-replay" />
 
-  <option name="compatibility:include-filter" value="HidlTraceRecorder" />
+  <!-- For Hidl Hal replay tests -->
+    <option name="compatibility:include-filter" value="VtsHalNfcV1_0TargetReplay" />
+
+  <!-- For Hidl Hal replay tests: Internal Only -->
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0TargetReplay" />
@@ -29,4 +32,5 @@
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0TargetReplay" />
+
 </configuration>
