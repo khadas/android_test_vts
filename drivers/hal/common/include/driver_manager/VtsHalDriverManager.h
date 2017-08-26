@@ -108,6 +108,10 @@ class VtsHalDriverManager {
   // nullptr if no driver instance existes with given id.
   DriverBase* GetDriverById(const DriverId id);
 
+  // Internal method to get the registered driver pointer based on driver id.
+  // Returns -1 if no driver instance existes with given id.
+  uint64_t GetDriverPointerById(const DriverId id);
+
   // Internal method to get the HAL driver based on FunctionCallMessage.
   DriverBase* GetDriverWithCallMsg(const FunctionCallMessage& call_msg);
 

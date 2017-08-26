@@ -125,8 +125,26 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   driver->FunctionCallBegin();
   cout << __func__ << " Call Function " << api->name() << " parent_path("
        << api->parent_path() << ")" << endl;
-  // For Hidl HAL, use CallFunction method.
   if (call_msg->component_class() == HAL_HIDL) {
+    // Pre-processing if we want to call an API with an interface as argument.
+    for (int index = 0; index < api->arg_size(); index++) {
+      auto* arg = api->mutable_arg(index);
+      if (arg->type() == TYPE_HIDL_INTERFACE) {
+        string type_name = arg->predefined_type();
+        ComponentSpecificationMessage spec_msg;
+        spec_msg.set_package(GetPackageName(type_name));
+        spec_msg.set_component_type_version(GetVersion(type_name));
+        spec_msg.set_component_name(GetComponentName(type_name));
+        DriverId driver_id = FindDriverIdInternal(spec_msg);
+        // If found a registered driver for the interface, set the pointer in
+        // the arg proto.
+        if (driver_id != kInvalidDriverId) {
+          uint64_t interface_pt = GetDriverPointerById(driver_id);
+          arg->set_hidl_interface_pointer(interface_pt);
+        }
+      }
+    }
+    // For Hidl HAL, use CallFunction method.
     if (!driver->CallFunction(*api, callback_socket_name_, &result_msg)) {
       cerr << __func__ << " Failed to call function: " << api->DebugString()
            << endl;
@@ -257,6 +275,16 @@ DriverBase* VtsHalDriverManager::GetDriverById(const DriverId id) {
   }
   cout << __func__ << " found driver info with id: " << id << endl;
   return res->second.driver.get();
+}
+
+uint64_t VtsHalDriverManager::GetDriverPointerById(const DriverId id) {
+  auto res = hal_driver_map_.find(id);
+  if (res == hal_driver_map_.end()) {
+    cerr << "Failed to find driver info with id: " << id << endl;
+    return 0;
+  }
+  cout << __func__ << " found driver info with id: " << id << endl;
+  return res->second.hidl_hal_proxy_pt;
 }
 
 ComponentSpecificationMessage* VtsHalDriverManager::GetComponentSpecById(
