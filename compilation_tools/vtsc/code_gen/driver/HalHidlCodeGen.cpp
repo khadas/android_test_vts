@@ -1103,7 +1103,23 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_INTERFACE:
     {
-      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
+      string type_name = val.predefined_type();
+      out << "if (" << arg_value_name << ".has_hidl_interface_pointer()) {\n";
+      out.indent();
+      out << arg_name << " = reinterpret_cast<" << type_name << "*>("
+          << arg_value_name << ".hidl_interface_pointer());\n";
+      out.unindent();
+      out << "} else {\n";
+      out.indent();
+      if (type_name == "::android::hidl::base::V1_0::IBase") {
+        out << "/* ERROR: general interface is not supported yet. */\n";
+      } else {
+        ReplaceSubString(type_name, "::", "_");
+        out << arg_name << " = VtsFuzzerCreateVts" << type_name
+            << "(callback_socket_name);\n";
+      }
+      out.unindent();
+      out << "}\n";
       break;
     }
     case TYPE_HIDL_MEMORY:
