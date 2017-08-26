@@ -22,7 +22,7 @@
   <option name="compatibility:include-filter" value="VtsTreblePlatformVersionTest" />
   <option name="compatibility:include-filter" value="VtsTrebleVintfTest" />
 
-  <!-- From vts-hal.xml -->
+  <!-- From vts-hal-hidl.xml -->
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
@@ -33,7 +33,7 @@
   <option name="compatibility:include-filter" value="VtsHalWifiNanV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
 
-  <!-- From vts-hal.xml: Internal Only -->
+  <!-- From vts-hal-hidl.xml: Internal Only -->
   <option name="compatibility:include-filter" value="VtsHalAudioV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1Target" />

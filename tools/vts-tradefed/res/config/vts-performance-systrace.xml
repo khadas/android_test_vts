@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 Google Inc.
+<!-- Copyright (C) 2017 Google Inc.
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for Conventional HALs (Staging)">
+<configuration description="VTS Performance Plan with Systrac">
   <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
+  <option name="vts-plan-result:plan-name" value="vts-performance-systrace" />
 
-  <option name="compatibility:include-filter" value="SampleLightTest" />
-  <option name="compatibility:include-filter" value="SampleCameraV2Test" />
-  <option name="compatibility:include-filter" value="SampleCameraV3Test" />
+  <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
+  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
 
 </configuration>
