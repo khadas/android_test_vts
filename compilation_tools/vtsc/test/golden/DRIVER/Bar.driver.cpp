@@ -1091,7 +1091,11 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
          ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
-            /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+            if (func_msg.arg(0).vector_value(arg0_index).has_hidl_interface_pointer()) {
+                arg0[arg0_index] = reinterpret_cast<::android::hardware::tests::foo::V1_0::ISimple*>(func_msg.arg(0).vector_value(arg0_index).hidl_interface_pointer());
+            } else {
+                arg0[arg0_index] = VtsFuzzerCreateVts_android_hardware_tests_foo_V1_0_ISimple(callback_socket_name);
+            }
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -1126,7 +1130,11 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
          ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
-            /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+            if (func_msg.arg(0).vector_value(arg0_index).has_hidl_interface_pointer()) {
+                arg0[arg0_index] = reinterpret_cast<::android::hidl::base::V1_0::IBase*>(func_msg.arg(0).vector_value(arg0_index).hidl_interface_pointer());
+            } else {
+                /* ERROR: general interface is not supported yet. */
+            }
         }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
@@ -1395,7 +1403,11 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "haveAInterface")) {
         sp<::android::hardware::tests::foo::V1_0::ISimple> arg0;
-        /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+        if (func_msg.arg(0).has_hidl_interface_pointer()) {
+            arg0 = reinterpret_cast<::android::hardware::tests::foo::V1_0::ISimple*>(func_msg.arg(0).hidl_interface_pointer());
+        } else {
+            arg0 = VtsFuzzerCreateVts_android_hardware_tests_foo_V1_0_ISimple(callback_socket_name);
+        }
         VtsMeasurement vts_measurement;
         vts_measurement.Start();
         cout << "Call an API" << endl;
