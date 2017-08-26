@@ -26,7 +26,10 @@
   <option name="compatibility:include-filter" value="VtsHalDumpstateV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNeuralnetworksV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostBinderize" />
+  <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalRadioV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalRenderscriptV1_0Target" />
@@ -44,9 +47,11 @@
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4Target" />
   <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGnssV1_0HostBinderize" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
@@ -59,6 +64,7 @@
   <option name="compatibility:include-filter" value="VtsHalOemLockV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalSensorsV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalTetherOffloadConfigV1_0Target" />
@@ -67,8 +73,10 @@
   <option name="compatibility:include-filter" value="VtsHalThermalV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalVrV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWeaverV1_0Target" />
 

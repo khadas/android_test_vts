@@ -17,7 +17,7 @@
     <include name="vts-base" />
     <option name="plan" value="vts" />
     <option name="test-tag" value="vts" />
-    <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-hidl-auto" />
+    <option name="vts-plan-result:plan-name" value="vts-hal-hidl-auto" />
 
     <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" />
     <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_1Target" />
