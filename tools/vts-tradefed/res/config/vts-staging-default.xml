@@ -13,17 +13,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Library Test Plan">
-  <include name="vts-base" />
-  <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-star" />
-  <option name="vts-plan-result:plan-name" value="vts-library" />
+<configuration description="VTS Serving Plan for Staging(new) tests">
 
-  <option name="compatibility:include-filter" value="CpuProfilingTest" />
-  <option name="compatibility:include-filter" value="BionicUnitTests" />
-  <option name="compatibility:include-filter" value="BionicUnitTestsStatic" />
-  <option name="compatibility:include-filter" value="LibcTest" />
-  <option name="compatibility:include-filter" value="VtsFmqUnitTests" />
-  <option name="compatibility:include-filter" value="VtsHidlUnitTests" />
+    <include name="vts-base" />
+    <option name="plan" value="vts" />
+    <option name="test-tag" value="vts" />
+    <option name="vts-plan-result:plan-name" value="vts-staging-default" />
+
+    <!-- for System -->
+    <option name="compatibility:include-filter" value="MemorySystemStressTest" />
+    <option name="compatibility:include-filter" value="VtsAppCameraStressTest" />
+
+    <!-- for VNDK -->
+    <option name="compatibility:include-filter" value="VtsVndkAbi" />
+    <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
 </configuration>

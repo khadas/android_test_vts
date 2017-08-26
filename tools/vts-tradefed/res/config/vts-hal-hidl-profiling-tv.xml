@@ -13,17 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for HIDL HAL Systracing (Staging)">
+<configuration description="VTS Serving Plan for HIDL HAL Profiling - TV/x86">
   <include name="vts-base" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
-  <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-hidl-systrace" />
+  <option name="vts-plan-result:plan-name" value="vts-hal-hidl-profiling-tv" />
 
-  <option name="compatibility:include-filter" value="HwBinderBinderizeLatencySystraceTest" />
-  <option name="compatibility:include-filter" value="HwBinderBinderizePerformanceSystraceTest" />
-  <option name="compatibility:include-filter" value="HwBinderBinderizeThroughputSystraceTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughLatencySystraceTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughPerformanceSystraceTest" />
-  <option name="compatibility:include-filter" value="HwBinderPassthroughThroughputSystraceTest" />
+  <option name="compatibility:include-filter" value="VtsHalTvCecV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalTvInputV1_0HostProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalTvInputV1_0TargetProfiling" />
 
 </configuration>
