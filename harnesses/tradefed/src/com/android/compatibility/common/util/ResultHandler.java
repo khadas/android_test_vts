@@ -74,7 +74,9 @@ public class ResultHandler {
     private static final String BUILD_FINGERPRINT = "build_fingerprint";
     private static final String BUILD_ID = "build_id";
     private static final String BUILD_PRODUCT = "build_product";
+    private static final String BUILD_SYSTEM_FINGERPRINT = "build_system_fingerprint";
     private static final String BUILD_TAG = "Build";
+    private static final String BUILD_VENDOR_FINGERPRINT = "build_vendor_fingerprint";
     private static final String CASE_TAG = "TestCase";
     private static final String COMMAND_LINE_ARGS = "command_line_args";
     private static final String DEVICES_ATTR = "devices";
@@ -140,25 +142,25 @@ public class ResultHandler {
 
     /**
      * @param resultDir
-     * @return an IInvocationResult for this result, or null upon error
+     * @return an VtsInvocationResult for this result, or null upon error
      */
-    public static IInvocationResult getResultFromDir(File resultDir) {
+    public static VtsInvocationResult getResultFromDir(File resultDir) {
         return getResultFromDir(resultDir, false);
     }
 
     /**
      * @param resultDir
      * @param useChecksum
-     * @return an IInvocationResult for this result, or null upon error
+     * @return an VtsInvocationResult for this result, or null upon error
      */
-    public static IInvocationResult getResultFromDir(File resultDir, Boolean useChecksum) {
+    public static VtsInvocationResult getResultFromDir(File resultDir, Boolean useChecksum) {
         try {
             File resultFile = new File(resultDir, TEST_RESULT_FILE_NAME);
             if (!resultFile.exists()) {
                 return null;
             }
             Boolean invocationUseChecksum = useChecksum;
-            IInvocationResult invocation = new InvocationResult();
+            VtsInvocationResult invocation = new VtsInvocationResult();
             invocation.setRetryDirectory(resultDir);
             ChecksumReporter checksumReporter = null;
             if (invocationUseChecksum) {
@@ -192,6 +194,10 @@ public class ResultHandler {
             invocation.addInvocationInfo(BUILD_PRODUCT, parser.getAttributeValue(NS,
                     BUILD_PRODUCT));
             invocation.setBuildFingerprint(parser.getAttributeValue(NS, BUILD_FINGERPRINT));
+            invocation.setBuildSystemFingerprint(
+                    parser.getAttributeValue(NS, BUILD_SYSTEM_FINGERPRINT));
+            invocation.setBuildVendorFingerprint(
+                    parser.getAttributeValue(NS, BUILD_VENDOR_FINGERPRINT));
 
             // TODO(stuartscott): may want to reload these incase the retry was done with
             // --skip-device-info flag
@@ -486,26 +492,25 @@ public class ResultHandler {
         }
     }
 
-
     /**
-     * Find the IInvocationResult for the given sessionId.
+     * Find the VtsInvocationResult for the given sessionId.
      */
-    public static IInvocationResult findResult(File resultsDir, Integer sessionId)
+    public static VtsInvocationResult findResult(File resultsDir, Integer sessionId)
             throws FileNotFoundException {
         return findResult(resultsDir, sessionId, true);
     }
 
     /**
-     * Find the IInvocationResult for the given sessionId.
+     * Find the VtsInvocationResult for the given sessionId.
      */
-    private static IInvocationResult findResult(
+    private static VtsInvocationResult findResult(
             File resultsDir, Integer sessionId, Boolean useChecksum) throws FileNotFoundException {
         if (sessionId < 0) {
             throw new IllegalArgumentException(
                 String.format("Invalid session id [%d] ", sessionId));
         }
         File resultDir = getResultDirectory(resultsDir, sessionId);
-        IInvocationResult result = getResultFromDir(resultDir, useChecksum);
+        VtsInvocationResult result = getResultFromDir(resultDir, useChecksum);
         if (result == null) {
             throw new RuntimeException(String.format("Could not find session [%d]", sessionId));
         }
