@@ -722,6 +722,7 @@ class AndroidDevice(object):
         """
         enable_vts_agent = getattr(self, "enable_vts_agent", True)
         enable_sl4a = getattr(self, "enable_sl4a", False)
+        enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
         try:
             self.startAdbLogcat()
         except:
@@ -741,7 +742,7 @@ class AndroidDevice(object):
             self.lib = lib_mirror.LibMirror(self.host_command_port)
             self.shell = shell_mirror.ShellMirror(self.host_command_port)
         if enable_sl4a:
-            self.startSl4aClient()
+            self.startSl4aClient(enable_sl4a_ed)
 
     def stopServices(self):
         """Stops long running services on the android device.
