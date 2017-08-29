@@ -78,6 +78,9 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
     private Collection<String> mDepModules = new TreeSet<>(Arrays.asList(DEFAULT_DEP_MODULES));
 
+    @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
+    private Collection<String> mNoDepModules = new TreeSet<>(Arrays.asList());
+
     @Option(name = "python-version", description = "The version of a Python interpreter to use.")
     private String mPythonVersion = "";
 
@@ -211,6 +214,9 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
         }
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
+                if (mNoDepModules.contains(dep)) {
+                    continue;
+                }
                 CommandResult result = null;
                 if (mLocalPypiPath != null) {
                     CLog.i("Attempting installation of %s from local directory", dep);
