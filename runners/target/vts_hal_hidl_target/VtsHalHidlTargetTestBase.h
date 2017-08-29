@@ -21,7 +21,6 @@
 #include <hidl/HidlSupport.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
-#include <VtsHalHidlTargetTestEnvBase.h>
 
 #define VTS_HAL_HIDL_GET_STUB "VTS_HAL_HIDL_GET_STUB"
 
@@ -108,17 +107,7 @@ class VtsHalHidlTargetTestBase : public ::testing::Test {
     return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
   }
 
-  /*
-   * Call interface's getService with the service name stored in the test
-   * environment and use passthrough mode if set from host.
-   */
-  template <class T>
-  static sp <T> getService(VtsHalHidlTargetTestEnvBase* testEnv) {
-    return T::getService(testEnv->getServiceName<T>(),
-                         VtsHalHidlTargetTestBase::VtsGetStub());
-  }
-
-private:
+ private:
   /*
    * Decide bool val for getStub option. Will read environment variable set
    * from host. If environment variable is not set, return will default to
