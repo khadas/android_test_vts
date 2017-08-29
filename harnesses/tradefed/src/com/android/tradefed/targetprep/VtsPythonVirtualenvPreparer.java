@@ -78,6 +78,9 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
     private Collection<String> mDepModules = new TreeSet<>(Arrays.asList(DEFAULT_DEP_MODULES));
 
+    @Option(name = "python-version", description = "The version of a Python interpreter to use.")
+    private String mPythonVersion = "";
+
     IBuildInfo mBuildInfo = null;
     IRunUtil mRunUtil = new RunUtil();
     String mPip = PIP;
@@ -266,7 +269,18 @@ public class VtsPythonVirtualenvPreparer implements ITargetPreparer, ITargetClea
                 mVenvDir = FileUtil.createTempDir(getMD5(buildInfo.getTestTag()) + "-virtualenv");
             }
             String virtualEnvPath = mVenvDir.getAbsolutePath();
-            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
+            CommandResult c;
+            if (mPythonVersion.length() == 0) {
+                c = mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
+            } else {
+                String[] cmd;
+                cmd = new String[4];
+                cmd[0] = "virtualenv";
+                cmd[1] = "-p";
+                cmd[2] = "python" + mPythonVersion;
+                cmd[3] = virtualEnvPath;
+                c = mRunUtil.runTimedCmd(BASE_TIMEOUT, cmd);
+            }
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
                 throw new TargetSetupError("Failed to create virtualenv");
