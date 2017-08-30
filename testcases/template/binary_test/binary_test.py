@@ -202,16 +202,10 @@ class BinaryTest(base_test.BaseTestClass):
 
         self.testcases = []
 
-        try:
-            ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
-                                                       self.shell)
-        except errors.VtsError as e:
-            logging.warn('VtsError occurred: %s', e)
+        ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
+                                                   self.shell)
+        if not ret:
             self._skip_all_testcases = True
-            return False
-        else:
-            if not ret:
-                self._skip_all_testcases = True
 
         self.tags = set()
         self.CreateTestCases()

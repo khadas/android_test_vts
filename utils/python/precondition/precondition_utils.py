@@ -155,18 +155,6 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
                     logging.warn(msg)
                     return False
 
-    hidl_shim = str(
-        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
-    if hidl_shim and bitness:
-        logging.info("Test bitness: %s", bitness)
-        tag = "" if (bitness == "32") else "64"
-        shim_path = "/system/lib" + tag + "/" + hidl_shim + ".so"
-        if not target_file_utils.Exists(shim_path, shell):
-            msg = ("The HIDL shim (path: {0}) required for {1}-bit testcases "
-                "was not found on device. Therefore {1}-bit testcases will be "
-                "skipped.").format(shim_path, bitness)
-            raise errors.VtsError(msg)
-
     hal = str(
         getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_VINTF, ""))
     vintf_xml = None
