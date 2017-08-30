@@ -76,11 +76,6 @@ class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
     return getServiceName(T::descriptor);
   }
 
-  /*
-   * Adds a hal sevice identified with the FQName.
-   */
-  void registerTestService(string FQName);
-
  private:
   /*
    * Parses VTS specific flags, currently support two flags:
