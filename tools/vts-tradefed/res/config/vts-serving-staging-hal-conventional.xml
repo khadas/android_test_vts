@@ -20,7 +20,6 @@
   <option name="vts-plan-result:plan-name" value="vts-serving-staging-hal-conventional" />
 
   <option name="compatibility:include-filter" value="SampleLightTest" />
-  <option name="compatibility:include-filter" value="SampleCameraV2Test" />
   <option name="compatibility:include-filter" value="SampleCameraV3Test" />
 
 </configuration>
