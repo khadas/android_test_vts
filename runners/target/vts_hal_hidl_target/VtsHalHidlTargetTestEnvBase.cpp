@@ -119,10 +119,6 @@ void VtsHalHidlTargetTestEnvBase::registerTestService(string FQName) {
   registeredHalServices_.insert(FQName);
 }
 
-void VtsHalHidlTargetTestEnvBase::registerTestService(string FQName) {
-  registeredHalServices_.insert(FQName);
-}
-
 void VtsHalHidlTargetTestEnvBase::listRegisteredServices() {
   for (string service : registeredHalServices_) {
     printf("hal_service: %s\n", service.c_str());
