@@ -489,7 +489,7 @@ void HalHidlProfilerCodeGen::GenerateUsingDeclaration(
 
 void HalHidlProfilerCodeGen::GenerateMacros(
     Formatter& out, const ComponentSpecificationMessage&) {
-  out << "#define TRACEFILEPREFIX \"/data/local/tmp\"\n";
+  out << "#define TRACEFILEPREFIX \"/data/local/tmp/\"\n";
   out << "\n";
 }
 
@@ -497,14 +497,16 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
     Formatter& out, const ComponentSpecificationMessage& message) {
   out << "if (strcmp(package, \"" << GetPackageName(message) << "\") != 0) {\n";
   out.indent();
-  out << "LOG(WARNING) << \"incorrect package.\";\n";
+  out << "LOG(WARNING) << \"incorrect package. Expect: "
+      << GetPackageName(message) << " actual: \" << package;\n";
   out << "return;\n";
   out.unindent();
   out << "}\n";
 
   out << "if (strcmp(version, \"" << GetVersion(message) << "\") != 0) {\n";
   out.indent();
-  out << "LOG(WARNING) << \"incorrect version.\";\n";
+  out << "LOG(WARNING) << \"incorrect version. Expect: " << GetVersion(message)
+      << " actual: \" << interface;\n";
   out << "return;\n";
   out.unindent();
   out << "}\n";
@@ -512,7 +514,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
   out << "if (strcmp(interface, \"" << GetComponentName(message)
       << "\") != 0) {\n";
   out.indent();
-  out << "LOG(WARNING) << \"incorrect interface.\";\n";
+  out << "LOG(WARNING) << \"incorrect interface. Expect: "
+      << GetComponentName(message) << " actual: \" << interface;\n";
   out << "return;\n";
   out.unindent();
   out << "}\n";
@@ -521,16 +524,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
 
 void HalHidlProfilerCodeGen::GenerateLocalVariableDefinition(
     Formatter& out, const ComponentSpecificationMessage&) {
-  // generate the name of file to store the trace.
-  out << "char trace_file[PATH_MAX];\n";
-  out << "sprintf(trace_file, \"%s/%s_%s\", TRACEFILEPREFIX, package, version);"
-      << "\n";
-
   // create and initialize the VTS profiler interface.
   out << "VtsProfilingInterface& profiler = "
-      << "VtsProfilingInterface::getInstance(trace_file);\n";
-  out << "profiler.Init();\n";
-  out << "\n";
+      << "VtsProfilingInterface::getInstance(TRACEFILEPREFIX);\n\n";
 }
 
 }  // namespace vts
