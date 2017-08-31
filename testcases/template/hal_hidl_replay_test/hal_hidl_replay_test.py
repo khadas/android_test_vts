@@ -22,8 +22,6 @@ from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.testcases.template.binary_test import binary_test
 from vts.testcases.template.hal_hidl_replay_test import hal_hidl_replay_test_case
-from vts.utils.python.common import vintf_utils
-
 from vts.utils.python.os import path_utils
 
 
