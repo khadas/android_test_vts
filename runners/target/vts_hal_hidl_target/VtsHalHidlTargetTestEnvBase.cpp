@@ -115,13 +115,6 @@ string VtsHalHidlTargetTestEnvBase::getServiceName(string instanceName) {
   return "";
 }
 
-void VtsHalHidlTargetTestEnvBase::registerTestService(string package,
-                                                      string version,
-                                                      string interfaceName) {
-  string FQName = package + '@' + version + "::" + interfaceName;
-  registeredHalServices_.insert(FQName);
-}
-
 void VtsHalHidlTargetTestEnvBase::registerTestService(string FQName) {
   registeredHalServices_.insert(FQName);
 }
