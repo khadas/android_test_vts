@@ -19,7 +19,6 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.light.conventional.Sample
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.fuzz.hal_light.conventional.LightFuzzTest $ANDROID_BUILD_TOP/test/vts/testcases/fuzz/hal_light/conventional/LightFuzzTest.config
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.fuzz.hal_light.conventional_standalone.StandaloneLightFuzzTest $ANDROID_BUILD_TOP/test/vts/testcases/fuzz/hal_light/conventional_standalone/StandaloneLightFuzzTest.config
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.camera.conventional.SampleCameraTest
-# PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.camera.conventional.2_1.SampleCameraV2Test
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.host.camera.conventional.3_4.SampleCameraV3Test
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.nfc.V1_0.host.VtsHalNfcV1_0HostTest
 # PYTHONPATH=$PYTHONPATH:.. python -m vts.testcases.hal.camera.provider.V2_4.host.VtsHalCameraProviderV2_4HostTest
