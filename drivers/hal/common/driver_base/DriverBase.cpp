@@ -275,14 +275,16 @@ bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
     return true;
   }
 
-  if (!target_loader_.Load(target_dll_path)) return false;
+  bool is_conventional_hal;
+  is_conventional_hal = (target_class_ == HAL_CONVENTIONAL) ? true : false;
+  if (!target_loader_.Load(target_dll_path, is_conventional_hal)) return false;
   target_dll_path_ = (char*)malloc(strlen(target_dll_path) + 1);
   strcpy(target_dll_path_, target_dll_path);
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == HAL_LEGACY) return true;
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file."
        << endl;
-  if (target_class_ == HAL_CONVENTIONAL) {
+  if (is_conventional_hal) {
     hmi_ = target_loader_.InitConventionalHal();
     if (!hmi_) {
       free(target_dll_path_);
