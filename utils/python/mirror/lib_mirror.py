@@ -161,7 +161,7 @@ class LibMirror(object):
         logging.info("Init the driver service for %s", target_type)
         target_class_id = hal_mirror.COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = hal_mirror.COMPONENT_TYPE_DICT[target_type.lower()]
-        launched = client.LaunchDriverService(
+        driver_id = client.LaunchDriverService(
             driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_CONVENTIONAL,
             service_name=service_name,
             bits=bits,
@@ -171,7 +171,7 @@ class LibMirror(object):
             target_version=target_version,
             target_package=target_package)
 
-        if not launched:
+        if driver_id == -1:
             raise errors.ComponentLoadingError(
                 "Failed to launch driver service %s from file path %s" %
                 (target_type, target_filename))
@@ -187,7 +187,7 @@ class LibMirror(object):
         text_format.Merge(found_api_spec, if_spec_msg)
 
         # Instantiate a MirrorObject and return it.
-        lib_mirror = mirror_object.MirrorObject(client, if_spec_msg, None)
+        lib_mirror = mirror_object.MirrorObject(client, if_spec_msg, None, driver_id)
         self._lib_level_mirrors[handler_name] = lib_mirror
 
     def __getattr__(self, name):
