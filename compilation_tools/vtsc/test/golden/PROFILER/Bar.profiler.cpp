@@ -7,7 +7,7 @@
 using namespace android::hardware::tests::bar::V1_0;
 using namespace android::hardware;
 
-#define TRACEFILEPREFIX "/data/local/tmp"
+#define TRACEFILEPREFIX "/data/local/tmp/"
 
 namespace android {
 namespace vts {
@@ -28,22 +28,19 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
         const char* method __attribute__((__unused__)),
         std::vector<void *> *args __attribute__((__unused__))) {
     if (strcmp(package, "android.hardware.tests.bar") != 0) {
-        LOG(WARNING) << "incorrect package.";
+        LOG(WARNING) << "incorrect package. Expect: android.hardware.tests.bar actual: " << package;
         return;
     }
     if (strcmp(version, "1.0") != 0) {
-        LOG(WARNING) << "incorrect version.";
+        LOG(WARNING) << "incorrect version. Expect: 1.0 actual: " << interface;
         return;
     }
     if (strcmp(interface, "IBar") != 0) {
-        LOG(WARNING) << "incorrect interface.";
+        LOG(WARNING) << "incorrect interface. Expect: IBar actual: " << interface;
         return;
     }
 
-    char trace_file[PATH_MAX];
-    sprintf(trace_file, "%s/%s_%s", TRACEFILEPREFIX, package, version);
-    VtsProfilingInterface& profiler = VtsProfilingInterface::getInstance(trace_file);
-    profiler.Init();
+    VtsProfilingInterface& profiler = VtsProfilingInterface::getInstance(TRACEFILEPREFIX);
 
     if (strcmp(method, "doThis") == 0) {
         FunctionSpecificationMessage msg;

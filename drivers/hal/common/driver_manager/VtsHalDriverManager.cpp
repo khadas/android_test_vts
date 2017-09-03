@@ -43,7 +43,7 @@ DriverId VtsHalDriverManager::LoadTargetComponent(
     const int component_class, const int component_type, const float version,
     const string& package_name, const string& component_name,
     const string& hw_binder_service_name, const string& submodule_name) {
-  cout << __func__ << " entry dll_file_name = " << dll_file_name << endl;
+  cout << __func__ << ": entry dll_file_name = " << dll_file_name << endl;
   ComponentSpecificationMessage spec_message;
   if (!hal_driver_loader_.FindComponentSpecification(
           component_class, package_name, version, component_name,
@@ -64,7 +64,7 @@ DriverId VtsHalDriverManager::LoadTargetComponent(
     default_driver_lib_name_ = driver_lib_path;
   }
 
-  cout << __func__ << " driver lib path " << driver_lib_path << endl;
+  cout << __func__ << ": driver lib path " << driver_lib_path << endl;
 
   std::unique_ptr<DriverBase> hal_driver = nullptr;
   hal_driver.reset(hal_driver_loader_.GetDriver(driver_lib_path, spec_message,
@@ -95,19 +95,19 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   if (call_msg->component_class() != HAL_HIDL && api->name() == "#Open") {
     cout << __func__ << ":" << __LINE__ << " #Open" << endl;
     if (api->arg().size() > 0) {
-      cout << __func__ << " open conventional hal with arg:"
+      cout << __func__ << ": open conventional hal with arg:"
            << api->arg(0).string_value().message() << endl;
       driver->OpenConventionalHal(api->arg(0).string_value().message().c_str());
     } else {
-      cout << __func__ << " open conventional hal with no arg" << endl;
+      cout << __func__ << ": open conventional hal with no arg" << endl;
       driver->OpenConventionalHal();
     }
     // return the return value from open;
     if (api->return_type().has_type()) {
-      cout << __func__ << " return_type exists" << endl;
+      cout << __func__ << ": return_type exists" << endl;
       // TODO handle when the size > 1.
       if (!strcmp(api->return_type().scalar_type().c_str(), "int32_t")) {
-        cout << __func__ << " return_type is int32_t" << endl;
+        cout << __func__ << ": return_type is int32_t" << endl;
         api->mutable_return_type()->mutable_scalar_value()->set_int32_t(0);
         cout << "result " << endl;
         // todo handle more types;
@@ -115,7 +115,7 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
         return output;
       }
     }
-    cerr << __func__ << " return_type unknown" << endl;
+    cerr << __func__ << ": return_type unknown" << endl;
     google::protobuf::TextFormat::PrintToString(*api, &output);
     return output;
   }
@@ -123,7 +123,7 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   void* result;
   FunctionSpecificationMessage result_msg;
   driver->FunctionCallBegin();
-  cout << __func__ << " Call Function " << api->name() << " parent_path("
+  cout << __func__ << ": Call Function " << api->name() << " parent_path("
        << api->parent_path() << ")" << endl;
   if (call_msg->component_class() == HAL_HIDL) {
     // Pre-processing if we want to call an API with an interface as argument.
@@ -146,13 +146,13 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
     }
     // For Hidl HAL, use CallFunction method.
     if (!driver->CallFunction(*api, callback_socket_name_, &result_msg)) {
-      cerr << __func__ << " Failed to call function: " << api->DebugString()
+      cerr << __func__ << ": Failed to call function: " << api->DebugString()
            << endl;
       return kErrorString;
     }
   } else {
     if (!driver->Fuzz(api, &result, callback_socket_name_)) {
-      cerr << __func__ << " Failed to call function: " << api->DebugString()
+      cerr << __func__ << ": Failed to call function: " << api->DebugString()
            << endl;
       return kErrorString;
     }
@@ -178,7 +178,7 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
                 HAL_HIDL, package_name, version, component_name, 0, "",
                 &spec_msg)) {
           cerr << __func__
-               << " Failed to load specification for gnerated interface :"
+               << ": Failed to load specification for gnerated interface :"
                << type_name << endl;
           return kErrorString;
         }
@@ -223,10 +223,10 @@ string VtsHalDriverManager::GetAttribute(FunctionCallMessage* call_msg) {
 
   void* result;
   FunctionSpecificationMessage* api = call_msg->mutable_api();
-  cout << __func__ << " Get Atrribute " << api->name() << " parent_path("
+  cout << __func__ << ": Get Atrribute " << api->name() << " parent_path("
        << api->parent_path() << ")" << endl;
   if (!driver->GetAttribute(api, &result)) {
-    cerr << __func__ << " attribute not found - todo handle more explicitly"
+    cerr << __func__ << ": attribute not found - todo handle more explicitly"
          << endl;
     return kErrorString;
   }
@@ -261,7 +261,7 @@ DriverId VtsHalDriverManager::RegisterDriver(
         make_pair(driver_id, HalDriverInfo(spec_msg, submodule_name,
                                            interface_pt, std::move(driver))));
   } else {
-    cout << __func__ << " Driver already exists. ";
+    cout << __func__ << ": Driver already exists. ";
   }
 
   return driver_id;
@@ -273,7 +273,7 @@ DriverBase* VtsHalDriverManager::GetDriverById(const DriverId id) {
     cerr << "Failed to find driver info with id: " << id << endl;
     return nullptr;
   }
-  cout << __func__ << " found driver info with id: " << id << endl;
+  cout << __func__ << ": found driver info with id: " << id << endl;
   return res->second.driver.get();
 }
 
@@ -283,7 +283,7 @@ uint64_t VtsHalDriverManager::GetDriverPointerById(const DriverId id) {
     cerr << "Failed to find driver info with id: " << id << endl;
     return 0;
   }
-  cout << __func__ << " found driver info with id: " << id << endl;
+  cout << __func__ << ": found driver info with id: " << id << endl;
   return res->second.hidl_hal_proxy_pt;
 }
 
@@ -294,7 +294,7 @@ ComponentSpecificationMessage* VtsHalDriverManager::GetComponentSpecById(
     cerr << "Failed to find driver info with id: " << id << endl;
     return nullptr;
   }
-  cout << __func__ << " found driver info with id: " << id << endl;
+  cout << __func__ << ": found driver info with id: " << id << endl;
   return &(res->second.spec_msg);
 }
 
@@ -338,28 +338,28 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
     const ComponentSpecificationMessage& spec_msg, const string& submodule_name,
     const uint64_t interface_pt, bool with_interface_pointer) {
   if (!spec_msg.has_component_class()) {
-    cerr << __func__ << " Component class not specified. " << endl;
+    cerr << __func__ << ": Component class not specified. " << endl;
     return kInvalidDriverId;
   }
   if (spec_msg.component_class() == HAL_HIDL) {
     if (!spec_msg.has_package() || spec_msg.package().empty()) {
-      cerr << __func__ << " Package name is requried but not specified. "
+      cerr << __func__ << ": Package name is required but not specified. "
            << endl;
       return kInvalidDriverId;
     }
     if (!spec_msg.has_component_type_version()) {
-      cerr << __func__ << " Package version is requried but not specified. "
+      cerr << __func__ << ": Package version is required but not specified. "
            << endl;
       return kInvalidDriverId;
     }
     if (!spec_msg.has_component_name() || spec_msg.component_name().empty()) {
-      cerr << __func__ << " Component name is requried but not specified. "
+      cerr << __func__ << ": Component name is required but not specified. "
            << endl;
       return kInvalidDriverId;
     }
-  } else {
+  } else if (spec_msg.component_class() == HAL_CONVENTIONAL) {
     if (submodule_name.empty()) {
-      cerr << __func__ << " Submodule name is requried but not specified. "
+      cerr << __func__ << ": Submodule name is required but not specified. "
            << endl;
       return kInvalidDriverId;
     }
@@ -392,7 +392,7 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
           it->second.hidl_hal_proxy_pt != interface_pt) {
         continue;
       }
-      cout << __func__ << " Found hidl hal driver with id: " << it->first
+      cout << __func__ << ": Found hidl hal driver with id: " << it->first
            << endl;
       return it->first;
     } else {
@@ -400,7 +400,8 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
            cur_spec_msg.component_type() == spec_msg.component_type()) &&
           it->second.submodule_name == submodule_name) {
         cout << __func__
-             << " Found conventional hal driver with id: " << it->first << endl;
+             << ": Found conventional hal driver with id: " << it->first
+             << endl;
         return it->first;
       }
     }
@@ -421,12 +422,13 @@ DriverBase* VtsHalDriverManager::GetDriverWithCallMsg(
     FunctionSpecificationMessage api = call_msg.api();
     if (api.submodule_name().size() > 0) {
       string submodule_name = api.submodule_name();
-      cout << __func__ << " submodule name " << submodule_name << endl;
+      cout << __func__ << ": submodule name " << submodule_name << endl;
       DriverId driver_id = FindDriverIdWithSubModuleName(submodule_name);
       if (driver_id != kInvalidDriverId) {
-        cout << __func__ << " call is for a submodule" << endl;
+        cout << __func__ << ": call is for a submodule" << endl;
       } else {
-        cerr << __func__ << " called an API of a non-loaded submodule." << endl;
+        cerr << __func__ << ": called an API of a non-loaded submodule."
+             << endl;
         return nullptr;
       }
     } else {
@@ -463,12 +465,12 @@ string VtsHalDriverManager::ProcessFuncResultsForConventionalHal(
     // TODO: actually handle this case.
     if (result != NULL) {
       // loads that interface spec and enqueues all functions.
-      cout << __func__ << " return type: " << func_msg->return_type().type()
+      cout << __func__ << ": return type: " << func_msg->return_type().type()
            << endl;
     } else {
-      cout << __func__ << " return value = NULL" << endl;
+      cout << __func__ << ": return value = NULL" << endl;
     }
-    cerr << __func__ << " todo: support aggregate" << endl;
+    cerr << __func__ << ": todo: support aggregate" << endl;
     google::protobuf::TextFormat::PrintToString(*func_msg, &output);
     return output;
   } else if (func_msg->return_type().type() == TYPE_SCALAR) {
@@ -500,10 +502,10 @@ string VtsHalDriverManager::ProcessFuncResultsForConventionalHal(
     cerr << __func__ << "[driver:hal] return type TYPE_SUBMODULE" << endl;
     if (result != NULL) {
       // loads that interface spec and enqueues all functions.
-      cout << __func__ << " return type: " << func_msg->return_type().type()
+      cout << __func__ << ": return type: " << func_msg->return_type().type()
            << endl;
     } else {
-      cout << __func__ << " return value = NULL" << endl;
+      cout << __func__ << ": return value = NULL" << endl;
     }
     // find a VTS spec for that module
     string submodule_name = func_msg->return_type().predefined_type().substr(
@@ -511,7 +513,7 @@ string VtsHalDriverManager::ProcessFuncResultsForConventionalHal(
     ComponentSpecificationMessage submodule_iface_spec_msg;
     DriverId driver_id = FindDriverIdWithSubModuleName(submodule_name);
     if (driver_id != kInvalidDriverId) {
-      cout << __func__ << " submodule InterfaceSpecification already loaded"
+      cout << __func__ << ": submodule InterfaceSpecification already loaded"
            << endl;
       ComponentSpecificationMessage* spec_msg = GetComponentSpecById(driver_id);
       func_msg->set_allocated_return_type_submodule_spec(spec_msg);
@@ -525,7 +527,7 @@ string VtsHalDriverManager::ProcessFuncResultsForConventionalHal(
               spec_msg->component_type_version(), spec_msg->component_name(),
               spec_msg->component_type(), submodule_name,
               &submodule_iface_spec_msg)) {
-        cout << __func__ << " submodule InterfaceSpecification found" << endl;
+        cout << __func__ << ": submodule InterfaceSpecification found" << endl;
         func_msg->set_allocated_return_type_submodule_spec(
             &submodule_iface_spec_msg);
         std::unique_ptr<DriverBase> driver = nullptr;
@@ -534,7 +536,7 @@ string VtsHalDriverManager::ProcessFuncResultsForConventionalHal(
         RegisterDriver(std::move(driver), submodule_iface_spec_msg,
                        submodule_name, 0);
       } else {
-        cerr << __func__ << " submodule InterfaceSpecification not found"
+        cerr << __func__ << ": submodule InterfaceSpecification not found"
              << endl;
       }
     }
