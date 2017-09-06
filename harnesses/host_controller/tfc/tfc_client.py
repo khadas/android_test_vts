@@ -16,10 +16,14 @@
 
 import httplib2
 import logging
+import threading
 import time
 
 from apiclient import discovery
+from apiclient import http
 from oauth2client.service_account import ServiceAccountCredentials
+
+from vts.harnesses.host_controller.tfc import command_task
 
 API_NAME = "tradefed_cluster"
 API_VERSION = "v1"
@@ -48,22 +52,19 @@ class TfcClient(object):
                           devices connected to the host.
 
         Returns:
-            A JSON object, the leased tasks.
-
-            Sample
-            {'tasks': [{'request_id': '2',
-                        'command_line': 'vts-codelab --serial ABCDEF',
-                        'task_id': '1-0',
-                        'device_serials': ['ABCDEF'],
-                        'command_id': u'1'}]}
+            A list of command_task.CommandTask, the leased tasks.
         """
-        json_obj = {"hostname": hostname,
-                    "cluster": cluster_id,
-                    "next_cluster_ids": next_cluster_ids,
-                    "device_infos": [x.ToLeaseHostTasksJson()
-                                     for x in device_infos]}
-        logging.info("tasks.leasehosttasks body=%s", json_obj)
-        return self._service.tasks().leasehosttasks(body=json_obj).execute()
+        lease = {"hostname": hostname,
+                 "cluster": cluster_id,
+                 "next_cluster_ids": next_cluster_ids,
+                 "device_infos": [x.ToLeaseHostTasksJson()
+                                  for x in device_infos]}
+        logging.info("tasks.leasehosttasks body=%s", lease)
+        tasks = self._service.tasks().leasehosttasks(body=lease).execute()
+        logging.info("tasks.leasehosttasks response=%s", tasks)
+        if "tasks" not in tasks:
+            return []
+        return [command_task.CommandTask(**task) for task in tasks["tasks"]]
 
     @staticmethod
     def CreateDeviceSnapshot(cluster_id, hostname, dev_infos):
@@ -128,7 +129,8 @@ class TfcClient(object):
         return self._service.requests().new(body=body, **params).execute()
 
 
-def CreateTfcClient(api_root, oauth2_service_json):
+def CreateTfcClient(api_root, oauth2_service_json,
+                    api_name=API_NAME, api_version=API_VERSION, scopes=SCOPES):
     """Builds an object of TFC service from a given URL.
 
     Args:
@@ -139,12 +141,20 @@ def CreateTfcClient(api_root, oauth2_service_json):
         A TfcClient object.
     """
     discovery_url = "%s/discovery/v1/apis/%s/%s/rest" % (
-            api_root, API_NAME, API_VERSION)
+            api_root, api_name, api_version)
     logging.info("Build service from: %s", discovery_url)
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            oauth2_service_json, scopes=SCOPES)
-    http = credentials.authorize(httplib2.Http())
+            oauth2_service_json, scopes=scopes)
+    # httplib2.Http is not thread-safe. Use thread local object.
+    thread_local = threading.local()
+    thread_local.http = credentials.authorize(httplib2.Http())
+    def BuildHttpRequest(unused_http, *args, **kwargs):
+        if not hasattr(thread_local, "http"):
+            thread_local.http = credentials.authorize(httplib2.Http())
+        return http.HttpRequest(thread_local.http, *args, **kwargs)
+
     service = discovery.build(
-            API_NAME, API_VERSION, http=http,
-            discoveryServiceUrl=discovery_url)
+            api_name, api_version, http=thread_local.http,
+            discoveryServiceUrl=discovery_url,
+            requestBuilder=BuildHttpRequest)
     return TfcClient(service)
