@@ -162,6 +162,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             description = "The path for test case.")
     private String mTestCasePath = null;
 
+    @Option(name = "test-case-path-type",
+            description = "The type of test case path ('module' by default or 'file').")
+    private String mTestCasePathType = null;
+
     @Option(name = "python-version", description = "The version of a Python interpreter to use.")
     private String mPythonVersion = "";
 
@@ -985,9 +989,24 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mPythonBin == null){
             mPythonBin = getPythonBinary();
         }
-        String[] baseOpts = {mPythonBin, "-m"};
-        String[] testModule = {mTestCasePath.replace("/", "."), jsonFilePath};
+        mRunUtil.setEnvVariable("VTS", "1");
+        String[] baseOpts = {
+                mPythonBin,
+        };
+        String[] testModule = new String[2];
         String[] cmd;
+        if (mTestCasePathType != null && mTestCasePathType.toLowerCase().equals("file")) {
+            testModule[0] = mTestCasePath;
+            if (!mTestCasePath.endsWith(".py")) {
+                testModule[0] += ".py";
+            }
+        } else {
+            baseOpts = new String[2];
+            baseOpts[0] = mPythonBin;
+            baseOpts[1] = "-m";
+            testModule[0] = mTestCasePath.replace("/", ".");
+        }
+        testModule[1] = jsonFilePath;
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
         printToDeviceLogcatAboutTestModuleStatus("BEGIN");
