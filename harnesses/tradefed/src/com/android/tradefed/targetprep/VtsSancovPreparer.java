@@ -86,7 +86,6 @@ public class VtsSancovPreparer implements ITargetPreparer, ITargetCleaner {
             // Fetch the symbolized binaries
             String artifactName = String.format(
                     SYMBOLS_ARTIFACT, flavor.substring(0, flavor.lastIndexOf("-")), buildId);
-            artifactName = "acts.zip";
 
             String cmdString = String.format(artifactFetcher, buildId, flavor, artifactName,
                     mDeviceInfoPath.getAbsolutePath().toString());
