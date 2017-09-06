@@ -164,6 +164,9 @@ public class VtsMultiDeviceTest
             description = "The path for test case.")
     private String mTestCasePath = null;
 
+    @Option(name = "python-version", description = "The version of a Python interpreter to use.")
+    private String mPythonVersion = "";
+
     @Option(name = "test-config-path",
             description = "The path for test case config file.")
     private String mTestConfigPath = null;
@@ -1261,7 +1264,7 @@ public class VtsMultiDeviceTest
      */
     private String getPythonBinary() {
         boolean isWindows = isOnWindows();
-        String python = (isWindows? "python.exe": "python");
+        String python = (isWindows ? "python.exe" : "python" + mPythonVersion);
         File venvDir = mBuildInfo.getFile(VIRTUAL_ENV_PATH);
         if (venvDir != null) {
             String binDir = (isWindows? "Scripts": "bin");
