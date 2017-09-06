@@ -26,12 +26,13 @@
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:run-as-vts-self-test:true" />
 
   <!-- Regular test modules running in vts self test mode -->
+  <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />
 
   <!-- For Treble-specific validations -->
   <option name="compatibility:include-filter" value="VtsTreblePlatformVersionTest" />
   <option name="compatibility:include-filter" value="VtsTrebleVintfTest" />
 
-  <!-- From vts-hal.xml -->
+  <!-- From vts-hal-hidl.xml -->
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
