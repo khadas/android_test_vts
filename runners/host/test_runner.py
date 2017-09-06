@@ -25,7 +25,10 @@ import os
 import pkgutil
 import signal
 import sys
-import thread
+try:
+    import thread
+except ImportError as e:
+    import _thread as thread
 import threading
 
 from vts.runners.host import base_test
@@ -62,8 +65,8 @@ def main():
     # a test script. The challenge is to handle multiple configs and how to do
     # default config in this case.
     if len(test_classes) != 1:
-        logging.error("Expected 1 test class per file, found %s.",
-                      len(test_classes))
+        logging.error("Expected 1 test class per file, found %s (%s).",
+                      len(test_classes), test_classes)
         sys.exit(1)
     test_result = runTestClass(test_classes[0])
     return test_result
