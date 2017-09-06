@@ -16,6 +16,8 @@
 
 LOCAL_PATH := $(call my-dir)
 
+build_utils_dir := $(LOCAL_PATH)/../utils
+
 include $(LOCAL_PATH)/list/vts_apk_package_list.mk
 include $(LOCAL_PATH)/list/vts_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_lib_package_list.mk
@@ -28,6 +30,7 @@ include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_hidl_hal_hash_list.mk
+include $(build_utils_dir)/vts_package_utils.mk
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
 
@@ -60,21 +63,8 @@ target_native_modules := \
     $(vts_test_lib_hidl_packages) \
     $(vts_func_fuzzer_packages) \
 
-target_native_copy_pairs :=
-$(foreach m,$(target_native_modules),\
-  $(eval _built_files := $(strip $(ALL_MODULES.$(m).BUILT_INSTALLED)\
-  $(ALL_MODULES.$(m)$(TARGET_2ND_ARCH_MODULE_SUFFIX).BUILT_INSTALLED)))\
-  $(foreach i, $(_built_files),\
-    $(eval bui_ins := $(subst :,$(space),$(i)))\
-    $(eval ins := $(word 2,$(bui_ins)))\
-    $(if $(filter $(TARGET_OUT_ROOT)/%,$(ins)),\
-      $(eval bui := $(word 1,$(bui_ins)))\
-      $(eval my_built_modules += $(bui))\
-      $(eval my_copy_dest := $(patsubst data/%,DATA/%,\
-                               $(patsubst system/%,DATA/%,\
-                                   $(patsubst $(PRODUCT_OUT)/%,%,$(ins)))))\
-      $(eval target_native_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/$(my_copy_dest)))\
-  ))
+target_native_copy_pairs := \
+  $(call target-native-copy-pairs,$(target_native_modules),$(VTS_TESTCASES_OUT))
 
 # Packaging rule for android-vts.zip's testcases dir (spec subdir).
 
@@ -115,20 +105,8 @@ target_hostdriven_modules := \
   $(vts_test_host_lib_packages) \
   $(vts_test_host_bin_packages) \
 
-target_hostdriven_copy_pairs :=
-$(foreach m,$(target_hostdriven_modules),\
-  $(eval _built_files := $(strip $(ALL_MODULES.$(m).BUILT_INSTALLED)\
-  $(ALL_MODULES.$(m)$(HOST_2ND_ARCH_MODULE_SUFFIX).BUILT_INSTALLED)))\
-  $(foreach i, $(_built_files),\
-    $(eval bui_ins := $(subst :,$(space),$(i)))\
-    $(eval ins := $(word 2,$(bui_ins)))\
-    $(if $(filter $(HOST_OUT)/% $(HOST_CROSS_OUT)/%,$(ins)),\
-      $(eval bui := $(word 1,$(bui_ins)))\
-      $(eval my_built_modules += $(bui))\
-      $(eval my_copy_dest := $(patsubst $(HOST_OUT)/%,%,\
-                               $(patsubst $(HOST_CROSS_OUT)/%,%,$(ins))))\
-      $(eval target_hostdriven_copy_pairs += $(bui):$(VTS_TESTCASES_OUT)/host/$(my_copy_dest)))\
-  ))
+target_hostdriven_copy_pairs := \
+  $(call host-native-copy-pairs,$(target_hostdriven_modules),$(VTS_TESTCASES_OUT))
 
 host_additional_deps_copy_pairs := \
   test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTS_TOOLS_OUT)/vts-tradefed_win.bat \
