@@ -42,13 +42,14 @@ def Exists(filepath, shell):
     return out_str.find(filepath) == 0
 
 
-def FindFiles(shell, path, name_pattern):
+def FindFiles(shell, path, name_pattern, options=None):
     """Searches a path for files on device.
 
     Args:
         shell: the ShellMirrorObject.
         path: string, the path to search on device.
         name_pattern: string, the file name pattern.
+        options: string, other options passed to find command.
 
     Returns:
         list of strings, the paths to the found files.
@@ -59,6 +60,8 @@ def FindFiles(shell, path, name_pattern):
     if '"' in name_pattern or "'" in name_pattern:
         raise IOError("File name pattern contains quotes")
     cmd = "find %s -name \"%s\"" % (path, name_pattern)
+    if options is not None:
+        cmd += " " + options
     results = shell.Execute(cmd)
     logging.info("%s: Shell command '%s' results: %s", path, cmd, results)
 
@@ -66,7 +69,8 @@ def FindFiles(shell, path, name_pattern):
         raise IOError(results[const.STDERR][0])
 
     stdout = str(results[const.STDOUT][0])
-    return stdout.strip().split("\n")
+    # Filter out empty strings before return.
+    return filter(None, stdout.strip().split("\n"))
 
 
 def ReadFileContent(filepath, shell):
