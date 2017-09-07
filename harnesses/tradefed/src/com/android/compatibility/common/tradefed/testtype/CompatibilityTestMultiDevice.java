@@ -16,6 +16,8 @@
 
 package com.android.compatibility.common.tradefed.testtype;
 
+import com.android.compatibility.common.tradefed.util.RetryFilterHelper;
+import com.android.compatibility.common.util.VtsRetryFilterHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.ConfigurationException;
 import com.android.tradefed.config.OptionClass;
@@ -105,5 +107,15 @@ public class CompatibilityTestMultiDevice extends CompatibilityTest implements I
             CLog.e(e);
         }
         return test;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected RetryFilterHelper createRetryFilterHelper(Integer retrySessionId) {
+        return new VtsRetryFilterHelper(getBuildHelper(), retrySessionId, getSubPlan(),
+                getIncludeFilters(), getExcludeFilters(), getAbiName(), getModuleName(),
+                getTestName(), getRetryType());
     }
 }
