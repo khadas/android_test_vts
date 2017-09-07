@@ -18,6 +18,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import zipfile
 
 from vts.runners.host import keys
 from vts.utils.python.web import feature_utils
@@ -57,6 +58,7 @@ class SancovFeature(feature_utils.Feature):
 
     _BUILD_INFO = 'BUILD_INFO'
     _REPO_DICT = 'repo-dict'
+    _SYMBOLS_ZIP = 'symbols.zip'
 
     def __init__(self,
                  user_params,
@@ -274,7 +276,7 @@ class SancovFeature(feature_utils.Feature):
         Args:
             dut: The device under test.
             hal_name: The HAL name and version (string) for which to process coverage
-                      (e.g. 'android.hardware.light@2.0-service')
+                      (e.g. 'android.hardware.light@2.0')
         """
         serial = dut.adb.shell('getprop ro.serialno').strip()
         product = dut.adb.shell('getprop ro.build.product').strip()
@@ -285,6 +287,10 @@ class SancovFeature(feature_utils.Feature):
 
         if serial not in self._file_vectors:
             self._file_vectors[serial] = {}
+
+        symbols_zip = zipfile.ZipFile(
+            os.path.join(self._device_resource_dict[serial],
+                         self._SYMBOLS_ZIP))
 
         sancov_files = dut.adb.shell('find {0}/{1} -name \"*.sancov\"'.format(
             self._TARGET_SANCOV_PATH, hal_name)).splitlines()
@@ -298,26 +304,32 @@ class SancovFeature(feature_utils.Feature):
                 os.path.join(temp_dir, os.path.basename(file)))
             binary_to_sancov[binary] = (bitness, offsets)
 
-        dut.adb.shell('rm -rf {0}/{1}'.format(self._TARGET_SANCOV_PATH, hal_name))
+        dut.adb.shell('rm -rf {0}/{1}'.format(self._TARGET_SANCOV_PATH,
+                                              hal_name))
 
-        search_root = os.path.join(self._device_resource_dict[serial], 'out',
-                                   'target', 'product', product, 'symbols')
+        search_root = os.path.join('out', 'target', 'product', product,
+                                   'symbols')
         for path, bitness in self._SEARCH_PATHS:
-            for root, _, files in os.walk(os.path.join(search_root, path)):
-                for f in files:
-                    if f in binary_to_sancov and (
-                            bitness is None or
-                            binary_to_sancov[f][0] == bitness):
-                        self._InitializeFileVectors(serial, os.path.join(root,
-                                                                         f))
+            for name in [f for f in symbols_zip.namelist()
+                         if f.startswith(os.path.join(search_root, path))]:
+                basename = os.path.basename(name)
+                if basename in binary_to_sancov and (
+                        bitness is None or
+                        binary_to_sancov[basename][0] == bitness):
+                    with symbols_zip.open(
+                            name) as source, tempfile.NamedTemporaryFile(
+                                'w+b') as target:
+                        shutil.copyfileobj(source, target)
+                        target.seek(0)
+                        self._InitializeFileVectors(serial, target.name)
                         addrs = map(lambda addr: '{0:#x}'.format(addr),
-                                    binary_to_sancov[f][1])
-                        args = ['addr2line', '-pe', os.path.join(root, f)]
+                                    binary_to_sancov[basename][1])
+                        args = ['addr2line', '-pe', target.name]
                         args.extend(addrs)
                         with tempfile.TemporaryFile('w+b') as tmp:
                             subprocess.call(args, stdout=tmp)
                             tmp.seek(0)
                             c = tmp.read().split()
                             self._UpdateLineCounts(serial, c)
-                        del binary_to_sancov[f]
+                        del binary_to_sancov[basename]
         shutil.rmtree(temp_dir)

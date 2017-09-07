@@ -27,17 +27,14 @@ import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
-import com.android.tradefed.util.ZipUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import java.util.zip.ZipFile;
 
 /**
  * Preparer class for sanitizer coverage.
  *
- * This preparer fetches the unstripped binaries and copies them to a temporary directory whose
+ * <p>This preparer fetches the unstripped binaries and copies them to a temporary directory whose
  * path is passed down with the test IBuildInfo object. It also prepares the device by remounting
  * the system partition for write access.
  */
@@ -46,7 +43,7 @@ public class VtsSancovPreparer implements ITargetPreparer, ITargetCleaner {
     private static final long BASE_TIMEOUT = 1000 * 60 * 20;
     private static final String BUILD_INFO_ARTIFACT = "BUILD_INFO";
     private static final String SYMBOLS_ARTIFACT = "%s-symbols-%s.zip";
-    private static final String UNZIP_FLAG = "--unzip";
+    private static final String SYMBOLS_FILE_NAME = "symbols.zip";
     private static final String SANCOV_FLAVOR = "_asan_coverage";
     private static final String SANCOV_RESOURCES_KEY = "sancov-resources-path-%s";
 
@@ -86,28 +83,16 @@ public class VtsSancovPreparer implements ITargetPreparer, ITargetCleaner {
             // Fetch the symbolized binaries
             String artifactName = String.format(
                     SYMBOLS_ARTIFACT, flavor.substring(0, flavor.lastIndexOf("-")), buildId);
+            File artifactFile = new File(mDeviceInfoPath, SYMBOLS_FILE_NAME);
 
             String cmdString = String.format(artifactFetcher, buildId, flavor, artifactName,
-                    mDeviceInfoPath.getAbsolutePath().toString());
+                    artifactFile.getAbsolutePath().toString());
             String[] cmd = cmdString.split("\\s+");
             CommandResult commandResult = runUtil.runTimedCmd(BASE_TIMEOUT, cmd);
-            File artifactFile = new File(mDeviceInfoPath, artifactName);
             if (commandResult == null || commandResult.getStatus() != CommandStatus.SUCCESS
                     || !artifactFile.exists()) {
                 CLog.e("Could not fetch unstripped binaries.");
                 return;
-            }
-            ZipFile zipFile = null;
-            try {
-                zipFile = new ZipFile(artifactFile);
-                ZipUtil.extractZip(zipFile, mDeviceInfoPath);
-            } catch (IOException | IllegalStateException exception) {
-                CLog.e("Could unpackage symbols.");
-                mDeviceInfoPath = null;
-                return;
-            } finally {
-                ZipUtil.closeZip(zipFile);
-                artifactFile.delete();
             }
 
             // Fetch the device build information file
@@ -125,6 +110,7 @@ public class VtsSancovPreparer implements ITargetPreparer, ITargetCleaner {
 
             // Push the sancov flushing tool
             device.pushFile(new File(SANCOV_CONFIGURE_SRC), SANCOV_CONFIGURE_DST);
+            device.executeShellCommand("setenforce 0");
             buildInfo.setFile(
                     getSancovResourceDirKey(device), mDeviceInfoPath, buildInfo.getBuildId());
         } catch (IOException | NoSuchElementException e) {
