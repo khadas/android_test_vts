@@ -23,4 +23,7 @@
   <option name="compatibility:include-filter" value="VtsKernelLinuxKselftestStaging" />
   <option name="compatibility:include-filter" value="VtsKernelLtpStaging" />
 
+  <!-- TODO(bowgotsai): move this into compliance test list -->
+  <option name="compatibility:include-filter" value="VtsKernelRootDir" />
+
 </configuration>
