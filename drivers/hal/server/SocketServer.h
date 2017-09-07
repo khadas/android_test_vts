@@ -51,7 +51,7 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
   const char* ReadSpecification(const string& name, int target_class,
                                 int target_type, float target_version,
                                 const string& target_package);
-  const char* Call(const string& arg);
+  string Call(const string& arg);
   const char* GetAttribute(const string& arg);
   string ListFunctions() const;
 

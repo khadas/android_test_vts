@@ -91,13 +91,13 @@ const char* VtsDriverHalSocketServer::ReadSpecification(
   return result->c_str();
 }
 
-const char* VtsDriverHalSocketServer::Call(const string& arg) {
+string VtsDriverHalSocketServer::Call(const string& arg) {
   cout << "VtsHalDriverServer::Call(" << arg << ")" << endl;
   FunctionCallMessage* call_msg = new FunctionCallMessage();
   google::protobuf::TextFormat::MergeFromString(arg, call_msg);
   const string& result = driver_manager_->CallFunction(call_msg);
   cout << __func__ << ":" << __LINE__ << " result: " << result.c_str() << endl;
-  return result.c_str();
+  return result;
 }
 
 const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
@@ -176,7 +176,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       if (command_message.has_driver_caller_uid()) {
         setuid(atoi(command_message.driver_caller_uid().c_str()));
       }
-      const char* result = Call(command_message.arg());
+      const string& result = Call(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_message(result);

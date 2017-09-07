@@ -145,25 +145,22 @@ const char* VtsDriverSocketClient::ReadSpecification(
   return result;
 }
 
-const char* VtsDriverSocketClient::Call(const string& arg, const string& uid) {
+string VtsDriverSocketClient::Call(const string& arg, const string& uid) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);
   command_message.set_arg(arg);
   command_message.set_driver_caller_uid(uid);
-  if (!VtsSocketSendMessage(command_message)) return NULL;
+  if (!VtsSocketSendMessage(command_message)) {
+    return {};
+  }
 
   VtsDriverControlResponseMessage response_message;
-  if (!VtsSocketRecvMessage(&response_message)) return NULL;
-
-  char* result =
-      (char*)malloc(strlen(response_message.return_message().c_str()) + 1);
-  if (!result) {
-    cerr << __func__ << " ERROR result is NULL" << endl;
-    return NULL;
+  if (!VtsSocketRecvMessage(&response_message)) {
+    return {};
   }
-  strcpy(result, response_message.return_message().c_str());
-  cout << __func__ << " result: " << result << endl;
-  return result;
+
+  cout << __func__ << " result: " << response_message.return_message() << endl;
+  return response_message.return_message();
 }
 
 const char* VtsDriverSocketClient::GetAttribute(const string& arg) {
