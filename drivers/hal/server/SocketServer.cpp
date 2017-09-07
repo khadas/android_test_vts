@@ -63,12 +63,12 @@ int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
                                           const string& target_package,
                                           const string& target_component_name,
                                           const string& hw_binder_service_name,
-                                          const string& module_name) {
+                                          const string& /*module_name*/) {
   printf("VtsHalDriverServer::LoadHal(%s)\n", path.c_str());
   int32_t driver_id = driver_manager_->LoadTargetComponent(
       path.c_str(), lib_path_, target_class, target_type, target_version,
       target_package.c_str(), target_component_name.c_str(),
-      hw_binder_service_name.c_str(), module_name.c_str());
+      hw_binder_service_name.c_str());
   cout << "Result: " << driver_id << std::endl;
   return driver_id;
 }
@@ -83,9 +83,8 @@ string VtsDriverHalSocketServer::ReadSpecification(
     const string& target_package) {
   printf("VtsHalDriverServer::ReadSpecification(%s)\n", name.c_str());
   ComponentSpecificationMessage msg;
-  driver_manager_->FindComponentSpecification(target_class, target_type,
-                                              target_version, "",
-                                              target_package, name, &msg);
+  driver_manager_->FindComponentSpecification(
+      target_class, target_type, target_version, target_package, name, &msg);
   string result;
   google::protobuf::TextFormat::PrintToString(msg, &result);
   return result;
