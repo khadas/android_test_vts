@@ -78,7 +78,7 @@ int32_t VtsDriverHalSocketServer::Status(int32_t type) {
   return 0;
 }
 
-const char* VtsDriverHalSocketServer::ReadSpecification(
+string VtsDriverHalSocketServer::ReadSpecification(
     const string& name, int target_class, int target_type, float target_version,
     const string& target_package) {
   printf("VtsHalDriverServer::ReadSpecification(%s)\n", name.c_str());
@@ -86,9 +86,9 @@ const char* VtsDriverHalSocketServer::ReadSpecification(
   driver_manager_->FindComponentSpecification(target_class, target_type,
                                               target_version, "",
                                               target_package, name, &msg);
-  string* result = new string();
-  google::protobuf::TextFormat::PrintToString(msg, result);
-  return result->c_str();
+  string result;
+  google::protobuf::TextFormat::PrintToString(msg, &result);
+  return result;
 }
 
 string VtsDriverHalSocketServer::Call(const string& arg) {
@@ -100,14 +100,13 @@ string VtsDriverHalSocketServer::Call(const string& arg) {
   return result;
 }
 
-const char* VtsDriverHalSocketServer::GetAttribute(const string& arg) {
+string VtsDriverHalSocketServer::GetAttribute(const string& arg) {
   cout << "VtsHalDriverServer::GetAttribute(" << arg << ")" << endl;
-  // printf("%s(%s)\n", __func__, arg.c_str());
   FunctionCallMessage* call_msg = new FunctionCallMessage();
   google::protobuf::TextFormat::MergeFromString(arg, call_msg);
   const string& result = driver_manager_->GetAttribute(call_msg);
-  cout << "VtsHalDriverServer::GetAttribute doen" << endl;
-  return result.c_str();
+  cout << "VtsHalDriverServer::GetAttribute done" << endl;
+  return result;
 }
 
 string VtsDriverHalSocketServer::ListFunctions() const {
@@ -184,7 +183,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case VTS_DRIVER_COMMAND_READ_SPECIFICATION: {
-      const char* result = ReadSpecification(
+      const string& result = ReadSpecification(
           command_message.module_name(), command_message.target_class(),
           command_message.target_type(), command_message.target_version(),
           command_message.target_package());
@@ -195,7 +194,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case GET_ATTRIBUTE: {
-      const char* result = GetAttribute(command_message.arg());
+      const string& result = GetAttribute(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_message(result);
