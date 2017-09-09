@@ -35,6 +35,7 @@ DEFAULT_DEVICE_SIDE_PORT = 8080
 
 UNKNOWN_UID = -1
 
+MAX_SL4A_START_RETRY = 3
 MAX_SL4A_WAIT_TIME = 10
 _SL4A_LAUNCH_CMD = (
     "am start -a com.googlecode.android_scripting.action.LAUNCH_SERVER "
@@ -63,28 +64,30 @@ class ProtocolError(Error):
 
 def start_sl4a(adb_proxy,
                device_side_port=DEFAULT_DEVICE_SIDE_PORT,
-               wait_time=MAX_SL4A_WAIT_TIME):
+               wait_time=MAX_SL4A_WAIT_TIME,
+               retries=MAX_SL4A_START_RETRY):
     """Starts sl4a server on the android device.
 
     Args:
         adb_proxy: adb.AdbProxy, The adb proxy to use to start sl4a
         device_side_port: int, The port number to open on the device side.
         wait_time: float, The time to wait for sl4a to come up before raising
-                   an error.
+                   an error (unit: second).
+        retries: number of sl4a start command retries.
 
     Raises:
         Error: Raised when SL4A was not able to be started.
     """
     if not is_sl4a_installed(adb_proxy):
         raise StartError("SL4A is not installed on %s" % adb_proxy.serial)
-    MAX_SL4A_WAIT_TIME = 10
-    cmd = _SL4A_LAUNCH_CMD.format(device_side_port)
-    logging.debug("sl4a launch cmd: %s", cmd)
-    adb_proxy.shell(cmd)
-    for _ in range(wait_time):
-        time.sleep(1)
-        if is_sl4a_running(adb_proxy):
-            return
+    for _ in range(retries):
+        cmd = _SL4A_LAUNCH_CMD.format(device_side_port)
+        logging.info("sl4a launch cmd: %s", cmd)
+        adb_proxy.shell(cmd)
+        for _ in range(wait_time):
+            time.sleep(1)
+            if is_sl4a_running(adb_proxy):
+                return
     raise StartError("SL4A failed to start on %s." % adb_proxy.serial)
 
 
@@ -98,8 +101,9 @@ def is_sl4a_installed(adb_proxy):
         True if sl4a is installed, False otherwise.
     """
     try:
-        adb_proxy.shell("pm path com.googlecode.android_scripting")
-        return True
+        if adb_proxy.shell("pm path com.googlecode.android_scripting"):
+            return True
+        return False
     except adb.AdbError as e:
         if not e.stderr:
             return False
@@ -116,10 +120,15 @@ def is_sl4a_running(adb_proxy):
         True if the sl4a app is running, False otherwise.
     """
     # Grep for process with a preceding S which means it is truly started.
-    out = adb_proxy.shell('ps | grep "S com.googlecode.android_scripting"')
-    if len(out) == 0:
-        return False
-    return True
+    try:
+        out = adb_proxy.shell('ps | grep "S com.googlecode.android_scripting"')
+        if len(out) == 0:
+            return False
+        return True
+    except adb.AdbError as e:
+        if not e.stderr:
+            return False
+        raise
 
 
 class Sl4aCommand(object):
@@ -230,8 +239,11 @@ class Sl4aClient(object):
         """
         if not uid:
             uid = self.uid
-        self.client.write(json.dumps({'cmd': command,
-                                      'uid': uid}).encode("utf8") + b'\n')
+        self.client.write(
+            json.dumps({
+                'cmd': command,
+                'uid': uid
+            }).encode("utf8") + b'\n')
         self.client.flush()
         return self.client.readline()
 
