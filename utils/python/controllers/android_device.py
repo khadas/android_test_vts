@@ -722,6 +722,7 @@ class AndroidDevice(object):
         """
         enable_vts_agent = getattr(self, "enable_vts_agent", True)
         enable_sl4a = getattr(self, "enable_sl4a", False)
+        enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
         try:
             self.startAdbLogcat()
         except:
@@ -741,7 +742,7 @@ class AndroidDevice(object):
             self.lib = lib_mirror.LibMirror(self.host_command_port)
             self.shell = shell_mirror.ShellMirror(self.host_command_port)
         if enable_sl4a:
-            self.startSl4aClient()
+            self.startSl4aClient(enable_sl4a_ed)
 
     def stopServices(self):
         """Stops long running services on the android device.
@@ -864,6 +865,31 @@ class AndroidDevice(object):
         if handle_event:
             ed = self._getSl4aEventDispatcher(droid)
         self.sl4a_event = ed
+
+    @property
+    def droid(self):
+        """The default SL4A session to the device if exist, None otherwise."""
+        if not hasattr(self, "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+            return None
+        try:
+            session_id = sorted(self._sl4a_sessions)[0]
+            result = self._sl4a_sessions[session_id][0]
+            logging.info("key %s val %s", session_id, result)
+            return result
+        except IndexError as e:
+            logging.exception(e)
+            return None
+
+    @property
+    def droids(self):
+        """A list of the active SL4A sessions on this device."""
+        if not hasattr(self, "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+            return None
+        keys = sorted(self._sl4a_sessions)
+        results = []
+        for key in keys:
+            results.append(self._sl4a_sessions[key][0])
+        return results
 
     @property
     def sl4a(self):
