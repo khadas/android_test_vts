@@ -279,7 +279,7 @@
     <option name="compatibility:include-filter" value="CtsSelinuxTargetSdk2TestCases" />
     <option name="compatibility:include-filter" value="CtsSelinuxTargetSdkTestCases" />
     <option name="compatibility:include-filter" value="CtsSensorTestCases" />
-    <option name="compatibility:include-filter" value="CtsServicesHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsActivityManagerDeviceTestCases" />
     <option name="compatibility:include-filter" value="CtsShortcutHostTestCases" />
     <option name="compatibility:include-filter" value="CtsShortcutManagerTestCases" />
     <option name="compatibility:include-filter" value="CtsSimpleCpuTestCases" />
@@ -320,7 +320,7 @@
     <option name="compatibility:include-filter" value="CtsVrTestCases" />
     <option name="compatibility:include-filter" value="CtsWebkitTestCases" />
     <option name="compatibility:include-filter" value="CtsWidgetTestCases" />
-    <option name="compatibility:include-filter" value="CtsWindowManagerHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsWindowManagerDeviceTestCases" />
     <option name="compatibility:include-filter" value="CtsWrapNoWrapTestCases" />
     <option name="compatibility:include-filter" value="CtsWrapWrapDebugMallocDebugTestCases" />
     <option name="compatibility:include-filter" value="CtsWrapWrapDebugTestCases" />

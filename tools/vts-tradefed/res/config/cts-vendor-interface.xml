@@ -62,7 +62,7 @@
     <option name="compatibility:include-filter" value="CtsViewTestCases" />
     <option name="compatibility:include-filter" value="CtsWebkitTestCases" />
     <option name="compatibility:include-filter" value="CtsWidgetTestCases" />
-    <option name="compatibility:include-filter" value="CtsWindowManagerHostTestCases" />
+    <option name="compatibility:include-filter" value="CtsWindowManagerDeviceTestCases" />
 
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:include-annotation:com.android.compatibility.common.util.VendorInterfaceTest" />
     <option name="compatibility:test-arg" value="com.android.compatibility.common.tradefed.testtype.JarHostTest:include-annotation:com.android.compatibility.common.util.VendorInterfaceTest" />
