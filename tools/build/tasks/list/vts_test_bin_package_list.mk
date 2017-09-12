@@ -39,11 +39,6 @@ vts_test_bin_packages := \
     libcutils_test \
     vts_test_binary_qtaguid_module \
 
-# some CTS packages for record-and-replay test development purpose
-vts_test_bin_packages += \
-    CtsAccelerationTestCases \
-    CtsSensorTestCases \
-
 # Proto fuzzer executable
 vts_test_bin_packages += \
     vts_proto_fuzzer \

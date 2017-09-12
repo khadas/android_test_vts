@@ -74,11 +74,13 @@ vts_test_lib_hidl_packages := \
   android.hardware.bluetooth@1.0-vts.profiler \
   android.hardware.boot@1.0-vts.profiler \
   android.hardware.broadcastradio@1.0-vts.profiler \
+  android.hardware.broadcastradio@1.1-vts.profiler \
   android.hardware.camera.common@1.0-vts.profiler \
   android.hardware.camera.device@1.0-vts.profiler \
   android.hardware.camera.device@3.2-vts.profiler \
   android.hardware.camera.metadata@3.2-vts.profiler \
   android.hardware.camera.provider@2.4-vts.profiler \
+  android.hardware.cas@1.0-vts.profiler \
   android.hardware.configstore@1.0-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
@@ -106,10 +108,12 @@ vts_test_lib_hidl_packages := \
   android.hardware.sensors@1.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
   android.hardware.thermal@1.0-vts.profiler \
+  android.hardware.thermal@1.1-vts.profiler \
   android.hardware.tv.cec@1.0-vts.profiler \
   android.hardware.tv.input@1.0-vts.profiler \
   android.hardware.usb@1.0-vts.profiler \
   android.hardware.vibrator@1.0-vts.profiler \
+  android.hardware.vibrator@1.1-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.wifi@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
