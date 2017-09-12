@@ -151,9 +151,10 @@ class ProfilingFeature(feature_utils.Feature):
 
         Args:
             shell: shell to control the testing device.
-            hal_instrumentation_lib_path: directory that stores profiling libraries.
+            hal_instrumentation_lib_path: string, the path of directory that stores
+                                          profiling libraries.
         """
-        if not hal_instrumentation_lib_path:
+        if hal_instrumentation_lib_path is None:
             bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS, None)
             if bitness == '64':
                 hal_instrumentation_lib_path = HAL_INSTRUMENTATION_LIB_PATH_64
