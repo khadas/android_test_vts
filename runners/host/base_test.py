@@ -180,6 +180,10 @@ class BaseTestClass(object):
     def __exit__(self, *args):
         self._exec_func(self.cleanUp)
 
+    def unpack_userparams(self, req_param_names=[], opt_param_names=[], **kwargs):
+        """Wrapper for test cases using ACTS runner API."""
+        return self.getUserParams(req_param_names, opt_param_names, **kwargs)
+
     def getUserParams(self, req_param_names=[], opt_param_names=[], **kwargs):
         """Unpacks user defined parameters in test config into individual
         variables.
