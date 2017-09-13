@@ -23,31 +23,35 @@ try:
 except ImportError:
     import mock
 
+from requests.models import Response
+
 
 class PartnerAndroidBuildClientTest(unittest.TestCase):
     """Tests for Partner Android Build client."""
+
+    def setUp(self):
+        self.client = pab_client.PartnerAndroidBuildClient()
+        self.client.XSRF_STORE = None
 
     def testUrlFormat(self):
         expected_url = (
             "https://partnerdash.google.com/build/gmsdownload/"
             "f_companion/label/clockwork.companion_20170906_211311_RC00/"
-            "ClockworkCompanionGoogleWithGmsRelease_signed.apk")
-        client = pab_client.PartnerAndroidBuildClient()
+            "ClockworkCompanionGoogleWithGmsRelease_signed.apk?a=100621237")
 
-        url = client.GetArtifactURL(
+        url = self.client.GetArtifactURL(
             'f_companion', 'label', 'clockwork.companion_20170906_211311_RC00',
-            'ClockworkCompanionGoogleWithGmsRelease_signed.apk')
+            'ClockworkCompanionGoogleWithGmsRelease_signed.apk', 100621237)
         self.assertEqual(url, expected_url)
 
     @mock.patch("pab_client.flow_from_clientsecrets")
     @mock.patch("pab_client.run_flow")
     @mock.patch("pab_client.Storage")
-    @mock.patch('pab_client.PartnerAndroidBuildClient.credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
     def testAuthenticationNew(self, mock_creds, mock_storage, mock_rf,
                               mock_ffc):
         mock_creds.invalid = True
-        client = pab_client.PartnerAndroidBuildClient()
-        client.Authenticate()
+        self.client.Authenticate()
         mock_ffc.assert_called_once()
         mock_storage.assert_called_once()
         mock_rf.assert_called_once()
@@ -55,13 +59,12 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
     @mock.patch("pab_client.flow_from_clientsecrets")
     @mock.patch("pab_client.run_flow")
     @mock.patch("pab_client.Storage")
-    @mock.patch('pab_client.PartnerAndroidBuildClient.credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
     def testAuthenticationStale(self, mock_creds, mock_storage, mock_rf,
                                 mock_ffc):
         mock_creds.invalid = False
         mock_creds.access_token_expired = True
-        client = pab_client.PartnerAndroidBuildClient()
-        client.Authenticate()
+        self.client.Authenticate()
         mock_ffc.assert_called_once()
         mock_storage.assert_called_once()
         mock_rf.assert_not_called()
@@ -70,41 +73,136 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
     @mock.patch("pab_client.flow_from_clientsecrets")
     @mock.patch("pab_client.run_flow")
     @mock.patch("pab_client.Storage")
-    @mock.patch('pab_client.PartnerAndroidBuildClient.credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
     def testAuthenticationFresh(self, mock_creds, mock_storage, mock_rf,
                                 mock_ffc):
         mock_creds.invalid = False
         mock_creds.access_token_expired = False
-        client = pab_client.PartnerAndroidBuildClient()
-        client.Authenticate()
+        self.client.Authenticate()
         mock_ffc.assert_called_once()
         mock_storage.assert_called_once()
         mock_rf.assert_not_called()
         mock_creds.refresh.assert_not_called()
 
-    @mock.patch('pab_client.PartnerAndroidBuildClient.credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
     @mock.patch('pab_client.requests')
     @mock.patch('pab_client.open')
     def testGetArtifact(self, mock_open, mock_requests, mock_creds):
-        expected_url = (
+        artifact_url = (
             "https://partnerdash.google.com/build/gmsdownload/"
             "f_companion/label/clockwork.companion_20170906_211311_RC00/"
-            "ClockworkCompanionGoogleWithGmsRelease_signed.apk")
-        client = pab_client.PartnerAndroidBuildClient()
-        client.GetArtifact(
-            'f_companion', 'label', 'clockwork.companion_20170906_211311_RC00',
-            'ClockworkCompanionGoogleWithGmsRelease_signed.apk', '100374304')
+            "ClockworkCompanionGoogleWithGmsRelease_signed.apk?a=100621237")
+        self.client.GetArtifact(
+            artifact_url, 'ClockworkCompanionGoogleWithGmsRelease_signed.apk')
         mock_creds.apply.assert_called_with({})
         mock_requests.get.assert_called_with(
-            expected_url, params={'a': '100374304'}, headers={}, stream=True)
+            artifact_url, headers={}, stream=True)
         mock_open.assert_called_with(
             'ClockworkCompanionGoogleWithGmsRelease_signed.apk', 'wb')
 
-        client.GetArtifact('f_companion', 'label',
-                           'clockwork.companion_20170906_211311_RC00',
-                           'ClockworkCompanionGoogleWithGmsRelease_signed.apk',
-                           '100374304', 'NewFile.apk')
-        mock_open.assert_called_with('NewFile.apk', 'wb')
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURL(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{ "result" : {"1": "this_url"}}'
+        mock_requests.post.return_value = response
+        url = self.client.GetABArtifactURL(
+            "4331445", "darwin_mac", "android-ndk-43345-darwin-x86_64.tar.bz2",
+            "aosp-master-ndk", "", 0, 100621237)
+
+        mock_requests.post.assert_called_with(
+            'https://partner.android.com/build/u/0/_gwt/_rpc/buildsvc',
+            data=
+            ('{"xsrf": "disable", "params": "{\\"1\\": \\"4331445\\", \\"3\\": '
+             '\\"android-ndk-43345-darwin-x86_64.tar.bz2\\", \\"2\\": '
+             '\\"darwin_mac\\", \\"5\\": \\"\\", \\"4\\": '
+             '\\"aosp-master-ndk\\", \\"6\\": 0}", '
+             '"method": "downloadBuildArtifact"}'),
+            headers={
+                'Content-Type': 'application/json',
+                'x-alkali-account': 100621237
+            })
+        self.assertEqual(url, "this_url")
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURLBackendError(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'not JSON'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetABArtifactURL(
+                "4331445", "darwin_mac",
+                "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
+                "", 0, 100621237)
+        expected = "Backend error -- check your account ID"
+        self.assertEqual(str(cm.exception), expected)
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURLMissingResultError(self, mock_requests,
+                                               mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"result": {}}'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetABArtifactURL(
+                "4331445", "darwin_mac",
+                "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
+                "", 0, 100621237)
+        expected = "Resource not found"
+        self.assertIn(expected, str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURLInvalidXSRFError(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"error": {"code": -32000, "message":"Invalid"}}'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetABArtifactURL(
+                "4331445", "darwin_mac",
+                "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
+                "", 0, 100621237)
+        self.assertIn('Bad XSRF token', str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURLInvalidXSRFError(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"error": {"code": -32001, "message":"Expired"}}'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetABArtifactURL(
+                "4331445", "darwin_mac",
+                "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
+                "", 0, 100621237)
+        self.assertIn('Expired XSRF token', str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetABArtifactURLUnknownError(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"some_other_json": "foo"}'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetABArtifactURL(
+                "4331445", "darwin_mac",
+                "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
+                "", 0, 100621237)
+        self.assertIn('Unknown response from server', str(cm.exception))
 
 
 if __name__ == "__main__":
