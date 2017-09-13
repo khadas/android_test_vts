@@ -892,6 +892,19 @@ class AndroidDevice(object):
         return results
 
     @property
+    def ed(self):
+        """The default SL4A session to the device if exist, None otherwise."""
+        if (not hasattr(self, "_sl4a_event_dispatchers") or
+            len(self._sl4a_event_dispatchers) == 0):
+            return None
+        logging.info("self._sl4a_event_dispatchers: %s", self._sl4a_event_dispatchers)
+        try:
+            session_id = sorted(self._sl4a_event_dispatchers)[0]
+            return self._sl4a_event_dispatchers[session_id]
+        except IndexError:
+            return None
+
+    @property
     def sl4a(self):
         """The default SL4A session to the device if exist, None otherwise."""
         try:
