@@ -19,10 +19,6 @@
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-host" />
 
-  <!-- For Conventional HALs -->
-  <option name="compatibility:include-filter" value="SampleLightTest" />
-  <option name="compatibility:include-filter" value="SampleCameraV3Test" />
-
   <!-- For HIDL HALs -->
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostBinderize" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0HostPassthrough" />
