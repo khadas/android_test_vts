@@ -20,9 +20,6 @@
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-serving-staging-presubmit" />
 
-  <!-- For vts-hal-conventional -->
-  <!-- option name="compatibility:include-filter" value="SampleLightTest" / -->
-
   <!-- For vts-hal-hidl -->
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:gtest-batch-mode:true" />
   <!-- option name="compatibility:include-filter" value="BinderThroughputBenchmark" / -->
