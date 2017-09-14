@@ -165,32 +165,37 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   if (call_msg->component_class() == HAL_HIDL) {
     for (int index = 0; index < result_msg.return_type_hidl_size(); index++) {
       auto* return_val = result_msg.mutable_return_type_hidl(index);
-      if (return_val->type() == TYPE_HIDL_INTERFACE &&
-          return_val->hidl_interface_pointer() != 0) {
-        string type_name = return_val->predefined_type();
-        uint64_t interface_pt = return_val->hidl_interface_pointer();
-        std::unique_ptr<DriverBase> driver;
-        ComponentSpecificationMessage spec_msg;
-        string package_name = GetPackageName(type_name);
-        float version = GetVersion(type_name);
-        string component_name = GetComponentName(type_name);
-        if (!hal_driver_loader_.FindComponentSpecification(
-                HAL_HIDL, package_name, version, component_name, 0, "",
-                &spec_msg)) {
-          cerr << __func__
-               << ": Failed to load specification for gnerated interface :"
-               << type_name << endl;
-          return kErrorString;
+      if (return_val->type() == TYPE_HIDL_INTERFACE) {
+        if (return_val->hidl_interface_pointer() != 0) {
+          string type_name = return_val->predefined_type();
+          uint64_t interface_pt = return_val->hidl_interface_pointer();
+          std::unique_ptr<DriverBase> driver;
+          ComponentSpecificationMessage spec_msg;
+          string package_name = GetPackageName(type_name);
+          float version = GetVersion(type_name);
+          string component_name = GetComponentName(type_name);
+          if (!hal_driver_loader_.FindComponentSpecification(
+                  HAL_HIDL, package_name, version, component_name, 0, "",
+                  &spec_msg)) {
+            cerr << __func__
+                 << ": Failed to load specification for gnerated interface :"
+                 << type_name << endl;
+            return kErrorString;
+          }
+          string driver_lib_path =
+              GetHidlHalDriverLibName(package_name, version);
+          // TODO(zhuoyao): figure out a way to get the service_name.
+          string hw_binder_service_name = "default";
+          driver.reset(hal_driver_loader_.GetDriver(
+              driver_lib_path, spec_msg, hw_binder_service_name, interface_pt,
+              true, "", ""));
+          int32_t driver_id =
+              RegisterDriver(std::move(driver), spec_msg, "", interface_pt);
+          return_val->set_hidl_interface_id(driver_id);
+        } else {
+          // in case of generated nullptr, set the driver_id to -1.
+          return_val->set_hidl_interface_id(-1);
         }
-        string driver_lib_path = GetHidlHalDriverLibName(package_name, version);
-        // TODO(zhuoyao): figure out a way to get the service_name.
-        string hw_binder_service_name = "default";
-        driver.reset(hal_driver_loader_.GetDriver(driver_lib_path, spec_msg,
-                                                  hw_binder_service_name,
-                                                  interface_pt, true, "", ""));
-        int32_t driver_id =
-            RegisterDriver(std::move(driver), spec_msg, "", interface_pt);
-        return_val->set_hidl_interface_id(driver_id);
       }
     }
     google::protobuf::TextFormat::PrintToString(result_msg, &output);
