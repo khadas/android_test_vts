@@ -556,9 +556,8 @@ class AndroidDevice(object):
             extra_params = self.adb_logcat_param
         except AttributeError:
             extra_params = "-b all"
-        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (self.serial,
-                                                           extra_params,
-                                                           logcat_file_path)
+        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (
+            self.serial, extra_params, logcat_file_path)
         self.adb_logcat_process = utils.start_standing_subprocess(cmd)
         self.adb_logcat_file_path = logcat_file_path
 
@@ -768,8 +767,8 @@ class AndroidDevice(object):
         """
         self.log.info("Starting VTS agent")
         if self.vts_agent_process:
-            raise AndroidDeviceError(
-                "HAL agent is already running on %s." % self.serial)
+            raise AndroidDeviceError("HAL agent is already running on %s." %
+                                     self.serial)
 
         cleanup_commands = [
             "rm -f /data/local/tmp/vts_driver_*",
@@ -981,7 +980,8 @@ class AndroidDevice(object):
     @property
     def droid(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if not hasattr(self, "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self,
+                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
             return None
         try:
             session_id = sorted(self._sl4a_sessions)[0]
@@ -995,7 +995,8 @@ class AndroidDevice(object):
     @property
     def droids(self):
         """A list of the active SL4A sessions on this device."""
-        if not hasattr(self, "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self,
+                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
             return None
         keys = sorted(self._sl4a_sessions)
         results = []
@@ -1037,12 +1038,15 @@ class AndroidDevice(object):
             results.append(self._sl4a_sessions[key][0])
         return results
 
-    def getVintfXml(self, use_lshal=True):
+    def getVintfXml(self, use_lshal=True, is_framework_manifest=False):
         """Reads the vendor interface manifest Xml.
 
         Args:
             use_hal: bool, set True to use lshal command and False to fetch
-                     /vendor/manifest.xml directly.
+                     manifest.xml directly.
+            is_framework_manifest: bool, set True to fetch /system/manifest.xml,
+                                   False to fetch /vendor/manifest.xml, effective
+                                   when use_lshal is False.
 
         Returns:
             Vendor interface manifest string.
@@ -1050,10 +1054,30 @@ class AndroidDevice(object):
         try:
             if use_lshal:
                 stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
-                return str(stdout)
+            elif is_framework_manifest:
+                stdout = self.adb.shell('cat /system/manifest.xml')
             else:
                 stdout = self.adb.shell('cat /vendor/manifest.xml')
-                return str(stdout)
+            return str(stdout)
+        except adb.AdbError as e:
+            return None
+
+    def getCompMatrixXml(self, is_framework_comp_matrix=True):
+        """Reads the vendor interface manifest Xml.
+
+        Args:
+            is_framework_comp_matrix: bool, set True to fetch /system/compatibility_matrix.xml,
+                                      False to fetch /vendor/compatibility_matrix.xml
+
+        Returns:
+            Compatibility matrix content string.
+        """
+        try:
+            if is_framework_comp_matrix:
+                stdout = self.adb.shell('cat /system/compatibility_matrix.xml')
+            else:
+                stdout = self.adb.shell('cat /vendor/compatibility_matrix.xml')
+            return str(stdout)
         except adb.AdbError as e:
             return None
 
