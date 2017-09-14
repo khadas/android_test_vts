@@ -127,12 +127,18 @@ host_testcase_files := \
   $(call find-files-in-subdirs,test/vts-testcase,"*.py" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.config" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.push" -and -type f,.) \
-  $(call find-files-in-subdirs,test/vts-testcase,"android-base*.cfg" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.dump" -and -type f,.)
 
 host_testcase_copy_pairs := \
   $(foreach f,$(host_testcase_files),\
     test/vts-testcase/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/$(f))
+
+host_kernel_config_files :=\
+  $(call find-files-in-subdirs,kernel/configs,"android-base*.cfg" -and -type f,.)
+
+host_kernel_config_copy_pairs := \
+  $(foreach f,$(host_kernel_config_files),\
+    kernel/configs/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/config/data/$(f))
 
 host_camera_its_files := \
   $(call find-files-in-subdirs,cts/apps/CameraITS,"*.py" -and -type f,.) \
@@ -184,6 +190,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(host_additional_deps_copy_pairs)) \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
+  $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
