@@ -27,6 +27,7 @@ _VERSION = "version"
 _INTERFACE = "interface"
 _INSTANCE = "instance"
 
+
 def ParseHalVersion(hal_version):
     """Returns major and minor verions extracted from hal_version string.
 
@@ -44,12 +45,32 @@ def ParseHalVersion(hal_version):
     return int(hal_version_major), int(hal_version_minor)
 
 
+def IsCompatableHal(hal_desc, package_name, version):
+    """Check whether the HAL info is compatable with given package and version.
+
+    Args:
+        hal_desc: a HalDescription object containing a HAL info.
+        package_name: string, HAL package name e.g., android.hardware.foo
+        version: string HAL version e.g., 1.0.
+
+    Returns:
+        True if the hal_desc is compatable with the given package and version.
+    """
+    major_version, minor_version = ParseHalVersion(version)
+    if (hal_desc.hal_name == package_name and
+            hal_desc.hal_version_major == major_version and
+            hal_desc.hal_version_minor >= minor_version):
+        return True
+    return False
+
+
 class HalInterfaceDescription(object):
     """Class to store the information of a running hal service interface.
 
     Attributes:
         hal_interface_name: interface name within the hal e.g. INfc.
-        hal_instance_instances: a list of instance name of the registered hal service e.g. default. nfc
+        hal_instance_instances: a list of instance name of the registered hal
+                                service e.g. default. nfc
     """
 
     def __init__(self, hal_interface_name, hal_interface_instances):
@@ -68,22 +89,30 @@ class HalDescription(object):
         hal_interfaces: a list of HalInterfaceDescription within the hal.
         hal_archs: a list of strings where each string indicates the supported
                    client bitness (e.g,. ["32", "64"]).
+        hal_key: string, key to identify the HAL.
     """
 
     def __init__(self, hal_name, hal_version, hal_interfaces, hal_archs):
         self.hal_name = hal_name
         self.hal_version = hal_version
-        if "." in hal_version:
+        if '-' in hal_version:
+            low_version, high_version_minor = hal_version.split('-')
+            low_version_major, _ = ParseHalVersion(low_version)
+            self.hal_version_major = low_version_major
+            self.hal_version_minor = high_version_minor
+        elif "." in hal_version:
             self.hal_version_major, self.hal_version_minor = ParseHalVersion(
                 hal_version)
         else:
             self.hal_version_major = -1
             self.hal_version_minor = -1
+        self.hal_key = "%s@%s.%s" % (self.hal_name, self.hal_version_major,
+                                     self.hal_version_minor)
         self.hal_interfaces = hal_interfaces
         self.hal_archs = hal_archs
 
 
-def GetHalDescriptions(vintf_xml):
+def GetHalDescriptions(xml_file):
     """Parses a vintf xml string.
 
     Args:
@@ -94,10 +123,10 @@ def GetHalDescriptions(vintf_xml):
         a dictionary containing the information of passthrough HALs.
     """
     try:
-        xml_root = ElementTree.fromstring(vintf_xml)
+        xml_root = ElementTree.fromstring(xml_file)
     except ElementTree.ParseError as e:
         logging.exception(e)
-        logging.error('This vintf xml could not be parsed:\n%s' % vintf_xml)
+        logging.error('This vintf xml could not be parsed:\n%s' % xml_file)
         return None, None
 
     hwbinder_hals = dict()
@@ -105,11 +134,12 @@ def GetHalDescriptions(vintf_xml):
 
     for xml_hal in xml_root:
         if xml_hal.tag != 'hal':
-            logging.debug('vintf has a non-hal child with tag: %s', xml_hal.tag)
+            logging.debug('xml file has a non-hal child with tag: %s',
+                          xml_hal.tag)
             continue
         hal_name = None
         hal_transport = None
-        hal_version = None
+        hal_versions = []
         hal_interfaces = []
         hal_archs = ["32", "64"]
         for xml_hal_item in xml_hal:
@@ -121,7 +151,8 @@ def GetHalDescriptions(vintf_xml):
                 if _ARCH in xml_hal_item.attrib:
                     hal_archs = xml_hal_item.attrib[_ARCH].split("+")
             elif tag == _VERSION:
-                hal_version = str(xml_hal_item.text)
+                # It is possible to have multiple version tags.
+                hal_versions.append(str(xml_hal_item.text))
             elif tag == _INTERFACE:
                 hal_interface_name = None
                 hal_interface_instances = []
@@ -135,13 +166,16 @@ def GetHalDescriptions(vintf_xml):
                 hal_interfaces.append(
                     HalInterfaceDescription(hal_interface_name,
                                             hal_interface_instances))
-        hal_info = HalDescription(hal_name, hal_version, hal_interfaces,
-                                  hal_archs)
-        hal_key = "%s@%s" % (hal_name, hal_version)
-        if hal_transport == _HWBINDER:
-            hwbinder_hals[hal_key] = hal_info
-        elif hal_transport == _PASSTHROUGH:
-            passthrough_hals[hal_key] = hal_info
-        else:
-            logging.error("Unknown transport type %s", hal_transport)
+
+        # Create hal description for each version.
+        for version in hal_versions:
+            hal_info = HalDescription(hal_name, version, hal_interfaces,
+                                      hal_archs)
+            if hal_transport is None or hal_transport == _HWBINDER:
+                hwbinder_hals[hal_info.hal_key] = hal_info
+            elif hal_transport == _PASSTHROUGH:
+                passthrough_hals[hal_info.hal_key] = hal_info
+            else:
+                logging.error("Unknown transport type %s", hal_transport)
+
     return hwbinder_hals, passthrough_hals
