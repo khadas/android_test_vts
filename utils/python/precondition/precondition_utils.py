@@ -19,8 +19,8 @@ import logging
 from vts.runners.host import const
 from vts.runners.host import errors
 from vts.runners.host import keys
-from vts.utils.python.common import vintf_utils
 from vts.utils.python.file import target_file_utils
+from vts.utils.python.hal import hal_info_utils
 
 
 def FindHalDescription(hal_desc, hal_package_name):
@@ -51,10 +51,10 @@ def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
         return False
     hal_package, hal_version = hal.split("@")
     logging.info("HAL package, version = %s, %s", hal_package, hal_version)
-    hal_version_major, hal_version_minor = vintf_utils.ParseHalVersion(
+    hal_version_major, hal_version_minor = hal_info_utils.ParseHalVersion(
         hal_version)
 
-    hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(vintf_xml)
+    hwbinder_hals, passthrough_hals = hal_info_utils.GetHalDescriptions(vintf_xml)
     hwbinder_hal_desc = FindHalDescription(hwbinder_hals, hal_package)
     passthrough_hal_desc = FindHalDescription(passthrough_hals, hal_package)
     if not hwbinder_hals or not passthrough_hals:
@@ -150,7 +150,8 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
         if tag in file_path_prefix:
             for path_prefix in file_path_prefix[tag]:
                 if not target_file_utils.Exists(path_prefix, shell):
-                    msg = ("The required file (prefix: {}) for {}-bit testcase "
+                    msg = (
+                        "The required file (prefix: {}) for {}-bit testcase "
                         "not found.").format(path_prefix, bitness)
                     logging.warn(msg)
                     return False
