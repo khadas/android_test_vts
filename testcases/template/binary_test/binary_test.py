@@ -208,7 +208,7 @@ class BinaryTest(base_test.BaseTestClass):
             self._skip_all_testcases = True
 
         self.tags = set()
-        self.CreateTestCases():
+        self.CreateTestCases()
         cmd = list(
             set('chmod 755 %s' % test_case.path
                 for test_case in self.testcases))
@@ -222,12 +222,13 @@ class BinaryTest(base_test.BaseTestClass):
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
             # Stop Android runtime to reduce interference.
+            logging.debug("Stops the Android framework.")
             self._dut.stop()
             stop_requested = True
 
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
                    False):
-            # Stops all (properly configured) native servers.
+            logging.debug("Stops all properly configured native servers.")
             results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
             stop_requested = True
 
@@ -357,12 +358,13 @@ class BinaryTest(base_test.BaseTestClass):
         '''Perform clean-up tasks'''
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
                    False):
-            # Restarts all (properly configured) native servers.
+            logging.debug("Restarts all properly configured native servers.")
             results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "0")
 
         # Restart Android runtime.
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
+            logging.debug("Starts the Android framework.")
             self._dut.start()
 
         # Retrieve coverage if applicable
