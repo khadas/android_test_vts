@@ -46,6 +46,8 @@ ANDROID_DEVICE_PICK_ALL_TOKEN = "*"
 ANDROID_DEVICE_ADB_LOGCAT_PARAM_KEY = "adb_logcat_param"
 ANDROID_DEVICE_EMPTY_CONFIG_MSG = "Configuration is empty, abort!"
 ANDROID_DEVICE_NOT_LIST_CONFIG_MSG = "Configuration should be a list, abort!"
+PORT_RETRY_COUNT = 3
+SL4A_APK_NAME = "com.googlecode.android_scripting"
 
 ANDROID_PRODUCT_TYPE_UNKNOWN = "unknown"
 
@@ -742,7 +744,12 @@ class AndroidDevice(object):
             self.lib = lib_mirror.LibMirror(self.host_command_port)
             self.shell = shell_mirror.ShellMirror(self.host_command_port)
         if enable_sl4a:
-            self.startSl4aClient(enable_sl4a_ed)
+            try:
+                self.startSl4aClient(enable_sl4a_ed)
+            except Exception as e:
+                self.log.exception("Failed to start SL4A!")
+                self.log.exception(e)
+                raise
 
     def stopServices(self):
         """Stops long running services on the android device.
@@ -852,19 +859,124 @@ class AndroidDevice(object):
         """
         self._sl4a_sessions = {}
         self._sl4a_event_dispatchers = {}
-        if not self.sl4a_host_port or not adb.is_port_available(
-                self.sl4a_host_port):
-            self.sl4a_host_port = adb.get_available_host_port()
-        self.adb.tcp_forward(self.sl4a_host_port, self.sl4a_target_port)
+
+        for i in range(PORT_RETRY_COUNT):
+            try:
+                if self.isRogueSl4aRunning():
+                    self.log.info("Stop rogue sl4a")
+                    self.stopSl4a()
+                    time.sleep(15)
+                sl4a_client.start_sl4a(
+                    self.adb, device_side_port=self.sl4a_target_port)
+                time.sleep(5)
+
+                self.setupSl4aPort()
+
+                droid = self._createNewSl4aSession()
+            except sl4a_client.Error as e:
+                logging.exception("error: %s", e)
+                logging.info("sl4a starting (%s)", self.serial)
+                sl4a_client.start_sl4a(
+                    self.adb, device_side_port=self.sl4a_target_port)
+                droid = self._createNewSl4aSession()
+
+            if handle_event:
+                ed = self._getSl4aEventDispatcher(droid)
+                ed.start()
+
+    def setupSl4aPort(self):
+        forward_success = False
+        last_error = None
+        for _ in range(PORT_RETRY_COUNT):
+            if not self.sl4a_host_port or not adb.is_port_available(
+                    self.sl4a_host_port):
+                self.sl4a_host_port = adb.get_available_host_port()
+            logging.info("sl4a port host %s target %s", self.sl4a_host_port,
+                     self.sl4a_target_port)
+            try:
+                self.adb.tcp_forward(self.sl4a_host_port,
+                                     self.sl4a_target_port)
+                forward_success = True
+                break
+            except adb.AdbError as e:
+                last_error = e
+                pass
+        if not forward_success:
+            self.log.error(last_error)
+            raise last_error
+
+    def stopSl4a(self):
+        """Stops an SL4A apk on a target device."""
         try:
-            droid = self._createNewSl4aSession()
-        except sl4a_client.Error:
-            sl4a_client.start_sl4a(self.adb)
-            droid = self._createNewSl4aSession()
-        self.sl4a = droid
-        if handle_event:
-            ed = self._getSl4aEventDispatcher(droid)
-        self.sl4a_event = ed
+            self.adb.shell(
+                "am force-stop %s" % SL4A_APK_NAME, ignore_status=True)
+        except adb.AdbError as e:
+            self.log.warn("Fail to stop package %s: %s", SL4A_APK_NAME, e)
+
+    def getPackagePid(self, package_name):
+        """Gets the pid for a given package. Returns None if not running.
+
+        Args:
+            package_name: The name of the package.
+
+        Returns:
+            The first pid found under a given package name. None if no process
+            was found running the package.
+
+        Raises:
+            AndroidDeviceError if the output of the phone's process list was
+            in an unexpected format.
+        """
+        for cmd in ("ps -A", "ps"):
+            try:
+                out = self.adb.shell(
+                    '%s | grep "S %s"' % (cmd, package_name),
+                    ignore_status=True)
+                if package_name not in out:
+                    continue
+                try:
+                    pid = int(out.split()[1])
+                    self.log.info('apk %s has pid %s.', package_name, pid)
+                    return pid
+                except (IndexError, ValueError) as e:
+                    # Possible ValueError from string to int cast.
+                    # Possible IndexError from split.
+                    self.log.warn('Command \"%s\" returned output line: '
+                                  '\"%s\".\nError: %s', cmd, out, e)
+            except Exception as e:
+                self.log.warn(
+                    'Device fails to check if %s running with \"%s\"\n'
+                    'Exception %s', package_name, cmd, e)
+        self.log.debug("apk %s is not running", package_name)
+        return None
+
+    def isRogueSl4aRunning(self):
+        """Returns true if SL4A was started by a process other than ACTS.
+
+        If SL4A is started by a process other than ACTS, the port will be set to
+        something other than sl4a_client.DEFAULT_DEVICE_SIDE_PORT. This causes
+        SL4A to be up and running, but nearly impossible to talk to.
+        """
+        sl4a_pid = self.getPackagePid(SL4A_APK_NAME)
+        if sl4a_pid is not None:
+            sl4a_port_hex = '{0:02x}'.format(
+                sl4a_client.DEFAULT_DEVICE_SIDE_PORT).upper()
+            port_is_open = (
+                # Get the tcp info
+                'cat /proc/%s/net/tcp | '
+                # Remove the space padding
+                'tr -s " " | '
+                # Grab the 4th column (rem_address)
+                'cut -d " " -f 4 | '
+                # Grab the port from that address
+                'cut -d ":" -f 2 | '
+                # Find the port we are looking for
+                'grep %s')
+            # If the resulting string from the command is empty, SL4A does not
+            # have a port open for ACTS to listen to.
+            return not bool(
+                self.adb.shell(port_is_open % (sl4a_pid, sl4a_port_hex)))
+        return False
 
     @property
     def droid(self):
