@@ -27,7 +27,7 @@ using namespace std;
 namespace android {
 namespace vts {
 
-DllLoader::DllLoader() : handle_(NULL), hmi_(NULL), device_(NULL) {}
+DllLoader::DllLoader() : handle_(NULL) {}
 
 DllLoader::~DllLoader() {
   if (!handle_) {
@@ -36,7 +36,7 @@ DllLoader::~DllLoader() {
   }
 }
 
-void* DllLoader::Load(const char* file_path, bool is_conventional_hal) {
+void* DllLoader::Load(const char* file_path) {
   if (!file_path) {
     cerr << __func__ << ": file_path is NULL" << endl;
     return NULL;
@@ -51,57 +51,7 @@ void* DllLoader::Load(const char* file_path, bool is_conventional_hal) {
     return NULL;
   }
   cout << __func__ << ": DLL loaded " << file_path << endl;
-  if (is_conventional_hal) {
-    cout << __func__ << ": setting hmi" << endl;
-    hmi_ = (struct hw_module_t*)LoadSymbol(HAL_MODULE_INFO_SYM_AS_STR);
-  }
   return handle_;
-}
-
-struct hw_module_t* DllLoader::InitConventionalHal() {
-  if (!handle_) {
-    cerr << __func__ << ": handle_ is NULL" << endl;
-    return NULL;
-  }
-  hmi_ = (struct hw_module_t*)LoadSymbol(HAL_MODULE_INFO_SYM_AS_STR);
-  if (!hmi_) {
-    return NULL;
-  }
-  cout << __func__ << ":" << __LINE__ << endl;
-  hmi_->dso = handle_;
-  device_ = NULL;
-  cout << __func__ << ": version " << hmi_->module_api_version << endl;
-  return hmi_;
-}
-
-struct hw_device_t* DllLoader::OpenConventionalHal(const char* module_name) {
-  cout << __func__ << endl;
-  if (!handle_) {
-    cerr << __func__ << ": handle_ is NULL" << endl;
-    return NULL;
-  }
-  if (!hmi_) {
-    cerr << __func__ << ": hmi_ is NULL" << endl;
-    return NULL;
-  }
-
-  device_ = NULL;
-  int ret;
-  if (module_name && strlen(module_name) > 0) {
-    cout << __func__ << ":" << __LINE__ << ": module_name |" << module_name
-         << "|" << endl;
-    ret =
-        hmi_->methods->open(hmi_, module_name, (struct hw_device_t**)&device_);
-  } else {
-    cout << __func__ << ":" << __LINE__ << ": (default) " << hmi_->name
-         << endl;
-    ret = hmi_->methods->open(hmi_, hmi_->name, (struct hw_device_t**)&device_);
-  }
-  if (ret != 0) {
-    cout << "returns " << ret << " " << strerror(errno) << endl;
-  }
-  cout << __func__ << ":" << __LINE__ << " device_ " << device_ << endl;
-  return device_;
 }
 
 loader_function DllLoader::GetLoaderFunction(const char* function_name) const {

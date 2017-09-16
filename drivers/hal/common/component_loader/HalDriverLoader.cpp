@@ -38,7 +38,7 @@ HalDriverLoader::HalDriverLoader(const string dir_path, int epoch_count,
 bool HalDriverLoader::FindComponentSpecification(
     const int component_class, const string& package_name, const float version,
     const string& component_name, const int component_type,
-    const string& submodule_name, ComponentSpecificationMessage* spec_msg) {
+    ComponentSpecificationMessage* spec_msg) {
   DIR* dir;
   struct dirent* ent;
 
@@ -71,12 +71,6 @@ bool HalDriverLoader::FindComponentSpecification(
               spec_msg->component_type_version() != version) {
             continue;
           }
-          if (!submodule_name.empty()) {
-            if (spec_msg->component_class() != HAL_CONVENTIONAL_SUBMODULE ||
-                spec_msg->original_data_structure_name() != submodule_name) {
-              continue;
-            }
-          }
           closedir(dir);
           return true;
         } else {
@@ -103,25 +97,23 @@ DriverBase* HalDriverLoader::GetDriver(
     const string& driver_lib_path,
     const ComponentSpecificationMessage& spec_msg,
     const string& hw_binder_service_name, const uint64_t interface_pt,
-    bool with_interface_pointer, const string& dll_file_name,
-    const string& target_func_name) {
+    bool with_interface_pointer, const string& dll_file_name) {
   DriverBase* driver = nullptr;
   if (spec_msg.component_class() == HAL_HIDL) {
     driver = GetHidlHalDriver(driver_lib_path, spec_msg, hw_binder_service_name,
                               interface_pt, with_interface_pointer);
   } else {
-    driver = GetConventionalHalDriver(driver_lib_path, spec_msg, dll_file_name,
-                                      target_func_name);
+    driver = GetLibDriver(driver_lib_path, spec_msg, dll_file_name);
   }
   cout << __func__ << ":" << __LINE__ << " loaded target comp" << endl;
 
   return driver;
 }
 
-DriverBase* HalDriverLoader::GetConventionalHalDriver(
+DriverBase* HalDriverLoader::GetLibDriver(
     const string& driver_lib_path,
-    const ComponentSpecificationMessage& spec_msg, const string& dll_file_name,
-    const string& /*target_func_name*/) {
+    const ComponentSpecificationMessage& spec_msg,
+    const string& dll_file_name) {
   DriverBase* driver = LoadDriver(driver_lib_path, spec_msg);
   if (!driver) {
     cerr << __func__ << ": couldn't get a driver base class" << endl;
@@ -133,49 +125,6 @@ DriverBase* HalDriverLoader::GetConventionalHalDriver(
     return nullptr;
   }
   return driver;
-  /*
-   * TODO: now always return the fuzzer. this change is due to the difficulty
-   * in checking nested apis although that's possible. need to check whether
-   * Fuzz() found the function, while still distinguishing the difference
-   * between that and defined but non-set api.
-  if (!strcmp(target_func_name, "#Open")) return driver;
-
-  for (const vts::FunctionSpecificationMessage& func_msg : spec_msg.api())
-  {
-    cout << "checking " << func_msg.name() << endl;
-    if (!strcmp(target_func_name, func_msg.name().c_str())) {
-      return driver;
-    }
-  }
-  return NULL;
-  */
-}
-
-DriverBase* HalDriverLoader::GetDriverForSubModule(
-    const string& spec_lib_file_path,
-    const ComponentSpecificationMessage& spec_msg, void* object_pointer) {
-  cout << __func__ << ":" << __LINE__ << " "
-       << "entry object_pointer " << ((uint64_t)object_pointer) << endl;
-  DriverBase* driver = LoadDriver(spec_lib_file_path, spec_msg);
-  if (!driver) {
-    cerr << __FUNCTION__ << ": couldn't get a driver base class" << endl;
-    return nullptr;
-  }
-
-  cout << __func__ << ":" << __LINE__ << " "
-       << "got fuzzer" << endl;
-  if (spec_msg.component_class() == HAL_HIDL) {
-    cerr << __func__ << " HIDL not supported" << endl;
-    return nullptr;
-  } else {
-    if (!driver->SetTargetObject(object_pointer)) {
-      cerr << __FUNCTION__ << ": couldn't set target object" << endl;
-      return nullptr;
-    }
-  }
-  cout << __func__ << ":" << __LINE__ << " "
-       << "loaded target comp" << endl;
-  return driver;
 }
 
 DriverBase* HalDriverLoader::GetFuzzerBaseAndAddAllFunctionsToQueue(
@@ -183,7 +132,7 @@ DriverBase* HalDriverLoader::GetFuzzerBaseAndAddAllFunctionsToQueue(
     const ComponentSpecificationMessage& iface_spec_msg,
     const char* dll_file_name, const char* hw_service_name) {
   DriverBase* driver = GetDriver(driver_lib_path, iface_spec_msg,
-                                 hw_service_name, 0, false, dll_file_name, "");
+                                 hw_service_name, 0, false, dll_file_name);
   if (!driver) {
     cerr << __FUNCTION__ << ": couldn't get a driver base class" << endl;
     return NULL;
@@ -252,7 +201,7 @@ DriverBase* HalDriverLoader::GetHidlHalDriver(
 DriverBase* HalDriverLoader::LoadDriver(
     const string& driver_lib_path,
     const ComponentSpecificationMessage& spec_msg) {
-  if (!dll_loader_.Load(driver_lib_path.c_str(), false)) {
+  if (!dll_loader_.Load(driver_lib_path.c_str())) {
     cerr << __func__ << ": failed to load  " << driver_lib_path << endl;
     return nullptr;
   }
@@ -277,7 +226,7 @@ DriverBase* HalDriverLoader::LoadDriverWithInterfacePointer(
   // the by the driver's linking dependency.
   // Example: name (android::hardware::gnss::V1_0::IAGnssRil) converted to
   // function name (vts_func_4_android_hardware_tests_bar_V1_0_IBar_with_arg)
-  if (!dll_loader_.Load(driver_lib_path.c_str(), false)) {
+  if (!dll_loader_.Load(driver_lib_path.c_str())) {
     cerr << __func__ << ": failed to load  " << driver_lib_path << endl;
     return nullptr;
   }
@@ -301,7 +250,7 @@ bool HalDriverLoader::Process(const char* dll_file_name,
                               const char* hal_service_name) {
   ComponentSpecificationMessage interface_specification_message;
   if (!FindComponentSpecification(target_class, target_package, target_version,
-                                  target_component_name, target_type, "",
+                                  target_component_name, target_type,
                                   &interface_specification_message)) {
     cerr << __func__ << ": no interface specification file found for class "
          << target_class << " type " << target_type << " version "
@@ -337,38 +286,6 @@ bool HalDriverLoader::Process(const char* dll_file_name,
       func_fuzzer->CallFunction(*func_msg, callback_socket_name_, &result_msg);
     } else {
       func_fuzzer->Fuzz(func_msg, &result, callback_socket_name_);
-    }
-    if (func_msg->return_type().type() == TYPE_PREDEFINED) {
-      if (result != NULL) {
-        // loads that interface spec and enqueues all functions.
-        cout << __FUNCTION__
-             << " return type: " << func_msg->return_type().predefined_type()
-             << endl;
-        // TODO: handle the case when size > 1
-        string submodule_name = func_msg->return_type().predefined_type();
-        while (!submodule_name.empty() &&
-               (std::isspace(submodule_name.back()) ||
-                submodule_name.back() == '*')) {
-          submodule_name.pop_back();
-        }
-        ComponentSpecificationMessage iface_spec_msg;
-        if (FindComponentSpecification(target_class, "", target_version, "",
-                                       target_type, submodule_name,
-                                       &iface_spec_msg)) {
-          cout << __FUNCTION__ << " submodule found - " << submodule_name
-               << endl;
-          if (!GetFuzzerBaseAndAddAllFunctionsToQueue(
-                  spec_lib_file_path, iface_spec_msg, dll_file_name,
-                  hal_service_name)) {
-            return false;
-          }
-        } else {
-          cout << __FUNCTION__ << " submodule not found - " << submodule_name
-               << endl;
-        }
-      } else {
-        cout << __FUNCTION__ << " return value = NULL" << endl;
-      }
     }
   }
 
