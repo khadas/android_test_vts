@@ -23,6 +23,7 @@ from vts.runners.host import test_runner
 from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.testcases.template.gtest_binary_test import gtest_test_case
 from vts.utils.python.cpu import cpu_frequency_scaling
+from vts.utils.python.hal import hal_service_name_utils
 
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
@@ -59,14 +60,18 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
         self._hal_precondition = None
         if hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL):
-            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL)
+            self._hal_precondition = getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL)
         elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF):
-            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF)
+            self._hal_precondition = getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF)
         elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE):
-            self._hal_precondition = getattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE)
+            self._hal_precondition = getattr(
+                self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE)
 
         if self.sancov.enabled and self._hal_precondition is not None:
-            self.sancov.InitializeDeviceCoverage(self._dut, self._hal_precondition)
+            self.sancov.InitializeDeviceCoverage(self._dut,
+                                                 self._hal_precondition)
 
     def CreateTestCases(self):
         """Create testcases and conditionally enable passthrough mode.
@@ -128,13 +133,19 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         # find the correponding service name(s) for each registered service and
         # store the mapping in dict service_instances.
         service_instances = {}
+        framework_comp_matrix_xml = self._dut.getCompMatrixXml()
+        framework_vintf_xml = self._dut.getVintfXml(
+            use_lshal=False, is_framework_manifest=True)
         for service in registered_services:
-            cmd = '"lshal -i | grep -o %s/.* | sort -u"' % service
-            out = str(self._dut.adb.shell(cmd)).split()
-            service_names = map(lambda x: x[x.find('/') + 1:], out)
-            logging.info("registered service: %s with name: %s" %
-                         (service, ' '.join(service_names)))
+            # TODO(zhuoyao): add support to get service names for optional instances.
+            service_names = set(
+                hal_service_name_utils.GetServiceNamesFromCompMatrix(
+                    framework_comp_matrix_xml, service))
+            service_names |= set(
+                hal_service_name_utils.GetServiceNamesFromVintf(
+                    framework_vintf_xml, service))
             service_instances[service] = service_names
+        logging.info("registered service instances: %s", service_instances)
 
         # get all the combination of service instances.
         service_instance_combinations = self._GetServiceInstancesCombinations(
@@ -172,7 +183,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         service = services.pop()
         pre_instance_combs = self._GetServiceInstancesCombinations(
             services, service_instances)
-        if service not in service_instances:
+        if service not in service_instances or not service_instances[service]:
             return pre_instance_combs
         for name in service_instances[service]:
             if not pre_instance_combs:
@@ -227,7 +238,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
         if self.sancov.enabled and self._hal_precondition is not None:
             self.sancov.FlushDeviceCoverage(self._dut, self._hal_precondition)
-            self.sancov.ProcessDeviceCoverage(self._dut, self._hal_precondition)
+            self.sancov.ProcessDeviceCoverage(self._dut,
+                                              self._hal_precondition)
             self.sancov.Upload()
 
         super(HidlHalGTest, self).tearDownClass()

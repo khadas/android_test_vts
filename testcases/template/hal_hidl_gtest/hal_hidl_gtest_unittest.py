@@ -48,6 +48,12 @@ class HidlHalGTestUnitTest(unittest.TestCase):
                            "s2": ["n3", "n4"]})
         self.assertEqual([["s2/n3", "s1/n1"], ["s2/n3", "s1/n2"],
                           ["s2/n4", "s1/n1"], ["s2/n4", "s1/n2"]], comb7)
+        comb8 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"], "s2": []})
+        self.assertEqual([["s1/n1"], ["s1/n2"]], comb8)
+        comb9 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": [], "s2": ["n1", "n2"]})
+        self.assertEqual([["s2/n1"], ["s2/n2"]], comb9)
 
 
 if __name__ == '__main__':
