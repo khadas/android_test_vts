@@ -275,23 +275,14 @@ bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
     return true;
   }
 
-  bool is_conventional_hal;
-  is_conventional_hal = (target_class_ == HAL_CONVENTIONAL) ? true : false;
-  if (!target_loader_.Load(target_dll_path, is_conventional_hal)) return false;
+  if (!target_loader_.Load(target_dll_path)) return false;
   target_dll_path_ = (char*)malloc(strlen(target_dll_path) + 1);
   strcpy(target_dll_path_, target_dll_path);
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == HAL_LEGACY) return true;
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file."
        << endl;
-  if (is_conventional_hal) {
-    hmi_ = target_loader_.InitConventionalHal();
-    if (!hmi_) {
-      free(target_dll_path_);
-      target_dll_path_ = NULL;
-      return false;
-    }
-  }
+
 #if SANCOV
   cout << __FUNCTION__ << "sancov reset "
        << target_loader_.SancovResetCoverage() << endl;
@@ -332,15 +323,6 @@ bool DriverBase::SetTargetObject(void* object_pointer) {
 bool DriverBase::GetService(bool /*get_stub*/, const char* /*service_name*/) {
   cerr << __func__ << " not impl" << endl;
   return false;
-}
-
-int DriverBase::OpenConventionalHal(const char* module_name) {
-  cout << __func__ << endl;
-  if (module_name) cout << __func__ << " " << module_name << endl;
-  device_ = target_loader_.OpenConventionalHal(module_name);
-  if (!device_) return -1;
-  cout << __func__ << " device_" << device_ << endl;
-  return 0;
 }
 
 bool DriverBase::Fuzz(vts::ComponentSpecificationMessage* message,

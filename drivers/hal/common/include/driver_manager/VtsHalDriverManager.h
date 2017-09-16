@@ -41,11 +41,13 @@ class VtsHalDriverManager {
   // driver instance, assign it a driver id and registers the created driver
   // instance in hal_driver_map_.
   // Returns the generated driver id.
-  DriverId LoadTargetComponent(
-      const string& dll_file_name, const string& spec_lib_file_path,
-      const int component_class, const int component_type, const float version,
-      const string& package_name, const string& component_name,
-      const string& hw_binder_service_name, const string& submodule_name);
+  DriverId LoadTargetComponent(const string& dll_file_name,
+                               const string& spec_lib_file_path,
+                               const int component_class,
+                               const int component_type, const float version,
+                               const string& package_name,
+                               const string& component_name,
+                               const string& hw_binder_service_name);
 
   // Call the API specified in func_msg with the provided parameter using the
   // the corresonding driver instance. If func_msg specified the driver_id,
@@ -81,7 +83,6 @@ class VtsHalDriverManager {
   // Returns true if load successfully, false otherwise.
   bool FindComponentSpecification(const int component_class,
                                   const int component_type, const float version,
-                                  const string& submodule_name,
                                   const string& package_name,
                                   const string& component_name,
                                   ComponentSpecificationMessage* spec_msg);
@@ -101,7 +102,6 @@ class VtsHalDriverManager {
   // Returns the driver id of registed driver.
   DriverId RegisterDriver(std::unique_ptr<DriverBase> driver,
                           const ComponentSpecificationMessage& spec_msg,
-                          const string& submodule_name,
                           const uint64_t interface_pt);
 
   // Internal method to get the HAL driver based on the driver id. Returns
@@ -115,30 +115,20 @@ class VtsHalDriverManager {
   // Internal method to get the HAL driver based on FunctionCallMessage.
   DriverBase* GetDriverWithCallMsg(const FunctionCallMessage& call_msg);
 
-  // Internal method to get the driver id based on submodule name
-  // (for conventional HAL only).
-  DriverId FindDriverIdWithSubModuleName(const string& submodule_name);
-
   // Internal method to find the driver id based on component spec and
   // (for Hidl HAL) address to the hidl proxy.
   DriverId FindDriverIdInternal(const ComponentSpecificationMessage& spec_msg,
-                                const string& submodule_name = "",
                                 const uint64_t interface_pt = 0,
                                 bool with_interface_pointer = false);
 
-  // Internal method to get the component spec based on driver id.
-  ComponentSpecificationMessage* GetComponentSpecById(const int32_t id);
-
-  // Internal method to process function return results for conventional HAL.
-  string ProcessFuncResultsForConventionalHal(
-      FunctionSpecificationMessage* func_msg, void* result);
+  // Internal method to process function return results for library.
+  string ProcessFuncResultsForLibrary(FunctionSpecificationMessage* func_msg,
+                                      void* result);
 
   // ============== attributes ===================
 
   // The server socket port # of the agent.
   const string callback_socket_name_;
-  // A default name for the driver libary name, only used for conventional HAL.
-  string default_driver_lib_name_;
   // A HalDriverLoader instance.
   HalDriverLoader hal_driver_loader_;
 
@@ -146,8 +136,6 @@ class VtsHalDriverManager {
   struct HalDriverInfo {
     // Spcification for the HAL.
     ComponentSpecificationMessage spec_msg;
-    // A submodule HAL name, used for conventional HAL only.
-    string submodule_name;
     // Pointer to the HAL client proxy, used for HIDL HAL only.
     uint64_t hidl_hal_proxy_pt;
     // A HAL driver instance.
@@ -155,10 +143,9 @@ class VtsHalDriverManager {
 
     // Constructor for halDriverInfo
     HalDriverInfo(const ComponentSpecificationMessage& spec_msg,
-                  const string& submodule_name, const uint64_t interface_pt,
+                  const uint64_t interface_pt,
                   std::unique_ptr<DriverBase> driver)
         : spec_msg(spec_msg),
-          submodule_name(submodule_name),
           hidl_hal_proxy_pt(interface_pt),
           driver(std::move(driver)) {}
   };
