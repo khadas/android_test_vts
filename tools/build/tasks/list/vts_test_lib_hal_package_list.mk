@@ -35,6 +35,8 @@ vts_test_lib_hal_packages := \
   android.hardware.tests.pointer@1.0-impl \
   android.hardware.tests.multithread@1.0 \
   android.hardware.tests.multithread@1.0-impl \
+  android.hardware.tests.trie@1.0 \
+  android.hardware.tests.trie@1.0-impl \
   libfootest \
   libpointertest \
   lights.vts \
