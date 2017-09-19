@@ -181,6 +181,13 @@ audio_test_res_copy_pairs := \
 vndk_test_res_copy_pairs := \
   development/vndk/tools/definition-tool/datasets/eligible-list-o-mr1-release.csv:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/current/eligible-list.csv \
 
+kernel_rootdir_test_rc_files := \
+  $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
+
+kernel_rootdir_test_rc_copy_pairs := \
+  $(foreach f,$(kernel_rootdir_test_rc_files),\
+    system/core/rootdir/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/api/rootdir/init_rc_files/$(f)) \
+
 $(compatibility_zip): \
   $(call copy-many-files,$(target_native_copy_pairs)) \
   $(call copy-many-files,$(target_spec_copy_pairs)) \
@@ -197,5 +204,6 @@ $(compatibility_zip): \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
   $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
+  $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
 
 -include vendor/google_vts/tools/build/vts_package_vendor.mk
