@@ -680,18 +680,22 @@ public class VtsMultiDeviceTest
         boolean coverageBuild = false;
         boolean sancovBuild = false;
 
+        boolean first_device = true;
         for (ITestDevice device : mInvocationContext.getDevices()) {
             JSONObject deviceJson = generateJsonDeviceItem(device);
-
             try {
                 String coverageProperty = device.getProperty(COVERAGE_PROPERTY);
-                if (coverageBuild
-                        && !(coverageBuild = coverageBuild
-                                           || (coverageProperty != null
-                                                      && coverageProperty.equals("1")))) {
-                    CLog.e("Device %s is not coverage build while others are.",
-                            device.getSerialNumber());
-                    throw new RuntimeException("Device build not the same.");
+                boolean enable_coverage_for_device =
+                        coverageProperty != null && coverageProperty.equals("1");
+                if (first_device) {
+                    coverageBuild = enable_coverage_for_device;
+                    first_device = false;
+                } else {
+                    if (coverageBuild && (!enable_coverage_for_device)) {
+                        CLog.e("Device %s is not coverage build while others are.",
+                                device.getSerialNumber());
+                        throw new RuntimeException("Device build not the same.");
+                    }
                 }
             } catch (DeviceNotAvailableException e) {
                 CLog.e("Device %s not available.", device.getSerialNumber());
