@@ -177,6 +177,13 @@ audio_test_res_copy_pairs := \
   $(foreach f,$(audio_test_res_files),\
     hardware/interfaces/audio/$(f):$(VTS_TESTCASES_OUT)/DATA/hardware/interfaces/audio/$(f))
 
+kernel_rootdir_test_rc_files := \
+  $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
+
+kernel_rootdir_test_rc_copy_pairs := \
+  $(foreach f,$(kernel_rootdir_test_rc_files),\
+    system/core/rootdir/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/api/rootdir/init_rc_files/$(f)) \
+
 $(compatibility_zip): \
   $(call copy-many-files,$(target_native_copy_pairs)) \
   $(call copy-many-files,$(target_spec_copy_pairs)) \
@@ -192,5 +199,6 @@ $(compatibility_zip): \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
+  $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
 
 -include vendor/google_vts/tools/build/vts_package_vendor.mk
