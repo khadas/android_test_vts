@@ -40,8 +40,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
             "ClockworkCompanionGoogleWithGmsRelease_signed.apk?a=100621237")
 
         url = self.client.GetArtifactURL(
-            'f_companion', 'label', 'clockwork.companion_20170906_211311_RC00',
-            'ClockworkCompanionGoogleWithGmsRelease_signed.apk', 100621237)
+            100621237, 'f_companion', 'label',
+            'clockwork.companion_20170906_211311_RC00',
+            'ClockworkCompanionGoogleWithGmsRelease_signed.apk')
         self.assertEqual(url, expected_url)
 
     @mock.patch("pab_client.flow_from_clientsecrets")
@@ -109,8 +110,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         response._content = b'{ "result" : {"1": "this_url"}}'
         mock_requests.post.return_value = response
         url = self.client.GetABArtifactURL(
-            "4331445", "darwin_mac", "android-ndk-43345-darwin-x86_64.tar.bz2",
-            "aosp-master-ndk", "", 0, 100621237)
+            100621237, "4331445", "darwin_mac",
+            "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk", "",
+            0)
 
         mock_requests.post.assert_called_with(
             'https://partner.android.com/build/u/0/_gwt/_rpc/buildsvc',
@@ -136,9 +138,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         mock_requests.post.return_value = response
         with self.assertRaises(ValueError) as cm:
             self.client.GetABArtifactURL(
-                "4331445", "darwin_mac",
+                100621237, "4331445", "darwin_mac",
                 "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
-                "", 0, 100621237)
+                "", 0)
         expected = "Backend error -- check your account ID"
         self.assertEqual(str(cm.exception), expected)
 
@@ -153,9 +155,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         mock_requests.post.return_value = response
         with self.assertRaises(ValueError) as cm:
             self.client.GetABArtifactURL(
-                "4331445", "darwin_mac",
+                100621237, "4331445", "darwin_mac",
                 "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
-                "", 0, 100621237)
+                "", 0)
         expected = "Resource not found"
         self.assertIn(expected, str(cm.exception))
 
@@ -169,9 +171,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         mock_requests.post.return_value = response
         with self.assertRaises(ValueError) as cm:
             self.client.GetABArtifactURL(
-                "4331445", "darwin_mac",
+                100621237, "4331445", "darwin_mac",
                 "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
-                "", 0, 100621237)
+                "", 0)
         self.assertIn('Bad XSRF token', str(cm.exception))
 
     @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
@@ -184,9 +186,9 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         mock_requests.post.return_value = response
         with self.assertRaises(ValueError) as cm:
             self.client.GetABArtifactURL(
-                "4331445", "darwin_mac",
+                100621237, "4331445", "darwin_mac",
                 "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
-                "", 0, 100621237)
+                "", 0)
         self.assertIn('Expired XSRF token', str(cm.exception))
 
     @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
@@ -199,10 +201,78 @@ class PartnerAndroidBuildClientTest(unittest.TestCase):
         mock_requests.post.return_value = response
         with self.assertRaises(ValueError) as cm:
             self.client.GetABArtifactURL(
-                "4331445", "darwin_mac",
+                100621237, "4331445", "darwin_mac",
                 "android-ndk-43345-darwin-x86_64.tar.bz2", "aosp-master-ndk",
-                "", 0, 100621237)
+                "", 0)
         self.assertIn('Unknown response from server', str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetBuildListSuccess(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"result": {"1": "foo"}}'
+        mock_requests.post.return_value = response
+        result = self.client.GetBuildList(100621237, "git_oc-treble-dev",
+                                          "aosp_arm64_ab-userdebug")
+        self.assertEqual(result, "foo")
+        mock_requests.post.assert_called_with(
+            'https://partner.android.com/build/u/0/_gwt/_rpc/buildsvc',
+            data=
+            ('{"xsrf": "disable", '
+             '"params": "{\\"1\\": \\"git_oc-treble-dev\\", \\"3\\": \\"\\", '
+             '\\"2\\": \\"aosp_arm64_ab-userdebug\\", '
+             '\\"4\\": 10, \\"7\\": 1}", '
+             '"method": "listBuild"}'),
+            headers={
+                'Content-Type': 'application/json',
+                'x-alkali-account': 100621237
+            })
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.requests')
+    def testGetBuildListError(self, mock_requests, mock_creds):
+        self.client._xsrf = 'disable'
+        response = Response()
+        response.status_code = 200
+        response._content = b'{"result": {"3": "foo"}}'
+        mock_requests.post.return_value = response
+        with self.assertRaises(ValueError) as cm:
+            self.client.GetBuildList(100621237, "git_oc-treble-dev",
+                                     "aosp_arm64_ab-userdebug")
+        self.assertIn('Build list not found', str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient.GetBuildList')
+    def testGetLatestBuildIdSuccess(self, mock_gbl, mock_creds):
+        self.client._xsrf = 'disable'
+        mock_gbl.return_value = [{'7': 5, '1': 'bad'}, {'7': 7, '1': 'good'}]
+        result = self.client.GetLatestBuildId(100621237, "git_oc-treble-dev",
+                                              "aosp_arm64_ab-userdebug")
+        self.assertEqual(result, 'good')
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient.GetBuildList')
+    def testGetLatestBuildIdEmpty(self, mock_gbl, mock_creds):
+        self.client._xsrf = 'disable'
+        mock_gbl.return_value = []
+        with self.assertRaises(ValueError) as cm:
+            result = self.client.GetLatestBuildId(
+                100621237, "git_oc-treble-dev", "aosp_arm64_ab-userdebug")
+        self.assertIn("No builds found for", str(cm.exception))
+
+    @mock.patch('pab_client.PartnerAndroidBuildClient._credentials')
+    @mock.patch('pab_client.PartnerAndroidBuildClient.GetBuildList')
+    def testGetLatestBuildIdAllBad(self, mock_gbl, mock_creds):
+        self.client._xsrf = 'disable'
+        mock_gbl.return_value = [{'7': 0}, {'7': 0}]
+        with self.assertRaises(ValueError) as cm:
+            result = self.client.GetLatestBuildId(
+                100621237, "git_oc-treble-dev", "aosp_arm64_ab-userdebug")
+        self.assertEqual(
+            "No complete builds found: 2 failed or incomplete builds found",
+            str(cm.exception))
 
 
 if __name__ == "__main__":
