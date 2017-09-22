@@ -21,7 +21,7 @@ from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.testcases.template.binary_test import binary_test
-from vts.testcases.template.hal_hidl_replay_test import hal_hidl_replay_test_case
+from vts.utils.python.hal import hal_service_name_utils
 from vts.utils.python.os import path_utils
 
 
@@ -31,9 +31,13 @@ class HalHidlReplayTest(binary_test.BinaryTest):
     Attributes:
         _dut: AndroidDevice, the device under test as config
         DEVICE_TMP_DIR: string, target device's tmp directory path.
+        DEVICE_VTS_SPEC_FILE_PATH: string, target device's directory for storing
+                                   HAL spec files.
     """
 
     DEVICE_TMP_DIR = "/data/local/tmp"
+    DEVICE_VTS_SPEC_FILE_PATH = "/data/local/tmp/spec"
+    DEVICE_VTS_TRACE_FILE_PATH = "/data/local/tmp/vts_replay_trace"
 
     def setUpClass(self):
         """Prepares class and initializes a target device."""
@@ -42,72 +46,51 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         if self._skip_all_testcases:
             return
 
-        # TODO(zhuoyao): consider to push trace just before each test case.
-        for trace_path in self.trace_paths:
-            trace_path = str(trace_path)
-            trace_file_name = str(os.path.basename(trace_path))
-            self._dut.adb.push(
-                path_utils.JoinTargetPath(self.data_file_path,
-                                          "hal-hidl-trace", trace_path),
-                path_utils.JoinTargetPath(self.DEVICE_TMP_DIR,
-                                          "vts_replay_trace", trace_file_name))
         if self.coverage.enabled:
             # enable passthrough mode to measure code coverage.
             self.shell.Execute('setprop vts.hidl.get_stub true')
-
-    def getServiceName(self):
-        """Get service name(s) for the given hal."""
-        cmd = "lshal --neat -i | grep -oP %s::[a-zA-Z]+/.+ | sort -u" % \
-              self.hal_hidl_package_name
-        out = str(self._dut.adb.shell(cmd)).split()
-        service_names = map(lambda x: x[x.find('/') + 1:], out)
-        logging.info("registered service: %s with name: %s" %
-                     (self.hal_hidl_package_name, ' '.join(service_names)))
-        return service_names
 
     # @Override
     def CreateTestCases(self):
         """Create a list of HalHidlReplayTestCase objects."""
         required_params = [
             keys.ConfigKeys.IKEY_HAL_HIDL_REPLAY_TEST_TRACE_PATHS,
-            keys.ConfigKeys.IKEY_HAL_HIDL_PACKAGE_NAME,
             keys.ConfigKeys.IKEY_ABI_BITNESS
         ]
         opt_params = [keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
-        self.hal_hidl_package_name = str(self.hal_hidl_package_name)
         self.abi_bitness = str(self.abi_bitness)
         self.trace_paths = map(str, self.hal_hidl_replay_test_trace_paths)
 
-        target_package, target_version = self.hal_hidl_package_name.split("@")
-        custom_ld_library_path = path_utils.JoinTargetPath(self.DEVICE_TMP_DIR,
-                                                           self.abi_bitness)
-        driver_binary_path = path_utils.JoinTargetPath(
+        self.driver_binary_path = path_utils.JoinTargetPath(
             self.DEVICE_TMP_DIR, self.abi_bitness,
             "vts_hal_replayer%s" % self.abi_bitness)
+        self.custom_ld_library_path = path_utils.JoinTargetPath(
+            self.DEVICE_TMP_DIR, self.abi_bitness)
 
-        if not self._skip_all_testcases:
-            service_names = self.getServiceName()
-        else:
-            service_names = [""]
-
-        test_suite = ''
         for trace_path in self.trace_paths:
             trace_file_name = str(os.path.basename(trace_path))
-            trace_path = path_utils.JoinTargetPath(
-                self.DEVICE_TMP_DIR, "vts_replay_trace", trace_file_name)
-            for service_name in service_names:
-                test_name = "replay_test_" + trace_file_name
-                if service_name:
-                    test_name += "_" + service_name
-                test_case = hal_hidl_replay_test_case.HalHidlReplayTestCase(
-                    trace_path,
-                    service_name,
-                    test_suite,
-                    test_name,
-                    driver_binary_path,
-                    ld_library_path=custom_ld_library_path)
+            target_trace_path = path_utils.JoinTargetPath(
+                self.DEVICE_VTS_TRACE_FILE_PATH, trace_file_name)
+            self._dut.adb.push(
+                path_utils.JoinTargetPath(self.data_file_path,
+                                          "hal-hidl-trace", trace_path),
+                target_trace_path)
+
+            service_instance_combinations = self._GetServiceInstanceCombinations(
+                target_trace_path)
+
+            for instance_combination in service_instance_combinations:
+                test_case = super(HalHidlReplayTest, self).CreateTestCase(
+                    self.driver_binary_path, '')
+                test_case.envp += "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH" % self.custom_ld_library_path
+                test_case.args += " --spec_dir_path=" + self.DEVICE_VTS_SPEC_FILE_PATH
+                test_case.test_name = "replay_test_" + trace_file_name
+                for instance in instance_combination:
+                    test_case.args += " --hal_service_instance=" + instance
+                    test_case.args += " " + target_trace_path
+                    test_case.tag += instance[instance.find('/'):]
                 self.testcases.append(test_case)
 
     def tearDownClass(self):
@@ -144,6 +127,49 @@ class HalHidlReplayTest(binary_test.BinaryTest):
             # disable passthrough mode.
             self.shell.Execute('setprop vts.hidl.get_stub false')
         super(HalHidlReplayTest, self).tearDown()
+
+    def _GetServiceInstanceCombinations(self, trace_path):
+        """Create all combinations of instances for all services recorded in
+        the trace file.
+
+        Args:
+            trace_path: string, full path of a given trace file
+        Returns:
+            A list of all service instance combinations.
+        """
+        registered_services = []
+        service_instances = {}
+        results = self.shell.Execute(
+            "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --list_service %s" %
+            (self.custom_ld_library_path, self.driver_binary_path, trace_path))
+
+        if (results[const.EXIT_CODE][0]):
+            logging.error('Failed to list test cases.')
+            return None
+
+        # parse the results to get the registered service list.
+        for line in results[const.STDOUT][0].split('\n'):
+            line = str(line)
+            if line.startswith('hal_service: '):
+                service = line[len('hal_service: '):]
+                registered_services.append(service)
+
+        framework_comp_matrix_xml = self._dut.getCompMatrixXml()
+        framework_vintf_xml = self._dut.getVintfXml(
+            use_lshal=False, is_framework_manifest=True)
+
+        for service in registered_services:
+            service_names = set(
+                hal_service_name_utils.GetServiceNamesFromCompMatrix(
+                    framework_comp_matrix_xml, service))
+            service_instances[service] = service_names
+        logging.info("registered service instances: %s", service_instances)
+
+        service_instance_combinations = \
+            hal_service_name_utils.GetServiceInstancesCombinations(
+                registered_services, service_instances)
+
+        return service_instance_combinations
 
 
 if __name__ == "__main__":
