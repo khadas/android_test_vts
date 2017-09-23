@@ -147,6 +147,7 @@ vts_test_lib_hidl_packages += \
   VtsHalBroadcastradioV1_0TargetTest \
   VtsHalBroadcastradioV1_1TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
+  VtsHalCasV1_0TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
