@@ -22,13 +22,15 @@
 
     <!-- for System -->
     <option name="compatibility:include-filter" value="MemorySystemStressTest" />
-    <option name="compatibility:include-filter" value="VtsAppCameraStressTest" />
+    <!-- b/66012102 -->
+    <!-- <option name="compatibility:include-filter" value="VtsAppCameraStressTest" /> -->
 
     <!-- for VNDK -->
     <option name="compatibility:include-filter" value="VtsVndkAbi" />
     <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
-    <!-- IOmxStore -->
+    <!-- for Hal -->
+    <option name="compatibility:include-filter" value="VtsHalCasV1_0Target" />
     <option name="compatibility:include-filter" value="VtsHalMediaOmxStoreV1_0Host" />
 
 </configuration>
