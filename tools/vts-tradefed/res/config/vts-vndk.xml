@@ -19,6 +19,9 @@
   <option name="test-tag" value="vts" />
   <option name="vts-plan-result:plan-name" value="vts-vndk" />
 
+  <option name="compatibility:include-filter" value="VtsVndkAbi" />
   <option name="compatibility:include-filter" value="VtsVndkDependency" />
+  <option name="compatibility:include-filter" value="VtsVndkFiles" />
+  <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
 </configuration>
