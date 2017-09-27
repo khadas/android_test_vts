@@ -24,6 +24,7 @@ import sys
 
 from vts.harnesses.host_controller import console
 from vts.harnesses.host_controller import host_controller
+from vts.harnesses.host_controller.build import pab_client
 from vts.harnesses.host_controller.tfc import tfc_client
 from vts.harnesses.host_controller.tradefed import remote_client
 
@@ -49,6 +50,8 @@ def main():
             api_version=config_json["tfc_api_version"],
             scopes=config_json["tfc_scopes"])
 
+    pab = pab_client.PartnerAndroidBuildClient()
+
     hosts = []
     for host_config in config_json["hosts"]:
         cluster_ids = host_config["cluster_ids"]
@@ -71,7 +74,7 @@ def main():
         while True:
             sys.stdin.readline()
     else:
-        console.Console(tfc, hosts).cmdloop()
+        console.Console(tfc, pab, hosts).cmdloop()
 
 
 if __name__ == "__main__":
