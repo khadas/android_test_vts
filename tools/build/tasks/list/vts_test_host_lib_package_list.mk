@@ -9,4 +9,4 @@ vts_test_host_lib_packages := \
     libvts_multidevice_proto \
     libvts_profiling_utils \
     libvts_traceprocessor \
-    libz-host \
+    libz \
