@@ -23,7 +23,7 @@
 #include <utils/Log.h>
 
 static constexpr const char* kListFlag = "--list_registered_services";
-static constexpr const char* kServceInstanceFlag = "--hal_service_instance";
+static constexpr const char* kServiceInstanceFlag = "--hal_service_instance";
 
 using namespace std;
 
@@ -70,7 +70,7 @@ void VtsHalHidlTargetTestEnvBase::init(int* argc, char** argv) {
 }
 
 bool VtsHalHidlTargetTestEnvBase::parseVtsTestOption(const char* arg) {
-  // str and flag must not be NULL.
+  // arg must not be NULL.
   if (arg == NULL) return false;
 
   if (strncmp(arg, kListFlag, strlen(kListFlag)) == 0) {
@@ -78,9 +78,9 @@ bool VtsHalHidlTargetTestEnvBase::parseVtsTestOption(const char* arg) {
     return true;
   }
 
-  if (strncmp(arg, kServceInstanceFlag, strlen(kServceInstanceFlag)) == 0) {
-    // value is the past after "--hal_service_instance="
-    const char* value = arg + strlen(kServceInstanceFlag) + 1;
+  if (strncmp(arg, kServiceInstanceFlag, strlen(kServiceInstanceFlag)) == 0) {
+    // value is the part after "--hal_service_instance="
+    const char* value = arg + strlen(kServiceInstanceFlag) + 1;
     addHalServiceInstance(string(value));
     return true;
   }

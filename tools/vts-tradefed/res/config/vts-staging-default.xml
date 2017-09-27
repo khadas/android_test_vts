@@ -31,6 +31,5 @@
 
     <!-- for Hal -->
     <option name="compatibility:include-filter" value="VtsHalCasV1_0Target" />
-    <option name="compatibility:include-filter" value="VtsHalMediaOmxStoreV1_0Host" />
 
 </configuration>
