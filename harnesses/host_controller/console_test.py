@@ -39,6 +39,7 @@ class ConsoleTest(unittest.TestCase):
         _in_file: The console input buffer.
         _out_file: The console output buffer.
         _host_controller: A mock host_controller.HostController.
+        _pab_client: A mock pab_client.PartnerAndroidBuildClient.
         _tfc_client: A mock tfc_client.TfcClient.
         _console: The console being tested.
     """
@@ -58,8 +59,10 @@ class ConsoleTest(unittest.TestCase):
         self._in_file = string_io_module.StringIO()
         self._out_file = string_io_module.StringIO()
         self._host_controller = mock.Mock()
+        self._pab_client = mock.Mock()
         self._tfc_client = mock.Mock()
         self._console = console.Console(self._tfc_client,
+                                        self._pab_client,
                                         [self._host_controller],
                                         self._in_file,
                                         self._out_file)
@@ -133,6 +136,20 @@ class ConsoleTest(unittest.TestCase):
         self.assertTrue(output.startswith(expected))
         output = self._IssueCommand("lease --host 1")
         self.assertTrue(output.startswith(expected))
+
+    def testFetchPOST(self):
+        self._IssueCommand(
+            "fetch --branch=aosp-master-ndk --target=darwin_mac "
+            "--account_id=100621237 "
+            "--artifact_name=foo-{id}.tar.bz2 --method=POST"
+        )
+        self._pab_client.GetArtifact.assert_called_with(
+            account_id='100621237',
+            branch='aosp-master-ndk',
+            target='darwin_mac',
+            artifact_name='foo-{id}.tar.bz2',
+            build_id='latest',
+            method='POST')
 
 
 if __name__ == "__main__":
