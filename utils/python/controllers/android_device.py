@@ -451,6 +451,19 @@ class AndroidDevice(object):
         cpu_abi = out.lower()
         return cpu_abi
 
+    def getCpuAbiList(self, bitness=""):
+        """Gets list of supported ABIs from property.
+
+        Args:
+            bitness: 32 or 64. If the argument is not specified, this method
+                     returns both 32 and 64-bit ABIs.
+
+        Returns:
+            A list of strings, the supported ABIs.
+        """
+        out = self.getProp("ro.product.cpu.abilist" + str(bitness))
+        return out.lower().split(",") if out else []
+
     @property
     def is64Bit(self):
         """True if device is 64 bit."""
