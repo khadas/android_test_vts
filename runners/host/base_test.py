@@ -64,6 +64,7 @@ class BaseTestClass(object):
         tests: A list of strings, each representing a test case name.
         TAG: A string used to refer to a test class. Default is the test class
              name.
+        log: A logger object used for logging.
         results: A records.TestResult object for aggregating test results from
                  the execution of test cases.
         _current_record: A records.TestResultRecord object for the test case
@@ -95,6 +96,7 @@ class BaseTestClass(object):
         for name, value in configs.items():
             setattr(self, name, value)
         self.results = records.TestResult()
+        self.log = logger.LoggerProxy()
         self._current_record = None
 
         # Setup test filters
