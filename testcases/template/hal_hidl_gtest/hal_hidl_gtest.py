@@ -148,7 +148,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         logging.info("registered service instances: %s", service_instances)
 
         # get all the combination of service instances.
-        service_instance_combinations = self._GetServiceInstancesCombinations(
+        service_instance_combinations = hal_service_name_utils.GetServiceInstancesCombinations(
             registered_services, service_instances)
 
         new_test_cases = []
@@ -162,40 +162,6 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 new_test_cases.append(new_test_case)
         return new_test_cases
 
-    @classmethod
-    def _GetServiceInstancesCombinations(self, services, service_instances):
-        '''Create all combinations of instances for all services.
-
-        Args:
-            services: list, all services used in the test. e.g. [s1, s2]
-            service_instances: dictionary, mapping of each service and the
-                               corresponding service name(s).
-                               e.g. {"s1": ["n1"], "s2": ["n2", "n3"]}
-
-        Returns:
-            A list of all service instance combinations.
-            e.g. [[s1/n1, s2/n2], [s1/n1, s2/n3]]
-        '''
-
-        service_instance_combinations = []
-        if not services:
-            return service_instance_combinations
-        service = services.pop()
-        pre_instance_combs = self._GetServiceInstancesCombinations(
-            services, service_instances)
-        if service not in service_instances or not service_instances[service]:
-            return pre_instance_combs
-        for name in service_instances[service]:
-            if not pre_instance_combs:
-                new_instance_comb = [service + '/' + name]
-                service_instance_combinations.append(new_instance_comb)
-            else:
-                for instance_comb in pre_instance_combs:
-                    new_instance_comb = [service + '/' + name]
-                    new_instance_comb.extend(instance_comb)
-                    service_instance_combinations.append(new_instance_comb)
-
-        return service_instance_combinations
 
     def _EnablePassthroughMode(self):
         """Enable passthrough mode by setting getStub to true.
