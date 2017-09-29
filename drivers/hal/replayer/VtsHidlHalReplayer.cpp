@@ -38,8 +38,34 @@ static constexpr const int kInvalidDriverId = -1;
 namespace android {
 namespace vts {
 
-bool VtsHidlHalReplayer::ReplayTrace(const string& trace_file,
-                                     const string& hal_service_name) {
+void VtsHidlHalReplayer::ListTestServices(const string& trace_file) {
+  // Parse the trace file to get the sequence of function calls.
+  int fd = open(trace_file.c_str(), O_RDONLY);
+  if (fd < 0) {
+    cerr << "Can not open trace file: " << trace_file
+         << " error: " << std::strerror(errno) << endl;
+    return;
+  }
+
+  google::protobuf::io::FileInputStream input(fd);
+
+  VtsProfilingRecord msg;
+  set<string> registeredHalServices;
+  while (readOneDelimited(&msg, &input)) {
+    string package_name = msg.package();
+    float version = msg.version();
+    string interface_name = msg.interface();
+    string service_fq_name =
+        GetInterfaceFQName(package_name, version, interface_name);
+    registeredHalServices.insert(service_fq_name);
+  }
+  for (string service : registeredHalServices) {
+    cout << "hal_service: " << service << endl;
+  }
+}
+
+bool VtsHidlHalReplayer::ReplayTrace(
+    const string& trace_file, map<string, string>& hal_service_instances) {
   // Parse the trace file to get the sequence of function calls.
   int fd = open(trace_file.c_str(), O_RDONLY);
   if (fd < 0) {
@@ -74,15 +100,27 @@ bool VtsHidlHalReplayer::ReplayTrace(const string& trace_file,
         expected_result_msg.event() !=
             InstrumentationEventType::PASSTHROUGH_EXIT) {
       cerr << "Expected a result message but got message with event: "
-           << call_msg.event();
+           << call_msg.event() << endl;
       continue;
     }
-
-    cout << __func__ << ": replay function: " << call_msg.func_msg().name();
 
     string package_name = call_msg.package();
     float version = call_msg.version();
     string interface_name = call_msg.interface();
+    string instance_name =
+        GetInterfaceFQName(package_name, version, interface_name);
+    string hal_service_name = "default";
+
+    if (hal_service_instances.find(instance_name) ==
+        hal_service_instances.end()) {
+      cout << "Does not find service name for " << instance_name
+           << ", using 'default' service name instead" << endl;
+    } else {
+      hal_service_name = hal_service_instances[instance_name];
+    }
+
+    cout << __func__ << ": replay function: " << call_msg.func_msg().name();
+
     int32_t driver_id = driver_manager_->GetDriverIdForHidlHalInterface(
         package_name, version, interface_name, hal_service_name);
     if (driver_id == kInvalidDriverId) {
