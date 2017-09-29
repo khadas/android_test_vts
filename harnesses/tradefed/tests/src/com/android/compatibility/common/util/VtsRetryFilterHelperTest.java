@@ -36,11 +36,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class VtsRetryFilterHelperTest {
     private final String RESULTS_DIR = "/util/results";
-    private final String SYSTEM_FINGERPRINT =
-            "Android/aosp_arm64_ab/generic_arm64_ab:8.0.0/OC/4311089:userdebug/test-keys";
-    private final String SYSTEM_FINGERPRINT_PROPERTY = "ro.build.fingerprint";
     private final String VENDOR_FINGERPRINT =
             "Android/aosp_sailfish/sailfish:8.0.0/OC/4311111:userdebug/test-keys";
+    private final String WRONG_FINGERPRINT =
+            "Android/other_device/other_device:8.0.0/OC/4311112:userdebug/test-keys";
     private final String VENDOR_FINGERPRINT_PROPERTY = "ro.vendor.build.fingerprint";
     private CompatibilityBuildHelper mBuildHelper;
     private RetryFilterHelper mHelper;
@@ -60,16 +59,13 @@ public class VtsRetryFilterHelperTest {
 
     /**
      * Create a mock {@link ITestDevice} with fingerprint properties.
-     * @param systemFingerprint The system fingerprint of the device.
      * @param vendorFingerprint The vendor fingerprint of the device.
      * @return The mock device.
      * @throws DeviceNotAvailableException
      */
-    private ITestDevice createMockDevice(String systemFingerprint, String vendorFingerprint)
+    private ITestDevice createMockDevice(String vendorFingerprint)
             throws DeviceNotAvailableException {
         ITestDevice mockDevice = EasyMock.createMock(ITestDevice.class);
-        EasyMock.expect(mockDevice.getProperty(SYSTEM_FINGERPRINT_PROPERTY))
-                .andReturn(systemFingerprint);
         EasyMock.expect(mockDevice.getProperty(VENDOR_FINGERPRINT_PROPERTY))
                 .andReturn(vendorFingerprint);
         EasyMock.replay(mockDevice);
@@ -82,24 +78,15 @@ public class VtsRetryFilterHelperTest {
      */
     @Test
     public void testValidateBuildFingerprint() throws DeviceNotAvailableException {
-        mHelper.validateBuildFingerprint(createMockDevice(SYSTEM_FINGERPRINT, VENDOR_FINGERPRINT));
+        mHelper.validateBuildFingerprint(createMockDevice(VENDOR_FINGERPRINT));
     }
 
     /**
-     * Test ValidateBuildFingerprint with mismatching system fingerprint.
+     * Test ValidateBuildFingerprint with the incorrect fingerprint.
      * @throws DeviceNotAvailableException
      */
     @Test(expected = IllegalArgumentException.class)
     public void testMismatchSystemFingerprint() throws DeviceNotAvailableException {
-        mHelper.validateBuildFingerprint(createMockDevice(VENDOR_FINGERPRINT, VENDOR_FINGERPRINT));
-    }
-
-    /**
-     * Test ValidateBuildFingerprint with mismatching vendor fingerprint.
-     * @throws DeviceNotAvailableException
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testMismatchVendorFingerprint() throws DeviceNotAvailableException {
-        mHelper.validateBuildFingerprint(createMockDevice(SYSTEM_FINGERPRINT, SYSTEM_FINGERPRINT));
+        mHelper.validateBuildFingerprint(createMockDevice(WRONG_FINGERPRINT));
     }
 }
