@@ -93,22 +93,6 @@ class VtsHalHidlTargetTestBase : public ::testing::Test {
   }
 
   /*
-   * Call interface's getService and use passthrough mode if set from host.
-   */
-  template <class T>
-  static sp<T> getService(const char serviceName[]) {
-    return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
-  }
-
-  /*
-   * Call interface's getService and use passthrough mode if set from host.
-   */
-  template <class T>
-  static sp<T> getService(const ::android::hardware::hidl_string& serviceName) {
-    return T::getService(serviceName, VtsHalHidlTargetTestBase::VtsGetStub());
-  }
-
-  /*
    * Call interface's getService with the service name stored in the test
    * environment and use passthrough mode if set from host.
    */
