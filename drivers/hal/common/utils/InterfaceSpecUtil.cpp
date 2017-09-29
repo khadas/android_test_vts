@@ -104,6 +104,11 @@ string GetHidlHalDriverLibName(const string& package_name,
   return package_name + "@" + GetVersionString(version) + "-vts.driver.so";
 }
 
+string GetInterfaceFQName(const string& package_name, const float version,
+                          const string& interface_name) {
+  return package_name + "@" + GetVersionString(version) + "::" + interface_name;
+}
+
 string GetPackageName(const string& type_name) {
   string str = type_name.substr(0, type_name.find('V') - strlen("::"));
   if (str.find("::") == 0) {

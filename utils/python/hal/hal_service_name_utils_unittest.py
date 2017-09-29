@@ -16,43 +16,45 @@
 
 import unittest
 
-from vts.testcases.template.hal_hidl_gtest import hal_hidl_gtest
+from vts.utils.python.hal import hal_service_name_utils
 
-class HidlHalGTestUnitTest(unittest.TestCase):
+
+class HalServiceNameUtilsUnitTest(unittest.TestCase):
     """Tests for hal hidl gtest template"""
 
     def testGetServiceInstancesCombinations(self):
         """Test the function to get service instance combinations"""
 
-        comb1 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
-            [], {})
+        comb1 = hal_service_name_utils.GetServiceInstancesCombinations([], {})
         self.assertEquals(0, len(comb1))
-        comb2 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
-            ["s1"], {})
+        comb2 = hal_service_name_utils.GetServiceInstancesCombinations(["s1"],
+                                                                       {})
         self.assertEquals(0, len(comb2))
-        comb3 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+        comb3 = hal_service_name_utils.GetServiceInstancesCombinations(
             ["s1"], {"s1": ["n1"]})
         self.assertEqual([["s1/n1"]], comb3)
-        comb4 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+        comb4 = hal_service_name_utils.GetServiceInstancesCombinations(
             ["s1"], {"s1": ["n1", "n2"]})
         self.assertEqual([["s1/n1"], ["s1/n2"]], comb4)
-        comb5 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+        comb5 = hal_service_name_utils.GetServiceInstancesCombinations(
             ["s1", "s2"], {"s1": ["n1", "n2"]})
         self.assertEqual([["s1/n1"], ["s1/n2"]], comb5)
-        comb6 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+        comb6 = hal_service_name_utils.GetServiceInstancesCombinations(
             ["s1", "s2"], {"s1": ["n1", "n2"],
                            "s2": ["n3"]})
         self.assertEqual([["s2/n3", "s1/n1"], ["s2/n3", "s1/n2"]], comb6)
-        comb7 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
+        comb7 = hal_service_name_utils.GetServiceInstancesCombinations(
             ["s1", "s2"], {"s1": ["n1", "n2"],
                            "s2": ["n3", "n4"]})
         self.assertEqual([["s2/n3", "s1/n1"], ["s2/n3", "s1/n2"],
                           ["s2/n4", "s1/n1"], ["s2/n4", "s1/n2"]], comb7)
-        comb8 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
-            ["s1", "s2"], {"s1": ["n1", "n2"], "s2": []})
+        comb8 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"],
+                           "s2": []})
         self.assertEqual([["s1/n1"], ["s1/n2"]], comb8)
-        comb9 = hal_hidl_gtest.HidlHalGTest._GetServiceInstancesCombinations(
-            ["s1", "s2"], {"s1": [], "s2": ["n1", "n2"]})
+        comb9 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": [],
+                           "s2": ["n1", "n2"]})
         self.assertEqual([["s2/n1"], ["s2/n2"]], comb9)
 
 

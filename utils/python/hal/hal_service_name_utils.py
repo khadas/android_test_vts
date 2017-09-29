@@ -61,7 +61,8 @@ def GetServiceNamesFromVintf(vintf_xml, hal_service):
     Returns:
         a list containing all service names for the given HAL.
     """
-    hwbinder_hals, passthrough_hals = hal_info_utils.GetHalDescriptions(vintf_xml)
+    hwbinder_hals, passthrough_hals = hal_info_utils.GetHalDescriptions(
+        vintf_xml)
     service_names = GetServiceNames(hwbinder_hals, hal_service)
     if len(service_names) == 0:
         # check passthrough hals.
@@ -86,8 +87,42 @@ def GetServiceNames(hals, hal_service):
     service_names = []
     for hal_full_name in hals:
         if hal_info_utils.IsCompatableHal(hals[hal_full_name], package_name,
-                                           version):
+                                          version):
             for interface in hals[hal_full_name].hal_interfaces:
                 if interface.hal_interface_name == interface_name:
                     service_names.extend(interface.hal_interface_instances)
     return service_names
+
+
+def GetServiceInstancesCombinations(services, service_instances):
+    """Create all combinations of instances for all services.
+
+    Args:
+        services: list, all services used in the test. e.g. [s1, s2]
+        service_instances: dictionary, mapping of each service and the
+                           corresponding service name(s).
+                           e.g. {"s1": ["n1"], "s2": ["n2", "n3"]}
+
+    Returns:
+        A list of all service instance combinations.
+        e.g. [[s1/n1, s2/n2], [s1/n1, s2/n3]]
+    """
+    service_instance_combinations = []
+    if not services or (service_instances and type(service_instances) != dict):
+        return service_instance_combinations
+    service = services.pop()
+    pre_instance_combs = GetServiceInstancesCombinations(services,
+                                                         service_instances)
+    if service not in service_instances or not service_instances[service]:
+        return pre_instance_combs
+    for name in service_instances[service]:
+        if not pre_instance_combs:
+            new_instance_comb = [service + '/' + name]
+            service_instance_combinations.append(new_instance_comb)
+        else:
+            for instance_comb in pre_instance_combs:
+                new_instance_comb = [service + '/' + name]
+                new_instance_comb.extend(instance_comb)
+                service_instance_combinations.append(new_instance_comb)
+
+    return service_instance_combinations
