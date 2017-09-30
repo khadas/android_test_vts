@@ -36,7 +36,6 @@ from vts.utils.python.controllers import fastboot
 from vts.utils.python.controllers import sl4a_client
 from vts.utils.python.mirror import mirror_tracker
 
-
 VTS_CONTROLLER_CONFIG_NAME = "AndroidDevice"
 VTS_CONTROLLER_REFERENCE_NAME = "android_devices"
 
@@ -912,18 +911,13 @@ class AndroidDevice(object):
                 time.sleep(5)
 
                 self.setupSl4aPort()
-
                 droid = self._createNewSl4aSession()
+                if handle_event:
+                    ed = self._getSl4aEventDispatcher(droid)
+                    ed.start()
+                break
             except sl4a_client.Error as e:
                 logging.exception("error: %s", e)
-                logging.info("sl4a starting (%s)", self.serial)
-                sl4a_client.start_sl4a(
-                    self.adb, device_side_port=self.sl4a_target_port)
-                droid = self._createNewSl4aSession()
-
-            if handle_event:
-                ed = self._getSl4aEventDispatcher(droid)
-                ed.start()
 
     def setupSl4aPort(self):
         forward_success = False

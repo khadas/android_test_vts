@@ -36,7 +36,7 @@ class DuplicateError(EventDispatcherError):
     """
 
 
-class EventDispatcher:
+class EventDispatcher(object):
     """Class managing events for an sl4a connection.
     """
 
