@@ -52,6 +52,7 @@
     </target_preparer>
   </device>
 
-  <option name="compatibility:include-filter" value="VtsAppWifiAwarePerformanceThroughput" />
+  <option name="compatibility:include-filter" value="VtsAppWifiAwarePerformanceLatency" />
+  <!-- <option name="compatibility:include-filter" value="VtsAppWifiAwarePerformanceThroughput" /> -->
 
 </configuration>
