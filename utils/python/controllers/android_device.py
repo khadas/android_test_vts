@@ -18,25 +18,27 @@ from builtins import open
 
 import logging
 import os
+import socket
+import subprocess
+import threading
 import time
 import traceback
-import threading
-import socket
 
+from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.runners.host import logger as vts_logger
 from vts.runners.host import signals
 from vts.runners.host import utils
+from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
 from vts.utils.python.controllers import sl4a_client
-from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.mirror import hal_mirror
-from vts.utils.python.mirror import shell_mirror
 from vts.utils.python.mirror import lib_mirror
-from vts.runners.host import errors
-import subprocess
+from vts.utils.python.mirror import mirror_tracker
+from vts.utils.python.mirror import shell_mirror
+
 
 VTS_CONTROLLER_CONFIG_NAME = "AndroidDevice"
 VTS_CONTROLLER_REFERENCE_NAME = "android_devices"
@@ -738,9 +740,10 @@ class AndroidDevice(object):
                 self.host_command_port = adb.get_available_host_port()
             self.adb.tcp_forward(self.host_command_port,
                                  self.device_command_port)
-            self.hal = hal_mirror.HalMirror(self.host_command_port,
-                                            self.host_callback_port)
-            self.lib = lib_mirror.LibMirror(self.host_command_port)
+            self.hal = mirror_tracker.MirrorTracker(self.host_command_port,
+                                            self.host_callback_port, True)
+            self.lib = mirror_tracker.MirrorTracker(self.host_command_port,
+                                                    self.host_callback_port)
             self.shell = shell_mirror.ShellMirror(self.host_command_port)
         if enable_sl4a:
             try:
