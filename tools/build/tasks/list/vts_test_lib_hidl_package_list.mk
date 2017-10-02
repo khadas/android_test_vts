@@ -31,6 +31,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.camera.device@3.2-vts.driver \
   android.hardware.camera.metadata@3.2-vts.driver \
   android.hardware.camera.provider@2.4-vts.driver \
+  android.hardware.cas@1.0-vts.driver \
   android.hardware.configstore@1.0-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
   android.hardware.drm@1.0-vts.driver \
@@ -60,6 +61,8 @@ vts_test_lib_hidl_packages := \
   android.hardware.renderscript@1.0-vts.driver \
   android.hardware.sensors@1.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
+  android.hardware.tetheroffload.config@1.0-vts.driver \
+  android.hardware.tetheroffload.control@1.0-vts.driver \
   android.hardware.thermal@1.0-vts.driver \
   android.hardware.thermal@1.1-vts.driver \
   android.hardware.tv.cec@1.0-vts.driver \
