@@ -15,9 +15,9 @@
 #
 
 import logging
+import sys
 
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
-import logging
 
 
 def PyValue2PbEnum(message, pb_spec, py_value):
@@ -102,11 +102,7 @@ def PyList2PbVector(message, pb_spec, py_value):
     vector_spec = pb_spec.vector_value[0]
     for curr_value in py_value:
         new_vector_message = message.vector_value.add()
-        if vector_spec.type == CompSpecMsg.TYPE_SCALAR:
-            PyValue2PbScalar(new_vector_message, vector_spec, curr_value)
-        else:
-            logging.error("unsupported type %s", message.type)
-            sys.exit(-1)
+        new_vector_message.CopyFrom(Convert(vector_spec, curr_value))
     message.vector_size = len(py_value)
     return message
 
@@ -193,14 +189,16 @@ def Convert(pb_spec, py_value):
     message = CompSpecMsg.VariableSpecificationMessage()
     message.name = pb_spec.name
 
-    if pb_spec.type == CompSpecMsg.TYPE_STRUCT:
+    if isinstance(py_value, CompSpecMsg.VariableSpecificationMessage):
+        message.CopyFrom(py_value)
+    elif pb_spec.type == CompSpecMsg.TYPE_STRUCT:
         PyDict2PbStruct(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_ENUM:
         PyValue2PbEnum(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_SCALAR:
         PyValue2PbScalar(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_STRING:
-        PyString2PbString(attr_msg, attr, curr_value)
+        PyString2PbString(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_VECTOR:
         PyList2PbVector(message, pb_spec, py_value)
     else:
