@@ -45,4 +45,5 @@
   <option name="compatibility:include-filter" value="VtsHalUsbV1_1IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalWeaverV1_0IfaceFuzzer" />
   <option name="compatibility:include-filter" value="VtsHalWifiOffloadV1_0IfaceFuzzer" />
+  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0IfaceFuzzer" />
 </configuration>
