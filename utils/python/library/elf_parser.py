@@ -264,8 +264,11 @@ class ElfParser(object):
                 deps.extend(self._LoadDtNeeded(sh.offset))
         return deps
 
-    def ListGlobalDynamicSymbols(self):
+    def ListGlobalDynamicSymbols(self, include_weak=False):
         """Lists the dynamic symbols defined in the ELF.
+
+        Args:
+            include_weak: A boolean, whether to include weak symbols.
 
         Returns:
             A list of strings, the names of the symbols.
@@ -281,14 +284,23 @@ class ElfParser(object):
         if not dynsym or not dynstr or dynsym.size == 0:
             raise ElfError("Cannot find dynamic symbol table.")
 
+        include_bindings = [elf_consts.SYMBOL_BINDING_GLOBAL]
+        if include_weak:
+            include_bindings.append(elf_consts.SYMBOL_BINDING_WEAK)
+
         sym_names = []
         for offset in range(
                 dynsym.offset, dynsym.offset + dynsym.size, dynsym.entry_size):
+            # sym_info is a 1-byte field in symbol table entry.
+            # The lower 4 bits represent the type, such as function, object,
+            # and section.
+            # The higher 4 bits represent the binding. Global symbols can be
+            # defined at most once at link time, while weak symbols may have
+            # multiple definitions.
             sym_info = self._SeekRead8(offset + self._offsets.SYMBOL_INFO)
             if (sym_info & 0xf) == elf_consts.SYMBOL_NOTYPE:
                 continue
-            if sym_info >> 4 not in (elf_consts.SYMBOL_BINDING_GLOBAL,
-                                     elf_consts.SYMBOL_BINDING_WEAK):
+            if (sym_info >> 4) not in include_bindings:
                 continue
             sym_sh_index = self._SeekRead16(
                     offset + self._offsets.SYMBOL_SECTION_INDEX)
