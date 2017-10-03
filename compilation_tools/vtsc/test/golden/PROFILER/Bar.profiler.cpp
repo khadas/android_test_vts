@@ -230,7 +230,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
-                    ::android::hardware::hidl_array<int32_t,15> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t,15>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<int32_t, 15> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t, 15>*> ((*args)[0]);
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_ARRAY);
                         arg_0->set_vector_size(15);
@@ -253,7 +253,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
-                    ::android::hardware::hidl_array<int32_t,32> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t,32>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<int32_t, 32> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<int32_t, 32>*> ((*args)[0]);
                     if (result_val_0 != nullptr) {
                         result_0->set_type(TYPE_ARRAY);
                         result_0->set_vector_size(32);
@@ -588,7 +588,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
-                    ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober, 20> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober, 20>*> ((*args)[0]);
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_ARRAY);
                         arg_0->set_vector_size(20);
@@ -705,7 +705,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
-                    ::android::hardware::hidl_array<::android::hardware::hidl_string,3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string,3>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 3>*> ((*args)[0]);
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_ARRAY);
                         arg_0->set_vector_size(3);
@@ -729,7 +729,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
-                    ::android::hardware::hidl_array<::android::hardware::hidl_string,2> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string,2>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 2> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 2>*> ((*args)[0]);
                     if (result_val_0 != nullptr) {
                         result_0->set_type(TYPE_ARRAY);
                         result_0->set_vector_size(2);
@@ -833,7 +833,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
-                    ::android::hardware::hidl_array<float, 3,5> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 3,5>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<float, 3, 5> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 3, 5>*> ((*args)[0]);
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_ARRAY);
                         arg_0->set_vector_size(3);
@@ -861,7 +861,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
-                    ::android::hardware::hidl_array<float, 5,3> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 5,3>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<float, 5, 3> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<float, 5, 3>*> ((*args)[0]);
                     if (result_val_0 != nullptr) {
                         result_0->set_type(TYPE_ARRAY);
                         result_0->set_vector_size(5);
@@ -1009,7 +1009,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
-                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 5, 3> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 5, 3>*> ((*args)[0]);
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_ARRAY);
                         arg_0->set_vector_size(5);
@@ -1038,7 +1038,7 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                         break;
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
-                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 3,5> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 3,5>*> ((*args)[0]);
+                    ::android::hardware::hidl_array<::android::hardware::hidl_string, 3, 5> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_array<::android::hardware::hidl_string, 3, 5>*> ((*args)[0]);
                     if (result_val_0 != nullptr) {
                         result_0->set_type(TYPE_ARRAY);
                         result_0->set_vector_size(3);
