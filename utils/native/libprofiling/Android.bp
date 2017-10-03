@@ -61,6 +61,8 @@ cc_binary {
 
     srcs: ["VtsProfilingConfigureMain.cpp"],
 
+    cflags: ["-Wall", "-Werror"],
+
     shared_libs: [
         "libbase",
         "libutils",
