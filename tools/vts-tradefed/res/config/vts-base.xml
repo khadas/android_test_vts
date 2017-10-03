@@ -17,6 +17,7 @@
   <include name="everything" />
   <option name="compatibility:skip-all-system-status-check" value="true" />
   <option name="max-log-size" value="200" />
+  <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
   <template-include name="reporters" default="basic-reporters" />
 </configuration>
