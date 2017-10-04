@@ -180,6 +180,10 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   void GenerateRandomFunctionDeclForAttribute(Formatter& out,
       const VariableSpecificationMessage& attribute);
 
+  // Generates the default return value for a typed variable.
+  void GenerateDefaultReturnValForTypedVariable(
+      Formatter& out, const VariableSpecificationMessage& val);
+
   // Generates the random function implementation for attributes defined within
   // an interface or in a types.hal.
   void GenerateRandomFunctionImplForAttribute(Formatter& out,

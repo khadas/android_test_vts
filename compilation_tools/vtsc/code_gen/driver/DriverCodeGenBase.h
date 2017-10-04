@@ -85,11 +85,11 @@ class DriverCodeGenBase : public CodeGenBase {
   // Generates C/C++ code for interface implemetation class.
   virtual void GenerateCppBodyInterfaceImpl(
       Formatter& /*out*/, const ComponentSpecificationMessage& /*message*/,
-      const string& /*fuzzer_extended_class_name*/){};
+      const string& /*fuzzer_extended_class_name*/) {};
 
   // Generates header code for interface impl class.
   virtual void GenerateHeaderInterfaceImpl(
-      Formatter& /*out*/, const ComponentSpecificationMessage& /*message*/){};
+      Formatter& /*out*/, const ComponentSpecificationMessage& /*message*/) {};
 
   // Generates header code for construction function.
   virtual void GenerateClassConstructionFunction(Formatter& /*out*/,

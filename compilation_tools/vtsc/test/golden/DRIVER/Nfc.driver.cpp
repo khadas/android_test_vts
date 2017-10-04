@@ -44,7 +44,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     var_msg0->set_type(TYPE_HIDL_CALLBACK);
     /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 ::android::hardware::Return<uint32_t> Vts_android_hardware_nfc_V1_0_INfc::write(
@@ -82,7 +82,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
         var_msg0_vector_i->mutable_scalar_value()->set_uint8_t(arg0[i]);
     }
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 ::android::hardware::Return<::android::hardware::nfc::V1_0::NfcStatus> Vts_android_hardware_nfc_V1_0_INfc::prediscover(
@@ -92,7 +92,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     callback_message.set_id(GetCallbackID("prediscover"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfc::prediscover");
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 ::android::hardware::Return<::android::hardware::nfc::V1_0::NfcStatus> Vts_android_hardware_nfc_V1_0_INfc::close(
@@ -102,7 +102,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     callback_message.set_id(GetCallbackID("close"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfc::close");
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 ::android::hardware::Return<::android::hardware::nfc::V1_0::NfcStatus> Vts_android_hardware_nfc_V1_0_INfc::controlGranted(
@@ -112,7 +112,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     callback_message.set_id(GetCallbackID("controlGranted"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfc::controlGranted");
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 ::android::hardware::Return<::android::hardware::nfc::V1_0::NfcStatus> Vts_android_hardware_nfc_V1_0_INfc::powerCycle(
@@ -122,7 +122,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     callback_message.set_id(GetCallbackID("powerCycle"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfc::powerCycle");
     RpcCallToAgent(callback_message, callback_socket_name_);
-    return static_cast< ::android::hardware::nfc::V1_0::NfcStatus>(Random__android__hardware__nfc__V1_0__NfcStatus());
+    return ::android::hardware::nfc::V1_0::NfcStatus();
 }
 
 sp<::android::hardware::nfc::V1_0::INfc> VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfc(const string& callback_socket_name) {

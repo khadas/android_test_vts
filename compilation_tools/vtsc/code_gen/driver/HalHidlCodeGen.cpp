@@ -81,7 +81,7 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
           out << ",";
         }
       }
-      out << ")>) {\n";
+      out << ")> cb) {\n";
     }
     out << "cout << \"" << api.name() << " called\" << endl;\n";
     out << "AndroidSystemCallbackRequestMessage callback_message;\n";
@@ -99,29 +99,21 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
 
     // TODO(zhuoyao): return the received results from host.
     if (CanElideCallback(api)) {
-      const auto& return_val = api.return_type_hidl(0);
-      const auto& type = return_val.type();
-      if (type == TYPE_SCALAR) {
-        out << "return static_cast<"
-            << GetCppVariableType(return_val.scalar_type()) << ">(0);\n";
-      } else if (type == TYPE_ENUM || type == TYPE_MASK) {
-        if (return_val.has_predefined_type()) {
-          std::string predefined_type_name = return_val.predefined_type();
-          ReplaceSubString(predefined_type_name, "::", "__");
-          if (type == TYPE_ENUM) {
-            out << "return static_cast< " << GetCppVariableType(return_val)
-                << ">(Random" << predefined_type_name << "());\n";
-          } else {
-            out << "return Random" << predefined_type_name << "();\n";
-          }
-        } else {
-          cerr << __func__ << " ENUM doesn't have predefined type" << endl;
-          exit(-1);
-        }
-      } else {
-        out << "return nullptr;\n";
-      }
+      out << "return ";
+      GenerateDefaultReturnValForTypedVariable(out, api.return_type_hidl(0));
+      out << ";\n";
     } else {
+      if (api.return_type_hidl_size() > 0) {
+        out << "cb(";
+        for (int index = 0; index < api.return_type_hidl_size(); index++) {
+          GenerateDefaultReturnValForTypedVariable(out,
+                                                   api.return_type_hidl(index));
+          if (index != (api.return_type_hidl_size() - 1)) {
+            out << ", ";
+          }
+        }
+        out << ");\n";
+      }
       out << "return ::android::hardware::Void();\n";
     }
     out.unindent();
@@ -534,7 +526,7 @@ void HalHidlCodeGen::GenerateHeaderInterfaceImpl(
         out << " arg" << index;
         if (index != (api.return_type_hidl_size() - 1)) out << ",";
       }
-      out << ")>) override;\n\n";
+      out << ")> cb) override;\n\n";
     }
     out.unindent();
   }
@@ -1710,6 +1702,45 @@ void HalHidlCodeGen::GenerateSetResultImplForAttribute(Formatter& out,
                                         "result_value");
   out.unindent();
   out << "}\n\n";
+}
+
+void HalHidlCodeGen::GenerateDefaultReturnValForTypedVariable(
+    Formatter& out, const VariableSpecificationMessage& val) {
+  switch (val.type()) {
+    case TYPE_SCALAR: {
+      out << "static_cast<" << GetCppVariableType(val.scalar_type()) << ">(0)";
+      break;
+    }
+    case TYPE_MASK: {
+      out << "static_cast<" << GetCppVariableType(val.scalar_type()) << ">("
+          << val.predefined_type() << "())";
+      break;
+    }
+    case TYPE_HIDL_CALLBACK:
+    case TYPE_HIDL_INTERFACE:
+    case TYPE_POINTER:
+    case TYPE_REF: {
+      out << "nullptr";
+      break;
+    }
+    case TYPE_STRING:
+    case TYPE_ENUM:
+    case TYPE_VECTOR:
+    case TYPE_ARRAY:
+    case TYPE_STRUCT:
+    case TYPE_UNION:
+    case TYPE_HANDLE:
+    case TYPE_HIDL_MEMORY:
+    case TYPE_FMQ_SYNC:
+    case TYPE_FMQ_UNSYNC: {
+      out << GetCppVariableType(val) << "()";
+      break;
+    }
+    default: {
+      cerr << __func__ << " ERROR: unsupported type " << val.type() << ".\n";
+      exit(-1);
+    }
+  }
 }
 
 void HalHidlCodeGen::GenerateAllFunctionDeclForAttribute(Formatter& out,

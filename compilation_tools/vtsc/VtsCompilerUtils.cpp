@@ -199,17 +199,20 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     }
     case TYPE_ARRAY:
     {
-      string element_type;
-      if (arg.vector_value(0).type() != TYPE_ARRAY) {
-        element_type = GetCppVariableType(arg.vector_value(0), message);
-        result = "::android::hardware::hidl_array<" + element_type + ","
-            + to_string(arg.vector_size()) + ">";
-      } else {
-        element_type = GetCppVariableType(arg.vector_value(0), message);
-        string prefix = element_type.substr(0, element_type.find(",") + 1);
-        string suffix = element_type.substr(element_type.find(","));
-        result = prefix + " " + to_string(arg.vector_size()) + suffix;
+      VariableSpecificationMessage cur_val = arg;
+      vector<int32_t> array_sizes;
+      while (cur_val.type() == TYPE_ARRAY) {
+        array_sizes.push_back(cur_val.vector_size());
+        VariableSpecificationMessage temp = cur_val.vector_value(0);
+        cur_val = temp;
       }
+      string element_type = GetCppVariableType(cur_val);
+      result = "::android::hardware::hidl_array<" + element_type + ", ";
+      for (size_t i = 0; i < array_sizes.size(); i++) {
+        result += to_string(array_sizes[i]);
+        if (i != array_sizes.size() - 1) result += ", ";
+      }
+      result += ">";
       break;
     }
     case TYPE_STRUCT:
