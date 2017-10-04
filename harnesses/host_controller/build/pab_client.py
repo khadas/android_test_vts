@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import requests
+import urlparse
 from posixpath import join as path_urljoin
 
 from oauth2client.client import flow_from_clientsecrets
@@ -38,12 +39,17 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 
+# constants for GET and POST endpoints
+GET = 'GET'
+POST = 'POST'
+
 
 class PartnerAndroidBuildClient(object):
     """Client that manages Partner Android Build downloading.
 
     Attributes:
         BAD_XSRF_CODE: int, error code for bad XSRF token error
+        BASE_URL: string, path to PAB entry point
         BUILDARTIFACT_NAME_KEY: string, index in artifact containing name
         BUILD_BUILDID_KEY: string, index in build containing build_id
         BUILD_COMPLETED_STATUS: int, value of 'complete' build
@@ -67,11 +73,12 @@ class PartnerAndroidBuildClient(object):
     _credentials = None
     _xsrf = None
     BAD_XSRF_CODE = -32000
+    BASE_URL = 'https://partner.android.com'
     BUILDARTIFACT_NAME_KEY = '1'
     BUILD_BUILDID_KEY = '1'
     BUILD_COMPLETED_STATUS = 7
     BUILD_STATUS_KEY = '7'
-    CHROME_DRIVER_LOCATION = '/usr/bin/chromedriver'
+    CHROME_DRIVER_LOCATION = '/usr/local/bin/chromedriver'
     CHROME_LOCATION = '/usr/bin/google-chrome'
     CLIENT_SECRETS = os.path.join(
         os.path.dirname(__file__), 'client_secrets.json')
@@ -88,7 +95,7 @@ class PartnerAndroidBuildClient(object):
     scopes = ('https://www.googleapis.com/auth/partnerdash',
               'https://www.googleapis.com/auth/alkali-base')
     SCOPE = ' '.join(scopes)
-    SVC_URL = 'https://partner.android.com/build/u/0/_gwt/_rpc/buildsvc'
+    SVC_URL = urlparse.urljoin(BASE_URL, 'build/u/0/_gwt/_rpc/buildsvc')
     XSRF_STORE = os.path.join(os.path.dirname(__file__), 'xsrf')
 
     def Authenticate(self):
@@ -157,7 +164,8 @@ class PartnerAndroidBuildClient(object):
 
         try:
             wait.until(EC.title_contains("Partner Android Build"))
-        except TimeoutException:
+        except TimeoutException as e:
+            logging.exception(e)
             raise ValueError('Wrong password or non-standard login flow')
 
         self._xsrf = driver.execute_script("return clientConfig.XSRF_TOKEN;")
@@ -215,7 +223,8 @@ class PartnerAndroidBuildClient(object):
                      target,
                      page_token="",
                      max_results=10,
-                     include_internal_build_info=1):
+                     internal=True,
+                     method=GET):
         """Get the list of builds for a given account, branch and target
         Args:
             account_id: int, ID associated with the PAB account.
@@ -223,63 +232,98 @@ class PartnerAndroidBuildClient(object):
             target: string, "latest" or a specific version.
             page_token: string, token used for pagination
             max_results: maximum build results the build list contains, e.g. 25
-            include_internal_build_info: int, whether to query internal build
+            internal: bool, whether to query internal build
+            method: 'GET' or 'POST', which endpoint to query
 
         Returns:
             list of dicts representing the builds, descending in time
         """
-        params = {
-            "1": branch,
-            "2": target,
-            "3": page_token,
-            "4": max_results,
-            "7": include_internal_build_info
-        }
+        if method == POST:
+            params = {
+                "1": branch,
+                "2": target,
+                "3": page_token,
+                "4": max_results,
+                "7": int(internal)
+            }
 
-        result = self.CallBuildsvc("listBuild", params, account_id)
-        # in listBuild response, index '1' contains builds
-        if self.LISTBUILD_BUILD_KEY in result:
-            return result[self.LISTBUILD_BUILD_KEY]
-        raise ValueError("Build list not found -- %s" % params)
+            result = self.CallBuildsvc("listBuild", params, account_id)
+            # in listBuild response, index '1' contains builds
+            if self.LISTBUILD_BUILD_KEY in result:
+                return result[self.LISTBUILD_BUILD_KEY]
+            raise ValueError("Build list not found -- %s" % params)
+        elif method == GET:
+            headers = {}
+            self._credentials.apply(headers)
 
-    def GetLatestBuildId(self, account_id, branch, target):
+            action = 'list-internal' if internal else 'list'
+            # PAB URL format expects something (anything) to be given as buildid
+            # and resource, even for action list
+            dummy = 'DUMMY'
+            url = path_urljoin(self.BASE_URL, 'build', 'builds', action,
+                               branch, target, dummy,
+                               dummy) + '?a=' + str(account_id)
+
+            response = requests.get(url, headers=headers)
+            try:
+                responseJSON = response.json()
+                return responseJSON['build']
+            except ValueError as e:
+                logging.exception(e)
+                raise ValueError("Backend error -- check your account ID")
+
+    def GetLatestBuildId(self, account_id, branch, target, method=GET):
         """Get the most recent build_id for a given account, branch and target
         Args:
             account_id: int, ID associated with the PAB account.
             branch: string, branch to pull resource from.
             target: string, "latest" or a specific version.
+            method: 'GET' or 'POST', which endpoint to query
 
         Returns:
             string, most recent build id
         """
         # TODO: support pagination, maybe?
         build_list = self.GetBuildList(
-            account_id=account_id, branch=branch, target=target)
+            account_id=account_id, branch=branch, target=target, method=method)
         if len(build_list) == 0:
             raise ValueError(
                 'No builds found for account_id=%s, branch=%s, target=%s' %
                 (account_id, branch, target))
         for build in build_list:
-            # get build status: 7 = completed build
-            if build.get(self.BUILD_STATUS_KEY,
-                         None) == self.BUILD_COMPLETED_STATUS:
-                # return build id (index '1')
-                return build[self.BUILD_BUILDID_KEY]
+            if method == POST:
+                # get build status: 7 = completed build
+                if build.get(self.BUILD_STATUS_KEY,
+                             None) == self.BUILD_COMPLETED_STATUS:
+                    # return build id (index '1')
+                    return build[self.BUILD_BUILDID_KEY]
+            elif method == GET:
+                if build['build_attempt_status'] == "COMPLETE" and build["successful"]:
+                    return build['build_id']
         raise ValueError(
             'No complete builds found: %s failed or incomplete builds found' %
             len(build_list))
 
-    def GetBuildArtifacts(self, account_id, build_id, branch, target):
+    def GetBuildArtifacts(self,
+                          account_id,
+                          build_id,
+                          branch,
+                          target,
+                          method=POST):
         """Get the list of build artifacts for an account, build, target, branch
         Args:
             account_id: int, ID associated with the PAB account.
             build_id: string, ID of the build
             branch: string, branch to pull resource from.
             target: string, "latest" or a specific version.
+            method: 'GET' or 'POST', which endpoint to query
 
         Returns:
-            string, most recent build id
+            list of build artifact objects
         """
+        if method == GET:
+            raise NotImplementedError(
+                "GetBuildArtifacts not supported with GET")
         params = {"1": build_id, "2": target, "3": branch}
 
         result = self.CallBuildsvc("getBuild", params, account_id)
@@ -289,60 +333,65 @@ class PartnerAndroidBuildClient(object):
         if len(result) == 0:
             raise ValueError("Build artifacts not found -- %s" % params)
 
-    def GetArtifactURL(self, account_id, appname, by_method, version,
-                       filename):
-        """Get the URL for an artifact on the Partner Android Build server.
-
-        Args:
-            account_id: int, ID associated with the PAB account.
-            appname: string, name of the app (f_companion).
-            by_method: string, method used for downloading (label).
-            version: string, "latest" or a specific MPM version.
-            filename: string, simple file name (no parent dir or path).
-
-        Returns:
-            string, The URL for the resource specified by the parameters
-        """
-        return path_urljoin(self.GMS_DOWNLOAD_URL, appname, by_method, version,
-                            filename) + '?a=' + str(account_id)
-
-    def GetABArtifactURL(self, account_id, build_id, target, resource_id,
-                         branch, release_candidate_name, internal):
+    def GetArtifactURL(self,
+                       account_id,
+                       build_id,
+                       target,
+                       artifact_name,
+                       branch,
+                       internal,
+                       method=GET):
         """Get the URL for an artifact on the PAB server, using buildsvc.
 
         Args:
             account_id: int, ID associated with the PAB account.
             build_id: string/int, id of the build.
             target: string, "latest" or a specific version.
-            resource_id: string, simple file name (no parent dir or path).
+            artifact_name: string, simple file name (no parent dir or path).
             branch: string, branch to pull resource from.
-            release_candidate_name: string, Release candidate name, e.g."LDY85C"
             internal: int, whether the request is for an internal build artifact
+            method: 'GET' or 'POST', which endpoint to query
 
         Returns:
             string, The URL for the resource specified by the parameters
         """
-        params = {
-            "1": str(build_id),
-            "2": target,
-            "3": resource_id,
-            "4": branch,
-            "5": release_candidate_name,
-            "6": internal
-        }
+        if method == POST:
+            params = {
+                "1": str(build_id),
+                "2": target,
+                "3": artifact_name,
+                "4": branch,
+                "5": "",  # release_candidate_name
+                "6": internal
+            }
 
-        result = self.CallBuildsvc(
-            method='downloadBuildArtifact',
-            params=params,
-            account_id=account_id)
+            result = self.CallBuildsvc(
+                method='downloadBuildArtifact',
+                params=params,
+                account_id=account_id)
 
-        # in downloadBuildArtifact response, index '1' contains the url
-        if self.DOWNLOAD_URL_KEY in result:
-            return result[self.DOWNLOAD_URL_KEY]
-        if len(result) == 0:
-            raise ValueError("Resource not found -- %s" % params)
+            # in downloadBuildArtifact response, index '1' contains the url
+            if self.DOWNLOAD_URL_KEY in result:
+                return result[self.DOWNLOAD_URL_KEY]
+            if len(result) == 0:
+                raise ValueError("Resource not found -- %s" % params)
+        elif method == GET:
+            headers = {}
+            self._credentials.apply(headers)
 
-    def GetArtifact(self, download_url, filename):
+            action = 'get-internal' if internal else 'get'
+            get_url = path_urljoin(self.BASE_URL, 'build', 'builds', action,
+                                   branch, target, build_id,
+                                   artifact_name) + '?a=' + str(account_id)
+
+            response = requests.get(get_url, headers=headers)
+            try:
+                responseJSON = response.json()
+                return responseJSON['url']
+            except ValueError:
+                raise ValueError("Backend error -- check your account ID")
+
+    def DownloadArtifact(self, download_url, filename):
         """Get artifact from Partner Android Build server.
 
         Args:
@@ -366,47 +415,66 @@ class PartnerAndroidBuildClient(object):
 
         return True
 
-    def GetLatestArtifact(self, account_id, branch, target, artifact_name):
-        """Get the most recent artifact for an account, branch, target and name
+    def GetArtifact(self,
+                    account_id,
+                    branch,
+                    target,
+                    artifact_name,
+                    build_id='latest',
+                    method=GET):
+        """Get an artifact for an account, branch, target and name and build id.
+
+        If build_id not given, get latest.
+
         Args:
             account_id: int, ID associated with the PAB account.
             branch: string, branch to pull resource from.
             target: string, "latest" or a specific version.
             artifact_name: name of artifact, e.g. aosp_arm64_ab-img-4353141.zip
                 ({id} will automatically get replaced with build ID)
+            method: 'GET' or 'POST', which endpoint to query
 
         Returns:
             string, filename of downloaded artifact
         """
-        build_id = self.GetLatestBuildId(
-            account_id=account_id, branch=branch, target=target)
-
-        artifacts = self.GetBuildArtifacts(
-            account_id=account_id,
-            build_id=build_id,
-            branch=branch,
-            target=target)
-
-        if len(artifacts) == 0:
-            raise ValueError(
-                "No artifacts found for build_id=%s, branch=%s, target=%s" %
-                (build_id, branch, target))
+        if build_id == 'latest':
+            build_id = self.GetLatestBuildId(
+                account_id=account_id,
+                branch=branch,
+                target=target,
+                method=method)
 
         artifact_name = artifact_name.format(id=build_id)
-        # in build artifact response, index '1' contains the name
-        artifact_names = [
-            artifact[self.BUILDARTIFACT_NAME_KEY] for artifact in artifacts
-        ]
-        if artifact_name not in artifact_names:
-            raise ValueError("%s not found in artifact list" % artifact_name)
 
-        url = self.GetABArtifactURL(
+        if method == POST:
+            artifacts = self.GetBuildArtifacts(
+                account_id=account_id,
+                build_id=build_id,
+                branch=branch,
+                target=target,
+                method=method)
+
+            if len(artifacts) == 0:
+                raise ValueError(
+                    "No artifacts found for build_id=%s, branch=%s, target=%s"
+                    % (build_id, branch, target))
+
+            # in build artifact response, index '1' contains the name
+            artifact_names = [
+                artifact[self.BUILDARTIFACT_NAME_KEY] for artifact in artifacts
+            ]
+            if artifact_name not in artifact_names:
+                raise ValueError(
+                    "%s not found in artifact list" % artifact_name)
+
+        url = self.GetArtifactURL(
             account_id=account_id,
             build_id=build_id,
             target=target,
-            resource_id=artifact_name,
+            artifact_name=artifact_name,
             branch=branch,
-            release_candidate_name="",
-            internal=0)
-        self.GetArtifact(url, artifact_name)
+            internal=False,
+            method=method)
+
+        self.DownloadArtifact(url, artifact_name)
         return artifact_name
