@@ -53,17 +53,18 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::GetService(bool 
 
 
 ::android::hardware::Return<void> Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite(
-    std::function<void(bool arg0,const ::android::hardware::MQDescriptorSync<uint16_t>& arg1)>) {
+    std::function<void(bool arg0,const ::android::hardware::MQDescriptorSync<uint16_t>& arg1)> cb) {
     cout << "configureFmqSyncReadWrite called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("configureFmqSyncReadWrite"));
     callback_message.set_name("Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite");
     RpcCallToAgent(callback_message, callback_socket_name_);
+    cb(static_cast<bool>(0), ::android::hardware::MQDescriptorSync<uint16_t>());
     return ::android::hardware::Void();
 }
 
 ::android::hardware::Return<void> Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::getFmqUnsyncWrite(
-    bool arg0 __attribute__((__unused__)), std::function<void(bool arg0,const ::android::hardware::MQDescriptorUnsync<uint16_t>& arg1)>) {
+    bool arg0 __attribute__((__unused__)), std::function<void(bool arg0,const ::android::hardware::MQDescriptorUnsync<uint16_t>& arg1)> cb) {
     cout << "getFmqUnsyncWrite called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("getFmqUnsyncWrite"));
@@ -73,6 +74,7 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::GetService(bool 
     var_msg0->set_scalar_type("bool_t");
     var_msg0->mutable_scalar_value()->set_bool_t(arg0);
     RpcCallToAgent(callback_message, callback_socket_name_);
+    cb(static_cast<bool>(0), ::android::hardware::MQDescriptorUnsync<uint16_t>());
     return ::android::hardware::Void();
 }
 
