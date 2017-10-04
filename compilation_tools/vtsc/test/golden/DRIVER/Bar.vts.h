@@ -59,13 +59,13 @@ class Vts_android_hardware_tests_bar_V1_0_IBar : public ::android::hardware::tes
         double arg3) override;
 
     ::android::hardware::Return<void> doSomethingElse(
-        const ::android::hardware::hidl_array<int32_t,15>& arg0, std::function<void(const ::android::hardware::hidl_array<int32_t,32>& arg0)>) override;
+        const ::android::hardware::hidl_array<int32_t, 15>& arg0, std::function<void(const ::android::hardware::hidl_array<int32_t, 32>& arg0)> cb) override;
 
     ::android::hardware::Return<void> doStuffAndReturnAString(
-        std::function<void(const ::android::hardware::hidl_string& arg0)>) override;
+        std::function<void(const ::android::hardware::hidl_string& arg0)> cb) override;
 
     ::android::hardware::Return<void> mapThisVector(
-        const ::android::hardware::hidl_vec<int32_t>& arg0, std::function<void(const ::android::hardware::hidl_vec<int32_t>& arg0)>) override;
+        const ::android::hardware::hidl_vec<int32_t>& arg0, std::function<void(const ::android::hardware::hidl_vec<int32_t>& arg0)> cb) override;
 
     ::android::hardware::Return<void> callMe(
         const sp<::android::hardware::tests::foo::V1_0::IFooCallback>& arg0) override;
@@ -80,49 +80,49 @@ class Vts_android_hardware_tests_bar_V1_0_IBar : public ::android::hardware::tes
         const ::android::hardware::tests::foo::V1_0::IFoo::Goober& arg0) override;
 
     ::android::hardware::Return<void> haveAGooberArray(
-        const ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober,20>& arg0) override;
+        const ::android::hardware::hidl_array<::android::hardware::tests::foo::V1_0::IFoo::Goober, 20>& arg0) override;
 
     ::android::hardware::Return<void> haveATypeFromAnotherFile(
         const ::android::hardware::tests::foo::V1_0::Abc& arg0) override;
 
     ::android::hardware::Return<void> haveSomeStrings(
-        const ::android::hardware::hidl_array<::android::hardware::hidl_string,3>& arg0, std::function<void(const ::android::hardware::hidl_array<::android::hardware::hidl_string,2>& arg0)>) override;
+        const ::android::hardware::hidl_array<::android::hardware::hidl_string, 3>& arg0, std::function<void(const ::android::hardware::hidl_array<::android::hardware::hidl_string, 2>& arg0)> cb) override;
 
     ::android::hardware::Return<void> haveAStringVec(
-        const ::android::hardware::hidl_vec<::android::hardware::hidl_string>& arg0, std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_string>& arg0)>) override;
+        const ::android::hardware::hidl_vec<::android::hardware::hidl_string>& arg0, std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_string>& arg0)> cb) override;
 
     ::android::hardware::Return<void> transposeMe(
-        const ::android::hardware::hidl_array<float, 3,5>& arg0, std::function<void(const ::android::hardware::hidl_array<float, 5,3>& arg0)>) override;
+        const ::android::hardware::hidl_array<float, 3, 5>& arg0, std::function<void(const ::android::hardware::hidl_array<float, 5, 3>& arg0)> cb) override;
 
     ::android::hardware::Return<void> callingDrWho(
-        const ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional& arg0, std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional& arg0)>) override;
+        const ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional& arg0, std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional& arg0)> cb) override;
 
     ::android::hardware::Return<void> transpose(
-        const ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix5x3& arg0, std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix3x5& arg0)>) override;
+        const ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix5x3& arg0, std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix3x5& arg0)> cb) override;
 
     ::android::hardware::Return<void> transpose2(
-        const ::android::hardware::hidl_array<::android::hardware::hidl_string, 5,3>& arg0, std::function<void(const ::android::hardware::hidl_array<::android::hardware::hidl_string, 3,5>& arg0)>) override;
+        const ::android::hardware::hidl_array<::android::hardware::hidl_string, 5, 3>& arg0, std::function<void(const ::android::hardware::hidl_array<::android::hardware::hidl_string, 3, 5>& arg0)> cb) override;
 
     ::android::hardware::Return<void> sendVec(
-        const ::android::hardware::hidl_vec<uint8_t>& arg0, std::function<void(const ::android::hardware::hidl_vec<uint8_t>& arg0)>) override;
+        const ::android::hardware::hidl_vec<uint8_t>& arg0, std::function<void(const ::android::hardware::hidl_vec<uint8_t>& arg0)> cb) override;
 
     ::android::hardware::Return<void> sendVecVec(
-        std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_vec<uint8_t>>& arg0)>) override;
+        std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_vec<uint8_t>>& arg0)> cb) override;
 
     ::android::hardware::Return<void> haveAVectorOfInterfaces(
-        const ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>& arg0, std::function<void(const ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>& arg0)>) override;
+        const ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>& arg0, std::function<void(const ::android::hardware::hidl_vec<sp<::android::hardware::tests::foo::V1_0::ISimple>>& arg0)> cb) override;
 
     ::android::hardware::Return<void> haveAVectorOfGenericInterfaces(
-        const ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>& arg0, std::function<void(const ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>& arg0)>) override;
+        const ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>& arg0, std::function<void(const ::android::hardware::hidl_vec<sp<::android::hidl::base::V1_0::IBase>>& arg0)> cb) override;
 
     ::android::hardware::Return<void> echoNullInterface(
-        const sp<::android::hardware::tests::foo::V1_0::IFooCallback>& arg0, std::function<void(bool arg0,const sp<::android::hardware::tests::foo::V1_0::IFooCallback>& arg1)>) override;
+        const sp<::android::hardware::tests::foo::V1_0::IFooCallback>& arg0, std::function<void(bool arg0,const sp<::android::hardware::tests::foo::V1_0::IFooCallback>& arg1)> cb) override;
 
     ::android::hardware::Return<void> createMyHandle(
-        std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::MyHandle& arg0)>) override;
+        std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::MyHandle& arg0)> cb) override;
 
     ::android::hardware::Return<void> createHandles(
-        uint32_t arg0, std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_handle>& arg0)>) override;
+        uint32_t arg0, std::function<void(const ::android::hardware::hidl_vec<::android::hardware::hidl_handle>& arg0)> cb) override;
 
     ::android::hardware::Return<void> closeHandles(
         ) override;
@@ -132,13 +132,13 @@ class Vts_android_hardware_tests_bar_V1_0_IBar : public ::android::hardware::tes
 
     ::android::hardware::Return<void> expectNullHandle(
         const ::android::hardware::hidl_handle& arg0,
-        const ::android::hardware::tests::foo::V1_0::Abc& arg1, std::function<void(bool arg0,bool arg1)>) override;
+        const ::android::hardware::tests::foo::V1_0::Abc& arg1, std::function<void(bool arg0,bool arg1)> cb) override;
 
     ::android::hardware::Return<void> takeAMask(
         ::android::hardware::tests::foo::V1_0::IFoo::BitField arg0,
         uint8_t arg1,
         const ::android::hardware::tests::foo::V1_0::IFoo::MyMask& arg2,
-        uint8_t arg3, std::function<void(::android::hardware::tests::foo::V1_0::IFoo::BitField arg0,uint8_t arg1,uint8_t arg2,uint8_t arg3)>) override;
+        uint8_t arg3, std::function<void(::android::hardware::tests::foo::V1_0::IFoo::BitField arg0,uint8_t arg1,uint8_t arg2,uint8_t arg3)> cb) override;
 
     ::android::hardware::Return<sp<::android::hardware::tests::foo::V1_0::ISimple>> haveAInterface(
         const sp<::android::hardware::tests::foo::V1_0::ISimple>& arg0) override;
