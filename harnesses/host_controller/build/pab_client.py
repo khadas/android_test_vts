@@ -100,11 +100,11 @@ class PartnerAndroidBuildClient(object):
 
     def Authenticate(self):
         """Authenticate using OAuth2."""
-        logging.info('Parsing flags, use --noauth_local_webserver' \
-        'if running on remote machine')
+        logging.info('Parsing flags, use --noauth_local_webserver'
+                     ' if running on remote machine')
 
         parser = argparse.ArgumentParser(parents=[argparser])
-        flags = parser.parse_args()
+        flags, unknown = parser.parse_known_args()
 
         logging.info('Preparing OAuth token')
         flow = flow_from_clientsecrets(self.CLIENT_SECRETS, scope=self.SCOPE)
