@@ -22,6 +22,8 @@ cc_library_static {
         "VtsHalHidlTargetTestEnvBase.cpp"
     ],
 
+    cflags: ["-Wall", "-Werror"],
+
     shared_libs: [
         "libbase",
         "libhidlbase",
