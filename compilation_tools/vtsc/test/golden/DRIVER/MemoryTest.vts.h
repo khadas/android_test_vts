@@ -32,7 +32,7 @@ class Vts_android_hardware_tests_memory_V1_0_IMemoryTest : public ::android::har
     virtual ~Vts_android_hardware_tests_memory_V1_0_IMemoryTest() = default;
 
     ::android::hardware::Return<void> haveSomeMemory(
-        const ::android::hardware::hidl_memory& arg0, std::function<void(const ::android::hardware::hidl_memory& arg0)>) override;
+        const ::android::hardware::hidl_memory& arg0, std::function<void(const ::android::hardware::hidl_memory& arg0)> cb) override;
 
     ::android::hardware::Return<void> fillMemory(
         const ::android::hardware::hidl_memory& arg0,

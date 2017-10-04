@@ -33,7 +33,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
 
 
 ::android::hardware::Return<void> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemory(
-    const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__)), std::function<void(const ::android::hardware::hidl_memory& arg0)>) {
+    const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__)), std::function<void(const ::android::hardware::hidl_memory& arg0)> cb) {
     cout << "haveSomeMemory called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("haveSomeMemory"));
@@ -42,6 +42,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
     var_msg0->set_type(TYPE_HIDL_MEMORY);
     /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
     RpcCallToAgent(callback_message, callback_socket_name_);
+    cb(::android::hardware::hidl_memory());
     return ::android::hardware::Void();
 }
 
