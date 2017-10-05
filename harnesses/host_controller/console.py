@@ -257,12 +257,16 @@ class Console(cmd.Cmd):
             required=True,
             help=
             "Name of the artifact to be fetched. {id} replaced with build id.")
+        self._fetch_parser.add_argument(
+            "--userinfo_file",
+            help=
+            "Location of file containing email and password, if using POST.")
 
     def do_fetch(self, line):
         """Makes the host download a build artifact from PAB."""
         args = self._fetch_parser.ParseLine(line)
         # do we want this somewhere else? No harm in doing multiple times
-        self._pab_client.Authenticate()
+        self._pab_client.Authenticate(args.userinfo_file)
         self._pab_client.GetArtifact(
             account_id=args.account_id,
             branch=args.branch,

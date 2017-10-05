@@ -59,18 +59,22 @@ class PartnerAndroidBuildClient(object):
         CLIENT_STORAGE: string, path to store credentials.
         DEFAULT_CHUNK_SIZE: int, number of bytes to download at a time.
         DOWNLOAD_URL_KEY: string, index in downloadBuildArtifact containing url
+        EMAIL: string, email constant for userinfo JSON
         EXPIRED_XSRF_CODE: int, error code for expired XSRF token error
         GETBUILD_ARTIFACTS_KEY, string, index in build obj containing artifacts
         GMS_DOWNLOAD_URL: string, base url for downloading artifacts.
         LISTBUILD_BUILD_KEY: string, index in listBuild containing builds
         PAB_URL: string, redirect url from Google sign-in to PAB
+        PASSWORD: string, password constant for userinfo JSON
         SCOPE: string, URL for which to request access via oauth2.
         SVC_URL: string, path to buildsvc RPC
         XSRF_STORE: string, path to store xsrf token
         _credentials : oauth2client credentials object
+        _userinfo_file: location of file containing email and password
         _xsrf : string, XSRF token from PAB website. expires after 7 days.
     """
     _credentials = None
+    _userinfo_file = None
     _xsrf = None
     BAD_XSRF_CODE = -32000
     BASE_URL = 'https://partner.android.com'
@@ -85,12 +89,14 @@ class PartnerAndroidBuildClient(object):
     CLIENT_STORAGE = os.path.join(os.path.dirname(__file__), 'credentials')
     DEFAULT_CHUNK_SIZE = 1024
     DOWNLOAD_URL_KEY = '1'
+    EMAIL = 'email'
     EXPIRED_XSRF_CODE = -32001
     GETBUILD_ARTIFACTS_KEY = '2'
     GMS_DOWNLOAD_URL = 'https://partnerdash.google.com/build/gmsdownload'
     LISTBUILD_BUILD_KEY = '1'
     PAB_URL = ('https://www.google.com/accounts/Login?&continue='
                'https://partner.android.com/build/')
+    PASSWORD = 'password'
     # need both of these scopes to access PAB downloader
     scopes = ('https://www.googleapis.com/auth/partnerdash',
               'https://www.googleapis.com/auth/alkali-base')
@@ -98,14 +104,15 @@ class PartnerAndroidBuildClient(object):
     SVC_URL = urlparse.urljoin(BASE_URL, 'build/u/0/_gwt/_rpc/buildsvc')
     XSRF_STORE = os.path.join(os.path.dirname(__file__), 'xsrf')
 
-    def Authenticate(self):
+    def Authenticate(self, userinfo_file=None):
         """Authenticate using OAuth2."""
+        # this should be a JSON file with "email" and "password" string fields
+        self._userinfo_file = userinfo_file
         logging.info('Parsing flags, use --noauth_local_webserver'
                      ' if running on remote machine')
 
         parser = argparse.ArgumentParser(parents=[argparser])
         flags, unknown = parser.parse_known_args()
-
         logging.info('Preparing OAuth token')
         flow = flow_from_clientsecrets(self.CLIENT_SECRETS, scope=self.SCOPE)
         storage = Storage(self.CLIENT_STORAGE)
@@ -133,6 +140,16 @@ class PartnerAndroidBuildClient(object):
         Returns:
             boolean, whether the token was accessed and stored
         """
+        if self._userinfo_file is not None:
+            with open(self._userinfo_file, 'r') as handle:
+                userinfo = json.load(handle)
+
+            if self.EMAIL not in userinfo or self.PASSWORD not in userinfo:
+                raise ValueError('Malformed userinfo file: needs email and password')
+
+            email = userinfo[self.EMAIL]
+            password = userinfo[self.PASSWORD]
+
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.binary_location = self.CHROME_LOCATION
@@ -185,6 +202,8 @@ class PartnerAndroidBuildClient(object):
         Returns:
             dict, result from RPC call
         """
+        if self._xsrf is None:
+            self.GetXSRFToken()
         params = json.dumps(params)
 
         data = {"method": method, "params": params, "xsrf": self._xsrf}
