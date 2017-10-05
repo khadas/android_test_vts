@@ -73,22 +73,25 @@ class Console(cmd.Cmd):
         _in_file: The input file object.
         _out_file: The output file object.
         prompt: The prompt string at the beginning of each command line.
+        _fetch_parser: The parser for fetch command
         _lease_parser: The parser for lease command.
         _list_parser: The parser for list command.
         _request_parser: The parser for request command.
     """
 
-    def __init__(self, tfc, host_controllers,
+    def __init__(self, tfc, pab, host_controllers,
                  in_file=sys.stdin, out_file=sys.stdout):
         """Initializes the attributes and the parsers."""
         # cmd.Cmd is old-style class.
         cmd.Cmd.__init__(self, stdin=in_file, stdout=out_file)
+        self._pab_client = pab
         self._tfc_client = tfc
         self._hosts = host_controllers
         self._in_file = in_file
         self._out_file = out_file
         self.prompt = "> "
 
+        self._InitFetchParser()
         self._InitLeaseParser()
         self._InitListParser()
         self._InitRequestParser()
@@ -122,6 +125,7 @@ class Console(cmd.Cmd):
         self._tfc_client.NewRequest(req)
 
     def help_request(self):
+        """Prints help message for request command."""
         self._request_parser.print_help(self._out_file)
 
     def _InitListParser(self):
@@ -133,6 +137,14 @@ class Console(cmd.Cmd):
         self._list_parser.add_argument("type",
                                        choices=("hosts", "devices"),
                                        help="The type of the shown objects.")
+
+    def _Print(self, string):
+        """Prints a string and a new line character.
+
+        Args:
+            string: The string to be printed.
+        """
+        self._out_file.write(string + "\n")
 
     def do_list(self, line):
         """Shows information about the hosts."""
@@ -150,6 +162,7 @@ class Console(cmd.Cmd):
                 self._PrintDevices(devices)
 
     def help_list(self):
+        """Prints help message for list command."""
         self._list_parser.print_help(self._out_file)
 
     def _PrintHosts(self, hosts):
@@ -210,7 +223,61 @@ class Console(cmd.Cmd):
         self._PrintTasks(tasks)
 
     def help_lease(self):
+        """Prints help message for lease command."""
         self._lease_parser.print_help(self._out_file)
+
+    def _InitFetchParser(self):
+        """Initializes the parser for fetch command."""
+        self._fetch_parser = ConsoleArgumentParser("fetch",
+                                                   "Fetch a build artifact.")
+        self._fetch_parser.add_argument(
+            '--method',
+            default='GET',
+            choices=('GET', 'POST'),
+            help='Method for fetching')
+        self._fetch_parser.add_argument(
+            "--branch",
+            required=True,
+            help="Branch to grab the artifact from.")
+        self._fetch_parser.add_argument(
+            "--target",
+            required=True,
+            help="Target product to grab the artifact from.")
+        # TODO(lejonathan): find a way to not specify this?
+        self._fetch_parser.add_argument(
+            "--account_id",
+            required=True,
+            help="Partner Android Build account_id to use.")
+        self._fetch_parser.add_argument(
+            '--build_id',
+            default='latest',
+            help='Build ID to use default latest.')
+        self._fetch_parser.add_argument(
+            "--artifact_name",
+            required=True,
+            help=
+            "Name of the artifact to be fetched. {id} replaced with build id.")
+        self._fetch_parser.add_argument(
+            "--userinfo_file",
+            help=
+            "Location of file containing email and password, if using POST.")
+
+    def do_fetch(self, line):
+        """Makes the host download a build artifact from PAB."""
+        args = self._fetch_parser.ParseLine(line)
+        # do we want this somewhere else? No harm in doing multiple times
+        self._pab_client.Authenticate(args.userinfo_file)
+        self._pab_client.GetArtifact(
+            account_id=args.account_id,
+            branch=args.branch,
+            target=args.target,
+            artifact_name=args.artifact_name,
+            build_id=args.build_id,
+            method=args.method)
+
+    def help_fetch(self):
+        """Prints help message for fetch command."""
+        self._fetch_parser.print_help(self._out_file)
 
     def _PrintTasks(self, tasks):
         """Shows a list of command tasks.
@@ -231,15 +298,8 @@ class Console(cmd.Cmd):
         return True
 
     def help_exit(self):
+        """Prints help message for exit command."""
         self._Print("Terminate the console.")
-
-    def _Print(self, string):
-        """Prints a string and a new line character.
-
-        Args:
-            string: The string to be printed.
-        """
-        self._out_file.write(string + "\n")
 
     # @Override
     def onecmd(self, line):
