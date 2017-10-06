@@ -19,6 +19,7 @@ import cmd
 import sys
 
 from vts.harnesses.host_controller.tfc import request
+from vts.harnesses.host_controller.build import build_flasher
 
 
 class ConsoleArgumentError(Exception):
@@ -68,12 +69,14 @@ class Console(cmd.Cmd):
     """The console for host controllers.
 
     Attributes:
+        _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
         _hosts: A list of HostController objects.
         _in_file: The input file object.
         _out_file: The output file object.
         prompt: The prompt string at the beginning of each command line.
         _fetch_parser: The parser for fetch command
+        _flash_parser: The parser for flash command
         _lease_parser: The parser for lease command.
         _list_parser: The parser for list command.
         _request_parser: The parser for request command.
@@ -92,6 +95,7 @@ class Console(cmd.Cmd):
         self.prompt = "> "
 
         self._InitFetchParser()
+        self._InitFlashParser()
         self._InitLeaseParser()
         self._InitListParser()
         self._InitRequestParser()
@@ -278,6 +282,41 @@ class Console(cmd.Cmd):
     def help_fetch(self):
         """Prints help message for fetch command."""
         self._fetch_parser.print_help(self._out_file)
+
+    def _InitFlashParser(self):
+        """Initializes the parser for flash command."""
+        self._flash_parser = ConsoleArgumentParser("flash",
+                                                   "Flash images to a device.")
+        self._flash_parser.add_argument(
+            "--serial",
+            default="",
+            help="Serial number for device.")
+        self._flash_parser.add_argument(
+            "--build_dir",
+            help="Directory containing build images to be flashed.")
+        self._flash_parser.add_argument(
+            "--gsi",
+            help="Path to generic system image")
+        self._flash_parser.add_argument(
+            "--vbmeta",
+            help="Path to vbmeta image")
+
+    def do_flash(self, line):
+        """Flash GSI or build images to a device connected with ADB."""
+        args = self._flash_parser.ParseLine(line)
+        if args.gsi is None and args.build_dir is None:
+            self._flash_parser.error(
+                "Nothing requested: specify --gsi or --build_dir")
+
+        flasher = build_flasher.BuildFlasher(args.serial)
+        if args.build_dir is not None:
+            flasher.Flashall(args.build_dir)
+        if args.gsi is not None:
+            flasher.FlashGSI(args.gsi, args.vbmeta)
+
+    def help_flash(self):
+        """Prints help message for flash command."""
+        self._flash_parser.print_help(self._out_file)
 
     def _PrintTasks(self, tasks):
         """Shows a list of command tasks.

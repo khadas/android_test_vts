@@ -151,6 +151,29 @@ class ConsoleTest(unittest.TestCase):
             build_id='latest',
             method='POST')
 
+    @mock.patch('vts.harnesses.host_controller.'
+        'console.build_flasher.BuildFlasher')
+    def testFlashGSI(self, mock_class):
+        flasher = mock.Mock()
+        mock_class.return_value = flasher
+        self._IssueCommand("flash --gsi=system.img")
+        flasher.FlashGSI.assert_called_with('system.img', None)
+
+    @mock.patch('vts.harnesses.host_controller.'
+        'console.build_flasher.BuildFlasher')
+    def testFlashGSIWithVbmeta(self, mock_class):
+        flasher = mock.Mock()
+        mock_class.return_value = flasher
+        self._IssueCommand("flash --gsi=system.img --vbmeta=vbmeta.img")
+        flasher.FlashGSI.assert_called_with('system.img', 'vbmeta.img')
+
+    @mock.patch('vts.harnesses.host_controller.'
+        'console.build_flasher.BuildFlasher')
+    def testFlashall(self, mock_class):
+        flasher = mock.Mock()
+        mock_class.return_value = flasher
+        self._IssueCommand("flash --build_dir=path/to/dir/")
+        flasher.Flashall.assert_called_with('path/to/dir/')
 
 if __name__ == "__main__":
     unittest.main()
