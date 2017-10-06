@@ -19,6 +19,8 @@ cc_binary {
 
     srcs: ["VtsSancovConfigureMain.cpp"],
 
+    cflags: ["-Wall", "-Werror"],
+
     shared_libs: [
         "libbase",
         "libutils",

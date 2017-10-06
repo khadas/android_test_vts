@@ -58,8 +58,8 @@ public class VtsRetryFilterHelper extends RetryFilterHelper {
      * {@inheritDoc}
      */
     @Override
-    public VtsInvocationResult getResult() {
-        VtsInvocationResult result = null;
+    public IInvocationResult getResult() {
+        IInvocationResult result = null;
         try {
             result = ResultHandler.findResult(mBuild.getResultsDir(), mSessionId);
         } catch (FileNotFoundException e) {
@@ -77,15 +77,8 @@ public class VtsRetryFilterHelper extends RetryFilterHelper {
      */
     @Override
     public void validateBuildFingerprint(ITestDevice device) throws DeviceNotAvailableException {
-        VtsInvocationResult result = getResult();
-        String oldSystemFingerprint = result.getBuildSystemFingerprint();
-        String currentSystemFingerprint = device.getProperty("ro.build.fingerprint");
-        if (!oldSystemFingerprint.equals(currentSystemFingerprint)) {
-            throw new IllegalArgumentException(
-                    String.format("Device system fingerprint must match %s to retry session %d",
-                            oldSystemFingerprint, mSessionId));
-        }
-        String oldVendorFingerprint = result.getBuildVendorFingerprint();
+        IInvocationResult result = getResult();
+        String oldVendorFingerprint = result.getBuildFingerprint();
         String currentVendorFingerprint = device.getProperty("ro.vendor.build.fingerprint");
         if (!oldVendorFingerprint.equals(currentVendorFingerprint)) {
             throw new IllegalArgumentException(
