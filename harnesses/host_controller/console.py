@@ -276,14 +276,15 @@ class Console(cmd.Cmd):
         args = self._fetch_parser.ParseLine(line)
         # do we want this somewhere else? No harm in doing multiple times
         self._pab_client.Authenticate(args.userinfo_file)
-        filename = self._pab_client.GetArtifact(
+        dirname, filenames = self._pab_client.GetArtifact(
             account_id=args.account_id,
             branch=args.branch,
             target=args.target,
             artifact_name=args.artifact_name,
             build_id=args.build_id,
             method=args.method)
-        print("Filename: %s" % filename)
+        print("Dir name: %s" % dirname)
+        print("File names: %s" % filenames)
 
     def help_fetch(self):
         """Prints help message for fetch command."""
