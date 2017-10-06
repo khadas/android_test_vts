@@ -154,9 +154,7 @@ string GetCppVariableType(const std::string scalar_type_string) {
 }
 
 string GetCppVariableType(const VariableSpecificationMessage& arg,
-                          const ComponentSpecificationMessage* message,
-                          bool generate_const,
-                          int var_depth) {
+                          bool generate_const) {
   string result;
   switch (arg.type()) {
     case TYPE_VOID:
@@ -193,7 +191,7 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     }
     case TYPE_VECTOR:
     {
-      string element_type = GetCppVariableType(arg.vector_value(0), message);
+      string element_type = GetCppVariableType(arg.vector_value(0));
       result = "::android::hardware::hidl_vec<" + element_type + ">";
       break;
     }
@@ -295,30 +293,32 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
     }
     case TYPE_FMQ_SYNC:
     {
-      string element_type = GetCppVariableType(arg.fmq_value(0), message);
+      string element_type = GetCppVariableType(arg.fmq_value(0));
       result = "::android::hardware::MQDescriptorSync<" + element_type + ">";
       break;
     }
     case TYPE_FMQ_UNSYNC:
     {
-      string element_type = GetCppVariableType(arg.fmq_value(0), message);
+      string element_type = GetCppVariableType(arg.fmq_value(0));
       result = "::android::hardware::MQDescriptorUnsync<" + element_type + ">";
       break;
     }
     case TYPE_REF:
     {
-      string element_type = GetCppVariableType(arg.ref_value(), message,
-                                               false, var_depth + 1);
-      if (element_type.length() > 0) {
-        if (var_depth == 0) {
-          return "const " + element_type + " *";
-        } else {
-          return element_type + " *const";
-        }
+      VariableSpecificationMessage cur_val = arg;
+      int ref_depth = 0;
+      while (cur_val.type() == TYPE_REF) {
+        ref_depth++;
+        VariableSpecificationMessage temp = cur_val.ref_value();
+        cur_val = temp;
       }
-      cerr << __func__ << ":" << __LINE__ << " ERROR"
-           << " TYPE_REF malformed" << endl;
-      exit(-1);
+      string element_type = GetCppVariableType(cur_val);
+      result = element_type;
+      for (int i = 0; i < ref_depth; i++) {
+        result += " const*";
+      }
+      return result;
+      break;
     }
     default:
     {

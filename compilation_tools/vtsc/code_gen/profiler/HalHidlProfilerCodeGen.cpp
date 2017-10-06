@@ -274,7 +274,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQSyncVariable(
     Formatter& out, const VariableSpecificationMessage& val,
     const std::string& arg_name, const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_FMQ_SYNC);\n";
-  string element_type = GetCppVariableType(val.fmq_value(0), nullptr);
+  string element_type = GetCppVariableType(val.fmq_value(0));
   std::string queue_name = arg_name + "_q";
   std::string temp_result_name = arg_name + "_result";
   out << "MessageQueue<" << element_type << ", kSynchronizedReadWrite> "
@@ -302,7 +302,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
     Formatter& out, const VariableSpecificationMessage& val,
     const std::string& arg_name, const std::string& arg_value) {
   out << arg_name << "->set_type(TYPE_FMQ_UNSYNC);\n";
-  string element_type = GetCppVariableType(val.fmq_value(0), nullptr);
+  string element_type = GetCppVariableType(val.fmq_value(0));
   std::string queue_name = arg_name + "_q";
   std::string temp_result_name = arg_name + "_result";
   out << "MessageQueue<" << element_type << ", kUnsynchronizedWrite> "
@@ -359,9 +359,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     std::string arg_value = "arg_val_" + std::to_string(i);
     out << "auto *" << arg_name
         << " __attribute__((__unused__)) = msg.add_arg();\n";
-    out << GetCppVariableType(arg, &message) << " *" << arg_value
+    out << GetCppVariableType(arg) << " *" << arg_value
         << " __attribute__((__unused__)) = reinterpret_cast<"
-        << GetCppVariableType(arg, &message) << "*> ((*args)[" << i << "]);\n";
+        << GetCppVariableType(arg) << "*> ((*args)[" << i << "]);\n";
     out << "if (" << arg_value << " != nullptr) {\n";
     out.indent();
     GenerateProfilerForTypedVariable(out, arg, arg_name,
@@ -398,9 +398,9 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     std::string result_value = "result_val_" + std::to_string(i);
     out << "auto *" << result_name
         << " __attribute__((__unused__)) = msg.add_return_type_hidl();\n";
-    out << GetCppVariableType(arg, &message) << " *" << result_value
+    out << GetCppVariableType(arg) << " *" << result_value
         << " __attribute__((__unused__)) = reinterpret_cast<"
-        << GetCppVariableType(arg, &message) << "*> ((*args)[" << i << "]);\n";
+        << GetCppVariableType(arg) << "*> ((*args)[" << i << "]);\n";
     out << "if (" << result_value << " != nullptr) {\n";
     out.indent();
     GenerateProfilerForTypedVariable(out, arg, result_name,

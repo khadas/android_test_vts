@@ -114,7 +114,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
         return true;
     }
     if (!strcmp(func_name, "sendData")) {
-         ::android::hardware::hidl_vec<uint8_t> arg0;
+        ::android::hardware::hidl_vec<uint8_t> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
