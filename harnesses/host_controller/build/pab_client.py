@@ -23,6 +23,8 @@ import json
 import logging
 import os
 import requests
+import shutil
+import tempfile
 import urlparse
 from posixpath import join as path_urljoin
 
@@ -70,6 +72,7 @@ class PartnerAndroidBuildClient(object):
         SVC_URL: string, path to buildsvc RPC
         XSRF_STORE: string, path to store xsrf token
         _credentials : oauth2client credentials object
+        _tmp_dirpath: string, the temp dir path created to keep artifacts.
         _userinfo_file: location of file containing email and password
         _xsrf : string, XSRF token from PAB website. expires after 7 days.
     """
@@ -103,6 +106,16 @@ class PartnerAndroidBuildClient(object):
     SCOPE = ' '.join(scopes)
     SVC_URL = urlparse.urljoin(BASE_URL, 'build/u/0/_gwt/_rpc/buildsvc')
     XSRF_STORE = os.path.join(os.path.dirname(__file__), 'xsrf')
+
+    def __init__(self):
+        """Creates a temp dir."""
+        self._tmp_dirpath = tempfile.mkdtemp()
+
+    def __del__(self):
+        """Deletes the temp dir if still set."""
+        if self._tmp_dirpath:
+            shutil.rmtree(self._tmp_dirpath)
+            self._tmp_dirpath = None
 
     def Authenticate(self, userinfo_file=None):
         """Authenticate using OAuth2."""
@@ -495,5 +508,9 @@ class PartnerAndroidBuildClient(object):
             internal=False,
             method=method)
 
-        self.DownloadArtifact(url, artifact_name)
-        return artifact_name
+        if self._tmp_dirpath:
+            artifact_path = os.path.join(self._tmp_dirpath, artifact_name)
+        else:
+            artifact_path = artifact_name
+        self.DownloadArtifact(url, artifact_path)
+        return artifact_path
