@@ -117,17 +117,14 @@ class HalHidlCodeGen : public DriverCodeGenBase {
 
   // Generates the driver function implementation for a method.
   void GenerateDriverImplForMethod(Formatter& out,
-      const ComponentSpecificationMessage& message,
       const FunctionSpecificationMessage& func_msg);
 
   // Generates the code to perform a Hal function call.
   void GenerateHalFunctionCall(Formatter& out,
-      const ComponentSpecificationMessage& message,
       const FunctionSpecificationMessage& func_msg);
 
   // Generates the implementation of a callback passed to the Hal function call.
   void GenerateSyncCallbackFunctionImpl(Formatter& out,
-      const ComponentSpecificationMessage& message,
       const FunctionSpecificationMessage& func_msg);
 
   // Generates the driver function declaration for attributes defined within
@@ -205,10 +202,6 @@ class HalHidlCodeGen : public DriverCodeGenBase {
   // Returns true if we could omit the callback function and return result
   // directly.
   bool CanElideCallback(const FunctionSpecificationMessage& func_msg);
-  bool isElidableType(const VariableType& type);
-
-  // Returns true if a HIDL type uses 'const' in its native C/C++ form.
-  bool isConstType(const VariableType& type);
 
   // instance variable name (e.g., device_);
   static const char* const kInstanceVariableName;
