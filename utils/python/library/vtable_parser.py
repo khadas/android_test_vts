@@ -87,7 +87,7 @@ class VtableParser(object):
                               "stderr: %s" % (cmd, exit_code, stdout, stderr))
         return stdout
 
-    def _ParseOneVtable(self, lines):
+    def ParseOneVtable(self, lines):
         """Parses one vtable from output of vndk-vtable-dumper.
 
         Args:
@@ -153,7 +153,7 @@ class VtableParser(object):
         vtables = dict()
         try:
             while True:
-                vtable, symbols = self._ParseOneVtable(lines)
+                vtable, symbols = self.ParseOneVtable(lines)
                 vtables[vtable] = symbols
         except StopIteration:
             return vtables
