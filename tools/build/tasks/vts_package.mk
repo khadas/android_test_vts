@@ -150,6 +150,14 @@ host_camera_its_copy_pairs := \
   $(foreach f,$(host_camera_its_files),\
     cts/apps/CameraITS/$(f):$(VTS_TESTCASES_OUT)/CameraITS/$(f))
 
+host_acloud_files := \
+  $(call find-files-in-subdirs,tools/acloud,"*.py" -and -type f,.) \
+  $(call find-files-in-subdirs,tools/acloud,"*.config" -and -type f,.)
+
+host_acloud_copy_pairs := \
+  $(foreach f,$(host_acloud_files),\
+    tools/acloud/$(f):$(VTS_TESTCASES_OUT)/acloud/$(f))
+
 host_systrace_files := \
   $(filter-out .git/%, \
     $(call find-files-in-subdirs,external/chromium-trace,"*" -and -type f,.))
@@ -200,6 +208,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
   $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
+  $(call copy-many-files,$(host_acloud_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
