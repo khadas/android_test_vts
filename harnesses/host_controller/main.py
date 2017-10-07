@@ -32,23 +32,43 @@ from vts.harnesses.host_controller.tradefed import remote_client
 def main():
     """Parses arguments and starts console."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("config_file", type=argparse.FileType('r'),
+    parser.add_argument("--config_file",
+                        default=None,
+                        type=argparse.FileType('r'),
                         help="The configuration file in JSON format")
     parser.add_argument("--poll", action="store_true",
                         help="Disable console and start host controller "
                              "threads polling TFC.")
+    parser.add_argument("--use_tfc", action="store_true",
+                        help="Enable TFC (TradeFed Cluster).")
     args = parser.parse_args()
-    config_json = json.load(args.config_file)
+    if args.config_file:
+        config_json = json.load(args.config_file)
+    else:
+        config_json = {}
+        config_json["log_level"] = "DEBUG"
+        config_json["hosts"] = []
+        host_config = {}
+        host_config["cluster_ids"] = ["local-cluster-1",
+                                      "local-cluster-2"]
+        host_config["lease_interval_sec"] = 30
+        config_json["hosts"].append(host_config)
 
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, config_json["log_level"]))
 
-    tfc = tfc_client.CreateTfcClient(
-            config_json["tfc_api_root"],
-            config_json["service_key_json_path"],
-            api_name=config_json["tfc_api_name"],
-            api_version=config_json["tfc_api_version"],
-            scopes=config_json["tfc_scopes"])
+    tfc = None
+    if args.use_tfc:
+        if args.config_file:
+            tfc = tfc_client.CreateTfcClient(
+                    config_json["tfc_api_root"],
+                    config_json["service_key_json_path"],
+                    api_name=config_json["tfc_api_name"],
+                    api_version=config_json["tfc_api_version"],
+                    scopes=config_json["tfc_scopes"])
+        else:
+            print("WARN: If --use_tfc is set, --config_file argument value "
+                  "must be provided. Starting without TFC.")
 
     pab = pab_client.PartnerAndroidBuildClient()
 

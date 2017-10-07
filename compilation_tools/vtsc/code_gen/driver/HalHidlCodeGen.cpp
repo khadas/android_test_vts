@@ -22,9 +22,9 @@
 #include <sstream>
 #include <string>
 
-#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
-
 #include "VtsCompilerUtils.h"
+#include "code_gen/common/HalHidlCodeGenUtils.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "utils/InterfaceSpecUtil.h"
 #include "utils/StringUtil.h"
 
@@ -45,7 +45,7 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
     // Generate return statement.
     if (CanElideCallback(api)) {
       out << "::android::hardware::Return<"
-          << GetCppVariableType(api.return_type_hidl(0), &message) << "> ";
+          << GetCppVariableType(api.return_type_hidl(0)) << "> ";
     } else {
       out << "::android::hardware::Return<void> ";
     }
@@ -56,12 +56,8 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
     out.indent();
     for (int index = 0; index < api.arg_size(); index++) {
       const auto& arg = api.arg(index);
-      if (!isConstType(arg.type())) {
-        out << GetCppVariableType(arg, &message);
-      } else {
-        out << GetCppVariableType(arg, &message, true);
-      }
-      out << " arg" << index << " __attribute__((__unused__))";
+      out << GetCppVariableType(arg, IsConstType(arg.type())) << " arg" << index
+          << " __attribute__((__unused__))";
       if (index != (api.arg_size() - 1)) out << ",\n";
     }
     if (api.return_type_hidl_size() == 0 || CanElideCallback(api)) {
@@ -71,12 +67,8 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
       out << "std::function<void(";
       for (int index = 0; index < api.return_type_hidl_size(); index++) {
         const auto& return_val = api.return_type_hidl(index);
-        if (!isConstType(return_val.type())) {
-          out << GetCppVariableType(return_val, &message);
-        } else {
-          out << GetCppVariableType(return_val, &message, true);
-        }
-        out << " arg" << index;
+        out << GetCppVariableType(return_val, IsConstType(return_val.type()))
+            << " arg" << index;
         if (index != (api.return_type_hidl_size() - 1)) {
           out << ",";
         }
@@ -200,7 +192,7 @@ void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
     out.unindent();
     out << "}\n";
     for (auto const& api : message.interface().api()) {
-      GenerateDriverImplForMethod(out, message, api);
+      GenerateDriverImplForMethod(out, api);
     }
 
     GenerateDriverImplForReservedMethods(out);
@@ -229,7 +221,6 @@ void HalHidlCodeGen::GenerateDriverImplForReservedMethods(Formatter& out) {
 }
 
 void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
-    const ComponentSpecificationMessage& message,
     const FunctionSpecificationMessage& func_msg) {
   out << "if (!strcmp(func_name, \"" << func_msg.name() << "\")) {\n";
   out.indent();
@@ -237,13 +228,8 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   for (int i = 0; i < func_msg.arg_size(); i++) {
     const auto& arg = func_msg.arg(i);
     string cur_arg_name = "arg" + std::to_string(i);
-    string var_type;
-    if (arg.type() == TYPE_ARRAY || arg.type() == TYPE_VECTOR) {
-      var_type = GetCppVariableType(arg, &message, true);
-      var_type = var_type.substr(5, var_type.length() - 6);
-    } else {
-      var_type = GetCppVariableType(arg, &message);
-    }
+    string var_type = GetCppVariableType(arg);
+
     if (arg.type() == TYPE_POINTER ||
         (arg.type() == TYPE_SCALAR &&
          (arg.scalar_type() == "pointer" ||
@@ -271,20 +257,19 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
     const auto& return_val = func_msg.return_type_hidl(index);
     if (return_val.type() != TYPE_FMQ_SYNC &&
         return_val.type() != TYPE_FMQ_UNSYNC) {
-      out << GetCppVariableType(return_val, &message) << " result" << index
-          << ";\n";
+      out << GetCppVariableType(return_val) << " result" << index << ";\n";
     } else {
       // Use pointer to store return results with fmq type as copy assignment
       // is not allowed for fmq descriptor.
-      out << "std::unique_ptr<" << GetCppVariableType(return_val, &message)
-          << "> result" << index << ";\n";
+      out << "std::unique_ptr<" << GetCppVariableType(return_val) << "> result"
+          << index << ";\n";
     }
   }
   if (CanElideCallback(func_msg)) {
     out << "result0 = ";
-    GenerateHalFunctionCall(out, message, func_msg);
+    GenerateHalFunctionCall(out, func_msg);
   } else {
-    GenerateHalFunctionCall(out, message, func_msg);
+    GenerateHalFunctionCall(out, func_msg);
   }
 
   GenerateCodeToStopMeasurement(out);
@@ -306,7 +291,6 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
 }
 
 void HalHidlCodeGen::GenerateHalFunctionCall(Formatter& out,
-    const ComponentSpecificationMessage& message,
     const FunctionSpecificationMessage& func_msg) {
   out << kInstanceVariableName << "->" << func_msg.name() << "(";
   for (int index = 0; index < func_msg.arg_size(); index++) {
@@ -317,23 +301,18 @@ void HalHidlCodeGen::GenerateHalFunctionCall(Formatter& out,
     out << ");\n";
   } else {
     out << (func_msg.arg_size() != 0 ? ", " : "");
-    GenerateSyncCallbackFunctionImpl(out, message, func_msg);
+    GenerateSyncCallbackFunctionImpl(out, func_msg);
     out << ");\n";
   }
 }
 
 void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
-    const ComponentSpecificationMessage& message,
     const FunctionSpecificationMessage& func_msg) {
   out << "[&](";
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     const auto& return_val = func_msg.return_type_hidl(index);
-    if (!isConstType(return_val.type())) {
-      out << GetCppVariableType(return_val, &message);
-    } else {
-      out << GetCppVariableType(return_val, &message, true);
-    }
-    out << " arg" << index;
+    out << GetCppVariableType(return_val, IsConstType(return_val.type()))
+        << " arg" << index;
     if (index != (func_msg.return_type_hidl_size() - 1)) out << ",";
   }
   out << "){\n";
@@ -348,8 +327,7 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
       out << "result" << index << " = arg" << index << ";\n";
     } else {
       out << "result" << index << ".reset(new (std::nothrow) "
-          << GetCppVariableType(return_val, &message) << "(arg" << index
-          << "));\n";
+          << GetCppVariableType(return_val) << "(arg" << index << "));\n";
     }
   }
   out.unindent();
@@ -494,7 +472,7 @@ void HalHidlCodeGen::GenerateHeaderInterfaceImpl(
     // Generate return statement.
     if (CanElideCallback(api)) {
       out << "::android::hardware::Return<"
-          << GetCppVariableType(api.return_type_hidl(0), &message) << "> ";
+          << GetCppVariableType(api.return_type_hidl(0)) << "> ";
     } else {
       out << "::android::hardware::Return<void> ";
     }
@@ -503,12 +481,8 @@ void HalHidlCodeGen::GenerateHeaderInterfaceImpl(
     out.indent();
     for (int index = 0; index < api.arg_size(); index++) {
       const auto& arg = api.arg(index);
-      if (!isConstType(arg.type())) {
-        out << GetCppVariableType(arg, &message);
-      } else {
-        out << GetCppVariableType(arg, &message, true);
-      }
-      out << " arg" << index;
+      out << GetCppVariableType(arg, IsConstType(arg.type())) << " arg"
+          << index;
       if (index != (api.arg_size() - 1)) out << ",\n";
     }
     if (api.return_type_hidl_size() == 0 || CanElideCallback(api)) {
@@ -518,12 +492,8 @@ void HalHidlCodeGen::GenerateHeaderInterfaceImpl(
       out << "std::function<void(";
       for (int index = 0; index < api.return_type_hidl_size(); index++) {
         const auto& return_val = api.return_type_hidl(index);
-        if (!isConstType(return_val.type())) {
-          out << GetCppVariableType(return_val, &message);
-        } else {
-          out << GetCppVariableType(return_val, &message, true);
-        }
-        out << " arg" << index;
+        out << GetCppVariableType(return_val, IsConstType(return_val.type()))
+            << " arg" << index;
         if (index != (api.return_type_hidl_size() - 1)) out << ",";
       }
       out << ")> cb) override;\n\n";
@@ -1152,8 +1122,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       if (arg_name.find("->") != std::string::npos) {
         cout << "Nested structure with fmq is not supported yet." << endl;
       } else {
-        std::string element_type =
-            GetCppVariableType(val.fmq_value(0), nullptr);
+        std::string element_type = GetCppVariableType(val.fmq_value(0));
         std::string queue_name = arg_name + "_sync_q";
         // TODO(zhuoyao): consider record and use the queue capacity.
         out << "::android::hardware::MessageQueue<" << element_type
@@ -1169,8 +1138,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
         out << queue_name << ".write(&" << fmq_item_name << ");\n";
         out.unindent();
         out << "}\n";
-        out << GetCppVariableType(val, nullptr) << " " << arg_name << "(*"
-            << queue_name << ".getDesc());\n";
+        out << GetCppVariableType(val) << " " << arg_name << "(*" << queue_name
+            << ".getDesc());\n";
       }
       break;
     }
@@ -1179,8 +1148,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       if (arg_name.find("->") != std::string::npos) {
         cout << "Nested structure with fmq is not supported yet." << endl;
       } else {
-        std::string element_type =
-            GetCppVariableType(val.fmq_value(0), nullptr);
+        std::string element_type = GetCppVariableType(val.fmq_value(0));
         std::string queue_name = arg_name + "_unsync_q";
         // TODO(zhuoyao): consider record and use the queue capacity.
         out << "::android::hardware::MessageQueue<" << element_type << ", "
@@ -1196,8 +1164,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
         out << queue_name << ".write(&" << fmq_item_name << ");\n";
         out.unindent();
         out << "}\n";
-        out << GetCppVariableType(val, nullptr) << " " << arg_name << "(*"
-            << queue_name << ".getDesc());\n";
+        out << GetCppVariableType(val) << " " << arg_name << "(*" << queue_name
+            << ".getDesc());\n";
       }
       break;
     }
@@ -1769,27 +1737,7 @@ bool HalHidlCodeGen::CanElideCallback(
   if (type == TYPE_ARRAY || type == TYPE_VECTOR || type == TYPE_REF) {
     return false;
   }
-  return isElidableType(type);
-}
-
-bool HalHidlCodeGen::isElidableType(const VariableType& type) {
-  if (type == TYPE_SCALAR || type == TYPE_ENUM || type == TYPE_MASK
-      || type == TYPE_POINTER || type == TYPE_HIDL_INTERFACE
-      || type == TYPE_VOID) {
-    return true;
-  }
-  return false;
-}
-
-bool HalHidlCodeGen::isConstType(const VariableType& type) {
-  if (type == TYPE_ARRAY || type == TYPE_VECTOR || type == TYPE_REF ||
-      type == TYPE_HIDL_INTERFACE) {
-    return true;
-  }
-  if (isElidableType(type)) {
-    return false;
-  }
-  return true;
+  return IsElidableType(type);
 }
 
 }  // namespace vts

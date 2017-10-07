@@ -21,6 +21,11 @@ import sys
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
 
+# The default Partner Android Build (PAB) public account.
+# To obtain access permission, please reach out to Android partner engineering
+# department of Google LLC.
+_DEFAULT_ACCOUNT_ID = '543365459'
+
 
 class ConsoleArgumentError(Exception):
     """Raised when the console fails to parse commands."""
@@ -250,7 +255,7 @@ class Console(cmd.Cmd):
         # TODO(lejonathan): find a way to not specify this?
         self._fetch_parser.add_argument(
             "--account_id",
-            required=True,
+            default=_DEFAULT_ACCOUNT_ID,
             help="Partner Android Build account_id to use.")
         self._fetch_parser.add_argument(
             '--build_id',
@@ -271,13 +276,15 @@ class Console(cmd.Cmd):
         args = self._fetch_parser.ParseLine(line)
         # do we want this somewhere else? No harm in doing multiple times
         self._pab_client.Authenticate(args.userinfo_file)
-        self._pab_client.GetArtifact(
+        dirname, filenames = self._pab_client.GetArtifact(
             account_id=args.account_id,
             branch=args.branch,
             target=args.target,
             artifact_name=args.artifact_name,
             build_id=args.build_id,
             method=args.method)
+        print("Dir name: %s" % dirname)
+        print("File names: %s" % filenames)
 
     def help_fetch(self):
         """Prints help message for fetch command."""

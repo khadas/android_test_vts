@@ -32,6 +32,7 @@ class ElfParser(object):
         _file: The ELF file object.
         _file_size: Size of the ELF.
         bitness: Bitness of the ELF.
+        _machine: The instruction set architecture of the ELF.
         _address_size: Size of address or offset in the ELF.
         _offsets: Offset of each entry in the ELF.
         _seek_read_address: The function to read an address or offset entry
@@ -193,6 +194,7 @@ class ElfParser(object):
         else:
             raise ElfError("Wrong bitness value.")
 
+        self._machine = self._SeekRead16(elf_consts.MACHINE_OFFSET)
         self._sh_offset = self._seek_read_address(
                 self._offsets.SECTION_HEADER_OFFSET)
         self._sh_size = self._SeekRead16(self._offsets.SECTION_HEADER_SIZE)
@@ -251,6 +253,25 @@ class ElfParser(object):
         names = [self._SeekReadString(strtab_offset + x)
                  for x in name_offsets]
         return names
+
+    def MatchCpuAbi(self, abi):
+        """Returns whether the ELF matches the ABI.
+
+        Args:
+            abi: A string, the name of the ABI.
+
+        Returns:
+            A boolean, whether the ELF matches the ABI.
+        """
+        for abi_prefix, machine in (("arm64", elf_consts.MACHINE_AARCH64),
+                                    ("arm", elf_consts.MACHINE_ARM),
+                                    ("mips64", elf_consts.MACHINE_MIPS),
+                                    ("mips", elf_consts.MACHINE_MIPS),
+                                    ("x86_64", elf_consts.MACHINE_X86_64),
+                                    ("x86", elf_consts.MACHINE_X86)):
+            if abi.startswith(abi_prefix):
+                return self._machine == machine
+        return False
 
     def ListDependencies(self):
         """Lists the shared libraries that the ELF depends on.
