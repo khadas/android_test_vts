@@ -122,7 +122,14 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             service_names = map(lambda x: x[x.find('/') + 1:], out)
             logging.info("registered service: %s with name: %s" %
                          (service, ' '.join(service_names)))
-            service_instances[service] = service_names
+            if not service_names:
+                logging.error("No service name found for: %s, skip all tests.", service)
+                self._skip_all_testcases = True
+                # If any of the test services are not available, return the
+                # initial test cases directly.
+                return initial_test_cases
+            else:
+                service_instances[service] = service_names
 
         # get all the combination of service instances.
         service_instance_combinations = self._GetServiceInstancesCombinations(
