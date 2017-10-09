@@ -197,9 +197,6 @@ class BinaryTest(base_test.BaseTestClass):
             self.coverage.LoadArtifacts()
             self.coverage.InitializeDeviceCoverage(self._dut)
 
-        # TODO: only set permissive mode for userdebug and eng build.
-        self.shell.Execute("setenforce 0")  # SELinux permissive mode
-
         self.testcases = []
 
         ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
