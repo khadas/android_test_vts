@@ -41,6 +41,9 @@ def main():
                              "threads polling TFC.")
     parser.add_argument("--use_tfc", action="store_true",
                         help="Enable TFC (TradeFed Cluster).")
+    parser.add_argument("--script",
+                        default=None,
+                        help="The path to a script file in .py format")
     args = parser.parse_args()
     if args.config_file:
         config_json = json.load(args.config_file)
@@ -94,7 +97,11 @@ def main():
         while True:
             sys.stdin.readline()
     else:
-        console.Console(tfc, pab, hosts).cmdloop()
+        main_console = console.Console(tfc, pab, hosts)
+        if args.script:
+            main_console.ProcessScript(args.script)
+        else:
+            main_console.cmdloop()
 
 
 if __name__ == "__main__":
