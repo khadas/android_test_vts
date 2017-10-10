@@ -18,6 +18,7 @@ LOCAL_PATH := $(call my-dir)
 
 build_utils_dir := $(LOCAL_PATH)/../utils
 
+include $(LOCAL_PATH)/list/vts_adapter_package_list.mk
 include $(LOCAL_PATH)/list/vts_apk_package_list.mk
 include $(LOCAL_PATH)/list/vts_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_lib_package_list.mk
@@ -54,6 +55,7 @@ target_native_modules := \
     $(kselftest_modules) \
     ltp \
     $(ltp_packages) \
+    $(vts_adapter_package_list) \
     $(vts_apk_packages) \
     $(vts_bin_packages) \
     $(vts_lib_packages) \
