@@ -17,10 +17,13 @@
 import argparse
 import cmd
 import imp  # Python v2 compatibility
+import logging
+import subprocess
 import sys
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
+from vts.harnesses.host_controller.build import build_provider_local_fs
 
 # The default Partner Android Build (PAB) public account.
 # To obtain access permission, please reach out to Android partner engineering
@@ -75,6 +78,8 @@ class Console(cmd.Cmd):
     """The console for host controllers.
 
     Attributes:
+        device_image_info: dict containing info about device image files.
+        test_suite_info: dict containing info about test suite package files.
         _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
         _hosts: A list of HostController objects.
@@ -93,12 +98,16 @@ class Console(cmd.Cmd):
         """Initializes the attributes and the parsers."""
         # cmd.Cmd is old-style class.
         cmd.Cmd.__init__(self, stdin=in_file, stdout=out_file)
-        self._pab_client = pab
+        self._build_provider = {}
+        self._build_provider["pab"] = pab
+        self._build_provider["local_fs"] = build_provider_local_fs.BuildProviderLocalFS()
         self._tfc_client = tfc
         self._hosts = host_controllers
         self._in_file = in_file
         self._out_file = out_file
         self.prompt = "> "
+        self.device_image_info = {}
+        self.test_suite_info = {}
 
         self._InitFetchParser()
         self._InitFlashParser()
@@ -268,17 +277,23 @@ class Console(cmd.Cmd):
         self._fetch_parser = ConsoleArgumentParser("fetch",
                                                    "Fetch a build artifact.")
         self._fetch_parser.add_argument(
+            '--type',
+            default='pab',
+            choices=('local_fs', 'pab'),
+            help='Build provider type')
+        self._fetch_parser.add_argument(
             '--method',
             default='GET',
             choices=('GET', 'POST'),
             help='Method for fetching')
         self._fetch_parser.add_argument(
-            "--branch",
-            required=True,
+            "--path",  # required for local_fs
+            help="The path of a local directory which keeps the artifacts.")
+        self._fetch_parser.add_argument(
+            "--branch",  # required for pab
             help="Branch to grab the artifact from.")
         self._fetch_parser.add_argument(
-            "--target",
-            required=True,
+            "--target",  # required for pab
             help="Target product to grab the artifact from.")
         # TODO(lejonathan): find a way to not specify this?
         self._fetch_parser.add_argument(
@@ -290,8 +305,7 @@ class Console(cmd.Cmd):
             default='latest',
             help='Build ID to use default latest.')
         self._fetch_parser.add_argument(
-            "--artifact_name",
-            required=True,
+            "--artifact_name",  # required for pab
             help=
             "Name of the artifact to be fetched. {id} replaced with build id.")
         self._fetch_parser.add_argument(
@@ -302,17 +316,25 @@ class Console(cmd.Cmd):
     def do_fetch(self, line):
         """Makes the host download a build artifact from PAB."""
         args = self._fetch_parser.ParseLine(line)
-        # do we want this somewhere else? No harm in doing multiple times
-        self._pab_client.Authenticate(args.userinfo_file)
-        dirname, filenames = self._pab_client.GetArtifact(
-            account_id=args.account_id,
-            branch=args.branch,
-            target=args.target,
-            artifact_name=args.artifact_name,
-            build_id=args.build_id,
-            method=args.method)
-        print("Dir name: %s" % dirname)
-        print("File names: %s" % filenames)
+        if args.type == "pab":
+            # do we want this somewhere else? No harm in doing multiple times
+            self._build_provider[args.type].Authenticate(args.userinfo_file)
+            device_images, test_suites = self._build_provider[args.type].GetArtifact(
+                account_id=args.account_id,
+                branch=args.branch,
+                target=args.target,
+                artifact_name=args.artifact_name,
+                build_id=args.build_id,
+                method=args.method)
+        elif args.type == "local_fs":
+            device_images, test_suites = self._build_provider[args.type].Fetch(
+                args.path)
+
+        self.device_image_info.update(device_images)
+        self.test_suite_info.update(test_suites)
+
+        print("device images: %s" % self.device_image_info)
+        print("test suites: %s" % self.test_suite_info)
 
     def help_fetch(self):
         """Prints help message for fetch command."""
@@ -322,6 +344,10 @@ class Console(cmd.Cmd):
         """Initializes the parser for flash command."""
         self._flash_parser = ConsoleArgumentParser("flash",
                                                    "Flash images to a device.")
+        self._flash_parser.add_argument(
+            "--current",
+            action="store_true",
+            help="If set, flash the currently fetched artifacts.")
         self._flash_parser.add_argument(
             "--serial",
             default="",
@@ -339,15 +365,18 @@ class Console(cmd.Cmd):
     def do_flash(self, line):
         """Flash GSI or build images to a device connected with ADB."""
         args = self._flash_parser.ParseLine(line)
-        if args.gsi is None and args.build_dir is None:
-            self._flash_parser.error(
-                "Nothing requested: specify --gsi or --build_dir")
 
         flasher = build_flasher.BuildFlasher(args.serial)
-        if args.build_dir is not None:
-            flasher.Flashall(args.build_dir)
-        if args.gsi is not None:
-            flasher.FlashGSI(args.gsi, args.vbmeta)
+        if args.current:
+            flasher.Flash(self.device_image_info)
+        else:
+            if args.gsi is None and args.build_dir is None:
+                self._flash_parser.error(
+                    "Nothing requested: specify --gsi or --build_dir")
+            if args.build_dir is not None:
+                flasher.Flashall(args.build_dir)
+            if args.gsi is not None:
+                flasher.FlashGSI(args.gsi, args.vbmeta)
 
     def help_flash(self):
         """Prints help message for flash command."""
