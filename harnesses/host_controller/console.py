@@ -16,6 +16,7 @@
 
 import argparse
 import cmd
+import imp  # Python v2 compatibility
 import sys
 
 from vts.harnesses.host_controller.tfc import request
@@ -123,6 +124,33 @@ class Console(cmd.Cmd):
                 help='The command to be executed. If the command contains '
                      'arguments starting with "-", place the command after '
                      '"--" at end of line.')
+
+    def ProcessScript(self, script_file_path):
+        """Processes a .py script file.
+
+        A script file implements a function which emits a list of console
+        commands to execute. That function emits an empty list or None if
+        no more command needs to be processed.
+
+        Args:
+            script_file_path: string, the path of a script file (.py file).
+
+        Returns:
+            True if successful; False otherwise
+        """
+        if not script_file_path.endswith(".py"):
+            print("Script file is not .py file: %s" % script_file_path)
+            return False
+
+        script_module = imp.load_source('script_module', script_file_path)
+        while True:
+            commands = script_module.EmitConsoleCommands()
+            if not commands:
+                break
+            for command in commands:
+                print("Command: %s" % command)
+                self.onecmd(command)
+        return True
 
     def do_request(self, line):
         """Sends TFC a request to execute a command."""
