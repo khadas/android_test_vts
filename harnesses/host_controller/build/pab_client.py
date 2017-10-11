@@ -23,8 +23,6 @@ import json
 import logging
 import os
 import requests
-import shutil
-import tempfile
 import urlparse
 import zipfile
 from posixpath import join as path_urljoin
@@ -42,12 +40,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 
+from vts.harnesses.host_controller.build import build_provider
+
 # constants for GET and POST endpoints
 GET = 'GET'
 POST = 'POST'
 
 
-class PartnerAndroidBuildClient(object):
+class PartnerAndroidBuildClient(build_provider.BuildProvider):
     """Client that manages Partner Android Build downloading.
 
     Attributes:
@@ -73,7 +73,6 @@ class PartnerAndroidBuildClient(object):
         SVC_URL: string, path to buildsvc RPC
         XSRF_STORE: string, path to store xsrf token
         _credentials : oauth2client credentials object
-        _tmp_dirpath: string, the temp dir path created to keep artifacts.
         _userinfo_file: location of file containing email and password
         _xsrf : string, XSRF token from PAB website. expires after 7 days.
     """
@@ -110,13 +109,7 @@ class PartnerAndroidBuildClient(object):
 
     def __init__(self):
         """Creates a temp dir."""
-        self._tmp_dirpath = tempfile.mkdtemp()
-
-    def __del__(self):
-        """Deletes the temp dir if still set."""
-        if self._tmp_dirpath:
-            shutil.rmtree(self._tmp_dirpath)
-            self._tmp_dirpath = None
+        super(PartnerAndroidBuildClient, self).__init__()
 
     def Authenticate(self, userinfo_file=None):
         """Authenticate using OAuth2."""
@@ -341,10 +334,11 @@ class PartnerAndroidBuildClient(object):
             len(build_list))
 
     def GetBuildArtifacts(
-            self, account_id,
-            build_id, branch,
-            target, method=POST):
-        """Get the list of build artifacts for an account, build, target, branch
+            self, account_id, build_id, branch, target, method=POST):
+        """Get the list of build artifacts.
+
+        For an account, build, target, branch.
+
         Args:
             account_id: int, ID associated with the PAB account.
             build_id: string, ID of the build
@@ -466,13 +460,12 @@ class PartnerAndroidBuildClient(object):
             target: string, "latest" or a specific version.
             artifact_name: name of artifact, e.g. aosp_arm64_ab-img-4353141.zip
                 ({id} will automatically get replaced with build ID)
+            build_id: string, build ID of an artifact to fetch (or 'latest').
             method: 'GET' or 'POST', which endpoint to query
             unzip: boolean, True to unzip the artifact if that's a zip file.
 
         Returns:
-            a string, the path of a directory which contains the returned files.
-            a list of strings, each string has the path of downloaded artifact
-                file which is either .img file or .zip file.
+            a dict containing the device image info.
         """
         if build_id == 'latest':
             build_id = self.GetLatestBuildId(account_id=account_id,
@@ -510,25 +503,31 @@ class PartnerAndroidBuildClient(object):
                                   internal=False,
                                   method=method)
 
-        if self._tmp_dirpath:
-            artifact_path = os.path.join(self._tmp_dirpath, artifact_name)
+        if self.tmp_dirpath:
+            artifact_path = os.path.join(self.tmp_dirpath, artifact_name)
         else:
             artifact_path = artifact_name
         self.DownloadArtifact(url, artifact_path)
         dirname = os.path.dirname(artifact_path)
         if unzip and artifact_path.endswith(".zip"):
-            dirname = os.path.join(dirname,
-                                   os.path.basename(artifact_path) + ".dir")
-            # Considering getting the list of contained files and unzipping
-            # only selected files (e.g., img files) if large files will be
-            # distributed.
-            with zipfile.ZipFile(artifact_path, 'r') as zip_ref:
-                zip_ref.extractall(artifact_path + ".dir")
-                artifact_paths = map(
-                    lambda filename: os.path.join(dirname, filename) if (
-                        filename and (filename.endswith(".img")
-                                      or filename.endswith(".zip"))) else None,
-                    zip_ref.namelist())
-                return dirname, filter(None, artifact_paths)
-        else:
-            return dirname, [artifact_path]
+            if artifact_path.endswith("android-vts.zip"):
+                self.SetTestSuitePackage("vts", artifact_path)
+            else:
+                dirname = os.path.join(dirname,
+                                       os.path.basename(artifact_path) + ".dir")
+                # Considering getting the list of contained files and unzipping
+                # only selected files (e.g., img files) if large files will be
+                # distributed.
+                with zipfile.ZipFile(artifact_path, 'r') as zip_ref:
+                    zip_ref.extractall(artifact_path + ".dir")
+                    artifact_paths = map(
+                        lambda filename: os.path.join(dirname, filename) if (
+                            filename and (filename.endswith(".img")
+                                          or filename.endswith(".zip"))) else None,
+                        zip_ref.namelist())
+                    artifact_paths = filter(None, artifact_paths)
+                    if artifact_paths:
+                        for path in artifact_paths:
+                            if path.endswith("system.img"):
+                                self.SetDeviceImage("system", path)
+        return self.GetDeviceImage(), self.GetTestSuitePackage()
