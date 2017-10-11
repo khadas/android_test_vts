@@ -114,6 +114,7 @@ class Console(cmd.Cmd):
         self._InitLeaseParser()
         self._InitListParser()
         self._InitRequestParser()
+        self._InitTestParser()
 
     def _InitRequestParser(self):
         """Initializes the parser for request command."""
@@ -381,6 +382,39 @@ class Console(cmd.Cmd):
     def help_flash(self):
         """Prints help message for flash command."""
         self._flash_parser.print_help(self._out_file)
+
+    def _InitTestParser(self):
+        """Initializes the parser for test command."""
+        self._test_parser = ConsoleArgumentParser(
+                "test", "Executes a command on TF.")
+        self._test_parser.add_argument(
+                "--serial", default=None,
+                help="The target device serial to run the command.")
+        self._test_parser.add_argument(
+                "--test_exec_mode", default="subprocess",
+                help="The target exec model.")
+        self._test_parser.add_argument(
+                "command", metavar="COMMAND", nargs="+",
+                help='The command to be executed. If the command contains '
+                     'arguments starting with "-", place the command after '
+                     '"--" at end of line. format: plan -m module -t testcase')
+
+    def do_test(self, line):
+        """Executes a command using a VTS-TF instance."""
+        args = self._test_parser.ParseLine(line)
+        if args.test_exec_mode == "subprocess":
+            bin_path = self.test_suite_info["vts"]
+            cmd = [bin_path, "run"]
+            cmd.extend(line.split())
+            print("Command: %s" % cmd)
+            result = subprocess.check_output(cmd)
+            logging.debug("result: %s", result)
+        else:
+            print("unsupported exec mode: %s", args.test_exec_mode)
+
+    def help_test(self):
+        """Prints help message for test command."""
+        self._test_parser.print_help(self._out_file)
 
     def _PrintTasks(self, tasks):
         """Shows a list of command tasks.
