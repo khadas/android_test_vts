@@ -144,7 +144,14 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             service_names |= set(
                 hal_service_name_utils.GetServiceNamesFromVintf(
                     framework_vintf_xml, service))
-            service_instances[service] = service_names
+            if not service_names:
+                logging.error("No service name found for: %s, skip all tests.", service)
+                self._skip_all_testcases = True
+                # If any of the test services are not available, return the
+                # initial test cases directly.
+                return initial_test_cases
+            else:
+                service_instances[service] = service_names
         logging.info("registered service instances: %s", service_instances)
 
         # get all the combination of service instances.
