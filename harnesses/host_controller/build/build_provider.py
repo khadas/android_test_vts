@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+import os
 import shutil
 import tempfile
 
@@ -36,7 +37,10 @@ class BuildProvider(object):
     def __init__(self):
         self._device_images = {}
         self._test_suites = {}
-        self._tmp_dirpath = tempfile.mkdtemp()
+        tempdir_base = os.path.join(os.getcwd(), "tmp")
+        if not os.path.exists(tempdir_base):
+            os.mkdir(tempdir_base)
+        self._tmp_dirpath = tempfile.mkdtemp(dir=tempdir_base)
 
     def __del__(self):
         """Deletes the temp dir if still set."""
