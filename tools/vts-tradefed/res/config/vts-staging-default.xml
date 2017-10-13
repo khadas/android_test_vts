@@ -30,6 +30,6 @@
     <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
     <!-- for Hal -->
-    <option name="compatibility:include-filter" value="VtsHalCasV1_0Target" />
+
 
 </configuration>
