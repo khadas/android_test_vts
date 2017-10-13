@@ -103,8 +103,8 @@ class BuildFlasher(object):
             logging.warn("Flash skipped because no device image is given.")
             return False
 
-        self.device.adb.wait_for_device()
         if not self.device.isBootloaderMode:
+            self.device.adb.wait_for_device()
             print("rebooting to bootloader")
             self.device.log.info(self.device.adb.reboot_bootloader())
         print("starting to flash vendor and other images...")
