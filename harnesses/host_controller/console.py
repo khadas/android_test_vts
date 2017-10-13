@@ -153,10 +153,8 @@ class Console(cmd.Cmd):
             return False
 
         script_module = imp.load_source('script_module', script_file_path)
-        while True:
-            commands = script_module.EmitConsoleCommands()
-            if not commands:
-                break
+        commands = script_module.EmitConsoleCommands()
+        if commands:
             for command in commands:
                 print("Command: %s" % command)
                 self.onecmd(command)
