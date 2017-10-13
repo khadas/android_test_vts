@@ -42,12 +42,14 @@ class BuildFlasher(object):
         else:
             serials = android_device.list_adb_devices()
             if len(serials) == 0:
-                raise android_device.AndroidDeviceError(
-                    "ADB could not find any target devices.")
+                serials = android_device.list_fastboot_devices()
+                if len(serials) == 0:
+                    raise android_device.AndroidDeviceError(
+                        "ADB and fastboot could not find any target devices.")
             if len(serials) > 1:
-                raise android_device.AndroidDeviceError(
-                    "ADB found more than one device: %s" % serials)
-            self.device = android_device.AndroidDevice(serials[0])
+                print("ADB or fastboot found more than one device: %s" % serials)
+            self.device = android_device.AndroidDevice(
+                serials[0], device_callback_port=-1)
 
     def FlashGSI(self, system_img, vbmeta_img=None, skip_check=False):
         """Flash the Generic System Image to the device.
