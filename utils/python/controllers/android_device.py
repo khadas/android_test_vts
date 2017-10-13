@@ -326,6 +326,8 @@ class AndroidDevice(object):
                 for adb port forwarding (for command-response sessions).
         device_callback_port: int, the port number used on the Android device
                 for adb port reverse forwarding (for callback sessions).
+                Set -1 if callback is not needed (e.g., when this class is used
+                as an adb library).
         log: A logger project with a device-specific prefix for each line -
              [AndroidDevice|<serial>]
         log_path: A string that is the path where all logs collected on this
@@ -370,8 +372,9 @@ class AndroidDevice(object):
             self.rootAdb()
         self.host_command_port = None
         self.host_callback_port = adb.get_available_host_port()
-        self.adb.reverse_tcp_forward(self.device_callback_port,
-                                     self.host_callback_port)
+        if self.device_callback_port >= 0:
+            self.adb.reverse_tcp_forward(self.device_callback_port,
+                                         self.host_callback_port)
         self.hal = None
         self.lib = None
         self.shell = None
