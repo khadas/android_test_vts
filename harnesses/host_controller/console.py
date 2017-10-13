@@ -25,6 +25,7 @@ import sys
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
+from vts.harnesses.host_controller.build import build_provider_ab
 from vts.harnesses.host_controller.build import build_provider_local_fs
 
 # The default Partner Android Build (PAB) public account.
@@ -104,6 +105,7 @@ class Console(cmd.Cmd):
         self._build_provider = {}
         self._build_provider["pab"] = pab
         self._build_provider["local_fs"] = build_provider_local_fs.BuildProviderLocalFS()
+        self._build_provider["ab"] = build_provider_ab.BuildProviderAB()
         self._tfc_client = tfc
         self._hosts = host_controllers
         self._in_file = in_file
@@ -282,7 +284,7 @@ class Console(cmd.Cmd):
         self._fetch_parser.add_argument(
             '--type',
             default='pab',
-            choices=('local_fs', 'pab'),
+            choices=('local_fs', 'pab', 'ab'),
             help='Build provider type')
         self._fetch_parser.add_argument(
             '--method',
@@ -332,6 +334,15 @@ class Console(cmd.Cmd):
         elif args.type == "local_fs":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 args.path)
+        elif args.type == "ab":
+            device_images, test_suites = self._build_provider[args.type].Fetch(
+                branch=args.branch,
+                target=args.target,
+                artifact_name=args.artifact_name,
+                build_id=args.build_id)
+        else:
+            printf("ERROR: unknown fetch type %s" % args.type)
+            sys.exit(-1)
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
