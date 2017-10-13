@@ -103,12 +103,13 @@ class AndroidBuildClient(object):
             version=self.API_VERSION,
             http=http_auth)
 
-    def GetArtifact(self,
-                    branch,
-                    build_target,
-                    build_id,
-                    resource_id,
-                    attempt_id=None):
+    def DownloadArtifactToFile(self,
+                               branch,
+                               build_target,
+                               build_id,
+                               resource_id,
+                               dest_filepath,
+                               attempt_id=None):
         """Get artifact from android build server.
 
         Args:
@@ -116,11 +117,36 @@ class AndroidBuildClient(object):
             build_target: Target name, e.g. "gce_x86-userdebug"
             build_id: Build id, a string, e.g. "2263051", "P2804227"
             resource_id: Name of resource to be downloaded, a string.
-            attempt_id: String, attempt id, will default to DEFAULT_ATTEMPT_ID.
-
+            attempt_id: string, attempt id, will default to DEFAULT_ATTEMPT_ID.
+            dest_filepath: string, set a file path to store to a file.
 
         Returns:
-            Contents of the requested resource as a string.
+            Contents of the requested resource as a string if dest_filepath is None;
+            None otherwise.
+        """
+        return self.GetArtifact(branch, build_target, build_id, resource_id,
+                                attempt_id=attempt_id, dest_filepath=dest_filepath)
+
+    def GetArtifact(self,
+                    branch,
+                    build_target,
+                    build_id,
+                    resource_id,
+                    attempt_id=None,
+                    dest_filepath=None):
+        """Get artifact from android build server.
+
+        Args:
+            branch: Branch from which the code was built, e.g. "master"
+            build_target: Target name, e.g. "gce_x86-userdebug"
+            build_id: Build id, a string, e.g. "2263051", "P2804227"
+            resource_id: Name of resource to be downloaded, a string.
+            attempt_id: string, attempt id, will default to DEFAULT_ATTEMPT_ID.
+            dest_filepath: string, set a file path to store to a file.
+
+        Returns:
+            Contents of the requested resource as a string if dest_filepath is None;
+            None otherwise.
         """
         attempt_id = attempt_id or self.DEFAULT_ATTEMPT_ID
         api = self.service.buildartifact().get_media(
@@ -130,18 +156,28 @@ class AndroidBuildClient(object):
             resourceId=resource_id)
         logger.info("Downloading artifact: target: %s, build_id: %s, "
                     "resource_id: %s", build_target, build_id, resource_id)
+        fh = None
         try:
-            with io.BytesIO() as mem_buffer:
-                downloader = apiclient.http.MediaIoBaseDownload(
-                    mem_buffer, api, chunksize=self.DEFAULT_CHUNK_SIZE)
-                done = False
-                while not done:
-                    _, done = downloader.next_chunk()
-                logger.info("Downloaded artifact %s" % resource_id)
-                return mem_buffer.getvalue()
+            if dest_filepath:
+                fh = io.FileIO(dest_filepath, mode='wb')
+            else:
+                fh = io.BytesIO()
+
+            downloader = apiclient.http.MediaIoBaseDownload(
+                fh, api, chunksize=self.DEFAULT_CHUNK_SIZE)
+            done = False
+            while not done:
+                _, done = downloader.next_chunk()
+            logger.info("Downloaded artifact %s" % resource_id)
+
+            if not dest_filepath:
+                return fh.getvalue()
         except OSError as e:
             logger.error("Downloading artifact failed: %s", str(e))
             raise DriverError(str(e))
+        finally:
+            if fh:
+                fh.close()
 
     def GetManifest(self, branch, build_target, build_id, attempt_id=None):
         """Get Android build manifest XML file.
