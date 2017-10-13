@@ -44,6 +44,8 @@ def main():
     parser.add_argument("--script",
                         default=None,
                         help="The path to a script file in .py format")
+    parser.add_argument("--loop",  action="store_true",
+                        help="Whether to endlessly repeat the script.")
     args = parser.parse_args()
     if args.config_file:
         config_json = json.load(args.config_file)
@@ -99,7 +101,9 @@ def main():
     else:
         main_console = console.Console(tfc, pab, hosts)
         if args.script:
-            main_console.ProcessScript(args.script)
+            while main_console.ProcessScript(args.script):
+                if not args.loop:
+                    break
         else:
             main_console.cmdloop()
 
