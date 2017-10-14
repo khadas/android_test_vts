@@ -22,12 +22,16 @@ class BuildProvider(object):
     """The base class for build provider.
 
     Attributes:
+        IMAGE_FILE_NAMES: a list of strings where each string contains the known
+                          Android device image file name.
         _device_images: dict where the key is image type and value is the
                         image file path.
         _test_suites: dict where the key is test suite type and value is the
                       test suite package file path.
         _tmp_dirpath: string, the temp dir path created to keep artifacts.
     """
+    IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img", "userdata.img",
+                        "vbmeta.img", "metadata.img"]
 
     def __init__(self):
         self._device_images = {}
