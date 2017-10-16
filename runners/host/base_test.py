@@ -737,24 +737,34 @@ class BaseTestClass(object):
         args = args or ()
         kwargs = kwargs or {}
         failed_settings = []
-        for s in settings:
-            test_name = "{} {}".format(tag, s)
+
+        def GenerateTestName(setting):
+            test_name = "{} {}".format(tag, setting)
             if name_func:
                 try:
-                    test_name = name_func(s, *args, **kwargs)
+                    test_name = name_func(setting, *args, **kwargs)
                 except:
                     logging.exception(("Failed to get test name from "
                                        "test_func. Fall back to default %s"),
                                       test_name)
 
-            tr_record = records.TestResultRecord(test_name, self.TAG)
-            self.results.requested.append(tr_record)
             if len(test_name) > utils.MAX_FILENAME_LEN:
                 test_name = test_name[:utils.MAX_FILENAME_LEN]
+
+        for setting in settings:
+            test_name = GenerateTestName(setting)
+
+            tr_record = records.TestResultRecord(test_name, self.TAG)
+            self.results.requested.append(tr_record)
+
+        for setting in settings:
+            test_name = GenerateTestName(setting)
             previous_success_cnt = len(self.results.passed)
-            self.execOneTest(test_name, test_func, (s, ) + args, **kwargs)
+
+            self.execOneTest(test_name, test_func, (setting, ) + args, **kwargs)
             if len(self.results.passed) - previous_success_cnt != 1:
-                failed_settings.append(s)
+                failed_settings.append(setting)
+
         return failed_settings
 
     def _exec_func(self, func, *args):
