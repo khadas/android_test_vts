@@ -88,7 +88,7 @@ bool VtsHalHidlTargetTestEnvBase::parseVtsTestOption(const char* arg) {
 }
 
 void VtsHalHidlTargetTestEnvBase::addHalServiceInstance(
-    string halServiceInstance) {
+    const string& halServiceInstance) {
   // hal_service_instance follows the format:
   // package@version::interface/service_name e.g.:
   // android.hardware.vibrator@1.0::IVibrator/default
@@ -106,23 +106,18 @@ void VtsHalHidlTargetTestEnvBase::addHalServiceInstance(
   halServiceInstances_[instanceName] = serviceName;
 }
 
-string VtsHalHidlTargetTestEnvBase::getServiceName(string instanceName) {
+string VtsHalHidlTargetTestEnvBase::getServiceName(const string& instanceName,
+                                                   const string& defaultName) {
   if (halServiceInstances_.find(instanceName) != halServiceInstances_.end()) {
     return halServiceInstances_[instanceName];
   }
   // Could not find the instance.
-  ALOGE("Does not find service name for %s", instanceName.c_str());
-  return "";
+  ALOGE("Does not find service name for %s, using default name: %s",
+        instanceName.c_str(), defaultName.c_str());
+  return defaultName;
 }
 
-void VtsHalHidlTargetTestEnvBase::registerTestService(string package,
-                                                      string version,
-                                                      string interfaceName) {
-  string FQName = package + '@' + version + "::" + interfaceName;
-  registeredHalServices_.insert(FQName);
-}
-
-void VtsHalHidlTargetTestEnvBase::registerTestService(string FQName) {
+void VtsHalHidlTargetTestEnvBase::registerTestService(const string& FQName) {
   registeredHalServices_.insert(FQName);
 }
 
