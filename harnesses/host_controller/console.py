@@ -18,6 +18,8 @@ import argparse
 import cmd
 import imp  # Python v2 compatibility
 import logging
+import os
+import shutil
 import subprocess
 import sys
 
@@ -86,6 +88,7 @@ class Console(cmd.Cmd):
         _in_file: The input file object.
         _out_file: The output file object.
         prompt: The prompt string at the beginning of each command line.
+        _copy_parser: The parser for copy command
         _fetch_parser: The parser for fetch command
         _flash_parser: The parser for flash command
         _lease_parser: The parser for lease command.
@@ -109,6 +112,7 @@ class Console(cmd.Cmd):
         self.device_image_info = {}
         self.test_suite_info = {}
 
+        self._InitCopyParser()
         self._InitFetchParser()
         self._InitFlashParser()
         self._InitLeaseParser()
@@ -380,6 +384,25 @@ class Console(cmd.Cmd):
     def help_flash(self):
         """Prints help message for flash command."""
         self._flash_parser.print_help(self._out_file)
+
+    def _InitCopyParser(self):
+        """Initializes the parser for copy command."""
+        self._copy_parser = ConsoleArgumentParser("copy",
+                                                  "Copy a file.")
+
+    def do_copy(self, line):
+        """Copy a file from source to destination path."""
+        src, dst = line.split()
+        if dst == "{vts_tf_home}":
+            dst = os.path.dirname(self.test_suite_info["vts"])
+        elif "{" in dst:
+            print("unknown dst %s" % dst)
+            return
+        shutil.copy(src, dst)
+
+    def help_copy(self):
+        """Prints help message for copy command."""
+        self._copy_parser.print_help(self._out_file)
 
     def _InitTestParser(self):
         """Initializes the parser for test command."""
