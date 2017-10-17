@@ -63,28 +63,8 @@ class BuildProviderAB(build_provider.BuildProvider):
             dest_filepath=dest_filepath)
 
         if dest_filepath.endswith("android-vts.zip"):
-            dest_path = os.path.join(self.tmp_dirpath, "android-vts")
-            with zipfile.ZipFile(dest_filepath, 'r') as zip_ref:
-                zip_ref.extractall(dest_path)
-                bin_path = os.path.join(dest_path, "android-vts",
-                                        "tools", "vts-tradefed")
-                os.chmod(bin_path, 0766)
-                self.SetTestSuitePackage("vts", bin_path)
+            self.SetTestSuitePackage("vts", dest_filepath)
         elif dest_filepath.endswith(".zip"):
-            dest_path = dest_filepath + ".dir"
-            with zipfile.ZipFile(dest_filepath, 'r') as zip_ref:
-                zip_ref.extractall(dest_path)
-                artifact_paths = map(
-                    lambda filename: os.path.join(dest_path, filename) if (
-                        filename and (filename.endswith(".img")
-                                      or filename.endswith(".zip"))) else None,
-                    zip_ref.namelist())
-                artifact_paths = filter(None, artifact_paths)
-                if artifact_paths:
-                    for path in artifact_paths:
-                        for known_filename in self.IMAGE_FILE_NAMES:
-                            if path.endswith(known_filename):
-                                self.SetDeviceImage(
-                                    known_filename.replace(".img", ""), path)
+            self.SetDeviceImageZip(dest_filepath)
 
         return self.GetDeviceImage(), self.GetTestSuitePackage()
