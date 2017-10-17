@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+static constexpr const char* kDefaultServiceName = "default";
+
 using namespace std;
 
 namespace testing {
@@ -60,22 +62,21 @@ class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
   void init(int* argc, char** argv);
 
   /*
-   * Gets the service name for a hal instance. Returns empty string if the hal
+   * Adds a hal sevice identified into registeredHalServices_.
+   */
+  template <class T>
+  void registerTestService() {
+    registerTestService(T::descriptor);
+  }
+
+  /*
+   * Gets the service name for a hal instance. Returns defaultName if the hal
    * instance is unkonwn (not in hal_instances_).
    */
-  string getServiceName(string instanceName);
-
-  /*
-   * Adds a hal sevice identified with the package_name, version and
-   * interface name into registeredHalServices_.
-   */
-  void registerTestService(string package, string version,
-                           string interfaceName);
-
-  /*
-   * Adds a hal sevice identified with the FQName.
-   */
-  void registerTestService(string FQName);
+  template <class T>
+  string getServiceName(const string& defaultName = kDefaultServiceName) {
+    return getServiceName(T::descriptor, defaultName);
+  }
 
  private:
   /*
@@ -96,9 +97,19 @@ class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
   void listRegisteredServices();
 
   /*
+   * Internal method to get the service name for a hal instance.
+   */
+  string getServiceName(const string& instanceName, const string& defaultName);
+
+  /*
+   * Internal method to register a HAL sevice identified with the FQName.
+   */
+  void registerTestService(const string& FQName);
+
+  /*
    * Internal method to add a hal service instance.
    */
-  void addHalServiceInstance(string halServiceInstance);
+  void addHalServiceInstance(const string& halServiceInstance);
 
   // Map of hal instances with their correpoding service names.
   map<string, string> halServiceInstances_;
