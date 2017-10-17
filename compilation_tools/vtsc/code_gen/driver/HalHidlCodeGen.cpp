@@ -541,14 +541,16 @@ void HalHidlCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
 
   for (const auto& import : message.import()) {
     FQName import_name = FQName(import);
-    string import_package_path = import_name.package();
+    string import_package_name = import_name.package();
     string import_package_version = import_name.version();
     string import_component_name = import_name.name();
+    string import_package_path = import_package_name;
     ReplaceSubString(import_package_path, ".", "/");
 
     out << "#include <" << import_package_path << "/" << import_package_version
         << "/" << import_component_name << ".h>\n";
-    if (import_package_path.find("android/hardware") != std::string::npos) {
+    // Exclude the base hal in include list.
+    if (import_package_name.find("android.hidl.base") == std::string::npos) {
       if (import_component_name[0] == 'I') {
         import_component_name = import_component_name.substr(1);
       }
@@ -557,6 +559,7 @@ void HalHidlCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
           << ".vts.h>\n";
     }
   }
+
   out << "\n\n";
 }
 
@@ -565,30 +568,6 @@ void HalHidlCodeGen::GenerateSourceIncludeFiles(Formatter& out,
     const string& fuzzer_extended_class_name) {
   DriverCodeGenBase::GenerateSourceIncludeFiles(out, message,
                                                 fuzzer_extended_class_name);
-  out << "#include <hidl/HidlSupport.h>\n";
-  out << "#include <" << GetPackagePath(message) << "/" << GetVersion(message)
-      << "/" << GetComponentName(message) << ".h>"
-      << "\n";
-  for (const auto& import : message.import()) {
-    FQName import_name = FQName(import);
-    string import_package_name = import_name.package();
-    string import_package_version = import_name.version();
-    string import_component_name = import_name.name();
-    string import_package_path = import_package_name;
-    ReplaceSubString(import_package_path, ".", "/");
-    if (import_package_name == GetPackageName(message) &&
-        import_package_version == GetVersion(message)) {
-      out << "#include \"" << import_package_path << "/"
-          << import_package_version << "/"
-          << (import_component_name == "types"
-                  ? "types"
-                  : import_component_name.substr(1))
-          << ".vts.h\"\n";
-    } else {
-      out << "#include <" << import_package_path << "/"
-          << import_package_version << "/" << import_component_name << ".h>\n";
-    }
-  }
   out << "#include <android/hidl/allocator/1.0/IAllocator.h>\n";
   out << "#include <fmq/MessageQueue.h>\n";
   out << "#include <sys/stat.h>\n";
