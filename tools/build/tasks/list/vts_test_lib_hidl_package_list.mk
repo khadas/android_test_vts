@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-vts_test_lib_hidl_packages := \
-  libhwbinder \
-  libhidlbase \
-  libhidltransport \
+vts_hal_driver_libs := \
   android.hardware.audio@2.0-vts.driver \
   android.hardware.audio.common@2.0-vts.driver \
   android.hardware.audio.effect@2.0-vts.driver \
@@ -76,6 +73,8 @@ vts_test_lib_hidl_packages := \
   android.hardware.wifi@1.1-vts.driver \
   android.hardware.wifi.offload@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.0-vts.driver \
+
+vts_hal_profiler_libs := \
   android.hardware.audio@2.0-vts.profiler \
   android.hardware.audio.common@2.0-vts.profiler \
   android.hardware.audio.effect@2.0-vts.profiler \
@@ -139,7 +138,7 @@ vts_test_lib_hidl_packages := \
   android.hardware.wifi.offload@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
 
-vts_test_lib_hidl_packages += \
+vts_hal_test_bins := \
   VtsHalAudioV2_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
@@ -192,5 +191,11 @@ vts_test_lib_hidl_packages += \
   VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
 
-vts_test_lib_hidl_packages += \
+vts_test_lib_hidl_packages := \
+  $(vts_hal_driver_libs) \
+  $(vts_hal_profiler_libs) \
+  $(vts_hal_test_bins) \
+  libhwbinder \
+  libhidlbase \
+  libhidltransport \
   libvtswidevine_prebuilt \
