@@ -1,15 +1,6 @@
 #include "android/hardware/tests/bar/1.0/Bar.vts.h"
 #include "vts_measurement.h"
 #include <iostream>
-#include <hidl/HidlSupport.h>
-#include <android/hardware/tests/bar/1.0/IBar.h>
-#include <android/hardware/tests/foo/1.0/IFoo.h>
-#include <android/hardware/tests/foo/1.0/IFooCallback.h>
-#include <android/hardware/tests/foo/1.0/IMyTypes.h>
-#include <android/hardware/tests/foo/1.0/ISimple.h>
-#include <android/hardware/tests/foo/1.0/ITheirTypes.h>
-#include <android/hardware/tests/foo/1.0/types.h>
-#include <android/hidl/base/1.0/types.h>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <fmq/MessageQueue.h>
 #include <sys/stat.h>

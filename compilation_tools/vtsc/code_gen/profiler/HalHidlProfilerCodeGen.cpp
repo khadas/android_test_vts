@@ -454,7 +454,8 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(
     out << "#include <" << imported_package_path << "/"
         << imported_package_version << "/" << imported_component_name
         << ".h>\n";
-    if (imported_package_name.find("android.hardware") != std::string::npos) {
+    // Exclude the base hal in include list.
+    if (imported_package_name.find("android.hidl.base") == std::string::npos) {
       if (imported_component_name[0] == 'I') {
         imported_component_name = imported_component_name.substr(1);
       }
