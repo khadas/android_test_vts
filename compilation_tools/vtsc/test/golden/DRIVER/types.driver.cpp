@@ -1,8 +1,6 @@
 #include "android/hardware/nfc/1.0/types.vts.h"
 #include "vts_measurement.h"
 #include <iostream>
-#include <hidl/HidlSupport.h>
-#include <android/hardware/nfc/1.0/types.h>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <fmq/MessageQueue.h>
 #include <sys/stat.h>

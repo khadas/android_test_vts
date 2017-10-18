@@ -1,9 +1,6 @@
 #include "android/hardware/tests/memory/1.0/MemoryTest.vts.h"
 #include "vts_measurement.h"
 #include <iostream>
-#include <hidl/HidlSupport.h>
-#include <android/hardware/tests/memory/1.0/IMemoryTest.h>
-#include <android/hidl/base/1.0/types.h>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <fmq/MessageQueue.h>
 #include <sys/stat.h>

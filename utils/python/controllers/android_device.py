@@ -34,10 +34,7 @@ from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
 from vts.utils.python.controllers import sl4a_client
-from vts.utils.python.mirror import hal_mirror
-from vts.utils.python.mirror import lib_mirror
 from vts.utils.python.mirror import mirror_tracker
-from vts.utils.python.mirror import shell_mirror
 
 VTS_CONTROLLER_CONFIG_NAME = "AndroidDevice"
 VTS_CONTROLLER_REFERENCE_NAME = "android_devices"
@@ -757,9 +754,8 @@ class AndroidDevice(object):
                                  self.device_command_port)
             self.hal = mirror_tracker.MirrorTracker(self.host_command_port,
                                             self.host_callback_port, True)
-            self.lib = mirror_tracker.MirrorTracker(self.host_command_port,
-                                                    self.host_callback_port)
-            self.shell = shell_mirror.ShellMirror(self.host_command_port)
+            self.lib = mirror_tracker.MirrorTracker(self.host_command_port)
+            self.shell = mirror_tracker.MirrorTracker(self.host_command_port)
         if enable_sl4a:
             try:
                 self.startSl4aClient(enable_sl4a_ed)
