@@ -685,7 +685,7 @@ class BaseTestClass(object):
         finally:
             if not finished:
                 for device in self.android_devices:
-                    device.shell.enabled = False
+                    device.shell.DisableShell()
 
                 logging.error('Test timed out.')
                 tr_record.testError()

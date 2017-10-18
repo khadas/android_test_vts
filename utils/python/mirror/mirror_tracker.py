@@ -16,14 +16,17 @@
 
 import logging
 
+from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
 from vts.runners.host import errors
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.runners.host.tcp_server import callback_server
 from vts.utils.python.mirror import hal_mirror
 from vts.utils.python.mirror import lib_mirror
+from vts.utils.python.mirror import shell_mirror
 
 _DEFAULT_TARGET_BASE_PATHS = ["/system/lib64/hw"]
 _DEFAULT_HWBINDER_SERVICE = "default"
+_DEFAULT_SHELL_NAME = "_default"
 
 
 class MirrorTracker(object):
@@ -41,7 +44,7 @@ class MirrorTracker(object):
 
     def __init__(self,
                  host_command_port,
-                 host_callback_port,
+                 host_callback_port=None,
                  start_callback_server=False):
         self._host_command_port = host_command_port
         self._host_callback_port = host_callback_port
@@ -93,7 +96,7 @@ class MirrorTracker(object):
         """Initiates a handler for a particular HIDL HAL.
 
         This will initiate a driver service for a HAL on the target side, create
-        the top level mirror object for a HAL, and register it in the manager.
+        a mirror object for a HAL, and register it in the tracker.
 
         Args:
             target_type: string, the target type name (e.g., light, camera).
@@ -130,7 +133,7 @@ class MirrorTracker(object):
         """Initiates a handler for a particular lib.
 
         This will initiate a driver service for a lib on the target side, create
-        the top level mirror object for a lib, and register it in the manager.
+        a mirror object for a lib, and register it in the tracker.
 
         Args:
             target_type: string, the target type name (e.g., light, camera).
@@ -153,6 +156,62 @@ class MirrorTracker(object):
                              target_filename, target_basepaths, handler_name,
                              bits)
         self._registered_mirrors[handler_name] = mirror
+
+    def InvokeTerminal(self, instance_name, bits=32):
+        """Initiates a handler for a particular shell terminal.
+
+        This will initiate a driver service for a shell on the target side,
+        create a mirror object for the shell, and register it in the tracker.
+
+        Args:
+            instance_name: string, the shell terminal instance name.
+            bits: integer, processor architecture indicator: 32 or 64.
+        """
+        if not instance_name:
+            raise error.ComponentLoadingError("instance_name is None")
+        if bits not in [32, 64]:
+            raise error.ComponentLoadingError("Invalid value for bits: %s" %
+                                              bits)
+
+        client = vts_tcp_client.VtsTcpClient()
+        client.Connect(command_port=self._host_command_port)
+
+        logging.info("Init the driver service for shell, %s", instance_name)
+        launched = client.LaunchDriverService(
+            driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_SHELL,
+            service_name="shell_" + instance_name,
+            bits=bits)
+
+        if not launched:
+            raise errors.ComponentLoadingError(
+                "Failed to launch shell driver service %s" % instance_name)
+
+        mirror = shell_mirror.ShellMirror(client)
+        self._registered_mirrors[instance_name] = mirror
+
+    def DisableShell(self):
+        """Disables all registered shell mirrors."""
+        for shell_mirror in self._registered_mirrors:
+            if not isinstance(shell_mirror, shell_mirror.ShellMirror):
+                logging.error("mirror object is not a shell mirror")
+                continue
+            shell_mirror.enabled = False
+
+    def Execute(self, command, no_except=False):
+        """Execute a shell command with default shell terminal."""
+        if _DEFAULT_SHELL_NAME not in self._registered_mirrors:
+            self.InvokeTerminal(_DEFAULT_SHELL_NAME)
+        return getattr(self, _DEFAULT_SHELL_NAME).Execute(command, no_except)
+
+    def SetConnTimeout(self, timeout):
+        """Set remove shell connection timeout for default shell terminal.
+
+        Args:
+            timeout: int, TCP connection timeout in seconds.
+        """
+        if _DEFAULT_SHELL_NAME not in self._registered_mirrors:
+            self.InvokeTerminal(_DEFAULT_SHELL_NAME)
+        getattr(self, _DEFAULT_SHELL_NAME).SetConnTimeout(timeout)
 
     def __getattr__(self, name):
         if name in self._registered_mirrors:
