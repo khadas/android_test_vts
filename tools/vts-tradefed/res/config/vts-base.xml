@@ -26,7 +26,7 @@
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
-  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTest" />
+  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 
   <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
   <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
