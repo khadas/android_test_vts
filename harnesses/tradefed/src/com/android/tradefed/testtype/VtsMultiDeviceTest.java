@@ -27,7 +27,7 @@ import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
-import com.android.tradefed.targetprep.VtsSancovPreparer;
+import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.Set;
 import java.util.Collection;
@@ -708,10 +709,16 @@ public class VtsMultiDeviceTest
                 throw new RuntimeException("Failed to get device information");
             }
 
-            File sancovDir = mBuildInfo.getFile(VtsSancovPreparer.getSancovResourceDirKey(device));
+            File sancovDir =
+                    mBuildInfo.getFile(VtsCoveragePreparer.getSancovResourceDirKey(device));
             if (sancovDir != null) {
                 deviceJson.put("sancov_resources_path", sancovDir.getAbsolutePath());
                 sancovBuild = true;
+            }
+            File gcovDir = mBuildInfo.getFile(VtsCoveragePreparer.getGcovResourceDirKey(device));
+            if (gcovDir != null) {
+                deviceJson.put("gcov_resources_path", gcovDir.getAbsolutePath());
+                coverageBuild = true;
             }
             deviceArray.put(deviceJson);
         }
