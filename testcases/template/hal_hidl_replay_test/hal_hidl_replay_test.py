@@ -145,7 +145,6 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         if self.coverage.enabled and not self.coverage.global_coverage:
             # enable passthrough mode to measure code coverage.
             self.shell.Execute('setprop vts.hidl.get_stub true')
-            self.coverage.LoadArtifacts()
             self.coverage.InitializeDeviceCoverage(self._dut)
 
     def tearDown(self):
