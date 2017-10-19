@@ -15,9 +15,9 @@
 //
 
 cc_binary {
-    name: "vts_sancov_configure",
+    name: "vts_coverage_configure",
 
-    srcs: ["VtsSancovConfigureMain.cpp"],
+    srcs: ["VtsCoverageConfigureMain.cpp"],
 
     cflags: ["-Wall", "-Werror"],
 
