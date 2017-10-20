@@ -180,11 +180,6 @@ void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
     out << "FunctionSpecificationMessage* result_msg) {\n";
 
     out << "const char* func_name = func_msg.name().c_str();" << "\n";
-    out << "cout << \"Function: \" << __func__ << \" \" << func_name << endl;"
-        << "\n";
-    out << "cout << \"Callback socket name: \" << callback_socket_name << endl;"
-        << "\n";
-
     out << "if (hw_binder_proxy_ == nullptr) {\n";
     out.indent();
     out << "cerr << \"" << kInstanceVariableName << " is null. \"<< endl;\n";
@@ -211,7 +206,6 @@ void HalHidlCodeGen::GenerateDriverImplForReservedMethods(Formatter& out) {
   out << "cout << \"Call notifySyspropsChanged\" << endl;" << "\n";
   out << kInstanceVariableName << "->notifySyspropsChanged();\n";
   out << "result_msg->set_name(\"notifySyspropsChanged\");\n";
-  out << "cout << \"called\" << endl;\n";
   out << "return true;\n";
 
   out.unindent();
@@ -246,10 +240,8 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
         out, arg, cur_arg_name, "func_msg.arg(" + std::to_string(i) + ")");
   }
 
-  GenerateCodeToStartMeasurement(out);
   // may need to check whether the function is actually defined.
-  out << "cout << \"Call an API\" << endl;" << "\n";
-  out << "cout << \"local_device = \" << " << kInstanceVariableName << ".get()"
+  out << "clog << \"local_device = \" << " << kInstanceVariableName << ".get()"
       << " << endl;\n";
 
   // Define the return results and call the HAL function.
@@ -272,8 +264,6 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
     GenerateHalFunctionCall(out, func_msg);
   }
 
-  GenerateCodeToStopMeasurement(out);
-
   // Set the return results value to the proto message.
   out << "result_msg->set_name(\"" << func_msg.name() << "\");\n";
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
@@ -284,7 +274,6 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
                                           "result" + std::to_string(index));
   }
 
-  out << "cout << \"called\" << endl;\n";
   out << "return true;\n";
   out.unindent();
   out << "}\n";

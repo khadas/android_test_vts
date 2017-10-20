@@ -125,6 +125,11 @@ class VtsHalDriverManager {
   string ProcessFuncResultsForLibrary(FunctionSpecificationMessage* func_msg,
                                       void* result);
 
+  // Util method to generate debug message with component info.
+  string GetComponentDebugMsg(const int component_class,
+                              const int component_type, const string& version,
+                              const string& package_name,
+                              const string& component_name);
   // ============== attributes ===================
 
   // The server socket port # of the agent.

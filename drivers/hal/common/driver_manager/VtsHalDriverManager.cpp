@@ -42,18 +42,23 @@ DriverId VtsHalDriverManager::LoadTargetComponent(
     const int component_class, const int component_type, const float version,
     const string& package_name, const string& component_name,
     const string& hw_binder_service_name) {
-  cout << __func__ << ": entry dll_file_name = " << dll_file_name << endl;
+  clog << __func__ << ": entry dll_file_name = " << dll_file_name << endl;
   ComponentSpecificationMessage spec_message;
   if (!hal_driver_loader_.FindComponentSpecification(
           component_class, package_name, version, component_name,
           component_type, &spec_message)) {
-    cerr << __func__ << ": Faild to load specification for component with "
-         << "class: " << component_class << " type: " << component_type
-         << " version: " << version << endl;
+    cerr << __func__ << ": Failed to load specification for component: "
+         << GetComponentDebugMsg(component_class, component_type,
+                                 std::to_string(version), package_name,
+                                 component_name)
+         << endl;
     return kInvalidDriverId;
   }
-  cout << "loaded specification for component with class: " << component_class
-       << " type: " << component_type << " version: " << version << endl;
+  cout << "loaded specification for component: "
+       << GetComponentDebugMsg(component_class, component_type,
+                               std::to_string(version), package_name,
+                               component_name)
+       << endl;
 
   string driver_lib_path = "";
   if (component_class == HAL_HIDL) {
@@ -62,18 +67,26 @@ DriverId VtsHalDriverManager::LoadTargetComponent(
     driver_lib_path = spec_lib_file_path;
   }
 
-  cout << __func__ << ": driver lib path " << driver_lib_path << endl;
+  clog << __func__ << ": driver lib path " << driver_lib_path << endl;
 
   std::unique_ptr<DriverBase> hal_driver = nullptr;
   hal_driver.reset(hal_driver_loader_.GetDriver(driver_lib_path, spec_message,
                                                 hw_binder_service_name, 0,
                                                 false, dll_file_name));
   if (!hal_driver) {
-    cerr << "can't load driver for component with class: " << component_class
-         << " type: " << component_type << " version: " << version << endl;
+    cerr << "can't load driver for component: "
+         << GetComponentDebugMsg(component_class, component_type,
+                                 std::to_string(version), package_name,
+                                 component_name)
+         << endl;
     return kInvalidDriverId;
+  } else {
+    cout << "loaded driver for component: "
+         << GetComponentDebugMsg(component_class, component_type,
+                                 std::to_string(version), package_name,
+                                 component_name)
+         << endl;
   }
-
   // TODO (zhuoyao): get hidl_proxy_pointer for loaded hidl hal dirver.
   uint64_t interface_pt = 0;
   return RegisterDriver(std::move(hal_driver), spec_message, interface_pt);
@@ -83,8 +96,12 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   string output = "";
   DriverBase* driver = GetDriverWithCallMsg(*call_msg);
   if (!driver) {
-    cerr << "can't find driver for package: " << call_msg->package_name()
-         << " version: " << call_msg->component_type_version() << endl;
+    cerr << "can't find driver for component: "
+         << GetComponentDebugMsg(
+                call_msg->component_class(), call_msg->component_type(),
+                call_msg->component_type_version(), call_msg->package_name(),
+                call_msg->component_name())
+         << endl;
     return kErrorString;
   }
 
@@ -92,8 +109,7 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
   void* result;
   FunctionSpecificationMessage result_msg;
   driver->FunctionCallBegin();
-  cout << __func__ << ": Call Function " << api->name() << " parent_path("
-       << api->parent_path() << ")" << endl;
+  cout << __func__ << ": Call Function " << api->name() << endl;
   if (call_msg->component_class() == HAL_HIDL) {
     // Pre-processing if we want to call an API with an interface as argument.
     for (int index = 0; index < api->arg_size(); index++) {
@@ -147,7 +163,7 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
                   HAL_HIDL, package_name, version, component_name, 0,
                   &spec_msg)) {
             cerr << __func__
-                 << ": Failed to load specification for gnerated interface :"
+                 << ": Failed to load specification for generated interface :"
                  << type_name << endl;
             return kErrorString;
           }
@@ -190,8 +206,12 @@ string VtsHalDriverManager::GetAttribute(FunctionCallMessage* call_msg) {
   string output = "";
   DriverBase* driver = GetDriverWithCallMsg(*call_msg);
   if (!driver) {
-    cerr << "can't find driver for package: " << call_msg->package_name()
-         << " version: " << call_msg->component_type_version() << endl;
+    cerr << "can't find driver for component: "
+         << GetComponentDebugMsg(
+                call_msg->component_class(), call_msg->component_type(),
+                call_msg->component_type_version(), call_msg->package_name(),
+                call_msg->component_name())
+         << endl;
     return kErrorString;
   }
 
@@ -204,10 +224,8 @@ string VtsHalDriverManager::GetAttribute(FunctionCallMessage* call_msg) {
          << endl;
     return kErrorString;
   }
-  cout << __func__ << ": called" << endl;
 
   if (call_msg->component_class() == HAL_HIDL) {
-    cout << __func__ << ": for a HIDL HAL" << endl;
     api->mutable_return_type()->set_type(TYPE_STRING);
     api->mutable_return_type()->mutable_string_value()->set_message(
         *(string*)result);
@@ -233,7 +251,7 @@ DriverId VtsHalDriverManager::RegisterDriver(
     hal_driver_map_.insert(make_pair(
         driver_id, HalDriverInfo(spec_msg, interface_pt, std::move(driver))));
   } else {
-    cout << __func__ << ": Driver already exists. ";
+    clog << __func__ << ": Driver already exists. ";
   }
 
   return driver_id;
@@ -245,7 +263,7 @@ DriverBase* VtsHalDriverManager::GetDriverById(const DriverId id) {
     cerr << "Failed to find driver info with id: " << id << endl;
     return nullptr;
   }
-  cout << __func__ << ": found driver info with id: " << id << endl;
+  clog << __func__ << ": found driver info with id: " << id << endl;
   return res->second.driver.get();
 }
 
@@ -255,7 +273,7 @@ uint64_t VtsHalDriverManager::GetDriverPointerById(const DriverId id) {
     cerr << "Failed to find driver info with id: " << id << endl;
     return 0;
   }
-  cout << __func__ << ": found driver info with id: " << id << endl;
+  clog << __func__ << ": found driver info with id: " << id << endl;
   return res->second.hidl_hal_proxy_pt;
 }
 
@@ -347,13 +365,13 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
           it->second.hidl_hal_proxy_pt != interface_pt) {
         continue;
       }
-      cout << __func__ << ": Found hidl hal driver with id: " << it->first
+      clog << __func__ << ": Found hidl hal driver with id: " << it->first
            << endl;
       return it->first;
     } else if (spec_msg.component_class() == LIB_SHARED) {
       if (spec_msg.has_component_type() &&
           cur_spec_msg.component_type() == spec_msg.component_type()) {
-        cout << __func__ << ": Found shared lib driver with id: " << it->first
+        clog << __func__ << ": Found shared lib driver with id: " << it->first
              << endl;
         return it->first;
       }
@@ -434,5 +452,17 @@ string VtsHalDriverManager::ProcessFuncResultsForLibrary(
   return kVoidString;
 }
 
+string VtsHalDriverManager::GetComponentDebugMsg(const int component_class,
+                                                 const int component_type,
+                                                 const string& version,
+                                                 const string& package_name,
+                                                 const string& component_name) {
+  if (component_class == HAL_HIDL) {
+    return "HIDL_HAL: " + package_name + "@" + version + "::" + component_name;
+  } else {
+    return "component_type: " + std::to_string(component_type) +
+           " version: " + version + " component_name: " + component_name;
+  }
+}
 }  // namespace vts
 }  // namespace android

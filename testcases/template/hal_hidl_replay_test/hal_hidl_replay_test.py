@@ -17,6 +17,7 @@
 import logging
 import os
 
+from vts.runners.host import asserts
 from vts.runners.host import const
 from vts.runners.host import keys
 from vts.runners.host import test_runner
@@ -92,6 +93,33 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                     test_case.args += " " + target_trace_path
                     test_case.tag += instance[instance.find('/'):]
                 self.testcases.append(test_case)
+
+    def VerifyTestResult(self, test_case, command_results):
+        '''Parse Gtest xml result output.
+
+        Args:
+            test_case: GtestTestCase object, the test being run. This param
+                       is not currently used in this method.
+            command_results: dict of lists, shell command result
+        '''
+        asserts.assertTrue(command_results, 'Empty command response.')
+        asserts.assertEqual(
+            len(command_results), 3, 'Abnormal command response.')
+
+        for stdout in command_results[const.STDOUT]:
+            if stdout and stdout.strip():
+                for line in stdout.split('\n'):
+                    logging.info(line)
+
+        if any(command_results[const.EXIT_CODE]):
+            # print stderr only when test fails.
+            for stderr in command_results[const.STDERR]:
+                if stderr and stderr.strip():
+                    for line in stderr.split('\n'):
+                        logging.error(line)
+            asserts.assertTrue(False, 'Test {} failed with the following results: {}'.format(
+                test_case, command_results))
+
 
     def tearDownClass(self):
         """Performs clean-up tasks."""
