@@ -42,189 +42,6 @@ using namespace android;
 
 #define USE_GCOV 1
 
-#if SANCOV
-extern "C" {
-typedef unsigned long uptr;
-
-#define SANITIZER_INTERFACE_ATTRIBUTE __attribute__((visibility("default")))
-SANITIZER_INTERFACE_ATTRIBUTE
-void __sanitizer_cov(uint32_t* guard) {
-  printf("sancov\n");
-  coverage_data.Add(StackTrace::GetPreviousInstructionPc(GET_CALLER_PC()),
-                    guard);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void* __asan_memset(void* block, int c, uptr size) {
-  ASAN_MEMSET_IMPL(nullptr, block, c, size);
-  return block;
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_register_globals() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_unregister_globals() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_handle_no_return() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load1() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load2() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load4() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load8() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_load16() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store1() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store2() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store4() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store8() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_report_store16() {}
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_set_error_report_callback() {}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_1(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_2(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_3(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_4(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_5(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_6(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_7(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_8(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_9(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-uptr __asan_stack_malloc_10(uptr size, uptr real_stack) {
-  return (uptr)malloc(size);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_1(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_2(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_3(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_4(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_5(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_6(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_7(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_8(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_9(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_stack_free_10(uptr ptr, uptr size, uptr real_stack) {
-  free((void*)ptr);
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_version_mismatch_check_v6() {
-  // Do nothing.
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE void __sanitizer_cov_module_init(
-    int32_t* guards, uptr npcs, uint8_t* counters, const char* comp_unit_name) {
-}
-
-SANITIZER_INTERFACE_ATTRIBUTE
-void __asan_init() {
-  static int inited = 0;
-  if (inited) return;
-  inited = 1;
-#if __WORDSIZE == 64
-  unsigned long start = 0x100000000000;
-  unsigned long size = 0x100000000000;
-#else
-  unsigned long start = 0x20000000;
-  unsigned long size = 0x20000000;
-#endif
-  void* res = mmap((void*)start, size, PROT_READ | PROT_WRITE,
-                   MAP_PRIVATE | MAP_ANON | MAP_FIXED | MAP_NORESERVE, 0, 0);
-  if (res == (void*)start) {
-    fprintf(stderr, "Fake AddressSanitizer run-time initialized ok at %p\n",
-            res);
-  } else {
-    fprintf(stderr,
-            "Fake AddressSanitizer run-time failed to initialize.\n"
-            "You have been warned. Aborting.");
-    abort();
-  }
-}
-}
-#endif
-
 namespace android {
 namespace vts {
 
@@ -283,11 +100,6 @@ bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
   cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file."
        << endl;
 
-#if SANCOV
-  cout << __FUNCTION__ << "sancov reset "
-       << target_loader_.SancovResetCoverage() << endl;
-#endif
-
   if (target_dll_path_) {
     cout << __func__ << ":" << __LINE__ << " target DLL path "
          << target_dll_path_ << endl;
@@ -314,17 +126,6 @@ bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
   return true;
 }
 
-bool DriverBase::SetTargetObject(void* object_pointer) {
-  device_ = NULL;
-  hmi_ = reinterpret_cast<struct hw_module_t*>(object_pointer);
-  return true;
-}
-
-bool DriverBase::GetService(bool /*get_stub*/, const char* /*service_name*/) {
-  cerr << __func__ << " not impl" << endl;
-  return false;
-}
-
 bool DriverBase::Fuzz(vts::ComponentSpecificationMessage* message,
                       void** result) {
   cout << __func__ << " Fuzzing target component: "
@@ -346,7 +147,6 @@ void DriverBase::FunctionCallBegin() {
   char product[128];
   char module_basepath[4096];
 
-  cout << __func__ << ":" << __LINE__ << " begin" << endl;
   snprintf(product_path, 4096, "%s/%s", default_gcov_output_basepath.c_str(),
            "proc/self/cwd/out/target/product");
   DIR* srcdir = opendir(product_path);
@@ -532,7 +332,6 @@ bool DriverBase::ScanAllGcdaFiles(const string& basepath,
 }
 
 bool DriverBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
-  cout << __func__ << ": gcov flush " << endl;
 #if USE_GCOV
   target_loader_.GcovFlush();
   // find the file.

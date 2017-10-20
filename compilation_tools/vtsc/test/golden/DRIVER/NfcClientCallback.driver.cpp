@@ -87,8 +87,6 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
     const string& callback_socket_name __attribute__((__unused__)),
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
-    cout << "Function: " << __func__ << " " << func_name << endl;
-    cout << "Callback socket name: " << callback_socket_name << endl;
     if (hw_binder_proxy_ == nullptr) {
         cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
@@ -98,15 +96,9 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
         arg0 = EnumValue__android__hardware__nfc__V1_0__NfcEvent(func_msg.arg(0).scalar_value());
         ::android::hardware::nfc::V1_0::NfcStatus arg1;
         arg1 = EnumValue__android__hardware__nfc__V1_0__NfcStatus(func_msg.arg(1).scalar_value());
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->sendEvent(arg0, arg1);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("sendEvent");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "sendData")) {
@@ -115,22 +107,15 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
         }
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->sendData(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("sendData");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
         cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
-        cout << "called" << endl;
         return true;
     }
     return false;
