@@ -27,6 +27,9 @@ from vts.harnesses.host_controller import host_controller
 from vts.harnesses.host_controller.build import pab_client
 from vts.harnesses.host_controller.tfc import tfc_client
 from vts.harnesses.host_controller.tradefed import remote_client
+from vts.utils.python.os import env_utils
+
+_ANDROID_BUILD_TOP = "ANDROID_BUILD_TOP"
 
 
 def main():
@@ -58,6 +61,8 @@ def main():
                                       "local-cluster-2"]
         host_config["lease_interval_sec"] = 30
         config_json["hosts"].append(host_config)
+
+    env_vars = env_utils.SaveAndClearEnvVars([_ANDROID_BUILD_TOP])
 
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, config_json["log_level"]))
@@ -106,6 +111,8 @@ def main():
                     break
         else:
             main_console.cmdloop()
+
+    env_utils.RestoreEnvVars(env_vars)
 
 
 if __name__ == "__main__":
