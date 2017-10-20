@@ -47,8 +47,11 @@ def main():
     parser.add_argument("--script",
                         default=None,
                         help="The path to a script file in .py format")
-    parser.add_argument("--loop",  action="store_true",
+    parser.add_argument("--loop", action="store_true",
                         help="Whether to endlessly repeat the script.")
+    parser.add_argument("--console", action="store_true",
+                        help="Whether to start a console after processing "
+                             "a script.")
     args = parser.parse_args()
     if args.config_file:
         config_json = json.load(args.config_file)
@@ -109,7 +112,9 @@ def main():
             while main_console.ProcessScript(args.script):
                 if not args.loop:
                     break
-        else:
+            if args.console:
+                main_console.cmdloop()
+        else:  # if not script, the default is console mode.
             main_console.cmdloop()
 
     env_utils.RestoreEnvVars(env_vars)
