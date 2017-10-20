@@ -396,8 +396,8 @@ class VtsTcpClient(object):
             SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND,
             shell_command=command)
         resp = self.RecvResponse(retries=2)
-        logging.info("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
-                     resp)
+        logging.debug("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
+                      resp)
 
         stdout = None
         stderr = None
