@@ -522,7 +522,8 @@ class Console(cmd.Cmd):
     # @Override
     def onecmd(self, line):
         """Executes a command and prints any exception."""
-        print("Command: %s" % line)
+        if line:
+            print("Command: %s" % line)
         try:
             return cmd.Cmd.onecmd(self, line)
         except Exception as e:
