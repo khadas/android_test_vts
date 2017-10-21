@@ -119,7 +119,7 @@ bool VtsHidlHalReplayer::ReplayTrace(
       hal_service_name = hal_service_instances[instance_name];
     }
 
-    cout << __func__ << ": replay function: " << call_msg.func_msg().name();
+    cout << "Replay function: " << call_msg.func_msg().DebugString() << endl;
 
     int32_t driver_id = driver_manager_->GetDriverIdForHidlHalInterface(
         package_name, version, interface_name, hal_service_name);

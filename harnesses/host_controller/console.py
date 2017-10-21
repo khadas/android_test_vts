@@ -32,6 +32,7 @@ from vts.harnesses.host_controller.build import build_provider_local_fs
 # To obtain access permission, please reach out to Android partner engineering
 # department of Google LLC.
 _DEFAULT_ACCOUNT_ID = '543365459'
+_ANDROID_SERIAL = "ANDROID_SERIAL"
 
 
 class ConsoleArgumentError(Exception):
@@ -82,16 +83,18 @@ class Console(cmd.Cmd):
 
     Attributes:
         device_image_info: dict containing info about device image files.
+        prompt: The prompt string at the beginning of each command line.
         test_suite_info: dict containing info about test suite package files.
         _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
         _hosts: A list of HostController objects.
         _in_file: The input file object.
         _out_file: The output file object.
-        prompt: The prompt string at the beginning of each command line.
-        _copy_parser: The parser for copy command
-        _fetch_parser: The parser for fetch command
-        _flash_parser: The parser for flash command
+        _serials: A list of string where each string is a device serial.
+        _copy_parser: The parser for copy command.
+        _device_parser: The parser for device command.
+        _fetch_parser: The parser for fetch command.
+        _flash_parser: The parser for flash command.
         _lease_parser: The parser for lease command.
         _list_parser: The parser for list command.
         _request_parser: The parser for request command.
@@ -115,6 +118,7 @@ class Console(cmd.Cmd):
         self.test_suite_info = {}
 
         self._InitCopyParser()
+        self._InitDeviceParser()
         self._InitFetchParser()
         self._InitFlashParser()
         self._InitLeaseParser()
@@ -159,10 +163,18 @@ class Console(cmd.Cmd):
             return False
 
         script_module = imp.load_source('script_module', script_file_path)
+
+        if _ANDROID_SERIAL in os.environ:
+            serial = os.environ[_ANDROID_SERIAL]
+        else:
+            serial = None
+
+        if serial:
+            self.onecmd("device --set_serial=%s" % serial)
+
         commands = script_module.EmitConsoleCommands()
         if commands:
             for command in commands:
-                print("Command: %s" % command)
                 self.onecmd(command)
         return True
 
@@ -380,7 +392,14 @@ class Console(cmd.Cmd):
         """Flash GSI or build images to a device connected with ADB."""
         args = self._flash_parser.ParseLine(line)
 
-        flasher = build_flasher.BuildFlasher(args.serial)
+        if args.serial:
+            serial = args.serial
+        elif self._serials:
+            serial = self._serials[0]
+        else:
+            serial = None
+
+        flasher = build_flasher.BuildFlasher(serial)
         if args.current:
             flasher.Flash(self.device_image_info)
         else:
@@ -415,6 +434,27 @@ class Console(cmd.Cmd):
         """Prints help message for copy command."""
         self._copy_parser.print_help(self._out_file)
 
+    def _InitDeviceParser(self):
+        """Initializes the parser for device command."""
+        self._device_parser = ConsoleArgumentParser(
+            "device", "Selects device(s) under test.")
+        self._device_parser.add_argument(
+            "--set_serial",
+            default="",
+            help="Serial number for device. Can be a comma-separated list.")
+        self._serials = []
+
+    def do_device(self, line):
+        """Sets device info such as serial number."""
+        args = self._device_parser.ParseLine(line)
+        if args.set_serial:
+            self._serials = args.set_serial.split(",")
+            print("serials: %s" % self._serials)
+
+    def help_device(self):
+        """Prints help message for device command."""
+        self._device_parser.print_help(self._out_file)
+
     def _InitTestParser(self):
         """Initializes the parser for test command."""
         self._test_parser = ConsoleArgumentParser(
@@ -434,10 +474,19 @@ class Console(cmd.Cmd):
     def do_test(self, line):
         """Executes a command using a VTS-TF instance."""
         args = self._test_parser.ParseLine(line)
+        if args.serial:
+            serial = args.serial
+        elif self._serials:
+            serial = self._serials[0]
+        else:
+            serial = ""
+
         if args.test_exec_mode == "subprocess":
             bin_path = self.test_suite_info["vts"]
             cmd = [bin_path, "run"]
             cmd.extend(line.split())
+            if serial:
+                cmd.extend(["-s", serial])
             print("Command: %s" % cmd)
             result = subprocess.check_output(cmd)
             logging.debug("result: %s", result)
@@ -473,6 +522,8 @@ class Console(cmd.Cmd):
     # @Override
     def onecmd(self, line):
         """Executes a command and prints any exception."""
+        if line:
+            print("Command: %s" % line)
         try:
             return cmd.Cmd.onecmd(self, line)
         except Exception as e:

@@ -51,6 +51,22 @@ class BuildFlasher(object):
             self.device = android_device.AndroidDevice(
                 serials[0], device_callback_port=-1)
 
+    def SetSerial(self, serial):
+        """Sets device serial.
+
+        Args:
+            serial: string, a device serial.
+
+        Returns:
+            True if successful; False otherwise.
+        """
+        if not serial:
+            print("no serial is given to BuildFlasher.SetSerial.")
+            return False
+
+        self.device = android_device.AndroidDevice(serial)
+        return True
+
     def FlashGSI(self, system_img, vbmeta_img=None, skip_check=False):
         """Flash the Generic System Image to the device.
 
