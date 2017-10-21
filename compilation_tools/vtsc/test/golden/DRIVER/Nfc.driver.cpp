@@ -142,8 +142,6 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(
     const string& callback_socket_name __attribute__((__unused__)),
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
-    cout << "Function: " << __func__ << " " << func_name << endl;
-    cout << "Callback socket name: " << callback_socket_name << endl;
     if (hw_binder_proxy_ == nullptr) {
         cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
@@ -152,19 +150,13 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(
         sp<::android::hardware::nfc::V1_0::INfcClientCallback> arg0;
         arg0 = VtsFuzzerCreateVts_android_hardware_nfc_V1_0_INfcClientCallback(callback_socket_name);
         static_cast<Vts_android_hardware_nfc_V1_0_INfcClientCallback*>(arg0.get())->Register(func_msg.arg(0));
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->open(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("open");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "write")) {
@@ -173,20 +165,14 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
         }
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         uint32_t result0;
         result0 = hw_binder_proxy_->write(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("write");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("uint32_t");
         result_val_0->mutable_scalar_value()->set_uint32_t(result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "coreInitialized")) {
@@ -195,90 +181,59 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::CallFunction(
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
         }
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->coreInitialized(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("coreInitialized");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "prediscover")) {
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->prediscover();
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("prediscover");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "close")) {
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->close();
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("close");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "controlGranted")) {
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->controlGranted();
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("controlGranted");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "powerCycle")) {
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::nfc::V1_0::NfcStatus result0;
         result0 = hw_binder_proxy_->powerCycle();
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("powerCycle");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_ENUM);
         SetResult__android__hardware__nfc__V1_0__NfcStatus(result_val_0, result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
         cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
-        cout << "called" << endl;
         return true;
     }
     return false;

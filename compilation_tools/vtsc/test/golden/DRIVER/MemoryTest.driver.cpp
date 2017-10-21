@@ -83,8 +83,6 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     const string& callback_socket_name __attribute__((__unused__)),
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
-    cout << "Function: " << __func__ << " " << func_name << endl;
-    cout << "Callback socket name: " << callback_socket_name << endl;
     if (hw_binder_proxy_ == nullptr) {
         cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
@@ -104,22 +102,16 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
             }
             arg0 = memory;
         });
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::hidl_memory result0;
         hw_binder_proxy_->haveSomeMemory(arg0, [&](const ::android::hardware::hidl_memory& arg0){
             cout << "callback haveSomeMemory called" << endl;
             result0 = arg0;
         });
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("haveSomeMemory");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_HIDL_MEMORY);
         /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "fillMemory")) {
@@ -139,22 +131,15 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         });
         uint8_t arg1 = 0;
         arg1 = func_msg.arg(1).scalar_value().uint8_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->fillMemory(arg0, arg1);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("fillMemory");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
         cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
-        cout << "called" << endl;
         return true;
     }
     return false;

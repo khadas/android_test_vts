@@ -200,17 +200,12 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
     const string& callback_socket_name __attribute__((__unused__)),
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
-    cout << "Function: " << __func__ << " " << func_name << endl;
-    cout << "Callback socket name: " << callback_socket_name << endl;
     if (hw_binder_proxy_ == nullptr) {
         cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
     }
     if (!strcmp(func_name, "configureFmqSyncReadWrite")) {
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         std::unique_ptr<::android::hardware::MQDescriptorSync<uint16_t>> result1;
         hw_binder_proxy_->configureFmqSyncReadWrite([&](bool arg0,const ::android::hardware::MQDescriptorSync<uint16_t>& arg1){
@@ -218,8 +213,6 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
             result0 = arg0;
             result1.reset(new (std::nothrow) ::android::hardware::MQDescriptorSync<uint16_t>(arg1));
         });
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("configureFmqSyncReadWrite");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
@@ -228,16 +221,12 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         VariableSpecificationMessage* result_val_1 = result_msg->add_return_type_hidl();
         result_val_1->set_type(TYPE_FMQ_SYNC);
         /* ERROR: TYPE_FMQ_SYNC is not supported yet. */
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "getFmqUnsyncWrite")) {
         bool arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().bool_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         std::unique_ptr<::android::hardware::MQDescriptorUnsync<uint16_t>> result1;
         hw_binder_proxy_->getFmqUnsyncWrite(arg0, [&](bool arg0,const ::android::hardware::MQDescriptorUnsync<uint16_t>& arg1){
@@ -245,8 +234,6 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
             result0 = arg0;
             result1.reset(new (std::nothrow) ::android::hardware::MQDescriptorUnsync<uint16_t>(arg1));
         });
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("getFmqUnsyncWrite");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
@@ -255,111 +242,74 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         VariableSpecificationMessage* result_val_1 = result_msg->add_return_type_hidl();
         result_val_1->set_type(TYPE_FMQ_UNSYNC);
         /* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestWriteFmqSync")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         result0 = hw_binder_proxy_->requestWriteFmqSync(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestWriteFmqSync");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("bool_t");
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestReadFmqSync")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         result0 = hw_binder_proxy_->requestReadFmqSync(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestReadFmqSync");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("bool_t");
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestWriteFmqUnsync")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         result0 = hw_binder_proxy_->requestWriteFmqUnsync(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestWriteFmqUnsync");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("bool_t");
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestReadFmqUnsync")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         bool result0;
         result0 = hw_binder_proxy_->requestReadFmqUnsync(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestReadFmqUnsync");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("bool_t");
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestBlockingRead")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->requestBlockingRead(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestBlockingRead");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestBlockingReadDefaultEventFlagBits")) {
         int32_t arg0 = 0;
         arg0 = func_msg.arg(0).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->requestBlockingReadDefaultEventFlagBits(arg0);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestBlockingReadDefaultEventFlagBits");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "requestBlockingReadRepeat")) {
@@ -367,22 +317,15 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         arg0 = func_msg.arg(0).scalar_value().int32_t();
         int32_t arg1 = 0;
         arg1 = func_msg.arg(1).scalar_value().int32_t();
-        VtsMeasurement vts_measurement;
-        vts_measurement.Start();
-        cout << "Call an API" << endl;
-        cout << "local_device = " << hw_binder_proxy_.get() << endl;
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->requestBlockingReadRepeat(arg0, arg1);
-        vector<float>* measured = vts_measurement.Stop();
-        cout << "time " << (*measured)[0] << endl;
         result_msg->set_name("requestBlockingReadRepeat");
-        cout << "called" << endl;
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
         cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
-        cout << "called" << endl;
         return true;
     }
     return false;
