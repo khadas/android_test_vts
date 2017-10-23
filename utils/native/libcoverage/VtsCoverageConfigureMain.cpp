@@ -26,8 +26,9 @@ const string kSysPropHalCoverage = "hal.coverage.enable";
 // Print usage directions.
 void usage() {
   cout << "usage:\n";
-  cout << "vts_sancov_configure flush\t\t\t\t: to flush coverage on all HALs\n";
-  cout << "vts_sancov_configure flush <hal name>@<hal version>\t: to flush "
+  cout << "vts_coverage_configure flush\t\t\t\t: to flush coverage on all "
+          "HALs\n";
+  cout << "vts_coverage_configure flush <hal name>@<hal version>\t: to flush "
           "coverage on one HAL name/version instance"
        << std::endl;
 }
@@ -51,7 +52,7 @@ bool parseFqInstaceName(string fqInstanceName, Lambda &&func) {
 
 // Flush coverage on all HAL processes, or just the provided HAL name if
 // provided.
-bool FlushHALSanitizerCoverage(string flushHal = "") {
+bool FlushHALCoverage(string flushHal = "") {
   using ::android::hidl::base::V1_0::IBase;
   using ::android::hidl::manager::V1_0::IServiceManager;
   using ::android::hardware::hidl_string;
@@ -104,9 +105,9 @@ bool FlushHALSanitizerCoverage(string flushHal = "") {
 
 // The provided binary can be used to flush coverage on one or all HALs.
 // Usage examples:
-//   To flush sancov coverage data on all hals: <binary> flush
-//   To flush sancov coverage data on one hal: <binary> flush <hal name>@<hal
-//   version>
+//   To flush gcov and/or sancov coverage data on all hals: <binary> flush
+//   To flush gcov and/or sancov coverage data on one hal: <binary> flush <hal
+//   name>@<hal version>
 int main(int argc, char *argv[]) {
   bool flush_coverage = false;
   if (argc < 2) {
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]) {
       halString = string(argv[2]);
     }
     cout << "* flush coverage" << std::endl;
-    if (!FlushHALSanitizerCoverage(halString)) {
+    if (!FlushHALCoverage(halString)) {
       cerr << "failed to flush coverage" << std::endl;
     }
   } else {
