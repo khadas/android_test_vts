@@ -45,7 +45,7 @@ class SancovFeature(feature_utils.Feature):
         'rm -rf {1}/{2} &&'
         'mkdir {1}/{2} && '
         'killall {0}\"')
-    _FLUSH_COMMAND = '/data/local/tmp/vts_sancov_configure flush {0}'
+    _FLUSH_COMMAND = '/data/local/tmp/vts_coverage_configure flush {0}'
     _TARGET_SANCOV_PATH = '/data/misc/trace'
     _SEARCH_PATHS = [
         (os.path.join('data', 'asan', 'vendor', 'bin'), None),
