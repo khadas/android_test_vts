@@ -202,6 +202,7 @@ vts_hal_test_bins := \
   VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
+  VtsHalWifiSupplicantV1_1TargetTest \
 
 vts_test_lib_hidl_packages := \
   $(vts_hal_driver_libs) \
