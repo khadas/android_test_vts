@@ -839,7 +839,12 @@ class AndroidDevice(object):
                 stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
                 return str(stdout)
             else:
-                stdout = self.adb.shell('cat /vendor/manifest.xml')
+                try:
+                    stdout = self.adb.shell('cat /odm/manifest.xml')
+                except adb.AdbError as e:
+                    logging.debug("Can't read /odm/manifest.xml; fall back to "
+                                  "use /vendor/manifest.xml instead.")
+                    stdout = self.adb.shell('cat /vendor/manifest.xml')
                 return str(stdout)
         except adb.AdbError as e:
             return None
