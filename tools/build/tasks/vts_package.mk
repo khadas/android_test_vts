@@ -34,7 +34,6 @@ include $(LOCAL_PATH)/list/vts_test_hidl_hal_hash_list.mk
 include $(build_utils_dir)/vts_package_utils.mk
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
--include vendor/google_vts/tools/build/tasks/list/vts_package_list_vendor.mk
 
 VTS_OUT_ROOT := $(HOST_OUT)/vts
 VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
