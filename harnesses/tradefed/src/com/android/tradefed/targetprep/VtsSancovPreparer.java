@@ -47,8 +47,8 @@ public class VtsSancovPreparer implements ITargetPreparer, ITargetCleaner {
     private static final String SANCOV_FLAVOR = "_asan_coverage";
     private static final String SANCOV_RESOURCES_KEY = "sancov-resources-path-%s";
 
-    private static final String SANCOV_CONFIGURE_SRC = "DATA/bin/vts_sancov_configure";
-    private static final String SANCOV_CONFIGURE_DST = "/data/local/tmp/vts_sancov_configure";
+    private static final String SANCOV_CONFIGURE_SRC = "DATA/bin/vts_coverage_configure";
+    private static final String SANCOV_CONFIGURE_DST = "/data/local/tmp/vts_coverage_configure";
 
     private File mDeviceInfoPath = null;
 
