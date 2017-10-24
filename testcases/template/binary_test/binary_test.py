@@ -220,22 +220,18 @@ class BinaryTest(base_test.BaseTestClass):
             logging.error('Failed to set permission to some of the binaries:\n'
                           '%s\n%s', cmd, cmd_results)
 
-        stop_requested = False
-
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
-            # Stop Android runtime to reduce interference.
-            logging.debug("Stops the Android framework.")
+            # Disable the framework if requested.
             self._dut.stop()
-            stop_requested = True
+        else:
+            # Enable the framework if requested.
+            self._dut.start()
 
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
                    False):
             logging.debug("Stops all properly configured native servers.")
             results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
-            stop_requested = True
-
-        if stop_requested:
             native_server_process_names = getattr(
                 self, keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME, [])
             if native_server_process_names:
@@ -363,12 +359,6 @@ class BinaryTest(base_test.BaseTestClass):
                    False):
             logging.debug("Restarts all properly configured native servers.")
             results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "0")
-
-        # Restart Android runtime.
-        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
-                   False):
-            logging.debug("Starts the Android framework.")
-            self._dut.start()
 
         # Retrieve coverage if applicable
         if self.coverage.enabled and self.coverage.global_coverage:
