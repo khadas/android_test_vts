@@ -400,6 +400,9 @@ class Console(cmd.Cmd):
             for serial in self._serials:
                 flasher = build_flasher.BuildFlasher(serial)
                 flashers.append(flasher)
+        else:
+            flasher = build_flasher.BuildFlasher()
+            flashers.append(flasher)
 
         if flashers:
             # Can be parallelized as long as that's proven reliable.
