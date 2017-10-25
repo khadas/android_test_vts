@@ -19,20 +19,24 @@ package com.android.tradefed.targetprep;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.targetprep.BuildError;
+import com.android.tradefed.targetprep.TargetSetupError;
 import com.android.tradefed.util.ArrayUtil;
+
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Collects device info. This's a fork of DeviceInfoCollector and is forked in order to simplify the
- * change deployment process and reduce the deployment time, which are critical for VTS services.
+ * Collects device info.
+ * This's a fork of DeviceInfoCollector and is forked in order to simplify the change
+ * deployment process and reduce the deployment time, which are critical for VTS services.
  */
-public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
+public class VtsDeviceInfoCollector implements ITargetPreparer {
+
     // TODO(trong): remove "cts:" prefix, will need a custom ResultReporter.
     private static final Map<String, String> BUILD_KEYS = new HashMap<>();
-    private static final long REBOOT_TIMEOUT = 1000 * 60 * 2; // 2 minutes.
-
     static {
         BUILD_KEYS.put("cts:build_id", "ro.build.id");
         BUILD_KEYS.put("cts:build_product", "ro.product.name");
@@ -62,28 +66,11 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
     }
 
     @Override
-    public void setUp(ITestDevice device, IBuildInfo buildInfo)
-            throws TargetSetupError, BuildError, DeviceNotAvailableException {
+    public void setUp(ITestDevice device, IBuildInfo buildInfo) throws TargetSetupError,
+            BuildError, DeviceNotAvailableException {
         for (Entry<String, String> entry : BUILD_KEYS.entrySet()) {
-            buildInfo.addBuildAttribute(
-                    entry.getKey(), ArrayUtil.join(",", device.getProperty(entry.getValue())));
-        }
-
-        // Set the default device runtime state to stopped.
-        device.executeShellCommand("stop");
-        device.executeShellCommand("setprop sys.boot_completed 0");
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
-            throws DeviceNotAvailableException {
-        // Restore the framework at test run completion.
-        long startTime = System.currentTimeMillis();
-        device.waitForDeviceOnline(REBOOT_TIMEOUT);
-        device.executeShellCommand("start");
-        if (!device.waitForBootComplete(REBOOT_TIMEOUT + startTime - System.currentTimeMillis())) {
-            throw new DeviceNotAvailableException("Framework irrecoverable after testing.");
+            buildInfo.addBuildAttribute(entry.getKey(),
+                    ArrayUtil.join(",", device.getProperty(entry.getValue())));
         }
     }
 }
