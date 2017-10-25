@@ -37,8 +37,10 @@ DT_NULL = 0
 DT_NEEDED = 1
 DT_STRTAB = 5
 # Section name
-DYNSYM = ".dynsym"
 DYNSTR = ".dynstr"
+DYNSYM = ".dynsym"
+STRTAB = ".strtab"
+SYMTAB = ".symtab"
 # Type in symbol table
 SYMBOL_NOTYPE = 0
 # Binding in symbol table
