@@ -150,7 +150,7 @@ int VtsShellDriver::HandleShellCommandConnection(int connection_fd) {
       continue;
     }
     LOG(INFO) << "Received " << cmd_msg.shell_command_size()
-              << " command(s). Processing... ";
+              << " command(s). Processing...";
 
     // execute command and write back output
     VtsDriverControlResponseMessage responseMessage;
