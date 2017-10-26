@@ -442,6 +442,12 @@ class Console(cmd.Cmd):
             "--set_serial",
             default="",
             help="Serial number for device. Can be a comma-separated list.")
+        self._device_parser.add_argument(
+            "--update",
+            action="store_true",
+            help="Update device info on TradeFed cluster")
+        self._device_parser.add_argument("--host", type=int,
+                                       help="The index of the host.")
         self._serials = []
 
     def do_device(self, line):
@@ -450,6 +456,19 @@ class Console(cmd.Cmd):
         if args.set_serial:
             self._serials = args.set_serial.split(",")
             print("serials: %s" % self._serials)
+        if args.update:
+            if args.host is None:
+                if len(self._hosts) > 1:
+                    raise ConsoleArgumentError("More than one host.")
+                args.host = 0
+            host = self._hosts[args.host]
+            devices = host.ListDevices()
+            for device in devices:
+                device.Extend(['sim_state', 'sim_operator', 'mac_address'])
+            snapshots = self._tfc_client.CreateDeviceSnapshot(host._cluster_ids[0],
+                                                        host.hostname,
+                                                        devices)
+            self._tfc_client.SubmitHostEvents(snapshots)
 
     def help_device(self):
         """Prints help message for device command."""
