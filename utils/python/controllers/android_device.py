@@ -525,6 +525,30 @@ class AndroidDevice(object):
             return True
         return False
 
+    @property
+    def mac_address(self):
+        """The MAC address of the device.
+        """
+        try:
+            command = 'su root cat /sys/class/net/wlan0/address'
+            response = self.adb.shell(command)
+            return response.strip()
+        except adb.AdbError as e:
+            logging.exception(e)
+            return "unknown"
+
+    @property
+    def sim_state(self):
+        """The SIM state of the device.
+        """
+        return self.getProp('gsm.sim.state')
+
+    @property
+    def sim_operator(self):
+        """The SIM operator of the device.
+        """
+        return self.getProp('gsm.operator.alpha')
+
     def loadConfig(self, config):
         """Add attributes to the AndroidDevice object based on json config.
 
