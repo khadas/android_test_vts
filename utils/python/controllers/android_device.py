@@ -1083,7 +1083,12 @@ class AndroidDevice(object):
             elif is_framework_manifest:
                 stdout = self.adb.shell('cat /system/manifest.xml')
             else:
-                stdout = self.adb.shell('cat /vendor/manifest.xml')
+                try:
+                    stdout = self.adb.shell('cat /odm/manifest.xml')
+                except adb.AdbError as e:
+                    logging.debug("Can't read /odm/manifest.xml; fall back to "
+                                  "use /vendor/manifest.xml instead.")
+                    stdout = self.adb.shell('cat /vendor/manifest.xml')
             return str(stdout)
         except adb.AdbError as e:
             return None
