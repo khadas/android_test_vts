@@ -359,4 +359,9 @@
     <option name="compatibility:exclude-filter" value="CtsWebkitTestCases android.webkit.cts.WebViewTest#testRequestFocusNodeHref" />
     <option name="compatibility:exclude-filter" value="CtsWebkitTestCases android.webkit.cts.WebViewTest#testRequestImageRef" />
 
+    <!-- Excluded tese cases: b/68090397 to show how it is fixed in future releases -->
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerActivityVisibilityTests#testTurnScreenOnActivity_withRelayout" />
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerActivityVisibilityTests#testTurnScreenOnAttrRemove" />
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.ActivityManagerActivityVisibilityTests#testTurnScreenOnAttrWithLockScreen" />
+
 </configuration>
