@@ -37,6 +37,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
 
     // TODO(trong): remove "cts:" prefix, will need a custom ResultReporter.
     private static final Map<String, String> BUILD_KEYS = new HashMap<>();
+
     static {
         BUILD_KEYS.put("cts:build_id", "ro.build.id");
         BUILD_KEYS.put("cts:build_product", "ro.product.name");
@@ -63,6 +64,10 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         BUILD_KEYS.put("cts:build_vendor_fingerprint", "ro.vendor.build.fingerprint");
         BUILD_KEYS.put("cts:build_vendor_manufacturer", "ro.product.vendor.manufacturer");
         BUILD_KEYS.put("cts:build_vendor_model", "ro.product.vendor.model");
+
+        BUILD_LEGACY_PROPERTIES.put(
+                "ro.product.vendor.manufacturer", "ro.vendor.product.manufacturer");
+        BUILD_LEGACY_PROPERTIES.put("ro.product.vendor.model", "ro.vendor.product.model");
     }
 
     @Override
