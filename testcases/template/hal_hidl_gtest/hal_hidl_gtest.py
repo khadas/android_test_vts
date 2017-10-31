@@ -72,6 +72,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if self.sancov.enabled and self._hal_precondition is not None:
             self.sancov.InitializeDeviceCoverage(self._dut,
                                                  self._hal_precondition)
+        if self.coverage.enabled and self._hal_precondition is not None:
+            self.coverage.SetHalNames([self._hal_precondition])
 
     def CreateTestCases(self):
         """Create testcases and conditionally enable passthrough mode.
