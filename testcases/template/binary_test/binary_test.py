@@ -225,7 +225,38 @@ class BinaryTest(base_test.BaseTestClass):
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
         source_list = list(map(self.ParseTestSource, self.binary_test_source))
-        source_list = filter(bool, source_list)
+
+        def isValidSource(source):
+            '''Checks that the truth value and bitness of source is valid.
+
+            Args:
+                source: a tuple of (string, string, string or None),
+                representing (host side absolute path, device side absolute
+                path, tag), is the return value of self.ParseTestSource
+
+            Returns:
+                False if source has a false truth value or its bitness does
+                not match the abi_bitness of the test run.
+            '''
+            if not source:
+                return False
+
+            tag = source[2]
+            if tag is None:
+                return True
+
+            tag = str(tag)
+            if (tag.endswith(const.SUFFIX_32BIT) and self.abi_bitness == '64'
+                ) or (tag.endswith(const.SUFFIX_64BIT) and
+                      self.abi_bitness == '32'):
+                logging.info('Bitness of test source, %s, does not match the '
+                             'abi_bitness, %s, of test run.', str(source[0]),
+                             self.abi_bitness)
+                return False
+
+            return True
+
+        source_list = filter(isValidSource, source_list)
         logging.info('Parsed test sources: %s', source_list)
 
         # Push source files first
