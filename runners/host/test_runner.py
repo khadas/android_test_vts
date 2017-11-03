@@ -324,8 +324,8 @@ class TestRunner(object):
                                "%s, abort!"), module_config_name)
             raise
         if not isinstance(objects, list):
-            raise ControllerError(("Controller module %s did not return a list"
-                                   " of objects, abort.") % module_ref_name)
+            raise signals.ControllerError(("Controller module %s did not"
+                        " return a list of objects, abort.") % module_ref_name)
         self.controller_registry[module_ref_name] = objects
         logging.debug("Found %d objects for controller %s",
                       len(objects), module_config_name)
