@@ -198,8 +198,7 @@ class CoverageFeature(feature_utils.Feature):
         except AdbError as e:
             logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
         logging.info("Removing existing gcda files.")
-        gcda_files = dut.adb.shell("find %s -name \"*.gcda\" -type f -delete" %
-                                   TARGET_COVERAGE_PATH)
+        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
 
     def GetGcdaDict(self, dut):
         """Retrieves GCDA files from device and creates a dictionary of files.
@@ -245,6 +244,7 @@ class CoverageFeature(feature_utils.Feature):
                 dut.adb.pull("%s %s" % (gcda, file_name))
                 gcda_content = open(file_name, "rb").read()
                 gcda_dict[basename] = gcda_content
+        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
         return gcda_dict
 
     def _OutputCoverageReport(self, isGlobal):
