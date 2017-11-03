@@ -191,11 +191,11 @@ class MirrorTracker(object):
 
     def DisableShell(self):
         """Disables all registered shell mirrors."""
-        for shell_mirror in self._registered_mirrors:
-            if not isinstance(shell_mirror, shell_mirror.ShellMirror):
+        for mirror in self._registered_mirrors.values():
+            if not isinstance(mirror, shell_mirror.ShellMirror):
                 logging.error("mirror object is not a shell mirror")
                 continue
-            shell_mirror.enabled = False
+            mirror.enabled = False
 
     def Execute(self, command, no_except=False):
         """Execute a shell command with default shell terminal."""
