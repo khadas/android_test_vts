@@ -61,6 +61,8 @@ class CoverageFeature(feature_utils.Feature):
         enabled: boolean, True if coverage is enabled, False otherwise
         web: (optional) WebFeature, object storing web feature util for test run
         local_coverage_path: path to store the coverage files.
+        _device_resource_dict: a map from device serial number to host resources directory.
+        _hal_names: the list of hal names for which to process coverage.
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_COVERAGE
@@ -85,6 +87,8 @@ class CoverageFeature(feature_utils.Feature):
                              self._OPTIONAL_PARAMS, user_params)
         self.web = web
         self._device_resource_dict = {}
+        self._hal_names = None
+
         if local_coverage_path:
             self.local_coverage_path = local_coverage_path
         else:
@@ -189,6 +193,10 @@ class CoverageFeature(feature_utils.Feature):
         Args:
             dut: the device under test.
         """
+        try:
+            dut.adb.shell(_FLUSH_COMMAND)
+        except AdbError as e:
+            logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
         logging.info("Removing existing gcda files.")
         gcda_files = dut.adb.shell("find %s -name \"*.gcda\" -type f -delete" %
                                    TARGET_COVERAGE_PATH)
@@ -202,7 +210,6 @@ class CoverageFeature(feature_utils.Feature):
 
         Args:
             dut: the device under test.
-            local_coverage_path: the host path (string) in which to copy gcda files
 
         Returns:
             A dictionary with gcda basenames as keys and contents as the values.
@@ -215,8 +222,22 @@ class CoverageFeature(feature_utils.Feature):
         except AdbError as e:
             logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
 
-        gcda_files = dut.adb.shell("find %s -name \"*.gcda\"" %
-                                   TARGET_COVERAGE_PATH).split("\n")
+        gcda_files = set()
+        if self._hal_names:
+            searchString = "|".join(self._hal_names)
+            entries = dut.adb.shell('lshal -itp 2> /dev/null | grep -E \"{0}\"'.format(
+                searchString)).splitlines()
+            pids = set([pid.strip()
+                        for pid in map(lambda entry: entry.split()[-1], entries)
+                        if pid.isdigit()])
+            gcda_files = set()
+            for pid in pids:
+                gcda_files.update(dut.adb.shell("find %s/%s -name \"*.gcda\"" %
+                                       (TARGET_COVERAGE_PATH, pid)).split("\n"))
+
+        else:
+            gcda_files.update(dut.adb.shell("find %s -name \"*.gcda\"" %
+                                       TARGET_COVERAGE_PATH).split("\n"))
         for gcda in gcda_files:
             if gcda:
                 basename = os.path.basename(gcda.strip())
@@ -479,3 +500,11 @@ class CoverageFeature(feature_utils.Feature):
         else:
             # explicitly process coverage data for the specified modules
             self._ManualProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
+
+    def SetHalNames(self, names=[]):
+        """Sets the HAL names for which to process coverage.
+
+        Args:
+            names: list of strings, names of hal (e.g. android.hardware.light@2.0)
+        """
+        self._hal_names = list(names)
