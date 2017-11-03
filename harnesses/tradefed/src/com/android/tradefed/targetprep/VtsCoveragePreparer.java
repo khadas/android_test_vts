@@ -157,6 +157,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
 
             // Push the sancov flushing tool
             device.pushFile(new File(COVERAGE_CONFIGURE_SRC), COVERAGE_CONFIGURE_DST);
+            device.executeShellCommand("rm -rf /data/misc/trace/*");
             device.executeShellCommand("setenforce 0");
 
             if (sancovEnabled) {
@@ -179,6 +180,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
         // Clear the temporary directories.
+        device.executeShellCommand("setenforce 1");
         if (mDeviceInfoPath != null) {
             FileUtil.recursiveDelete(mDeviceInfoPath);
             device.executeShellCommand("rm -r " + COVERAGE_CONFIGURE_DST);
