@@ -26,7 +26,7 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
-import com.android.tradefed.targetprep.VtsSancovPreparer;
+import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.Set;
 import java.util.Collection;
@@ -641,21 +642,28 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         JSONArray deviceArray = new JSONArray();
         JSONObject deviceItemObject = new JSONObject();
         deviceItemObject.put(SERIAL, mDevice.getSerialNumber());
+
         boolean coverageBuild = false;
         boolean sancovBuild = false;
+
         try {
             deviceItemObject.put("product_type", mDevice.getProductType());
             deviceItemObject.put("product_variant", mDevice.getProductVariant());
             deviceItemObject.put("build_alias", mDevice.getBuildAlias());
             deviceItemObject.put("build_id", mDevice.getBuildId());
             deviceItemObject.put("build_flavor", mDevice.getBuildFlavor());
-            File sancovDir = mBuildInfo.getFile(VtsSancovPreparer.getSancovResourceDirKey(mDevice));
+
+            File sancovDir =
+                    mBuildInfo.getFile(VtsCoveragePreparer.getSancovResourceDirKey(mDevice));
             if (sancovDir != null) {
                 deviceItemObject.put("sancov_resources_path", sancovDir.getAbsolutePath());
                 sancovBuild = true;
             }
-            String coverageProperty = mDevice.getProperty(COVERAGE_PROPERTY);
-            coverageBuild = coverageProperty != null && coverageProperty.equals("1");
+            File gcovDir = mBuildInfo.getFile(VtsCoveragePreparer.getGcovResourceDirKey(mDevice));
+            if (gcovDir != null) {
+                deviceItemObject.put("gcov_resources_path", gcovDir.getAbsolutePath());
+                coverageBuild = true;
+            }
         } catch (DeviceNotAvailableException e) {
             CLog.e("A device not available - continuing");
             throw new RuntimeException("Failed to get device information");

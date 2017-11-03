@@ -26,6 +26,7 @@ from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.runners.host import test_runner
 from vts.utils.python.common import list_utils
+from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.os import path_utils
 from vts.utils.python.precondition import precondition_utils
 from vts.utils.python.web import feature_utils
@@ -194,8 +195,11 @@ class BinaryTest(base_test.BaseTestClass):
         self.shell = self._dut.shell
 
         if self.coverage.enabled and self.coverage.global_coverage:
-            self.coverage.LoadArtifacts()
             self.coverage.InitializeDeviceCoverage(self._dut)
+            if coverage_utils.FLUSH_PATH_VAR not in self.envp:
+                self.envp[coverage_utils.FLUSH_PATH_VAR] = (
+                    path_utils.JoinTargetPath(coverage_utils.TARGET_COVERAGE_PATH,
+                        'self'))
 
         self.testcases = []
 
