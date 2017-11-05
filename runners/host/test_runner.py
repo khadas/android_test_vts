@@ -324,8 +324,8 @@ class TestRunner(object):
                                "%s, abort!"), module_config_name)
             raise
         if not isinstance(objects, list):
-            raise ControllerError(("Controller module %s did not return a list"
-                                   " of objects, abort.") % module_ref_name)
+            raise signals.ControllerError(("Controller module %s did not"
+                        " return a list of objects, abort.") % module_ref_name)
         self.controller_registry[module_ref_name] = objects
         logging.debug("Found %d objects for controller %s",
                       len(objects), module_config_name)
@@ -341,7 +341,7 @@ class TestRunner(object):
         for name, destroy in self.controller_destructors.items():
             try:
                 logging.debug("Destroying %s.", name)
-                dut = self.controller_destructors[name][0]
+                dut = self.controller_destructors[name]
                 destroy(self.controller_registry[name])
             except:
                 logging.exception("Exception occurred destroying %s.", name)
@@ -390,6 +390,8 @@ class TestRunner(object):
                 cls_result = test_cls_instance.run(test_cases)
             except signals.TestAbortAll as e:
                 raise e
+            finally:
+                self.unregisterControllers()
 
     def run(self):
         """Executes test cases.

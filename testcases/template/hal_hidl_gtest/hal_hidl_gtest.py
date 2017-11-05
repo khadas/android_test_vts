@@ -72,6 +72,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         if self.sancov.enabled and self._hal_precondition is not None:
             self.sancov.InitializeDeviceCoverage(self._dut,
                                                  self._hal_precondition)
+        if self.coverage.enabled and self._hal_precondition is not None:
+            self.coverage.SetHalNames([self._hal_precondition])
 
     def CreateTestCases(self):
         """Create testcases and conditionally enable passthrough mode.
@@ -85,9 +87,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         passthrough_opt = self.getUserParam(
             keys.ConfigKeys.IKEY_PASSTHROUGH_MODE, default_value=False)
 
-        # Enable coverage if specified in the configuration or coverage enabled.
-        # TODO(ryanjcampbell@) support binderized mode
-        if passthrough_opt or self.coverage.enabled:
+        # Enable coverage if specified in the configuration.
+        if passthrough_opt:
             self._EnablePassthroughMode()
 
     # @Override

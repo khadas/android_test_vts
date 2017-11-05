@@ -359,4 +359,7 @@
     <option name="compatibility:exclude-filter" value="CtsWebkitTestCases android.webkit.cts.WebViewTest#testRequestFocusNodeHref" />
     <option name="compatibility:exclude-filter" value="CtsWebkitTestCases android.webkit.cts.WebViewTest#testRequestImageRef" />
 
+    <!-- Excluded tese case - TODO(jiyong): b/67739526 to reenable that -->
+    <option name="compatibility:exclude-filter" value="CtsJniTestCases android.jni.cts.JniStaticTest#test_linker_namespaces" />
+
 </configuration>

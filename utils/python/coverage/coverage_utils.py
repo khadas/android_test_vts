@@ -13,26 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import io
+import json
 import logging
 import os
 import shutil
 import time
 import zipfile
 
-from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
-
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import keys
 from vts.utils.python.archive import archive_parser
-from vts.utils.python.build.api import artifact_fetcher
+from vts.utils.python.controllers.adb import AdbError
 from vts.utils.python.coverage import coverage_report
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 from vts.utils.python.coverage.parser import FileFormatError
 from vts.utils.python.web import feature_utils
 
-TARGET_COVERAGE_PATH = "/data/misc/gcov/"
-LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"
+FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
+TARGET_COVERAGE_PATH = "/data/misc/trace/"  # location to flush coverage
+LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # locatino to pull coverage to host
 
 GCNO_SUFFIX = ".gcno"
 GCDA_SUFFIX = ".gcda"
@@ -42,7 +42,13 @@ MODULE_NAME = "module_name"
 NAME = "name"
 PATH = "path"
 
-_BRANCH = "master"  # TODO: make this a runtime parameter
+_BUILD_INFO = 'BUILD_INFO'  # name of build info artifact
+_GCOV_ZIP = "gcov.zip"  # name of gcov artifact zip
+_REPO_DICT = 'repo-dict'  # name of dictionary from project to revision in BUILD_INFO
+
+# Command for flushing coverage
+_FLUSH_COMMAND = "GCOV_PREFIX=/data/local/tmp/flusher /data/local/tmp/vts_coverage_configure flush"
+
 _CHECKSUM_GCNO_DICT = "checksum_gcno_dict"
 _COVERAGE_ZIP = "coverage_zip"
 _REVISION_DICT = "revision_dict"
@@ -55,12 +61,12 @@ class CoverageFeature(feature_utils.Feature):
         enabled: boolean, True if coverage is enabled, False otherwise
         web: (optional) WebFeature, object storing web feature util for test run
         local_coverage_path: path to store the coverage files.
+        _device_resource_dict: a map from device serial number to host resources directory.
+        _hal_names: the list of hal names for which to process coverage.
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_COVERAGE
     _REQUIRED_PARAMS = [
-        keys.ConfigKeys.IKEY_ANDROID_DEVICE,
-        keys.ConfigKeys.IKEY_SERVICE_JSON_PATH,
         keys.ConfigKeys.IKEY_ANDROID_DEVICE
     ]
     _OPTIONAL_PARAMS = [
@@ -80,6 +86,9 @@ class CoverageFeature(feature_utils.Feature):
         self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS,
                              self._OPTIONAL_PARAMS, user_params)
         self.web = web
+        self._device_resource_dict = {}
+        self._hal_names = None
+
         if local_coverage_path:
             self.local_coverage_path = local_coverage_path
         else:
@@ -94,6 +103,21 @@ class CoverageFeature(feature_utils.Feature):
 
         self.global_coverage = getattr(
                     self, keys.ConfigKeys.IKEY_GLOBAL_COVERAGE, True)
+        if self.enabled:
+            android_devices = getattr(self,
+                                      keys.ConfigKeys.IKEY_ANDROID_DEVICE)
+            if not isinstance(android_devices, list):
+                logging.warn('Android device information not available')
+                self.enabled = False
+            for device in android_devices:
+                serial = str(device.get(keys.ConfigKeys.IKEY_SERIAL))
+                coverage_resource_path = str(
+                    device.get(keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH))
+                if not serial or not coverage_resource_path:
+                    logging.warn('Missing coverage information in device: %s',
+                                 device)
+                    continue
+                self._device_resource_dict[serial] = coverage_resource_path
         logging.info("Coverage enabled: %s", self.enabled)
 
     def _ExtractSourceName(self, gcno_summary, file_name):
@@ -169,9 +193,12 @@ class CoverageFeature(feature_utils.Feature):
         Args:
             dut: the device under test.
         """
+        try:
+            dut.adb.shell(_FLUSH_COMMAND)
+        except AdbError as e:
+            logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
         logging.info("Removing existing gcda files.")
-        gcda_files = dut.adb.shell("find %s -name \"*.gcda\" -type f -delete" %
-                                   TARGET_COVERAGE_PATH)
+        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
 
     def GetGcdaDict(self, dut):
         """Retrieves GCDA files from device and creates a dictionary of files.
@@ -182,7 +209,6 @@ class CoverageFeature(feature_utils.Feature):
 
         Args:
             dut: the device under test.
-            local_coverage_path: the host path (string) in which to copy gcda files
 
         Returns:
             A dictionary with gcda basenames as keys and contents as the values.
@@ -190,8 +216,27 @@ class CoverageFeature(feature_utils.Feature):
         logging.info("Creating gcda dictionary")
         gcda_dict = {}
         logging.info("Storing gcda tmp files to: %s", self.local_coverage_path)
-        gcda_files = dut.adb.shell("find %s -name \"*.gcda\"" %
-                                   TARGET_COVERAGE_PATH).split("\n")
+        try:
+            dut.adb.shell(_FLUSH_COMMAND)
+        except AdbError as e:
+            logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
+
+        gcda_files = set()
+        if self._hal_names:
+            searchString = "|".join(self._hal_names)
+            entries = dut.adb.shell('lshal -itp 2> /dev/null | grep -E \"{0}\"'.format(
+                searchString)).splitlines()
+            pids = set([pid.strip()
+                        for pid in map(lambda entry: entry.split()[-1], entries)
+                        if pid.isdigit()])
+            gcda_files = set()
+            for pid in pids:
+                gcda_files.update(dut.adb.shell("find %s/%s -name \"*.gcda\"" %
+                                       (TARGET_COVERAGE_PATH, pid)).split("\n"))
+
+        else:
+            gcda_files.update(dut.adb.shell("find %s -name \"*.gcda\"" %
+                                       TARGET_COVERAGE_PATH).split("\n"))
         for gcda in gcda_files:
             if gcda:
                 basename = os.path.basename(gcda.strip())
@@ -199,6 +244,7 @@ class CoverageFeature(feature_utils.Feature):
                 dut.adb.pull("%s %s" % (gcda, file_name))
                 gcda_content = open(file_name, "rb").read()
                 gcda_dict[basename] = gcda_content
+        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
         return gcda_dict
 
     def _OutputCoverageReport(self, isGlobal):
@@ -220,7 +266,7 @@ class CoverageFeature(feature_utils.Feature):
         with open(coverage_report_file, 'w+') as f:
             f.write(str(coverage_report_msg))
 
-    def _AutoProcess(self, gcda_dict, isGlobal):
+    def _AutoProcess(self, cov_zip, revision_dict, gcda_dict, isGlobal):
         """Process coverage data and appends coverage reports to the report message.
 
         Matches gcno files with gcda files and processes them into a coverage report
@@ -238,12 +284,13 @@ class CoverageFeature(feature_utils.Feature):
              test/vts or <some folder>/test/vts in order to be recognized.
 
         Args:
+            cov_zip: the ZipFile object containing the gcno coverage artifacts.
+            revision_dict: the dictionary from project name to project version.
             gcda_dict: the dictionary of gcda basenames to gcda content (binary string)
             isGlobal: boolean, True if the coverage data is for the entire test, False if only for
                       the current test case.
         """
-        revision_dict = getattr(self, _REVISION_DICT, None)
-        checksum_gcno_dict = getattr(self, _CHECKSUM_GCNO_DICT, None)
+        checksum_gcno_dict = self._GetChecksumGcnoDict(cov_zip)
         output_coverage_report = getattr(
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, False)
 
@@ -316,7 +363,7 @@ class CoverageFeature(feature_utils.Feature):
         if output_coverage_report:
             self._OutputCoverageReport(isGlobal)
 
-    def _ManualProcess(self, gcda_dict, isGlobal):
+    def _ManualProcess(self, cov_zip, revision_dict, gcda_dict, isGlobal):
         """Process coverage data and appends coverage reports to the report message.
 
         Opens the gcno files in the cov_zip for the specified modules and matches
@@ -326,12 +373,12 @@ class CoverageFeature(feature_utils.Feature):
         for the modules explicitly defined in 'modules'.
 
         Args:
+            cov_zip: the ZipFile object containing the gcno coverage artifacts.
+            revision_dict: the dictionary from project name to project version.
             gcda_dict: the dictionary of gcda basenames to gcda content (binary string)
             isGlobal: boolean, True if the coverage data is for the entire test, False if only for
                       the current test case.
         """
-        cov_zip = getattr(self, _COVERAGE_ZIP, None)
-        revision_dict = getattr(self, _REVISION_DICT, None)
         output_coverage_report = getattr(
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, True)
         modules = getattr(self, keys.ConfigKeys.IKEY_MODULES, None)
@@ -417,82 +464,7 @@ class CoverageFeature(feature_utils.Feature):
         if output_coverage_report:
             self._OutputCoverageReport(isGlobal)
 
-    def LoadArtifacts(self):
-        """Initializes the test for coverage instrumentation.
-
-        Downloads build artifacts from the build server
-        (gcno zip file and git revision dictionary) and prepares for coverage
-        measurement.
-
-        Requires coverage feature enabled; no-op otherwise.
-        """
-        if not self.enabled:
-            return
-
-        self.enabled = False
-
-        # Use first device info to get product, flavor, and ID
-        # TODO: support multi-device builds
-        android_devices = getattr(self, keys.ConfigKeys.IKEY_ANDROID_DEVICE)
-        if not isinstance(android_devices, list):
-            logging.warn("android device information not available")
-            return
-
-        device_spec = android_devices[0]
-        build_flavor = device_spec.get(keys.ConfigKeys.IKEY_BUILD_FLAVOR)
-        device_build_id = device_spec.get(keys.ConfigKeys.IKEY_BUILD_ID)
-
-        if not build_flavor or not device_build_id:
-            logging.error("Could not read device information.")
-            return
-
-        build_flavor = str(build_flavor)
-        if not "coverage" in build_flavor:
-            build_flavor = "{0}_coverage".format(build_flavor)
-        product = build_flavor.split("-", 1)[0]
-        build_id = str(device_build_id)
-
-        # Get service json path
-        service_json_path = getattr(self,
-                                    keys.ConfigKeys.IKEY_SERVICE_JSON_PATH)
-
-        # Instantiate build client
-        try:
-            build_client = artifact_fetcher.AndroidBuildClient(
-                service_json_path)
-        except Exception as e:
-            logging.exception('Failed to instantiate build client: %s', e)
-            return
-
-        # Fetch repo dictionary
-        try:
-            revision_dict = build_client.GetRepoDictionary(
-                _BRANCH, build_flavor, device_build_id)
-            setattr(self, _REVISION_DICT, revision_dict)
-        except Exception as e:
-            logging.exception('Failed to fetch repo dictionary: %s', e)
-            logging.info('Coverage disabled')
-            return
-
-        # Fetch coverage zip
-        try:
-            cov_zip = io.BytesIO(
-                build_client.GetCoverage(_BRANCH, build_flavor,
-                                         device_build_id, product))
-            cov_zip = zipfile.ZipFile(cov_zip)
-            setattr(self, _COVERAGE_ZIP, cov_zip)
-        except Exception as e:
-            logging.exception('Failed to fetch coverage zip: %s', e)
-            logging.info('Coverage disabled')
-            return
-
-        if not hasattr(self, keys.ConfigKeys.IKEY_MODULES):
-            checksum_gcno_dict = self._GetChecksumGcnoDict(cov_zip)
-            setattr(self, _CHECKSUM_GCNO_DICT, checksum_gcno_dict)
-
-        self.enabled = True
-
-    def SetCoverageData(self, coverage_data=None, isGlobal=False, dut=None):
+    def SetCoverageData(self, dut, isGlobal=False):
         """Sets and processes coverage data.
 
         Organizes coverage data and processes it into a coverage report in the
@@ -501,40 +473,38 @@ class CoverageFeature(feature_utils.Feature):
         Requires feature to be enabled; no-op otherwise.
 
         Args:
-            coverage_data may be either:
-                          (1) a dict where gcda name is the key and binary
-                              content is the value, or
-                          (2) a list of NativeCodeCoverageRawDataMessage objects
-                          (3) None if the data will be pulled from dut
+            dut:  the device object for which to pull coverage data
             isGlobal: True if the coverage data is for the entire test, False if
                       if the coverage data is just for the current test case.
-            dut: (optional) the device object for which to pull coverage data
         """
         if not self.enabled:
             return
 
-        if not coverage_data and dut:
-            coverage_data = self.GetGcdaDict(dut)
-
-        if not coverage_data:
-            logging.info("SetCoverageData: empty coverage data")
+        serial = dut.adb.shell('getprop ro.serialno').strip()
+        if not serial in self._device_resource_dict:
+            logging.error('Invalid device provided: %s', serial)
             return
 
-        if isinstance(coverage_data, RepeatedCompositeFieldContainer):
-            gcda_dict = {}
-            for coverage_msg in coverage_data:
-                gcda_dict[coverage_msg.file_path] = coverage_msg.gcda
-        elif isinstance(coverage_data, dict):
-            gcda_dict = coverage_data
-        else:
-            logging.error("SetCoverageData: unexpected coverage_data type: %s",
-                          str(type(coverage_data)))
-            return
+        gcda_dict = self.GetGcdaDict(dut)
         logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
+
+        resource_path = self._device_resource_dict[serial]
+        cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
+
+        revision_dict = json.load(
+                open(os.path.join(resource_path, _BUILD_INFO)))[_REPO_DICT]
 
         if not hasattr(self, keys.ConfigKeys.IKEY_MODULES):
             # auto-process coverage data
-            self._AutoProcess(gcda_dict, isGlobal)
+            self._AutoProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
         else:
             # explicitly process coverage data for the specified modules
-            self._ManualProcess(gcda_dict, isGlobal)
+            self._ManualProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
+
+    def SetHalNames(self, names=[]):
+        """Sets the HAL names for which to process coverage.
+
+        Args:
+            names: list of strings, names of hal (e.g. android.hardware.light@2.0)
+        """
+        self._hal_names = list(names)

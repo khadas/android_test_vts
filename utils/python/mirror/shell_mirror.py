@@ -16,6 +16,7 @@
 
 import logging
 
+from vts.runners.host import const
 from vts.utils.python.mirror import mirror_object
 
 

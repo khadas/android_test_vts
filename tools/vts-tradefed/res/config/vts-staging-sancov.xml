@@ -15,7 +15,7 @@
 -->
 <configuration description="VTS Staging Plan for Sancov on HALs">
   <include name="vts-base" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsSancovPreparer" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsCoveragePreparer" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:default-type" value="staging" />
