@@ -22,10 +22,11 @@
  *    /data/local/tmp/hal-trace/nfc/V1_0/nfc.vts.trace
  */
 
+#include <getopt.h>
 #include <iostream>
 #include <string>
 
-#include <getopt.h>
+#include <android-base/logging.h>
 
 #include "VtsHidlHalReplayer.h"
 #include "driver_manager/VtsHalDriverManager.h"
@@ -66,6 +67,8 @@ void ShowUsage() {
 }
 
 int main(int argc, char** argv) {
+  android::base::InitLogging(argv, android::base::StderrLogger);
+
   const char* const short_opts = "hld:n:";
   const option long_opts[] = {
       {"help", no_argument, nullptr, 'h'},
