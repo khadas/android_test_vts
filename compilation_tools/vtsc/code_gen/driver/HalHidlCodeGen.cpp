@@ -16,10 +16,7 @@
 
 #include "code_gen/driver/HalHidlCodeGen.h"
 
-#include <fstream>
 #include <iostream>
-#include <set>
-#include <sstream>
 #include <string>
 
 #include "VtsCompilerUtils.h"
@@ -75,7 +72,7 @@ void HalHidlCodeGen::GenerateCppBodyInterfaceImpl(
       }
       out << ")> cb) {\n";
     }
-    out << "cout << \"" << api.name() << " called\" << endl;\n";
+    out << "LOG(INFO) << \"" << api.name() << " called\";\n";
     out << "AndroidSystemCallbackRequestMessage callback_message;\n";
     out << "callback_message.set_id(GetCallbackID(\"" << api.name()
         << "\"));\n";
@@ -182,7 +179,7 @@ void HalHidlCodeGen::GenerateDriverFunctionImpl(Formatter& out,
     out << "const char* func_name = func_msg.name().c_str();" << "\n";
     out << "if (hw_binder_proxy_ == nullptr) {\n";
     out.indent();
-    out << "cerr << \"" << kInstanceVariableName << " is null. \"<< endl;\n";
+    out << "LOG(ERROR) << \"" << kInstanceVariableName << " is null. \";\n";
     out << "return false;\n";
     out.unindent();
     out << "}\n";
@@ -203,7 +200,8 @@ void HalHidlCodeGen::GenerateDriverImplForReservedMethods(Formatter& out) {
   out << "if (!strcmp(func_name, \"notifySyspropsChanged\")) {\n";
   out.indent();
 
-  out << "cout << \"Call notifySyspropsChanged\" << endl;" << "\n";
+  out << "LOG(INFO) << \"Call notifySyspropsChanged\";"
+      << "\n";
   out << kInstanceVariableName << "->notifySyspropsChanged();\n";
   out << "result_msg->set_name(\"notifySyspropsChanged\");\n";
   out << "return true;\n";
@@ -241,8 +239,8 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   }
 
   // may need to check whether the function is actually defined.
-  out << "clog << \"local_device = \" << " << kInstanceVariableName << ".get()"
-      << " << endl;\n";
+  out << "LOG(DEBUG) << \"local_device = \" << " << kInstanceVariableName
+      << ".get();\n";
 
   // Define the return results and call the HAL function.
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
@@ -306,8 +304,8 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
   }
   out << "){\n";
   out.indent();
-  out << "cout << \"callback " << func_msg.name() << " called\""
-      << " << endl;\n";
+  out << "LOG(INFO) << \"callback " << func_msg.name() << " called\""
+      << ";\n";
 
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     const auto& return_val = func_msg.return_type_hidl(index);
@@ -334,7 +332,7 @@ void HalHidlCodeGen::GenerateCppBodyGetAttributeFunction(
     out << "void** /*result*/) {"
         << "\n";
     // TOOD: impl
-    out << "cerr << \"attribute not found\" << endl;\n"
+    out << "LOG(ERROR) << \"attribute not found.\";\n"
         << "return false;\n";
     out.unindent();
     out << "}" << "\n";
@@ -407,7 +405,7 @@ void HalHidlCodeGen::GenerateCppBodyGlobalFunctions(Formatter& out,
     out.unindent();
     out << "} else {\n";
     out.indent();
-    out << "cout << \" Creating DriverBase with null proxy.\" << endl;\n";
+    out << "LOG(INFO) << \" Creating DriverBase with null proxy.\";\n";
     out.unindent();
     out << "}\n";
     out << "android::vts::DriverBase* result ="
@@ -775,21 +773,24 @@ void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
   out << "static bool initialized = false;" << "\n";
   out << "if (!initialized) {" << "\n";
   out.indent();
-  out << "cout << \"[agent:hal] HIDL getService\" << endl;" << "\n";
+  out << "LOG(INFO) << \"HIDL getService\";"
+      << "\n";
   out << "if (service_name) {\n"
-      << "  cout << \"  - service name: \" << service_name << endl;" << "\n"
+      << "  LOG(INFO) << \"  - service name: \" << service_name;"
+      << "\n"
       << "}\n";
   FQName fqname = GetFQName(message);
   out << kInstanceVariableName << " = " << fqname.cppName() << "::getService("
       << "service_name, get_stub);" << "\n";
   out << "if (" << kInstanceVariableName << " == nullptr) {\n";
   out.indent();
-  out << "cerr << \"getService() returned a null pointer.\" << endl;\n";
+  out << "LOG(ERROR) << \"getService() returned a null pointer.\";\n";
   out << "return false;\n";
   out.unindent();
   out << "}\n";
-  out << "cout << \"[agent:hal] " << kInstanceVariableName << " = \" << "
-      << kInstanceVariableName << ".get() << endl;" << "\n";
+  out << "LOG(DEBUG) << \"" << kInstanceVariableName << " = \" << "
+      << kInstanceVariableName << ".get();"
+      << "\n";
   out << "initialized = true;" << "\n";
   out.unindent();
   out << "}" << "\n";
@@ -925,7 +926,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
           << ".handle_value().num_ints());\n";
       out << "if (!handle) {\n";
       out.indent();
-      out << "cerr << \"Failed to create handle. \" << endl;\n";
+      out << "LOG(ERROR) << \"Failed to create handle. \";\n";
       out << "exit(-1);\n";
       out.unindent();
       out << "}\n";
@@ -955,7 +956,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << "pre = pos;\n";
       out << "if(dir.size() == 0) continue; // ignore leading /\n";
       out << "if (stat(dir.c_str(), &st) == -1) {\n";
-      out << "cout << \" Creating dir: \" << dir << endl;\n";
+      out << "LOG(INFO) << \" Creating dir: \" << dir;\n";
       out.indent();
       out << "mkdir(dir.c_str(), 0700);\n";
       out.unindent();
@@ -966,8 +967,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
           << "fd_val.flags() | O_CREAT, fd_val.mode());\n";
       out << "if (fd == -1) {\n";
       out.indent();
-      out << "cout << \"Failed to open file: \" << file_name << \" error: \" "
-          << "<< errno << endl;\n";
+      out << "LOG(ERROR) << \"Failed to open file: \" << file_name << \" "
+             "error: \" << errno;\n";
       out << "exit (-1);\n";
       out.unindent();
       out << "}\n";
@@ -1006,7 +1007,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << "case FdType::LINK_TYPE:\n";
       out << "{\n";
       out.indent();
-      out << "cout << \"Not supported yet. \" << endl;\n";
+      out << "LOG(ERROR) << \"Not supported yet. \";\n";
       out << "break;\n";
       out.unindent();
       out << "}\n";
@@ -1059,7 +1060,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
           << "ashmem\");\n";
       out << "if (ashmemAllocator == nullptr) {\n";
       out.indent();
-      out << "cerr << \"Failed to get ashmemAllocator! \" << endl;\n";
+      out << "LOG(ERROR) << \"Failed to get ashmemAllocator! \";\n";
       out << "exit(-1);\n";
       out.unindent();
       out << "}\n";
@@ -1070,7 +1071,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out.indent();
       out << "if (!success) {\n";
       out.indent();
-      out << "cerr << \"Failed to allocate memory! \" << endl;\n";
+      out << "LOG(ERROR) << \"Failed to allocate memory! \";\n";
       out << arg_name << " = ::android::hardware::hidl_memory();\n";
       out << "return;\n";
       out.unindent();
@@ -1235,9 +1236,10 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
       out << "if (" << actual_result << ".vector_value_size() != "
           << expected_result << ".vector_value_size()) {\n";
       out.indent();
-      out << "cerr << \"Verification failed for vector size. expected: \" << "
-             << expected_result << ".vector_value_size() << \" actual: \" << "
-             << actual_result << ".vector_value_size();\n";
+      out << "LOG(ERROR) << \"Verification failed for vector size. expected: "
+             "\" << "
+          << expected_result << ".vector_value_size() << \" actual: \" << "
+          << actual_result << ".vector_value_size();\n";
       out << "return false;\n";
       out.unindent();
       out << "}\n";
@@ -1256,7 +1258,8 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
       out << "if (" << actual_result << ".vector_value_size() != "
           << expected_result << ".vector_value_size()) {\n";
       out.indent();
-      out << "cerr << \"Verification failed for vector size. expected: \" << "
+      out << "LOG(ERROR) << \"Verification failed for vector size. expected: "
+             "\" << "
           << expected_result << ".vector_value_size() << \" actual: \" << "
           << actual_result << ".vector_value_size();\n";
       out << "return false;\n";

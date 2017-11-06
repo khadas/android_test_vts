@@ -16,13 +16,8 @@
 
 #include "component_loader/DllLoader.h"
 
+#include <android-base/logging.h>
 #include <dlfcn.h>
-
-#include <iostream>
-
-#include "hardware/hardware.h"
-
-using namespace std;
 
 namespace android {
 namespace vts {
@@ -38,19 +33,18 @@ DllLoader::~DllLoader() {
 
 void* DllLoader::Load(const char* file_path) {
   if (!file_path) {
-    cerr << __func__ << ": file_path is NULL" << endl;
+    LOG(ERROR) << "file_path is NULL";
     return NULL;
   }
 
   // consider using the load mechanism in hardware/libhardware/hardware.c
   handle_ = dlopen(file_path, RTLD_LAZY);
   if (!handle_) {
-    cerr << __func__ << ": " << dlerror() << endl;
-    cerr << __func__ << ": Can't load a shared library, " << file_path << "."
-         << endl;
+    LOG(ERROR) << "Can't load a shared library, " << file_path
+               << ", error: " << dlerror();
     return NULL;
   }
-  cout << __func__ << ": DLL loaded " << file_path << endl;
+  LOG(DEBUG) << "DLL loaded " << file_path;
   return handle_;
 }
 
@@ -94,14 +88,12 @@ bool DllLoader::GcovFlush() {
 void* DllLoader::LoadSymbol(const char* symbol_name) const {
   const char* error = dlerror();
   if (error != NULL) {
-    cerr << __func__ << ": existing error message before loading "
-         << symbol_name << endl;
-    cerr << __func__ << ": " << error << endl;
+    LOG(ERROR) << "Existing error message " << error << "before loading "
+               << symbol_name;
   }
   void* sym = dlsym(handle_, symbol_name);
   if ((error = dlerror()) != NULL) {
-    cerr << __func__ << ": Can't find " << symbol_name << endl;
-    cerr << __func__ << ": " << error << endl;
+    LOG(ERROR) << "Can't find " << symbol_name << " error: " << error;
     return NULL;
   }
   return sym;
