@@ -17,12 +17,15 @@
 #ifndef VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_CODEGENBASE_H_
 #define VTS_COMPILATION_TOOLS_VTSC_CODE_GEN_DRIVER_CODEGENBASE_H_
 
-#include <string>
-
 #include <hidl-util/Formatter.h>
 #include <hidl-util/FQName.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #include "code_gen/CodeGenBase.h"
+
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;

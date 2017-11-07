@@ -13,21 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "VtsHalDriverBase"
 
 #include "driver_base/DriverBase.h"
 
 #include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
-#include <android-base/logging.h>
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
+
+#include "component_loader/DllLoader.h"
+#include "utils/InterfaceSpecUtil.h"
 
 #include "GcdaParser.h"
-#include "component_loader/DllLoader.h"
-#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
-#include "utils/InterfaceSpecUtil.h"
 
 using namespace std;
 using namespace android;
@@ -72,26 +80,29 @@ DriverBase::DriverBase(int target_class)
 
 DriverBase::~DriverBase() { free(component_filename_); }
 
-void wfn() { LOG(DEBUG) << "debug"; }
+void wfn() { cout << __func__ << endl; }
 
-void ffn() { LOG(DEBUG) << "debug"; }
+void ffn() { cout << __func__ << endl; }
 
 bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
   if (target_dll_path && target_dll_path_ &&
       !strcmp(target_dll_path, target_dll_path_)) {
-    LOG(DEBUG) << "Skip loading " << target_dll_path;
+    cout << __func__ << " skip loading" << endl;
     return true;
   }
 
   if (!target_loader_.Load(target_dll_path)) return false;
   target_dll_path_ = (char*)malloc(strlen(target_dll_path) + 1);
   strcpy(target_dll_path_, target_dll_path);
-  LOG(DEBUG) << "Loaded the target";
+  cout << __FUNCTION__ << ":" << __LINE__ << " loaded the target" << endl;
   if (target_class_ == HAL_LEGACY) return true;
-  LOG(DEBUG) << "Loaded a non-legacy HAL file.";
+  cout << __FUNCTION__ << ":" << __LINE__ << " loaded a non-legacy HAL file."
+       << endl;
 
   if (target_dll_path_) {
-    LOG(DEBUG) << "Target DLL path " << target_dll_path_;
+    cout << __func__ << ":" << __LINE__ << " target DLL path "
+         << target_dll_path_ << endl;
     string target_path(target_dll_path_);
 
     size_t offset = target_path.rfind("/", target_path.length());
@@ -101,23 +112,26 @@ bool DriverBase::LoadTargetComponent(const char* target_dll_path) {
       filename = filename.substr(0, filename.length() - 3 /* for .so */);
       component_filename_ = (char*)malloc(filename.length() + 1);
       strcpy(component_filename_, filename.c_str());
-      LOG(DEBUG) << "Module file name: " << component_filename_;
+      cout << __FUNCTION__ << ":" << __LINE__
+           << " module file name: " << component_filename_ << endl;
     }
-    LOG(DEBUG) << "Target_dll_path " << target_dll_path_;
+    cout << __FUNCTION__ << ":" << __LINE__ << " target_dll_path "
+         << target_dll_path_ << endl;
   }
 
 #if USE_GCOV
-  LOG(DEBUG) << "gcov init " << target_loader_.GcovInit(wfn, ffn);
+  cout << __FUNCTION__ << ": gcov init " << target_loader_.GcovInit(wfn, ffn)
+       << endl;
 #endif
   return true;
 }
 
 bool DriverBase::Fuzz(vts::ComponentSpecificationMessage* message,
                       void** result) {
-  LOG(DEBUG) << "Fuzzing target component: "
-             << "class " << message->component_class() << " type "
-             << message->component_type() << " version "
-             << message->component_type_version();
+  cout << __func__ << " Fuzzing target component: "
+       << "class " << message->component_class() << " type "
+       << message->component_type() << " version "
+       << message->component_type_version() << endl;
 
   string function_name_prefix = GetFunctionNamePrefix(*message);
   function_name_prefix_ = function_name_prefix.c_str();
@@ -137,7 +151,7 @@ void DriverBase::FunctionCallBegin() {
            "proc/self/cwd/out/target/product");
   DIR* srcdir = opendir(product_path);
   if (!srcdir) {
-    LOG(WARNING) << "Couldn't open " << product_path;
+    cerr << __func__ << " couldn't open " << product_path << endl;
     return;
   }
 
@@ -149,30 +163,30 @@ void DriverBase::FunctionCallBegin() {
       continue;
     }
     if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
-      LOG(ERROR) << "Error " << dent->d_name;
+      cerr << __func__ << " error " << dent->d_name << endl;
       continue;
     }
     if (S_ISDIR(st.st_mode)) {
-      LOG(DEBUG) << "dir " << dent->d_name;
+      cout << __func__ << ":" << __LINE__ << " dir " << dent->d_name << endl;
       strcpy(product, dent->d_name);
       dir_count++;
     }
   }
   closedir(srcdir);
   if (dir_count != 1) {
-    LOG(ERROR) << "More than one product dir found.";
+    cerr << __func__ << " more than one product dir found." << endl;
     return;
   }
 
   int n = snprintf(module_basepath, 4096, "%s/%s/obj/SHARED_LIBRARIES",
                    product_path, product);
   if (n <= 0 || n >= 4096) {
-    LOG(ERROR) << "Couln't get module_basepath";
+    cerr << __func__ << " couln't get module_basepath" << endl;
     return;
   }
   srcdir = opendir(module_basepath);
   if (!srcdir) {
-    LOG(ERROR) << "Couln't open " << module_basepath;
+    cerr << __func__ << " couln't open " << module_basepath << endl;
     return;
   }
 
@@ -180,19 +194,20 @@ void DriverBase::FunctionCallBegin() {
     dir_count = 0;
     string target = string(component_filename_) + "_intermediates";
     bool hit = false;
+    cout << __func__ << ":" << __LINE__ << endl;
     while ((dent = readdir(srcdir)) != NULL) {
       struct stat st;
       if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
         continue;
       }
       if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
-        LOG(ERROR) << "Error " << dent->d_name;
+        cerr << __func__ << " error " << dent->d_name << endl;
         continue;
       }
       if (S_ISDIR(st.st_mode)) {
-        LOG(DEBUG) << "module_basepath " << string(dent->d_name);
+        cout << "module_basepath " << string(dent->d_name) << endl;
         if (string(dent->d_name) == target) {
-          LOG(DEBUG) << "hit";
+          cout << "hit" << endl;
           hit = true;
         }
         dir_count++;
@@ -203,23 +218,25 @@ void DriverBase::FunctionCallBegin() {
       gcov_output_basepath_ =
           (char*)malloc(strlen(module_basepath) + target.length() + 2);
       if (!gcov_output_basepath_) {
-        LOG(ERROR) << "Couldn't alloc memory";
+        cerr << __FUNCTION__ << ": couldn't alloc memory" << endl;
         return;
       }
       sprintf(gcov_output_basepath_, "%s/%s", module_basepath, target.c_str());
       RemoveDir(gcov_output_basepath_);
     }
   } else {
-    LOG(ERROR) << "component_filename_ is NULL";
+    cerr << __func__ << ":" << __LINE__ << " component_filename_ is NULL"
+         << endl;
   }
   // TODO: check how it works when there already is a file.
   closedir(srcdir);
+  cout << __func__ << ":" << __LINE__ << " end" << endl;
 }
 
 bool DriverBase::ReadGcdaFile(const string& basepath, const string& filename,
                               FunctionSpecificationMessage* msg) {
 #if VTS_GCOV_DEBUG
-  LOG(DEBUG) << "file = " << dent->d_name;
+  cout << __func__ << ":" << __LINE__ << " file = " << dent->d_name << endl;
 #endif
   if (string(filename).rfind(".gcda") != string::npos) {
     string buffer = basepath + "/" + filename;
@@ -231,25 +248,30 @@ bool DriverBase::ReadGcdaFile(const string& basepath, const string& filename,
 
     FILE* gcda_file = fopen(buffer.c_str(), "rb");
     if (!gcda_file) {
-      LOG(ERROR) << "Unable to open a gcda file. " << buffer;
+      cerr << __func__ << ":" << __LINE__ << " Unable to open a gcda file. "
+           << buffer << endl;
     } else {
-      LOG(DEBUG) << "Opened a gcda file. " << buffer;
+      cout << __func__ << ":" << __LINE__ << " Opened a gcda file. " << buffer
+           << endl;
       fseek(gcda_file, 0, SEEK_END);
       long gcda_file_size = ftell(gcda_file);
 #if VTS_GCOV_DEBUG
-      LOG(DEBUG) << "File size " << gcda_file_size << " bytes";
+      cout << __func__ << ":" << __LINE__ << " File size " << gcda_file_size
+           << " bytes" << endl;
 #endif
       fseek(gcda_file, 0, SEEK_SET);
 
       char* gcda_file_buffer = (char*)malloc(gcda_file_size + 1);
       if (!gcda_file_buffer) {
-        LOG(ERROR) << "Unable to allocate memory to read a gcda file.";
+        cerr << __func__ << ":" << __LINE__
+             << "Unable to allocate memory to read a gcda file. " << endl;
       } else {
         if (fread(gcda_file_buffer, gcda_file_size, 1, gcda_file) != 1) {
-          LOG(ERROR) << "File read error";
+          cerr << __func__ << ":" << __LINE__ << "File read error" << endl;
         } else {
 #if VTS_GCOV_DEBUG
-          LOG(DEBUG) << "GCDA field populated.";
+          cout << __func__ << ":" << __LINE__ << " GCDA field populated."
+               << endl;
 #endif
           gcda_file_buffer[gcda_file_size] = '\0';
           NativeCodeCoverageRawDataMessage* raw_msg =
@@ -265,7 +287,7 @@ bool DriverBase::ReadGcdaFile(const string& basepath, const string& filename,
 #if USE_GCOV_DEBUG
     if (result) {
       for (unsigned int index = 0; index < result->size(); index++) {
-        LOG(DEBUG) << result->at(index);
+        cout << result->at(index) << endl;
       }
     }
 #endif
@@ -278,21 +300,22 @@ bool DriverBase::ScanAllGcdaFiles(const string& basepath,
                                   FunctionSpecificationMessage* msg) {
   DIR* srcdir = opendir(basepath.c_str());
   if (!srcdir) {
-    LOG(ERROR) << "Couln't open " << basepath;
+    cerr << __func__ << ":" << __LINE__ << " couln't open " << basepath << endl;
     return false;
   }
 
   struct dirent* dent;
   while ((dent = readdir(srcdir)) != NULL) {
 #if VTS_GCOV_DEBUG
-    LOG(DEBUG) << "readdir(" << basepath << ") for " << dent->d_name;
+    cout << __func__ << ":" << __LINE__ << " readdir(" << basepath << ") for "
+         << dent->d_name << endl;
 #endif
     struct stat st;
     if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
       continue;
     }
     if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
-      LOG(ERROR) << "error " << dent->d_name;
+      cerr << "error " << dent->d_name << endl;
       continue;
     }
     if (S_ISDIR(st.st_mode)) {
@@ -302,7 +325,7 @@ bool DriverBase::ScanAllGcdaFiles(const string& basepath,
     }
   }
 #if VTS_GCOV_DEBUG
-  LOG(DEBUG) << "closedir(" << srcdir << ")";
+  cout << __func__ << ":" << __LINE__ << " closedir(" << srcdir << ")" << endl;
 #endif
   closedir(srcdir);
   return true;
@@ -313,25 +336,26 @@ bool DriverBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
   target_loader_.GcovFlush();
   // find the file.
   if (!gcov_output_basepath_) {
-    LOG(WARNING) << "No gcov basepath set";
+    cerr << __FUNCTION__ << ": no gcov basepath set" << endl;
     return ScanAllGcdaFiles(default_gcov_output_basepath, msg);
   }
   DIR* srcdir = opendir(gcov_output_basepath_);
   if (!srcdir) {
-    LOG(WARNING) << "Couln't open " << gcov_output_basepath_;
+    cerr << __func__ << " couln't open " << gcov_output_basepath_ << endl;
     return false;
   }
 
   struct dirent* dent;
   while ((dent = readdir(srcdir)) != NULL) {
-    LOG(DEBUG) << "readdir(" << srcdir << ") for " << dent->d_name;
+    cout << __func__ << ": readdir(" << srcdir << ") for " << dent->d_name
+         << endl;
 
     struct stat st;
     if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
       continue;
     }
     if (fstatat(dirfd(srcdir), dent->d_name, &st, 0) < 0) {
-      LOG(ERROR) << "error " << dent->d_name;
+      cerr << "error " << dent->d_name << endl;
       continue;
     }
     if (!S_ISDIR(st.st_mode) &&
@@ -339,7 +363,7 @@ bool DriverBase::FunctionCallEnd(FunctionSpecificationMessage* msg) {
       break;
     }
   }
-  LOG(DEBUG) << "closedir(" << srcdir << ")";
+  cout << __func__ << ": closedir(" << srcdir << ")" << endl;
   closedir(srcdir);
 #endif
   return true;
