@@ -28,6 +28,7 @@ from vts.utils.python.coverage import coverage_report
 from vts.utils.python.coverage import gcda_parser
 from vts.utils.python.coverage import gcno_parser
 from vts.utils.python.coverage.parser import FileFormatError
+from vts.utils.python.os import path_utils
 from vts.utils.python.web import feature_utils
 
 FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
@@ -184,11 +185,27 @@ class CoverageFeature(feature_utils.Feature):
                     gcno_file_parser.checksum] = gcno_file_parser
         return checksum_gcno_dict
 
+    def _ClearTargetGcov(self, dut, path_suffix=None):
+        """Removes gcov data from the device.
+
+        Finds and removes all gcda files relative to TARGET_COVERAGE_PATH.
+        Args:
+            dut: the device under test.
+            path_suffix: optional string path suffix.
+        """
+        path = TARGET_COVERAGE_PATH
+        if path_suffix:
+            path = path_utils.JoinTargetPath(path, path_suffix)
+        try:
+            dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
+        except AdbError as e:
+            logging.warn('Gcov cleanup error: \"%s\"', e)
+
     def InitializeDeviceCoverage(self, dut):
         """Initializes the device for coverage before tests run.
 
-        Finds and removes all gcda files under TARGET_COVERAGE_PATH before tests
-        run.
+        Flushes, then finds and removes all gcda files under
+        TARGET_COVERAGE_PATH before tests run.
 
         Args:
             dut: the device under test.
@@ -198,7 +215,7 @@ class CoverageFeature(feature_utils.Feature):
         except AdbError as e:
             logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
         logging.info("Removing existing gcda files.")
-        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
+        self._ClearTargetGcov(dut)
 
     def GetGcdaDict(self, dut):
         """Retrieves GCDA files from device and creates a dictionary of files.
@@ -244,7 +261,7 @@ class CoverageFeature(feature_utils.Feature):
                 dut.adb.pull("%s %s" % (gcda, file_name))
                 gcda_content = open(file_name, "rb").read()
                 gcda_dict[basename] = gcda_content
-        dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
+        self._ClearTargetGcov(dut)
         return gcda_dict
 
     def _OutputCoverageReport(self, isGlobal):
