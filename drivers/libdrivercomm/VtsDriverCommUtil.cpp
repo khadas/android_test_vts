@@ -15,17 +15,23 @@
  */
 
 #define LOG_TAG "VtsDriverCommUtil"
-
 #include "VtsDriverCommUtil.h"
 
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/un.h>
-#include <sstream>
+#include <unistd.h>
 
 #include <android-base/logging.h>
+
+#include <iostream>
+#include <sstream>
 
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
@@ -40,16 +46,16 @@ bool VtsDriverCommUtil::Connect(const string& socket_name) {
   struct sockaddr_un serv_addr;
   struct hostent* server;
 
-  LOG(DEBUG) << "Connect socket: " << socket_name;
+  LOG(INFO) << __func__ << " socket name: " << socket_name << endl;
   sockfd_ = socket(PF_UNIX, SOCK_STREAM, 0);
   if (sockfd_ < 0) {
-    LOG(ERROR) << "ERROR opening socket.";
+    cerr << __func__ << " ERROR opening socket" << endl;
     return false;
   }
 
   server = gethostbyname("127.0.0.1");
   if (server == NULL) {
-    LOG(ERROR) << "ERROR can't resolve the host name, 127.0.0.1";
+    cerr << __func__ << " ERROR can't resolve the host name, 127.0.0.1" << endl;
     return false;
   }
 
@@ -58,8 +64,8 @@ bool VtsDriverCommUtil::Connect(const string& socket_name) {
   strcpy(serv_addr.sun_path, socket_name.c_str());
 
   if (connect(sockfd_, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-    LOG(ERROR) << "ERROR connecting to " << socket_name << " errno = " << errno
-               << " " << strerror(errno);
+    cerr << __func__ << " ERROR connecting to " << socket_name
+         << " errno = " << errno << " " << strerror(errno) << endl;
     sockfd_ = -1;
     return false;
   }
@@ -71,7 +77,8 @@ int VtsDriverCommUtil::Close() {
   if (sockfd_ != -1) {
     result = close(sockfd_);
     if (result != 0) {
-      LOG(ERROR) << "ERROR closing socket (errno = " << errno << ")";
+      cerr << getpid() << " " << __func__ << ":" << __LINE__
+           << " ERROR closing socket (errno = " << errno << ")" << endl;
     }
 
     sockfd_ = -1;
@@ -82,15 +89,16 @@ int VtsDriverCommUtil::Close() {
 
 bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   if (sockfd_ == -1) {
-    LOG(ERROR) << "ERROR sockfd not set.";
+    cerr << __func__ << " ERROR sockfd not set" << endl;
     return false;
   }
-  stringstream header;
+  std::stringstream header;
   header << message.length() << "\n";
-  LOG(DEBUG) << "[agent->driver] len = " << message.length();
+  LOG(INFO) << "[agent->driver] len = " << message.length() << endl;
   int n = write(sockfd_, header.str().c_str(), header.str().length());
   if (n < 0) {
-    LOG(ERROR) << " ERROR writing to socket.";
+    cerr << getpid() << " " << __func__ << ":" << __LINE__
+         << " ERROR writing to socket" << endl;
     return false;
   }
 
@@ -99,7 +107,8 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
   while (bytes_sent < msg_len) {
     n = write(sockfd_, &message.c_str()[bytes_sent], msg_len - bytes_sent);
     if (n <= 0) {
-      LOG(ERROR) << "ERROR writing to socket.";
+      cerr << getpid() << " " << __func__ << ":" << __LINE__
+           << " ERROR writing to socket" << endl;
       return false;
     }
     bytes_sent += n;
@@ -109,7 +118,7 @@ bool VtsDriverCommUtil::VtsSocketSendBytes(const string& message) {
 
 string VtsDriverCommUtil::VtsSocketRecvBytes() {
   if (sockfd_ == -1) {
-    LOG(ERROR) << "ERROR sockfd not set.";
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return string();
   }
 
@@ -121,9 +130,10 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
     int ret = read(sockfd_, &header_buffer[header_index], 1);
     if (ret != 1) {
       int errno_save = errno;
-      LOG(DEBUG) << "ERROR reading the length ret = " << ret
-                 << " sockfd = " << sockfd_ << " "
-                 << " errno = " << errno_save << " " << strerror(errno_save);
+      cerr << getpid() << " " << __func__
+           << " ERROR reading the length ret = " << ret
+           << " sockfd = " << sockfd_ << " "
+           << " errno = " << errno_save << " " << strerror(errno_save) << endl;
       return string();
     }
     if (header_buffer[header_index] == '\n' ||
@@ -136,7 +146,7 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   int msg_len = atoi(header_buffer);
   char* msg = (char*)malloc(msg_len + 1);
   if (!msg) {
-    LOG(ERROR) << "ERROR malloc failed.";
+    cerr << getpid() << " " << __func__ << " ERROR malloc failed" << endl;
     return string();
   }
 
@@ -144,7 +154,7 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
   while (bytes_read < msg_len) {
     int result = read(sockfd_, &msg[bytes_read], msg_len - bytes_read);
     if (result <= 0) {
-      LOG(ERROR) << "ERROR read failed.";
+      cerr << getpid() << " " << __func__ << " ERROR read failed" << endl;
       return string();
     }
     bytes_read += result;
@@ -156,13 +166,14 @@ string VtsDriverCommUtil::VtsSocketRecvBytes() {
 bool VtsDriverCommUtil::VtsSocketSendMessage(
     const google::protobuf::Message& message) {
   if (sockfd_ == -1) {
-    LOG(ERROR) << "ERROR sockfd not set.";
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return false;
   }
 
   string message_string;
   if (!message.SerializeToString(&message_string)) {
-    LOG(ERROR) << "ERROR can't serialize the message to a string.";
+    cerr << getpid() << " " << __func__
+         << " ERROR can't serialize the message to a string." << endl;
     return false;
   }
   return VtsSocketSendBytes(message_string);
@@ -171,13 +182,14 @@ bool VtsDriverCommUtil::VtsSocketSendMessage(
 bool VtsDriverCommUtil::VtsSocketRecvMessage(
     google::protobuf::Message* message) {
   if (sockfd_ == -1) {
-    LOG(ERROR) << "ERROR sockfd not set.";
+    cerr << getpid() << " " << __func__ << " ERROR sockfd not set" << endl;
     return false;
   }
 
   string message_string = VtsSocketRecvBytes();
   if (message_string.length() == 0) {
-    LOG(DEBUG) << "ERROR message string zero length.";
+    cerr << getpid() << " " << __func__ << " ERROR message string zero length"
+         << endl;
     return false;
   }
 

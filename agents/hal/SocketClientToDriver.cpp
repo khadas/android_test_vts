@@ -13,19 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "VtsAgentSocketClient"
 
-#include "SocketClientToDriver.h"
+#include <errno.h>
 
-#include <android-base/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <dirent.h>
+
+#include <netdb.h>
+#include <netinet/in.h>
+
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/un.h>
+
+#include <utils/RefBase.h>
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "AgentRequestHandler.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
+#include "BinderClientToDriver.h"
+#include "SocketClientToDriver.h"
+
 #define LOCALHOST_IP "127.0.0.1"
+
+using namespace std;
 
 namespace android {
 namespace vts {
+
 
 bool VtsDriverSocketClient::Exit() {
   VtsDriverControlCommandMessage command_message;
@@ -59,14 +86,16 @@ int32_t VtsDriverSocketClient::LoadHal(const string& file_path,
   VtsDriverControlResponseMessage response_message;
   if (!VtsSocketRecvMessage(&response_message)) return -1;
   if (response_message.response_code() != VTS_DRIVER_RESPONSE_SUCCESS) {
-    LOG(ERROR) << "Failed to load the selected HAL.";
+    cerr << __func__ << "Failed to load the selected HAL." << endl;
     return -1;
   }
-  LOG(INFO) << "Loaded the selected HAL.";
+  cout << __func__ << "Loaded the selected HAL." << endl;
   return response_message.return_value();
 }
 
 string VtsDriverSocketClient::GetFunctions() {
+  cout << "[agent->driver] LIST_FUNCTIONS" << endl;
+
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(LIST_FUNCTIONS);
   if (!VtsSocketSendMessage(command_message)) {
@@ -86,6 +115,8 @@ string VtsDriverSocketClient::ReadSpecification(const string& component_name,
                                                 int target_type,
                                                 float target_version,
                                                 const string& target_package) {
+  cout << "[agent->driver] LIST_FUNCTIONS" << endl;
+
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(
       VTS_DRIVER_COMMAND_READ_SPECIFICATION);
@@ -121,7 +152,7 @@ string VtsDriverSocketClient::Call(const string& arg, const string& uid) {
     return {};
   }
 
-  LOG(DEBUG) << "Result: " << response_message.return_message();
+  cout << __func__ << " result: " << response_message.return_message() << endl;
   return response_message.return_message();
 }
 
@@ -143,7 +174,7 @@ string VtsDriverSocketClient::GetAttribute(const string& arg) {
 
 unique_ptr<VtsDriverControlResponseMessage>
 VtsDriverSocketClient::ExecuteShellCommand(
-    const ::google::protobuf::RepeatedPtrField<string> shell_command) {
+    const ::google::protobuf::RepeatedPtrField<::std::string> shell_command) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(EXECUTE_COMMAND);
   for (const auto& cmd : shell_command) {
@@ -171,6 +202,8 @@ int32_t VtsDriverSocketClient::Status(int32_t type) {
 string GetSocketPortFilePath(const string& service_name) {
   string result("/data/local/tmp/");
   result += service_name;
+  // static int count = 0;
+  // result += std::to_string(count++);
   return result;
 }
 
@@ -184,7 +217,8 @@ bool IsDriverRunning(const string& service_name, int retry_count) {
     }
     sleep(1);
   }
-  LOG(ERROR) << "Couldn't connect to " << service_name;
+  cout << __func__ << " "
+       << "couldn't connect to " << service_name << endl;
   return false;
 }
 
@@ -192,7 +226,7 @@ VtsDriverSocketClient* GetDriverSocketClient(const string& service_name) {
   string socket_port_file_path = GetSocketPortFilePath(service_name);
   VtsDriverSocketClient* client = new VtsDriverSocketClient();
   if (!client->Connect(socket_port_file_path)) {
-    LOG(ERROR) << "Can't connect to " << socket_port_file_path;
+    cerr << __func__ << " can't connect to " << socket_port_file_path << endl;
     delete client;
     return NULL;
   }
