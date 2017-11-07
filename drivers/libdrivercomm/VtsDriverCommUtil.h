@@ -17,6 +17,7 @@
 #ifndef __VTS_DRIVER_COMM_UTIL_H_
 #define __VTS_DRIVER_COMM_UTIL_H_
 
+#include <iostream>
 #include <string>
 
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"

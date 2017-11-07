@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-#include <getopt.h>
-#include <string>
+#include "ShellDriverMain.h"
 
-#include <android-base/logging.h>
+#include <getopt.h>
+#include <stdio.h>
+#include <string>
 
 #include "ShellDriver.h"
 
 using namespace std;
-
-static constexpr const char* DEFAULT_SOCKET_PATH =
-    "/data/local/tmp/tmp_socket_shell_driver.tmp";
 
 // Dumps usage on stderr.
 static void usage() {
@@ -45,9 +43,7 @@ static void usage() {
 }
 
 // Parses command args and kicks things off.
-int main(int argc, char** argv) {
-  android::base::InitLogging(argv, android::base::StderrLogger);
-
+int main(int argc, char* const argv[]) {
   static const struct option longOptions[] = {
       {"help", no_argument, NULL, 'h'},
       {"server_socket_path", required_argument, NULL, 's'},

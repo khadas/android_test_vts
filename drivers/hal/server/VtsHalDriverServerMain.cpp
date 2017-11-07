@@ -21,11 +21,10 @@
  *    --callback_socket_name /data/local/tmp/vts_agent_callback
  *    --server_socket_path /data/local/tmp/vts_tcp_server_port
  */
-#include <getopt.h>
 #include <iostream>
 #include <string>
 
-#include <android-base/logging.h>
+#include <getopt.h>
 
 #include "BinderServer.h"
 #include "SocketServer.h"
@@ -52,8 +51,6 @@ void ShowUsage() {
 }
 
 int main(int argc, char** argv) {
-  android::base::InitLogging(argv, android::base::StderrLogger);
-
   const char* const short_opts = "h:d:c:s:n";
   const option long_opts[] = {
       {"help", no_argument, nullptr, 'h'},

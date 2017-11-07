@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <getopt.h>
-#include <map>
+#include <unistd.h>
 
-#include <android-base/logging.h>
+#include <iostream>
+
 #include "TcpServerForRunner.h"
 
 #define DEFAULT_HAL_DRIVER_FILE_PATH32 "./vts_hal_driver32"
@@ -28,15 +28,13 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  android::base::InitLogging(argv, android::base::StderrLogger);
-
   char* spec_dir_path = NULL;
   char* hal_path32;
   char* hal_path64;
   char* shell_path32;
   char* shell_path64;
 
-  LOG(INFO) << "|| VTS AGENT ||";
+  printf("|| VTS AGENT ||\n");
 
   if (argc == 1) {
     hal_path32 = (char*) DEFAULT_HAL_DRIVER_FILE_PATH32;
@@ -63,10 +61,11 @@ int main(int argc, char* argv[]) {
     shell_path32 = argv[4];
     shell_path64 = argv[5];
   } else {
-    LOG(ERROR) << "usage: vts_hal_agent "
-               << "[[<hal 32-bit binary path> [<hal 64-bit binary path>] "
-               << "[<spec file base dir path>]]"
-               << "[[<shell 32-bit binary path> [<shell 64-bit binary path>] ";
+    std::cerr << "usage: vts_hal_agent "
+              << "[[<hal 32-bit binary path> [<hal 64-bit binary path>] "
+              << "[<spec file base dir path>]]"
+              << "[[<shell 32-bit binary path> [<shell 64-bit binary path>] "
+              << std::endl;
     return -1;
   }
 
@@ -79,6 +78,7 @@ int main(int argc, char* argv[]) {
       break;
     }
   }
+  printf("chdir %s\n", dir_path);
   chdir(dir_path);
 
   android::vts::StartTcpServerForRunner(

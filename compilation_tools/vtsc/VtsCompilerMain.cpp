@@ -21,9 +21,8 @@
 
 #include <iostream>
 
-#include <android-base/logging.h>
-#include "VtsCompilerUtils.h"
 #include "code_gen/CodeGenBase.h"
+#include "VtsCompilerUtils.h"
 
 using namespace std;
 
