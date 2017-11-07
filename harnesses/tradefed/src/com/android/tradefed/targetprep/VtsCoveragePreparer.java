@@ -16,6 +16,7 @@
 
 package com.android.tradefed.targetprep;
 
+import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -97,6 +98,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
         }
 
         IRunUtil runUtil = new RunUtil();
+        VtsCompatibilityInvocationHelper invocationHelper = new VtsCompatibilityInvocationHelper();
 
         try {
             // Load the vendor configuration
@@ -161,7 +163,8 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
             }
 
             // Push the sancov flushing tool
-            device.pushFile(new File(COVERAGE_CONFIGURE_SRC), COVERAGE_CONFIGURE_DST);
+            File configureSrc = new File(invocationHelper.getTestsDir(), COVERAGE_CONFIGURE_SRC);
+            device.pushFile(configureSrc, COVERAGE_CONFIGURE_DST);
             device.executeShellCommand("rm -rf /data/misc/trace/*");
             mEnforcingState = device.executeShellCommand("getenforce");
             if (!mEnforcingState.equals(SELINUX_DISABLED)
