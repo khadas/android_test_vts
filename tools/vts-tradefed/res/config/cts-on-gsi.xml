@@ -362,4 +362,9 @@
     <!-- Excluded tese case - TODO(jiyong): b/67739526 to reenable that -->
     <option name="compatibility:exclude-filter" value="CtsJniTestCases android.jni.cts.JniStaticTest#test_linker_namespaces" />
 
+    <!-- b/68190722: Remove testcases that require RRO which is planned for Pi -->
+    <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.ActionBarTest#testOpenOptionsMenu" />
+    <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.ActionBarTest#testOptionsMenuKey" />
+    <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.ActivityKeyboardShortcutsTest#testRequestShowKeyboardShortcuts" />
+
 </configuration>
