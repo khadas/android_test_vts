@@ -1,6 +1,6 @@
 #include "android/hardware/nfc/1.0/NfcClientCallback.vts.h"
 #include "vts_measurement.h"
-#include <android-base/logging.h>
+#include <iostream>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <fmq/MessageQueue.h>
 #include <sys/stat.h>
@@ -13,16 +13,16 @@ namespace vts {
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::GetService(bool get_stub, const char* service_name) {
     static bool initialized = false;
     if (!initialized) {
-        LOG(INFO) << "HIDL getService";
+        cout << "[agent:hal] HIDL getService" << endl;
         if (service_name) {
-          LOG(INFO) << "  - service name: " << service_name;
+          cout << "  - service name: " << service_name << endl;
         }
         hw_binder_proxy_ = ::android::hardware::nfc::V1_0::INfcClientCallback::getService(service_name, get_stub);
         if (hw_binder_proxy_ == nullptr) {
-            LOG(ERROR) << "getService() returned a null pointer.";
+            cerr << "getService() returned a null pointer." << endl;
             return false;
         }
-        LOG(DEBUG) << "hw_binder_proxy_ = " << hw_binder_proxy_.get();
+        cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }
     return true;
@@ -32,7 +32,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::GetService(boo
 ::android::hardware::Return<void> Vts_android_hardware_nfc_V1_0_INfcClientCallback::sendEvent(
     ::android::hardware::nfc::V1_0::NfcEvent arg0 __attribute__((__unused__)),
     ::android::hardware::nfc::V1_0::NfcStatus arg1 __attribute__((__unused__))) {
-    LOG(INFO) << "sendEvent called";
+    cout << "sendEvent called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("sendEvent"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfcClientCallback::sendEvent");
@@ -48,7 +48,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::GetService(boo
 
 ::android::hardware::Return<void> Vts_android_hardware_nfc_V1_0_INfcClientCallback::sendData(
     const ::android::hardware::hidl_vec<uint8_t>& arg0 __attribute__((__unused__))) {
-    LOG(INFO) << "sendData called";
+    cout << "sendData called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("sendData"));
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfcClientCallback::sendData");
@@ -79,7 +79,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::Fuzz(
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::GetAttribute(
     FunctionSpecificationMessage* /*func_msg*/,
     void** /*result*/) {
-    LOG(ERROR) << "attribute not found.";
+    cerr << "attribute not found" << endl;
     return false;
 }
 bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
@@ -88,7 +88,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
     if (hw_binder_proxy_ == nullptr) {
-        LOG(ERROR) << "hw_binder_proxy_ is null. ";
+        cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
     }
     if (!strcmp(func_name, "sendEvent")) {
@@ -96,7 +96,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
         arg0 = EnumValue__android__hardware__nfc__V1_0__NfcEvent(func_msg.arg(0).scalar_value());
         ::android::hardware::nfc::V1_0::NfcStatus arg1;
         arg1 = EnumValue__android__hardware__nfc__V1_0__NfcStatus(func_msg.arg(1).scalar_value());
-        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->sendEvent(arg0, arg1);
         result_msg->set_name("sendEvent");
         return true;
@@ -107,13 +107,13 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback::CallFunction(
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
             arg0[arg0_index] = func_msg.arg(0).vector_value(arg0_index).scalar_value().uint8_t();
         }
-        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->sendData(arg0);
         result_msg->set_name("sendData");
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
-        LOG(INFO) << "Call notifySyspropsChanged";
+        cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
         return true;
@@ -144,7 +144,7 @@ android::vts::DriverBase* vts_func_4_android_hardware_nfc_V1_0_INfcClientCallbac
     if (hw_binder_proxy) {
         arg = reinterpret_cast<::android::hardware::nfc::V1_0::INfcClientCallback*>(hw_binder_proxy);
     } else {
-        LOG(INFO) << " Creating DriverBase with null proxy.";
+        cout << " Creating DriverBase with null proxy." << endl;
     }
     android::vts::DriverBase* result =
         new android::vts::FuzzerExtended_android_hardware_nfc_V1_0_INfcClientCallback(

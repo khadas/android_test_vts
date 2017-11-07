@@ -16,16 +16,36 @@
 
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
 
-#define LOG_TAG "VtsDriverHalSocketServer"
-
 #include "SocketServer.h"
 
+#define LOG_TAG "VtsDriverHalSocketServer"
+#include <utils/Log.h>
+#include <utils/String8.h>
+
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <dirent.h>
+
+#include <netdb.h>
 #include <netinet/in.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/un.h>
+
+#include <utils/RefBase.h>
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 
 #include <VtsDriverCommUtil.h>
-#include <android-base/logging.h>
 #include <google/protobuf/text_format.h>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -36,9 +56,7 @@ using namespace std;
 namespace android {
 namespace vts {
 
-void VtsDriverHalSocketServer::Exit() {
-  LOG(INFO) << "VtsHalDriverServer::Exit";
-}
+void VtsDriverHalSocketServer::Exit() { printf("VtsHalDriverServer::Exit\n"); }
 
 int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
                                           int target_type, float target_version,
@@ -46,78 +64,87 @@ int32_t VtsDriverHalSocketServer::LoadHal(const string& path, int target_class,
                                           const string& target_component_name,
                                           const string& hw_binder_service_name,
                                           const string& /*module_name*/) {
-  LOG(DEBUG) << "LoadHal(" << path << ")";
+  printf("VtsHalDriverServer::LoadHal(%s)\n", path.c_str());
   int32_t driver_id = driver_manager_->LoadTargetComponent(
       path.c_str(), lib_path_, target_class, target_type, target_version,
       target_package.c_str(), target_component_name.c_str(),
       hw_binder_service_name.c_str());
-  LOG(DEBUG) << "Result: " << driver_id;
+  cout << "Result: " << driver_id << std::endl;
   return driver_id;
 }
 
+int32_t VtsDriverHalSocketServer::Status(int32_t type) {
+  printf("VtsHalDriverServer::Status(%i)\n", type);
+  return 0;
+}
 
 string VtsDriverHalSocketServer::ReadSpecification(
     const string& name, int target_class, int target_type, float target_version,
     const string& target_package) {
+  printf("VtsHalDriverServer::ReadSpecification(%s)\n", name.c_str());
   ComponentSpecificationMessage msg;
   driver_manager_->FindComponentSpecification(
       target_class, target_type, target_version, target_package, name, &msg);
   string result;
   google::protobuf::TextFormat::PrintToString(msg, &result);
-  LOG(DEBUG) << "Result: " << result;
   return result;
 }
 
 string VtsDriverHalSocketServer::Call(const string& arg) {
+  cout << "VtsHalDriverServer::Call(" << arg << ")" << endl;
   FunctionCallMessage* call_msg = new FunctionCallMessage();
   google::protobuf::TextFormat::MergeFromString(arg, call_msg);
   const string& result = driver_manager_->CallFunction(call_msg);
-  LOG(DEBUG) << "Result: " << result;
+  cout << __func__ << ":" << __LINE__ << " result: " << result.c_str() << endl;
   return result;
 }
 
 string VtsDriverHalSocketServer::GetAttribute(const string& arg) {
+  cout << "VtsHalDriverServer::GetAttribute(" << arg << ")" << endl;
   FunctionCallMessage* call_msg = new FunctionCallMessage();
   google::protobuf::TextFormat::MergeFromString(arg, call_msg);
   const string& result = driver_manager_->GetAttribute(call_msg);
-  LOG(DEBUG) << "Result: " << result;
+  cout << "VtsHalDriverServer::GetAttribute done" << endl;
   return result;
 }
 
 string VtsDriverHalSocketServer::ListFunctions() const {
+  cout << "VtsHalDriverServer::" << __func__ << endl;
   vts::ComponentSpecificationMessage* spec =
       driver_manager_->GetComponentSpecification();
   string output;
   if (!spec) {
     return output;
   }
+  cout << "VtsHalDriverServer::" << __func__ << " serialize" << endl;
   if (google::protobuf::TextFormat::PrintToString(*spec, &output)) {
-    LOG(DEBUG) << "Result: " << output;
+    cout << "VtsHalDriverServer::" << __func__ << " result length "
+         << output.length() << endl;
     return output;
   } else {
-    LOG(ERROR) << "Can't serialize the interface spec message to a string.";
+    cout << "can't serialize the interface spec message to a string." << endl;
     return output;
   }
 }
 
 bool VtsDriverHalSocketServer::ProcessOneCommand() {
+  cout << __func__ << ":" << __LINE__ << " entry" << endl;
   VtsDriverControlCommandMessage command_message;
   if (!VtsSocketRecvMessage(&command_message)) return false;
-  // TODO: get the command type description.
-  LOG(DEBUG) << " command_type " << command_message.command_type();
+  cout << __func__ << ":" << __LINE__ << " command_type "
+       << command_message.command_type() << endl;
   switch (command_message.command_type()) {
     case EXIT: {
       Exit();
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       if (VtsSocketSendMessage(response_message)) {
-        LOG(INFO) << "process: " << getpid() << " exiting";
+        cout << getpid() << " " << __func__ << " exiting" << endl;
         return false;
       }
       break;
     }
     case LOAD_HAL: {
-      LOG(INFO) << "Process command LOAD_HAL";
       int32_t driver_id = LoadHal(
           command_message.file_path(), command_message.target_class(),
           command_message.target_type(), command_message.target_version(),
@@ -136,7 +163,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case GET_STATUS: {
-      int32_t result = command_message.status_type();
+      int32_t result = Status(command_message.status_type());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
       response_message.set_return_value(result);
@@ -144,7 +171,6 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case CALL_FUNCTION: {
-      LOG(INFO) << "Process command CALL_FUNCTION";
       if (command_message.has_driver_caller_uid()) {
         setuid(atoi(command_message.driver_caller_uid().c_str()));
       }
@@ -156,7 +182,6 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case VTS_DRIVER_COMMAND_READ_SPECIFICATION: {
-      LOG(INFO) << "Process command READ_SPECIFICATION";
       const string& result = ReadSpecification(
           command_message.module_name(), command_message.target_class(),
           command_message.target_type(), command_message.target_version(),
@@ -168,7 +193,6 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case GET_ATTRIBUTE: {
-      LOG(INFO) << "Process command GET_ATTRIBUTE";
       const string& result = GetAttribute(command_message.arg());
       VtsDriverControlResponseMessage response_message;
       response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
@@ -177,7 +201,6 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       break;
     }
     case LIST_FUNCTIONS: {
-      LOG(INFO) << "Process command LIST_FUNCTIONS";
       string result = ListFunctions();
       VtsDriverControlResponseMessage response_message;
       if (result.size() > 0) {
@@ -192,7 +215,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
     default:
       break;
   }
-  LOG(ERROR) << "Failed.";
+  cerr << __func__ << " failed." << endl;
   return false;
 }
 
@@ -207,7 +230,7 @@ int StartSocketServer(const string& socket_port_file,
 
   sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
   if (sockfd < 0) {
-    LOG(ERROR) << "Can't open the socket.";
+    cerr << "Can't open the socket." << endl;
     return -1;
   }
 
@@ -216,12 +239,14 @@ int StartSocketServer(const string& socket_port_file,
   serv_addr.sun_family = AF_UNIX;
   strcpy(serv_addr.sun_path, socket_port_file.c_str());
 
-  LOG(DEBUG) << "Trying to bind (port file: " << socket_port_file << ")";
+  cout << "[driver:hal] trying to bind (port file: " << socket_port_file << ")"
+       << endl;
 
   if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
     int error_save = errno;
-    LOG(ERROR) << "ERROR binding failed. errno = " << error_save << " "
-               << strerror(error_save);
+    cerr << getpid() << " " << __func__
+         << " ERROR binding failed. errno = " << error_save << " "
+         << strerror(error_save) << endl;
     return -1;
   }
 
@@ -229,18 +254,18 @@ int StartSocketServer(const string& socket_port_file,
   clilen = sizeof(cli_addr);
 
   while (true) {
-    LOG(DEBUG) << "Waiting for a new connection from the agent";
+    cout << "[driver:hal] waiting for a new connection from the agent" << endl;
     int newsockfd = ::accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
     if (newsockfd < 0) {
-      LOG(ERROR) << "ERROR accept failed.";
+      cerr << __func__ << " ERROR accept failed." << endl;
       return -1;
     }
 
-    LOG(DEBUG) << "New session";
+    cout << "New session" << endl;
     pid_t pid = fork();
     if (pid == 0) {  // child
       close(sockfd);
-      LOG(DEBUG) << "Process for an agent - pid = " << getpid();
+      cout << "[driver:hal] process for an agent - pid = " << getpid() << endl;
       VtsDriverHalSocketServer* server =
           new VtsDriverHalSocketServer(driver_manager, lib_path);
       server->SetSockfd(newsockfd);
@@ -249,12 +274,12 @@ int StartSocketServer(const string& socket_port_file,
       delete server;
       exit(0);
     } else if (pid < 0) {
-      LOG(ERROR) << "Can't fork a child process to handle a session.";
+      cerr << "can't fork a child process to handle a session." << endl;
       return -1;
     }
     close(newsockfd);
   }
-  LOG(ERROR) << "Exiting";
+  cerr << "[driver] exiting" << endl;
   return 0;
 }
 

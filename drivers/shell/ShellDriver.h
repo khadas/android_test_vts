@@ -17,8 +17,10 @@
 #ifndef __VTS_SHELL_DRIVER_H_
 #define __VTS_SHELL_DRIVER_H_
 
+#include <iostream>
 #include <string>
 
+#include <VtsDriverCommUtil.h>
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 using namespace std;
@@ -40,6 +42,7 @@ class VtsShellDriver {
       : socket_address_(socket_address) {}
 
   ~VtsShellDriver() {
+    cout << __func__ << endl;
     if (!this->socket_address_.empty()) {
       Close();
     }

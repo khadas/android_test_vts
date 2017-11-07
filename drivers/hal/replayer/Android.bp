@@ -38,7 +38,6 @@ cc_binary {
     ],
 
     shared_libs: [
-        "libbase",
         "libprotobuf-cpp-full",
         "libvts_common",
         "libvts_multidevice_proto",
