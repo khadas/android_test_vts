@@ -1,6 +1,6 @@
 #include "android/hardware/tests/memory/1.0/MemoryTest.vts.h"
 #include "vts_measurement.h"
-#include <android-base/logging.h>
+#include <iostream>
 #include <android/hidl/allocator/1.0/IAllocator.h>
 #include <fmq/MessageQueue.h>
 #include <sys/stat.h>
@@ -13,16 +13,16 @@ namespace vts {
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(bool get_stub, const char* service_name) {
     static bool initialized = false;
     if (!initialized) {
-        LOG(INFO) << "HIDL getService";
+        cout << "[agent:hal] HIDL getService" << endl;
         if (service_name) {
-          LOG(INFO) << "  - service name: " << service_name;
+          cout << "  - service name: " << service_name << endl;
         }
         hw_binder_proxy_ = ::android::hardware::tests::memory::V1_0::IMemoryTest::getService(service_name, get_stub);
         if (hw_binder_proxy_ == nullptr) {
-            LOG(ERROR) << "getService() returned a null pointer.";
+            cerr << "getService() returned a null pointer." << endl;
             return false;
         }
-        LOG(DEBUG) << "hw_binder_proxy_ = " << hw_binder_proxy_.get();
+        cout << "[agent:hal] hw_binder_proxy_ = " << hw_binder_proxy_.get() << endl;
         initialized = true;
     }
     return true;
@@ -31,7 +31,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
 
 ::android::hardware::Return<void> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemory(
     const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__)), std::function<void(const ::android::hardware::hidl_memory& arg0)> cb) {
-    LOG(INFO) << "haveSomeMemory called";
+    cout << "haveSomeMemory called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("haveSomeMemory"));
     callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemory");
@@ -46,7 +46,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
 ::android::hardware::Return<void> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::fillMemory(
     const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__)),
     uint8_t arg1 __attribute__((__unused__))) {
-    LOG(INFO) << "fillMemory called";
+    cout << "fillMemory called" << endl;
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("fillMemory"));
     callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::fillMemory");
@@ -75,7 +75,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::Fuzz(
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetAttribute(
     FunctionSpecificationMessage* /*func_msg*/,
     void** /*result*/) {
-    LOG(ERROR) << "attribute not found.";
+    cerr << "attribute not found" << endl;
     return false;
 }
 bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction(
@@ -84,28 +84,28 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     FunctionSpecificationMessage* result_msg) {
     const char* func_name = func_msg.name().c_str();
     if (hw_binder_proxy_ == nullptr) {
-        LOG(ERROR) << "hw_binder_proxy_ is null. ";
+        cerr << "hw_binder_proxy_ is null. "<< endl;
         return false;
     }
     if (!strcmp(func_name, "haveSomeMemory")) {
         ::android::hardware::hidl_memory arg0;
         sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
         if (ashmemAllocator == nullptr) {
-            LOG(ERROR) << "Failed to get ashmemAllocator! ";
+            cerr << "Failed to get ashmemAllocator! " << endl;
             exit(-1);
         }
         auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
             if (!success) {
-                LOG(ERROR) << "Failed to allocate memory! ";
+                cerr << "Failed to allocate memory! " << endl;
                 arg0 = ::android::hardware::hidl_memory();
                 return;
             }
             arg0 = memory;
         });
-        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         ::android::hardware::hidl_memory result0;
         hw_binder_proxy_->haveSomeMemory(arg0, [&](const ::android::hardware::hidl_memory& arg0){
-            LOG(INFO) << "callback haveSomeMemory called";
+            cout << "callback haveSomeMemory called" << endl;
             result0 = arg0;
         });
         result_msg->set_name("haveSomeMemory");
@@ -118,12 +118,12 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         ::android::hardware::hidl_memory arg0;
         sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
         if (ashmemAllocator == nullptr) {
-            LOG(ERROR) << "Failed to get ashmemAllocator! ";
+            cerr << "Failed to get ashmemAllocator! " << endl;
             exit(-1);
         }
         auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
             if (!success) {
-                LOG(ERROR) << "Failed to allocate memory! ";
+                cerr << "Failed to allocate memory! " << endl;
                 arg0 = ::android::hardware::hidl_memory();
                 return;
             }
@@ -131,13 +131,13 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         });
         uint8_t arg1 = 0;
         arg1 = func_msg.arg(1).scalar_value().uint8_t();
-        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        clog << "local_device = " << hw_binder_proxy_.get() << endl;
         hw_binder_proxy_->fillMemory(arg0, arg1);
         result_msg->set_name("fillMemory");
         return true;
     }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
-        LOG(INFO) << "Call notifySyspropsChanged";
+        cout << "Call notifySyspropsChanged" << endl;
         hw_binder_proxy_->notifySyspropsChanged();
         result_msg->set_name("notifySyspropsChanged");
         return true;
@@ -169,7 +169,7 @@ android::vts::DriverBase* vts_func_4_android_hardware_tests_memory_V1_0_IMemoryT
     if (hw_binder_proxy) {
         arg = reinterpret_cast<::android::hardware::tests::memory::V1_0::IMemoryTest*>(hw_binder_proxy);
     } else {
-        LOG(INFO) << " Creating DriverBase with null proxy.";
+        cout << " Creating DriverBase with null proxy." << endl;
     }
     android::vts::DriverBase* result =
         new android::vts::FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest(

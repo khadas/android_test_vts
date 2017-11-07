@@ -38,7 +38,6 @@ vtslib_interfacespec_includes := \
   $(TARGET_OUT_HEADERS) \
 
 vtslib_interfacespec_shared_libraries := \
-  libbase \
   libcutils \
   liblog \
   libdl \

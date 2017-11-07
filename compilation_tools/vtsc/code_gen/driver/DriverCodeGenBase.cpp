@@ -16,14 +16,19 @@
 
 #include "code_gen/driver/DriverCodeGenBase.h"
 
-#include <iostream>
-#include <string>
-
 #include <hidl-util/Formatter.h>
 #include <hidl-util/FQName.h>
 
-#include "VtsCompilerUtils.h"
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <sstream>
+#include <string>
+
 #include "utils/InterfaceSpecUtil.h"
+
+#include "VtsCompilerUtils.h"
 #include "utils/StringUtil.h"
 
 using namespace std;
@@ -197,8 +202,7 @@ void DriverCodeGenBase::GenerateSourceIncludeFiles(Formatter& out,
         << ".vts.h\"\n";
   }
   out << "#include \"vts_measurement.h\"" << "\n";
-  out << "#include <android-base/logging.h>"
-      << "\n";
+  out << "#include <iostream>" << "\n";
 }
 
 void DriverCodeGenBase::GenerateHeaderGlobalFunctionDeclarations(
@@ -318,8 +322,7 @@ void DriverCodeGenBase::GenerateCodeToStartMeasurement(Formatter& out) {
 
 void DriverCodeGenBase::GenerateCodeToStopMeasurement(Formatter& out) {
   out << "vector<float>* measured = vts_measurement.Stop();" << "\n";
-  out << "LOG(INFO) << \"time \" << (*measured)[0];"
-      << "\n";
+  out << "cout << \"time \" << (*measured)[0] << endl;" << "\n";
 }
 
 }  // namespace vts
