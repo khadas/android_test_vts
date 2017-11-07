@@ -47,6 +47,10 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
     private static final String GCOV_ARTIFACT = "%s-coverage-%s.zip"; // gcov coverage artifact
     private static final String GCOV_FILE_NAME = "gcov.zip"; // gcov zip file to pass to VTS
 
+    private static final String SELINUX_DISABLED = "Disabled"; // selinux disabled
+    private static final String SELINUX_ENFORCING = "Enforcing"; // selinux enforcing mode
+    private static final String SELINUX_PERMISSIVE = "Permissive"; // selinux permissive mode
+
     private static final String SYMBOLS_ARTIFACT = "%s-symbols-%s.zip"; // symbolized binary zip
     private static final String SYMBOLS_FILE_NAME = "symbols.zip"; // sancov zip to pass to VTS
     private static final String SANCOV_FLAVOR = "_asan_coverage"; // sancov device build flavor
@@ -64,6 +68,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
     private static final String COVERAGE_CONFIGURE_DST = "/data/local/tmp/vts_coverage_configure";
 
     private File mDeviceInfoPath = null; // host path where gcov device artifacts are stored
+    private String mEnforcingState = null; // start state for selinux enforcement
 
     /** {@inheritDoc} */
     @Override
@@ -158,7 +163,11 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
             // Push the sancov flushing tool
             device.pushFile(new File(COVERAGE_CONFIGURE_SRC), COVERAGE_CONFIGURE_DST);
             device.executeShellCommand("rm -rf /data/misc/trace/*");
-            device.executeShellCommand("setenforce 0");
+            mEnforcingState = device.executeShellCommand("getenforce");
+            if (!mEnforcingState.equals(SELINUX_DISABLED)
+                    && !mEnforcingState.equals(SELINUX_PERMISSIVE)) {
+                device.executeShellCommand("setenforce " + SELINUX_PERMISSIVE);
+            }
 
             if (sancovEnabled) {
                 buildInfo.setFile(
@@ -180,11 +189,14 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
         // Clear the temporary directories.
-        device.executeShellCommand("setenforce 1");
+        if (!mEnforcingState.equals(SELINUX_DISABLED)) {
+            device.executeShellCommand("setenforce " + mEnforcingState);
+        }
         if (mDeviceInfoPath != null) {
             FileUtil.recursiveDelete(mDeviceInfoPath);
             device.executeShellCommand("rm -r " + COVERAGE_CONFIGURE_DST);
         }
+        device.executeShellCommand("rm -rf /data/misc/trace/*");
     }
 
     /**
