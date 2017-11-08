@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+#include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <iostream>
 
-#include <android-base/logging.h>
-#include "VtsCompilerUtils.h"
 #include "code_gen/CodeGenBase.h"
+#include "VtsCompilerUtils.h"
 
 using namespace std;
 

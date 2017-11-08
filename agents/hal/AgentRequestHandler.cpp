@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "VtsAgentRequestHandler"
 
 #include "AgentRequestHandler.h"
 
-#include <dirent.h>
 #include <errno.h>
-#include <sys/stat.h>
-#include <string>
 
-#include <android-base/logging.h>
+#include <dirent.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <utils/RefBase.h>
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "BinderClientToDriver.h"
 #include "SocketClientToDriver.h"
@@ -37,14 +49,15 @@ namespace android {
 namespace vts {
 
 bool AgentRequestHandler::ListHals(const RepeatedPtrField<string>& base_paths) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage response_msg;
   ResponseCode result = FAIL;
 
   for (const string& path : base_paths) {
-    LOG(DEBUG) << "open a dir " << path;
+    cout << __FUNCTION__ << ": open a dir " << path << endl;
     DIR* dp;
     if (!(dp = opendir(path.c_str()))) {
-      LOG(ERROR) << "Error(" << errno << ") opening " << path;
+      cerr << "Error(" << errno << ") opening " << path << endl;
       continue;
     }
 
@@ -54,7 +67,7 @@ bool AgentRequestHandler::ListHals(const RepeatedPtrField<string>& base_paths) {
       len = strlen(dirp->d_name);
       if (len > 3 && !strcmp(&dirp->d_name[len - 3], ".so")) {
         string found_path = path + "/" + string(dirp->d_name);
-        LOG(INFO) << "found " << found_path;
+        cout << __FUNCTION__ << ": found " << found_path << endl;
         response_msg.add_file_names(found_path);
         result = SUCCESS;
       }
@@ -66,6 +79,7 @@ bool AgentRequestHandler::ListHals(const RepeatedPtrField<string>& base_paths) {
 }
 
 bool AgentRequestHandler::SetHostInfo(const int callback_port) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
   callback_port_ = callback_port;
   AndroidSystemControlResponseMessage response_msg;
   response_msg.set_response_code(SUCCESS);
@@ -74,6 +88,7 @@ bool AgentRequestHandler::SetHostInfo(const int callback_port) {
 
 bool AgentRequestHandler::CheckDriverService(const string& service_name,
                                              bool* live) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage response_msg;
 
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
@@ -85,7 +100,7 @@ bool AgentRequestHandler::CheckDriverService(const string& service_name,
     if (live) *live = true;
     response_msg.set_response_code(SUCCESS);
     response_msg.set_reason("found the service");
-    LOG(DEBUG) << "set service_name " << service_name;
+    cout << "set service_name " << service_name << endl;
     service_name_ = service_name;
   } else {
     if (live) *live = false;
@@ -112,7 +127,8 @@ bool AgentRequestHandler::LaunchDriverService(
   const string& hw_binder_service_name = command_msg.hw_binder_service_name();
   int bits = command_msg.bits();
 
-  LOG(DEBUG) << "file_path=" << file_path;
+  cout << "[runner->agent] command " << __FUNCTION__ << " (file_path="
+       << file_path << ")" << endl;
   ResponseCode result = FAIL;
 
   // TODO: shall check whether there's a service with the same name and return
@@ -124,7 +140,7 @@ bool AgentRequestHandler::LaunchDriverService(
   struct stat file_stat;
   if (stat(socket_port_flie_path.c_str(), &file_stat) == 0  // file exists
       && remove(socket_port_flie_path.c_str()) == -1) {
-    LOG(ERROR) << socket_port_flie_path << " delete error";
+    cerr << __func__ << " " << socket_port_flie_path << " delete error" << endl;
     response_msg.set_reason("service file already exists.");
   } else {
     pid_t pid = fork();
@@ -139,8 +155,8 @@ bool AgentRequestHandler::LaunchDriverService(
         // TODO: check whether the port is available and handle if fails.
         static int port = 0;
         string callback_socket_name(kUnixSocketNamePrefixForCallbackServer);
-        callback_socket_name += to_string(port++);
-        LOG(INFO) << "callback_socket_name: " << callback_socket_name;
+        callback_socket_name += std::to_string(port++);
+        cout << "callback_socket_name: " << callback_socket_name << endl;
         StartSocketServerForDriver(callback_socket_name, -1);
 
         if (bits == 32) {
@@ -203,17 +219,17 @@ bool AgentRequestHandler::LaunchDriverService(
             ld_dir_path.c_str(), driver_binary_path.c_str(),
             socket_port_flie_path.c_str());
 #else  // binder
-        LOG(ERROR) << "No binder implementation available.";
+        cerr << __func__ << " no binder implementation available." << endl;
         exit(-1);
 #endif
       } else {
-        LOG(ERROR) << "Unsupported driver type.";
+        cerr << __func__ << " unsupported driver type." << endl;
       }
 
       if (cmd) {
-        LOG(INFO) << "Launch a driver - " << cmd;
+        cout << __func__ << "launch a driver - " << cmd << endl;
         system(cmd);
-        LOG(INFO) << "driver exits";
+        cout << __func__ << "driver exits" << endl;
         free(cmd);
       }
       exit(0);
@@ -245,25 +261,26 @@ bool AgentRequestHandler::LaunchDriverService(
         if (driver_type == VTS_DRIVER_TYPE_HAL_CONVENTIONAL ||
             driver_type == VTS_DRIVER_TYPE_HAL_LEGACY ||
             driver_type == VTS_DRIVER_TYPE_HAL_HIDL) {
-          LOG(DEBUG) << "LoadHal " << module_name;
+          cout << "[agent->driver]: LoadHal " << module_name << endl;
           int32_t driver_id = client->LoadHal(
               file_path, target_class, target_type, target_version,
               target_package, target_component_name, hw_binder_service_name,
               module_name);
+          cout << "[driver->agent]: LoadHal returns " << driver_id << endl;
           if (driver_id == -1) {
             response_msg.set_response_code(FAIL);
             response_msg.set_reason("Failed to load the selected HAL.");
           } else {
             response_msg.set_response_code(SUCCESS);
-            response_msg.set_result(to_string(driver_id));
+            response_msg.set_result(std::to_string(driver_id));
             response_msg.set_reason("Loaded the selected HAL.");
-            LOG(DEBUG) << "set service_name " << service_name;
+            cout << "set service_name " << service_name << endl;
             service_name_ = service_name;
           }
         } else if (driver_type == VTS_DRIVER_TYPE_SHELL) {
           response_msg.set_response_code(SUCCESS);
           response_msg.set_reason("Loaded the shell driver.");
-          LOG(DEBUG) << "set service_name " << service_name;
+          cout << "set service_name " << service_name << endl;
           service_name_ = service_name;
         }
 
@@ -277,12 +294,13 @@ bool AgentRequestHandler::LaunchDriverService(
         "Failed to fork a child process to start a driver.");
   }
   response_msg.set_response_code(FAIL);
-  LOG(ERROR) << "Can't fork a child process to run the vts_hal_driver.";
+  cerr << "can't fork a child process to run the vts_hal_driver." << endl;
   return VtsSocketSendMessage(response_msg);
 }
 
 bool AgentRequestHandler::ReadSpecification(
     const AndroidSystemControlCommandMessage& command_message) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
@@ -303,6 +321,7 @@ bool AgentRequestHandler::ReadSpecification(
 }
 
 bool AgentRequestHandler::ListApis() {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
 // TODO: use an attribute (client) of a newly defined class.
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
@@ -319,6 +338,7 @@ bool AgentRequestHandler::ListApis() {
 
 bool AgentRequestHandler::CallApi(const string& call_payload,
                                   const string& uid) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
@@ -335,6 +355,7 @@ bool AgentRequestHandler::CallApi(const string& call_payload,
 }
 
 bool AgentRequestHandler::GetAttribute(const string& payload) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
@@ -355,7 +376,7 @@ bool AgentRequestHandler::SendApiResult(const string& func_name,
                                         const string& spec) {
   AndroidSystemControlResponseMessage response_msg;
   if (result.size() > 0 || spec.size() > 0) {
-    LOG(DEBUG) << "Call: success";
+    cout << "[agent] Call: success" << endl;
     response_msg.set_response_code(SUCCESS);
     if (result.size() > 0) {
       response_msg.set_result(result);
@@ -364,7 +385,7 @@ bool AgentRequestHandler::SendApiResult(const string& func_name,
       response_msg.set_spec(spec);
     }
   } else {
-    LOG(ERROR) << "Call: fail";
+    cout << "[agent] Call: fail" << endl;
     response_msg.set_response_code(FAIL);
     response_msg.set_reason("Failed to call api function: " + func_name);
   }
@@ -372,6 +393,7 @@ bool AgentRequestHandler::SendApiResult(const string& func_name,
 }
 
 bool AgentRequestHandler::DefaultResponse() {
+  cout << "[agent] " << __FUNCTION__ << endl;
   AndroidSystemControlResponseMessage response_msg;
   response_msg.set_response_code(SUCCESS);
   response_msg.set_reason("an example reason here");
@@ -380,11 +402,12 @@ bool AgentRequestHandler::DefaultResponse() {
 
 bool AgentRequestHandler::ExecuteShellCommand(
     const AndroidSystemControlCommandMessage& command_message) {
+  cout << "[runner->agent] command " << __FUNCTION__ << endl;
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   VtsDriverSocketClient* client = driver_client_;
   if (!client) {
 #else  // binder
-  LOG(ERROR) << " binder not supported.";
+  cerr << __func__ << " binder not supported." << endl;
   {
 #endif
     return false;
@@ -399,7 +422,7 @@ bool AgentRequestHandler::ExecuteShellCommand(
     CreateSystemControlResponseFromDriverControlResponse(*result_message,
                                                          &response_msg);
   } else {
-    LOG(ERROR) << "ExecuteShellCommand: failed to call the api";
+    cout << "ExecuteShellCommand: failed to call the api" << endl;
     response_msg.set_response_code(FAIL);
     response_msg.set_reason("Failed to call the api.");
   }
@@ -413,15 +436,15 @@ void AgentRequestHandler::CreateSystemControlResponseFromDriverControlResponse(
 
   if (driver_control_response_message.response_code() ==
       VTS_DRIVER_RESPONSE_SUCCESS) {
-    LOG(DEBUG) << "ExecuteShellCommand: shell driver reported success";
+    cout << "ExecuteShellCommand: shell driver reported success" << endl;
     system_control_response_message->set_response_code(SUCCESS);
   } else if (driver_control_response_message.response_code() ==
       VTS_DRIVER_RESPONSE_FAIL) {
-    LOG(ERROR) << "ExecuteShellCommand: shell driver reported fail";
+    cout << "ExecuteShellCommand: shell driver reported fail" << endl;
     system_control_response_message->set_response_code(FAIL);
   } else if (driver_control_response_message.response_code() ==
       UNKNOWN_VTS_DRIVER_RESPONSE_CODE) {
-    LOG(ERROR) << "ExecuteShellCommand: shell driver reported unknown";
+    cout << "ExecuteShellCommand: shell driver reported unknown" << endl;
     system_control_response_message->set_response_code(UNKNOWN_RESPONSE_CODE);
   }
 
@@ -442,7 +465,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
 
-  LOG(DEBUG) << "command_type = " << command_msg.command_type();
+  cout << getpid() << " " << __func__
+       << " command_type = " << command_msg.command_type() << endl;
   switch (command_msg.command_type()) {
     case LIST_HALS:
       return ListHals(command_msg.paths());
@@ -465,7 +489,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
       ExecuteShellCommand(command_msg);
       return true;
     default:
-      LOG(ERROR) << " ERROR unknown command " << command_msg.command_type();
+      cerr << __func__ << " ERROR unknown command "
+           << command_msg.command_type() << endl;
       return DefaultResponse();
   }
 }

@@ -13,20 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "VtsAgentTcpServer"
 
 #include "TcpServerForRunner.h"
 
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <dirent.h>
+
 #include <netdb.h>
 #include <netinet/in.h>
+
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include <android-base/logging.h>
+#include <utils/RefBase.h>
+
+#include <iostream>
+#include <sstream>
 
 #include "AgentRequestHandler.h"
 #include "BinderClientToDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
+
+using namespace std;
 
 namespace android {
 namespace vts {
@@ -44,7 +58,7 @@ int StartTcpServerForRunner(const char* spec_dir_path,
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
-    LOG(ERROR) << "Can't open the socket.";
+    cerr << "Can't open the socket." << endl;
     return -1;
   }
 
@@ -54,47 +68,49 @@ int StartTcpServerForRunner(const char* spec_dir_path,
   serv_addr.sin_port = htons(0);
 
   if (::bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
-    LOG(ERROR) << "bind failed. errno = " << errno << " " << strerror(errno);
+    cerr << __func__ << " binding failed. errno = " << errno << endl;
+    cerr << __func__ << " " << strerror(errno) << endl;
     return -1;
   }
 
   socklen_t sa_len = sizeof(serv_addr);
   if (getsockname(sockfd, (struct sockaddr*) &serv_addr, &sa_len) == -1) {
-    LOG(ERROR) << "getsockname failed. errno = " << errno << " "
-               << strerror(errno);
+    cerr << __func__ << " getsockname failed. errno = " << errno << endl;
+    cerr << __func__ << " " << strerror(errno) << endl;
     return -1;
   }
 
-  LOG(DEBUG) << "TCP server port is " << (int)ntohs(serv_addr.sin_port);
+  cout << "[agent] TCP server port is " << (int) ntohs(serv_addr.sin_port)
+       << endl;
   FILE* fp = fopen("/data/local/tmp/vts_tcp_server_port", "wt");
   if (!fp) {
-    LOG(ERROR) << "Can't write to "
-               << "/data/local/tmp/vts_tcp_server_port";
+    cerr << __func__ << " can't write to "
+         << "/data/local/tmp/vts_tcp_server_port" << endl;
     return -1;
   }
   fprintf(fp, "%d", (int) ntohs(serv_addr.sin_port));
   fclose(fp);
 
-  LOG(DEBUG) << "Listening";
+  cout << "[agent] listening" << endl;
   if (listen(sockfd, 5) == -1) {
-    LOG(ERROR) << " listen failed.";
+    cerr << __func__ << " listen failed." << endl;
     return -1;
   }
   clilen = sizeof(cli_addr);
   while (true) {
-    LOG(DEBUG) << "Accepting";
+    cout << "[agent] accepting" << endl;
     int newsockfd = ::accept(sockfd, (struct sockaddr*)&cli_addr, &clilen);
     if (newsockfd < 0) {
-      LOG(ERROR) << "accept failed";
+      cerr << __func__ << " accept failed" << endl;
       return -1;
     }
 
-    LOG(DEBUG) << "[runner->agent] NEW SESSION";
-    LOG(DEBUG) << "[runner->agent] ===========";
+    cout << "[runner->agent] NEW SESSION" << endl;
+    cout << "[runner->agent] ===========" << endl;
     pid_t pid = fork();
     if (pid == 0) {  // child
       close(sockfd);
-      LOG(DEBUG) << "Process for a runner - pid = " << getpid();
+      cout << "[agent] process for a runner - pid = " << getpid() << endl;
       AgentRequestHandler handler(spec_dir_path, hal_driver_path32,
                                   hal_driver_path64, shell_driver_path32,
                                   shell_driver_path64);
@@ -103,7 +119,7 @@ int StartTcpServerForRunner(const char* spec_dir_path,
         ;
       exit(-1);
     } else if (pid < 0) {
-      LOG(ERROR) << "Can't fork a child process to handle a session.";
+      cerr << "can't fork a child process to handle a session." << endl;
       return -1;
     } else {
       close(newsockfd);

@@ -18,6 +18,7 @@
 #define __VTS_SYSFUZZER_COMMON_FUZZER_BASE_H__
 
 #include "component_loader/DllLoader.h"
+
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 
 using namespace std;
