@@ -204,7 +204,7 @@ class BinaryTest(base_test.BaseTestClass):
         self.testcases = []
 
         ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
-                                                   self.shell)
+                                                   self.shell, self.run_as_compliance_test)
         if not ret:
             self._skip_all_testcases = True
 
