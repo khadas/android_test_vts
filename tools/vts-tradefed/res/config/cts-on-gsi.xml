@@ -367,4 +367,7 @@
     <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.ActionBarTest#testOptionsMenuKey" />
     <option name="compatibility:exclude-filter" value="CtsAppTestCases android.app.cts.ActivityKeyboardShortcutsTest#testRequestShowKeyboardShortcuts" />
 
+    <!-- b/66924299: Remove testcase that logd reads kernel log -->
+    <option name="compatibility:exclude-filter" value="CtsLiblogTestCases liblog#android_logger_get_" />
+
 </configuration>
