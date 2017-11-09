@@ -40,7 +40,7 @@ static constexpr const char* kInterfaceSpecLibName =
 static const int kDefaultEpochCount = 100;
 
 void ShowUsage() {
-  cout << "Usage: vts_hal_driver [options] <interface spce lib>\n"
+  cout << "Usage: vts_hal_driver [options] <interface spec lib>\n"
           "--spec_dir_path <path>:         Set path that store the vts spec "
           "files\n"
           "--callback_socket_name <name>:  Set the callback (agent) socket "

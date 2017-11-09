@@ -25,6 +25,7 @@ class ConfigKeys(object):
     # These keys define the wording of test configs and their internal
     # references.
     KEY_LOG_PATH = "log_path"
+    KEY_LOG_SEVERITY = "log_severity"
     KEY_TESTBED = "test_bed"
     KEY_TESTBED_NAME = "name"
     KEY_TEST_PATHS = "test_paths"
