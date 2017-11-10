@@ -61,6 +61,7 @@ import java.util.TreeSet;
 import java.util.Set;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
@@ -78,6 +79,7 @@ public class VtsMultiDeviceTest
     static final String COVERAGE_PROPERTY = "ro.vts.coverage";
     static final String DATA_FILE_PATH = "data_file_path";
     static final String LOG_PATH = "log_path";
+    static final String LOG_SEVERITY = "log_severity";
     static final String NAME = "name";
     static final String OS_NAME = "os.name";
     static final String WINDOWS = "Windows";
@@ -397,6 +399,9 @@ public class VtsMultiDeviceTest
 
     @Option(name = "gtest-batch-mode", description = "Run Gtest binaries in batch mode.")
     private boolean mGtestBatchMode = false;
+
+    @Option(name = "log-severity", description = "Set the log severity level.")
+    private String mLogSeverity = "INFO";
 
     // This variable is set in order to include the directory that contains the
     // python test cases. This is set before calling the method.
@@ -793,6 +798,19 @@ public class VtsMultiDeviceTest
 
         jsonObject.put(TEST_MAX_TIMEOUT, mTestTimeout);
         CLog.i("Added %s to the Json object: %d", TEST_MAX_TIMEOUT, mTestTimeout);
+
+        if (!mLogSeverity.isEmpty()) {
+            String logSeverity = mLogSeverity.toUpperCase();
+            ArrayList<String> severityList =
+                    new ArrayList<String>(Arrays.asList("ERROR", "WARNING", "INFO", "DEBUG"));
+            if (!severityList.contains(logSeverity)) {
+                CLog.w("Unsupported log severity %s, use default log_severity:INFO instead.",
+                        logSeverity);
+                logSeverity = "INFO";
+            }
+            jsonObject.put(LOG_SEVERITY, logSeverity);
+            CLog.i("Added %s to the Json object: %s", LOG_SEVERITY, logSeverity);
+        }
 
         if (mAbi != null) {
             jsonObject.put(ABI_NAME, mAbi.getName());
