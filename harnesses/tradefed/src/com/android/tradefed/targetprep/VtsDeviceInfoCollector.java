@@ -17,6 +17,7 @@
 package com.android.tradefed.targetprep;
 
 import com.android.tradefed.build.IBuildInfo;
+import com.android.tradefed.config.Option;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.util.ArrayUtil;
@@ -33,6 +34,9 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
     private static final Map<String, String> BUILD_KEYS = new HashMap<>();
     private static final Map<String, String> BUILD_LEGACY_PROPERTIES = new HashMap<>();
     private static final long REBOOT_TIMEOUT = 1000 * 60 * 2; // 2 minutes.
+
+    @Option(name = "disable-framework", description = "Initialize device by stopping framework.")
+    private boolean mDisableFramework = true;
 
     static {
         BUILD_KEYS.put("cts:build_id", "ro.build.id");
@@ -78,21 +82,26 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
             buildInfo.addBuildAttribute(entry.getKey(), ArrayUtil.join(",", propertyValue));
         }
 
-        // Set the default device runtime state to stopped.
-        device.executeShellCommand("stop");
-        device.executeShellCommand("setprop sys.boot_completed 0");
+        if (mDisableFramework) {
+            // Set the default device runtime state to stopped.
+            device.executeShellCommand("stop");
+            device.executeShellCommand("setprop sys.boot_completed 0");
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
-        // Restore the framework at test run completion.
-        long startTime = System.currentTimeMillis();
-        device.waitForDeviceOnline(REBOOT_TIMEOUT);
-        device.executeShellCommand("start");
-        if (!device.waitForBootComplete(REBOOT_TIMEOUT + startTime - System.currentTimeMillis())) {
-            throw new DeviceNotAvailableException("Framework irrecoverable after testing.");
+        if (mDisableFramework) {
+            // Restore the framework at test run completion.
+            long startTime = System.currentTimeMillis();
+            device.waitForDeviceOnline(REBOOT_TIMEOUT);
+            device.executeShellCommand("start");
+            if (!device.waitForBootComplete(
+                        REBOOT_TIMEOUT + startTime - System.currentTimeMillis())) {
+                throw new DeviceNotAvailableException("Framework irrecoverable after testing.");
+            }
         }
     }
 }
