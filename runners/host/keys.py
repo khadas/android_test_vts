@@ -133,3 +133,6 @@ class ConfigKeys(object):
 
     # Vts self test related keys
     RUN_AS_VTS_SELFTEST = "run_as_vts_self_test"
+
+    # Vts compliance test related keys
+    RUN_AS_COMPLIANCE_TEST = "run_as_compliance_test"
