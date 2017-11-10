@@ -134,6 +134,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name";
     static final String REPORT_MESSAGE_FILE_NAME = "report_proto.msg";
     static final String RUN_AS_VTS_SELF_TEST = "run_as_vts_self_test";
+    static final String RUN_AS_COMPLIANCE_TEST = "run_as_compliance_test";
     static final String SYSTRACE_PROCESS_NAME = "systrace_process_name";
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
@@ -203,12 +204,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     + "needed to run the test (e.g., android.hardware.graphics.mapper@2.0). "
                     + "this can override precondition-lshal option.")
     private String mPreconditionVintf = null;
-
-    @Option(name = "precondition-vintf-override",
-            description = "If precondition-lshal is present and precondition-vintf is not, "
-                    + "set precondition-vintf to the value of precondition-lshal. "
-                    + "The test runner will find the HAL in manifest.xml instead of lshal.")
-    private boolean mPreconditionVintfOverride = false;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -881,16 +876,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Added %s to the Json object", PRECONDITION_VINTF);
         }
 
-        if (mPreconditionVintfOverride && mPreconditionLshal != null) {
-            if (mPreconditionVintf == null) {
-                jsonObject.put(PRECONDITION_VINTF, mPreconditionLshal);
-                CLog.i("Added %s to the Json object, overriding %s", PRECONDITION_VINTF,
-                        PRECONDITION_LSHAL);
-            } else {
-                CLog.w("Ignored precondition-vintf-override as precondition-vintf is present");
-            }
-        }
-
         if (!mBinaryTestProfilingLibraryPath.isEmpty()) {
             jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATH,
                     new JSONArray(mBinaryTestProfilingLibraryPath));
@@ -946,6 +931,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mRunAsVtsSelfTest) {
             jsonObject.put(RUN_AS_VTS_SELF_TEST, mRunAsVtsSelfTest);
             CLog.i("Added %s to the Json object", RUN_AS_VTS_SELF_TEST);
+        }
+
+        if ("vts".equals(mBuildInfo.getTestTag())) {
+            jsonObject.put(RUN_AS_COMPLIANCE_TEST, true);
+            CLog.i("Added %s to the Json object", RUN_AS_COMPLIANCE_TEST);
         }
     }
 
