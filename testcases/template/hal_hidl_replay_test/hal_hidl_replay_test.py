@@ -117,9 +117,8 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 if stderr and stderr.strip():
                     for line in stderr.split('\n'):
                         logging.error(line)
-            asserts.assertTrue(False, 'Test {} failed with the following results: {}'.format(
-                test_case, command_results))
-
+            asserts.fail('Test {} failed with the following results: {}'.format(
+                    test_case, command_results))
 
     def tearDownClass(self):
         """Performs clean-up tasks."""
@@ -181,14 +180,10 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 service = line[len('hal_service: '):]
                 registered_services.append(service)
 
-        framework_comp_matrix_xml = self._dut.getCompMatrixXml()
-        framework_vintf_xml = self._dut.getVintfXml(
-            use_lshal=False, is_framework_manifest=True)
-
         for service in registered_services:
-            service_names = set(
-                hal_service_name_utils.GetServiceNamesFromCompMatrix(
-                    framework_comp_matrix_xml, service))
+            _, service_names = hal_service_name_utils.GetHalServiceName(
+                self.shell, service, self.abi_bitness,
+                self.run_as_compliance_test)
             service_instances[service] = service_names
         logging.info("registered service instances: %s", service_instances)
 

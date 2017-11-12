@@ -850,21 +850,26 @@ class AndroidDevice(object):
                 self.log.warning(
                     "A command to setup the env to start the VTS Agent failed %s",
                     e)
-
+        log_severity = getattr(self, keys.ConfigKeys.KEY_LOG_SEVERITY, "INFO")
         bits = ['64', '32'] if self.is64Bit else ['32']
         for bitness in bits:
             vts_agent_log_path = os.path.join(self.log_path,
                                               "vts_agent_" + bitness + ".log")
             cmd = (
                 'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
-                '{path}/{bitness}/vts_hal_agent{bitness}'
-                ' {path}/32/vts_hal_driver32 {path}/64/vts_hal_driver64 {path}/spec'
-                ' {path}/32/vts_shell_driver32 {path}/64/vts_shell_driver64 >> {log} 2>&1'
+                '{path}/{bitness}/vts_hal_agent{bitness} '
+                '--hal_driver_path_32={path}/32/vts_hal_driver32 '
+                '--hal_driver_path_64={path}/64/vts_hal_driver64 '
+                '--spec_dir={path}/spec '
+                '--shell_driver_path_32={path}/32/vts_shell_driver32 '
+                '--shell_driver_path_64={path}/64/vts_shell_driver64 '
+                '-l {severity} >> {log} 2>&1'
             ).format(
                 s=self.serial,
                 bitness=bitness,
                 path=DEFAULT_AGENT_BASE_DIR,
-                log=vts_agent_log_path)
+                log=vts_agent_log_path,
+                severity=log_severity)
             try:
                 self.vts_agent_process = utils.start_standing_subprocess(
                     cmd, check_health_delay=1)

@@ -159,6 +159,8 @@ class BaseTestClass(object):
             self.user_params, web=self.web)
         self.run_as_vts_self_test = self.getUserParam(
             keys.ConfigKeys.RUN_AS_VTS_SELFTEST, default_value=False)
+        self.run_as_compliance_test = self.getUserParam(
+            keys.ConfigKeys.RUN_AS_COMPLIANCE_TEST, default_value=False)
         self._skip_all_testcases = False
         self._bug_report_on_failure = self.getUserParam(
             keys.ConfigKeys.IKEY_BUG_REPORT_ON_FAILURE, default_value=False)

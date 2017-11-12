@@ -14,78 +14,20 @@
 # limitations under the License.
 #
 
+import json
 import logging
 
 from vts.runners.host import const
 from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.utils.python.file import target_file_utils
-from vts.utils.python.hal import hal_info_utils
+from vts.utils.python.hal import hal_service_name_utils
 
 
-def FindHalDescription(hal_desc, hal_package_name):
-    """Find a HAL description whose name is hal_package_name from hal_desc."""
-    for hal_full_name in hal_desc:
-        if hal_desc[hal_full_name].hal_name == hal_package_name:
-            return hal_desc[hal_full_name]
-    return None
-
-
-def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
-    """Checks whether a HAL is registered in a VINTF XML.
-
-    If the given hal is an earlier minor version of what is specified in
-    vintf_xml, it returns True.
-
-    Args:
-        hal: string, the full name of a HAL (e.g., package@version)
-        vintf_xml: string, the VINTF XML content.
-        bitness, string, currently tested ABI bitness (e.g., 32 or 64).
-
-    Returns:
-        True if found or vintf_xml is malformed, False otherwise.
-    """
-    result = True
-    if "@" not in hal:
-        logging.error("HAL full name is invalid, %s", hal)
-        return False
-    hal_package, hal_version = hal.split("@")
-    logging.info("HAL package, version = %s, %s", hal_package, hal_version)
-    hal_version_major, hal_version_minor = hal_info_utils.ParseHalVersion(
-        hal_version)
-
-    hwbinder_hals, passthrough_hals = hal_info_utils.GetHalDescriptions(vintf_xml)
-    hwbinder_hal_desc = FindHalDescription(hwbinder_hals, hal_package)
-    passthrough_hal_desc = FindHalDescription(passthrough_hals, hal_package)
-    if not hwbinder_hals or not passthrough_hals:
-        logging.error("can't check precondition due to a "
-                      "VINTF XML format error.")
-        # Assume it's satisfied.
-        return True
-    elif (hwbinder_hal_desc is None and passthrough_hal_desc is None):
-        logging.warn("The required HAL %s not found in VINTF XML.", hal)
-        return False
-    elif (hwbinder_hal_desc is None and passthrough_hal_desc is not None):
-        if (bitness and bitness not in passthrough_hal_desc.hal_archs):
-            logging.warn("The required feature %s found as a "
-                         "passthrough HAL but the client bitness %s "
-                         "unsupported", hal, bitness)
-            result = False
-        hal_desc = passthrough_hal_desc
-    else:
-        hal_desc = hwbinder_hal_desc
-        logging.info("The feature %s found in VINTF XML", hal)
-    found_version_major = hal_desc.hal_version_major
-    found_version_minor = hal_desc.hal_version_minor
-    if (hal_version_major != found_version_major or
-            hal_version_minor > found_version_minor):
-        logging.warn("The found HAL version %s@%s is not relevant for %s",
-                     found_version_major, found_version_minor, hal_version)
-        result = False
-    return result
-
-
-def CanRunHidlHalTest(test_instance, dut, shell=None):
+def CanRunHidlHalTest(test_instance,
+                      dut,
+                      shell=None,
+                      run_as_compliance_test=False):
     """Checks HAL precondition of a test instance.
 
     Args:
@@ -93,6 +35,7 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
         dut: the AndroidDevice under test.
         shell: the ShellMirrorObject to execute command on the device.
                If not specified, the function creates one from dut.
+        run_as_compliance_test: boolean, whether it is a compliance test.
 
     Returns:
         True if the precondition is satisfied; False otherwise.
@@ -107,7 +50,6 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
         keys.ConfigKeys.IKEY_PRECONDITION_FEATURE,
         keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
         keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
-        keys.ConfigKeys.IKEY_PRECONDITION_VINTF,
     ]
     test_instance.getUserParams(opt_param_names=opt_params)
 
@@ -157,32 +99,13 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
                     return False
 
     hal = str(
-        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_VINTF, ""))
-    vintf_xml = None
+        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
     if hal:
-        use_lshal = False
-        vintf_xml = dut.getVintfXml(use_lshal=use_lshal)
-        logging.debug("precondition-vintf used to retrieve VINTF xml.")
-    else:
-        use_lshal = True
-        hal = str(
-            getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL,
-                    ""))
-        if hal:
-            vintf_xml = dut.getVintfXml(use_lshal=use_lshal)
-            logging.debug("precondition-lshal used to retrieve VINTF xml.")
+        testable, _ = hal_service_name_utils.GetHalServiceName(
+            shell, hal, bitness, run_as_compliance_test)
+        if not testable:
+            logging.warn("The required hal %s is not testable.", hal)
+            return False
 
-    if vintf_xml:
-        result = IsHalRegisteredInVintfXml(hal, vintf_xml,
-                                           test_instance.abi_bitness)
-        if not result and use_lshal:
-            # this is for when a test is configured to use the runtime HAL
-            # service availability (the default mode for HIDL tests).
-            # if a HAL is in vendor/manifest.xml, test is supposed to fail
-            # even though a respective HIDL HAL service is not running.
-            vintf_xml = dut.getVintfXml(use_lshal=False)
-            return IsHalRegisteredInVintfXml(hal, vintf_xml,
-                                             test_instance.abi_bitness)
-        return result
-
+    logging.info("Precondition check pass.")
     return True
