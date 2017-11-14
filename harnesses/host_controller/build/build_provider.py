@@ -57,6 +57,9 @@ class BuildProvider(object):
     def tmp_dirpath(self):
         return self._tmp_dirpath
 
+    def CreateNewTmpDir(self):
+        return tempfile.mkdtemp(dir=self._tmp_dirpath)
+
     def SetDeviceImage(self, type, path):
         """Sets device image `path` for the specified `type`."""
         self._device_images[type] = path
@@ -119,6 +122,8 @@ class BuildProvider(object):
                                         "tools", "vts-tradefed")
                 os.chmod(bin_path, 0766)
                 path = bin_path
+        else:
+            print("unsupported zip file %s" % path)
         self._test_suites[type] = path
 
     def GetTestSuitePackage(self, type=None):
