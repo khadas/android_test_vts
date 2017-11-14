@@ -830,6 +830,8 @@ class AndroidDevice(object):
             stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
             return str(stdout)
         except adb.AdbError as e:
+            logging.exception(
+                "AdbError in retrieving VINTF XML via lshal: %s" % e)
             return None
 
     def _getSl4aEventDispatcher(self, droid):
