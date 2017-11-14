@@ -909,9 +909,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             waitCount++;
         }
 
-        CLog.i("Report message path: %s, size: %s", reportMsg, reportMsg.length());
+        CLog.i("Report message path: %s", reportMsg);
 
         if (reportMsg != null) {
+            CLog.i("Report message file size: %s", reportMsg.length());
         } else {
             CLog.e("Cannot find report message proto file.");
         }
