@@ -117,5 +117,8 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
             else:
                 logging.info(
                     "The feature %s found in lshal-emitted vintf xml", hal)
+        else:
+            logging.error("No VINTF XML was retrieved.")
 
+    logging.info("Precondition check pass.")
     return True
