@@ -42,14 +42,14 @@ class HalHidlReplayTest(binary_test.BinaryTest):
 
     def setUpClass(self):
         """Prepares class and initializes a target device."""
+        self._test_hal_services = set()
         super(HalHidlReplayTest, self).setUpClass()
 
         if self._skip_all_testcases:
             return
 
-        if self.coverage.enabled:
-            # enable passthrough mode to measure code coverage.
-            self.shell.Execute('setprop vts.hidl.get_stub true')
+        if self.coverage.enabled and self._test_hal_services is not None:
+            self.coverage.SetHalNames(self._test_hal_services)
 
     # @Override
     def CreateTestCases(self):
@@ -133,25 +133,19 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 if not cmd_results or any(cmd_results[const.EXIT_CODE]):
                     logging.warning("Failed to remove: %s", cmd_results)
 
-        if self.coverage.enabled:
-            # disable passthrough mode.
-            self.shell.Execute('setprop vts.hidl.get_stub false')
         super(HalHidlReplayTest, self).tearDownClass()
 
     def setUp(self):
         """Setup for code coverage for each test case."""
         super(HalHidlReplayTest, self).setUp()
         if self.coverage.enabled and not self.coverage.global_coverage:
-            # enable passthrough mode to measure code coverage.
-            self.shell.Execute('setprop vts.hidl.get_stub true')
             self.coverage.InitializeDeviceCoverage(self._dut)
 
     def tearDown(self):
         """Generate the coverage data for each test case."""
         if self.coverage.enabled and not self.coverage.global_coverage:
             self.coverage.SetCoverageData(dut=self._dut, isGlobal=False)
-            # disable passthrough mode.
-            self.shell.Execute('setprop vts.hidl.get_stub false')
+
         super(HalHidlReplayTest, self).tearDown()
 
     def _GetServiceInstanceCombinations(self, trace_path):
@@ -184,7 +178,9 @@ class HalHidlReplayTest(binary_test.BinaryTest):
             _, service_names = hal_service_name_utils.GetHalServiceName(
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
-            service_instances[service] = service_names
+            if service_names:
+                service_instances[service] = service_names
+                self._test_hal_services.add(service)
         logging.info("registered service instances: %s", service_instances)
 
         service_instance_combinations = \
