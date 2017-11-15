@@ -129,6 +129,7 @@ vts_test_lib_packages += \
     libtest_with_dependency_loop_b \
     libtest_with_dependency_loop_b_tmp \
     libtest_with_dependency_loop_c \
+    libtestshared \
     preinit_getauxval_test_helper \
     preinit_syscall_test_helper \
 

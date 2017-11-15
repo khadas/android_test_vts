@@ -192,7 +192,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
         // Clear the temporary directories.
-        if (!mEnforcingState.equals(SELINUX_DISABLED)) {
+        if (mEnforcingState != null && !mEnforcingState.equals(SELINUX_DISABLED)) {
             device.executeShellCommand("setenforce " + mEnforcingState);
         }
         if (mDeviceInfoPath != null) {
