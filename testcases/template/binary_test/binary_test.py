@@ -196,10 +196,12 @@ class BinaryTest(base_test.BaseTestClass):
 
         if self.coverage.enabled and self.coverage.global_coverage:
             self.coverage.InitializeDeviceCoverage(self._dut)
-            if coverage_utils.FLUSH_PATH_VAR not in self.envp:
-                self.envp[coverage_utils.FLUSH_PATH_VAR] = (
-                    path_utils.JoinTargetPath(coverage_utils.TARGET_COVERAGE_PATH,
-                        'self'))
+            for tag in [self.DEFAULT_TAG_32, self.DEFAULT_TAG_64]:
+                if tag in self.envp:
+                    self.envp[tag] = '%s %s'.format(
+                        self.envp[tag], coverage_utils.COVERAGE_TEST_ENV)
+                else:
+                    self.envp[tag] = coverage_utils.COVERAGE_TEST_ENV
 
         self.testcases = []
 
