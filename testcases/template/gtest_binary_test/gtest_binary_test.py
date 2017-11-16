@@ -128,7 +128,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
 
         gtest_batch = gtest_test_case.GtestTestCase(
             path, '', path, tag, self.PutTag, working_directory,
-            ld_library_path, profiling_library_path)
+            ld_library_path, profiling_library_path, envp=envp)
         gtest_batch.full_name = ':'.join(test_names)
         return [gtest_batch]
 
