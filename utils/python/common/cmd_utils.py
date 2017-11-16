@@ -26,6 +26,7 @@ def RunCommand(command):
 
     Args:
         command: the command to run.
+
     Returns:
         code of the subprocess.
     """
