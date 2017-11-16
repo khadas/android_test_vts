@@ -35,6 +35,9 @@ FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
 TARGET_COVERAGE_PATH = "/data/misc/trace/"  # location to flush coverage
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # locatino to pull coverage to host
 
+# Environment for test process
+COVERAGE_TEST_ENV = "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/misc/trace/self"
+
 GCNO_SUFFIX = ".gcno"
 GCDA_SUFFIX = ".gcda"
 COVERAGE_SUFFIX = ".gcnodir"
@@ -47,8 +50,10 @@ _BUILD_INFO = 'BUILD_INFO'  # name of build info artifact
 _GCOV_ZIP = "gcov.zip"  # name of gcov artifact zip
 _REPO_DICT = 'repo-dict'  # name of dictionary from project to revision in BUILD_INFO
 
-# Command for flushing coverage
-_FLUSH_COMMAND = "GCOV_PREFIX=/data/local/tmp/flusher /data/local/tmp/vts_coverage_configure flush"
+_FLUSH_COMMAND = (
+    "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/local/tmp/flusher "
+    "/data/local/tmp/vts_coverage_configure flush")
+_SP_COVERAGE_PATH = "self"  # relative location where same-process coverage is dumped.
 
 _CHECKSUM_GCNO_DICT = "checksum_gcno_dict"
 _COVERAGE_ZIP = "coverage_zip"
@@ -246,10 +251,15 @@ class CoverageFeature(feature_utils.Feature):
             pids = set([pid.strip()
                         for pid in map(lambda entry: entry.split()[-1], entries)
                         if pid.isdigit()])
+            pids.add(_SP_COVERAGE_PATH)
             gcda_files = set()
             for pid in pids:
-                gcda_files.update(dut.adb.shell("find %s/%s -name \"*.gcda\"" %
-                                       (TARGET_COVERAGE_PATH, pid)).split("\n"))
+                path = path_utils.JoinTargetPath(TARGET_COVERAGE_PATH, pid)
+                try:
+                    files = dut.adb.shell("find %s -name \"*.gcda\"" % path)
+                    gcda_files.update(files.split("\n"))
+                except AdbError as e:
+                    logging.info('No gcda files found in path: \"%s\"', path)
 
         else:
             gcda_files.update(dut.adb.shell("find %s -name \"*.gcda\"" %
