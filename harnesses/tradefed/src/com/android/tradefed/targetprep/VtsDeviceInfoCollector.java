@@ -37,7 +37,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
 
     // TODO(trong): remove "cts:" prefix, will need a custom ResultReporter.
     private static final Map<String, String> BUILD_KEYS = new HashMap<>();
-
+    private static final Map<String, String> BUILD_LEGACY_PROPERTIES = new HashMap<>();
     static {
         BUILD_KEYS.put("cts:build_id", "ro.build.id");
         BUILD_KEYS.put("cts:build_product", "ro.product.name");
@@ -74,8 +74,13 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
     public void setUp(ITestDevice device, IBuildInfo buildInfo) throws TargetSetupError,
             BuildError, DeviceNotAvailableException {
         for (Entry<String, String> entry : BUILD_KEYS.entrySet()) {
+            String propertyValue = device.getProperty(entry.getValue());
+            if ((propertyValue == null || propertyValue.length() == 0)
+                    && BUILD_LEGACY_PROPERTIES.containsKey(entry.getValue())) {
+                propertyValue = device.getProperty(BUILD_LEGACY_PROPERTIES.get(entry.getValue()));
+            }
             buildInfo.addBuildAttribute(entry.getKey(),
-                    ArrayUtil.join(",", device.getProperty(entry.getValue())));
+                    ArrayUtil.join(",", propertyValue));
         }
     }
 }
