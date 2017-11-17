@@ -99,9 +99,11 @@ class RemoteClient(object):
         """Sends ListDevices operation.
 
         Returns:
-            A JSON object which is the devices connected to the host.
+            A list of device_info.DeviceInfo which are the devices connected to
+            the host.
         """
-        return self.SendOperation(remote_operation.ListDevices())
+        json_obj = self.SendOperation(remote_operation.ListDevices())
+        return remote_operation.ParseListDevicesResponse(json_obj)
 
     def RunCommand(self, serial, *command):
         """Sends a series of operations to run a command.
