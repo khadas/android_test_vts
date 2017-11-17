@@ -57,6 +57,22 @@ class DeviceInfo(api_message.ApiMessage):
         super(DeviceInfo, self).__init__(self._ALL_KEYS,
                                          device_serial=device_serial, **kwargs)
 
+    def IsAvailable(self):
+        """Returns whether the device is available for running commands.
+
+        Returns:
+            A boolean.
+        """
+        return getattr(self, "state", None) == "Available"
+
+    def IsStub(self):
+        """Returns whether the device is a stub.
+
+        Returns:
+            A boolean.
+        """
+        return getattr(self, "stub", False)
+
     def ToDeviceSnapshotJson(self):
         """Converts to the parameter of host_events.
 
