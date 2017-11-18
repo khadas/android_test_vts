@@ -69,12 +69,11 @@ class CoverageFeature(feature_utils.Feature):
         local_coverage_path: path to store the coverage files.
         _device_resource_dict: a map from device serial number to host resources directory.
         _hal_names: the list of hal names for which to process coverage.
+        _coverage_report_file_prefix: prefix of the output coverage report file.
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_COVERAGE
-    _REQUIRED_PARAMS = [
-        keys.ConfigKeys.IKEY_ANDROID_DEVICE
-    ]
+    _REQUIRED_PARAMS = [keys.ConfigKeys.IKEY_ANDROID_DEVICE]
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.IKEY_MODULES,
         keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT,
@@ -106,9 +105,10 @@ class CoverageFeature(feature_utils.Feature):
                              self.local_coverage_path)
                 shutil.rmtree(self.local_coverage_path)
             os.makedirs(self.local_coverage_path)
+        self._coverage_report_file_prefix = ""
 
         self.global_coverage = getattr(
-                    self, keys.ConfigKeys.IKEY_GLOBAL_COVERAGE, True)
+            self, keys.ConfigKeys.IKEY_GLOBAL_COVERAGE, True)
         if self.enabled:
             android_devices = getattr(self,
                                       keys.ConfigKeys.IKEY_ANDROID_DEVICE)
@@ -277,9 +277,12 @@ class CoverageFeature(feature_utils.Feature):
     def _OutputCoverageReport(self, isGlobal):
         logging.info("outputing coverage data")
         timestamp_seconds = str(int(time.time() * 1000000))
-        coverage_report_file = os.path.join(
-            self.local_coverage_path,
-            "coverage_report_" + timestamp_seconds + ".txt")
+        coverage_report_file_name = "coverage_report_" + timestamp_seconds + ".txt"
+        if self._coverage_report_file_prefix:
+            coverage_report_file_name = "coverage_report_" + self._coverage_report_file_prefix + ".txt"
+
+        coverage_report_file = os.path.join(self.local_coverage_path,
+                                            coverage_report_file_name)
         logging.info("Storing coverage report to: %s", coverage_report_file)
         coverage_report_msg = ReportMsg.TestReportMessage()
         if isGlobal:
@@ -519,7 +522,7 @@ class CoverageFeature(feature_utils.Feature):
         cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
 
         revision_dict = json.load(
-                open(os.path.join(resource_path, _BUILD_INFO)))[_REPO_DICT]
+            open(os.path.join(resource_path, _BUILD_INFO)))[_REPO_DICT]
 
         if not hasattr(self, keys.ConfigKeys.IKEY_MODULES):
             # auto-process coverage data
@@ -535,3 +538,11 @@ class CoverageFeature(feature_utils.Feature):
             names: list of strings, names of hal (e.g. android.hardware.light@2.0)
         """
         self._hal_names = list(names)
+
+    def SetCoverageReportFilePrefix(self, prefix):
+        """Sets the prefix for outputting the coverage report file.
+
+        Args:
+            prefix: strings, prefix of the coverage report file.
+        """
+        self._coverage_report_file_prefix = prefix
