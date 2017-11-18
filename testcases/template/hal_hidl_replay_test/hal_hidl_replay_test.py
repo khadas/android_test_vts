@@ -139,6 +139,8 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         """Setup for code coverage for each test case."""
         super(HalHidlReplayTest, self).setUp()
         if self.coverage.enabled and not self.coverage.global_coverage:
+            self.coverage.SetCoverageReportFilePrefix(
+                self._current_record.test_name.replace('/', '_'))
             self.coverage.InitializeDeviceCoverage(self._dut)
 
     def tearDown(self):
