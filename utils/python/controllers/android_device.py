@@ -1093,50 +1093,20 @@ class AndroidDevice(object):
             results.append(self._sl4a_sessions[key][0])
         return results
 
-    def getVintfXml(self, use_lshal=True, is_framework_manifest=False):
+    def getVintfXml(self, use_lshal=True):
         """Reads the vendor interface manifest Xml.
 
         Args:
             use_hal: bool, set True to use lshal command and False to fetch
                      manifest.xml directly.
-            is_framework_manifest: bool, set True to fetch /system/manifest.xml,
-                                   False to fetch /vendor/manifest.xml, effective
-                                   when use_lshal is False.
 
         Returns:
             Vendor interface manifest string.
         """
-        try:
-            if use_lshal:
-                stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
-            elif is_framework_manifest:
-                stdout = self.adb.shell('cat /system/manifest.xml')
-            else:
-                try:
-                    stdout = self.adb.shell('cat /odm/manifest.xml')
-                except adb.AdbError as e:
-                    logging.debug("Can't read /odm/manifest.xml; fall back to "
-                                  "use /vendor/manifest.xml instead.")
-                    stdout = self.adb.shell('cat /vendor/manifest.xml')
-            return str(stdout)
-        except adb.AdbError as e:
+        if not use_lshal:
             return None
-
-    def getCompMatrixXml(self, is_framework_comp_matrix=True):
-        """Reads the vendor interface manifest Xml.
-
-        Args:
-            is_framework_comp_matrix: bool, set True to fetch /system/compatibility_matrix.xml,
-                                      False to fetch /vendor/compatibility_matrix.xml
-
-        Returns:
-            Compatibility matrix content string.
-        """
         try:
-            if is_framework_comp_matrix:
-                stdout = self.adb.shell('cat /system/compatibility_matrix.xml')
-            else:
-                stdout = self.adb.shell('cat /vendor/compatibility_matrix.xml')
+            stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
             return str(stdout)
         except adb.AdbError as e:
             return None

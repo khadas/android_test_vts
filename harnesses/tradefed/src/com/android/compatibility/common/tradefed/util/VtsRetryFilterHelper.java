@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.compatibility.common.util;
+package com.android.compatibility.common.tradefed.util;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.compatibility.common.tradefed.util.RetryFilterHelper;
 import com.android.compatibility.common.tradefed.util.RetryType;
+import com.android.compatibility.common.util.IInvocationResult;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
-import java.io.FileNotFoundException;
 import java.util.Set;
 
 /**
@@ -29,7 +29,6 @@ import java.util.Set;
  */
 public class VtsRetryFilterHelper extends RetryFilterHelper {
     /* Instance variables for retrieving results to be retried. */
-    private CompatibilityBuildHelper mBuild;
     private int mSessionId;
 
     /**
@@ -50,26 +49,7 @@ public class VtsRetryFilterHelper extends RetryFilterHelper {
             String moduleName, String testName, RetryType retryType) {
         super(build, sessionId, subPlan, includeFilters, excludeFilters, abiName, moduleName,
                 testName, retryType);
-        mBuild = build;
         mSessionId = sessionId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IInvocationResult getResult() {
-        IInvocationResult result = null;
-        try {
-            result = ResultHandler.findResult(mBuild.getResultsDir(), mSessionId);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        if (result == null) {
-            throw new IllegalArgumentException(
-                    String.format("Could not find session with id %d", mSessionId));
-        }
-        return result;
     }
 
     /**

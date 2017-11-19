@@ -26,6 +26,9 @@
     <!-- <option name="compatibility:include-filter" value="VtsAppCameraStressTest" /> -->
 
     <!-- for Hal -->
+   <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0TargetReplay" />
+   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetReplay" />
+   <option name="compatibility:include-filter" value="VtsHalThermalV1_0TargetReplay" />
 
 
 </configuration>

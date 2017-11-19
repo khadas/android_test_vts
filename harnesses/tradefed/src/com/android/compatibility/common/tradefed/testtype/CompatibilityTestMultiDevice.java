@@ -17,7 +17,7 @@
 package com.android.compatibility.common.tradefed.testtype;
 
 import com.android.compatibility.common.tradefed.util.RetryFilterHelper;
-import com.android.compatibility.common.util.VtsRetryFilterHelper;
+import com.android.compatibility.common.tradefed.util.VtsRetryFilterHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.ConfigurationException;
 import com.android.tradefed.config.OptionClass;

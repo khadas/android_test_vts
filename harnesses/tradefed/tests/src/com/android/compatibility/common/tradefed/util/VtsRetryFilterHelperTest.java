@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compatibility.common.util;
+package com.android.compatibility.common.tradefed.util;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.compatibility.common.tradefed.util.RetryFilterHelper;
@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for {@link VtsRetryHelper}.
+ * Unit tests for {@link VtsRetryFilterHelper}.
  */
 @RunWith(JUnit4.class)
 public class VtsRetryFilterHelperTest {
