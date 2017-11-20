@@ -37,19 +37,20 @@ class HostControllerTest(unittest.TestCase):
         _tfc_client: A mock tfc_client.TfcClient.
         _host_controller: The HostController being tested.
     """
-    _AVAILABLE_DEVICES = [
-            device_info.DeviceInfo(device_serial="ABC001",
-                                   run_target="sailfish",
-                                   state="Available")]
-    _UNAVAILABLE_DEVICES = [
-            device_info.DeviceInfo(device_serial="ABC002",
-                                   run_target="sailfish",
-                                   state="Allocated"),
-            device_info.DeviceInfo(device_serial="emulator-5554",
-                                   run_target="unknown",
-                                   state="Available",
-                                   stub=True)]
-
+    _AVAILABLE_DEVICE = device_info.DeviceInfo(
+            device_serial="ABC001",
+            run_target="sailfish",
+            state="Available")
+    _ALLOCATED_DEVICE = device_info.DeviceInfo(
+            device_serial="ABC002",
+            run_target="sailfish",
+            state="Allocated")
+    _STUB_DEVICE = device_info.DeviceInfo(
+            device_serial="emulator-5554",
+            run_target="unknown",
+            state="Available",
+            stub=True)
+    _DEVICES = [_AVAILABLE_DEVICE, _ALLOCATED_DEVICE, _STUB_DEVICE]
     _TASKS = [command_task.CommandTask(task_id="1-0",
                                        command_line="vts -m SampleShellTest",
                                        device_serials=["ABC001"])]
@@ -65,20 +66,26 @@ class HostControllerTest(unittest.TestCase):
                 "InvocationThread.run")
     def testDeviceStateDuringInvocation(self, mock_run):
         """Tests LeaseHostTasks and ListAvailableDevices."""
-        self._remote_client.ListDevices.return_value = (
-                self._AVAILABLE_DEVICES + self._UNAVAILABLE_DEVICES)
+        self._remote_client.ListDevices.return_value = self._DEVICES
         self._tfc_client.LeaseHostTasks.return_value = self._TASKS
         run_event = threading.Event()
         mock_run.side_effect = lambda: run_event.wait()
 
-        self._host_controller.LeaseCommandTasks(self._AVAILABLE_DEVICES)
+        self._host_controller.LeaseCommandTasks()
         devices = self._host_controller.ListAvailableDevices()
         self.assertEqual([], devices)
         run_event.set()
         # Wait for thread termination
         time.sleep(0.2)
         devices = self._host_controller.ListAvailableDevices()
-        self.assertEqual(self._AVAILABLE_DEVICES, devices)
+        self.assertEqual([self._AVAILABLE_DEVICE], devices)
+
+    def testListDevices(self):
+        """Tests ListDevices."""
+        self._remote_client.ListDevices.return_value = self._DEVICES
+        devices = self._host_controller.ListDevices()
+        self.assertEqual([self._AVAILABLE_DEVICE, self._ALLOCATED_DEVICE],
+                         devices)
 
 
 if __name__ == "__main__":

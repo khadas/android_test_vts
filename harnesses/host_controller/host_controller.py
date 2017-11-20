@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (C) 2017 The Android Open Source Project
 #
@@ -15,13 +14,8 @@
 # limitations under the License.
 #
 
-
-import argparse
-import json
 import logging
 import socket
-import sys
-import threading
 import time
 import uuid
 
@@ -29,9 +23,7 @@ import httplib2
 from apiclient import errors
 
 from vts.harnesses.host_controller import invocation_thread
-from vts.harnesses.host_controller.tradefed import remote_client
 from vts.harnesses.host_controller.tradefed import remote_operation
-from vts.harnesses.host_controller.tfc import tfc_client
 from vts.harnesses.host_controller.tfc import command_attempt
 
 
@@ -53,6 +45,11 @@ class HostController(object):
         self._hostname = hostname
         self._cluster_ids = cluster_ids
         self._invocation_threads = []
+
+    @property
+    def hostname(self):
+        """Returns the name of the host."""
+        return self._hostname
 
     def _JoinInvocationThreads(self):
         """Removes terminated threads from _invocation_threads."""
@@ -81,8 +78,17 @@ class HostController(object):
                 task.command_line.split(), task.device_serials)
         return inv_thread
 
+    def ListDevices(self):
+        """Lists present devices on the host.
+
+        Returns:
+            A list of DeviceInfo.
+        """
+        devices = self._remote_client.ListDevices()
+        return [dev for dev in devices if not dev.IsStub()]
+
     def ListAvailableDevices(self):
-        """Lists available devices on the host.
+        """Lists available devices for command tasks.
 
         Returns:
             A list of DeviceInfo.
@@ -92,18 +98,21 @@ class HostController(object):
         for inv_thread in self._invocation_threads:
             allocated_serials.update(inv_thread.device_serials)
 
-        present_devices = self._remote_client.ListDevices()
+        present_devices = self.ListDevices()
         return [dev for dev in present_devices if
                 dev.IsAvailable() and
-                not dev.IsStub() and
                 dev.device_serial not in allocated_serials]
 
-    def LeaseCommandTasks(self, available_devices):
+    def LeaseCommandTasks(self):
         """Leases command tasks and creates threads to execute them.
 
-        Args:
-            available_devices: A list of DeviceInfo available for testing.
+        Returns:
+            A list of CommandTask. The leased command tasks.
         """
+        available_devices = self.ListAvailableDevices()
+        if not available_devices:
+            return []
+
         tasks = self._tfc_client.LeaseHostTasks(
                 self._cluster_ids[0], self._cluster_ids[1:],
                 self._hostname, available_devices)
@@ -112,6 +121,7 @@ class HostController(object):
             inv_thread.daemon = True
             inv_thread.start()
             self._invocation_threads.append(inv_thread)
+        return tasks
 
     def Run(self, poll_interval):
         """Starts polling TFC for tasks.
@@ -121,53 +131,10 @@ class HostController(object):
         """
         while True:
             try:
-                available_devices = self.ListAvailableDevices()
-                if available_devices:
-                    self.LeaseCommandTasks(available_devices)
+                self.LeaseCommandTasks()
             except (socket.error,
                     remote_operation.RemoteOperationException,
                     httplib2.HttpLib2Error,
                     errors.HttpError) as e:
                 logging.exception(e)
             time.sleep(poll_interval)
-
-
-def Main():
-    """Parses arguments and starts host controller threads."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config_file", type=argparse.FileType('r'),
-                        help="The configuration file in JSON format")
-    args = parser.parse_args()
-    config_json = json.load(args.config_file)
-    logging.getLogger().setLevel(getattr(logging, config_json["log_level"]))
-    tfc = tfc_client.CreateTfcClient(
-            config_json["tfc_api_root"],
-            config_json["service_key_json_path"],
-            api_name=config_json["tfc_api_name"],
-            api_version=config_json["tfc_api_version"],
-            scopes=config_json["tfc_scopes"])
-
-    host_threads = []
-    for host_config in config_json["hosts"]:
-        cluster_ids = host_config["cluster_ids"]
-        # If host name is not specified, use local host.
-        hostname = host_config.get("hostname", socket.gethostname())
-        port = host_config.get("port", remote_client.DEFAULT_PORT)
-        cluster_ids = host_config["cluster_ids"]
-        lease_interval_sec = host_config["lease_interval_sec"]
-
-        remote = remote_client.RemoteClient(hostname, port)
-        host_controller = HostController(remote, tfc, hostname, cluster_ids)
-        host_thread = threading.Thread(target=host_controller.Run,
-                                       args=(lease_interval_sec,))
-        host_thread.daemon = True
-        host_thread.start()
-        host_threads.append(host_thread)
-
-    while True:
-        # TODO(hsinyichen): Implement console.
-        sys.stdin.readline()
-
-
-if __name__ == "__main__":
-    Main()
