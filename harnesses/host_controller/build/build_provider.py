@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+import zipfile
 
 
 class BuildProvider(object):
@@ -31,8 +32,9 @@ class BuildProvider(object):
                       test suite package file path.
         _tmp_dirpath: string, the temp dir path created to keep artifacts.
     """
-    IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img", "userdata.img",
-                        "vbmeta.img", "metadata.img"]
+    IMAGE_FILE_NAMES = ["boot.img", "cache.img", "metadata.img", "modem.img",
+                        "keymaster.img", "system.img", "userdata.img",
+                        "vbmeta.img", "vendor.img"]
 
     def __init__(self):
         self._device_images = {}
@@ -56,6 +58,32 @@ class BuildProvider(object):
         """Sets device image `path` for the specified `type`."""
         self._device_images[type] = path
 
+    def SetDeviceImageZip(self, path):
+        """Sets device image(s) using files in a given zip file.
+
+        It extracts image files inside the given zip file and selects
+        known Android image files using self.IMAGE_FILE_NAMES.
+
+        Args:
+            path: string, the path to a zip file.
+        """
+        dest_path = path + ".dir"
+        with zipfile.ZipFile(path, 'r') as zip_ref:
+            zip_ref.extractall(dest_path)
+            artifact_paths = map(
+                lambda filename: os.path.join(dest_path, filename) if (
+                    filename and (filename.endswith(".img")
+                                  or filename.endswith(".zip"))) else None,
+                zip_ref.namelist())
+            artifact_paths = filter(None, artifact_paths)
+            if artifact_paths:
+                for artifact_path in artifact_paths:
+                    for known_filename in self.IMAGE_FILE_NAMES:
+                        if artifact_path.endswith(known_filename):
+                            self.SetDeviceImage(
+                                known_filename.replace(".img", ""),
+                                artifact_path)
+
     def GetDeviceImage(self, type=None):
         """Returns device image info."""
         if type is None:
@@ -63,7 +91,21 @@ class BuildProvider(object):
         return self._device_images[type]
 
     def SetTestSuitePackage(self, type, path):
-        """Sets test suite package `path` for the specified `type`."""
+        """Sets test suite package `path` for the specified `type`.
+
+        Args:
+            type: string, test suite type such as 'vts' or 'cts'.
+            path: string, the path of a file. if a file is a zip file,
+                  it's unziped and its main binary is set.
+        """
+        if path.endswith("android-vts.zip"):
+            dest_path = os.path.join(self.tmp_dirpath, "android-vts")
+            with zipfile.ZipFile(path, 'r') as zip_ref:
+                zip_ref.extractall(dest_path)
+                bin_path = os.path.join(dest_path, "android-vts",
+                                        "tools", "vts-tradefed")
+                os.chmod(bin_path, 0766)
+                path = bin_path
         self._test_suites[type] = path
 
     def GetTestSuitePackage(self, type=None):
