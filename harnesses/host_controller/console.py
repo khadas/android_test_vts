@@ -419,6 +419,8 @@ class Console(cmd.Cmd):
                         flasher.Flashall(args.build_dir)
                     if args.gsi is not None:
                         flasher.FlashGSI(args.gsi, args.vbmeta)
+            for flasher in flashers:
+                flasher.WaitForDevice()
 
     def help_flash(self):
         """Prints help message for flash command."""
