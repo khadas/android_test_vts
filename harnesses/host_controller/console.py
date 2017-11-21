@@ -18,11 +18,14 @@ import argparse
 import cmd
 import imp  # Python v2 compatibility
 import logging
+import os
+import shutil
 import subprocess
 import sys
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
+from vts.harnesses.host_controller.build import build_provider_ab
 from vts.harnesses.host_controller.build import build_provider_local_fs
 
 # The default Partner Android Build (PAB) public account.
@@ -86,6 +89,7 @@ class Console(cmd.Cmd):
         _in_file: The input file object.
         _out_file: The output file object.
         prompt: The prompt string at the beginning of each command line.
+        _copy_parser: The parser for copy command
         _fetch_parser: The parser for fetch command
         _flash_parser: The parser for flash command
         _lease_parser: The parser for lease command.
@@ -101,6 +105,7 @@ class Console(cmd.Cmd):
         self._build_provider = {}
         self._build_provider["pab"] = pab
         self._build_provider["local_fs"] = build_provider_local_fs.BuildProviderLocalFS()
+        self._build_provider["ab"] = build_provider_ab.BuildProviderAB()
         self._tfc_client = tfc
         self._hosts = host_controllers
         self._in_file = in_file
@@ -109,6 +114,7 @@ class Console(cmd.Cmd):
         self.device_image_info = {}
         self.test_suite_info = {}
 
+        self._InitCopyParser()
         self._InitFetchParser()
         self._InitFlashParser()
         self._InitLeaseParser()
@@ -153,10 +159,8 @@ class Console(cmd.Cmd):
             return False
 
         script_module = imp.load_source('script_module', script_file_path)
-        while True:
-            commands = script_module.EmitConsoleCommands()
-            if not commands:
-                break
+        commands = script_module.EmitConsoleCommands()
+        if commands:
             for command in commands:
                 print("Command: %s" % command)
                 self.onecmd(command)
@@ -280,7 +284,7 @@ class Console(cmd.Cmd):
         self._fetch_parser.add_argument(
             '--type',
             default='pab',
-            choices=('local_fs', 'pab'),
+            choices=('local_fs', 'pab', 'ab'),
             help='Build provider type')
         self._fetch_parser.add_argument(
             '--method',
@@ -330,6 +334,15 @@ class Console(cmd.Cmd):
         elif args.type == "local_fs":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 args.path)
+        elif args.type == "ab":
+            device_images, test_suites = self._build_provider[args.type].Fetch(
+                branch=args.branch,
+                target=args.target,
+                artifact_name=args.artifact_name,
+                build_id=args.build_id)
+        else:
+            printf("ERROR: unknown fetch type %s" % args.type)
+            sys.exit(-1)
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
@@ -382,6 +395,25 @@ class Console(cmd.Cmd):
     def help_flash(self):
         """Prints help message for flash command."""
         self._flash_parser.print_help(self._out_file)
+
+    def _InitCopyParser(self):
+        """Initializes the parser for copy command."""
+        self._copy_parser = ConsoleArgumentParser("copy",
+                                                  "Copy a file.")
+
+    def do_copy(self, line):
+        """Copy a file from source to destination path."""
+        src, dst = line.split()
+        if dst == "{vts_tf_home}":
+            dst = os.path.dirname(self.test_suite_info["vts"])
+        elif "{" in dst:
+            print("unknown dst %s" % dst)
+            return
+        shutil.copy(src, dst)
+
+    def help_copy(self):
+        """Prints help message for copy command."""
+        self._copy_parser.print_help(self._out_file)
 
     def _InitTestParser(self):
         """Initializes the parser for test command."""
