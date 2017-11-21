@@ -472,8 +472,10 @@ class PartnerAndroidBuildClient(build_provider.BuildProvider):
                                              branch=branch,
                                              target=target,
                                              method=method)
+            print("latest build ID = %s" % build_id)
 
-        artifact_name = artifact_name.format(id=build_id)
+        if "build_id" in artifact_name:
+            artifact_name = artifact_name.format(build_id=build_id)
 
         if method == POST:
             artifacts = self.GetBuildArtifacts(account_id=account_id,
@@ -513,21 +515,5 @@ class PartnerAndroidBuildClient(build_provider.BuildProvider):
             if artifact_path.endswith("android-vts.zip"):
                 self.SetTestSuitePackage("vts", artifact_path)
             else:
-                dirname = os.path.join(dirname,
-                                       os.path.basename(artifact_path) + ".dir")
-                # Considering getting the list of contained files and unzipping
-                # only selected files (e.g., img files) if large files will be
-                # distributed.
-                with zipfile.ZipFile(artifact_path, 'r') as zip_ref:
-                    zip_ref.extractall(artifact_path + ".dir")
-                    artifact_paths = map(
-                        lambda filename: os.path.join(dirname, filename) if (
-                            filename and (filename.endswith(".img")
-                                          or filename.endswith(".zip"))) else None,
-                        zip_ref.namelist())
-                    artifact_paths = filter(None, artifact_paths)
-                    if artifact_paths:
-                        for path in artifact_paths:
-                            if path.endswith("system.img"):
-                                self.SetDeviceImage("system", path)
+                self.SetDeviceImageZip(artifact_path)
         return self.GetDeviceImage(), self.GetTestSuitePackage()
