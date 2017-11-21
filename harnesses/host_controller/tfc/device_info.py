@@ -15,6 +15,7 @@
 #
 
 from vts.harnesses.host_controller.tfc import api_message
+from vts.utils.python.controllers import android_device
 
 
 class DeviceInfo(api_message.ApiMessage):
@@ -88,3 +89,17 @@ class DeviceInfo(api_message.ApiMessage):
             A JSON object.
         """
         return self.ToJson(self._LEASE_HOST_TASKS)
+
+    def Extend(self, properties):
+        """Adds properties to a DeviceInfo object, using AndroidDevice
+
+        Args:
+            properties: list of strings, list of properties to update
+        """
+        serial = getattr(self, "device_serial", None)
+        ad = android_device.AndroidDevice(serial)
+        for prop in properties:
+            val = getattr(ad, prop, None)
+            if val is None:
+                continue
+            setattr(self, prop, val)
