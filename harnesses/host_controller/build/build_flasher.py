@@ -18,6 +18,7 @@
 import logging
 import os
 
+from vts.harnesses.host_controller.build import build_provider
 from vts.utils.python.controllers import android_device
 
 
@@ -123,7 +124,15 @@ class BuildFlasher(object):
             self.device.adb.wait_for_device()
             print("rebooting to bootloader")
             self.device.log.info(self.device.adb.reboot_bootloader())
+
         print("starting to flash vendor and other images...")
+        if build_provider.FULL_ZIPFILE in device_images:
+            print("fastboot update %s --skip-reboot" % (
+                  device_images[build_provider.FULL_ZIPFILE]))
+            self.device.log.info(self.device.fastboot.update(
+                device_images[build_provider.FULL_ZIPFILE],
+                "--skip-reboot"))
+
         for image_type in ["boot", "vendor", "cache", "userdata"]:
             if image_type in device_images and device_images[image_type]:
                 print("fastboot flash %s %s" % (image_type,

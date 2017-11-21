@@ -19,6 +19,8 @@ import shutil
 import tempfile
 import zipfile
 
+FULL_ZIPFILE = "full-zipfile"
+
 
 class BuildProvider(object):
     """The base class for build provider.
@@ -35,6 +37,7 @@ class BuildProvider(object):
     IMAGE_FILE_NAMES = ["boot.img", "cache.img", "metadata.img", "modem.img",
                         "keymaster.img", "system.img", "userdata.img",
                         "vbmeta.img", "vendor.img"]
+    BASIC_IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img"]
 
     def __init__(self):
         self._device_images = {}
@@ -58,6 +61,13 @@ class BuildProvider(object):
         """Sets device image `path` for the specified `type`."""
         self._device_images[type] = path
 
+    def IsFullDeviceImage(self, namelist):
+        """Returns true if given namelist list has all common device images."""
+        for image_file in self.BASIC_IMAGE_FILE_NAMES:
+            if image_file not in namelist:
+                return False
+        return True
+
     def SetDeviceImageZip(self, path):
         """Sets device image(s) using files in a given zip file.
 
@@ -69,20 +79,23 @@ class BuildProvider(object):
         """
         dest_path = path + ".dir"
         with zipfile.ZipFile(path, 'r') as zip_ref:
-            zip_ref.extractall(dest_path)
-            artifact_paths = map(
-                lambda filename: os.path.join(dest_path, filename) if (
-                    filename and (filename.endswith(".img")
-                                  or filename.endswith(".zip"))) else None,
-                zip_ref.namelist())
-            artifact_paths = filter(None, artifact_paths)
-            if artifact_paths:
-                for artifact_path in artifact_paths:
-                    for known_filename in self.IMAGE_FILE_NAMES:
-                        if artifact_path.endswith(known_filename):
-                            self.SetDeviceImage(
-                                known_filename.replace(".img", ""),
-                                artifact_path)
+            if self.IsFullDeviceImage(zip_ref.namelist()):
+                self.SetDeviceImage(FULL_ZIPFILE, path)
+            else:
+                zip_ref.extractall(dest_path)
+                artifact_paths = map(
+                    lambda filename: os.path.join(dest_path, filename) if (
+                        filename and (filename.endswith(".img")
+                                      or filename.endswith(".zip"))) else None,
+                    zip_ref.namelist())
+                artifact_paths = filter(None, artifact_paths)
+                if artifact_paths:
+                    for artifact_path in artifact_paths:
+                        for known_filename in self.IMAGE_FILE_NAMES:
+                            if artifact_path.endswith(known_filename):
+                                self.SetDeviceImage(
+                                    known_filename.replace(".img", ""),
+                                    artifact_path)
 
     def GetDeviceImage(self, type=None):
         """Returns device image info."""
