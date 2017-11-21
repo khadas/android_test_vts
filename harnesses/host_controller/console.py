@@ -16,6 +16,7 @@
 
 import argparse
 import cmd
+import imp  # Python v2 compatibility
 import sys
 
 from vts.harnesses.host_controller.tfc import request
@@ -123,6 +124,33 @@ class Console(cmd.Cmd):
                 help='The command to be executed. If the command contains '
                      'arguments starting with "-", place the command after '
                      '"--" at end of line.')
+
+    def ProcessScript(self, script_file_path):
+        """Processes a .py script file.
+
+        A script file implements a function which emits a list of console
+        commands to execute. That function emits an empty list or None if
+        no more command needs to be processed.
+
+        Args:
+            script_file_path: string, the path of a script file (.py file).
+
+        Returns:
+            True if successful; False otherwise
+        """
+        if not script_file_path.endswith(".py"):
+            print("Script file is not .py file: %s" % script_file_path)
+            return False
+
+        script_module = imp.load_source('script_module', script_file_path)
+        while True:
+            commands = script_module.EmitConsoleCommands()
+            if not commands:
+                break
+            for command in commands:
+                print("Command: %s" % command)
+                self.onecmd(command)
+        return True
 
     def do_request(self, line):
         """Sends TFC a request to execute a command."""
@@ -276,14 +304,15 @@ class Console(cmd.Cmd):
         args = self._fetch_parser.ParseLine(line)
         # do we want this somewhere else? No harm in doing multiple times
         self._pab_client.Authenticate(args.userinfo_file)
-        filename = self._pab_client.GetArtifact(
+        dirname, filenames = self._pab_client.GetArtifact(
             account_id=args.account_id,
             branch=args.branch,
             target=args.target,
             artifact_name=args.artifact_name,
             build_id=args.build_id,
             method=args.method)
-        print("Filename: %s" % filename)
+        print("Dir name: %s" % dirname)
+        print("File names: %s" % filenames)
 
     def help_fetch(self):
         """Prints help message for fetch command."""

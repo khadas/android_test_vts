@@ -26,6 +26,7 @@ import requests
 import shutil
 import tempfile
 import urlparse
+import zipfile
 from posixpath import join as path_urljoin
 
 from oauth2client.client import flow_from_clientsecrets
@@ -158,7 +159,8 @@ class PartnerAndroidBuildClient(object):
                 userinfo = json.load(handle)
 
             if self.EMAIL not in userinfo or self.PASSWORD not in userinfo:
-                raise ValueError('Malformed userinfo file: needs email and password')
+                raise ValueError(
+                    'Malformed userinfo file: needs email and password')
 
             email = userinfo[self.EMAIL]
             password = userinfo[self.PASSWORD]
@@ -241,13 +243,12 @@ class PartnerAndroidBuildClient(object):
         if 'error' in responseJSON and 'code' in responseJSON['error']:
             if responseJSON['error']['code'] == self.BAD_XSRF_CODE:
                 raise ValueError(
-            "Bad XSRF token -- must be for the same account as your credentials"
-                )
+                    "Bad XSRF token -- must be for the same account as your credentials")
             if responseJSON['error']['code'] == self.EXPIRED_XSRF_CODE:
                 raise ValueError("Expired XSRF token -- please refresh")
 
-        raise ValueError(
-            "Unknown response from server -- %s" % json.dumps(responseJSON))
+        raise ValueError("Unknown response from server -- %s" %
+                         json.dumps(responseJSON))
 
     def GetBuildList(self,
                      account_id,
@@ -316,8 +317,10 @@ class PartnerAndroidBuildClient(object):
             string, most recent build id
         """
         # TODO: support pagination, maybe?
-        build_list = self.GetBuildList(
-            account_id=account_id, branch=branch, target=target, method=method)
+        build_list = self.GetBuildList(account_id=account_id,
+                                       branch=branch,
+                                       target=target,
+                                       method=method)
         if len(build_list) == 0:
             raise ValueError(
                 'No builds found for account_id=%s, branch=%s, target=%s' %
@@ -330,18 +333,17 @@ class PartnerAndroidBuildClient(object):
                     # return build id (index '1')
                     return build[self.BUILD_BUILDID_KEY]
             elif method == GET:
-                if build['build_attempt_status'] == "COMPLETE" and build["successful"]:
+                if build['build_attempt_status'] == "COMPLETE" and build[
+                        "successful"]:
                     return build['build_id']
         raise ValueError(
             'No complete builds found: %s failed or incomplete builds found' %
             len(build_list))
 
-    def GetBuildArtifacts(self,
-                          account_id,
-                          build_id,
-                          branch,
-                          target,
-                          method=POST):
+    def GetBuildArtifacts(
+            self, account_id,
+            build_id, branch,
+            target, method=POST):
         """Get the list of build artifacts for an account, build, target, branch
         Args:
             account_id: int, ID associated with the PAB account.
@@ -397,10 +399,9 @@ class PartnerAndroidBuildClient(object):
                 "6": internal
             }
 
-            result = self.CallBuildsvc(
-                method='downloadBuildArtifact',
-                params=params,
-                account_id=account_id)
+            result = self.CallBuildsvc(method='downloadBuildArtifact',
+                                       params=params,
+                                       account_id=account_id)
 
             # in downloadBuildArtifact response, index '1' contains the url
             if self.DOWNLOAD_URL_KEY in result:
@@ -453,7 +454,8 @@ class PartnerAndroidBuildClient(object):
                     target,
                     artifact_name,
                     build_id='latest',
-                    method=GET):
+                    method=GET,
+                    unzip=True):
         """Get an artifact for an account, branch, target and name and build id.
 
         If build_id not given, get latest.
@@ -465,26 +467,27 @@ class PartnerAndroidBuildClient(object):
             artifact_name: name of artifact, e.g. aosp_arm64_ab-img-4353141.zip
                 ({id} will automatically get replaced with build ID)
             method: 'GET' or 'POST', which endpoint to query
+            unzip: boolean, True to unzip the artifact if that's a zip file.
 
         Returns:
-            string, filename of downloaded artifact
+            a string, the path of a directory which contains the returned files.
+            a list of strings, each string has the path of downloaded artifact
+                file which is either .img file or .zip file.
         """
         if build_id == 'latest':
-            build_id = self.GetLatestBuildId(
-                account_id=account_id,
-                branch=branch,
-                target=target,
-                method=method)
+            build_id = self.GetLatestBuildId(account_id=account_id,
+                                             branch=branch,
+                                             target=target,
+                                             method=method)
 
         artifact_name = artifact_name.format(id=build_id)
 
         if method == POST:
-            artifacts = self.GetBuildArtifacts(
-                account_id=account_id,
-                build_id=build_id,
-                branch=branch,
-                target=target,
-                method=method)
+            artifacts = self.GetBuildArtifacts(account_id=account_id,
+                                               build_id=build_id,
+                                               branch=branch,
+                                               target=target,
+                                               method=method)
 
             if len(artifacts) == 0:
                 raise ValueError(
@@ -496,21 +499,36 @@ class PartnerAndroidBuildClient(object):
                 artifact[self.BUILDARTIFACT_NAME_KEY] for artifact in artifacts
             ]
             if artifact_name not in artifact_names:
-                raise ValueError(
-                    "%s not found in artifact list" % artifact_name)
+                raise ValueError("%s not found in artifact list" %
+                                 artifact_name)
 
-        url = self.GetArtifactURL(
-            account_id=account_id,
-            build_id=build_id,
-            target=target,
-            artifact_name=artifact_name,
-            branch=branch,
-            internal=False,
-            method=method)
+        url = self.GetArtifactURL(account_id=account_id,
+                                  build_id=build_id,
+                                  target=target,
+                                  artifact_name=artifact_name,
+                                  branch=branch,
+                                  internal=False,
+                                  method=method)
 
         if self._tmp_dirpath:
             artifact_path = os.path.join(self._tmp_dirpath, artifact_name)
         else:
             artifact_path = artifact_name
         self.DownloadArtifact(url, artifact_path)
-        return artifact_path
+        dirname = os.path.dirname(artifact_path)
+        if unzip and artifact_path.endswith(".zip"):
+            dirname = os.path.join(dirname,
+                                   os.path.basename(artifact_path) + ".dir")
+            # Considering getting the list of contained files and unzipping
+            # only selected files (e.g., img files) if large files will be
+            # distributed.
+            with zipfile.ZipFile(artifact_path, 'r') as zip_ref:
+                zip_ref.extractall(artifact_path + ".dir")
+                artifact_paths = map(
+                    lambda filename: os.path.join(dirname, filename) if (
+                        filename and (filename.endswith(".img")
+                                      or filename.endswith(".zip"))) else None,
+                    zip_ref.namelist())
+                return dirname, filter(None, artifact_paths)
+        else:
+            return dirname, [artifact_path]
