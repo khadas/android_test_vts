@@ -15,6 +15,7 @@
 #
 """Class to flash build artifacts onto devices"""
 
+import logging
 import os
 
 from vts.utils.python.controllers import android_device
@@ -41,27 +42,33 @@ class BuildFlasher(object):
         else:
             serials = android_device.list_adb_devices()
             if len(serials) == 0:
-                raise android_device.AndroidDeviceError(
-                    "ADB could not find any target devices.")
+                serials = android_device.list_fastboot_devices()
+                if len(serials) == 0:
+                    raise android_device.AndroidDeviceError(
+                        "ADB and fastboot could not find any target devices.")
             if len(serials) > 1:
-                raise android_device.AndroidDeviceError(
-                    "ADB found more than one device: %s" % serials)
-            self.device = android_device.AndroidDevice(serials[0])
+                print("ADB or fastboot found more than one device: %s" % serials)
+            self.device = android_device.AndroidDevice(
+                serials[0], device_callback_port=-1)
 
-    def FlashGSI(self, system_img, vbmeta_img=None):
+    def FlashGSI(self, system_img, vbmeta_img=None, skip_check=False):
         """Flash the Generic System Image to the device.
 
         Args:
             system_img: string, path to GSI
             vbmeta_img: string, optional, path to vbmeta image for new devices
+            skip_check: boolean, set True to skip adb-based checks when
+                        the DUT is already running its bootloader.
         """
         if not os.path.exists(system_img):
             raise ValueError("Couldn't find system image at %s" % system_img)
-        self.device.adb.wait_for_device()
-        if not self.device.isBootloaderMode:
-            self.device.log.info(self.device.adb.reboot_bootloader())
+        if not skip_check:
+            self.device.adb.wait_for_device()
+            if not self.device.isBootloaderMode:
+                self.device.log.info(self.device.adb.reboot_bootloader())
         if vbmeta_img is not None:
-            self.device.fastboot.flash('vbmeta', vbmeta_img)
+            self.device.log.info(self.device.fastboot.flash(
+                'vbmeta', vbmeta_img))
         self.device.log.info(self.device.fastboot.erase('system'))
         self.device.log.info(self.device.fastboot.flash('system', system_img))
         self.device.log.info(self.device.fastboot.erase('metadata'))
@@ -81,3 +88,39 @@ class BuildFlasher(object):
         if not self.device.isBootloaderMode:
             self.device.log.info(self.device.adb.reboot_bootloader())
         self.device.log.info(self.device.fastboot.flashall())
+
+    def Flash(self, device_images):
+        """Flash the Generic System Image to the device.
+
+        Args:
+            device_images: dict, where the key is image type and value is
+                           file path.
+
+        Returns:
+            True if succesful; False otherwise
+        """
+        if not device_images:
+            logging.warn("Flash skipped because no device image is given.")
+            return False
+
+        if not self.device.isBootloaderMode:
+            self.device.adb.wait_for_device()
+            print("rebooting to bootloader")
+            self.device.log.info(self.device.adb.reboot_bootloader())
+        print("starting to flash vendor and other images...")
+        for image_type in ["boot", "vendor", "cache", "userdata"]:
+            if image_type in device_images and device_images[image_type]:
+                print("fastboot flash %s %s" % (image_type,
+                                                device_images[image_type]))
+                self.device.log.info(self.device.fastboot.flash(
+                    image_type, device_images[image_type]))
+
+        print("starting to flash system and other images...")
+        if "system" in device_images and device_images["system"]:
+            system_img = device_images["system"]
+            vbmeta_img = device_images["vbmeta"] if (
+                "vbmeta" in device_images and device_images["vbmeta"]) else None
+            self.FlashGSI(system_img, vbmeta_img, skip_check=True)
+        else:
+            self.device.log.info(self.device.fastboot.reboot())
+        return True
