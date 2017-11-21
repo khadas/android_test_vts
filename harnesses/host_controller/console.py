@@ -19,6 +19,12 @@ import cmd
 import sys
 
 from vts.harnesses.host_controller.tfc import request
+from vts.harnesses.host_controller.build import build_flasher
+
+# The default Partner Android Build (PAB) public account.
+# To obtain access permission, please reach out to Android partner engineering
+# department of Google LLC.
+_DEFAULT_ACCOUNT_ID = '543365459'
 
 
 class ConsoleArgumentError(Exception):
@@ -68,27 +74,33 @@ class Console(cmd.Cmd):
     """The console for host controllers.
 
     Attributes:
+        _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
         _hosts: A list of HostController objects.
         _in_file: The input file object.
         _out_file: The output file object.
         prompt: The prompt string at the beginning of each command line.
+        _fetch_parser: The parser for fetch command
+        _flash_parser: The parser for flash command
         _lease_parser: The parser for lease command.
         _list_parser: The parser for list command.
         _request_parser: The parser for request command.
     """
 
-    def __init__(self, tfc, host_controllers,
+    def __init__(self, tfc, pab, host_controllers,
                  in_file=sys.stdin, out_file=sys.stdout):
         """Initializes the attributes and the parsers."""
         # cmd.Cmd is old-style class.
         cmd.Cmd.__init__(self, stdin=in_file, stdout=out_file)
+        self._pab_client = pab
         self._tfc_client = tfc
         self._hosts = host_controllers
         self._in_file = in_file
         self._out_file = out_file
         self.prompt = "> "
 
+        self._InitFetchParser()
+        self._InitFlashParser()
         self._InitLeaseParser()
         self._InitListParser()
         self._InitRequestParser()
@@ -122,6 +134,7 @@ class Console(cmd.Cmd):
         self._tfc_client.NewRequest(req)
 
     def help_request(self):
+        """Prints help message for request command."""
         self._request_parser.print_help(self._out_file)
 
     def _InitListParser(self):
@@ -133,6 +146,14 @@ class Console(cmd.Cmd):
         self._list_parser.add_argument("type",
                                        choices=("hosts", "devices"),
                                        help="The type of the shown objects.")
+
+    def _Print(self, string):
+        """Prints a string and a new line character.
+
+        Args:
+            string: The string to be printed.
+        """
+        self._out_file.write(string + "\n")
 
     def do_list(self, line):
         """Shows information about the hosts."""
@@ -150,6 +171,7 @@ class Console(cmd.Cmd):
                 self._PrintDevices(devices)
 
     def help_list(self):
+        """Prints help message for list command."""
         self._list_parser.print_help(self._out_file)
 
     def _PrintHosts(self, hosts):
@@ -210,7 +232,97 @@ class Console(cmd.Cmd):
         self._PrintTasks(tasks)
 
     def help_lease(self):
+        """Prints help message for lease command."""
         self._lease_parser.print_help(self._out_file)
+
+    def _InitFetchParser(self):
+        """Initializes the parser for fetch command."""
+        self._fetch_parser = ConsoleArgumentParser("fetch",
+                                                   "Fetch a build artifact.")
+        self._fetch_parser.add_argument(
+            '--method',
+            default='GET',
+            choices=('GET', 'POST'),
+            help='Method for fetching')
+        self._fetch_parser.add_argument(
+            "--branch",
+            required=True,
+            help="Branch to grab the artifact from.")
+        self._fetch_parser.add_argument(
+            "--target",
+            required=True,
+            help="Target product to grab the artifact from.")
+        # TODO(lejonathan): find a way to not specify this?
+        self._fetch_parser.add_argument(
+            "--account_id",
+            default=_DEFAULT_ACCOUNT_ID,
+            help="Partner Android Build account_id to use.")
+        self._fetch_parser.add_argument(
+            '--build_id',
+            default='latest',
+            help='Build ID to use default latest.')
+        self._fetch_parser.add_argument(
+            "--artifact_name",
+            required=True,
+            help=
+            "Name of the artifact to be fetched. {id} replaced with build id.")
+        self._fetch_parser.add_argument(
+            "--userinfo_file",
+            help=
+            "Location of file containing email and password, if using POST.")
+
+    def do_fetch(self, line):
+        """Makes the host download a build artifact from PAB."""
+        args = self._fetch_parser.ParseLine(line)
+        # do we want this somewhere else? No harm in doing multiple times
+        self._pab_client.Authenticate(args.userinfo_file)
+        filename = self._pab_client.GetArtifact(
+            account_id=args.account_id,
+            branch=args.branch,
+            target=args.target,
+            artifact_name=args.artifact_name,
+            build_id=args.build_id,
+            method=args.method)
+        print("Filename: %s" % filename)
+
+    def help_fetch(self):
+        """Prints help message for fetch command."""
+        self._fetch_parser.print_help(self._out_file)
+
+    def _InitFlashParser(self):
+        """Initializes the parser for flash command."""
+        self._flash_parser = ConsoleArgumentParser("flash",
+                                                   "Flash images to a device.")
+        self._flash_parser.add_argument(
+            "--serial",
+            default="",
+            help="Serial number for device.")
+        self._flash_parser.add_argument(
+            "--build_dir",
+            help="Directory containing build images to be flashed.")
+        self._flash_parser.add_argument(
+            "--gsi",
+            help="Path to generic system image")
+        self._flash_parser.add_argument(
+            "--vbmeta",
+            help="Path to vbmeta image")
+
+    def do_flash(self, line):
+        """Flash GSI or build images to a device connected with ADB."""
+        args = self._flash_parser.ParseLine(line)
+        if args.gsi is None and args.build_dir is None:
+            self._flash_parser.error(
+                "Nothing requested: specify --gsi or --build_dir")
+
+        flasher = build_flasher.BuildFlasher(args.serial)
+        if args.build_dir is not None:
+            flasher.Flashall(args.build_dir)
+        if args.gsi is not None:
+            flasher.FlashGSI(args.gsi, args.vbmeta)
+
+    def help_flash(self):
+        """Prints help message for flash command."""
+        self._flash_parser.print_help(self._out_file)
 
     def _PrintTasks(self, tasks):
         """Shows a list of command tasks.
@@ -231,15 +343,8 @@ class Console(cmd.Cmd):
         return True
 
     def help_exit(self):
+        """Prints help message for exit command."""
         self._Print("Terminate the console.")
-
-    def _Print(self, string):
-        """Prints a string and a new line character.
-
-        Args:
-            string: The string to be printed.
-        """
-        self._out_file.write(string + "\n")
 
     # @Override
     def onecmd(self, line):
