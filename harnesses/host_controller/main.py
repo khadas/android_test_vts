@@ -32,14 +32,14 @@ from vts.harnesses.host_controller.tradefed import remote_client
 def main():
     """Parses arguments and starts console."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_file",
+    parser.add_argument("--config-file",
                         default=None,
                         type=argparse.FileType('r'),
                         help="The configuration file in JSON format")
     parser.add_argument("--poll", action="store_true",
                         help="Disable console and start host controller "
                              "threads polling TFC.")
-    parser.add_argument("--use_tfc", action="store_true",
+    parser.add_argument("--use-tfc", action="store_true",
                         help="Enable TFC (TradeFed Cluster).")
     parser.add_argument("--script",
                         default=None,
