@@ -27,6 +27,9 @@ from vts.harnesses.host_controller import host_controller
 from vts.harnesses.host_controller.build import pab_client
 from vts.harnesses.host_controller.tfc import tfc_client
 from vts.harnesses.host_controller.tradefed import remote_client
+from vts.utils.python.os import env_utils
+
+_ANDROID_BUILD_TOP = "ANDROID_BUILD_TOP"
 
 
 def main():
@@ -44,8 +47,11 @@ def main():
     parser.add_argument("--script",
                         default=None,
                         help="The path to a script file in .py format")
-    parser.add_argument("--loop",  action="store_true",
+    parser.add_argument("--loop", action="store_true",
                         help="Whether to endlessly repeat the script.")
+    parser.add_argument("--console", action="store_true",
+                        help="Whether to start a console after processing "
+                             "a script.")
     args = parser.parse_args()
     if args.config_file:
         config_json = json.load(args.config_file)
@@ -58,6 +64,8 @@ def main():
                                       "local-cluster-2"]
         host_config["lease_interval_sec"] = 30
         config_json["hosts"].append(host_config)
+
+    env_vars = env_utils.SaveAndClearEnvVars([_ANDROID_BUILD_TOP])
 
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, config_json["log_level"]))
@@ -104,8 +112,12 @@ def main():
             while main_console.ProcessScript(args.script):
                 if not args.loop:
                     break
-        else:
+            if args.console:
+                main_console.cmdloop()
+        else:  # if not script, the default is console mode.
             main_console.cmdloop()
+
+    env_utils.RestoreEnvVars(env_vars)
 
 
 if __name__ == "__main__":
