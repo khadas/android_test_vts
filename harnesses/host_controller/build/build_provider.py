@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+import os
 import shutil
 import tempfile
 
@@ -22,17 +23,24 @@ class BuildProvider(object):
     """The base class for build provider.
 
     Attributes:
+        IMAGE_FILE_NAMES: a list of strings where each string contains the known
+                          Android device image file name.
         _device_images: dict where the key is image type and value is the
                         image file path.
         _test_suites: dict where the key is test suite type and value is the
                       test suite package file path.
         _tmp_dirpath: string, the temp dir path created to keep artifacts.
     """
+    IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img", "userdata.img",
+                        "vbmeta.img", "metadata.img"]
 
     def __init__(self):
         self._device_images = {}
         self._test_suites = {}
-        self._tmp_dirpath = tempfile.mkdtemp()
+        tempdir_base = os.path.join(os.getcwd(), "tmp")
+        if not os.path.exists(tempdir_base):
+            os.mkdir(tempdir_base)
+        self._tmp_dirpath = tempfile.mkdtemp(dir=tempdir_base)
 
     def __del__(self):
         """Deletes the temp dir if still set."""
