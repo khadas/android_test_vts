@@ -392,24 +392,28 @@ class Console(cmd.Cmd):
         """Flash GSI or build images to a device connected with ADB."""
         args = self._flash_parser.ParseLine(line)
 
+        flashers = []
         if args.serial:
-            serial = args.serial
+            flasher = build_flasher.BuildFlasher(args.serial)
+            flashers.append(flasher)
         elif self._serials:
-            serial = self._serials[0]
-        else:
-            serial = None
+            for serial in self._serials:
+                flasher = build_flasher.BuildFlasher(serial)
+                flashers.append(flasher)
 
-        flasher = build_flasher.BuildFlasher(serial)
-        if args.current:
-            flasher.Flash(self.device_image_info)
-        else:
-            if args.gsi is None and args.build_dir is None:
-                self._flash_parser.error(
-                    "Nothing requested: specify --gsi or --build_dir")
-            if args.build_dir is not None:
-                flasher.Flashall(args.build_dir)
-            if args.gsi is not None:
-                flasher.FlashGSI(args.gsi, args.vbmeta)
+        if flashers:
+            # Can be parallelized as long as that's proven reliable.
+            for flasher in flashers:
+                if args.current:
+                    flasher.Flash(self.device_image_info)
+                else:
+                    if args.gsi is None and args.build_dir is None:
+                        self._flash_parser.error(
+                            "Nothing requested: specify --gsi or --build_dir")
+                    if args.build_dir is not None:
+                        flasher.Flashall(args.build_dir)
+                    if args.gsi is not None:
+                        flasher.FlashGSI(args.gsi, args.vbmeta)
 
     def help_flash(self):
         """Prints help message for flash command."""
@@ -522,7 +526,8 @@ class Console(cmd.Cmd):
     # @Override
     def onecmd(self, line):
         """Executes a command and prints any exception."""
-        print("Command: %s" % line)
+        if line:
+            print("Command: %s" % line)
         try:
             return cmd.Cmd.onecmd(self, line)
         except Exception as e:
