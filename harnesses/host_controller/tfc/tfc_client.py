@@ -98,6 +98,16 @@ class TfcClient(object):
         logging.info("host_events.submit body=%s", json_obj)
         self._service.host_events().submit(body=json_obj).execute()
 
+    def SubmitCommandEvents(self, command_events):
+        """Calls command_events.submit.
+
+        Args:
+            command_events: A list of JSON objects converted from CommandAttempt.
+        """
+        json_obj = {"command_events": command_events}
+        logging.info("command_events.submit body=%s", json_obj)
+        self._service.command_events().submit(body=json_obj).execute()
+
     def NewRequest(self, request):
         """Calls requests.new.
 
