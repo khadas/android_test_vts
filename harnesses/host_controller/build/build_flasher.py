@@ -149,3 +149,15 @@ class BuildFlasher(object):
         else:
             self.device.log.info(self.device.fastboot.reboot())
         return True
+
+    def WaitForDevice(self, timeout_secs=600):
+        """Waits for the device to boot completely.
+
+        Args:
+            timeout_secs: integer, the maximum timeout value for this
+                          operation (unit: seconds).
+
+        Returns:
+            True if device is booted successfully; False otherwise.
+        """
+        return self.device.waitForBootCompletion(timeout=timeout_secs)
