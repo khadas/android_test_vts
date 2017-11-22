@@ -43,6 +43,7 @@ vts_hal_driver_libs := \
   android.hardware.graphics.composer@2.1-vts.driver \
   android.hardware.graphics.mapper@2.0-vts.driver \
   android.hardware.health@1.0-vts.driver \
+  android.hardware.health@2.0-vts.driver \
   android.hardware.ir@1.0-vts.driver \
   android.hardware.keymaster@3.0-vts.driver \
   android.hardware.light@2.0-vts.driver \
@@ -106,6 +107,7 @@ vts_hal_profiler_libs := \
   android.hardware.graphics.composer@2.1-vts.profiler \
   android.hardware.graphics.mapper@2.0-vts.profiler \
   android.hardware.health@1.0-vts.profiler \
+  android.hardware.health@2.0-vts.profiler \
   android.hardware.ir@1.0-vts.profiler \
   android.hardware.keymaster@3.0-vts.profiler \
   android.hardware.light@2.0-vts.profiler \
@@ -161,6 +163,7 @@ vts_hal_test_bins := \
   VtsHalGraphicsComposerV2_1TargetTest \
   VtsHalGraphicsMapperV2_0TargetTest \
   VtsHalHealthV1_0TargetTest \
+  VtsHalHealthV2_0TargetTest \
   VtsHalIrV1_0TargetTest \
   VtsHalKeymasterV3_0TargetTest \
   VtsHalLightV2_0TargetTest \

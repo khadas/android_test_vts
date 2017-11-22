@@ -30,5 +30,7 @@
    <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0TargetReplay" />
    <option name="compatibility:include-filter" value="VtsHalThermalV1_0TargetReplay" />
 
+   <!-- TODO(b/69005254): move to vts and vts-hal -->
+   <option name="compatibility:include-filter" value="VtsHalHealthV2_0Target" />
 
 </configuration>
