@@ -47,7 +47,7 @@ test_suite_readme := test/vts/README.md
 include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 
 .PHONY: vts
-vts: $(compatibility_zip) run adb fastboot
+vts: $(compatibility_zip) run adb fastboot simg2img
 $(call dist-for-goals, vts, $(compatibility_zip))
 
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
