@@ -19,9 +19,10 @@ import json
 from vts.runners.host import asserts
 from vts.runners.host import const
 
-VTS_TESTABILITY_CHECKER = "/data/local/tmp/vts_testability_checker"
+VTS_TESTABILITY_CHECKER_32 = "/data/local/tmp/vts_testability_checker32"
+VTS_TESTABILITY_CHECKER_64 = "/data/local/tmp/vts_testability_checker64"
 
-def GetHalServiceName(shell, hal, bitness="32", run_as_compliance_test=False):
+def GetHalServiceName(shell, hal, bitness="64", run_as_compliance_test=False):
     """Determine whether to run a VTS test against a HAL and get the service
     names of the given hal if determine to run.
 
@@ -37,7 +38,9 @@ def GetHalServiceName(shell, hal, bitness="32", run_as_compliance_test=False):
         a set containing all service names for the given HAL.
     """
 
-    cmd = VTS_TESTABILITY_CHECKER
+    cmd = VTS_TESTABILITY_CHECKER_64
+    if bitness == "32":
+        cmd = VTS_TESTABILITY_CHECKER_32
     if run_as_compliance_test:
         cmd += " -c "
     cmd += " -b " + bitness + " " + hal
