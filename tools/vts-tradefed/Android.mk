@@ -30,6 +30,7 @@ LOCAL_SUITE_VERSION := 8.0_r7
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     google-api-java-client-min-repackaged \
+    libvts_protos_host \
 
 LOCAL_JAR_MANIFEST := MANIFEST.mf
 
