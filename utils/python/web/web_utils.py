@@ -400,6 +400,10 @@ class WebFeature(feature_utils.Feature):
         logging.info("_tearDownClass hook: start (username: %s)",
                      getpass.getuser())
 
+        if len(self.report_msg.test_case) == 0:
+            logging.info("_tearDownClass hook: skip uploading (no test case)")
+            return ''
+
         post_msg = ReportMsg.DashboardPostMessage()
         post_msg.test_report.extend([self.report_msg])
 
