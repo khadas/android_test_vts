@@ -911,11 +911,15 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
 
         CLog.i("Report message path: %s", reportMsg);
 
-        if (reportMsg != null) {
-            CLog.i("Report message file size: %s", reportMsg.length());
-        } else {
+        if (reportMsg == null) {
             CLog.e("Cannot find report message proto file.");
+        } else if (reportMsg.length() > 0) {
+            CLog.i("Uploading report message. File size: %s", reportMsg.length());
+            //TODO upload report message from here
+        } else {
+            CLog.i("Result uploading is not enabled.");
         }
+
         FileUtil.recursiveDelete(vtsRunnerLogDir);
         CLog.i("Deleted the runner log dir, %s.", vtsRunnerLogDir);
         if (jsonFilePath != null) {
