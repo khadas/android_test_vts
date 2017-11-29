@@ -187,7 +187,8 @@ class BaseTestClass(object):
                      param_name,
                      error_if_not_found=False,
                      log_warning_and_continue_if_not_found=False,
-                     default_value=None):
+                     default_value=None,
+                     to_str=False):
         """Get the value of a single user parameter.
 
         This method returns the value of specified user parameter.
@@ -205,16 +206,25 @@ class BaseTestClass(object):
                                                    not found.
             default_value: object, default value to return if not found. If error_if_not_found is
                            True, this parameter has no effect. Default: None
+            to_str: boolean, whether to convert the result object to string if not None.
+                    Note, strings passing in from java json config are usually unicode.
 
         Returns:
             object, value of the specified parameter name chain if exists;
             <default_value> if not exists.
         """
+
+        def ToStr(return_value):
+            """Check to_str option and convert to string if not None"""
+            if to_str and return_value is not None:
+                return str(return_value)
+            return return_value
+
         if not param_name:
             if error_if_not_found:
                 raise errors.BaseTestError("empty param_name provided")
             logging.error("empty param_name")
-            return default_value
+            return ToStr(default_value)
 
         if not isinstance(param_name, list):
             param_name = [param_name]
@@ -227,10 +237,10 @@ class BaseTestClass(object):
                     raise errors.BaseTestError(msg)
                 elif log_warning_and_continue_if_not_found:
                     logging.warn(msg)
-                return default_value
+                return ToStr(default_value)
             curr_obj = curr_obj[param]
 
-        return curr_obj
+        return ToStr(curr_obj)
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass
