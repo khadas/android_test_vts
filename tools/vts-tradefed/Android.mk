@@ -28,6 +28,9 @@ LOCAL_SUITE_NAME := VTS
 LOCAL_SUITE_FULLNAME := "Vendor Test Suite"
 LOCAL_SUITE_VERSION := 8.0_r5
 
+LOCAL_STATIC_JAVA_LIBRARIES += \
+    google-api-java-client-min-repackaged \
+
 LOCAL_JAR_MANIFEST := MANIFEST.mf
 
 LOCAL_MODULE := vts-tradefed
