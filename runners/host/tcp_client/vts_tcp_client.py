@@ -57,7 +57,9 @@ class VtsTcpClient(object):
         timeout: tcp connection timeout.
     """
 
-    def __init__(self, mode="adb_forwarding", timeout=_DEFAULT_SOCKET_TIMEOUT_SECS):
+    def __init__(self,
+                 mode="adb_forwarding",
+                 timeout=_DEFAULT_SOCKET_TIMEOUT_SECS):
         self.connection = None
         self.channel = None
         self._mode = mode
@@ -399,15 +401,18 @@ class VtsTcpClient(object):
         logging.debug("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
                       resp)
 
-        stdout = None
-        stderr = None
-        exit_code = None
+        stdout = []
+        stderr = []
+        exit_code = -1
 
         if not resp:
-            logging.error("resp is: %s.", resp)
+            msg = "Framework error: TCP client did not receive response from device."
+            logging.error(msg)
+            stderr = [msg]
         elif resp.response_code != SysMsg_pb2.SUCCESS:
-            logging.error("resp response code is not success: %s.",
-                          resp.response_code)
+            msg = "Framework error: TCP client received unsuccessful response code."
+            logging.error(msg)
+            stderr = [msg]
         else:
             stdout = resp.stdout
             stderr = resp.stderr

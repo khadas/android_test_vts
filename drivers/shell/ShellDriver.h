@@ -77,6 +77,11 @@ class VtsShellDriver {
    * Execute a shell command using nohup and return a CommandResult object.
    */
   CommandResult* ExecShellCommandNohup(const string& command);
+
+  /*
+   * Helper method to get the size of the given file.
+   */
+  long GetFileSize(const char* filename);
 };
 
 }  // namespace vts

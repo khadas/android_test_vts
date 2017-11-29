@@ -18,6 +18,7 @@
 #include "ShellDriver.h"
 
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 #include <sstream>
 
@@ -28,6 +29,9 @@
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 
 using namespace std;
+
+// Threshold of serialized proto msg size sent over socket.
+static constexpr long kProtoSizeThreshold = 1024 * 1024;  // 1MB
 
 namespace android {
 namespace vts {
@@ -105,13 +109,27 @@ CommandResult* VtsShellDriver::ExecShellCommandNohup(const string& command) {
 
   // execute the command.
   int exit_code = system(ss.str().c_str()) / 256;
-
   result->exit_code = exit_code;
-  result->stdout = ReadFile(stdout_file_name);
-  result->stderr = ReadFile(stderr_file_name);
 
-  remove(stdout_file_name);
-  remove(stderr_file_name);
+  // If stdout size larger than threshold, send back the temp file path.
+  // Otherwise, send back the context directly.
+  long stdout_size = GetFileSize(stdout_file_name);
+  if (stdout_size > kProtoSizeThreshold) {
+    result->stdout = string(stdout_file_name);
+  } else {
+    result->stdout = ReadFile(stdout_file_name);
+    remove(stdout_file_name);
+  }
+
+  // If stderr size larger than threshold, send back the temp file path.
+  // Otherwise, send back the context directly.
+  long stderr_size = GetFileSize(stderr_file_name);
+  if (stderr_size > kProtoSizeThreshold) {
+    result->stderr = string(stderr_file_name);
+  } else {
+    result->stderr = ReadFile(stderr_file_name);
+    remove(stderr_file_name);
+  }
 
   return result;
 }
@@ -247,6 +265,12 @@ int VtsShellDriver::StartListen() {
   close(socket_fd);
 
   return 0;
+}
+
+long VtsShellDriver::GetFileSize(const char* filename) {
+  struct stat stat_buf;
+  int rc = stat(filename, &stat_buf);
+  return rc == 0 ? stat_buf.st_size : -1;
 }
 
 }  // namespace vts

@@ -13,8 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import logging
+import os
+import re
+import shutil
+import tempfile
 
 from vts.runners.host import const
 from vts.utils.python.mirror import mirror_object
@@ -25,11 +28,15 @@ class ShellMirror(mirror_object.MirrorObject):
 
     Attributes:
         _client: the TCP client instance.
+        _adb: An AdbProxy object used for interacting with the device via adb.
         enabled: bool, whether remote shell feature is enabled for the device.
     """
 
-    def __init__(self, client):
+    TMP_FILE_PATTERN = "/data/local/tmp/nohup.*"
+
+    def __init__(self, client, adb):
         super(ShellMirror, self).__init__(client)
+        self._adb = adb
         self.enabled = True
 
     def Execute(self, command, no_except=False):
@@ -49,10 +56,33 @@ class ShellMirror(mirror_object.MirrorObject):
             return {
                 const.STDOUT: [""] * len(command),
                 const.STDERR:
-                    ["VTS remote shell has been disabled."] * len(command),
+                ["VTS remote shell has been disabled."] * len(command),
                 const.EXIT_CODE: [-2] * len(command)
             }
-        return self._client.ExecuteShellCommand(command, no_except)
+        result = self._client.ExecuteShellCommand(command, no_except)
+
+        tmp_dir = tempfile.mkdtemp()
+        pattern = re.compile(self.TMP_FILE_PATTERN)
+
+        for result_val, result_type in zip(
+            [result[const.STDOUT], result[const.STDERR]],
+            ["stdout", "stderr"]):
+            for index, val in enumerate(result_val):
+                # If val is a tmp file name, pull the file and set the contents
+                # to result.
+                if pattern.match(val):
+                    tmp_file = os.path.join(tmp_dir, result_type + str(index))
+                    logging.info("pulling file: %s to %s", val, tmp_file)
+                    self._adb.pull(val, tmp_file)
+                    result_val[index] = open(tmp_file, "r").read()
+                    self._adb.shell("rm -f %s" % val)
+                else:
+                    result_val[index] = val
+
+        shutil.rmtree(tmp_dir)
+        logging.debug("resp for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND: %s",
+                      result)
+        return result
 
     def SetConnTimeout(self, timeout):
         """Set remote shell connection timeout.
