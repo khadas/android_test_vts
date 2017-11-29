@@ -118,3 +118,6 @@ class ConfigKeys(object):
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
+
+    # Vts self test related keys
+    RUN_AS_VTS_SELFTEST = "run_as_vts_self_test"
