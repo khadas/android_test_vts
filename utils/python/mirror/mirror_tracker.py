@@ -36,6 +36,7 @@ class MirrorTracker(object):
         _host_command_port: int, the host-side port for command-response
                             sessions.
         _host_callback_port: int, the host-side port for callback sessions.
+        _adb: An AdbProxy object used for interacting with the device via adb.
         _registered_mirrors: dict, key is mirror handler name, value is the
                              mirror object.
         _callback_server: VtsTcpServer, the server that receives and handles
@@ -45,9 +46,11 @@ class MirrorTracker(object):
     def __init__(self,
                  host_command_port,
                  host_callback_port=None,
-                 start_callback_server=False):
+                 start_callback_server=False,
+                 adb = None):
         self._host_command_port = host_command_port
         self._host_callback_port = host_callback_port
+        self._adb = adb
         self._registered_mirrors = {}
         self._callback_server = None
         if start_callback_server:
@@ -186,7 +189,7 @@ class MirrorTracker(object):
             raise errors.ComponentLoadingError(
                 "Failed to launch shell driver service %s" % instance_name)
 
-        mirror = shell_mirror.ShellMirror(client)
+        mirror = shell_mirror.ShellMirror(client, self._adb)
         self._registered_mirrors[instance_name] = mirror
 
     def DisableShell(self):
