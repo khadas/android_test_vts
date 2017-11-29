@@ -56,7 +56,15 @@ cc_binary {
     name: "vts_testability_checker",
     defaults : ["VtsTestabilityCheckerDefaults"],
     srcs: ["VtsTestabilityCheckerMain.cpp"],
-
+    multilib: {
+        lib64: {
+            suffix: "64",
+        },
+        lib32: {
+            suffix: "32",
+        },
+    },
+    compile_multilib: "both",
     static_libs: [
         "libhidl-gen-utils",
         "libjsoncpp",
