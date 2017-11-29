@@ -119,7 +119,7 @@ class BaseTestClass(object):
             keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI, default_value=False)
         self.skip_on_64bit_abi = self.getUserParam(
             keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, default_value=False)
-        self.run_32bit_on_64_bit_abi = self.getUserParam(
+        self.run_32bit_on_64bit_abi = self.getUserParam(
             keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
         self.web = web_utils.WebFeature(self.user_params)
         self.coverage = coverage_utils.CoverageFeature(
