@@ -111,12 +111,16 @@ class BaseTestClass(object):
 
         # TODO: get abi information differently for multi-device support.
         # Set other optional parameters
-        opt_param_names = [keys.ConfigKeys.IKEY_ABI_NAME,
-                           keys.ConfigKeys.IKEY_ABI_BITNESS,
-                           keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI,
-                           keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI,
-                           keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI]
-        self.getUserParams(opt_param_names=opt_param_names)
+        self.abi_name = self.getUserParam(
+            keys.ConfigKeys.IKEY_ABI_NAME, default_value=None)
+        self.abi_bitness = self.getUserParam(
+            keys.ConfigKeys.IKEY_ABI_BITNESS, default_value=None)
+        self.skip_on_32bit_abi = self.getUserParam(
+            keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI, default_value=False)
+        self.skip_on_64bit_abi = self.getUserParam(
+            keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, default_value=False)
+        self.run_32bit_on_64_bit_abi = self.getUserParam(
+            keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
         self.web = web_utils.WebFeature(self.user_params)
         self.coverage = coverage_utils.CoverageFeature(
             self.user_params, web=self.web)
@@ -541,25 +545,16 @@ class BaseTestClass(object):
         if self._skip_all_testcases:
             raise signals.TestSkip("All test cases skipped.")
 
-        if hasattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS):
-            bitness = getattr(self, keys.ConfigKeys.IKEY_ABI_BITNESS)
-            run_32bit_on_64bit_abi = getattr(
-                self, keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, False)
-
-            skip_on_32bit_abi = getattr(
-                self, keys.ConfigKeys.IKEY_SKIP_ON_32BIT_ABI, False)
-            skip_on_64bit_abi = getattr(
-                self, keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, False)
-
-            asserts.skipIf(
-                ((skip_on_32bit_abi is True) and bitness == "32") or (
-                    (skip_on_64bit_abi is True) and bitness == "64") or
-                (test_name.lower().endswith(const.SUFFIX_32BIT) and
-                 bitness != "32") or (
-                     test_name.lower().endswith(const.SUFFIX_64BIT) and
-                     bitness != "64" and not run_32bit_on_64bit_abi),
-                "Test case '{}' excluded as ABI bitness is {}.".format(
-                    test_name, bitness))
+        asserts.skipIf(
+            self.abi_bitness and
+            ((self.skip_on_32bit_abi is True) and self.abi_bitness == "32") or
+            ((self.skip_on_64bit_abi is True) and self.abi_bitness == "64") or
+            (test_name.lower().endswith(const.SUFFIX_32BIT) and
+             self.abi_bitness != "32") or
+            (test_name.lower().endswith(const.SUFFIX_64BIT) and
+             self.abi_bitness != "64" and not self.run_32bit_on_64bit_abi),
+            "Test case '{}' excluded as ABI bitness is {}.".format(
+                test_name, self.abi_bitness))
 
     def execOneTest(self, test_name, test_func, args, **kwargs):
         """Executes one test case and update test results.
