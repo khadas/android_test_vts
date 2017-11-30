@@ -116,14 +116,13 @@ class CoverageFeature(feature_utils.Feature):
                 logging.warn('Android device information not available')
                 self.enabled = False
             for device in android_devices:
-                serial = str(device.get(keys.ConfigKeys.IKEY_SERIAL))
-                coverage_resource_path = str(
-                    device.get(keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH))
+                serial = device.get(keys.ConfigKeys.IKEY_SERIAL)
+                coverage_resource_path = device.get(keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH)
                 if not serial or not coverage_resource_path:
                     logging.warn('Missing coverage information in device: %s',
                                  device)
                     continue
-                self._device_resource_dict[serial] = coverage_resource_path
+                self._device_resource_dict[str(serial)] = str(coverage_resource_path)
         logging.info("Coverage enabled: %s", self.enabled)
 
     def _ExtractSourceName(self, gcno_summary, file_name):
@@ -151,8 +150,8 @@ class CoverageFeature(feature_utils.Feature):
                 continue
             if src_file_name.endswith(file_name):
                 logging.info("Coverage source file: %s", src_file_path)
-                break
-        return src_file_path
+                return src_file_path
+        return None
 
     def _GetChecksumGcnoDict(self, cov_zip):
         """Generates a dictionary from gcno checksum to GCNOParser object.
@@ -519,6 +518,10 @@ class CoverageFeature(feature_utils.Feature):
         logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
 
         resource_path = self._device_resource_dict[serial]
+        if not resource_path:
+            logging.error('coverage resource path not found.')
+            return
+
         cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
 
         revision_dict = json.load(
