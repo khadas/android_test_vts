@@ -161,6 +161,7 @@
     <option name="compatibility:include-filter" value="CtsIcuTestCases" />
     <option name="compatibility:include-filter" value="CtsIncidentHostTestCases" />
     <option name="compatibility:include-filter" value="CtsIncidentTestCases" />
+    <option name="compatibility:include-filter" value="CtsInlineMockingTestCases" />
     <option name="compatibility:include-filter" value="CtsInputMethodServiceHostTestCases" />
     <option name="compatibility:include-filter" value="CtsInputMethodTestCases" />
     <option name="compatibility:include-filter" value="CtsIntentSignatureTestCases" />
@@ -230,6 +231,7 @@
     <option name="compatibility:include-filter" value="CtsMediaStressTestCases" />
     <option name="compatibility:include-filter" value="CtsMediaTestCases" />
     <option name="compatibility:include-filter" value="CtsMidiTestCases" />
+    <option name="compatibility:include-filter" value="CtsMockingTestCases" />
     <option name="compatibility:include-filter" value="CtsMonkeyTestCases" />
     <option name="compatibility:include-filter" value="CtsMultiUserHostTestCases" />
     <option name="compatibility:include-filter" value="CtsMultiUserTestCases" />
