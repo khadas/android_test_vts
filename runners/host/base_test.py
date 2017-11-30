@@ -568,6 +568,7 @@ class BaseTestClass(object):
         tr_record.testBegin()
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
+        finished = False
         try:
             ret = self._testEntry(test_name)
             asserts.assertTrue(ret is not False,
@@ -582,34 +583,41 @@ class BaseTestClass(object):
                     verdict = test_func(*args, **kwargs)
                 else:
                     verdict = test_func()
+                finished = True
             finally:
                 self._tearDown(test_name)
         except (signals.TestFailure, AssertionError) as e:
             tr_record.testFail(e)
             self._exec_procedure_func(self._onFail, tr_record)
+            finished = True
         except signals.TestSkip as e:
             # Test skipped.
             tr_record.testSkip(e)
             self._exec_procedure_func(self._onSkip, tr_record)
+            finished = True
         except (signals.TestAbortClass, signals.TestAbortAll) as e:
             # Abort signals, pass along.
             tr_record.testFail(e)
+            finished = True
             raise e
         except signals.TestPass as e:
             # Explicit test pass.
             tr_record.testPass(e)
             self._exec_procedure_func(self._onPass, tr_record)
+            finished = True
         except signals.TestSilent as e:
             # Suppress test reporting.
             is_silenced = True
             self._exec_procedure_func(self._onSilent, tr_record)
             self.results.requested.remove(test_name)
+            finished = True
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
             tr_record.testError(e)
             self._exec_procedure_func(self._onException, tr_record)
             self._exec_procedure_func(self._onFail, tr_record)
+            finished = True
         else:
             # Keep supporting return False for now.
             # TODO(angli): Deprecate return False support.
@@ -622,7 +630,14 @@ class BaseTestClass(object):
             # This should be removed eventually.
             tr_record.testFail()
             self._exec_procedure_func(self._onFail, tr_record)
+            finished = True
         finally:
+            if not finished:
+                logging.error('Test timed out.')
+                tr_record.testError()
+                self._exec_procedure_func(self._onException)
+                self._exec_procedure_func(self._onFail)
+
             if not is_silenced:
                 self.results.addRecord(tr_record)
             self._testExit(test_name)
