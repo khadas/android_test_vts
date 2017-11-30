@@ -39,5 +39,15 @@ class ShellMirrorObject(object):
         '''
         return self._client.ExecuteShellCommand(command, no_except)
 
+    def SetConnTimeout(self, timeout):
+        """Set remote shell connection timeout.
+
+        Set remote TCP connection timeout.
+
+        Args:
+            timeout: int, TCP connection timeout in seconds.
+        """
+        self._client.timeout = timeout
+
     def CleanUp(self):
         self._client.Disconnect()

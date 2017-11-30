@@ -99,3 +99,13 @@ class ShellMirror(object):
     def Execute(self, command, no_except=False):
         """Execute a shell command with default shell terminal"""
         return self.default.Execute(command, no_except)
+
+    def SetConnTimeout(self, timeout):
+        """Set remove shell connection timeout for default shell session.
+
+        Set remote TCP connection timeout.
+
+        Args:
+            timeout: int, TCP connection timeout in seconds.
+        """
+        self.default.SetConnTimeout(timeout)
