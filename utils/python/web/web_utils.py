@@ -391,7 +391,7 @@ class WebFeature(feature_utils.Feature):
 
         for test in requested[start_index:]:
             msg = self.report_msg.test_case.add()
-            msg.name = test
+            msg.name = test.test_name
             msg.start_timestamp = feature_utils.GetTimestamp()
             msg.end_timestamp = msg.start_timestamp
             msg.test_result = ReportMsg.TEST_CASE_RESULT_FAIL
