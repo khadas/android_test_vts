@@ -30,6 +30,7 @@ _function_pointer_id_dict = {}
 INTERFACE = "interface"
 API = "api"
 
+
 class MirrorObjectError(Exception):
     """Raised when there is a general error in manipulating a mirror object."""
     pass
@@ -552,12 +553,12 @@ class MirrorObject(object):
             logging.debug("MESSAGE %s", api_name)
             if arg_msg.type == CompSpecMsg.TYPE_STRUCT:
                 for struct_value in arg_msg.struct_value:
-                    logging.debug("for %s %s",
-                                  struct_value.name, struct_value.scalar_type)
+                    logging.debug("matching struct %s %s", struct_value.name,
+                                  struct_value.scalar_type)
                     for given_name, given_value in kwargs.iteritems():
-                        logging.debug("check %s %s", struct_value.name, given_name)
                         if given_name == struct_value.name:
-                            logging.debug("match type=%s", struct_value.scalar_type)
+                            logging.debug("matched type=%s",
+                                          struct_value.scalar_type)
                             if struct_value.type == CompSpecMsg.TYPE_SCALAR:
                                 if struct_value.scalar_type == "uint32_t":
                                     struct_value.scalar_value.uint32_t = given_value
@@ -565,32 +566,40 @@ class MirrorObject(object):
                                     struct_value.scalar_value.int32_t = given_value
                                 else:
                                     raise MirrorObjectError(
-                                        "support %s" % struct_value.scalar_type)
-                            continue
-            elif arg_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
-                for fp_value in arg_msg.function_pointer:
-                    logging.debug("for %s", fp_value.function_name)
-                    for given_name, given_value in kwargs.iteritems():
-                          logging.debug("check %s %s", fp_value.function_name, given_name)
-                          if given_name == fp_value.function_name:
-                              fp_value.id = self.GetFunctionPointerID(given_value)
-                              break
+                                        "support %s" %
+                                        struct_value.scalar_type)
+                            break
 
-            if arg_msg.type == CompSpecMsg.TYPE_STRUCT:
-                for struct_value, given_value in zip(arg_msg.struct_value, args):
-                    logging.debug("arg match type=%s", struct_value.scalar_type)
+                for struct_value, given_value in zip(arg_msg.struct_value,
+                                                     args):
                     if struct_value.type == CompSpecMsg.TYPE_SCALAR:
+                        logging.debug("matched arg type=%s",
+                                      struct_value.scalar_type)
                         if struct_value.scalar_type == "uint32_t":
                             struct_value.scalar_value.uint32_t = given_value
                         elif struct_value.scalar_type == "int32_t":
                             struct_value.scalar_value.int32_t = given_value
                         else:
                             raise MirrorObjectError("support %s" % p_type)
+
             elif arg_msg.type == CompSpecMsg.TYPE_FUNCTION_POINTER:
-                for fp_value, given_value in zip(arg_msg.function_pointer, args):
+                for fp_value in arg_msg.function_pointer:
+                    logging.debug("matching function %s",
+                                  fp_value.function_name)
+                    for given_name, given_value in kwargs.iteritems():
+                        if given_name == fp_value.function_name:
+                            logging.debug("matched function %s %s",
+                                          fp_value.function_name, given_name)
+                            fp_value.id = self.GetFunctionPointerID(
+                                given_value)
+                            break
+
+                for fp_value, given_value in zip(arg_msg.function_pointer,
+                                                 args):
                     logging.debug("for %s", fp_value.function_name)
                     fp_value.id = self.GetFunctionPointerID(given_value)
                     logging.debug("fp %s", fp_value)
+
             logging.debug("generated %s", arg_msg)
             return arg_msg
 
