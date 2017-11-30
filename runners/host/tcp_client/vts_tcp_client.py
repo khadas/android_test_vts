@@ -309,8 +309,43 @@ class VtsTcpClient(object):
         raise errors.VtsTcpCommunicationError(
             "RPC Error, response code for %s is %s" % (arg, resp_code))
 
-    def ExecuteShellCommand(self, command):
-        """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND."""
+    def ExecuteShellCommand(self, command, no_except=False):
+        """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND.
+
+        Args:
+            command: string or list of string, command to execute on device
+            no_except: bool, whether to throw exceptions. If set to True,
+                       when exception happens, return code will be -1 and
+                       str(err) will be in stderr. Result will maintain the
+                       same length as with input command.
+
+        Returns:
+            dictionary of list, command results that contains stdout,
+            stderr, and exit_code.
+        """
+        if not no_except:
+            return self.__ExecuteShellCommand(command)
+
+        try:
+            return self.__ExecuteShellCommand(command)
+        except Exception as e:
+            logging.exception(e)
+            return {
+                const.STDOUT: [""] * len(command),
+                const.STDERR: [str(e)] * len(command),
+                const.EXIT_CODE: [-1] * len(command)
+            }
+
+    def __ExecuteShellCommand(self, command):
+        """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND.
+
+        Args:
+            command: string or list of string, command to execute on device
+
+        Returns:
+            dictionary of list, command results that contains stdout,
+            stderr, and exit_code.
+        """
         self.SendCommand(
             SysMsg_pb2.VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND,
             shell_command=command)
@@ -325,16 +360,18 @@ class VtsTcpClient(object):
         if not resp:
             logging.error("resp is: %s.", resp)
         elif resp.response_code != SysMsg_pb2.SUCCESS:
-            logging.error("resp response code is not success: %s.", resp.response_code)
+            logging.error("resp response code is not success: %s.",
+                          resp.response_code)
         else:
             stdout = resp.stdout
             stderr = resp.stderr
             exit_code = resp.exit_code
 
-        return {const.STDOUT: stdout,
-                const.STDERR: stderr,
-                const.EXIT_CODE: exit_code,
-                }
+        return {
+            const.STDOUT: stdout,
+            const.STDERR: stderr,
+            const.EXIT_CODE: exit_code
+        }
 
     def Ping(self):
         """RPC to send a PING request.
