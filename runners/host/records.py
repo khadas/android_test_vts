@@ -233,6 +233,7 @@ class TestResult(object):
         if not isinstance(r, TestResult):
             raise TypeError("Operand %s of type %s is not a TestResult." %
                             (r, type(r)))
+        r.reportNonExecutedRecord()
         sum_result = TestResult()
         for name in sum_result.__dict__:
             if name.startswith("_test_module"):
@@ -262,6 +263,26 @@ class TestResult(object):
                 r_value = list(getattr(r, name))
                 setattr(sum_result, name, l_value + r_value)
         return sum_result
+
+    def reportNonExecutedRecord(self):
+        """Check and report any requested tests that did not finish.
+
+        Adds a test record to self.error list iff it is in requested list but not
+        self.executed result list.
+        """
+        for requested in self.requested:
+            found = False
+
+            for executed in self.executed:
+                if (requested.test_name == executed.test_name and
+                        requested.test_class == executed.test_class):
+                    found = True
+                    break
+
+            if not found:
+                requested.testBegin()
+                requested.testError()
+                self.error.append(requested)
 
     def addRecord(self, record):
         """Adds a test record to test result.
