@@ -61,6 +61,43 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
     return ::android::hardware::Void();
 }
 
+::android::hardware::Return<void> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemoryBlock(
+    const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0 __attribute__((__unused__)), std::function<void(const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0)> cb) {
+    LOG(INFO) << "haveSomeMemoryBlock called";
+    AndroidSystemCallbackRequestMessage callback_message;
+    callback_message.set_id(GetCallbackID("haveSomeMemoryBlock"));
+    callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemoryBlock");
+    VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
+    var_msg0->set_type(TYPE_STRUCT);
+    SetResult__android__hidl__memory__block__V1_0__MemoryBlock(var_msg0, arg0);
+    RpcCallToAgent(callback_message, callback_socket_name_);
+    cb(::android::hidl::memory::block::V1_0::MemoryBlock());
+    return ::android::hardware::Void();
+}
+
+::android::hardware::Return<void> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::set(
+    const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__))) {
+    LOG(INFO) << "set called";
+    AndroidSystemCallbackRequestMessage callback_message;
+    callback_message.set_id(GetCallbackID("set"));
+    callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::set");
+    VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
+    var_msg0->set_type(TYPE_HIDL_MEMORY);
+    /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+    RpcCallToAgent(callback_message, callback_socket_name_);
+    return ::android::hardware::Void();
+}
+
+::android::hardware::Return<sp<::android::hidl::memory::token::V1_0::IMemoryToken>> Vts_android_hardware_tests_memory_V1_0_IMemoryTest::get(
+    ) {
+    LOG(INFO) << "get called";
+    AndroidSystemCallbackRequestMessage callback_message;
+    callback_message.set_id(GetCallbackID("get"));
+    callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::get");
+    RpcCallToAgent(callback_message, callback_socket_name_);
+    return nullptr;
+}
+
 sp<::android::hardware::tests::memory::V1_0::IMemoryTest> VtsFuzzerCreateVts_android_hardware_tests_memory_V1_0_IMemoryTest(const string& callback_socket_name) {
     static sp<::android::hardware::tests::memory::V1_0::IMemoryTest> result;
     result = new Vts_android_hardware_tests_memory_V1_0_IMemoryTest(callback_socket_name);
@@ -136,6 +173,57 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         result_msg->set_name("fillMemory");
         return true;
     }
+    if (!strcmp(func_name, "haveSomeMemoryBlock")) {
+        ::android::hidl::memory::block::V1_0::MemoryBlock arg0;
+        MessageTo__android__hidl__memory__block__V1_0__MemoryBlock(func_msg.arg(0), &(arg0));
+        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        ::android::hidl::memory::block::V1_0::MemoryBlock result0;
+        hw_binder_proxy_->haveSomeMemoryBlock(arg0, [&](const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0){
+            LOG(INFO) << "callback haveSomeMemoryBlock called";
+            result0 = arg0;
+        });
+        result_msg->set_name("haveSomeMemoryBlock");
+        VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
+        result_val_0->set_type(TYPE_STRUCT);
+        SetResult__android__hidl__memory__block__V1_0__MemoryBlock(result_val_0, result0);
+        return true;
+    }
+    if (!strcmp(func_name, "set")) {
+        ::android::hardware::hidl_memory arg0;
+        sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
+        if (ashmemAllocator == nullptr) {
+            LOG(ERROR) << "Failed to get ashmemAllocator! ";
+            exit(-1);
+        }
+        auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
+            if (!success) {
+                LOG(ERROR) << "Failed to allocate memory! ";
+                arg0 = ::android::hardware::hidl_memory();
+                return;
+            }
+            arg0 = memory;
+        });
+        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        hw_binder_proxy_->set(arg0);
+        result_msg->set_name("set");
+        return true;
+    }
+    if (!strcmp(func_name, "get")) {
+        LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
+        sp<::android::hidl::memory::token::V1_0::IMemoryToken> result0;
+        result0 = hw_binder_proxy_->get();
+        result_msg->set_name("get");
+        VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
+        result_val_0->set_type(TYPE_HIDL_INTERFACE);
+        result_val_0->set_predefined_type("::android::hidl::memory::token::V1_0::IMemoryToken");
+        if (result0 != nullptr) {
+            result0->incStrong(result0.get());
+            result_val_0->set_hidl_interface_pointer(reinterpret_cast<uintptr_t>(result0.get()));
+        } else {
+            result_val_0->set_hidl_interface_pointer(0);
+        }
+        return true;
+    }
     if (!strcmp(func_name, "notifySyspropsChanged")) {
         LOG(INFO) << "Call notifySyspropsChanged";
         hw_binder_proxy_->notifySyspropsChanged();
@@ -154,6 +242,20 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::VerifyResult
     }
     if (!strcmp(actual_result.name().c_str(), "fillMemory")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
+        return true;
+    }
+    if (!strcmp(actual_result.name().c_str(), "haveSomeMemoryBlock")) {
+        if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
+        if (!Verify__android__hidl__memory__block__V1_0__MemoryBlock(expected_result.return_type_hidl(0), actual_result.return_type_hidl(0))) { return false; }
+        return true;
+    }
+    if (!strcmp(actual_result.name().c_str(), "set")) {
+        if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
+        return true;
+    }
+    if (!strcmp(actual_result.name().c_str(), "get")) {
+        if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
+        /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
         return true;
     }
     return false;
