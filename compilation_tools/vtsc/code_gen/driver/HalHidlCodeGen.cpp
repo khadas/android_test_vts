@@ -1042,7 +1042,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out.unindent();
       out << "} else {\n";
       out.indent();
-      if (type_name == "::android::hidl::base::V1_0::IBase") {
+      if (type_name.find("::android::hidl") == 0) {
         out << "/* ERROR: general interface is not supported yet. */\n";
       } else {
         ReplaceSubString(type_name, "::", "_");
