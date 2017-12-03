@@ -42,6 +42,34 @@ def Exists(filepath, shell):
     return out_str.find(filepath) == 0
 
 
+def _Test(shell, *args):
+    """Executes test command on device.
+
+    Args:
+        shell: an instance of the VTS shell.
+        *args: strings, the command line arguments.
+
+    Returns:
+        boolean, whether the condition is true.
+    """
+    cmd = "test %s" % " ".join(args)
+    results = shell.Execute(cmd)
+    return results[const.EXIT_CODE][0] == 0
+
+
+def IsDirectory(path, shell):
+    """Determines if a path is a directory.
+
+    Args:
+        path: string, a path on device.
+        shell: an instance of the VTS shell.
+
+    Returns:
+        True if the path is a directory, False otherwise.
+    """
+    return _Test(shell, "-d", path)
+
+
 def FindFiles(shell, path, name_pattern, options=None):
     """Searches a path for files on device.
 
