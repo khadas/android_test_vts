@@ -17,6 +17,7 @@
 import logging
 import os
 import re
+import sys
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -37,6 +38,8 @@ from vts.utils.python.reporting import log_uploading_utils
 from vts.utils.python.systrace import systrace_utils
 from vts.utils.python.web import feature_utils
 from vts.utils.python.web import web_utils
+
+from acts import signals as acts_signals
 
 # Macro strings for test result reporting
 TEST_CASE_TOKEN = "[Test Case]"
@@ -513,8 +516,8 @@ class BaseTestClass(object):
             return
         try:
             func()
-        except signals.TestAbortAll:
-            raise
+        except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
+            raise signals.TestAbortAll, e, sys.exc_info()[2]
         except Exception as e:
             logging.exception("Exception happened when executing %s for %s.",
                               func.__name__, record.test_name)
@@ -639,26 +642,31 @@ class BaseTestClass(object):
                 finished = True
             finally:
                 self._tearDown(test_name)
-        except (signals.TestFailure, AssertionError) as e:
+        except (signals.TestFailure, acts_signals.TestFailure, AssertionError) as e:
             tr_record.testFail(e)
             self._exec_procedure_func(self._onFail)
             finished = True
-        except signals.TestSkip as e:
+        except (signals.TestSkip, acts_signals.TestSkip) as e:
             # Test skipped.
             tr_record.testSkip(e)
             self._exec_procedure_func(self._onSkip)
             finished = True
-        except (signals.TestAbortClass, signals.TestAbortAll) as e:
+        except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             # Abort signals, pass along.
             tr_record.testFail(e)
             finished = True
-            raise e
-        except signals.TestPass as e:
+            raise signals.TestAbortClass, e, sys.exc_info()[2]
+        except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
+            # Abort signals, pass along.
+            tr_record.testFail(e)
+            finished = True
+            raise signals.TestAbortAll, e, sys.exc_info()[2]
+        except (signals.TestPass, acts_signals.TestPass) as e:
             # Explicit test pass.
             tr_record.testPass(e)
             self._exec_procedure_func(self._onPass)
             finished = True
-        except signals.TestSilent as e:
+        except (signals.TestSilent, acts_signals.TestSilent) as e:
             # Suppress test reporting.
             is_silenced = True
             self._exec_procedure_func(self._onSilent)
@@ -687,7 +695,9 @@ class BaseTestClass(object):
         finally:
             if not finished:
                 for device in self.android_devices:
-                    device.shell.DisableShell()
+                    # if shell has not been set up yet
+                    if device.shell is not None:
+                        device.shell.DisableShell()
 
                 logging.error('Test timed out.')
                 tr_record.testError()
@@ -769,8 +779,8 @@ class BaseTestClass(object):
         """
         try:
             return func(*args)
-        except signals.TestAbortAll:
-            raise
+        except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
+            raise signals.TestAbortAll, e, sys.exc_info()[2]
         except:
             logging.exception("Exception happened when executing %s in %s.",
                               func.__name__, self.TAG)
@@ -890,15 +900,15 @@ class BaseTestClass(object):
                     self.TAG,
                     "All test cases skipped; unable to find any test case.")
             return self.results
-        except signals.TestAbortClass:
+        except (signals.TestAbortClass, acts_signals.TestAbortClass):
             logging.info("Received TestAbortClass signal")
             return self.results
-        except signals.TestAbortAll as e:
+        except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
             logging.info("Received TestAbortAll signal")
             # Piggy-back test results on this exception object so we don't lose
             # results from this test class.
             setattr(e, "results", self.results)
-            raise e
+            raise signals.TestAbortAll, e, sys.exc_info()[2]
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
