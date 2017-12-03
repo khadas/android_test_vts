@@ -19,6 +19,7 @@ import argparse
 import json
 import logging
 import socket
+import time
 import threading
 import sys
 
@@ -30,6 +31,37 @@ from vts.harnesses.host_controller.tradefed import remote_client
 from vts.utils.python.os import env_utils
 
 _ANDROID_BUILD_TOP = "ANDROID_BUILD_TOP"
+_SECONDS_PER_UNIT = {
+    "m": 60,
+    "h": 60 * 60,
+    "d": 60 * 60 * 24
+}
+
+
+def _ParseInterval(interval_str):
+    """Parses string to time interval.
+
+    Args:
+        interval_str: string, a floating-point number followed by time unit.
+
+    Returns:
+        float, the interval in seconds.
+
+    Raises:
+        ValueError if the argument format is wrong.
+    """
+    if not interval_str:
+        raise ValueError("Argument is empty.")
+
+    unit = interval_str[-1]
+    if unit not in _SECONDS_PER_UNIT:
+        raise ValueError("Unknown unit: %s" % unit)
+
+    interval = float(interval_str[:-1])
+    if interval < 0:
+        raise ValueError("Invalid time interval: %s" % interval)
+
+    return interval * _SECONDS_PER_UNIT[unit]
 
 
 def main():
@@ -47,8 +79,15 @@ def main():
     parser.add_argument("--script",
                         default=None,
                         help="The path to a script file in .py format")
-    parser.add_argument("--loop", action="store_true",
-                        help="Whether to endlessly repeat the script.")
+    parser.add_argument("--loop",
+                        default=None,
+                        metavar="INTERVAL",
+                        type=_ParseInterval,
+                        help="The interval of repeating the script. "
+                             "The format is a float followed by unit which is "
+                             "one of 'm' (minute), 'h' (hour), and 'd' (day). "
+                             "If this option is unspecified, the script will "
+                             "be processed once.")
     parser.add_argument("--console", action="store_true",
                         help="Whether to start a console after processing "
                              "a script.")
@@ -109,9 +148,24 @@ def main():
     else:
         main_console = console.Console(tfc, pab, hosts)
         if args.script:
+            next_start_time = time.time()
             while main_console.ProcessScript(args.script):
-                if not args.loop:
+                if args.loop is None:
                     break
+                if args.loop == 0:
+                    continue
+                current_time = time.time()
+                skip_cnt = (current_time - next_start_time) // args.loop
+                if skip_cnt >= 1:
+                    logging.warning("Script execution time is longer than "
+                                    "loop interval. Skip %d iteration(s).",
+                                    skip_cnt)
+                next_start_time += (skip_cnt + 1) * args.loop
+                if next_start_time - current_time >= 0:
+                    time.sleep(next_start_time - current_time)
+                else:
+                    logging.error("Unexpected timestamps: current=%f, next=%f",
+                                  current_time, next_start_time)
             if args.console:
                 main_console.cmdloop()
         else:  # if not script, the default is console mode.
