@@ -404,8 +404,8 @@ class AndroidDevice(object):
     @property
     def isAdbRoot(self):
         """True if adb is running as root for this device."""
-        id_str = self.adb.shell("id -u").decode("utf-8")
-        return "root" in id_str
+        id_str = self.adb.shell("id -un").strip().decode("utf-8")
+        return id_str == "root"
 
     @property
     def verityEnabled(self):
