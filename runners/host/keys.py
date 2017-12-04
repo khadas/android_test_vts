@@ -34,6 +34,7 @@ class ConfigKeys(object):
     # Keys in test suite
     KEY_INCLUDE_FILTER = "include_filter"
     KEY_EXCLUDE_FILTER = "exclude_filter"
+    KEY_EXCLUDE_OVER_INCLUDE = "exclude_over_include"
 
     # Keys for binary tests
     IKEY_BINARY_TEST_SOURCE = "binary_test_source"
