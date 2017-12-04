@@ -28,6 +28,7 @@ import time
 
 import httplib2
 from apiclient import errors
+import urlparse
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
@@ -390,6 +391,60 @@ class Console(cmd.Cmd):
     def help_fetch(self):
         """Prints help message for fetch command."""
         self._fetch_parser.print_help(self._out_file)
+
+    def DownloadTestResources(self, request_id):
+        """Download all of the test resources for a TFC request id.
+
+        Args:
+            request_id: int, TFC request id
+        """
+        resources = self._tfc_client.TestResourceList(request_id)
+        for resource in resources:
+            self.DownloadTestResource(resource['url'])
+
+    def DownloadTestResource(self, url):
+        """Download a test resource with build provider, given a url.
+
+        Args:
+            url: a resource locator (not necessarily HTTP[s])
+                with the scheme specifying the build provider.
+        """
+        parsed = urlparse.urlparse(url)
+        path = (parsed.netloc + parsed.path).split('/')
+        # pab://5346564/oc-release/marlin-userdebug/4329875/artifact.img
+        if parsed.scheme == "pab":
+            if len(path) != 5:
+                print("Invalid pab resource locator: %s" % url)
+                return
+            account_id, branch, target, build_id, artifact_name = path
+            cmd = ("fetch"
+                   " --type=pab"
+                   " --account_id=%s"
+                   " --branch=%s"
+                   " --target=%s"
+                   " --build_id=%s"
+                   " --artifact_name=%s") % (account_id, branch, target,
+                                             build_id, artifact_name)
+            self.onecmd(cmd)
+        # ab://oc-release/marlin-userdebug/4329875/artifact.img
+        elif parsed.scheme == "ab":
+            if len(path) != 4:
+                print("Invalid ab resource locator: %s" % url)
+                return
+            branch, target, build_id, artifact_name = path
+            cmd = ("fetch"
+                   "--type=ab"
+                   " --branch=%s"
+                   " --target=%s"
+                   " --build_id=%s"
+                   " --artifact_name=%s") % (branch, target, build_id,
+                                             artifact_name)
+            self.onecmd(cmd)
+        elif parsed.scheme == gcs:
+            cmd = "fetch --type=gcs --path=%s" % url
+            self.onecmd(cmd)
+        else:
+            print "Invalid URL: %s" % url
 
     def _InitFlashParser(self):
         """Initializes the parser for flash command."""
