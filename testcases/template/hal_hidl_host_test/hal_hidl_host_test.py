@@ -67,10 +67,13 @@ class HalHidlHostTest(base_test.BaseTestClass):
         If coverage is enabled for the test, collect the coverage data and
         upload it to dashboard.
         """
+        if self._skip_all_testcases:
+            return
+
         if self.coverage.enabled and self.coverage.global_coverage:
             self.coverage.SetCoverageData(dut=self.dut, isGlobal=True)
 
-        if not self._skip_all_testcases and self.profiling.enabled:
+        if self.profiling.enabled:
             self.profiling.ProcessAndUploadTraceData()
 
     def setUp(self):
