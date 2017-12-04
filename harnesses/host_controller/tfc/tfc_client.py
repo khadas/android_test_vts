@@ -66,6 +66,22 @@ class TfcClient(object):
             return []
         return [command_task.CommandTask(**task) for task in tasks["tasks"]]
 
+    def TestResourceList(self, request_id):
+        """Calls testResource.list.
+
+        Args:
+            request_id: int, id of request to grab resources for
+
+        Returns:
+            A list of TestResources
+        """
+        logging.info("request.testResource.list request_id=%s", request_id)
+        test_resources = self._service.requests().testResource().list(request_id=request_id).execute()
+        logging.info("request.testResource.list response=%s", test_resources)
+        if 'test_resources' not in test_resources:
+            return {}
+        return test_resources['test_resources']
+
     @staticmethod
     def CreateDeviceSnapshot(cluster_id, hostname, dev_infos):
         """Creates a DeviceSnapshot which can be uploaded as host event.
