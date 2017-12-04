@@ -810,6 +810,8 @@ class AndroidDevice(object):
         """
         if self.adb_logcat_process:
             self.stopAdbLogcat()
+        self._terminateAllSl4aSessions()
+        self.stopSl4a()
         self.stopVtsAgent()
         if self.hal:
             self.hal.CleanUp()
@@ -1203,7 +1205,7 @@ class AndroidDevice(object):
 
         Terminate all sessions and clear caches.
         """
-        if self._sl4a_sessions:
+        if hasattr(self, "_sl4a_sessions") and self._sl4a_sessions:
             session_ids = list(self._sl4a_sessions.keys())
             for session_id in session_ids:
                 try:
