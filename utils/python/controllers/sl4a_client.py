@@ -355,8 +355,8 @@ class Sl4aClient(object):
                     logging.error(
                         "No response for RPC method %s on iteration %s",
                         method, i)
-                    raise Sl4aProtocolError(
-                        Sl4aProtocolError.NO_RESPONSE_FROM_SERVER)
+                    raise ProtocolError(
+                        ProtocolError.NO_RESPONSE_FROM_SERVER)
             else:
                 break
         result = json.loads(str(response, encoding="utf8"))
