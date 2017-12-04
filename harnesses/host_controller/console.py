@@ -20,14 +20,21 @@ import imp  # Python v2 compatibility
 import logging
 import os
 import shutil
+import socket
 import subprocess
 import sys
+import threading
+import time
+
+import httplib2
+from apiclient import errors
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
 from vts.harnesses.host_controller.build import build_provider_ab
 from vts.harnesses.host_controller.build import build_provider_gcs
 from vts.harnesses.host_controller.build import build_provider_local_fs
+from vts.harnesses.host_controller.tradefed import remote_operation
 
 # The default Partner Android Build (PAB) public account.
 # To obtain access permission, please reach out to Android partner engineering
@@ -51,9 +58,8 @@ class ConsoleArgumentParser(argparse.ArgumentParser):
             command_name: A string, the first argument of the command.
             description: The help message about the command.
         """
-        super(ConsoleArgumentParser, self).__init__(prog=command_name,
-                                                    description=description,
-                                                    add_help=False)
+        super(ConsoleArgumentParser, self).__init__(
+            prog=command_name, description=description, add_help=False)
 
     def ParseLine(self, line):
         """Parses a command line.
@@ -86,6 +92,7 @@ class Console(cmd.Cmd):
         device_image_info: dict containing info about device image files.
         prompt: The prompt string at the beginning of each command line.
         test_suite_info: dict containing info about test suite package files.
+        update_thread: threading.Thread that updates device state regularly
         _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
         _hosts: A list of HostController objects.
@@ -101,14 +108,19 @@ class Console(cmd.Cmd):
         _request_parser: The parser for request command.
     """
 
-    def __init__(self, tfc, pab, host_controllers,
-                 in_file=sys.stdin, out_file=sys.stdout):
+    def __init__(self,
+                 tfc,
+                 pab,
+                 host_controllers,
+                 in_file=sys.stdin,
+                 out_file=sys.stdout):
         """Initializes the attributes and the parsers."""
         # cmd.Cmd is old-style class.
         cmd.Cmd.__init__(self, stdin=in_file, stdout=out_file)
         self._build_provider = {}
         self._build_provider["pab"] = pab
-        self._build_provider["local_fs"] = build_provider_local_fs.BuildProviderLocalFS()
+        self._build_provider[
+            "local_fs"] = build_provider_local_fs.BuildProviderLocalFS()
         self._build_provider["gcs"] = build_provider_gcs.BuildProviderGCS()
         self._build_provider["ab"] = build_provider_ab.BuildProviderAB()
         self._tfc_client = tfc
@@ -118,6 +130,7 @@ class Console(cmd.Cmd):
         self.prompt = "> "
         self.device_image_info = {}
         self.test_suite_info = {}
+        self.update_thread = None
 
         self._InitCopyParser()
         self._InitDeviceParser()
@@ -131,21 +144,26 @@ class Console(cmd.Cmd):
     def _InitRequestParser(self):
         """Initializes the parser for request command."""
         self._request_parser = ConsoleArgumentParser(
-                "request", "Send TFC a request to execute a command.")
+            "request", "Send TFC a request to execute a command.")
         self._request_parser.add_argument(
-                "--cluster", required=True,
-                help="The cluster to which the request is submitted.")
+            "--cluster",
+            required=True,
+            help="The cluster to which the request is submitted.")
         self._request_parser.add_argument(
-                "--run-target", required=True,
-                help="The target device to run the command.")
+            "--run-target",
+            required=True,
+            help="The target device to run the command.")
         self._request_parser.add_argument(
-                "--user", required=True,
-                help="The name of the user submitting the request.")
+            "--user",
+            required=True,
+            help="The name of the user submitting the request.")
         self._request_parser.add_argument(
-                "command", metavar="COMMAND", nargs="+",
-                help='The command to be executed. If the command contains '
-                     'arguments starting with "-", place the command after '
-                     '"--" at end of line.')
+            "command",
+            metavar="COMMAND",
+            nargs="+",
+            help='The command to be executed. If the command contains '
+            'arguments starting with "-", place the command after '
+            '"--" at end of line.')
 
     def ProcessScript(self, script_file_path):
         """Processes a .py script file.
@@ -183,10 +201,11 @@ class Console(cmd.Cmd):
     def do_request(self, line):
         """Sends TFC a request to execute a command."""
         args = self._request_parser.ParseLine(line)
-        req = request.Request(cluster=args.cluster,
-                              command_line=" ".join(args.command),
-                              run_target=args.run_target,
-                              user=args.user)
+        req = request.Request(
+            cluster=args.cluster,
+            command_line=" ".join(args.command),
+            run_target=args.run_target,
+            user=args.user)
         self._tfc_client.NewRequest(req)
 
     def help_request(self):
@@ -196,12 +215,13 @@ class Console(cmd.Cmd):
     def _InitListParser(self):
         """Initializes the parser for list command."""
         self._list_parser = ConsoleArgumentParser(
-                "list", "Show information about the hosts.")
-        self._list_parser.add_argument("--host", type=int,
-                                       help="The index of the host.")
-        self._list_parser.add_argument("type",
-                                       choices=("hosts", "devices"),
-                                       help="The type of the shown objects.")
+            "list", "Show information about the hosts.")
+        self._list_parser.add_argument(
+            "--host", type=int, help="The index of the host.")
+        self._list_parser.add_argument(
+            "type",
+            choices=("hosts", "devices"),
+            help="The type of the shown objects.")
 
     def _Print(self, string):
         """Prints a string and a new line character.
@@ -260,22 +280,24 @@ class Console(cmd.Cmd):
         width = [len(name) for name in attr_names]
         rows = [attr_names]
         for dev_info in objects:
-            attrs = [_ToPrintString(getattr(dev_info, name, ""))
-                     for name in attr_names]
+            attrs = [
+                _ToPrintString(getattr(dev_info, name, ""))
+                for name in attr_names
+            ]
             rows.append(attrs)
             for index, attr in enumerate(attrs):
                 width[index] = max(width[index], len(attr))
 
         for row in rows:
-            self._Print("  ".join(attr.ljust(width[index])
-                                  for index, attr in enumerate(row)))
+            self._Print("  ".join(
+                attr.ljust(width[index]) for index, attr in enumerate(row)))
 
     def _InitLeaseParser(self):
         """Initializes the parser for lease command."""
         self._lease_parser = ConsoleArgumentParser(
-                "lease", "Make a host lease command tasks from TFC.")
-        self._lease_parser.add_argument("--host", type=int,
-                                        help="The index of the host.")
+            "lease", "Make a host lease command tasks from TFC.")
+        self._lease_parser.add_argument(
+            "--host", type=int, help="The index of the host.")
 
     def do_lease(self, line):
         """Makes a host lease command tasks from TFC."""
@@ -338,13 +360,14 @@ class Console(cmd.Cmd):
         if args.type == "pab":
             # do we want this somewhere else? No harm in doing multiple times
             self._build_provider[args.type].Authenticate(args.userinfo_file)
-            device_images, test_suites = self._build_provider[args.type].GetArtifact(
-                account_id=args.account_id,
-                branch=args.branch,
-                target=args.target,
-                artifact_name=args.artifact_name,
-                build_id=args.build_id,
-                method=args.method)
+            device_images, test_suites = self._build_provider[
+                args.type].GetArtifact(
+                    account_id=args.account_id,
+                    branch=args.branch,
+                    target=args.target,
+                    artifact_name=args.artifact_name,
+                    build_id=args.build_id,
+                    method=args.method)
         elif args.type == "local_fs" or args.type == "gcs":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 args.path)
@@ -377,18 +400,14 @@ class Console(cmd.Cmd):
             action="store_true",
             help="If set, flash the currently fetched artifacts.")
         self._flash_parser.add_argument(
-            "--serial",
-            default="",
-            help="Serial number for device.")
+            "--serial", default="", help="Serial number for device.")
         self._flash_parser.add_argument(
             "--build_dir",
             help="Directory containing build images to be flashed.")
         self._flash_parser.add_argument(
-            "--gsi",
-            help="Path to generic system image")
+            "--gsi", help="Path to generic system image")
         self._flash_parser.add_argument(
-            "--vbmeta",
-            help="Path to vbmeta image")
+            "--vbmeta", help="Path to vbmeta image")
 
     def do_flash(self, line):
         """Flash GSI or build images to a device connected with ADB."""
@@ -428,8 +447,7 @@ class Console(cmd.Cmd):
 
     def _InitCopyParser(self):
         """Initializes the parser for copy command."""
-        self._copy_parser = ConsoleArgumentParser("copy",
-                                                  "Copy a file.")
+        self._copy_parser = ConsoleArgumentParser("copy", "Copy a file.")
 
     def do_copy(self, line):
         """Copy a file from source to destination path."""
@@ -455,11 +473,46 @@ class Console(cmd.Cmd):
             help="Serial number for device. Can be a comma-separated list.")
         self._device_parser.add_argument(
             "--update",
-            action="store_true",
+            choices=("single", "start", "stop"),
+            default="",
             help="Update device info on TradeFed cluster")
-        self._device_parser.add_argument("--host", type=int,
-                                       help="The index of the host.")
+        self._device_parser.add_argument(
+            "--interval",
+            type=int,
+            default=30,
+            help="Interval (seconds) to repeat device update.")
+        self._device_parser.add_argument(
+            "--host", type=int, help="The index of the host.")
         self._serials = []
+
+    def UpdateDevice(self, host):
+        """Updates the device state of all devices on a given host.
+
+        Args:
+            host: HostController object
+        """
+        devices = host.ListDevices()
+        for device in devices:
+            device.Extend(['sim_state', 'sim_operator', 'mac_address'])
+        snapshots = self._tfc_client.CreateDeviceSnapshot(
+            host._cluster_ids[0], host.hostname, devices)
+        self._tfc_client.SubmitHostEvents([snapshots])
+
+    def UpdateDeviceRepeat(self, host, update_interval):
+        """Regularly updates the device state of devices on a given host.
+
+        Args:
+            host: HostController object
+            update_internval: int, number of seconds before repeating
+        """
+        thread = threading.currentThread()
+        while getattr(thread, 'keep_running', True):
+            try:
+                self.UpdateDevice(host)
+            except (socket.error, remote_operation.RemoteOperationException,
+                    httplib2.HttpLib2Error, errors.HttpError) as e:
+                logging.exception(e)
+            time.sleep(update_interval)
 
     def do_device(self, line):
         """Sets device info such as serial number."""
@@ -473,13 +526,30 @@ class Console(cmd.Cmd):
                     raise ConsoleArgumentError("More than one host.")
                 args.host = 0
             host = self._hosts[args.host]
-            devices = host.ListDevices()
-            for device in devices:
-                device.Extend(['sim_state', 'sim_operator', 'mac_address'])
-            snapshots = self._tfc_client.CreateDeviceSnapshot(host._cluster_ids[0],
-                                                        host.hostname,
-                                                        devices)
-            self._tfc_client.SubmitHostEvents(snapshots)
+            if args.update == "single":
+                self.UpdateDevice(host)
+            elif args.update == "start":
+                if args.interval <= 0:
+                    raise ConsoleArgumentError(
+                        "update interval must be positive")
+                # do not allow user to create new
+                # thread if one is currently running
+                if self.update_thread is not None and not hasattr(
+                        self.update_thread, 'keep_running'):
+                    print(
+                        'device update already running. '
+                        'run device --update stop first.'
+                    )
+                    return
+                self.update_thread = threading.Thread(
+                    target=self.UpdateDeviceRepeat,
+                    args=(
+                        host,
+                        args.interval, ))
+                self.update_thread.daemon = True
+                self.update_thread.start()
+            elif args.update == "stop":
+                self.update_thread.keep_running = False
 
     def help_device(self):
         """Prints help message for device command."""
@@ -487,19 +557,23 @@ class Console(cmd.Cmd):
 
     def _InitTestParser(self):
         """Initializes the parser for test command."""
-        self._test_parser = ConsoleArgumentParser(
-                "test", "Executes a command on TF.")
+        self._test_parser = ConsoleArgumentParser("test",
+                                                  "Executes a command on TF.")
         self._test_parser.add_argument(
-                "--serial", default=None,
-                help="The target device serial to run the command.")
+            "--serial",
+            default=None,
+            help="The target device serial to run the command.")
         self._test_parser.add_argument(
-                "--test_exec_mode", default="subprocess",
-                help="The target exec model.")
+            "--test_exec_mode",
+            default="subprocess",
+            help="The target exec model.")
         self._test_parser.add_argument(
-                "command", metavar="COMMAND", nargs="+",
-                help='The command to be executed. If the command contains '
-                     'arguments starting with "-", place the command after '
-                     '"--" at end of line. format: plan -m module -t testcase')
+            "command",
+            metavar="COMMAND",
+            nargs="+",
+            help='The command to be executed. If the command contains '
+            'arguments starting with "-", place the command after '
+            '"--" at end of line. format: plan -m module -t testcase')
 
     def do_test(self, line):
         """Executes a command using a VTS-TF instance."""
