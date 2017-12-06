@@ -115,7 +115,7 @@ bool VtsHidlHalReplayer::ReplayTrace(
     if (hal_service_instances.find(instance_name) ==
         hal_service_instances.end()) {
       LOG(WARNING) << "Does not find service name for " << instance_name
-                   << ", using 'default' service name instead";
+                   << "; this could be a nested interface.";
     } else {
       hal_service_name = hal_service_instances[instance_name];
     }
