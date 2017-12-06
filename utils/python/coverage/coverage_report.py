@@ -51,8 +51,8 @@ def GenerateLineCoverageVector(src_file_name, gcno_file_summary):
     for ident in gcno_file_summary.functions:
         func = gcno_file_summary.functions[ident]
         if not src_file_name == func.src_file_name:
-            logging.warn("GenerateLineCoverageVector: \"%s\" file is skipped \"%s\"",
-                         func.src_file_name, src_file_name)
+            logging.debug("GenerateLineCoverageVector: \"%s\" file is skipped \"%s\"",
+                          func.src_file_name, src_file_name)
             continue
         for block in func.blocks:
             for line in block.lines:
