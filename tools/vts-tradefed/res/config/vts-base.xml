@@ -29,7 +29,7 @@
 
   <template-include name="reporters" default="basic-reporters" />
   <target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
-  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTest" />
+  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 
   <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
   <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
