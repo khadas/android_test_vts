@@ -146,7 +146,7 @@ class CoverageFeature(feature_utils.Feature):
             src_file_name = src_parts[0]
             src_extension = src_parts[1] if len(src_parts) > 1 else None
             if src_extension not in ["c", "cpp", "cc"]:
-                logging.warn("Found unsupported file type: %s", src_file_path)
+                logging.debug("Found unsupported file type: %s", src_file_path)
                 continue
             if src_file_name.endswith(file_name):
                 logging.info("Coverage source file: %s", src_file_path)
@@ -245,13 +245,20 @@ class CoverageFeature(feature_utils.Feature):
         gcda_files = set()
         if self._hal_names:
             searchString = "|".join(self._hal_names)
-            entries = dut.adb.shell('lshal -itp 2> /dev/null | grep -E \"{0}\"'.format(
-                searchString)).splitlines()
-            pids = set([pid.strip()
-                        for pid in map(lambda entry: entry.split()[-1], entries)
-                        if pid.isdigit()])
+            entries = []
+            try:
+                entries = dut.adb.shell(
+                    'lshal -itp 2> /dev/null | grep -E \"{0}\"'.format(
+                        searchString)).splitlines()
+            except AdbError as e:
+                logging.error('failed to get pid entries')
+
+            pids = set([
+                pid.strip()
+                for pid in map(lambda entry: entry.split()[-1], entries)
+                if pid.isdigit()
+            ])
             pids.add(_SP_COVERAGE_PATH)
-            gcda_files = set()
             for pid in pids:
                 path = path_utils.JoinTargetPath(TARGET_COVERAGE_PATH, pid)
                 try:
@@ -261,8 +268,14 @@ class CoverageFeature(feature_utils.Feature):
                     logging.info('No gcda files found in path: \"%s\"', path)
 
         else:
-            gcda_files.update(dut.adb.shell("find %s -name \"*.gcda\"" %
-                                       TARGET_COVERAGE_PATH).split("\n"))
+            try:
+                gcda_files.update(
+                    dut.adb.shell("find %s -name \"*.gcda\"" %
+                                  TARGET_COVERAGE_PATH).split("\n"))
+            except AdbError as e:
+                logging.warn('No gcda files found in path: \"%s\"',
+                             TARGET_COVERAGE_PATH)
+
         for gcda in gcda_files:
             if gcda:
                 basename = os.path.basename(gcda.strip())
