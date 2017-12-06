@@ -29,10 +29,9 @@ class VtsSelfTestBaseTestFilter(base_test.BaseTestClass):
     Attributes:
         SHOULD_PASS_FILTER: list of string, test names that should pass
                             the internal test filter configured by user
-        SHOULD_NOT_PASS_FILTER: list of string, test names that should pass
+        SHOULD_NOT_PASS_FILTER: list of string, test names that should not pass
                                 the internal test filter configured by user
     '''
-
     SHOULD_PASS_FILTER = []
     SHOULD_NOT_PASS_FILTER = []
 
