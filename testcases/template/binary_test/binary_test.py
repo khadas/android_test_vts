@@ -362,7 +362,8 @@ class BinaryTest(base_test.BaseTestClass):
 
         # Retrieve coverage if applicable
         if self.coverage.enabled and self.coverage.global_coverage:
-            self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
+            if not self._skip_all_testcases:
+                self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
         # Clean up the pushed binaries
         logging.info('Start class cleaning up jobs.')
@@ -388,7 +389,7 @@ class BinaryTest(base_test.BaseTestClass):
         if not cmd_results or any(cmd_results[const.EXIT_CODE]):
             logging.warning('Failed to remove: %s', cmd_results)
 
-        if self.profiling.enabled:
+        if not self._skip_all_testcases and self.profiling.enabled:
             self.profiling.ProcessAndUploadTraceData()
 
         logging.info('Finished class cleaning up jobs.')
