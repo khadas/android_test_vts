@@ -26,6 +26,7 @@
   <!-- From vts-hal-hidl.xml -->
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBootV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalDumpstateV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalNfcV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_0Target" />
@@ -43,8 +44,8 @@
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalBroadcastradioV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalCameraProviderV2_4Target" />
+  <option name="compatibility:include-filter" value="VtsHalCasV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
@@ -55,6 +56,7 @@
   <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalMemtrackV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalMediaOmxStoreV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalMediaOmxV1_0Host" />
   <option name="compatibility:include-filter" value="VtsHalOemLockV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalPowerV1_0Target" />
@@ -64,6 +66,7 @@
   <option name="compatibility:include-filter" value="VtsHalTetherOffloadConfigV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalTetherOffloadControlV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalThermalV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalThermalV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0Target" />

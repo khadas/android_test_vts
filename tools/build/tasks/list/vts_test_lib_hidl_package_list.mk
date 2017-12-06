@@ -19,7 +19,6 @@ vts_hal_driver_libs := \
   android.hardware.audio.effect@2.0-vts.driver \
   android.hardware.automotive.evs@1.0-vts.driver \
   android.hardware.automotive.vehicle@2.0-vts.driver \
-  android.hardware.automotive.vehicle@2.1-vts.driver \
   android.hardware.biometrics.fingerprint@2.1-vts.driver \
   android.hardware.bluetooth@1.0-vts.driver \
   android.hardware.boot@1.0-vts.driver \
@@ -31,7 +30,6 @@ vts_hal_driver_libs := \
   android.hardware.camera.provider@2.4-vts.driver \
   android.hardware.cas@1.0-vts.driver \
   android.hardware.configstore@1.0-vts.driver \
-  android.hardware.configstore@1.1-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
   android.hardware.drm@1.0-vts.driver \
   android.hardware.dumpstate@1.0-vts.driver \
@@ -49,6 +47,7 @@ vts_hal_driver_libs := \
   android.hardware.media@1.0-vts.driver \
   android.hardware.media.omx@1.0-vts.driver \
   android.hardware.memtrack@1.0-vts.driver \
+  android.hardware.neuralnetworks@1.0-vts.driver \
   android.hardware.nfc@1.0-vts.driver \
   android.hardware.oemlock@1.0-vts.driver \
   android.hardware.power@1.0-vts.driver \
@@ -62,6 +61,7 @@ vts_hal_driver_libs := \
   android.hardware.tetheroffload.config@1.0-vts.driver \
   android.hardware.tetheroffload.control@1.0-vts.driver \
   android.hardware.thermal@1.0-vts.driver \
+  android.hardware.thermal@1.1-vts.driver \
   android.hardware.tv.cec@1.0-vts.driver \
   android.hardware.tv.input@1.0-vts.driver \
   android.hardware.usb@1.0-vts.driver \
@@ -79,7 +79,6 @@ vts_hal_profiler_libs := \
   android.hardware.audio.common@2.0-vts.profiler \
   android.hardware.audio.effect@2.0-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
-  android.hardware.automotive.vehicle@2.1-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
   android.hardware.bluetooth@1.0-vts.profiler \
   android.hardware.boot@1.0-vts.profiler \
@@ -92,7 +91,6 @@ vts_hal_profiler_libs := \
   android.hardware.camera.provider@2.4-vts.profiler \
   android.hardware.cas@1.0-vts.profiler \
   android.hardware.configstore@1.0-vts.profiler \
-  android.hardware.configstore@1.1-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
   android.hardware.dumpstate@1.0-vts.profiler \
@@ -111,6 +109,7 @@ vts_hal_profiler_libs := \
   android.hardware.media@1.0-vts.profiler \
   android.hardware.media.omx@1.0-vts.profiler \
   android.hardware.memtrack@1.0-vts.profiler \
+  android.hardware.neuralnetworks@1.0-vts.profiler \
   android.hardware.nfc@1.0-vts.profiler \
   android.hardware.oemlock@1.0-vts.profiler \
   android.hardware.power@1.0-vts.profiler \
@@ -146,10 +145,11 @@ vts_hal_test_bins := \
   VtsHalBootV1_0TargetTest \
   VtsHalBroadcastradioV1_0TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
+  VtsHalCasV1_0TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
-  VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
+  VtsHalDumpstateV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
@@ -164,6 +164,7 @@ vts_hal_test_bins := \
   VtsHalMediaOmxV1_0TargetVideoEncTest \
   VtsHalMediaOmxV1_0TargetVideoDecTest \
   VtsHalMemtrackV1_0TargetTest \
+  VtsHalNeuralnetworksV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
@@ -177,6 +178,7 @@ vts_hal_test_bins := \
   VtsHalTetheroffloadConfigV1_0TargetTest \
   VtsHalTetheroffloadControlV1_0TargetTest \
   VtsHalThermalV1_0TargetTest \
+  VtsHalThermalV1_1TargetTest \
   thermal_hidl_stress_test \
   VtsHalTvInputV1_0TargetTest \
   VtsHalUsbV1_0TargetTest \

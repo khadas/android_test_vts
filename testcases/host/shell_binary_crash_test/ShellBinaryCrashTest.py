@@ -31,7 +31,6 @@ class ShellBinaryCrashTest(base_test.BaseTestClass):
     EXIT_CODE_SEGFAULT = 139
 
     def setUpClass(self):
-        self.run_as_vts_self_test = False
         self.dut = self.registerController(android_device)[0]
 
     def testCrashBinary(self):
