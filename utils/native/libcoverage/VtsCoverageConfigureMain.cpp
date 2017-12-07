@@ -77,6 +77,7 @@ bool FlushHALCoverage(string flushHal = "") {
         halName = hal;
       };
       if (!parseFqInstaceName(fqInstanceName, cb)) continue;
+      if (halName.find("android.hidl") == 0) continue;
       if (flushHal == "" || !flushHal.compare(halName)) {
         Return<sp<IBase>> interfaceRet = sm->get(fqInterfaceName, instanceName);
         if (!interfaceRet.isOk()) {
@@ -96,6 +97,7 @@ bool FlushHALCoverage(string flushHal = "") {
       }
     }
   });
+  property_set(kSysPropHalCoverage.c_str(), "false");
   if (!listRet.isOk()) {
     cerr << "failed to list services: " << listRet.description() << std::endl;
     return false;
