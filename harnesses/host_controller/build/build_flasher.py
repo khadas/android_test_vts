@@ -110,8 +110,8 @@ class BuildFlasher(object):
         """Flash the Generic System Image to the device.
 
         Args:
-            device_images: dict, where the key is image type and value is
-                           file path.
+            device_images: dict, where the key is partition name and value is
+                           image file path.
 
         Returns:
             True if succesful; False otherwise
@@ -133,12 +133,15 @@ class BuildFlasher(object):
                 device_images[build_provider.FULL_ZIPFILE],
                 "--skip-reboot"))
 
-        for image_type in ["boot", "vendor", "cache", "userdata"]:
-            if image_type in device_images and device_images[image_type]:
-                print("fastboot flash %s %s" % (image_type,
-                                                device_images[image_type]))
-                self.device.log.info(self.device.fastboot.flash(
-                    image_type, device_images[image_type]))
+        for partition, image_path in device_images.iteritems():
+            if partition in (build_provider.FULL_ZIPFILE, "system", "vbmeta"):
+                continue
+            if not image_path:
+                self.device.log.warning("%s image is empty", partition)
+                continue
+            self.device.log.info("fastboot flash %s %s", partition, image_path)
+            self.device.log.info(
+                self.device.fastboot.flash(partition, image_path))
 
         print("starting to flash system and other images...")
         if "system" in device_images and device_images["system"]:
