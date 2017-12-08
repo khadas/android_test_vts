@@ -36,7 +36,6 @@ class ConsoleTest(unittest.TestCase):
     """A test for console.Console.
 
     Attribute:
-        _in_file: The console input buffer.
         _out_file: The console output buffer.
         _host_controller: A mock host_controller.HostController.
         _pab_client: A mock pab_client.PartnerAndroidBuildClient.
@@ -56,7 +55,6 @@ class ConsoleTest(unittest.TestCase):
 
     def setUp(self):
         """Creates the console."""
-        self._in_file = string_io_module.StringIO()
         self._out_file = string_io_module.StringIO()
         self._host_controller = mock.Mock()
         self._pab_client = mock.Mock()
@@ -64,8 +62,12 @@ class ConsoleTest(unittest.TestCase):
         self._console = console.Console(self._tfc_client,
                                         self._pab_client,
                                         [self._host_controller],
-                                        self._in_file,
+                                        None,
                                         self._out_file)
+
+    def tearDown(self):
+        """Closes the output file."""
+        self._out_file.close()
 
     def _IssueCommand(self, command_line):
         """Issues a command in the console.
@@ -76,10 +78,6 @@ class ConsoleTest(unittest.TestCase):
         Returns:
             A string, the output of the console.
         """
-        in_position = self._in_file.tell()
-        self._in_file.write(command_line)
-        self._in_file.seek(in_position)
-
         out_position = self._out_file.tell()
         self._console.onecmd(command_line)
         self._out_file.seek(out_position)
@@ -137,7 +135,13 @@ class ConsoleTest(unittest.TestCase):
         output = self._IssueCommand("lease --host 1")
         self.assertTrue(output.startswith(expected))
 
-    def testFetchPOST(self):
+    @mock.patch('vts.harnesses.host_controller.'
+        'console.build_flasher.BuildFlasher')
+    def testFetchPOSTAndFlash(self, mock_class):
+        """Tests fetching from pab and flashing."""
+        self._pab_client.GetArtifact.return_value = (
+            {"system.img": "/mock/system.img", "odm.img": "/mock/odm.img"},
+            None)
         self._IssueCommand(
             "fetch --branch=aosp-master-ndk --target=darwin_mac "
             "--account_id=100621237 "
@@ -150,6 +154,12 @@ class ConsoleTest(unittest.TestCase):
             artifact_name='foo-{id}.tar.bz2',
             build_id='latest',
             method='POST')
+
+        flasher = mock.Mock()
+        mock_class.return_value = flasher
+        self._IssueCommand("flash --current system=system.img odm=odm.img")
+        flasher.Flash.assert_called_with(
+            {"system": "/mock/system.img", "odm": "/mock/odm.img"})
 
     @mock.patch('vts.harnesses.host_controller.'
         'console.build_flasher.BuildFlasher')

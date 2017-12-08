@@ -65,7 +65,8 @@ class BuildFlasherTest(unittest.TestCase):
     def testEmptySerial(self, mock_class):
         mock_class.list_adb_devices.return_value = ['oneserial']
         flasher = build_flasher.BuildFlasher(serial="")
-        mock_class.AndroidDevice.assert_called_with("oneserial")
+        mock_class.AndroidDevice.assert_called_with("oneserial",
+                                                    device_callback_port=-1)
 
 
 if __name__ == "__main__":
