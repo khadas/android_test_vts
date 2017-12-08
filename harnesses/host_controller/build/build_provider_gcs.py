@@ -82,15 +82,7 @@ class BuildProviderGCS(build_provider.BuildProvider):
                 _, _, ret_code = cmd_utils.ExecuteOneShellCommand(
                     copy_command)
                 if ret_code == 0:
-                    # Consider checking the existences of those files before setting
-                    # and raising an error if a required file is missing.
-                    for image_type in ["boot", "system", "vendor", "userdata"]:
-                        file_path = os.path.join(temp_dir_path,
-                                                 "%s.img" % image_type)
-                        if os.path.isfile(file_path):
-                            self.SetDeviceImage(image_type, file_path)
-                        else:
-                            print("%s image file doesn't exist" % image_type)
+                    self.SetDeviceImagesInDirecotry(temp_dir_path)
                 else:
                     print("Error in copy files from GCS (code %s)." % ret_code)
             else:
