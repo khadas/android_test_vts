@@ -32,6 +32,7 @@ import urlparse
 
 from vts.harnesses.host_controller.tfc import request
 from vts.harnesses.host_controller.build import build_flasher
+from vts.harnesses.host_controller.build import build_provider
 from vts.harnesses.host_controller.build import build_provider_ab
 from vts.harnesses.host_controller.build import build_provider_gcs
 from vts.harnesses.host_controller.build import build_provider_local_fs
@@ -41,6 +42,14 @@ from vts.harnesses.host_controller.tradefed import remote_operation
 # To obtain access permission, please reach out to Android partner engineering
 # department of Google LLC.
 _DEFAULT_ACCOUNT_ID = '543365459'
+
+# The default value for "flash --current".
+_DEFAULT_FLASH_IMAGES = [
+    build_provider.FULL_ZIPFILE, "boot.img", "cache.img", "system.img",
+    "userdata.img", "vbmeta.img", "vendor.img",
+]
+
+# The environment variable for default serial numbers.
 _ANDROID_SERIAL = "ANDROID_SERIAL"
 
 
@@ -385,8 +394,14 @@ class Console(cmd.Cmd):
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
 
-        print("device images: %s" % self.device_image_info)
-        print("test suites: %s" % self.test_suite_info)
+        if self.device_image_info:
+            logging.info("device images:\n%s",
+                         "\n".join(image + ": " + path for image, path in
+                                   self.device_image_info.iteritems()))
+        if self.test_suite_info:
+            logging.info("test suites:\n%s",
+                         "\n".join(suite + ": " + path for suite, path in
+                                   self.test_suite_info.iteritems()))
 
     def help_fetch(self):
         """Prints help message for fetch command."""
@@ -452,8 +467,13 @@ class Console(cmd.Cmd):
                                                    "Flash images to a device.")
         self._flash_parser.add_argument(
             "--current",
-            action="store_true",
-            help="If set, flash the currently fetched artifacts.")
+            metavar="PARTITION_IMAGE",
+            nargs="*",
+            type=lambda x: x.split("="),
+            help="The partitions and images to be flashed. The format is "
+                 "<partition>=<image>. If PARTITION_IMAGE list is empty, "
+                 "currently fetched " + ", ".join(_DEFAULT_FLASH_IMAGES) +
+                 " will be flashed.")
         self._flash_parser.add_argument(
             "--serial", default="", help="Serial number for device.")
         self._flash_parser.add_argument(
@@ -480,11 +500,21 @@ class Console(cmd.Cmd):
             flasher = build_flasher.BuildFlasher()
             flashers.append(flasher)
 
+        if args.current:
+            partition_image = dict(
+                (partition, self.device_image_info[image])
+                for partition, image in args.current)
+        else:
+            partition_image = dict(
+                (image.rsplit(".img", 1)[0], self.device_image_info[image])
+                for image in _DEFAULT_FLASH_IMAGES
+                if image in self.device_image_info)
+
         if flashers:
             # Can be parallelized as long as that's proven reliable.
             for flasher in flashers:
-                if args.current:
-                    flasher.Flash(self.device_image_info)
+                if args.current is not None:
+                    flasher.Flash(partition_image)
                 else:
                     if args.gsi is None and args.build_dir is None:
                         self._flash_parser.error(
