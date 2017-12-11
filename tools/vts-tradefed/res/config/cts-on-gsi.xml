@@ -17,7 +17,7 @@
     <option name="dynamic-sharding" value="false" />
     <device_recovery class="com.android.tradefed.device.WaitDeviceRecovery" />
     <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
-    <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTest" />
+    <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:rerun-from-file:true" />
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:fallback-to-serial-rerun:false" />
     <option name="compatibility:test-arg" value="com.android.compatibility.testtype.LibcoreTest:rerun-from-file:true" />
