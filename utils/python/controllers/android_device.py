@@ -552,7 +552,6 @@ class AndroidDevice(object):
         self.adb.bugreport(" > %s" % full_out_path)
         self.log.info("Bugreport for %s taken at %s", test_name, full_out_path)
 
-    @utils.timeout(15 * 60)
     def waitForBootCompletion(self, timeout=900):
         """Waits for Android framework to broadcast ACTION_BOOT_COMPLETED.
 
@@ -565,7 +564,7 @@ class AndroidDevice(object):
         """
         start = time.time()
         try:
-            self.adb.wait_for_device()
+            self.adb.wait_for_device(timeout=timeout)
         except adb.AdbError as e:
             # adb wait-for-device is not always possible in the lab
             logging.exception(e)

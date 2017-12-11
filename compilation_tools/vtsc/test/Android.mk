@@ -32,9 +32,16 @@ $(LOCAL_BUILT_MODULE): PRIVATE_HIDL_EXEC := $(HOST_OUT_EXECUTABLES)/hidl-gen
 $(LOCAL_BUILT_MODULE): $(PRIVATE_PY_SCRIPT) $(HOST_OUT_EXECUTABLES)/vtsc
 $(LOCAL_BUILT_MODULE): $(PRIVATE_PY_SCRIPT) $(HOST_OUT_EXECUTABLES)/hidl-gen
 	@echo "Regression test (build time): $(PRIVATE_MODULE)"
-	$(hide) PYTHONPATH=$$PYTHONPATH:test \
-	python $(PRIVATE_PY_SCRIPT) -h $(PRIVATE_HIDL_EXEC) -p $(PRIVATE_VTSC_EXEC) \
-	    -c $(PRIVATE_CANONICAL_DIR) -o $(PRIVATE_OUT_DIR) -t $(PRIVATE_TEMP_DIR)
+	# b/71519031 This branch does not have complete external/python.
+	# Run the test only if the system has the required modules.
+	$(hide) \
+	if python -c "import concurrent.futures" 2> /dev/null ; then \
+	  PYTHONPATH=$$PYTHONPATH:test \
+	    python $(PRIVATE_PY_SCRIPT) -h $(PRIVATE_HIDL_EXEC) -p $(PRIVATE_VTSC_EXEC) \
+	    -c $(PRIVATE_CANONICAL_DIR) -o $(PRIVATE_OUT_DIR) -t $(PRIVATE_TEMP_DIR); \
+	else \
+	  echo "Skip $(PRIVATE_MODULE) as the required Python module isn't available."; \
+	fi
 	$(hide) touch $@
 
 .PHONY: $(LOCAL_BUILT_MODULE)
