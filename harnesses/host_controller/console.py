@@ -45,8 +45,13 @@ _DEFAULT_ACCOUNT_ID = '543365459'
 
 # The default value for "flash --current".
 _DEFAULT_FLASH_IMAGES = [
-    build_provider.FULL_ZIPFILE, "boot.img", "cache.img", "system.img",
-    "userdata.img", "vbmeta.img", "vendor.img",
+    build_provider.FULL_ZIPFILE,
+    "boot.img",
+    "cache.img",
+    "system.img",
+    "userdata.img",
+    "vbmeta.img",
+    "vendor.img",
 ]
 
 # The environment variable for default serial numbers.
@@ -395,13 +400,13 @@ class Console(cmd.Cmd):
         self.test_suite_info.update(test_suites)
 
         if self.device_image_info:
-            logging.info("device images:\n%s",
-                         "\n".join(image + ": " + path for image, path in
-                                   self.device_image_info.iteritems()))
+            logging.info("device images:\n%s", "\n".join(
+                image + ": " + path
+                for image, path in self.device_image_info.iteritems()))
         if self.test_suite_info:
-            logging.info("test suites:\n%s",
-                         "\n".join(suite + ": " + path for suite, path in
-                                   self.test_suite_info.iteritems()))
+            logging.info("test suites:\n%s", "\n".join(
+                suite + ": " + path
+                for suite, path in self.test_suite_info.iteritems()))
 
     def help_fetch(self):
         """Prints help message for fetch command."""
@@ -471,9 +476,9 @@ class Console(cmd.Cmd):
             nargs="*",
             type=lambda x: x.split("="),
             help="The partitions and images to be flashed. The format is "
-                 "<partition>=<image>. If PARTITION_IMAGE list is empty, "
-                 "currently fetched " + ", ".join(_DEFAULT_FLASH_IMAGES) +
-                 " will be flashed.")
+            "<partition>=<image>. If PARTITION_IMAGE list is empty, "
+            "currently fetched " + ", ".join(_DEFAULT_FLASH_IMAGES) +
+            " will be flashed.")
         self._flash_parser.add_argument(
             "--serial", default="", help="Serial number for device.")
         self._flash_parser.add_argument(
@@ -483,6 +488,13 @@ class Console(cmd.Cmd):
             "--gsi", help="Path to generic system image")
         self._flash_parser.add_argument(
             "--vbmeta", help="Path to vbmeta image")
+        self._flash_parser.add_argument(
+            "--flasher_type",
+            default="fastboot",
+            choices=("fastboot", "custom"),
+            help="Flasher binary type")
+        self._flash_parser.add_argument(
+            "--flasher_path", help="Path to flasher binary")
 
     def do_flash(self, line):
         """Flash GSI or build images to a device connected with ADB."""
@@ -490,25 +502,25 @@ class Console(cmd.Cmd):
 
         flashers = []
         if args.serial:
-            flasher = build_flasher.BuildFlasher(args.serial)
+            flasher = build_flasher.BuildFlasher(args.serial,
+                                                 args.flasher_path)
             flashers.append(flasher)
         elif self._serials:
             for serial in self._serials:
-                flasher = build_flasher.BuildFlasher(serial)
+                flasher = build_flasher.BuildFlasher(serial, args.flasher_path)
                 flashers.append(flasher)
         else:
-            flasher = build_flasher.BuildFlasher()
+            flasher = build_flasher.BuildFlasher("", args.flasher_path)
             flashers.append(flasher)
 
         if args.current:
-            partition_image = dict(
-                (partition, self.device_image_info[image])
-                for partition, image in args.current)
+            partition_image = dict((partition, self.device_image_info[image])
+                                   for partition, image in args.current)
         else:
-            partition_image = dict(
-                (image.rsplit(".img", 1)[0], self.device_image_info[image])
-                for image in _DEFAULT_FLASH_IMAGES
-                if image in self.device_image_info)
+            partition_image = dict((image.rsplit(".img", 1)[0],
+                                    self.device_image_info[image])
+                                   for image in _DEFAULT_FLASH_IMAGES
+                                   if image in self.device_image_info)
 
         if flashers:
             # Can be parallelized as long as that's proven reliable.
@@ -516,13 +528,27 @@ class Console(cmd.Cmd):
                 if args.current is not None:
                     flasher.Flash(partition_image)
                 else:
-                    if args.gsi is None and args.build_dir is None:
+                    if args.flasher_type is None or args.flasher_type == "fastboot":
+                        if args.gsi is None and args.build_dir is None:
+                            self._flash_parser.error(
+                                "Nothing requested: specify --gsi or --build_dir"
+                            )
+                        if args.build_dir is not None:
+                            flasher.Flashall(args.build_dir)
+                        if args.gsi is not None:
+                            flasher.FlashGSI(args.gsi, args.vbmeta)
+                    elif args.flasher_type == "custom":
+                        if args.flasher_path is not None:
+                            flasher.FlashUsingCustomBinary(
+                                self.device_image_info, 300)
+                        else:
+                            self._flash_parser.error(
+                                "Please specify the path to custom flash tool."
+                            )
+                    else:
                         self._flash_parser.error(
-                            "Nothing requested: specify --gsi or --build_dir")
-                    if args.build_dir is not None:
-                        flasher.Flashall(args.build_dir)
-                    if args.gsi is not None:
-                        flasher.FlashGSI(args.gsi, args.vbmeta)
+                            "Wrong flasher type requested: --flasher_type=%s" %
+                            args.flasher_type)
             for flasher in flashers:
                 flasher.WaitForDevice()
 
@@ -621,16 +647,15 @@ class Console(cmd.Cmd):
                 # thread if one is currently running
                 if self.update_thread is not None and not hasattr(
                         self.update_thread, 'keep_running'):
-                    print(
-                        'device update already running. '
-                        'run device --update stop first.'
-                    )
+                    print('device update already running. '
+                          'run device --update stop first.')
                     return
                 self.update_thread = threading.Thread(
                     target=self.UpdateDeviceRepeat,
                     args=(
                         host,
-                        args.interval, ))
+                        args.interval,
+                    ))
                 self.update_thread.daemon = True
                 self.update_thread.start()
             elif args.update == "stop":
