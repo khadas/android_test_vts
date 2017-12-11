@@ -37,14 +37,7 @@ class BuildProviderLocalFS(build_provider.BuildProvider):
             a dict containing the test suite package info.
         """
         if os.path.isdir(path):
-            # Consider checking the existences of those files before setting
-            # and raising an error if a required file is missing.
-            for image_type in ["boot", "system", "vendor", "userdata"]:
-                file_path = os.path.join(path, "%s.img" % image_type)
-                if os.path.isfile(file_path):
-                    self.SetDeviceImage(image_type, file_path)
-                else:
-                    print("%s image file doesn't exist" % image_type)
+            self.SetDeviceImagesInDirecotry(path)
         else:
             if path.endswith("android-vts.zip"):
                 if os.path.isfile(path):

@@ -19,6 +19,8 @@ import shutil
 import tempfile
 import zipfile
 
+from vts.runners.host import utils
+
 FULL_ZIPFILE = "full-zipfile"
 
 
@@ -26,18 +28,18 @@ class BuildProvider(object):
     """The base class for build provider.
 
     Attributes:
-        IMAGE_FILE_NAMES: a list of strings where each string contains the known
-                          Android device image file name.
-        _device_images: dict where the key is image type and value is the
-                        image file path.
+        _IMAGE_FILE_EXTENSIONS: a list of strings which are common image file
+                                extensions.
+        _BASIC_IMAGE_FILE_NAMES: a list of strings which are the image names in
+                                 an artifact zip.
+        _device_images: dict where the key is image file name and value is the
+                        path.
         _test_suites: dict where the key is test suite type and value is the
                       test suite package file path.
         _tmp_dirpath: string, the temp dir path created to keep artifacts.
     """
-    IMAGE_FILE_NAMES = ["boot.img", "cache.img", "metadata.img", "modem.img",
-                        "keymaster.img", "system.img", "userdata.img",
-                        "vbmeta.img", "vendor.img"]
-    BASIC_IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img"]
+    _IMAGE_FILE_EXTENSIONS = [".img", ".bin"]
+    _BASIC_IMAGE_FILE_NAMES = ["boot.img", "system.img", "vendor.img"]
 
     def __init__(self):
         self._device_images = {}
@@ -60,51 +62,62 @@ class BuildProvider(object):
     def CreateNewTmpDir(self):
         return tempfile.mkdtemp(dir=self._tmp_dirpath)
 
-    def SetDeviceImage(self, type, path):
-        """Sets device image `path` for the specified `type`."""
-        self._device_images[type] = path
+    def SetDeviceImage(self, name, path):
+        """Sets device image `path` for the specified `name`."""
+        self._device_images[name] = path
 
-    def IsFullDeviceImage(self, namelist):
+    def _IsFullDeviceImage(self, namelist):
         """Returns true if given namelist list has all common device images."""
-        for image_file in self.BASIC_IMAGE_FILE_NAMES:
+        for image_file in self._BASIC_IMAGE_FILE_NAMES:
             if image_file not in namelist:
                 return False
         return True
+
+    def _IsImageFile(self, file_path):
+        """Returns whether a file is an image.
+
+        Args:
+            file_path: string, the file path.
+
+        Returns:
+            boolean, whether the file is an image.
+        """
+        return any(file_path.endswith(ext)
+                   for ext in self._IMAGE_FILE_EXTENSIONS)
+
+    def SetDeviceImagesInDirecotry(self, root_dir):
+        """Sets device images to *.img and *.bin in a directory.
+
+        Args:
+            root_dir: string, the directory to find images in.
+        """
+        for dir_name, file_name in utils.iterate_files(root_dir):
+            if self._IsImageFile(file_name):
+                self.SetDeviceImage(file_name,
+                                    os.path.join(dir_name, file_name))
 
     def SetDeviceImageZip(self, path):
         """Sets device image(s) using files in a given zip file.
 
         It extracts image files inside the given zip file and selects
-        known Android image files using self.IMAGE_FILE_NAMES.
+        known Android image files.
 
         Args:
             path: string, the path to a zip file.
         """
         dest_path = path + ".dir"
         with zipfile.ZipFile(path, 'r') as zip_ref:
-            if self.IsFullDeviceImage(zip_ref.namelist()):
+            if self._IsFullDeviceImage(zip_ref.namelist()):
                 self.SetDeviceImage(FULL_ZIPFILE, path)
             else:
                 zip_ref.extractall(dest_path)
-                artifact_paths = map(
-                    lambda filename: os.path.join(dest_path, filename) if (
-                        filename and (filename.endswith(".img")
-                                      or filename.endswith(".zip"))) else None,
-                    zip_ref.namelist())
-                artifact_paths = filter(None, artifact_paths)
-                if artifact_paths:
-                    for artifact_path in artifact_paths:
-                        for known_filename in self.IMAGE_FILE_NAMES:
-                            if artifact_path.endswith(known_filename):
-                                self.SetDeviceImage(
-                                    known_filename.replace(".img", ""),
-                                    artifact_path)
+                self.SetDeviceImagesInDirecotry(dest_path)
 
-    def GetDeviceImage(self, type=None):
+    def GetDeviceImage(self, name=None):
         """Returns device image info."""
-        if type is None:
+        if name is None:
             return self._device_images
-        return self._device_images[type]
+        return self._device_images[name]
 
     def SetTestSuitePackage(self, type, path):
         """Sets test suite package `path` for the specified `type`.
