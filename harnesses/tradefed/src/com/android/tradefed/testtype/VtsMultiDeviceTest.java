@@ -900,23 +900,23 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             JSONObject object = null;
             File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
             if (testRunSummary == null) {
-                throw new RuntimeException("Couldn't locate the file : " +
-                        TEST_RUN_SUMMARY_FILE_NAME);
+                CLog.e("Couldn't locate the file : " + TEST_RUN_SUMMARY_FILE_NAME);
+            } else {
+                try {
+                    jsonData = FileUtil.readStringFromFile(testRunSummary);
+                    CLog.i("Test Result Summary: %s", jsonData);
+                    object = new JSONObject(jsonData);
+                } catch (IOException e) {
+                    CLog.e("Error occurred in parsing Json file : %s", testRunSummary.toPath());
+                } catch (JSONException e) {
+                    CLog.e("Error occurred in parsing Json String : %s", jsonData);
+                }
+                if (object == null) {
+                    CLog.e("Json object is null.");
+                    throw new RuntimeException("Json object is null.");
+                }
+                parser.processJsonFile(object);
             }
-            try {
-                jsonData = FileUtil.readStringFromFile(testRunSummary);
-                CLog.i("Test Result Summary: %s", jsonData);
-                object = new JSONObject(jsonData);
-            } catch (IOException e) {
-                CLog.e("Error occurred in parsing Json file : %s", testRunSummary.toPath());
-            } catch (JSONException e) {
-                CLog.e("Error occurred in parsing Json String : %s", jsonData);
-            }
-            if (object == null) {
-                CLog.e("Json object is null.");
-                throw new RuntimeException("Json object is null.");
-            }
-            parser.processJsonFile(object);
         }
         printVtsLogs(vtsRunnerLogDir);
 
