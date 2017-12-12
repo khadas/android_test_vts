@@ -553,18 +553,31 @@ class AndroidDevice(object):
         self.log.info("Bugreport for %s taken at %s", test_name, full_out_path)
 
     @utils.timeout(15 * 60)
-    def waitForBootCompletion(self):
+    def waitForBootCompletion(self, timeout=900):
         """Waits for Android framework to broadcast ACTION_BOOT_COMPLETED.
 
-        This function times out after 15 minutes.
+        Args:
+            timeout: int, seconds to wait for boot completion. Default is
+                     15 minutes.
+
+        Returns:
+            bool, True if boot completed. False if any error or timeout
         """
+        start = time.time()
         try:
             self.adb.wait_for_device()
         except adb.AdbError as e:
             # adb wait-for-device is not always possible in the lab
             logging.exception(e)
+            return False
+
         while not self.hasBooted():
-            time.sleep(5)
+            if time.time() - start >= timeout:
+                logging.error("Timeout while waiting for boot completion.")
+                return False
+            time.sleep(3)
+
+        return True
 
     def hasBooted(self):
         """Checks whether the device has booted.
@@ -585,8 +598,10 @@ class AndroidDevice(object):
         """Starts Android runtime and waits for ACTION_BOOT_COMPLETED."""
         logging.info("starting Android Runtime")
         self.adb.shell("start")
-        self.waitForBootCompletion()
-        logging.info("Android Runtime started")
+        if self.waitForBootCompletion(60 * 2):
+            logging.info("Android Runtime started")
+        else:
+            logging.error("Failed to start Android Runtime.")
 
     def stop(self):
         """Stops Android runtime."""
