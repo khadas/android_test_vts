@@ -673,7 +673,7 @@ class Console(cmd.Cmd):
         if args.test_exec_mode == "subprocess":
             bin_path = self.test_suite_info["vts"]
             cmd = [bin_path, "run"]
-            cmd.extend(line.split())
+            cmd.extend(args.command)
             if serial:
                 cmd.extend(["-s", serial])
             print("Command: %s" % cmd)
