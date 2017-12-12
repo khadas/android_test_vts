@@ -594,8 +594,9 @@ class AndroidDevice(object):
             extra_params = self.adb_logcat_param
         except AttributeError:
             extra_params = "-b all"
-        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (
-            self.serial, extra_params, logcat_file_path)
+        cmd = "adb -s %s logcat -v threadtime %s >> %s" % (self.serial,
+                                                           extra_params,
+                                                           logcat_file_path)
         self.adb_logcat_process = utils.start_standing_subprocess(cmd)
         self.adb_logcat_file_path = logcat_file_path
 
@@ -630,18 +631,31 @@ class AndroidDevice(object):
         self.log.info("Bugreport for %s taken at %s", test_name, full_out_path)
 
     @utils.timeout(15 * 60)
-    def waitForBootCompletion(self):
+    def waitForBootCompletion(self, timeout=900):
         """Waits for Android framework to broadcast ACTION_BOOT_COMPLETED.
 
-        This function times out after 15 minutes.
+        Args:
+            timeout: int, seconds to wait for boot completion. Default is
+                     15 minutes.
+
+        Returns:
+            bool, True if boot completed. False if any error or timeout
         """
+        start = time.time()
         try:
             self.adb.wait_for_device()
         except adb.AdbError as e:
             # adb wait-for-device is not always possible in the lab
             logging.exception(e)
+            return False
+
         while not self.hasBooted():
-            time.sleep(5)
+            if time.time() - start >= timeout:
+                logging.error("Timeout while waiting for boot completion.")
+                return False
+            time.sleep(3)
+
+        return True
 
     def hasBooted(self):
         """Checks whether the device has booted.
@@ -662,8 +676,10 @@ class AndroidDevice(object):
         """Starts Android runtime and waits for ACTION_BOOT_COMPLETED."""
         logging.info("starting Android Runtime")
         self.adb.shell("start")
-        self.waitForBootCompletion()
-        logging.info("Android Runtime started")
+        if self.waitForBootCompletion(60 * 2):
+            logging.info("Android Runtime started")
+        else:
+            logging.error("Failed to start Android Runtime.")
 
     def stop(self):
         """Stops Android runtime."""
@@ -808,8 +824,8 @@ class AndroidDevice(object):
         """
         self.log.info("Starting VTS agent")
         if self.vts_agent_process:
-            raise AndroidDeviceError("HAL agent is already running on %s." %
-                                     self.serial)
+            raise AndroidDeviceError(
+                "HAL agent is already running on %s." % self.serial)
 
         cleanup_commands = [
             "rm -f /data/local/tmp/vts_driver_*",
@@ -932,7 +948,7 @@ class AndroidDevice(object):
                     self.sl4a_host_port):
                 self.sl4a_host_port = adb.get_available_host_port()
             logging.info("sl4a port host %s target %s", self.sl4a_host_port,
-                     self.sl4a_target_port)
+                         self.sl4a_target_port)
             try:
                 self.adb.tcp_forward(self.sl4a_host_port,
                                      self.sl4a_target_port)
@@ -1049,9 +1065,10 @@ class AndroidDevice(object):
     def ed(self):
         """The default SL4A session to the device if exist, None otherwise."""
         if (not hasattr(self, "_sl4a_event_dispatchers") or
-            len(self._sl4a_event_dispatchers) == 0):
+                len(self._sl4a_event_dispatchers) == 0):
             return None
-        logging.info("self._sl4a_event_dispatchers: %s", self._sl4a_event_dispatchers)
+        logging.info("self._sl4a_event_dispatchers: %s",
+                     self._sl4a_event_dispatchers)
         try:
             session_id = sorted(self._sl4a_event_dispatchers)[0]
             return self._sl4a_event_dispatchers[session_id]
