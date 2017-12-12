@@ -101,7 +101,7 @@ def stop_sl4a(adb_proxy):
         adb_proxy: adb.AdbProxy, The adb proxy to use for checking.
     """
     adb_proxy.shell(
-        'am force-stop com.googlecode.android_scripting', ignore_status=True)
+        'am force-stop com.googlecode.android_scripting', no_except=True)
 
 
 def is_sl4a_installed(adb_proxy):
