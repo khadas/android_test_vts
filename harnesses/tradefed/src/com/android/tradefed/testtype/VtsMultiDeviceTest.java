@@ -984,6 +984,19 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         VtsMultiDeviceTestResultParser parser =
                 new VtsMultiDeviceTestResultParser(listener, mRunName);
 
+        File reportMsg;
+        int waitCount = 0;
+        // Wait python process to finish for 3 minutes at most
+        while ((reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME)) == null
+                && waitCount < 180) {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            waitCount++;
+        }
+
         if (mUseStdoutLogs) {
             if (commandResult.getStdout() == null) {
                 CLog.e("The std:out is null for CommandResult.");
@@ -1024,19 +1037,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             }
         }
         printVtsLogs(vtsRunnerLogDir);
-
-        File reportMsg;
-        int waitCount = 0;
-        // Wait python process to finish for 3 minutes at most
-        while ((reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME)) == null
-                && waitCount < 180) {
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-            waitCount++;
-        }
 
         CLog.i("Report message path: %s", reportMsg);
 
