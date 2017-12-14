@@ -439,6 +439,16 @@ class AndroidDevice(object):
             return model
 
     @property
+    def first_api_level(self):
+        """Gets the API level that the device was initially launched with."""
+        return self.getProp("ro.product.first_api_level")
+
+    @property
+    def vndk_version(self):
+        """Gets the VNDK version that the vendor partition is using."""
+        return self.getProp("ro.vndk.version")
+
+    @property
     def cpu_abi(self):
         """CPU ABI (Application Binary Interface) of the device."""
         out = self.getProp("ro.product.cpu.abi")
