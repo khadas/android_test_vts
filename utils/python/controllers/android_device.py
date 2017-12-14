@@ -964,8 +964,7 @@ class AndroidDevice(object):
     def stopSl4a(self):
         """Stops an SL4A apk on a target device."""
         try:
-            self.adb.shell(
-                "am force-stop %s" % SL4A_APK_NAME, ignore_status=True)
+            self.adb.shell("am force-stop %s" % SL4A_APK_NAME)
         except adb.AdbError as e:
             self.log.warn("Fail to stop package %s: %s", SL4A_APK_NAME, e)
 
@@ -985,9 +984,7 @@ class AndroidDevice(object):
         """
         for cmd in ("ps -A", "ps"):
             try:
-                out = self.adb.shell(
-                    '%s | grep "S %s"' % (cmd, package_name),
-                    ignore_status=True)
+                out = self.adb.shell('%s | grep "S %s"' % (cmd, package_name))
                 if package_name not in out:
                     continue
                 try:
