@@ -42,6 +42,76 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
 
     VtsProfilingInterface& profiler = VtsProfilingInterface::getInstance(TRACEFILEPREFIX);
 
+    if (strcmp(method, "convertToBoolIfSmall") == 0) {
+        FunctionSpecificationMessage msg;
+        msg.set_name("convertToBoolIfSmall");
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
+                {
+                    if ((*args).size() != 2) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 2, actual: " << (*args).size() << ", method name: convertToBoolIfSmall, event type: " << event;
+                        break;
+                    }
+                    auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
+                    ::android::hardware::tests::foo::V1_0::IFoo::Discriminator *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::tests::foo::V1_0::IFoo::Discriminator*> ((*args)[0]);
+                    if (arg_val_0 != nullptr) {
+                        arg_0->set_type(TYPE_ENUM);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__Discriminator(arg_0, (*arg_val_0));
+                    } else {
+                        LOG(WARNING) << "argument 0 is null.";
+                    }
+                    auto *arg_1 __attribute__((__unused__)) = msg.add_arg();
+                    ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Union> *arg_val_1 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Union>*> ((*args)[1]);
+                    if (arg_val_1 != nullptr) {
+                        arg_1->set_type(TYPE_VECTOR);
+                        arg_1->set_vector_size((*arg_val_1).size());
+                        for (int arg_1_index = 0; arg_1_index < (int)(*arg_val_1).size(); arg_1_index++) {
+                            auto *arg_1_vector_arg_1_index __attribute__((__unused__)) = arg_1->add_vector_value();
+                            arg_1_vector_arg_1_index->set_type(TYPE_UNION);
+                            profile____android__hardware__tests__foo__V1_0__IFoo__Union(arg_1_vector_arg_1_index, (*arg_val_1)[arg_1_index]);
+                        }
+                    } else {
+                        LOG(WARNING) << "argument 1 is null.";
+                    }
+                    break;
+                }
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: convertToBoolIfSmall, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
+                    ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::ContainsUnion> *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::ContainsUnion>*> ((*args)[0]);
+                    if (result_val_0 != nullptr) {
+                        result_0->set_type(TYPE_VECTOR);
+                        result_0->set_vector_size((*result_val_0).size());
+                        for (int result_0_index = 0; result_0_index < (int)(*result_val_0).size(); result_0_index++) {
+                            auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
+                            result_0_vector_result_0_index->set_type(TYPE_STRUCT);
+                            profile____android__hardware__tests__foo__V1_0__IFoo__ContainsUnion(result_0_vector_result_0_index, (*result_val_0)[result_0_index]);
+                        }
+                    } else {
+                        LOG(WARNING) << "return value 0 is null.";
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
+            }
+        }
+        profiler.AddTraceEvent(event, package, version, interface, msg);
+    }
     if (strcmp(method, "doThis") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("doThis");
