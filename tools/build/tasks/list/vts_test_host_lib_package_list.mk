@@ -1,9 +1,9 @@
 vts_test_host_lib_packages := \
-    host_cross_libLLVM \
+    host_cross_libLLVM_android \
     libbase \
     libc++ \
     libcutils \
-    libLLVM \
+    libLLVM_android \
     liblog \
     libprotobuf-cpp-full \
     libvts_multidevice_proto \
