@@ -46,6 +46,10 @@ class Vts_android_hardware_tests_bar_V1_0_IBar : public ::android::hardware::tes
 
     virtual ~Vts_android_hardware_tests_bar_V1_0_IBar() = default;
 
+    ::android::hardware::Return<void> convertToBoolIfSmall(
+        ::android::hardware::tests::foo::V1_0::IFoo::Discriminator arg0,
+        const ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Union>& arg1, std::function<void(const ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::ContainsUnion>& arg0)> cb) override;
+
     ::android::hardware::Return<void> doThis(
         float arg0) override;
 
