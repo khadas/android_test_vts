@@ -30,8 +30,9 @@ import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
-import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.JsonUtil;
+import com.android.tradefed.util.ProcessHelper;
+import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
@@ -42,10 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
-import java.io.FileReader;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -908,13 +906,72 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     }
 
     /**
+     * Create a {@link ProcessHelper} from mRunUtil.
+     *
+     * @param cmd the command to run.
+     * @throws IOException if fails to start Process.
+     */
+    protected ProcessHelper createProcessHelper(String[] cmd) throws IOException {
+        return new ProcessHelper(mRunUtil.runCmdInBackground(cmd));
+    }
+
+    /**
+     * Run VTS Python runner and handle interrupt from TradeFed.
+     *
+     * @param cmd the command to start VTS Python runner.
+     * @param commandResult the object containing the command result.
+     * @return null if the command terminates or times out; a message string if the command is
+     * interrupted by TradeFed.
+     */
+    private String runPythonRunner(String[] cmd, CommandResult commandResult) {
+        ProcessHelper process;
+        try {
+            process = createProcessHelper(cmd);
+        } catch (IOException e) {
+            CLog.e(e);
+            commandResult.setStatus(CommandStatus.EXCEPTION);
+            commandResult.setStdout("");
+            commandResult.setStderr("");
+            return null;
+        }
+
+        String interruptMessage;
+        try {
+            CommandStatus commandStatus;
+            try {
+                commandStatus = process.waitForProcess(mTestTimeout);
+                interruptMessage = null;
+            } catch (RunInterruptedException e) {
+                CLog.e("Python process is interrupted.");
+                commandStatus = CommandStatus.TIMED_OUT;
+                interruptMessage = (e.getMessage() != null ? e.getMessage() : "");
+            }
+            if (process.isRunning()) {
+                CLog.e("Cancel Python process and wait %d seconds.",
+                        TEST_ABORT_TIMEOUT_MSECS / 1000);
+                try {
+                    process.closeStdin();
+                    // Wait for the process to clean up and ignore the CommandStatus.
+                    // Propagate RunInterruptedException if this is interrupted again.
+                    process.waitForProcess(TEST_ABORT_TIMEOUT_MSECS);
+                } catch (IOException e) {
+                    CLog.e("Fail to cancel Python process.");
+                }
+            }
+            commandResult.setStatus(commandStatus);
+        } finally {
+            process.cleanUp();
+        }
+        commandResult.setStdout(process.getStdout());
+        commandResult.setStderr(process.getStderr());
+        return interruptMessage;
+    }
+
+    /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
      *
      * @param listener
-     * @param runUtil
-     * @param mTestCasePath
-     * @param mTestConfigPath
      * @throws RuntimeException
      * @throws IllegalArgumentException
      */
@@ -959,8 +1016,9 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         cmd = ArrayUtil.buildArray(baseOpts, testModule);
 
         printToDeviceLogcatAboutTestModuleStatus("BEGIN");
-        CommandResult commandResult =
-                mRunUtil.runTimedCmd(mTestTimeout + TEST_ABORT_TIMEOUT_MSECS, cmd);
+
+        CommandResult commandResult = new CommandResult();
+        String interruptMessage = runPythonRunner(cmd, commandResult);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
@@ -977,8 +1035,6 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.i("Standard output is: %s", commandResult.getStdout());
             CLog.i("Parsing test result: %s", commandResult.getStderr());
             printToDeviceLogcatAboutTestModuleStatus("END");
-        } else {
-            printToDeviceLogcatAboutTestModuleStatus("FRAMEWORK_ERROR");
         }
 
         VtsMultiDeviceTestResultParser parser =
@@ -1055,6 +1111,10 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (jsonFilePath != null) {
           FileUtil.deleteFile(new File(jsonFilePath));
           CLog.i("Deleted the runner json config file, %s.", jsonFilePath);
+        }
+
+        if (interruptMessage != null) {
+            throw new RunInterruptedException(interruptMessage);
         }
     }
 
