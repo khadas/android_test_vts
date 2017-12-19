@@ -19,5 +19,6 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.runners.host.tcp_server.callback_server_
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.coverage.coverage_report_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.build.pab_client_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.controllers.customflasher_test
+PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.build.build_flasher_test
 popd
 
