@@ -50,6 +50,8 @@ class BuildProviderLocalFS(build_provider.BuildProvider):
                         self.SetTestSuitePackage("vts", bin_path)
                 else:
                     print("The specified file doesn't exist, %s" % path)
+            elif path.endswith(".tar.md5"):
+                self.SetDeviceImage("img", path)
             else:
                 print("unsupported zip file %s" % path)
         return self.GetDeviceImage(), self.GetTestSuitePackage()
