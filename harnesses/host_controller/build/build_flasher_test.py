@@ -65,8 +65,36 @@ class BuildFlasherTest(unittest.TestCase):
     def testEmptySerial(self, mock_class):
         mock_class.list_adb_devices.return_value = ['oneserial']
         flasher = build_flasher.BuildFlasher(serial="")
-        mock_class.AndroidDevice.assert_called_with("oneserial",
-                                                    device_callback_port=-1)
+        mock_class.AndroidDevice.assert_called_with(
+            "oneserial", device_callback_port=-1)
+
+    @mock.patch(
+        "vts.harnesses.host_controller.build.build_flasher.android_device")
+    def testFlashUsingCustomBinary(self, mock_class):
+        """Test for FlashUsingCustomBinary().
+
+            Tests if the method passes right args to customflasher
+            and the execution path of the method.
+        """
+        mock_device = mock.Mock()
+        mock_class.AndroidDevice.return_value = mock_device
+        flasher = build_flasher.BuildFlasher("mySerial", "myCustomBinary")
+
+        mock_device.isBootloaderMode = False
+        device_images = {"img": "my/image/path"}
+        flasher.FlashUsingCustomBinary(device_images, "reboottowhatever",
+                                       "myarg")
+        mock_device.adb.reboot.assert_called_with("reboottowhatever")
+        mock_device.customflasher.myarg.assert_called_with("my/image/path")
+
+        mock_device.reset_mock()
+        mock_device.isBootloaderMode = True
+        device_images["img"] = "my/other/image/path"
+        flasher.FlashUsingCustomBinary(device_images, "reboottowhatever",
+                                       "myarg")
+        mock_device.adb.reboot.assert_not_called()
+        mock_device.customflasher.myarg.assert_called_with(
+            "my/other/image/path")
 
 
 if __name__ == "__main__":

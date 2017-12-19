@@ -175,31 +175,43 @@ class BuildFlasher(object):
 
     def FlashUsingCustomBinary(self,
                                device_images,
+                               reboot_mode,
+                               arg_flasher,
                                timeout_secs_for_reboot=900):
         """Flash the customized image to the device.
 
         Args:
             device_images: dict, where the key is partition name and value is
                            image file path.
+            reboot_mode: string, decides which mode device will reboot into.
+                         ("bootloader"/"download").
+            arg_flasher: string, argument that will be passed to the flash binary.
             timeout_secs_for_reboot: integer, the maximum timeout value for
                                      reboot to flash-able mode(unit: seconds).
 
         Returns:
             True if succesful; False otherwise.
         """
+        if not device_images:
+            logging.warn("Flash skipped because no device image is given.")
+            return False
+
         if not self.device.isBootloaderMode:
             self.device.adb.wait_for_device()
-            print("rebooting to download mode")
-            self.device.log.info(self.device.adb.reboot("download"))
+            print("rebooting to %s mode" % reboot_mode)
+            self.device.log.info(self.device.adb.reboot(reboot_mode))
 
         start = time.time()
         while not self.device.customflasher._l():
             if time.time() - start >= timeout_secs_for_reboot:
                 logging.error(
-                    "Timeout while waiting for download mode boot completion.")
+                    "Timeout while waiting for %s mode boot completion." %
+                    reboot_mode)
                 return False
             time.sleep(1)
 
+        arg = arg_flasher.replace('-', '_')
         self.device.log.info(
-            self.device.customflasher._a(device_images["img"]))
+            getattr(self.device.customflasher, arg)(device_images["img"]))
+
         return True
