@@ -33,6 +33,7 @@ from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
+from vts.utils.python.controllers import customflasher
 from vts.utils.python.controllers import sl4a_client
 from vts.utils.python.mirror import mirror_tracker
 
@@ -339,6 +340,8 @@ class AndroidDevice(object):
         adb: An AdbProxy object used for interacting with the device via adb.
         fastboot: A FastbootProxy object used for interacting with the device
                   via fastboot.
+        customflasher: A CustomFlasherProxy object used for interacting with
+                       the device via user defined flashing binary.
         host_command_port: the host-side port for runner to agent sessions
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
@@ -359,8 +362,9 @@ class AndroidDevice(object):
         self._product_type = product_type
         self.device_command_port = None
         self.device_callback_port = device_callback_port
-        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
-                                              {"serial": self.serial})
+        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(), {
+            "serial": self.serial
+        })
         base_log_path = getattr(logging, "log_path", "/tmp/logs/")
         self.log_path = os.path.join(base_log_path, "AndroidDevice%s" % serial)
         self.adb_logcat_process = None
@@ -368,6 +372,7 @@ class AndroidDevice(object):
         self.vts_agent_process = None
         self.adb = adb.AdbProxy(serial)
         self.fastboot = fastboot.FastbootProxy(serial)
+        self.customflasher = customflasher.CustomFlasherProxy(serial)
         if not self.isBootloaderMode:
             self.rootAdb()
         self.host_command_port = None
@@ -385,6 +390,14 @@ class AndroidDevice(object):
 
     def __del__(self):
         self.cleanUp()
+
+    def SetCustomFlasherPath(self, customflasher_path):
+        """Sets customflasher path to use to flash the device.
+
+        Args:
+            customflasher_path: string, path to user-spcified flash binary.
+        """
+        self.customflasher.SetCustomBinaryPath(customflasher_path)
 
     def cleanUp(self):
         """Cleans up the AndroidDevice object and releases any resources it
@@ -792,8 +805,8 @@ class AndroidDevice(object):
                 self.host_command_port = adb.get_available_host_port()
             self.adb.tcp_forward(self.host_command_port,
                                  self.device_command_port)
-            self.hal = mirror_tracker.MirrorTracker(self.host_command_port,
-                                            self.host_callback_port, True)
+            self.hal = mirror_tracker.MirrorTracker(
+                self.host_command_port, self.host_callback_port, True)
             self.lib = mirror_tracker.MirrorTracker(self.host_command_port)
             self.shell = mirror_tracker.MirrorTracker(
                 host_command_port=self.host_command_port, adb=self.adb)
@@ -858,21 +871,19 @@ class AndroidDevice(object):
         for bitness in bits:
             vts_agent_log_path = os.path.join(self.log_path,
                                               "vts_agent_" + bitness + ".log")
-            cmd = (
-                'adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
-                '{path}/{bitness}/vts_hal_agent{bitness} '
-                '--hal_driver_path_32={path}/32/vts_hal_driver32 '
-                '--hal_driver_path_64={path}/64/vts_hal_driver64 '
-                '--spec_dir={path}/spec '
-                '--shell_driver_path_32={path}/32/vts_shell_driver32 '
-                '--shell_driver_path_64={path}/64/vts_shell_driver64 '
-                '-l {severity} >> {log} 2>&1'
-            ).format(
-                s=self.serial,
-                bitness=bitness,
-                path=DEFAULT_AGENT_BASE_DIR,
-                log=vts_agent_log_path,
-                severity=log_severity)
+            cmd = ('adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
+                   '{path}/{bitness}/vts_hal_agent{bitness} '
+                   '--hal_driver_path_32={path}/32/vts_hal_driver32 '
+                   '--hal_driver_path_64={path}/64/vts_hal_driver64 '
+                   '--spec_dir={path}/spec '
+                   '--shell_driver_path_32={path}/32/vts_shell_driver32 '
+                   '--shell_driver_path_64={path}/64/vts_shell_driver64 '
+                   '-l {severity} >> {log} 2>&1').format(
+                       s=self.serial,
+                       bitness=bitness,
+                       path=DEFAULT_AGENT_BASE_DIR,
+                       log=vts_agent_log_path,
+                       severity=log_severity)
             try:
                 self.vts_agent_process = utils.start_standing_subprocess(
                     cmd, check_health_delay=1)
@@ -1034,8 +1045,8 @@ class AndroidDevice(object):
     @property
     def droid(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if not hasattr(self,
-                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self, "_sl4a_sessions") or len(
+                self._sl4a_sessions) == 0:
             return None
         try:
             session_id = sorted(self._sl4a_sessions)[0]
@@ -1049,8 +1060,8 @@ class AndroidDevice(object):
     @property
     def droids(self):
         """A list of the active SL4A sessions on this device."""
-        if not hasattr(self,
-                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self, "_sl4a_sessions") or len(
+                self._sl4a_sessions) == 0:
             return None
         keys = sorted(self._sl4a_sessions)
         results = []
@@ -1061,8 +1072,8 @@ class AndroidDevice(object):
     @property
     def ed(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if (not hasattr(self, "_sl4a_event_dispatchers") or
-                len(self._sl4a_event_dispatchers) == 0):
+        if (not hasattr(self, "_sl4a_event_dispatchers")
+                or len(self._sl4a_event_dispatchers) == 0):
             return None
         logging.info("self._sl4a_event_dispatchers: %s",
                      self._sl4a_event_dispatchers)
