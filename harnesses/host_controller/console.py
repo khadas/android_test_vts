@@ -495,6 +495,13 @@ class Console(cmd.Cmd):
             help="Flasher binary type")
         self._flash_parser.add_argument(
             "--flasher_path", help="Path to flasher binary")
+        self._flash_parser.add_argument(
+            "--reboot_mode",
+            default="bootloader",
+            choices=("bootloader", "download"),
+            help="Reboot device to bootloader/download mode")
+        self._flash_parser.add_argument(
+            "--arg_flasher", help="Argument passed to the custom binary")
 
     def do_flash(self, line):
         """Flash GSI or build images to a device connected with ADB."""
@@ -540,7 +547,8 @@ class Console(cmd.Cmd):
                     elif args.flasher_type == "custom":
                         if args.flasher_path is not None:
                             flasher.FlashUsingCustomBinary(
-                                self.device_image_info, 300)
+                                self.device_image_info, args.reboot_mode,
+                                args.arg_flasher, 300)
                         else:
                             self._flash_parser.error(
                                 "Please specify the path to custom flash tool."
@@ -549,6 +557,7 @@ class Console(cmd.Cmd):
                         self._flash_parser.error(
                             "Wrong flasher type requested: --flasher_type=%s" %
                             args.flasher_type)
+
             for flasher in flashers:
                 flasher.WaitForDevice()
 
