@@ -502,6 +502,11 @@ class Console(cmd.Cmd):
             help="Reboot device to bootloader/download mode")
         self._flash_parser.add_argument(
             "--arg_flasher", help="Argument passed to the custom binary")
+        self._flash_parser.add_argument(
+            "--repackage",
+            default="tar.md5",
+            choices=("tar.md5"),
+            help="Repackage artifacts into given format before flashing.")
 
     def do_flash(self, line):
         """Flash GSI or build images to a device connected with ADB."""
@@ -546,6 +551,9 @@ class Console(cmd.Cmd):
                             flasher.FlashGSI(args.gsi, args.vbmeta)
                     elif args.flasher_type == "custom":
                         if args.flasher_path is not None:
+                            if args.repackage is not None:
+                                flasher.RepackageArtifacts(
+                                    self.device_image_info, args.repackage)
                             flasher.FlashUsingCustomBinary(
                                 self.device_image_info, args.reboot_mode,
                                 args.arg_flasher, 300)
