@@ -107,6 +107,7 @@ class Console(cmd.Cmd):
         device_image_info: dict containing info about device image files.
         prompt: The prompt string at the beginning of each command line.
         test_suite_info: dict containing info about test suite package files.
+        tools_info: dict containing info about custom tool files.
         update_thread: threading.Thread that updates device state regularly
         _pab_client: The PartnerAndroidBuildClient used to download artifacts
         _tfc_client: The TfcClient that the host controllers connect to.
@@ -145,6 +146,7 @@ class Console(cmd.Cmd):
         self.prompt = "> "
         self.device_image_info = {}
         self.test_suite_info = {}
+        self.tools_info = {}
         self.update_thread = None
 
         self._InitCopyParser()
@@ -368,6 +370,8 @@ class Console(cmd.Cmd):
             "--userinfo_file",
             help=
             "Location of file containing email and password, if using POST.")
+        self._fetch_parser.add_argument(
+            "--tool", help="The path of custom tool to be fetched from GCS.")
 
     def do_fetch(self, line):
         """Makes the host download a build artifact from PAB."""
@@ -383,9 +387,12 @@ class Console(cmd.Cmd):
                     artifact_name=args.artifact_name,
                     build_id=args.build_id,
                     method=args.method)
-        elif args.type == "local_fs" or args.type == "gcs":
+        elif args.type == "local_fs":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 args.path)
+        elif args.type == "gcs":
+            device_images, test_suites, tools = self._build_provider[
+                args.type].Fetch(args.path, args.tool)
         elif args.type == "ab":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 branch=args.branch,
@@ -398,6 +405,7 @@ class Console(cmd.Cmd):
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
+        self.tools_info.update(tools)
 
         if self.device_image_info:
             logging.info("device images:\n%s", "\n".join(
@@ -512,17 +520,21 @@ class Console(cmd.Cmd):
         """Flash GSI or build images to a device connected with ADB."""
         args = self._flash_parser.ParseLine(line)
 
+        if self.tools_info is not None:
+            flasher_path = self.tools_info[args.flasher_path]
+        else:
+            flasher_path = args.flasher_path
+
         flashers = []
         if args.serial:
-            flasher = build_flasher.BuildFlasher(args.serial,
-                                                 args.flasher_path)
+            flasher = build_flasher.BuildFlasher(args.serial, flasher_path)
             flashers.append(flasher)
         elif self._serials:
             for serial in self._serials:
-                flasher = build_flasher.BuildFlasher(serial, args.flasher_path)
+                flasher = build_flasher.BuildFlasher(serial, flasher_path)
                 flashers.append(flasher)
         else:
-            flasher = build_flasher.BuildFlasher("", args.flasher_path)
+            flasher = build_flasher.BuildFlasher("", flasher_path)
             flashers.append(flasher)
 
         if args.current:
@@ -550,7 +562,7 @@ class Console(cmd.Cmd):
                         if args.gsi is not None:
                             flasher.FlashGSI(args.gsi, args.vbmeta)
                     elif args.flasher_type == "custom":
-                        if args.flasher_path is not None:
+                        if flasher_path is not None:
                             if args.repackage is not None:
                                 flasher.RepackageArtifacts(
                                     self.device_image_info, args.repackage)
