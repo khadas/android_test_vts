@@ -140,7 +140,6 @@
     <option name="compatibility:include-filter" value="CtsDisplayTestCases" />
     <option name="compatibility:include-filter" value="CtsDpiTestCases" />
     <option name="compatibility:include-filter" value="CtsDpiTestCases2" />
-    <option name="compatibility:include-filter" value="CtsDramTestCases" />
     <option name="compatibility:include-filter" value="CtsDreamsTestCases" />
     <option name="compatibility:include-filter" value="CtsDrmTestCases" />
     <option name="compatibility:include-filter" value="CtsDumpsysHostTestCases" />
