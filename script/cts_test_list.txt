@@ -40,7 +40,6 @@ CtsDevicePolicyManagerTestCases
 CtsDisplayTestCases
 CtsDpiTestCases
 CtsDpiTestCases2
-CtsDramTestCases
 CtsDreamsTestCases
 CtsDrmTestCases
 CtsDumpsysHostTestCases
