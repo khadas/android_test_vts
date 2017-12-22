@@ -13,9 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Main Test Plan">
-  <include name="vts-base-common" />
+<configuration description="Config for VTS CodeLab HelloWorld test case">
+    <multi_target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
+    </multi_target_preparer>
 
-  <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsCodelabHelloWorldMultiDeviceTest"/>
+        <option name="test-case-path" value="vts/testcases/codelab/hello_world_multi/VtsCodelabHelloWorldMultiDeviceTest" />
+    </test>
+
 </configuration>
