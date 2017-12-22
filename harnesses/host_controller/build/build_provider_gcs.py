@@ -52,48 +52,54 @@ class BuildProviderGCS(build_provider.BuildProvider):
             True if gs_path is a file, False otherwise.
         """
         check_command = "%s stat %s" % (gsutil_path, gs_path)
-        _, _, ret_code = cmd_utils.ExecuteOneShellCommand(
-            check_command)
+        _, _, ret_code = cmd_utils.ExecuteOneShellCommand(check_command)
         return ret_code == 0
 
-    def Fetch(self, path):
+    def Fetch(self, path, tool=None):
         """Fetches Android device artifact file(s) from GCS.
 
         Args:
             path: string, the path of a directory which keeps artifacts.
+            tool: string, the path of a custom tool to be fetched from GCS.
 
         Returns:
             a dict containing the device image info.
             a dict containing the test suite package info.
+            a dict containing the info about custom tool files.
         """
         if not path.startswith("gs://"):
             path = "gs://" + re.sub("^/*", "", path)
         path = re.sub("/*$", "", path)
-
+        if tool is not None:
+            path = os.path.join(path, re.sub("/*$", "", tool))
+        tools_info = {}
         # make sure gsutil is available. Instead of a Python library,
         # gsutil binary is used that is to avoid packaging GCS PIP package
         # as part of VTS HC (Host Controller).
         gsutil_path = BuildProviderGCS.GetGsutilPath()
         if gsutil_path:
             temp_dir_path = self.CreateNewTmpDir()
-            if not BuildProviderGCS.IsGcsFile(gsutil_path, path):  # directory (not exist)
-                copy_command = "%s cp -r %s/* %s" % (
-                    gsutil_path, path, temp_dir_path)
-                _, _, ret_code = cmd_utils.ExecuteOneShellCommand(
-                    copy_command)
+            if not BuildProviderGCS.IsGcsFile(gsutil_path,
+                                              path):  # directory (not exist)
+                copy_command = "%s cp -r %s/* %s" % (gsutil_path, path,
+                                                     temp_dir_path)
+                _, _, ret_code = cmd_utils.ExecuteOneShellCommand(copy_command)
                 if ret_code == 0:
                     self.SetDeviceImagesInDirecotry(temp_dir_path)
                 else:
                     print("Error in copy files from GCS (code %s)." % ret_code)
             else:
-                copy_command = "%s cp %s %s" % (
-                    gsutil_path, path, temp_dir_path)
-                _, _, ret_code = cmd_utils.ExecuteOneShellCommand(
-                    copy_command)
+                copy_command = "%s cp %s %s" % (gsutil_path, path,
+                                                temp_dir_path)
+                _, _, ret_code = cmd_utils.ExecuteOneShellCommand(copy_command)
                 dest_file_path = os.path.join(temp_dir_path,
                                               os.path.basename(path))
                 if ret_code == 0:
-                    self.SetTestSuitePackage("vts", dest_file_path)
+                    if tool is None:
+                        self.SetTestSuitePackage("vts", dest_file_path)
+                    else:
+                        os.chmod(dest_file_path, 0755)
+                        tools_info[os.path.basename(tool)] = dest_file_path
                 else:
                     print("Error in copy file from GCS (code %s)." % ret_code)
-        return self.GetDeviceImage(), self.GetTestSuitePackage()
+        return self.GetDeviceImage(), self.GetTestSuitePackage(), tools_info

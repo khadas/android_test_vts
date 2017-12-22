@@ -15,11 +15,16 @@
 #
 """Class to flash build artifacts onto devices"""
 
+import hashlib
 import logging
 import os
+import resource
+import sys
+import tempfile
 import time
 
 from vts.harnesses.host_controller.build import build_provider
+from vts.utils.python.common import cmd_utils
 from vts.utils.python.controllers import android_device
 
 
@@ -213,5 +218,71 @@ class BuildFlasher(object):
         arg = arg_flasher.replace('-', '_')
         self.device.log.info(
             getattr(self.device.customflasher, arg)(device_images["img"]))
+
+        return True
+
+    def RepackageArtifacts(self, device_images, repackage_form):
+        """Repackage artifacts into a given format.
+
+        Once repackaged, device_images becomes
+        {"img": "path_to_repackaged_image"}
+
+        Args:
+            device_images: dict, where the key is partition name and value is
+                           image file path.
+            repackage_form: string, format to repackage.
+
+        Returns:
+            True if succesful; False otherwise.
+        """
+        if not device_images:
+            logging.warn("Repackage skipped because no device image is given.")
+            return False
+
+        if repackage_form == "tar.md5":
+            tmp_file_name = next(tempfile._get_candidate_names()) + ".tar"
+            tmp_dir_path = os.path.dirname(
+                device_images[device_images.keys()[0]])
+
+            current_dir = os.getcwd()
+            os.chdir(tmp_dir_path)
+
+            if sys.platform == "linux2":
+                tar_cmd = "tar -cf %s %s" % (tmp_file_name, ' '.join(
+                    (device_images.keys())))
+            else:
+                logging.error("Unsupported OS for the given repackage form.")
+                return False
+            logging.info(tar_cmd)
+            std_out, std_err, err_code = cmd_utils.ExecuteOneShellCommand(
+                tar_cmd)
+            if err_code:
+                logging.error(std_err)
+                return False
+
+            hash_md5 = hashlib.md5()
+            try:
+                with open(tmp_file_name, "rb") as file:
+                    data_chunk = 0
+                    chunk_size = resource.getpagesize()
+                    while data_chunk != b'':
+                        data_chunk = file.read(chunk_size)
+                        hash_md5.update(data_chunk)
+                    hash_ret = hash_md5.hexdigest()
+                with open(tmp_file_name, "a") as file:
+                    file.write("%s  %s" % (hash_ret, tmp_file_name))
+            except IOError as e:
+                logging.error(e.strerror)
+                return False
+
+            device_images.clear()
+            device_images["img"] = os.path.join(tmp_dir_path, tmp_file_name)
+
+            os.chdir(current_dir)
+        else:
+            logging.error(
+                "Please specify correct repackage form: --repackage=%s" %
+                repackage_form)
+            return False
 
         return True
