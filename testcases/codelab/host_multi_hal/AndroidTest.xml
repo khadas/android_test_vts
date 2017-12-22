@@ -25,8 +25,8 @@
         <option name="push" value="DATA/lib/android.hardware.light@2.0-vts.driver.so->/data/local/tmp/32/android.hardware.light@2.0-vts.driver.so"/>
         <option name="push" value="DATA/lib64/android.hardware.light@2.0-vts.driver.so->/data/local/tmp/64/android.hardware.light@2.0-vts.driver.so"/>
     </target_preparer>
-    <target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-    </target_preparer>
+    <multi_target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
+    </multi_target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsCodelabHostDrivenMultiHalTest" />
         <option name="test-case-path" value="vts/testcases/codelab/host_multi_hal/VtsCodelabHostMultiHalTest" />
