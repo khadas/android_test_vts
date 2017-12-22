@@ -76,6 +76,7 @@ class BinaryTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
             keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
             keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
+            keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -170,11 +171,19 @@ class BinaryTest(base_test.BaseTestClass):
         # TODO: only set permissive mode for userdebug and eng build.
         self.shell.Execute("setenforce 0")  # SELinux permissive mode
 
-        if not precondition_utils.CanRunHidlHalTest(self, self._dut,
-                                                    self.shell):
+        self.testcases = []
+        if not precondition_utils.CheckSysPropPrecondition(
+                self, self._dut, self.shell):
+            logging.info('Precondition sysprop not met; '
+                         'all tests skipped.')
             self._skip_all_testcases = True
 
-        self.testcases = []
+        if not self._skip_all_testcases:
+            ret = precondition_utils.CanRunHidlHalTest(
+                self, self._dut, self.shell)
+            if not ret:
+                self._skip_all_testcases = True
+
         self.tags = set()
         self.CreateTestCases()
         cmd = list(
