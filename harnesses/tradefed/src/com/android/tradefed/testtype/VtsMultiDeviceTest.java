@@ -1163,19 +1163,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         }
         printVtsLogs(vtsRunnerLogDir);
 
-        File reportMsg;
-        int waitCount = 0;
-        // Wait python process to finish for 3 minutes at most
-        while ((reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME)) == null
-                && waitCount < 180) {
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-            waitCount++;
-        }
-
+        File reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME);
         CLog.i("Report message path: %s", reportMsg);
 
         if (reportMsg == null) {
