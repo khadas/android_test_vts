@@ -116,6 +116,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PRECONDITION_FEATURE = "precondition_feature";
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
     static final String PRECONDITION_LSHAL = "precondition_lshal";
+    static final String PRECONDITION_SYSPROP = "precondition_sysprop";
     static final String PRECONDITION_VINTF = "precondition_vintf";
     static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths";
@@ -177,6 +178,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     + "needed to run the test (e.g., android.hardware.graphics.mapper@2.0). "
                     + "this can override precondition-lshal option.")
     private String mPreconditionVintf = null;
+
+    @Option(name = "precondition-sysprop",
+            description = "The name=value for a system property configuration that needs "
+                    + "to be met to run the test.")
+    private String mPreconditionSysProp = null;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -740,6 +746,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         if (mPreconditionVintf != null) {
             jsonObject.put(PRECONDITION_VINTF, mPreconditionVintf);
             CLog.i("Added %s to the Json object", PRECONDITION_VINTF);
+        }
+
+        if (mPreconditionSysProp != null) {
+            jsonObject.put(PRECONDITION_SYSPROP, mPreconditionSysProp);
+            CLog.i("Added %s to the Json object", PRECONDITION_SYSPROP);
         }
 
         if (!mBinaryTestProfilingLibraryPath.isEmpty()) {
