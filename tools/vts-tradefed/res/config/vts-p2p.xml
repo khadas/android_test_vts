@@ -37,4 +37,7 @@
 
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-p2p" />
 
+  <!-- VtsNbuBle is not verified as a stable test module yet -->
+  <option name="compatibility:exclude-filter" value="VtsNbuBle" />
+
 </configuration>
