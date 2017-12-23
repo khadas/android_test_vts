@@ -208,16 +208,16 @@ class CpuFrequencyScalingController(object):
                 return False
             configurable_max_frequency = results[const.STDOUT][0].strip()
             current_frequency = results[const.STDOUT][1].strip()
-            if configurable_max_frequency != current_frequency:
+            if configurable_max_frequency > current_frequency:
                 logging.error(
-                    "CPU%s: Configurable max frequency %s != current frequency %s",
+                    "CPU%s: Configurable max frequency %s > current frequency %s",
                     cpu_no, configurable_max_frequency, current_frequency)
                 return True
             theoretical_max_frequency = self._GetTheoreticalMaxFrequency(cpu_no)
             if (theoretical_max_frequency is not None and
-                theoretical_max_frequency != int(current_frequency)):
+                theoretical_max_frequency > int(current_frequency)):
                 logging.error(
-                    "CPU%s, Theoretical max frequency %d != scaling current frequency %s",
+                    "CPU%s, Theoretical max frequency %d > scaling current frequency %s",
                     cpu_no, theoretical_max_frequency, current_frequency)
                 return True
         return False
