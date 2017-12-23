@@ -16,6 +16,7 @@
 #
 
 import unittest
+
 from vts.harnesses.host_controller.build import build_flasher
 
 try:
@@ -95,6 +96,38 @@ class BuildFlasherTest(unittest.TestCase):
         mock_device.adb.reboot.assert_not_called()
         mock_device.customflasher.myarg.assert_called_with(
             "my/other/image/path")
+
+    @mock.patch(
+        "vts.harnesses.host_controller.build.build_flasher.android_device")
+    @mock.patch("vts.harnesses.host_controller.build.build_flasher.logging")
+    @mock.patch("vts.harnesses.host_controller.build.build_flasher.cmd_utils")
+    @mock.patch("vts.harnesses.host_controller.build.build_flasher.os")
+    @mock.patch(
+        "vts.harnesses.host_controller.build.build_flasher.open",
+        new_callable=mock.mock_open)
+    def testRepackageArtifacts(self, mock_open, mock_os, mock_cmd_utils,
+                               mock_logger, mock_class):
+        """Test for RepackageArtifacts().
+
+            Tests if the method executes in correct path regarding
+            given arguments.
+        """
+        mock_device = mock.Mock()
+        mock_class.AndroidDevice.return_value = mock_device
+        flasher = build_flasher.BuildFlasher("serial")
+        device_images = {
+            "system.img": "/my/tmp/path/system.img",
+            "vendor.img": "/my/tmp/path/vendor.img"
+        }
+        mock_cmd_utils.ExecuteOneShellCommand.return_value = "", "", 0
+        ret = flasher.RepackageArtifacts(device_images, "tar.md5")
+        self.assertEqual(ret, True)
+        self.assertIsNotNone(device_images["img"])
+
+        ret = flasher.RepackageArtifacts(device_images, "incorrect")
+        self.assertFalse(ret)
+        mock_logger.error.assert_called_with(
+            "Please specify correct repackage form: --repackage=incorrect")
 
 
 if __name__ == "__main__":
