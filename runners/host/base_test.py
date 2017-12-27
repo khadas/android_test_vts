@@ -139,7 +139,7 @@ class BaseTestClass(object):
             keys.ConfigKeys.KEY_EXCLUDE_OVER_INCLUDE, default_value=None)
         self.test_module_name = self.getUserParam(
             keys.ConfigKeys.KEY_TESTBED_NAME,
-            log_warning_and_continue_if_not_found=True,
+            warn_if_not_found=True,
             default_value=self.__class__.__name__)
         self.test_filter = filter_utils.Filter(
             self.include_filter,
@@ -244,13 +244,15 @@ class BaseTestClass(object):
     def getUserParam(self,
                      param_name,
                      error_if_not_found=False,
-                     log_warning_and_continue_if_not_found=False,
+                     warn_if_not_found=False,
                      default_value=None,
                      to_str=False):
         """Get the value of a single user parameter.
 
         This method returns the value of specified user parameter.
-        Note: this method will not automatically set attribute using the parameter name and value.
+
+        Note: unlike getUserParams(), this method will not automatically set
+              attribute using the parameter name and value.
 
         Args:
             param_name: string or list of string, denoting user parameter names. If provided
@@ -258,18 +260,21 @@ class BaseTestClass(object):
                         If provided multiple strings,
                         self.user_params["<param_name1>"]["<param_name2>"]["<param_name3>"]...
                         will be accessed.
-            error_if_not_found: bool, whether to raise error if parameter not exists. Default:
-                                False
-            log_warning_and_continue_if_not_found: bool, log a warning message if parameter value
-                                                   not found.
-            default_value: object, default value to return if not found. If error_if_not_found is
-                           True, this parameter has no effect. Default: None
-            to_str: boolean, whether to convert the result object to string if not None.
-                    Note, strings passing in from java json config are usually unicode.
+            error_if_not_found: bool, whether to raise error if parameter not
+                                exists. Default: False
+            warn_if_not_found: bool, log a warning message if parameter value
+                               not found. Default: False
+            default_value: object, default value to return if not found.
+                           If error_if_not_found is true, this parameter has no
+                           effect. Default: None
+            to_str: boolean, whether to convert the result object to string if
+                    not None.
+                    Note, strings passing in from java json config are often
+                    unicode.
 
         Returns:
             object, value of the specified parameter name chain if exists;
-            <default_value> if not exists.
+            <default_value> otherwise.
         """
 
         def ToStr(return_value):
@@ -290,15 +295,92 @@ class BaseTestClass(object):
         curr_obj = self.user_params
         for param in param_name:
             if param not in curr_obj:
-                msg = "Missing user param '%s' in test configuration." % param_name
+                msg = ("Missing user param '%s' in test configuration.\n"
+                       "User params: %s") % (param_name, self.user_params)
                 if error_if_not_found:
                     raise errors.BaseTestError(msg)
-                elif log_warning_and_continue_if_not_found:
+                elif warn_if_not_found:
                     logging.warn(msg)
                 return ToStr(default_value)
             curr_obj = curr_obj[param]
 
         return ToStr(curr_obj)
+
+    def _getUserConfig(self,
+                       config_type,
+                       key,
+                       default_value=None,
+                       error_if_not_found=False,
+                       warn_if_not_found=False,
+                       to_str=False):
+        """Get the value of a user config given the key.
+
+        This method returns the value of specified user config type.
+
+        Args:
+            config_type: string, type of user config
+            key: string, key of the value string in string config map.
+            default_value: object, default value to return if not found.
+                           If error_if_not_found is true, this parameter has no
+                           effect. Default: None
+            error_if_not_found: bool, whether to raise error if parameter not
+                                exists. Default: False
+            warn_if_not_found: bool, log a warning message if parameter value
+                               not found. Default: False
+            to_str: boolean, whether to apply str() method to result value
+                    if result is not None.
+                    Note, strings passing in from java json config are ofen
+                    unicode.
+
+        Returns:
+            Value in config matching the given key and type if exists;
+            <default_value> otherwise.
+        """
+        dic = self.getUserParam(config_type,
+                                error_if_not_found=False,
+                                warn_if_not_found=False,
+                                default_value=None,
+                                to_str=False)
+
+        if dic is None or key not in dic:
+            msg = ("Config key %s not found in user config type %s.\n"
+                   "User params: %s") % (key, config_type, self.user_params)
+            if error_if_not_found:
+                raise errors.BaseTestError(msg)
+            elif warn_if_not_found:
+                logging.warn(msg)
+
+            return default_value
+
+        return dic[key] if not to_str else str(dic[key])
+
+    def getUserConfigStr(self, key, **kwargs):
+        """Get the value of a user config string given the key.
+
+        See _getUserConfig method for more details.
+        """
+        kwargs["to_str"] = True
+        return self._getUserConfig(keys.ConfigKeys.IKEY_USER_CONFIG_STR,
+                                   key,
+                                   **kwargs)
+
+    def getUserConfigInt(self, key, **kwargs):
+        """Get the value of a user config int given the key.
+
+        See _getUserConfig method for more details.
+        """
+        return self._getUserConfig(keys.ConfigKeys.IKEY_USER_CONFIG_INT,
+                                   key,
+                                   **kwargs)
+
+    def getUserConfigBool(self, key, **kwargs):
+        """Get the value of a user config bool given the key.
+
+        See _getUserConfig method for more details.
+        """
+        return self._getUserConfig(keys.ConfigKeys.IKEY_USER_CONFIG_BOOL,
+                                   key,
+                                   **kwargs)
 
     def _setUpClass(self):
         """Proxy function to guarantee the base implementation of setUpClass

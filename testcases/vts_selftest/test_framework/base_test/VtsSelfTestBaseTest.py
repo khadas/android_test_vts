@@ -86,6 +86,61 @@ class VtsSelfTestBaseTest(base_test.BaseTestClass):
         asserts.assertTrue(self.dut.total_memory > 0,
                            'Failed to get device memory info.')
 
+    def test_getUserConfigStr1(self):
+        '''Test getUserConfigStr.'''
+        asserts.assertEqual(self.getUserConfigStr('a'), 'a')
+
+    def test_getUserConfigStr2(self):
+        '''Test getUserConfigStr.'''
+        asserts.assertEqual(self.getUserConfigStr('b'), 'b')
+
+    def test_getUserConfigStr3(self):
+        '''Test getUserConfigStr.'''
+        asserts.assertEqual(self.getUserConfigStr('c'), None)
+
+    def test_getUserConfigStr4(self):
+        '''Test getUserConfigStr.'''
+        asserts.assertEqual(self.getUserConfigStr('c', to_str=True), None)
+
+    def test_getUserConfigInt1(self):
+        '''Test getUserConfigInt.'''
+        asserts.assertEqual(self.getUserConfigInt('a'), 1)
+
+    def test_getUserConfigInt2(self):
+        '''Test getUserConfigInt.'''
+        asserts.assertEqual(self.getUserConfigInt('b'), 2)
+
+    def test_getUserConfigInt3(self):
+        '''Test getUserConfigInt.'''
+        asserts.assertEqual(self.getUserConfigInt('b', to_str=True), '2')
+
+    def test_getUserConfigInt4(self):
+        '''Test getUserConfigInt.'''
+        asserts.assertEqual(self.getUserConfigInt('c'), None)
+
+    def test_getUserConfigInt5(self):
+        '''Test getUserConfigInt.'''
+        asserts.assertEqual(self.getUserConfigInt('c', to_str=True), None)
+
+    def test_getUserConfigBool1(self):
+        '''Test getUserConfigBool.'''
+        asserts.assertEqual(self.getUserConfigBool('a'), True)
+
+    def test_getUserConfigBool2(self):
+        '''Test getUserConfigBool.'''
+        asserts.assertEqual(self.getUserConfigBool('b'), False)
+
+    def test_getUserConfigBool3(self):
+        '''Test getUserConfigBool.'''
+        asserts.assertEqual(self.getUserConfigBool('b', to_str=True), 'False')
+
+    def test_getUserConfigBool4(self):
+        '''Test getUserConfigBool.'''
+        asserts.assertEqual(self.getUserConfigBool('c'), None)
+
+    def test_getUserConfigBool5(self):
+        '''Test getUserConfigBool.'''
+        asserts.assertEqual(self.getUserConfigBool('c', to_str=True), None)
 
 if __name__ == "__main__":
     test_runner.main()
