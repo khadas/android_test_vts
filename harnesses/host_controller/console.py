@@ -393,6 +393,7 @@ class Console(cmd.Cmd):
         elif args.type == "gcs":
             device_images, test_suites, tools = self._build_provider[
                 args.type].Fetch(args.path, args.tool)
+            self.tools_info.update(tools)
         elif args.type == "ab":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 branch=args.branch,
@@ -405,7 +406,6 @@ class Console(cmd.Cmd):
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
-        self.tools_info.update(tools)
 
         if self.device_image_info:
             logging.info("device images:\n%s", "\n".join(
