@@ -20,5 +20,6 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.coverage.coverage_report_te
 PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.build.pab_client_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.controllers.customflasher_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.build.build_flasher_test
+PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.console_test
 popd
 
