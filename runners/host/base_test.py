@@ -397,7 +397,7 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(record.test_name, begin_time)
         if self._bug_report_on_failure:
-            self.CatchBugReport('%s-%s' % (self.TAG, record.test_name))
+            self.DumpBugReport('%s-%s' % (self.TAG, record.test_name))
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -490,7 +490,7 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
         self.onException(test_name, begin_time)
         if self._bug_report_on_failure:
-            self.CatchBugReport('%s-%s' % (self.TAG, record.test_name))
+            self.DumpBugReport('%s-%s' % (self.TAG, record.test_name))
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -947,7 +947,7 @@ class BaseTestClass(object):
         user.
         """
 
-    def CatchBugReport(self, prefix=''):
+    def DumpBugReport(self, prefix=''):
         """Get device bugreport through adb command.
 
         Args:
@@ -957,12 +957,14 @@ class BaseTestClass(object):
         if prefix:
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
-        for i in range(len(self.android_devices)):
-            device = self.android_devices[i]
-            bug_report_file_name = prefix + _BUG_REPORT_FILE_PREFIX + str(
-                i) + _BUG_REPORT_FILE_EXTENSION
+        for device in self.android_devices:
+            bug_report_file_name = (prefix
+                                    + _BUG_REPORT_FILE_PREFIX
+                                    + device.serial
+                                    + _BUG_REPORT_FILE_EXTENSION)
+
             bug_report_file_path = os.path.join(logging.log_path,
                                                 bug_report_file_name)
 
-            logging.info('Catching bugreport %s' % bug_report_file_path)
+            logging.info('Catching bugreport %s...' % bug_report_file_path)
             device.adb.bugreport(bug_report_file_path)
