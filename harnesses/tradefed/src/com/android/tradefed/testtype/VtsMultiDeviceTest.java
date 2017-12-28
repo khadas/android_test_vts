@@ -1287,7 +1287,11 @@ public class VtsMultiDeviceTest
         if (children != null) {
             for (File child : children) {
                 if (child.isDirectory()) {
-                    printVtsLogs(child);
+                    if (!child.getName().equals("temp")) {
+                        // temp in python log directory is for temp files produced by test module
+                        // and thus should not be included in log printout
+                        printVtsLogs(child);
+                    }
                 } else {
                     CLog.i("VTS log file %s\n", child.getAbsolutePath());
                     try {
