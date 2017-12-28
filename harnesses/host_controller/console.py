@@ -410,8 +410,8 @@ class Console(cmd.Cmd):
             print("ERROR: unknown fetch type %s" % args.type)
             sys.exit(-1)
 
-        fetch_info["branch"] = args.branch
-        fetch_info["target"] = args.target
+        self.fetch_info["branch"] = args.branch
+        self.fetch_info["target"] = args.target
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)
