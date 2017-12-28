@@ -1242,10 +1242,10 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * This method return the file test_run_details.txt which is then used to parse logs.
+     * This method return the file test_run_summary.json which is then used to parse logs.
      *
      * @param logDir : The file that needs to be converted
-     * @return the file named test_run_details.txt
+     * @return the file named test_run_summary.json
      * @throws IllegalArgumentException
      */
     private File getFileTestRunSummary(File logDir) throws IllegalArgumentException {
