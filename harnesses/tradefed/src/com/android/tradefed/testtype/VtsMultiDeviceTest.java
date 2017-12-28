@@ -109,8 +109,9 @@ public class VtsMultiDeviceTest
     static final String BINARY_TEST_TYPE_HAL_HIDL_GTEST = "hal_hidl_gtest";
     static final String BINARY_TEST_TYPE_HAL_HIDL_REPLAY_TEST = "hal_hidl_replay_test";
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
-    static final String BUG_REPORT_ON_FAILURE = "bug_report_on_failure";
+    static final String BUG_REPORT_ON_FAILURE = "BUG_REPORT_ON_FAILURE";
     static final String COLLECT_TESTS_ONLY = "collect_tests_only";
+    static final String LOGCAT_ON_FAILURE = "LOGCAT_ON_FAILURE";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String EXCLUDE_COVERAGE_PATH = "exclude_coverage_path";
     static final String ENABLE_PROFILING = "enable_profiling";
@@ -370,9 +371,15 @@ public class VtsMultiDeviceTest
 
     @Option(name = "bug-report-on-failure",
             description = "To catch bugreport zip file at the end of failed test cases. "
-                    + "If set to true, a report will be caught through adh shell command at the end of each failed "
-                    + "test cases.")
+                    + "If set to true, a report will be caught through adh shell command at the "
+                    + "end of each failed test cases.")
     private boolean mBugReportOnFailure = false;
+
+    @Option(name = "logcat-on-failure",
+            description = "To catch logcat from each buffers at the end of failed test cases. "
+                    + "If set to true, a report will be caught through adh shell command at the "
+                    + "end of each failed test cases.")
+    private boolean mLogcatOnFailure = true;
 
     @Option(name = "native-server-process-name",
             description = "Name of a native server process. The runner checks to make sure "
@@ -873,6 +880,11 @@ public class VtsMultiDeviceTest
         if (mBugReportOnFailure) {
             jsonObject.put(BUG_REPORT_ON_FAILURE, mBugReportOnFailure);
             CLog.i("Added %s to the Json object", BUG_REPORT_ON_FAILURE);
+        }
+
+        if (!mLogcatOnFailure) {
+            jsonObject.put(LOGCAT_ON_FAILURE, mLogcatOnFailure);
+            CLog.i("Added %s to the Json object", LOGCAT_ON_FAILURE);
         }
 
         if (mEnableProfiling) {
