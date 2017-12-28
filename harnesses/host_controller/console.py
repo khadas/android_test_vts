@@ -148,6 +148,7 @@ class Console(cmd.Cmd):
         self.test_suite_info = {}
         self.tools_info = {}
         self.update_thread = None
+        self.fetch_info = {}
 
         self._InitCopyParser()
         self._InitDeviceParser()
@@ -379,7 +380,7 @@ class Console(cmd.Cmd):
         if args.type == "pab":
             # do we want this somewhere else? No harm in doing multiple times
             self._build_provider[args.type].Authenticate(args.userinfo_file)
-            device_images, test_suites = self._build_provider[
+            device_images, test_suites, fetch_environment = self._build_provider[
                 args.type].GetArtifact(
                     account_id=args.account_id,
                     branch=args.branch,
@@ -387,22 +388,30 @@ class Console(cmd.Cmd):
                     artifact_name=args.artifact_name,
                     build_id=args.build_id,
                     method=args.method)
+            self.fetch_info["build_id"] = fetch_environment["build_id"]
         elif args.type == "local_fs":
             device_images, test_suites = self._build_provider[args.type].Fetch(
                 args.path)
+            self.fetch_info["build_id"] = None
         elif args.type == "gcs":
             device_images, test_suites, tools = self._build_provider[
                 args.type].Fetch(args.path, args.tool)
             self.tools_info.update(tools)
+            self.fetch_info["build_id"] = None
         elif args.type == "ab":
-            device_images, test_suites = self._build_provider[args.type].Fetch(
-                branch=args.branch,
-                target=args.target,
-                artifact_name=args.artifact_name,
-                build_id=args.build_id)
+            device_images, test_suites, fetch_environment = self._build_provider[
+                args.type].Fetch(
+                    branch=args.branch,
+                    target=args.target,
+                    artifact_name=args.artifact_name,
+                    build_id=args.build_id)
+            self.fetch_info["build_id"] = fetch_environment["build_id"]
         else:
             print("ERROR: unknown fetch type %s" % args.type)
             sys.exit(-1)
+
+        fetch_info["branch"] = args.branch
+        fetch_info["target"] = args.target
 
         self.device_image_info.update(device_images)
         self.test_suite_info.update(test_suites)

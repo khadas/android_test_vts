@@ -466,13 +466,17 @@ class PartnerAndroidBuildClient(build_provider.BuildProvider):
 
         Returns:
             a dict containing the device image info.
+            a dict containing the test suite package info.
+            a dict containing the artifact info.
         """
+        artifact_info = {}
         if build_id == 'latest':
             build_id = self.GetLatestBuildId(account_id=account_id,
                                              branch=branch,
                                              target=target,
                                              method=method)
             print("latest build ID = %s" % build_id)
+        artifact_info["build_id"] = build_id
 
         if "build_id" in artifact_name:
             artifact_name = artifact_name.format(build_id=build_id)
@@ -516,4 +520,4 @@ class PartnerAndroidBuildClient(build_provider.BuildProvider):
                 self.SetTestSuitePackage("vts", artifact_path)
             else:
                 self.SetDeviceImageZip(artifact_path)
-        return self.GetDeviceImage(), self.GetTestSuitePackage()
+        return self.GetDeviceImage(), self.GetTestSuitePackage(), artifact_info

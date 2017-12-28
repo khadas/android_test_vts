@@ -45,14 +45,18 @@ class BuildProviderAB(build_provider.BuildProvider):
         Returns:
             a dict containing the device image info.
             a dict containing the test suite package info.
+            a dict containing the artifact info.
         """
+        fetch_info = {}
+
         if not self._artifact_fetcher:
-            return self.GetDeviceImage(), self.GetTestSuitePackage()
+            return self.GetDeviceImage(), self.GetTestSuitePackage(), fetch_info
 
         if build_id == "latest":
             recent_build_ids = self._artifact_fetcher.ListBuildIds(
                 branch, target)
             build_id = recent_build_ids[0]
+        fetch_info["build_id"] = build_id
 
         if "{build_id}" in artifact_name:
             artifact_name = artifact_name.replace("{build_id}", build_id)
@@ -67,4 +71,4 @@ class BuildProviderAB(build_provider.BuildProvider):
         elif dest_filepath.endswith(".zip"):
             self.SetDeviceImageZip(dest_filepath)
 
-        return self.GetDeviceImage(), self.GetTestSuitePackage()
+        return self.GetDeviceImage(), self.GetTestSuitePackage(), fetch_info
