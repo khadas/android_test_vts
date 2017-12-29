@@ -1253,3 +1253,7 @@ class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
         """
         msg = "[AndroidDevice|%s] %s" % (self.extra["serial"], msg)
         return (msg, kwargs)
+
+    def warn(self, msg, *args, **kwargs):
+        """Function call warper for warn() to warning()."""
+        super(AndroidDeviceLoggerAdapter, self).warning(msg, *args, **kwargs)
