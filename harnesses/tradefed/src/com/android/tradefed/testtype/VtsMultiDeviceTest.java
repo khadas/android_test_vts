@@ -1161,14 +1161,10 @@ public class VtsMultiDeviceTest
                 && commandStatus != CommandStatus.TIMED_OUT) {
                 CLog.e("Python process failed");
                 CLog.e("Python path: %s", mPythonPath);
-                CLog.e("Stderr: %s", commandResult.getStderr());
-                CLog.e("Stdout: %s", commandResult.getStdout());
                 printVtsLogs(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
                 throw new RuntimeException("Failed to run VTS test");
             }
-            CLog.i("Standard output is: %s", commandResult.getStdout());
-            CLog.i("Parsing test result: %s", commandResult.getStderr());
             printToDeviceLogcatAboutTestModuleStatus("END");
         }
 
@@ -1242,10 +1238,10 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * This method return the file test_run_details.txt which is then used to parse logs.
+     * This method return the file test_run_summary.json which is then used to parse logs.
      *
      * @param logDir : The file that needs to be converted
-     * @return the file named test_run_details.txt
+     * @return the file named test_run_summary.json
      * @throws IllegalArgumentException
      */
     private File getFileTestRunSummary(File logDir) throws IllegalArgumentException {

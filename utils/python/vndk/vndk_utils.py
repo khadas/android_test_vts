@@ -47,7 +47,7 @@ def _FormatVndkPath(pattern, bitness, version=""):
     """
     return pattern.format(
         LIB=("lib64" if str(bitness) == "64" else "lib"),
-        VER=("-" + version if version and version != "current" else ""))
+        VER=("-" + version if version else ""))
 
 
 def GetVndkCoreDirectory(bitness, version):
