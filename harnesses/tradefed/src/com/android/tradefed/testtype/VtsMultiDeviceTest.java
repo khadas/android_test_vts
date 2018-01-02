@@ -127,6 +127,7 @@ public class VtsMultiDeviceTest
     static final String PRECONDITION_FEATURE = "precondition_feature";
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
     static final String PRECONDITION_LSHAL = "precondition_lshal";
+    static final String PRECONDITION_SYSPROP = "precondition_sysprop";
     static final String PRECONDITION_VINTF = "precondition_vintf";
     static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths";
@@ -197,6 +198,11 @@ public class VtsMultiDeviceTest
     @Option(name = "precondition-lshal",
         description = "The name of a `lshal`-listable feature needed to run the test.")
     private String mPreconditionLshal = null;
+
+    @Option(name = "precondition-sysprop",
+            description = "The name=value for a system property configuration that needs "
+                    + "to be met to run the test.")
+    private String mPreconditionSysProp = null;
 
     @Option(name = "precondition-vintf",
             description = "The full name of a HAL specified in vendor/manifest.xml and "
@@ -924,6 +930,11 @@ public class VtsMultiDeviceTest
         if (mPreconditionVintf != null) {
             jsonObject.put(PRECONDITION_VINTF, mPreconditionVintf);
             CLog.i("Added %s to the Json object", PRECONDITION_VINTF);
+        }
+
+        if (mPreconditionSysProp != null) {
+            jsonObject.put(PRECONDITION_SYSPROP, mPreconditionSysProp);
+            CLog.i("Added %s to the Json object", PRECONDITION_SYSPROP);
         }
 
         if (!mBinaryTestProfilingLibraryPath.isEmpty()) {

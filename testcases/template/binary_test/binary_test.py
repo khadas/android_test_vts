@@ -81,6 +81,7 @@ class BinaryTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
             keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
             keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
+            keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP,
         ]
         self.getUserParams(
             req_param_names=required_params, opt_param_names=opt_params)
@@ -204,11 +205,17 @@ class BinaryTest(base_test.BaseTestClass):
                     self.envp[tag] = coverage_utils.COVERAGE_TEST_ENV
 
         self.testcases = []
-
-        ret = precondition_utils.CanRunHidlHalTest(self, self._dut,
-                                                   self.shell, self.run_as_compliance_test)
-        if not ret:
+        if not precondition_utils.CheckSysPropPrecondition(
+                self, self._dut, self.shell):
+            logging.info('Precondition sysprop not met; '
+                         'all tests skipped.')
             self._skip_all_testcases = True
+
+        if not self._skip_all_testcases:
+            ret = precondition_utils.CanRunHidlHalTest(
+                self, self._dut, self.shell, self.run_as_compliance_test)
+            if not ret:
+                self._skip_all_testcases = True
 
         self.tags = set()
         self.CreateTestCases()
