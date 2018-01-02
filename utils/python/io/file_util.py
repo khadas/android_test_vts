@@ -14,8 +14,10 @@
 # limitations under the License.
 #
 
+import logging
 import os
 import shutil
+import tempfile
 
 
 def FindFile(directory, filename):
@@ -43,9 +45,19 @@ def Rmdirs(path, ignore_errors=False):
     Args:
         path: string, directory to delete
         ignore_errors: bool, whether to ignore errors. Defaults to False
+
+    Returns:
+        bool, True if directory is deleted.
+              False if errors occur or directory does not exist.
     '''
-    #TODO(yuexima): capture exceptions and make this function returning a bool
-    shutil.rmtree(path, ignore_errors=ignore_errors)
+    return_value = False
+    if os.path.exists(path):
+        try:
+            shutil.rmtree(path, ignore_errors=ignore_errors)
+            return_value = True
+        except OSError as e:
+            logging.exception(e)
+    return return_value
 
 
 def Makedirs(path, skip_if_exists=True):
@@ -55,9 +67,29 @@ def Makedirs(path, skip_if_exists=True):
         path: string, directory to make
         skip_if_exists: bool, True for ignoring exisitng dir. False for throwing
                         error from os.mkdirs. Defaults to True
-    '''
-    #TODO(yuexima): capture exceptions and make this function returning a bool
-    if skip_if_exists and os.path.exists(path):
-        return
 
-    os.makedirs(path)
+    Returns:
+        bool, True if directory is created.
+              False if errors occur or directory already exist.
+    '''
+    return_value = False
+    if not skip_if_exists or not os.path.exists(path):
+        try:
+            os.makedirs(path)
+            return_value = True
+        except OSError as e:
+            logging.exception(e)
+    return return_value
+
+
+def MakeTempDir(base_dir):
+    """Make a temp directory based on the given path and return its path.
+
+    Args:
+        base_dir: string, base directory to make temp directory.
+
+    Returns:
+        string, relative path to created temp directory
+    """
+    Makedirs(base_dir)
+    return tempfile.mkdtemp(dir=base_dir)
