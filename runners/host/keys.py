@@ -99,6 +99,7 @@ class ConfigKeys(object):
     IKEY_PRECONDITION_FEATURE = "precondition_feature"
     IKEY_PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix"
     IKEY_PRECONDITION_LSHAL = "precondition_lshal"
+    IKEY_PRECONDITION_SYSPROP = "precondition_sysprop"
 
     # Keys for toggle passthrough mode
     IKEY_PASSTHROUGH_MODE = "passthrough_mode"
