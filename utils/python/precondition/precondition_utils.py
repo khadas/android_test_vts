@@ -136,10 +136,11 @@ def CheckSysPropPrecondition(test_instance,
                If not specified, the function creates one from dut.
 
     Returns:
-        True if no sysprop precondition is set,
-        the precondition is satisfied or
-        there is an error in retrieving the target sysprop;
-        False otherwise.
+        False if precondition is not met (i.e., to skip tests),
+        True otherwise (e.g., when no sysprop precondition is set;
+        the precondition is satisfied;
+        there is an error in retrieving the target sysprop; or
+        the specified sysprop is undefined)
     """
     if not hasattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP):
         return True
@@ -161,6 +162,8 @@ def CheckSysPropPrecondition(test_instance,
         return True
     else:
         value = cmd_results[const.STDOUT][0].strip()
-        if len(value) == 0 or value != sysprop_value:
+        if len(value) == 0:
+            return True
+        elif value != sysprop_value:
             return False
     return True
