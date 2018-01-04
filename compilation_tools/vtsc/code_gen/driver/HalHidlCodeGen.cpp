@@ -672,7 +672,7 @@ void HalHidlCodeGen::GenerateDriverDeclForAttribute(Formatter& out,
         + ClearStringWithNameSpaceAccess(attribute.name());
     out << "void " << func_name
         << "(const VariableSpecificationMessage& var_msg, " << attribute.name()
-        << "* arg);\n";
+        << "* arg, const string& callback_socket_name);\n";
   } else if (attribute.type() == TYPE_ENUM) {
     string func_name = "EnumValue"
             + ClearStringWithNameSpaceAccess(attribute.name());
@@ -711,9 +711,11 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
       }
       string func_name = "MessageTo"
           + ClearStringWithNameSpaceAccess(attribute.name());
-      out << "void " << func_name << "(const VariableSpecificationMessage& "
-                                     "var_msg __attribute__((__unused__)), "
-          << attribute.name() << "* arg __attribute__((__unused__))) {"
+      out << "void " << func_name
+          << "(const VariableSpecificationMessage& "
+             "var_msg __attribute__((__unused__)), "
+          << attribute.name() << "* arg __attribute__((__unused__)), "
+          << "const string& callback_socket_name __attribute__((__unused__))) {"
           << "\n";
       out.indent();
       int struct_index = 0;
@@ -737,7 +739,9 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
           + ClearStringWithNameSpaceAccess(attribute.name());
       out << "void " << func_name
           << "(const VariableSpecificationMessage& var_msg, "
-          << attribute.name() << "* arg) {" << "\n";
+          << attribute.name() << "* arg, "
+          << "const string& callback_socket_name __attribute__((__unused__))) {"
+          << "\n";
       out.indent();
       int union_index = 0;
       for (const auto& union_value : attribute.union_value()) {
@@ -870,8 +874,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       if (val.has_predefined_type()) {
         string func_name = "MessageTo"
             + ClearStringWithNameSpaceAccess(val.predefined_type());
-        out << func_name << "(" << arg_value_name << ", &("
-            << arg_name << "));\n";
+        out << func_name << "(" << arg_value_name << ", &(" << arg_name
+            << "), callback_socket_name);\n";
       } else {
         int struct_index = 0;
         for (const auto struct_field : val.struct_value()) {
@@ -892,7 +896,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
         string func_name = "MessageTo"
             + ClearStringWithNameSpaceAccess(val.predefined_type());
         out << func_name << "(" << arg_value_name << ", &(" << arg_name
-            << "));\n";
+            << "), callback_socket_name);\n";
       } else {
         int union_index = 0;
         for (const auto union_field : val.union_value()) {
