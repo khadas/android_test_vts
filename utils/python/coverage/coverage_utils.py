@@ -33,7 +33,7 @@ from vts.utils.python.web import feature_utils
 
 FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
 TARGET_COVERAGE_PATH = "/data/misc/trace/"  # location to flush coverage
-LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # locatino to pull coverage to host
+LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # location to pull coverage to host
 
 # Environment for test process
 COVERAGE_TEST_ENV = "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/misc/trace/self"
@@ -117,15 +117,17 @@ class CoverageFeature(feature_utils.Feature):
                 self.enabled = False
             for device in android_devices:
                 serial = device.get(keys.ConfigKeys.IKEY_SERIAL)
-                coverage_resource_path = device.get(keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH)
+                coverage_resource_path = device.get(
+                    keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH)
                 if not serial or not coverage_resource_path:
                     logging.warn('Missing coverage information in device: %s',
                                  device)
                     continue
                 self._device_resource_dict[str(serial)] = str(coverage_resource_path)
+
         logging.info("Coverage enabled: %s", self.enabled)
 
-    def _ExtractSourceName(self, gcno_summary, file_name):
+    def _ExtractSourceName(self, gcno_summary, file_name, legacy_build=False):
         """Gets the source name from the GCNO summary object.
 
         Gets the original source file name from the FileSummary object describing
@@ -134,30 +136,31 @@ class CoverageFeature(feature_utils.Feature):
         Args:
             gcno_summary: a FileSummary object describing a gcno file
             file_name: the base filename (without extensions) of the gcno or gcda file
+            legacy_build: boolean to indicate whether the file is build with
+                          legacy compile system.
 
         Returns:
             The relative path to the original source file corresponding to the
             provided gcno summary. The path is relative to the root of the build.
         """
-        src_file_path = None
-        for key in gcno_summary.functions:
-            src_file_path = gcno_summary.functions[key].src_file_name
-            src_parts = src_file_path.rsplit(".", 1)
-            src_file_name = src_parts[0]
-            src_extension = src_parts[1] if len(src_parts) > 1 else None
-            if src_extension not in ["c", "cpp", "cc"]:
-                logging.debug("Found unsupported file type: %s", src_file_path)
-                continue
-            if src_file_name.endswith(file_name):
-                logging.info("Coverage source file: %s", src_file_path)
-                return src_file_path
-        return None
+        # Check the source file for the entry function.
+        src_file_path = gcno_summary.functions[0].src_file_name
+        src_file_name = src_file_path.rsplit(".", 1)[0]
+        # If build with legacy compile system, compare only the base source file
+        # name. Otherwise, compare the full source file name (with path info).
+        if legacy_build:
+            base_src_file_name = os.path.basename(src_file_name)
+            return src_file_path if file_name.endswith(
+                base_src_file_name) else None
+        else:
+            return src_file_path if file_name.endswith(src_file_name) else None
 
     def _GetChecksumGcnoDict(self, cov_zip):
         """Generates a dictionary from gcno checksum to GCNOParser object.
 
         Processes the gcnodir files in the zip file to produce a mapping from gcno
         checksum to the GCNOParser object wrapping the gcno content.
+        Note there might be multiple gcno files corresponds to the same checksum.
 
         Args:
             cov_zip: the zip file containing gcnodir files from the device build
@@ -181,12 +184,14 @@ class CoverageFeature(feature_utils.Feature):
                 continue
 
             for gcno_file_path in archive.files:
-                file_name_path = gcno_file_path.rsplit(".", 1)[0]
-                file_name = os.path.basename(file_name_path)
                 gcno_stream = io.BytesIO(archive.files[gcno_file_path])
                 gcno_file_parser = gcno_parser.GCNOParser(gcno_stream)
-                checksum_gcno_dict[
-                    gcno_file_parser.checksum] = gcno_file_parser
+                if gcno_file_parser.checksum in checksum_gcno_dict:
+                    checksum_gcno_dict[gcno_file_parser.checksum].append(
+                        gcno_file_parser)
+                else:
+                    checksum_gcno_dict[
+                        gcno_file_parser.checksum] = [gcno_file_parser]
         return checksum_gcno_dict
 
     def _ClearTargetGcov(self, dut, path_suffix=None):
@@ -282,7 +287,7 @@ class CoverageFeature(feature_utils.Feature):
                 file_name = os.path.join(self.local_coverage_path, basename)
                 dut.adb.pull("%s %s" % (gcda, file_name))
                 gcda_content = open(file_name, "rb").read()
-                gcda_dict[basename] = gcda_content
+                gcda_dict[gcda.strip()] = gcda_content
         self._ClearTargetGcov(dut)
         return gcda_dict
 
@@ -339,20 +344,27 @@ class CoverageFeature(feature_utils.Feature):
         for gcda_name in gcda_dict:
             gcda_stream = io.BytesIO(gcda_dict[gcda_name])
             gcda_file_parser = gcda_parser.GCDAParser(gcda_stream)
+            file_name = gcda_name.rsplit(".", 1)[0]
 
             if not gcda_file_parser.checksum in checksum_gcno_dict:
                 logging.info("No matching gcno file for gcda: %s", gcda_name)
                 continue
-            gcno_file_parser = checksum_gcno_dict[gcda_file_parser.checksum]
+            gcno_file_parsers = checksum_gcno_dict[gcda_file_parser.checksum]
 
-            try:
-                gcno_summary = gcno_file_parser.Parse()
-            except FileFormatError:
-                logging.error("Error parsing gcno for gcda %s", gcda_name)
-                continue
-
-            file_name = gcda_name.rsplit(".", 1)[0]
-            src_file_path = self._ExtractSourceName(gcno_summary, file_name)
+            # Find the corresponding gcno summary and source file name for the
+            # gcda file.
+            for gcno_file_parser in gcno_file_parsers:
+                try:
+                    gcno_summary = gcno_file_parser.Parse()
+                except FileFormatError:
+                    logging.error("Error parsing gcno for gcda %s", gcda_name)
+                    continue
+                legacy_build = "soong/.intermediates" not in gcda_name
+                src_file_path = self._ExtractSourceName(
+                    gcno_summary, file_name, legacy_build)
+                if src_file_path:
+                    logging.info("Coverage source file: %s", src_file_path)
+                    break
 
             if not src_file_path:
                 logging.error("No source file found for gcda %s.", gcda_name)
@@ -405,6 +417,7 @@ class CoverageFeature(feature_utils.Feature):
         if output_coverage_report:
             self._OutputCoverageReport(isGlobal)
 
+    # TODO: consider to deprecate the manual process.
     def _ManualProcess(self, cov_zip, revision_dict, gcda_dict, isGlobal):
         """Process coverage data and appends coverage reports to the report message.
 
