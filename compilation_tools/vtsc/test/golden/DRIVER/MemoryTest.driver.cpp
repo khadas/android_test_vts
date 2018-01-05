@@ -175,7 +175,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     }
     if (!strcmp(func_name, "haveSomeMemoryBlock")) {
         ::android::hidl::memory::block::V1_0::MemoryBlock arg0;
-        MessageTo__android__hidl__memory__block__V1_0__MemoryBlock(func_msg.arg(0), &(arg0));
+        MessageTo__android__hidl__memory__block__V1_0__MemoryBlock(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hidl::memory::block::V1_0::MemoryBlock result0;
         hw_binder_proxy_->haveSomeMemoryBlock(arg0, [&](const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0){
