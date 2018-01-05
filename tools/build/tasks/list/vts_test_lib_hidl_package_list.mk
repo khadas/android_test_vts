@@ -178,6 +178,7 @@ vts_hal_test_bins := \
   VtsHalPowerV1_1TargetTest \
   VtsHalRadioV1_0TargetTest \
   VtsHalRadioV1_1TargetTest \
+  VtsHalRadioV1_2TargetTest \
   VtsHalRenderscriptV1_0TargetTest \
   VtsHalSapV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
