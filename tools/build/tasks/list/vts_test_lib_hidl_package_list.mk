@@ -176,6 +176,7 @@ vts_hal_test_bins := \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \
+  VtsHalPowerV1_2TargetTest \
   VtsHalRadioV1_0TargetTest \
   VtsHalRadioV1_1TargetTest \
   VtsHalRadioV1_2TargetTest \
