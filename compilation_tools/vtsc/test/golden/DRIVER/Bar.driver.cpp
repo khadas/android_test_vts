@@ -10,8 +10,8 @@
 using namespace android::hardware::tests::bar::V1_0;
 namespace android {
 namespace vts {
-void MessageTo__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& var_msg __attribute__((__unused__)), ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated* arg __attribute__((__unused__))) {
-    MessageTo__android__hardware__tests__foo__V1_0__Unrelated(var_msg.struct_value(0), &(arg->myRelated));
+void MessageTo__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& var_msg __attribute__((__unused__)), ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated* arg __attribute__((__unused__)), const string& callback_socket_name __attribute__((__unused__))) {
+    MessageTo__android__hardware__tests__foo__V1_0__Unrelated(var_msg.struct_value(0), &(arg->myRelated), callback_socket_name);
 }
 bool Verify__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& expected_result __attribute__((__unused__)), const VariableSpecificationMessage& actual_result __attribute__((__unused__))){
     if (!Verify__android__hardware__tests__foo__V1_0__Unrelated(expected_result.struct_value(0), actual_result.struct_value(0))) { return false; }
@@ -652,7 +652,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
         ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Union> arg1;
         arg1.resize(func_msg.arg(1).vector_value_size());
         for (int arg1_index = 0; arg1_index < func_msg.arg(1).vector_value_size(); arg1_index++) {
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Union(func_msg.arg(1).vector_value(arg1_index), &(arg1[arg1_index]));
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Union(func_msg.arg(1).vector_value(arg1_index), &(arg1[arg1_index]), callback_socket_name);
         }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::ContainsUnion> result0;
@@ -797,7 +797,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
         ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Goober> arg0;
         arg0.resize(func_msg.arg(0).vector_value_size());
         for (int arg0_index = 0; arg0_index < func_msg.arg(0).vector_value_size(); arg0_index++) {
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0).vector_value(arg0_index), &(arg0[arg0_index]));
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0).vector_value(arg0_index), &(arg0[arg0_index]), callback_socket_name);
         }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         hw_binder_proxy_->haveAGooberVec(arg0);
@@ -806,7 +806,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "haveAGoober")) {
         ::android::hardware::tests::foo::V1_0::IFoo::Goober arg0;
-        MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0), &(arg0));
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__Goober(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         hw_binder_proxy_->haveAGoober(arg0);
         result_msg->set_name("haveAGoober");
@@ -821,8 +821,8 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
             for (int arg0_arg0_index__numbers_index = 0; arg0_arg0_index__numbers_index < func_msg.arg(0).vector_value(arg0_index).struct_value(3).vector_value_size(); arg0_arg0_index__numbers_index++) {
                 arg0[arg0_index].numbers[arg0_arg0_index__numbers_index] = func_msg.arg(0).vector_value(arg0_index).struct_value(3).vector_value(arg0_arg0_index__numbers_index).scalar_value().double_t();
             }
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(4), &(arg0[arg0_index].fumble));
-            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(5), &(arg0[arg0_index].gumble));
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(4), &(arg0[arg0_index].fumble), callback_socket_name);
+            MessageTo__android__hardware__tests__foo__V1_0__IFoo__Fumble(func_msg.arg(0).vector_value(arg0_index).struct_value(5), &(arg0[arg0_index].gumble), callback_socket_name);
         }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         hw_binder_proxy_->haveAGooberArray(arg0);
@@ -831,7 +831,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "haveATypeFromAnotherFile")) {
         ::android::hardware::tests::foo::V1_0::Abc arg0;
-        MessageTo__android__hardware__tests__foo__V1_0__Abc(func_msg.arg(0), &(arg0));
+        MessageTo__android__hardware__tests__foo__V1_0__Abc(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         hw_binder_proxy_->haveATypeFromAnotherFile(arg0);
         result_msg->set_name("haveATypeFromAnotherFile");
@@ -916,7 +916,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "callingDrWho")) {
         ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional arg0;
-        MessageTo__android__hardware__tests__foo__V1_0__IFoo__MultiDimensional(func_msg.arg(0), &(arg0));
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__MultiDimensional(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional result0;
         hw_binder_proxy_->callingDrWho(arg0, [&](const ::android::hardware::tests::foo::V1_0::IFoo::MultiDimensional& arg0){
@@ -931,7 +931,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "transpose")) {
         ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix5x3 arg0;
-        MessageTo__android__hardware__tests__foo__V1_0__IFoo__StringMatrix5x3(func_msg.arg(0), &(arg0));
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__StringMatrix5x3(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix3x5 result0;
         hw_binder_proxy_->transpose(arg0, [&](const ::android::hardware::tests::foo::V1_0::IFoo::StringMatrix3x5& arg0){
@@ -1223,7 +1223,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
             arg0 = nullptr;
         }
         ::android::hardware::tests::foo::V1_0::Abc arg1;
-        MessageTo__android__hardware__tests__foo__V1_0__Abc(func_msg.arg(1), &(arg1));
+        MessageTo__android__hardware__tests__foo__V1_0__Abc(func_msg.arg(1), &(arg1), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         bool result0;
         bool result1;
@@ -1249,7 +1249,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
         uint8_t arg1;
         arg1 = func_msg.arg(1).scalar_value().uint8_t();
         ::android::hardware::tests::foo::V1_0::IFoo::MyMask arg2;
-        MessageTo__android__hardware__tests__foo__V1_0__IFoo__MyMask(func_msg.arg(2), &(arg2));
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__MyMask(func_msg.arg(2), &(arg2), callback_socket_name);
         uint8_t arg3;
         arg3 = func_msg.arg(3).scalar_value().uint8_t();
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();

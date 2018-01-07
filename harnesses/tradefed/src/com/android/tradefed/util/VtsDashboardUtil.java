@@ -23,10 +23,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
@@ -119,10 +122,16 @@ public class VtsDashboardUtil {
             String commandTemplate =
                     mConfigReader.GetVendorConfigVariable("dashboard_post_command");
             commandTemplate = commandTemplate.replace("{path}", messageFilePath);
+            // removes ', while keeping any substrings quoted by "".
             commandTemplate = commandTemplate.replace("'", "");
             CLog.i(String.format("Upload command: %s", commandTemplate));
-            CommandResult c =
-                    mRunUtil.runTimedCmd(BASE_TIMEOUT_MSECS * 3, commandTemplate.split(" "));
+            List<String> commandList = new ArrayList<String>();
+            Matcher matcher = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(commandTemplate);
+            while (matcher.find()) {
+                commandList.add(matcher.group(1));
+            }
+            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT_MSECS * 3,
+                    (String[]) commandList.toArray(new String[commandList.size()]));
             if (c == null || c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.e("Uploading the test plan execution result to GAE DB faiied.");
                 CLog.e("Stdout: %s", c.getStdout());

@@ -31,7 +31,6 @@ vts_hal_driver_libs := \
   android.hardware.camera.provider@2.4-vts.driver \
   android.hardware.cas@1.0-vts.driver \
   android.hardware.configstore@1.0-vts.driver \
-  android.hardware.configstore@1.1-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
   android.hardware.drm@1.0-vts.driver \
   android.hardware.dumpstate@1.0-vts.driver \
@@ -94,7 +93,6 @@ vts_hal_profiler_libs := \
   android.hardware.camera.provider@2.4-vts.profiler \
   android.hardware.cas@1.0-vts.profiler \
   android.hardware.configstore@1.0-vts.profiler \
-  android.hardware.configstore@1.1-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
   android.hardware.dumpstate@1.0-vts.profiler \
@@ -153,7 +151,6 @@ vts_hal_test_bins := \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalCasV1_0TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
-  VtsHalConfigstoreV1_1TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDumpstateV1_0TargetTest \
@@ -179,8 +176,10 @@ vts_hal_test_bins := \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \
+  VtsHalPowerV1_2TargetTest \
   VtsHalRadioV1_0TargetTest \
   VtsHalRadioV1_1TargetTest \
+  VtsHalRadioV1_2TargetTest \
   VtsHalRenderscriptV1_0TargetTest \
   VtsHalSapV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
@@ -202,6 +201,7 @@ vts_hal_test_bins := \
   VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
+  VtsHalWifiSupplicantV1_1TargetTest \
 
 vts_test_lib_hidl_packages := \
   $(vts_hal_driver_libs) \
