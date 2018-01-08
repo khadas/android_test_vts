@@ -45,4 +45,4 @@ if [ -z ${VTS_ROOT} ]; then
     VTS_ROOT="$(dirname $(readlink -e $0))/../.."
 fi;
 
-cd ${VTS_ROOT}/android-vts/testcases/; python -m vts.harnesses.host_controller.main "$@"
+cd ${VTS_ROOT}/android-vts/testcases/; python -m host_controller.main "$@"

@@ -154,6 +154,14 @@ host_camera_its_copy_pairs := \
   $(foreach f,$(host_camera_its_files),\
     cts/apps/CameraITS/$(f):$(VTS_TESTCASES_OUT)/CameraITS/$(f))
 
+host_hc_files := \
+  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.py" -and -type f,.) \
+    $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.)
+
+host_hc_copy_pairs := \
+  $(foreach f,$(host_hc_files),\
+      test/framework/harnesses/host_controller/$(f):$(VTS_TESTCASES_OUT)/host_controller/$(f))
+
 host_acloud_files := \
   $(call find-files-in-subdirs,tools/acloud,"*.py" -and -type f,.) \
   $(call find-files-in-subdirs,tools/acloud,"*.config" -and -type f,.)
@@ -223,6 +231,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
   $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
+  $(call copy-many-files,$(host_hc_copy_pairs)) \
   $(call copy-many-files,$(host_acloud_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
