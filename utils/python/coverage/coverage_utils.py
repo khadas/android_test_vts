@@ -45,6 +45,7 @@ GIT_PROJECT = "git_project"
 MODULE_NAME = "module_name"
 NAME = "name"
 PATH = "path"
+GEN_TAG = "/gen/"
 
 _BUILD_INFO = 'BUILD_INFO'  # name of build info artifact
 _GCOV_ZIP = "gcov.zip"  # name of gcov artifact zip
@@ -342,6 +343,11 @@ class CoverageFeature(feature_utils.Feature):
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, False)
 
         for gcda_name in gcda_dict:
+            if GEN_TAG in gcda_name:
+                # skip coverage measurement for intermediate code.
+                logging.warn("Skip for gcda file: %s", gcda_name)
+                continue
+
             gcda_stream = io.BytesIO(gcda_dict[gcda_name])
             gcda_file_parser = gcda_parser.GCDAParser(gcda_stream)
             file_name = gcda_name.rsplit(".", 1)[0]
