@@ -148,6 +148,7 @@
     <option name="compatibility:include-filter" value="CtsCompilationTestCases" />
     <option name="compatibility:include-filter" value="CtsContactsProviderWipe" />
     <option name="compatibility:include-filter" value="CtsContentTestCases" />
+    <option name="compatibility:include-filter" value="CtsSyncAccountAccessOtherCertTestCases" />
     <option name="compatibility:include-filter" value="CtsCppToolsTestCases" />
     <option name="compatibility:include-filter" value="CtsDatabaseTestCases" />
     <option name="compatibility:include-filter" value="CtsDebugTestCases" />
