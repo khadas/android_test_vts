@@ -154,7 +154,8 @@ host_camera_its_copy_pairs := \
 
 host_hc_files := \
   $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.py" -and -type f,.) \
-    $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.)
+  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.) \
+  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.sh" -and -type f,.)
 
 host_hc_copy_pairs := \
   $(foreach f,$(host_hc_files),\
