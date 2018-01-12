@@ -15,11 +15,7 @@
 #
 
 import base64
-# TODO(b/71519031) add external/futures to PYTHON_PATH of vtsc_test
-try:
-    import concurrent.futures
-except ImportError:
-    pass
+import concurrent.futures
 import datetime
 import functools
 import json
