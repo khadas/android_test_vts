@@ -78,7 +78,8 @@ class CoverageFeature(feature_utils.Feature):
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.IKEY_MODULES,
         keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT,
-        keys.ConfigKeys.IKEY_GLOBAL_COVERAGE
+        keys.ConfigKeys.IKEY_GLOBAL_COVERAGE,
+        keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH
     ]
 
     def __init__(self, user_params, web=None, local_coverage_path=None):
@@ -280,7 +281,7 @@ class CoverageFeature(feature_utils.Feature):
                                   TARGET_COVERAGE_PATH).split("\n"))
             except AdbError as e:
                 logging.warn('No gcda files found in path: \"%s\"',
-                             TARGET_COVERAGE_PATH)
+                            TARGET_COVERAGE_PATH)
 
         for gcda in gcda_files:
             if gcda:
@@ -341,6 +342,8 @@ class CoverageFeature(feature_utils.Feature):
         checksum_gcno_dict = self._GetChecksumGcnoDict(cov_zip)
         output_coverage_report = getattr(
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, False)
+        exclude_coverage_path = getattr(
+            self, keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH, None)
 
         for gcda_name in gcda_dict:
             if GEN_TAG in gcda_name:
@@ -374,6 +377,17 @@ class CoverageFeature(feature_utils.Feature):
 
             if not src_file_path:
                 logging.error("No source file found for gcda %s.", gcda_name)
+                continue
+
+            skip_path = False
+            if exclude_coverage_path:
+                for path in exclude_coverage_path:
+                    if src_file_path.startswith(str(path)):
+                        skip_path = True
+                        break
+
+            if skip_path:
+                logging.warn("Skip excluded source file %s.", src_file_path)
                 continue
 
             # Process and merge gcno/gcda data
