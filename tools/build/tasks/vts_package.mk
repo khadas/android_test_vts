@@ -154,7 +154,8 @@ host_camera_its_copy_pairs := \
 
 host_hc_files := \
   $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.py" -and -type f,.) \
-    $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.)
+  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.) \
+  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.sh" -and -type f,.)
 
 host_hc_copy_pairs := \
   $(foreach f,$(host_hc_files),\
@@ -167,6 +168,13 @@ host_acloud_files := \
 host_acloud_copy_pairs := \
   $(foreach f,$(host_acloud_files),\
     tools/acloud/$(f):$(VTS_TESTCASES_OUT)/acloud/$(f))
+
+host_vti_proto_files := \
+  $(call find-files-in-subdirs,test/vti/test_serving/proto,"*.py" -and -type f,.)
+
+host_vti_proto_copy_pairs := \
+  $(foreach f,$(host_vti_proto_files),\
+    test/vti/test_serving/proto/$(f):$(VTS_TESTCASES_OUT)/vti/test_serving/proto/$(f))
 
 host_systrace_files := \
   $(filter-out .git/%, \
@@ -221,7 +229,9 @@ acts_testcases_copy_pairs := \
   $(foreach f,$(acts_testcases_files),\
     tools/test/connectivity/acts/tests/google/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/acts/$(f))
 
-$(compatibility_zip): \
+$(compatibility_zip): vts_copy_pairs
+
+vts_copy_pairs: \
   $(call copy-many-files,$(target_native_copy_pairs)) \
   $(call copy-many-files,$(target_spec_copy_pairs)) \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
@@ -234,6 +244,7 @@ $(compatibility_zip): \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
   $(call copy-many-files,$(host_hc_copy_pairs)) \
   $(call copy-many-files,$(host_acloud_copy_pairs)) \
+  $(call copy-many-files,$(host_vti_proto_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
@@ -241,6 +252,8 @@ $(compatibility_zip): \
   $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(acts_framework_copy_pairs)) \
-  $(call copy-many-files,$(acts_testcases_copy_pairs)) \
+  $(call copy-many-files,$(acts_testcases_copy_pairs))
+	@touch $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py
+	@touch $(VTS_TESTCASES_OUT)/vti/__init__.py
 
 -include vendor/google_vts/tools/build/vts_package_vendor.mk

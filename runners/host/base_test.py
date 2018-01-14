@@ -64,9 +64,8 @@ class BaseTestClass(object):
     Attributes:
         android_devices: A list of AndroidDevice object, representing android
                          devices.
+        test_module_name: A string representing the test module name.
         tests: A list of strings, each representing a test case name.
-        TAG: A string used to refer to a test class. Default is the test class
-             name.
         log: A logger object used for logging.
         results: A records.TestResult object for aggregating test results from
                  the execution of test cases.
@@ -89,12 +88,9 @@ class BaseTestClass(object):
                                 of failed test cases.
         test_filter: Filter object to filter test names.
     """
-    TAG = None
 
     def __init__(self, configs):
         self.tests = []
-        if not self.TAG:
-            self.TAG = self.__class__.__name__
         # Set all the controller objects and params.
         for name, value in configs.items():
             setattr(self, name, value)
@@ -124,8 +120,10 @@ class BaseTestClass(object):
             list_utils.ItemsToStr(self.exclude_filter), ',')
         exclude_over_include = self.getUserParam(
             keys.ConfigKeys.KEY_EXCLUDE_OVER_INCLUDE, default_value=None)
-        self.test_module_name = self.getUserParam(keys.ConfigKeys.KEY_TESTBED_NAME,
-                                             default_value=None)
+        self.test_module_name = self.getUserParam(
+            keys.ConfigKeys.KEY_TESTBED_NAME,
+            log_warning_and_continue_if_not_found=True,
+            default_value=self.__class__.__name__)
         self.test_filter = filter_utils.Filter(
             self.include_filter,
             self.exclude_filter,
@@ -397,7 +395,8 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(record.test_name, begin_time)
         if self._bug_report_on_failure:
-            self.DumpBugReport('%s-%s' % (self.TAG, record.test_name))
+            self.DumpBugReport(
+                '%s-%s' % (self.test_module_name, record.test_name))
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -490,7 +489,8 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
         self.onException(test_name, begin_time)
         if self._bug_report_on_failure:
-            self.DumpBugReport('%s-%s' % (self.TAG, record.test_name))
+            self.DumpBugReport(
+                '%s-%s' % (self.test_module_name, record.test_name))
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -626,7 +626,7 @@ class BaseTestClass(object):
             kwargs: Extra kwargs.
         """
         is_silenced = False
-        tr_record = records.TestResultRecord(test_name, self.TAG)
+        tr_record = records.TestResultRecord(test_name, self.test_module_name)
         tr_record.testBegin()
         logging.info("%s %s", TEST_CASE_TOKEN, test_name)
         verdict = None
@@ -768,7 +768,7 @@ class BaseTestClass(object):
         for setting in settings:
             test_name = GenerateTestName(setting)
 
-            tr_record = records.TestResultRecord(test_name, self.TAG)
+            tr_record = records.TestResultRecord(test_name, self.test_module_name)
             self.results.requested.append(tr_record)
 
         for setting in settings:
@@ -801,7 +801,7 @@ class BaseTestClass(object):
             raise signals.TestAbortAll, e, sys.exc_info()[2]
         except:
             logging.exception("Exception happened when executing %s in %s.",
-                              func.__name__, self.TAG)
+                              func.__name__, self.test_module_name)
             return False
 
     def _get_all_test_names(self):
@@ -837,8 +837,8 @@ class BaseTestClass(object):
         test_funcs = []
         for test_name in test_names:
             if not hasattr(self, test_name):
-                logging.warning("%s does not have test case %s.", self.TAG,
-                                test_name)
+                logging.warning("%s does not have test case %s.",
+                                self.test_module_name, test_name)
             elif (test_name.startswith(STR_TEST) or
                   test_name.startswith(STR_GENERATE)):
                 test_funcs.append((test_name, getattr(self, test_name)))
@@ -869,7 +869,7 @@ class BaseTestClass(object):
         Returns:
             The test results object of this class.
         """
-        logging.info("==========> %s <==========", self.TAG)
+        logging.info("==========> %s <==========", self.test_module_name)
         # Devise the actual test cases to run in the test class.
         if not test_names:
             if self.tests:
@@ -881,7 +881,7 @@ class BaseTestClass(object):
 
         if not self.run_as_vts_self_test:
             self.results.requested = [
-                records.TestResultRecord(test_name, self.TAG)
+                records.TestResultRecord(test_name, self.test_module_name)
                 for test_name in test_names if test_name.startswith(STR_TEST)
             ]
         tests = self._get_test_funcs(test_names)
@@ -889,10 +889,11 @@ class BaseTestClass(object):
         # Setup for the class.
         try:
             if self._setUpClass() is False:
-                raise signals.TestFailure("Failed to setup %s." % self.TAG)
+                raise signals.TestFailure(
+                    "Failed to setup %s." % self.test_module_name)
         except Exception as e:
-            logging.exception("Failed to setup %s.", self.TAG)
-            self.results.failClass(self.TAG, e)
+            logging.exception("Failed to setup %s.", self.test_module_name)
+            self.results.failClass(self.test_module_name, e)
             self._exec_func(self._tearDownClass)
             return self.results
 
@@ -901,7 +902,7 @@ class BaseTestClass(object):
             # Check if module is running in self test mode.
             if self.run_as_vts_self_test:
                 logging.info('setUpClass function was executed successfully.')
-                self.results.passClass(self.TAG)
+                self.results.passClass(self.test_module_name)
                 return self.results
 
             for test_name, test_func in tests:
@@ -915,7 +916,7 @@ class BaseTestClass(object):
                     self.execOneTest(test_name, test_func, None)
             if self._skip_all_testcases and not self.results.executed:
                 self.results.skipClass(
-                    self.TAG,
+                    self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
             return self.results
         except (signals.TestAbortClass, acts_signals.TestAbortClass):
@@ -936,8 +937,8 @@ class BaseTestClass(object):
             if self.web.enabled:
                 name, timestamp = self.web.GetTestModuleKeys()
                 self.results.setTestModuleKeys(name, timestamp)
-            logging.info("Summary for test class %s: %s", self.TAG,
-                         self.results.summary())
+            logging.info("Summary for test class %s: %s",
+                         self.test_module_name, self.results.summary())
 
     def cleanUp(self):
         """A function that is executed upon completion of all tests cases
