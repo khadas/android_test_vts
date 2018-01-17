@@ -20,6 +20,7 @@ PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.coverage.coverage_report_te
 PYTHONPATH=$PYTHONPATH:.. python -m vts.harnesses.host_controller.build.build_provider_pab_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.controllers.customflasher_test
 PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.build.build_flasher_test
+PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.build.build_provider_test
 PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.console_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.io.file_util_test
 popd
