@@ -23,6 +23,7 @@ import zipfile
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import keys
 from vts.utils.python.archive import archive_parser
+from vts.utils.python.common import cmd_utils
 from vts.utils.python.controllers.adb import AdbError
 from vts.utils.python.coverage import coverage_report
 from vts.utils.python.coverage import gcda_parser
@@ -579,6 +580,13 @@ class CoverageFeature(feature_utils.Feature):
         else:
             # explicitly process coverage data for the specified modules
             self._ManualProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
+
+        # cleanup the downloaded gcda files.
+        results = cmd_utils.ExecuteShellCommand(
+            "rm -rf %s" % path_utils.JoinTargetPath(self.local_coverage_path,
+                                                    "*.gcda"))
+        if any(results[cmd_utils.EXIT_CODE]):
+            logging.error("Fail to cleanup gcda files.")
 
     def SetHalNames(self, names=[]):
         """Sets the HAL names for which to process coverage.
