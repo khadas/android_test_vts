@@ -191,6 +191,13 @@ media_test_res_copy_pairs := \
   $(foreach f,$(media_test_res_files),\
     hardware/interfaces/media/res/$(f):$(VTS_TESTCASES_OUT)/DATA/media/res/$(f))
 
+nbu_p2p_apk_files := \
+  $(call find-files-in-subdirs,test/vts-testcase/nbu/src,"*.apk" -and -type f,.)
+
+nbu_p2p_apk_copy_pairs := \
+  $(foreach f,$(nbu_p2p_apk_files),\
+      test/vts-testcase/nbu/src/$(f):$(VTS_TESTCASES_OUT)/DATA/app/nbu/$(f))
+
 performance_test_res_files := \
   $(call find-files-in-subdirs,test/vts-testcase/performance/res/,"*.*" -and -type f,.) \
 
@@ -244,6 +251,7 @@ vts_copy_pairs: \
   $(call copy-many-files,$(host_vti_proto_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
+  $(call copy-many-files,$(nbu_p2p_apk_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
