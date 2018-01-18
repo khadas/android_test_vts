@@ -363,6 +363,7 @@ class CoverageFeature(feature_utils.Feature):
 
             # Find the corresponding gcno summary and source file name for the
             # gcda file.
+            src_file_path = None
             for gcno_file_parser in gcno_file_parsers:
                 try:
                     gcno_summary = gcno_file_parser.Parse()
