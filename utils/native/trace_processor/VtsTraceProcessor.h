@@ -20,14 +20,16 @@
 #include <android-base/macros.h>
 #include <test/vts/proto/VtsProfilingMessage.pb.h>
 #include <test/vts/proto/VtsReportMessage.pb.h>
+#include "VtsCoverageProcessor.h"
 
 namespace android {
 namespace vts {
 
 class VtsTraceProcessor {
  public:
-  VtsTraceProcessor() {};
-  virtual ~VtsTraceProcessor() {};
+  VtsTraceProcessor(VtsCoverageProcessor* coverage_processor)
+      : coverage_processor_(coverage_processor){};
+  virtual ~VtsTraceProcessor(){};
 
   enum TraceSelectionMetric {
     MAX_COVERAGE,
@@ -90,8 +92,7 @@ class VtsTraceProcessor {
   long GetTotalCoverageLine(const TestReportMessage& msg);
   // Helper method to calculate total code line in the given report message.
   long GetTotalLine(const TestReportMessage& msg);
-  // Helper method to extract the trace file name from the given coverage file
-  // name.
+  // Helper method to extract the trace file name from the given file name.
   std::string GetTraceFileName(const std::string& coverage_file_name);
   // Helper method to check whether the given event is an entry event.
   bool isEntryEvent(const InstrumentationEventType& event);
@@ -108,7 +109,10 @@ class VtsTraceProcessor {
     long trace_file_size;
   };
 
-  DISALLOW_COPY_AND_ASSIGN (VtsTraceProcessor);
+  // A class to process coverage reports. Not owned.
+  VtsCoverageProcessor* coverage_processor_;
+
+  DISALLOW_COPY_AND_ASSIGN(VtsTraceProcessor);
 };
 
 }  // namespace vts
