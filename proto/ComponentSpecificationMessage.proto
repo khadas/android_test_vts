@@ -188,11 +188,14 @@ message FunctionCallMessage {
   // Component type, e.g., BLUETOOTH, used for Conventional HAL only.
   optional ComponentType component_type = 22;
   // Component version (e.g., 1.0).
-  optional bytes component_type_version = 23;
+  optional bytes component_type_version = 23 [deprecated = true];
   // Component name (e.g., INfc), used for HIDL HALs only.
   optional bytes component_name = 24;
   // Component package name (e.g., android.hardware.nfc).
   optional bytes package_name = 25;
+  // Component major and minor versions stored separately.
+  optional uint32 component_type_version_major = 26;
+  optional uint32 component_type_version_minor = 27;
 
   // Specifies API function and inputs.
   optional FunctionSpecificationMessage api = 100;
