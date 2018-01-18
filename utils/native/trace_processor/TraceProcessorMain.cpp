@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "VtsCoverageProcessor.h"
 #include "VtsTraceProcessor.h"
 // Usage examples:
 //   To cleanup trace, <binary> --cleanup <trace file>/<trace file directory>
@@ -41,8 +42,16 @@
 //
 // Parse trace is used to parse a binary trace file and print the text format of
 // the proto (used of for debug).
+//
+// Merge coverage is used to merge the coverage reports under the given
+// directory and generate a merged report.
+//
+// Compare coverage is used to compare a new coverage report with a existing
+// coverage report and print the additional file/lines covered.
+
 int main(int argc, char* argv[]) {
-  android::vts::VtsTraceProcessor trace_processor;
+  android::vts::VtsCoverageProcessor coverage_processor;
+  android::vts::VtsTraceProcessor trace_processor(&coverage_processor);
   if (argc == 3) {
     if (!strcmp(argv[1], "--cleanup")) {
       trace_processor.CleanupTraces(argv[2]);
@@ -61,6 +70,10 @@ int main(int argc, char* argv[]) {
   } else if (argc == 4) {
     if (!strcmp(argv[1], "--trace_selection")) {
       trace_processor.SelectTraces(argv[2], argv[3]);
+    } else if (!strcmp(argv[1], "--compare_coverage")) {
+      coverage_processor.CompareCoverage(argv[2], argv[3]);
+    } else if (!strcmp(argv[1], "--merge_coverage")) {
+      coverage_processor.MergeCoverage(argv[2], argv[3]);
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
