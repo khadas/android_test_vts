@@ -236,13 +236,6 @@ acts_testcases_copy_pairs := \
   $(foreach f,$(acts_testcases_files),\
     tools/test/connectivity/acts/tests/google/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/acts/$(f))
 
-target_script_files := \
-  $(call find-files-in-subdirs,test/vts/script/target,"*.sh" -and -type f,.)
-
-target_script_copy_pairs := \
-  $(foreach f,$(target_script_files),\
-    test/vts/script/target/$(f):$(VTS_TESTCASES_OUT)/script/target/$(f))
-
 $(compatibility_zip): vts_copy_pairs
 
 vts_copy_pairs: \
@@ -267,8 +260,7 @@ vts_copy_pairs: \
   $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(acts_framework_copy_pairs)) \
-  $(call copy-many-files,$(acts_testcases_copy_pairs)) \
-  $(call copy-many-files,$(target_script_copy_pairs))
+  $(call copy-many-files,$(acts_testcases_copy_pairs))
 	@touch $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py
 	@touch $(VTS_TESTCASES_OUT)/vti/__init__.py
 
