@@ -93,6 +93,7 @@ public class VtsMultiDeviceTest
     static final String SKIP_ON_32BIT_ABI = "skip_on_32bit_abi";
     static final String SKIP_ON_64BIT_ABI = "skip_on_64bit_abi";
     static final String SKIP_IF_THERMAL_THROTTLING = "skip_if_thermal_throttling";
+    static final String DISABLE_CPU_FREQUENCY_SCALING = "disable_cpu_frequency_scaling";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
     static final String VTS = "vts";
     static final String CONFIG_FILE_EXTENSION = ".config";
@@ -285,6 +286,10 @@ public class VtsMultiDeviceTest
     @Option(name = "skip-if-thermal-throttling",
             description = "Whether to skip tests if target device suffers from thermal throttling.")
     private boolean mSkipIfThermalThrottling = false;
+
+    @Option(name = "disable-cpu-frequency-scaling",
+            description = "Whether to disable cpu frequency scaling for test.")
+    private boolean mDisableCpuFrequencyScaling = true;
 
     @Option(name = "run-32bit-on-64bit-abi",
             description = "Whether to run 32bit tests on 64bit ABI.")
@@ -840,6 +845,10 @@ public class VtsMultiDeviceTest
             jsonObject.put(SKIP_IF_THERMAL_THROTTLING, mSkipIfThermalThrottling);
             CLog.i("Added %s to the Json object", SKIP_IF_THERMAL_THROTTLING);
         }
+
+        jsonObject.put(DISABLE_CPU_FREQUENCY_SCALING, mDisableCpuFrequencyScaling);
+        CLog.i("Added %s to the Json object, value: %s", DISABLE_CPU_FREQUENCY_SCALING,
+                mDisableCpuFrequencyScaling);
 
         if (!mBinaryTestSource.isEmpty()) {
             jsonObject.put(BINARY_TEST_SOURCE, new JSONArray(mBinaryTestSource));

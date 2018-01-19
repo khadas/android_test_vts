@@ -58,6 +58,7 @@ class ConfigKeys(object):
     IKEY_SKIP_ON_32BIT_ABI = "skip_on_32bit_abi"
     IKEY_SKIP_ON_64BIT_ABI = "skip_on_64bit_abi"
     IKEY_SKIP_IF_THERMAL_THROTTLING = "skip_if_thermal_throttling"
+    IKEY_DISABLE_CPU_FREQUENCY_SCALING = "disable_cpu_frequency_scaling"
 
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
