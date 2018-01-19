@@ -1025,16 +1025,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     throw new RuntimeException("Json object is null.");
                 }
                 parser.processJsonFile(object);
-            }
-            parser.processJsonFile(object);
-
-            try {
-                JSONObject planObject = object.getJSONObject(TESTMODULE);
-                String test_module_name = planObject.getString("Name");
-                long test_module_timestamp = planObject.getLong("Timestamp");
-                AddTestModuleKeys(test_module_name, test_module_timestamp);
-            } catch (JSONException e) {
-                CLog.d("Key '%s' not found in result json summary", TESTMODULE);
+                try {
+                    JSONObject planObject = object.getJSONObject(TESTMODULE);
+                    String test_module_name = planObject.getString("Name");
+                    long test_module_timestamp = planObject.getLong("Timestamp");
+                    AddTestModuleKeys(test_module_name, test_module_timestamp);
+                } catch (JSONException e) {
+                    CLog.d("Key '%s' not found in result json summary", TESTMODULE);
+                }
             }
         }
         printVtsLogs(vtsRunnerLogDir);
