@@ -43,18 +43,23 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         """Checks precondition."""
         super(HidlHalGTest, self).setUpClass()
 
-        opt_params = [keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING]
+        opt_params = [keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
+                      keys.ConfigKeys.IKEY_DISABLE_CPU_FREQUENCY_SCALING]
         self.getUserParams(opt_param_names=opt_params)
 
         self._skip_if_thermal_throttling = self.getUserParam(
             keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
             default_value=False)
+        self._disable_cpu_frequency_scaling = self.getUserParam(
+            keys.ConfigKeys.IKEY_DISABLE_CPU_FREQUENCY_SCALING,
+            default_value=True)
 
         if not self._skip_all_testcases:
-            logging.info("Disable CPU frequency scaling")
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
-            self._cpu_freq.DisableCpuScaling()
+            if self._disable_cpu_frequency_scaling:
+                logging.info("Disable CPU frequency scaling")
+                self._cpu_freq.DisableCpuScaling()
         else:
             self._cpu_freq = None
 
@@ -199,7 +204,8 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
     def tearDownClass(self):
         """Turns off CPU frequency scaling."""
-        if (not self._skip_all_testcases and getattr(self, "_cpu_freq", None)):
+        if (not self._skip_all_testcases and getattr(self, "_cpu_freq", None)
+            and self._disable_cpu_frequency_scaling):
             logging.info("Enable CPU frequency scaling")
             self._cpu_freq.EnableCpuScaling()
 
