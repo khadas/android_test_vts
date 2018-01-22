@@ -365,4 +365,7 @@
     <!-- b/66924299: Remove testcase that logd reads kernel log -->
     <option name="compatibility:exclude-filter" value="CtsLiblogTestCases liblog#android_logger_get_" />
 
+    <!-- b/71958344: Exclude until CTS releases it -->
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.OverlayHostTest#testInstallingOverlayHasNoEffect" />
+
 </configuration>
