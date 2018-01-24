@@ -21,6 +21,7 @@
     <option name="vts-plan-result:plan-name" value="vts-staging-default" />
 
     <!-- for System -->
+    <option name="compatibility:include-filter" value="VtsHalBaseV1_0TargetTest" />
     <option name="compatibility:include-filter" value="MemorySystemStressTest" />
     <!-- b/66012102 -->
     <!-- <option name="compatibility:include-filter" value="VtsAppCameraStressTest" /> -->
