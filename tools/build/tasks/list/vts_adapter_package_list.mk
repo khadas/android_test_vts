@@ -66,6 +66,8 @@ vts_adapter_package_list := \
   android.hardware.graphics.composer@2.1-adapter-helper \
   android.hardware.graphics.mapper@2.0-adapter \
   android.hardware.graphics.mapper@2.0-adapter-helper \
+  android.hardware.graphics.mapper@2.1-adapter \
+  android.hardware.graphics.mapper@2.1-adapter-helper \
   android.hardware.health@1.0-adapter \
   android.hardware.health@1.0-adapter-helper \
   android.hardware.ir@1.0-adapter \
