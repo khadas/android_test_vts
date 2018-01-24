@@ -130,7 +130,7 @@ class CoverageFeature(feature_utils.Feature):
 
         logging.info("Coverage enabled: %s", self.enabled)
 
-    def _ExtractSourceName(self, gcno_summary, file_name, legacy_build=False):
+    def _ExtractSourceName(self, gcno_summary, file_name, legacy_build=False, check_name=True):
         """Gets the source name from the GCNO summary object.
 
         Gets the original source file name from the FileSummary object describing
@@ -141,6 +141,8 @@ class CoverageFeature(feature_utils.Feature):
             file_name: the base filename (without extensions) of the gcno or gcda file
             legacy_build: boolean to indicate whether the file is build with
                           legacy compile system.
+            check_name: boolean, whether to compare the source name in gcno_summary with
+                        the given file name.
 
         Returns:
             The relative path to the original source file corresponding to the
@@ -148,6 +150,8 @@ class CoverageFeature(feature_utils.Feature):
         """
         # Check the source file for the entry function.
         src_file_path = gcno_summary.functions[0].src_file_name
+        if not check_name:
+            return src_file_path
         src_file_name = src_file_path.rsplit(".", 1)[0]
         # If build with legacy compile system, compare only the base source file
         # name. Otherwise, compare the full source file name (with path info).
@@ -364,20 +368,28 @@ class CoverageFeature(feature_utils.Feature):
             # Find the corresponding gcno summary and source file name for the
             # gcda file.
             src_file_path = None
+            gcno_summary = None
             for gcno_file_parser in gcno_file_parsers:
                 try:
                     gcno_summary = gcno_file_parser.Parse()
                 except FileFormatError:
                     logging.error("Error parsing gcno for gcda %s", gcda_name)
-                    continue
+                    break
                 legacy_build = "soong/.intermediates" not in gcda_name
                 src_file_path = self._ExtractSourceName(
-                    gcno_summary, file_name, legacy_build)
+                    gcno_summary, file_name, legacy_build=legacy_build)
                 if src_file_path:
                     logging.info("Coverage source file: %s", src_file_path)
                     break
 
-            if not src_file_path:
+            # If could not find the matched source file name, try to get the
+            # name directly form gcno_summary.
+            if gcno_summary and not src_file_path:
+                src_file_path = self._ExtractSourceName(
+                    gcno_summary, file_name, check_name=False)
+            if src_file_path:
+                logging.info("Coverage source file: %s", src_file_path)
+            else:
                 logging.error("No source file found for gcda %s.", gcda_name)
                 continue
 
