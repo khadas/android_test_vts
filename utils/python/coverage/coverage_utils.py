@@ -384,7 +384,10 @@ class CoverageFeature(feature_utils.Feature):
             skip_path = False
             if exclude_coverage_path:
                 for path in exclude_coverage_path:
-                    if src_file_path.startswith(str(path)):
+                    base_name = os.path.basename(path)
+                    if "." not in base_name:
+                        path = path if path.endswith("/") else path + "/"
+                    if src_file_path.startswith(path):
                         skip_path = True
                         break
 
