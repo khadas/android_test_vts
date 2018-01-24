@@ -45,8 +45,10 @@ adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.gnss@1.0-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.allocator@2.0-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.common@1.0-vts.profiler.so system/lib64/
+adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.common@1.1-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.composer@2.1-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.mapper@2.0-vts.profiler.so system/lib64/
+adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.graphics.mapper@2.1-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.health@1.0-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.ir@1.0-vts.profiler.so system/lib64/
 adb push ${ANDROID_BUILD_TOP}/out/host/linux-x86/vts/android-vts/testcases/DATA/lib64/android.hardware.keymaster@3.0-vts.profiler.so system/lib64/
