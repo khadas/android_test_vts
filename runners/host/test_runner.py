@@ -109,33 +109,45 @@ def runTestClass(test_class):
             timeout_sec = 60 * 60 * 3
             logging.warning("%s unspecified. Set timeout to %s seconds.",
                             keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT, timeout_sec)
-        # The default SIGINT handler sends KeyboardInterrupt to main thread.
-        # On Windows, raising CTRL_C_EVENT, which is received as SIGINT,
-        # has no effect on non-console process. interrupt_main() works but
-        # does not unblock main thread's IO immediately.
-        timeout_func = (raiseSigint if not utils.is_on_windows() else
-                        thread.interrupt_main)
-        sig_timer = threading.Timer(timeout_sec, timeout_func)
+
+        watcher_enabled = threading.Event()
+
+        def watchStdin():
+            while True:
+                line = sys.stdin.readline()
+                if not line:
+                    break
+            watcher_enabled.wait()
+            logging.info("Attempt to interrupt runner thread.")
+            if not utils.is_on_windows():
+                # Default SIGINT handler sends KeyboardInterrupt to main thread
+                # and unblocks it.
+                os.kill(os.getpid(), signal.SIGINT)
+            else:
+                # On Windows, raising CTRL_C_EVENT, which is received as
+                # SIGINT, has no effect on non-console process.
+                # interrupt_main() behaves like SIGINT but does not unblock
+                # main thread immediately.
+                thread.interrupt_main()
+
+        watcher_thread = threading.Thread(target=watchStdin, name="watchStdin")
+        watcher_thread.daemon = True
+        watcher_thread.start()
 
         tr = TestRunner(config, test_identifiers)
         tr.parseTestConfig(config)
         try:
-            sig_timer.start()
+            watcher_enabled.set()
             tr.runTestClass(test_class, None)
         except KeyboardInterrupt as e:
-            logging.exception("Aborted by timeout or ctrl+C: %s", e)
+            logging.exception("Aborted")
         except Exception as e:
             logging.error("Unexpected exception")
             logging.exception(e)
         finally:
-            sig_timer.cancel()
+            watcher_enabled.clear()
             tr.stop()
             return tr.results
-
-
-def raiseSigint():
-    """Raises SIGINT."""
-    os.kill(os.getpid(), signal.SIGINT)
 
 
 class TestRunner(object):
