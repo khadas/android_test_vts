@@ -112,7 +112,7 @@ target_hostdriven_copy_pairs := \
 
 host_additional_deps_copy_pairs := \
   test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTS_TOOLS_OUT)/vts-tradefed_win.bat \
-  test/vts/tools/vts-tradefed/CtsDynamicConfig.xml:$(VTS_TESTCASES_OUT)/cts.dynamic
+  test/vts/tools/vts-tradefed/DynamicConfig.xml:$(VTS_TESTCASES_OUT)/cts.dynamic
 
 # Packaging rule for host-side Python logic, configs, and data files
 
