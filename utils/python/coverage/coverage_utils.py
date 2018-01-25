@@ -146,17 +146,21 @@ class CoverageFeature(feature_utils.Feature):
             The relative path to the original source file corresponding to the
             provided gcno summary. The path is relative to the root of the build.
         """
-        # Check the source file for the entry function.
-        src_file_path = gcno_summary.functions[0].src_file_name
-        src_file_name = src_file_path.rsplit(".", 1)[0]
-        # If build with legacy compile system, compare only the base source file
-        # name. Otherwise, compare the full source file name (with path info).
-        if legacy_build:
-            base_src_file_name = os.path.basename(src_file_name)
-            return src_file_path if file_name.endswith(
-                base_src_file_name) else None
-        else:
-            return src_file_path if file_name.endswith(src_file_name) else None
+        if gcno_summay is None or gcno_summary.functions is None:
+            return None
+        for key in gcno_summary.functions:
+            src_file_path = gcno_summary.functions[key].src_file_name
+            src_file_name = src_file_path.rsplit(".", 1)[0]
+            # If build with legacy compile system, compare only the base source file
+            # name. Otherwise, compare the full source file name (with path info).
+            if legacy_build:
+                base_src_file_name = os.path.basename(src_file_name)
+                if file_name.endswith(base_src_file_name):
+                    return src_file_path
+            else:
+                if file_name.endswith(src_file_name):
+                    return src_file_path
+        return None
 
     def _GetChecksumGcnoDict(self, cov_zip):
         """Generates a dictionary from gcno checksum to GCNOParser object.
