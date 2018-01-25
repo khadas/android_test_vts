@@ -106,11 +106,17 @@ DATA/lib64/android.hardware.graphics.bufferqueue@1.0-vts.profiler.so->system/lib
 DATA/lib/android.hardware.graphics.common@1.0-vts.profiler.so->system/lib/android.hardware.graphics.common@1.0-vts.profiler.so
 DATA/lib64/android.hardware.graphics.common@1.0-vts.profiler.so->system/lib64/android.hardware.graphics.common@1.0-vts.profiler.so
 
+DATA/lib/android.hardware.graphics.common@1.1-vts.profiler.so->system/lib/android.hardware.graphics.common@1.1-vts.profiler.so
+DATA/lib64/android.hardware.graphics.common@1.1-vts.profiler.so->system/lib64/android.hardware.graphics.common@1.1-vts.profiler.so
+
 DATA/lib/android.hardware.graphics.composer@2.1-vts.profiler.so->system/lib/android.hardware.graphics.composer@2.1-vts.profiler.so
 DATA/lib64/android.hardware.graphics.composer@2.1-vts.profiler.so->system/lib64/android.hardware.graphics.composer@2.1-vts.profiler.so
 
 DATA/lib/android.hardware.graphics.mapper@2.0-vts.profiler.so->system/lib/android.hardware.graphics.mapper@2.0-vts.profiler.so
 DATA/lib64/android.hardware.graphics.mapper@2.0-vts.profiler.so->system/lib64/android.hardware.graphics.mapper@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.graphics.mapper@2.1-vts.profiler.so->system/lib/android.hardware.graphics.mapper@2.1-vts.profiler.so
+DATA/lib64/android.hardware.graphics.mapper@2.1-vts.profiler.so->system/lib64/android.hardware.graphics.mapper@2.1-vts.profiler.so
 
 DATA/lib/android.hardware.health@1.0-vts.profiler.so->system/lib/android.hardware.health@1.0-vts.profiler.so
 DATA/lib64/android.hardware.health@1.0-vts.profiler.so->system/lib64/android.hardware.health@1.0-vts.profiler.so
@@ -290,11 +296,17 @@ DATA/lib64/android.hardware.graphics.bufferqueue@1.0-vts.profiler.so->system/lib
 DATA/lib/android.hardware.graphics.common@1.0-vts.profiler.so->system/lib/hw/android.hardware.graphics.common@1.0-vts.profiler.so
 DATA/lib64/android.hardware.graphics.common@1.0-vts.profiler.so->system/lib64/hw/android.hardware.graphics.common@1.0-vts.profiler.so
 
+DATA/lib/android.hardware.graphics.common@1.1-vts.profiler.so->system/lib/hw/android.hardware.graphics.common@1.1-vts.profiler.so
+DATA/lib64/android.hardware.graphics.common@1.1-vts.profiler.so->system/lib64/hw/android.hardware.graphics.common@1.1-vts.profiler.so
+
 DATA/lib/android.hardware.graphics.composer@2.1-vts.profiler.so->system/lib/hw/android.hardware.graphics.composer@2.1-vts.profiler.so
 DATA/lib64/android.hardware.graphics.composer@2.1-vts.profiler.so->system/lib64/hw/android.hardware.graphics.composer@2.1-vts.profiler.so
 
 DATA/lib/android.hardware.graphics.mapper@2.0-vts.profiler.so->system/lib/hw/android.hardware.graphics.mapper@2.0-vts.profiler.so
 DATA/lib64/android.hardware.graphics.mapper@2.0-vts.profiler.so->system/lib64/hw/android.hardware.graphics.mapper@2.0-vts.profiler.so
+
+DATA/lib/android.hardware.graphics.mapper@2.1-vts.profiler.so->system/lib/hw/android.hardware.graphics.mapper@2.1-vts.profiler.so
+DATA/lib64/android.hardware.graphics.mapper@2.1-vts.profiler.so->system/lib64/hw/android.hardware.graphics.mapper@2.1-vts.profiler.so
 
 DATA/lib/android.hardware.health@1.0-vts.profiler.so->system/lib/hw/android.hardware.health@1.0-vts.profiler.so
 DATA/lib64/android.hardware.health@1.0-vts.profiler.so->system/lib64/hw/android.hardware.health@1.0-vts.profiler.so
