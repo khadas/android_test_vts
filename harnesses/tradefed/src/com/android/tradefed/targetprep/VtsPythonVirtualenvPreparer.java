@@ -59,8 +59,7 @@ import java.util.TreeSet;
  * That means changes here will be upstreamed gradually.
  */
 @OptionClass(alias = "python-venv")
-public class VtsPythonVirtualenvPreparer
-        implements ITargetPreparer, ITargetCleaner, IMultiTargetPreparer {
+public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String PIP = "pip";
     private static final String PATH = "PATH";
     private static final String OS_NAME = "os.name";
@@ -100,28 +99,19 @@ public class VtsPythonVirtualenvPreparer
      * {@inheritDoc}
      */
     @Override
-    public void setUp(ITestDevice device, IBuildInfo buildInfo)
-            throws TargetSetupError, BuildError, DeviceNotAvailableException {
-        mBuildInfo = buildInfo;
-        startVirtualenv(buildInfo);
-        setLocalPypiPath();
-        installDeps(buildInfo);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setUp(IInvocationContext context)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
-        setUp(context.getDevices().get(0), context.getBuildInfos().get(0));
+        mBuildInfo = context.getBuildInfos().get(0);
+        startVirtualenv(mBuildInfo);
+        setLocalPypiPath();
+        installDeps(mBuildInfo);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
+    public void tearDown(IInvocationContext context, Throwable e)
             throws DeviceNotAvailableException {
         if (mVenvDir != null) {
             try {
@@ -132,15 +122,6 @@ public class VtsPythonVirtualenvPreparer
             }
             mVenvDir = null;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void tearDown(IInvocationContext context, Throwable e)
-            throws DeviceNotAvailableException {
-        tearDown(context.getDevices().get(0), context.getBuildInfos().get(0), e);
     }
 
     /**
