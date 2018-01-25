@@ -738,8 +738,6 @@ class BaseTestClass(object):
                                        "test_func. Fall back to default %s"),
                                       test_name)
 
-            tr_record = records.TestResultRecord(test_name, self.test_module_name)
-            self.results.requested.append(tr_record)
             if len(test_name) > utils.MAX_FILENAME_LEN:
                 test_name = test_name[:utils.MAX_FILENAME_LEN]
 
@@ -748,7 +746,7 @@ class BaseTestClass(object):
         for setting in settings:
             test_name = GenerateTestName(setting)
 
-            tr_record = records.TestResultRecord(test_name, self.TAG)
+            tr_record = records.TestResultRecord(test_name, self.test_module_name)
             self.results.requested.append(tr_record)
 
         for setting in settings:
