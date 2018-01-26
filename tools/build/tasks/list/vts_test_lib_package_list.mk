@@ -41,6 +41,10 @@ vts_test_lib_packages += \
     libfortify2-tests-clang \
     libgnu-hash-table-library \
     libnstest_dlopened \
+    libnstest_ns_a_public1 \
+    libnstest_ns_a_public1_internal \
+    libnstest_ns_b_public2 \
+    libnstest_ns_b_public3 \
     libnstest_private \
     libnstest_private_external \
     libnstest_public \
