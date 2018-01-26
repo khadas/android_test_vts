@@ -16,14 +16,14 @@
 """Class to fetch artifacts from internal build server.
 """
 
-import apiclient
+import googleapiclient
 import httplib2
 import io
 import json
 import logging
 import re
 import time
-from apiclient.discovery import build
+from googleapiclient.discovery import build
 from oauth2client import client as oauth2_client
 from oauth2client.service_account import ServiceAccountCredentials
 from vts.utils.python.retry import retry
@@ -163,7 +163,7 @@ class AndroidBuildClient(object):
             else:
                 fh = io.BytesIO()
 
-            downloader = apiclient.http.MediaIoBaseDownload(
+            downloader = googleapiclient.http.MediaIoBaseDownload(
                 fh, api, chunksize=self.DEFAULT_CHUNK_SIZE)
             done = False
             while not done:
