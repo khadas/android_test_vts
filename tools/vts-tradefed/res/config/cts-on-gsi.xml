@@ -32,7 +32,7 @@
     <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
 
     <include name="cts-preconditions" />
-    <option name="dynamic-resource-name" value="vts-tradefed" />
+    <option name="dynamic-config-pusher:dynamic-resource-name" value="vts-tradefed" />
     <include name="cts-system-checkers" />
     <include name="cts-known-failures" />
 
