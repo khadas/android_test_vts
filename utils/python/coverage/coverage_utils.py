@@ -146,7 +146,7 @@ class CoverageFeature(feature_utils.Feature):
             The relative path to the original source file corresponding to the
             provided gcno summary. The path is relative to the root of the build.
         """
-        if gcno_summay is None or gcno_summary.functions is None:
+        if gcno_summary is None or gcno_summary.functions is None:
             return None
         for key in gcno_summary.functions:
             src_file_path = gcno_summary.functions[key].src_file_name
