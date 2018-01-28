@@ -16,6 +16,8 @@
 <configuration description="Runs a subset of CTS tests that can heavily exercise HALs">
 
     <include name="cts" />
+    <option name="compatibility-build-provider:url-suite-name-override" value="CTS" />
+    <option name="dynamic-config-pusher:dynamic-resource-name" value="vts-tradefed" />
 
     <option name="plan" value="cts-vendor-interface" />
 
