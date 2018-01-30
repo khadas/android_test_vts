@@ -79,6 +79,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                                                  self._hal_precondition)
         if self.coverage.enabled and self._hal_precondition is not None:
             self.coverage.SetHalNames([self._hal_precondition])
+            self.coverage.SetCoverageReportFilePrefix(self.test_module_name)
 
     def CreateTestCases(self):
         """Create testcases and conditionally enable passthrough mode.
