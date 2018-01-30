@@ -140,7 +140,7 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
                 "The given feature name %s is invalid for HIDL HAL.",
                 feature)
         else:
-            cmd_results = shell.Execute("pm list features")
+            cmd_results = shell.Execute("LD_LIBRARY_PATH= pm list features")
             if (any(cmd_results[const.EXIT_CODE]) or
                 feature not in cmd_results[const.STDOUT][0]):
                 logging.warn("The required feature %s not found.",
