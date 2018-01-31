@@ -48,6 +48,10 @@
 //
 // Compare coverage is used to compare a new coverage report with a existing
 // coverage report and print the additional file/lines covered.
+//
+// Get subset coverage is used in cases when we have an aggregated coverage
+// report for all files but are only interested in the coverage measurement of
+// a subset of files in that report.
 
 int main(int argc, char* argv[]) {
   android::vts::VtsCoverageProcessor coverage_processor;
@@ -63,6 +67,8 @@ int main(int argc, char* argv[]) {
       trace_processor.ParseTrace(argv[2]);
     } else if (!strcmp(argv[1], "--convert")) {
       trace_processor.ConvertTrace(argv[2]);
+    } else if (!strcmp(argv[1], "--get_coverage_summary")) {
+      coverage_processor.GetCoverageSummary(argv[2]);
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
@@ -77,6 +83,10 @@ int main(int argc, char* argv[]) {
     } else {
       fprintf(stderr, "Invalid argument.\n");
       return -1;
+    }
+  } else if (argc == 5) {
+    if (!strcmp(argv[1], "--get_subset_coverage")) {
+      coverage_processor.GetSubsetCoverage(argv[2], argv[3], argv[4]);
     }
   } else {
     fprintf(stderr, "Invalid argument.\n");
