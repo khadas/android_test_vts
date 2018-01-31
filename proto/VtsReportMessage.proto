@@ -195,7 +195,7 @@ message CoverageReportMessage {
   optional bytes revision = 13;
 
   // i-th element gives the number of times i-th line is executed.
-  repeated int32 line_coverage_vector = 23;
+  repeated int64 line_coverage_vector = 23;
 
   // the number of source code lines that are instrumented for code coverage
   // measurement.
