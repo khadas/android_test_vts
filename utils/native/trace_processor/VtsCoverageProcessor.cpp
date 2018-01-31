@@ -106,13 +106,7 @@ void VtsCoverageProcessor::MergeCoverage(const string& coverage_file_dir,
     }
   }
 
-  long total_lines_covered = GetTotalCoverageLine(merged_coverage_report);
-  long total_code_lines = GetTotalCodeLine(merged_coverage_report);
-  double coverage_rate = (double)total_lines_covered / total_code_lines;
-  cout << "total lines covered: " << total_lines_covered << endl;
-  cout << "total lines: " << total_code_lines << endl;
-  cout << "coverage rate: " << coverage_rate << endl;
-
+  PrintCoverageSummary(merged_coverage_report);
   ofstream fout;
   fout.open(merged_coverage_file);
   fout << merged_coverage_report.DebugString();
@@ -136,6 +130,10 @@ void VtsCoverageProcessor::MergeCoverageMsg(
     exit(-1);
   }
   for (int i = 0; i < ref_coverage_msg.line_coverage_vector_size(); i++) {
+    if (i > merged_coverage_msg->line_coverage_vector_size() - 1) {
+      cerr << "Reach the end of coverage vector" << endl;
+      break;
+    }
     int ref_line_count = ref_coverage_msg.line_coverage_vector(i);
     int merged_line_count = merged_coverage_msg->line_coverage_vector(i);
     if (ref_line_count > 0) {
@@ -196,6 +194,62 @@ void VtsCoverageProcessor::CompareCoverage(const string& ref_msg_file,
       cout << covered_line << endl;
     }
   }
+}
+
+void VtsCoverageProcessor::GetSubsetCoverage(const string& ref_msg_file,
+                                             const string& full_msg_file,
+                                             const string& result_msg_file) {
+  TestReportMessage ref_coverage_report;
+  TestReportMessage full_coverage_report;
+  TestReportMessage result_coverage_report;
+  ParseCoverageData(ref_msg_file, &ref_coverage_report);
+  ParseCoverageData(full_msg_file, &full_coverage_report);
+
+  for (const auto& ref_coverage : ref_coverage_report.coverage()) {
+    bool seen_file = false;
+    for (const auto& coverage : full_coverage_report.coverage()) {
+      if (coverage.file_path() == ref_coverage.file_path()) {
+        *result_coverage_report.add_coverage() = coverage;
+        seen_file = true;
+        break;
+      }
+    }
+    if (!seen_file) {
+      cout << ": missing coverage for file " << ref_coverage.file_path()
+           << endl;
+      CoverageReportMessage* empty_coverage =
+          result_coverage_report.add_coverage();
+      *empty_coverage = ref_coverage;
+      for (int line = 0; line < empty_coverage->line_coverage_vector_size();
+           line++) {
+        if (empty_coverage->line_coverage_vector(line) > 0) {
+          empty_coverage->set_line_coverage_vector(line, 0);
+        }
+      }
+      empty_coverage->set_covered_line_count(0);
+    }
+  }
+  PrintCoverageSummary(result_coverage_report);
+  ofstream fout;
+  fout.open(result_msg_file);
+  fout << result_coverage_report.DebugString();
+  fout.close();
+}
+
+void VtsCoverageProcessor::GetCoverageSummary(const string& coverage_msg_file) {
+  TestReportMessage coverage_report;
+  ParseCoverageData(coverage_msg_file, &coverage_report);
+  PrintCoverageSummary(coverage_report);
+}
+
+void VtsCoverageProcessor::PrintCoverageSummary(
+    const TestReportMessage& coverage_report) {
+  long total_lines_covered = GetTotalCoverageLine(coverage_report);
+  long total_code_lines = GetTotalCodeLine(coverage_report);
+  double coverage_rate = (double)total_lines_covered / total_code_lines;
+  cout << "total lines covered: " << total_lines_covered << endl;
+  cout << "total lines: " << total_code_lines << endl;
+  cout << "coverage rate: " << coverage_rate << endl;
 }
 
 long VtsCoverageProcessor::GetTotalCoverageLine(
