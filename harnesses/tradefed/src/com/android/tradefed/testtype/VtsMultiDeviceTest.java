@@ -120,6 +120,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
     static final String PRECONDITION_LSHAL = "precondition_lshal";
     static final String PRECONDITION_VINTF = "precondition_vintf";
+    static final String PRECONDITION_SYSPROP = "precondition_sysprop";
     static final String ENABLE_SYSTRACE = "enable_systrace";
     static final String HAL_HIDL_REPLAY_TEST_TRACE_PATHS = "hal_hidl_replay_test_trace_paths";
     static final String HAL_HIDL_PACKAGE_NAME = "hal_hidl_package_name";
@@ -187,6 +188,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     + "set precondition-vintf to the value of precondition-lshal. "
                     + "The test runner will find the HAL in manifest.xml instead of lshal.")
     private boolean mPreconditionVintfOverride = false;
+
+    @Option(name = "precondition-sysprop",
+            description = "The name=value for a system property configuration that needs "
+                    + "to be met to run the test.")
+    private String mPreconditionSysProp = null;
 
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
@@ -808,6 +814,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             } else {
                 CLog.w("Ignored precondition-vintf-override as precondition-vintf is present");
             }
+        }
+
+        if (mPreconditionSysProp != null) {
+            jsonObject.put(PRECONDITION_SYSPROP, mPreconditionSysProp);
+            CLog.i("Added %s to the Json object", PRECONDITION_SYSPROP);
         }
 
         if (!mBinaryTestProfilingLibraryPath.isEmpty()) {
