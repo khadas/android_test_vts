@@ -83,6 +83,10 @@ class CoverageFeature(feature_utils.Feature):
         keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH
     ]
 
+    _DEFAULT_EXCLUDE_PATHS = [
+        'bionic', 'external/libcxx', 'system/core', 'system/libhidl', 'system/libfmq'
+    ]
+
     def __init__(self, user_params, web=None, local_coverage_path=None):
         """Initializes the coverage feature.
 
@@ -130,37 +134,51 @@ class CoverageFeature(feature_utils.Feature):
 
         logging.info("Coverage enabled: %s", self.enabled)
 
-    def _ExtractSourceName(self, gcno_summary, file_name, legacy_build=False):
-        """Gets the source name from the GCNO summary object.
+    def _FindGcnoSummary(self, gcda_file_path, gcno_file_parsers):
+        """Find the corresponding gcno summary for given gcda file.
 
-        Gets the original source file name from the FileSummary object describing
-        a gcno file using the base filename of the gcno/gcda file.
+        Identify the corresponding gcno summary for given gcda file from a list
+        of gcno files with the same checksum as the gcda file by matching
+        the the gcda file path.
+        Note: if none of the gcno summary contains the source file same as the
+        given gcda_file_path (e.g. when the corresponding source file does not
+        contain any executable codes), just return the last gcno summary in the
+        list as a fall back solution.
 
         Args:
-            gcno_summary: a FileSummary object describing a gcno file
-            file_name: the base filename (without extensions) of the gcno or gcda file
-            legacy_build: boolean to indicate whether the file is build with
-                          legacy compile system.
+            gcda_file_path: the path of gcda file (without extensions).
+            gcno_file_parsers: a list of gcno file parser that has the same
+                               chechsum.
 
         Returns:
-            The relative path to the original source file corresponding to the
-            provided gcno summary. The path is relative to the root of the build.
+            The corresponding gcno summary for given gcda file.
         """
-        if gcno_summary is None or gcno_summary.functions is None:
-            return None
-        for key in gcno_summary.functions:
-            src_file_path = gcno_summary.functions[key].src_file_name
-            src_file_name = src_file_path.rsplit(".", 1)[0]
-            # If build with legacy compile system, compare only the base source file
-            # name. Otherwise, compare the full source file name (with path info).
-            if legacy_build:
-                base_src_file_name = os.path.basename(src_file_name)
-                if file_name.endswith(base_src_file_name):
-                    return src_file_path
-            else:
-                if file_name.endswith(src_file_name):
-                    return src_file_path
-        return None
+        gcno_summary = None
+        # For each gcno files with the matched checksum, compare the
+        # gcda_file_path to find the corresponding gcno summary.
+        for gcno_file_parser in gcno_file_parsers:
+            try:
+                gcno_summary = gcno_file_parser.Parse()
+            except FileFormatError:
+                logging.error("Error parsing gcno for gcda %s", gcda_file_path)
+                break
+            legacy_build = "soong/.intermediates" not in gcda_file_path
+            for key in gcno_summary.functions:
+                src_file_path = gcno_summary.functions[key].src_file_name
+                src_file_name = src_file_path.rsplit(".", 1)[0]
+                # If build with legacy compile system, compare only the base
+                # source file name. Otherwise, compare the full source file name
+                # (with path info).
+                if legacy_build:
+                    base_src_file_name = os.path.basename(src_file_name)
+                    if gcda_file_path.endswith(base_src_file_name):
+                        return gcno_summary
+                else:
+                    if gcda_file_path.endswith(src_file_name):
+                        return gcno_summary
+        # If no gcno file matched with the gcda_file_name, return the last
+        # gcno summary as a fall back solution.
+        return gcno_summary
 
     def _GetChecksumGcnoDict(self, cov_zip):
         """Generates a dictionary from gcno checksum to GCNOParser object.
@@ -348,8 +366,14 @@ class CoverageFeature(feature_utils.Feature):
         output_coverage_report = getattr(
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, False)
         exclude_coverage_path = getattr(
-            self, keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH, None)
+            self, keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH, [])
+        for path in exclude_coverage_path:
+            base_name = os.path.basename(path)
+            if "." not in base_name:
+                path = path if path.endswith("/") else path + "/"
+        exclude_coverage_path.extend(self._DEFAULT_EXCLUDE_PATHS)
 
+        coverage_dict = dict()
         for gcda_name in gcda_dict:
             if GEN_TAG in gcda_name:
                 # skip coverage measurement for intermediate code.
@@ -364,39 +388,9 @@ class CoverageFeature(feature_utils.Feature):
                 logging.info("No matching gcno file for gcda: %s", gcda_name)
                 continue
             gcno_file_parsers = checksum_gcno_dict[gcda_file_parser.checksum]
-
-            # Find the corresponding gcno summary and source file name for the
-            # gcda file.
-            src_file_path = None
-            for gcno_file_parser in gcno_file_parsers:
-                try:
-                    gcno_summary = gcno_file_parser.Parse()
-                except FileFormatError:
-                    logging.error("Error parsing gcno for gcda %s", gcda_name)
-                    continue
-                legacy_build = "soong/.intermediates" not in gcda_name
-                src_file_path = self._ExtractSourceName(
-                    gcno_summary, file_name, legacy_build)
-                if src_file_path:
-                    logging.info("Coverage source file: %s", src_file_path)
-                    break
-
-            if not src_file_path:
-                logging.error("No source file found for gcda %s.", gcda_name)
-                continue
-
-            skip_path = False
-            if exclude_coverage_path:
-                for path in exclude_coverage_path:
-                    base_name = os.path.basename(path)
-                    if "." not in base_name:
-                        path = path if path.endswith("/") else path + "/"
-                    if src_file_path.startswith(path):
-                        skip_path = True
-                        break
-
-            if skip_path:
-                logging.warn("Skip excluded source file %s.", src_file_path)
+            gcno_summary = self._FindGcnoSummary(file_name, gcno_file_parsers)
+            if gcno_summary is None:
+                logging.error("No gcno file found for gcda %s.", gcda_name)
                 continue
 
             # Process and merge gcno/gcda data
@@ -406,6 +400,10 @@ class CoverageFeature(feature_utils.Feature):
                 logging.error("Error parsing gcda file %s", gcda_name)
                 continue
 
+            coverage_report.GenerateLineCoverageVector(
+                    gcno_summary, exclude_coverage_path, coverage_dict)
+
+        for src_file_path in coverage_dict:
             # Get the git project information
             # Assumes that the project name and path to the project root are similar
             revision = None
@@ -428,16 +426,16 @@ class CoverageFeature(feature_utils.Feature):
                     revision = str(revision_dict[project_name])
                     logging.info("Source file '%s' matched with project '%s'",
                                  src_file_path, git_project_name)
+                    break
 
             if not revision:
                 logging.info("Could not find git info for %s", src_file_path)
                 continue
 
             if self.web and self.web.enabled:
-                coverage_vec = coverage_report.GenerateLineCoverageVector(
-                    src_file_path, gcno_summary)
+                coverage_vec = coverage_dict[src_file_path]
                 total_count, covered_count = coverage_report.GetCoverageStats(
-                    coverage_vec)
+                coverage_vec)
                 self.web.AddCoverageReport(coverage_vec, src_file_path,
                                            git_project_name, git_project_path,
                                            revision, covered_count,
