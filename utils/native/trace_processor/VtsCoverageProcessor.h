@@ -49,6 +49,15 @@ class VtsCoverageProcessor {
   void UpdateCoverageData(const CoverageReportMessage& ref_msg,
                           CoverageReportMessage* msg_to_be_updated);
 
+  // Extract the files covered in ref_msg_file from full_msg_file and store
+  // the result in result_msg_file.
+  void GetSubsetCoverage(const std::string& ref_msg_file,
+                         const std::string& full_msg_file,
+                         const std::string& result_msg_file);
+
+  // Parse the coverage report and print the coverage summary.
+  void GetCoverageSummary(const std::string& coverage_msg_file);
+
   // Calculate total coverage line in the given report message.
   long GetTotalCoverageLine(const TestReportMessage& msg) const;
   // Calculate total code line in the given report message.
@@ -58,6 +67,9 @@ class VtsCoverageProcessor {
   // Internal method to merge the ref_coverage_msg into merged_covergae_msg.
   void MergeCoverageMsg(const CoverageReportMessage& ref_coverage_msg,
                         CoverageReportMessage* merged_covergae_msg);
+
+  // Help method to print the coverage summary.
+  void PrintCoverageSummary(const TestReportMessage& coverage_report);
 
   DISALLOW_COPY_AND_ASSIGN(VtsCoverageProcessor);
 };
