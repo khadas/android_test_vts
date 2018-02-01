@@ -577,6 +577,16 @@ string GetVersion(const ComponentSpecificationMessage& message,
   return GetVersionString(message.component_type_version(), for_macro);
 }
 
+int GetMajorVersion(const ComponentSpecificationMessage& message) {
+  string version = GetVersion(message);
+  return stoi(version.substr(0, version.find('.')));
+}
+
+int GetMinorVersion(const ComponentSpecificationMessage& message) {
+  string version = GetVersion(message);
+  return stoi(version.substr(version.find('.') + 1));
+}
+
 string GetComponentBaseName(const ComponentSpecificationMessage& message) {
   if (!message.component_name().empty()) {
     return (message.component_name() == "types"
