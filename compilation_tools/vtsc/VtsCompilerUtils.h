@@ -79,6 +79,12 @@ string GetPackageNamespaceToken(const ComponentSpecificationMessage& message);
 std::string GetVersion(const ComponentSpecificationMessage& message,
                        bool for_macro = false);
 
+// Get component major version from the message. e.g. 1.0 -> 1
+int GetMajorVersion(const ComponentSpecificationMessage& message);
+
+// Get component minor version from the message. e.g. 1.0 -> 0
+int GetMinorVersion(const ComponentSpecificationMessage& message);
+
 // Get the base name of component from the message. e.g. typs, Foo.
 std::string GetComponentBaseName(const ComponentSpecificationMessage& message);
 
