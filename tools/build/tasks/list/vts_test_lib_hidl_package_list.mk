@@ -33,6 +33,7 @@ vts_hal_driver_libs := \
   android.hardware.configstore@1.0-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
   android.hardware.drm@1.0-vts.driver \
+  android.hardware.drm@1.1-vts.driver \
   android.hardware.dumpstate@1.0-vts.driver \
   android.hardware.gatekeeper@1.0-vts.driver \
   android.hardware.gnss@1.0-vts.driver \
@@ -98,6 +99,7 @@ vts_hal_profiler_libs := \
   android.hardware.configstore@1.0-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
+  android.hardware.drm@1.1-vts.profiler \
   android.hardware.dumpstate@1.0-vts.profiler \
   android.hardware.automotive.evs@1.0-vts.profiler \
   android.hardware.gatekeeper@1.0-vts.profiler \
@@ -159,6 +161,7 @@ vts_hal_test_bins := \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
+  VtsHalDrmV1_1TargetTest \
   VtsHalDumpstateV1_0TargetTest \
   VtsHalEvsV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
