@@ -60,6 +60,7 @@ vts_hal_driver_libs := \
   android.hardware.radio@1.1-vts.driver \
   android.hardware.radio.deprecated@1.0-vts.driver \
   android.hardware.renderscript@1.0-vts.driver \
+  android.hardware.secure_element@1.0-vts.driver \
   android.hardware.sensors@1.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
   android.hardware.tetheroffload.config@1.0-vts.driver \
@@ -125,6 +126,7 @@ vts_hal_profiler_libs := \
   android.hardware.radio@1.1-vts.profiler \
   android.hardware.radio.deprecated@1.0-vts.profiler \
   android.hardware.renderscript@1.0-vts.profiler \
+  android.hardware.secure_element@1.0-vts.profiler \
   android.hardware.sensors@1.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
   android.hardware.tetheroffload.config@1.0-vts.profiler \
@@ -187,6 +189,7 @@ vts_hal_test_bins := \
   VtsHalRadioV1_2TargetTest \
   VtsHalRenderscriptV1_0TargetTest \
   VtsHalSapV1_0TargetTest \
+  VtsHalSecureElementV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
   VtsHalSoundtriggerV2_0TargetTest \
   VtsHalTetheroffloadConfigV1_0TargetTest \
