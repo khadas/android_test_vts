@@ -31,8 +31,11 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
         LOG(WARNING) << "incorrect package. Expect: android.hardware.tests.bar actual: " << package;
         return;
     }
-    if (strcmp(version, "1.0") != 0) {
-        LOG(WARNING) << "incorrect version. Expect: 1.0 actual: " << interface;
+    std::string version_str = std::string(version);
+    int major_version = stoi(version_str.substr(0, version_str.find('.')));
+    int minor_version = stoi(version_str.substr(version_str.find('.') + 1));
+    if (major_version != 1 || minor_version > 0) {
+        LOG(WARNING) << "incorrect version. Expect: 1.0 or lower (if version != x.0), actual: " << version;
         return;
     }
     if (strcmp(interface, "IBar") != 0) {
