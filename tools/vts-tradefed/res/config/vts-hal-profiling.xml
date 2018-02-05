@@ -29,6 +29,7 @@
   <option name="compatibility:include-filter" value="VtsHalConfigstoreV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalContexthubV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalDrmV1_1TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1TargetProfiling" />
