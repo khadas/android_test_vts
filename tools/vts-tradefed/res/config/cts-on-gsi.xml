@@ -169,4 +169,7 @@
     <!-- b/71958344: Exclude until CTS releases it -->
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.OverlayHostTest#testInstallingOverlayHasNoEffect" />
 
+    <!-- b/65561379: Exclude android.media.cts.MediaPlayerFlakyNetworkTest -->
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.MediaPlayerFlakyNetworkTest" />
+
 </configuration>
