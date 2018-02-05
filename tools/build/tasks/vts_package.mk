@@ -233,6 +233,9 @@ target_script_copy_pairs := \
   $(foreach f,$(target_script_files),\
     test/vts/script/target/$(f):$(VTS_TESTCASES_OUT)/script/target/$(f))
 
+system_property_compatibility_test_res_copy_pairs := \
+  system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
+
 $(compatibility_zip): vts_copy_pairs
 
 vts_copy_pairs: \
@@ -256,7 +259,8 @@ vts_copy_pairs: \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(acts_framework_copy_pairs)) \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
-  $(call copy-many-files,$(target_script_copy_pairs))
+  $(call copy-many-files,$(target_script_copy_pairs)) \
+  $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs))
 	@touch $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py
 	@touch $(VTS_TESTCASES_OUT)/vti/__init__.py
 
