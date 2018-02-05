@@ -16,8 +16,8 @@
 
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -25,26 +25,24 @@ import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
 import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
+import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.ProcessHelper;
 import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
-import com.android.tradefed.testtype.IAbi;
-import com.android.tradefed.testtype.IInvocationContextReceiver;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -53,12 +51,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.Set;
-import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
@@ -1125,7 +1122,8 @@ public class VtsMultiDeviceTest
      * @throws RuntimeException
      * @throws IllegalArgumentException
      */
-    private void doRunTest(ITestRunListener listener) throws RuntimeException, IllegalArgumentException {
+    private void doRunTest(ITestLifeCycleReceiver listener)
+            throws RuntimeException, IllegalArgumentException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         JSONObject jsonObject = new JSONObject();
