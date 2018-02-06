@@ -53,8 +53,9 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     netd_integration_test \
 
-# Tun device tests.
+# Kernel tests.
 vts_test_bin_packages += \
+    dt_early_mount_test \
     vts_kernel_tun_test \
 
 # Binder tests.
