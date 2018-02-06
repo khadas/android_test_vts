@@ -15,10 +15,11 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
 
 import junit.framework.TestCase;
+
 import org.easymock.EasyMock;
 
 import java.io.BufferedReader;
@@ -70,7 +71,7 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_1, 2);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
         mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
@@ -97,7 +98,7 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
          long totalTime = getTotalTime(contents);
 
          // prepare the mock object
-         ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
          mockRunListener.testRunStarted(TEST_NAME_1, 2);
          mockRunListener.testRunStarted(TEST_NAME_2, 2);
          mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
@@ -125,7 +126,7 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
        long totalTime = getTotalTime(contents);
 
        // prepare the mock object
-       ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+       ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
        mockRunListener.testRunStarted(null, 0);
        mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 

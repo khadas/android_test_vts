@@ -19,6 +19,7 @@ import com.android.ddmlib.Log.LogLevel;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,7 +57,7 @@ public class VtsMultiDeviceTestResultParser {
 
     // General state
     private Map<TestIdentifier, String> mTestResultCache;
-    private final Collection<ITestRunListener> mListeners;
+    private final Collection<ITestLifeCycleReceiver> mListeners;
     private String mRunName = null;
     private String mCurrentTestName = null;
     private int mTotalTestCount = 0;
@@ -106,9 +107,8 @@ public class VtsMultiDeviceTestResultParser {
         }
     }
 
-    public VtsMultiDeviceTestResultParser(ITestRunListener listener,
-            String runName) {
-        mListeners = new ArrayList<ITestRunListener>(1);
+    public VtsMultiDeviceTestResultParser(ITestLifeCycleReceiver listener, String runName) {
+        mListeners = new ArrayList<>(1);
         mListeners.add(listener);
         mRunName = runName;
         mTestResultCache = new HashMap<>();
@@ -172,13 +172,13 @@ public class VtsMultiDeviceTestResultParser {
         CLog.e(String.format("Test run failed: %s", errorMsg));
 
         Map<String, String> emptyMap = Collections.emptyMap();
-        for (ITestRunListener listener : mListeners) {
+        for (ITestLifeCycleReceiver listener : mListeners) {
             listener.testFailed(mCurrentTestId, FAIL);
             listener.testEnded(mCurrentTestId, emptyMap);
         }
 
         // Report the test run failed
-        for (ITestRunListener listener : mListeners) {
+        for (ITestLifeCycleReceiver listener : mListeners) {
             listener.testRunFailed(errorMsg);
         }
     }
@@ -311,7 +311,7 @@ public class VtsMultiDeviceTestResultParser {
     }
 
     boolean completeTestRun() {
-        for (ITestRunListener listener: mListeners) {
+        for (ITestLifeCycleReceiver listener : mListeners) {
             // do testRunStarted
             listener.testRunStarted(mCurrentTestName, mTotalTestCount);
 
@@ -379,7 +379,7 @@ public class VtsMultiDeviceTestResultParser {
 
         try {
             results = object.getJSONArray(RESULTS);
-            for (ITestRunListener listener: mListeners) {
+            for (ITestLifeCycleReceiver listener : mListeners) {
                 if (results == null || results.length() < 1) {
                     CLog.e("JSONArray is null.");
                     continue;

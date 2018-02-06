@@ -8,6 +8,6 @@ vts_test_host_bin_packages := \
     mkuserimg_mke2fs.sh \
 
 # TODO(hridya): b/72697311 Ensure that the test works on Windows OS
-vts_test_host_bin_packages := \
+vts_test_host_bin_packages += \
     ufdt_verify_overlay_host \
     verifyDTBO.sh \
