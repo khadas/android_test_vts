@@ -33,5 +33,6 @@
   <option name="compatibility:include-filter" value="VtsKernelSelinuxFileApi" />
   <option name="compatibility:include-filter" value="VtsKernelTunTest" />
   <option name="compatibility:include-filter" value="VtsQtaguidTest" />
+  <option name="compatibility:include-filter" value="VtsBpfTest" />
 
 </configuration>

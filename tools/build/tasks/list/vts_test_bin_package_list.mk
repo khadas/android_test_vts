@@ -38,6 +38,7 @@ vts_test_bin_packages := \
     stressapptest \
     libcutils_test \
     vts_test_binary_qtaguid_module \
+    vts_test_binary_bpf_module \
 
 # Proto fuzzer executable
 vts_test_bin_packages += \
