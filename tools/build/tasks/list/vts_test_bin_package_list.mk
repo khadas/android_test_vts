@@ -27,6 +27,7 @@ vts_test_bin_packages := \
     libhwbinder_latency \
     libbinder_benchmark \
     vts_codelab_target_binary \
+    vts_selftest_flaky_test \
     vts_test_binary_crash_app \
     vts_test_binary_syscall_exists \
     simpleperf_cpu_hotplug_test \
@@ -53,8 +54,9 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     netd_integration_test \
 
-# Tun device tests.
+# Kernel tests.
 vts_test_bin_packages += \
+    dt_early_mount_test \
     vts_kernel_tun_test \
 
 # Binder tests.
