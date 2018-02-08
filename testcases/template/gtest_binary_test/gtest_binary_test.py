@@ -45,10 +45,18 @@ class GtestBinaryTest(binary_test.BinaryTest):
     # @Override
     def setUpClass(self):
         '''Prepare class, push binaries, set permission, create test cases.'''
+        self.collect_tests_only = self.getUserParam(
+            keys.ConfigKeys.IKEY_COLLECT_TESTS_ONLY, default_value=False)
         self.batch_mode = self.getUserParam(
             keys.ConfigKeys.IKEY_GTEST_BATCH_MODE, default_value=False)
+
         if self.batch_mode:
-            self._gtest_results = []
+            if self.collect_tests_only:
+                self.batch_mode = False
+                logging.info("Disable batch mode when collecting tests.")
+            else:
+                self._gtest_results = []
+
         super(GtestBinaryTest, self).setUpClass()
 
     # @Override
