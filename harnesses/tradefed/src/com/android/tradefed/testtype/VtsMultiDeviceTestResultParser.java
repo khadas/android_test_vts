@@ -17,9 +17,9 @@ package com.android.tradefed.testtype;
 
 import com.android.ddmlib.Log.LogLevel;
 import com.android.ddmlib.testrunner.ITestRunListener;
-import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,12 +51,12 @@ public class VtsMultiDeviceTestResultParser {
 
     // Current test state
     String mTestClass;
-    TestIdentifier mCurrentTestId;
+    TestDescription mCurrentTestId;
     String mCurrentTraceback;
     long mTotalElapsedTime = 0;
 
     // General state
-    private Map<TestIdentifier, String> mTestResultCache;
+    private Map<TestDescription, String> mTestResultCache;
     private final Collection<ITestLifeCycleReceiver> mListeners;
     private String mRunName = null;
     private String mCurrentTestName = null;
@@ -253,7 +253,7 @@ public class VtsMultiDeviceTestResultParser {
         // process the test case
         String[] toks = mCurrentLine.split(" ");
         mCurrentTestName = toks[toks.length - 1];
-        mCurrentTestId = new TestIdentifier(mTestClass, mCurrentTestName);
+        mCurrentTestId = new TestDescription(mTestClass, mCurrentTestName);
         mTotalTestCount++;
     }
     /**
@@ -316,7 +316,7 @@ public class VtsMultiDeviceTestResultParser {
             listener.testRunStarted(mCurrentTestName, mTotalTestCount);
 
             // mark each test passed or failed
-            for (Entry<TestIdentifier, String> test : mTestResultCache.entrySet()) {
+            for (Entry<TestDescription, String> test : mTestResultCache.entrySet()) {
                 listener.testStarted(test.getKey());
                 if (test.getValue() == PASS) {
                     listener.testEnded(test.getKey(), Collections.<String, String>emptyMap());
@@ -401,8 +401,8 @@ public class VtsMultiDeviceTestResultParser {
                             resultObject.isNull(DETAILS) ? "" : resultObject.getString(DETAILS);
 
                     // mark test started
-                    TestIdentifier testIdentifier = new TestIdentifier(testClass, testName);
-                    listener.testStarted(testIdentifier);
+                    TestDescription TestDescription = new TestDescription(testClass, testName);
+                    listener.testStarted(TestDescription);
 
                     switch (result) {
                         case ERROR:
@@ -413,14 +413,15 @@ public class VtsMultiDeviceTestResultParser {
                                failure or a bug in device implementation. Since error is not yet
                                recognized in TF, it is converted to FAIL. */
                             listener.testFailed(
-                                    testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
+                                    TestDescription, details.isEmpty() ? UNKNOWN_ERROR : details);
                         case PASS :
-                            listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
+                            listener.testEnded(
+                                    TestDescription, Collections.<String, String>emptyMap());
                             break;
                         case TIMEOUT :
                             /* Timeout is not recognized in TF. Use FAIL instead. */
                             listener.testFailed(
-                                    testIdentifier, details.isEmpty() ? UNKNOWN_TIMEOUT : details);
+                                    TestDescription, details.isEmpty() ? UNKNOWN_TIMEOUT : details);
                             break;
                         case SKIP :
                             /* Skip is not recognized in TF */
@@ -428,7 +429,7 @@ public class VtsMultiDeviceTestResultParser {
                         case FAIL:
                             /* Indicates a test failure. */
                             listener.testFailed(
-                                    testIdentifier, details.isEmpty() ? UNKNOWN_FAILURE : details);
+                                    TestDescription, details.isEmpty() ? UNKNOWN_FAILURE : details);
                         default:
                             break;
                     }

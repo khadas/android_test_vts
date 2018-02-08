@@ -15,8 +15,8 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 
 import junit.framework.TestCase;
 
@@ -74,11 +74,11 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_1, 2);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
-        mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_2));
-        mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_1),
-                Collections.<String, String>emptyMap());
-        mockRunListener.testFailed(new TestIdentifier(RUN_NAME, TEST_NAME_2), TIME_OUT);
+        mockRunListener.testStarted(new TestDescription(RUN_NAME, TEST_NAME_1));
+        mockRunListener.testStarted(new TestDescription(RUN_NAME, TEST_NAME_2));
+        mockRunListener.testEnded(
+                new TestDescription(RUN_NAME, TEST_NAME_1), Collections.<String, String>emptyMap());
+        mockRunListener.testFailed(new TestDescription(RUN_NAME, TEST_NAME_2), TIME_OUT);
         mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 
         EasyMock.replay(mockRunListener);
@@ -101,11 +101,11 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
          ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
          mockRunListener.testRunStarted(TEST_NAME_1, 2);
          mockRunListener.testRunStarted(TEST_NAME_2, 2);
-         mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_1));
-         mockRunListener.testStarted(new TestIdentifier(RUN_NAME, TEST_NAME_2));
-         mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_1),
+         mockRunListener.testStarted(new TestDescription(RUN_NAME, TEST_NAME_1));
+         mockRunListener.testStarted(new TestDescription(RUN_NAME, TEST_NAME_2));
+         mockRunListener.testEnded(new TestDescription(RUN_NAME, TEST_NAME_1),
                  Collections.<String, String>emptyMap());
-         mockRunListener.testEnded(new TestIdentifier(RUN_NAME, TEST_NAME_2),
+         mockRunListener.testEnded(new TestDescription(RUN_NAME, TEST_NAME_2),
                  Collections.<String, String>emptyMap());
          mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 
