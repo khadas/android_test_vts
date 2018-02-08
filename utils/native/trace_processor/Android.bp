@@ -26,6 +26,9 @@ cc_library_host_shared {
         "libvts_multidevice_proto",
         "libvts_profiling_utils",
     ],
+    static_libs: [
+        "libjsoncpp",
+    ],
     cflags: [
         "-Wall",
         "-Werror",
