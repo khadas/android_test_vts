@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-_O_MR1_API_LEVEL = 27
+from vts.utils.python.android import api
 
 
 def IsVndkRuntimeEnforced(dut):
@@ -30,7 +30,7 @@ def IsVndkRuntimeEnforced(dut):
     Returns:
         A boolean, whether VNDK runtime should be enabled.
     """
-    return bool(int(dut.first_api_level) > _O_MR1_API_LEVEL or
+    return bool(int(dut.first_api_level) > api.PLATFORM_API_LEVEL_O_MR1 or
                 dut.vndk_version)
 
 
