@@ -17,6 +17,6 @@ subdirs = [
      "proto",
      "compilation_tools",
      "runners/target/vts_hal_hidl_target",
-     "testcases/vts_selftest/flaky_test",
+     "testcases/vts_selftest/manual_tests/flaky_test",
      "utils",
 ]
