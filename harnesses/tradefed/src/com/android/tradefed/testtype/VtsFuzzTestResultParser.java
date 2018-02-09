@@ -20,8 +20,8 @@ import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.Log;
 import com.android.ddmlib.MultiLineReceiver;
 import com.android.ddmlib.testrunner.ITestRunListener;
-import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +50,7 @@ public class VtsFuzzTestResultParser extends MultiLineReceiver {
     private int mTotalNumberOfTestFailed = 0;
     private final String mTestRunName;
     private final Collection<ITestLifeCycleReceiver> mTestListeners;
-    private TestIdentifier mTestId;
+    private TestDescription mTestId;
 
     /** True if start of test has already been reported to listener. */
     private boolean mTestRunStartReported = false;
@@ -105,7 +105,7 @@ public class VtsFuzzTestResultParser extends MultiLineReceiver {
         if (!mTestRunStartReported) {
             // current test results are cleared out after every complete test run,
             // if it's not null, assume the last test caused this and report as a test failure
-            mTestId = new TestIdentifier("fuzzer", mTestRunName);
+            mTestId = new TestDescription("fuzzer", mTestRunName);
             for (ITestLifeCycleReceiver listener : mTestListeners) {
                 listener.testRunStarted(mTestRunName, mNumTestsExpected);
             }

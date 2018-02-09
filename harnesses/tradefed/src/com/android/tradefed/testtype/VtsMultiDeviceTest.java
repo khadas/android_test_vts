@@ -27,6 +27,7 @@ import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.util.ArrayUtil;
 import com.android.tradefed.util.CommandResult;
@@ -525,8 +526,8 @@ public class VtsMultiDeviceTest
         }
     }
 
-    /*
-     * Conforms filters using a {@link com.android.ddmlib.testrunner.TestIdentifier} format
+    /**
+     * Conforms filters using a {@link TestDescription} format
      * to be recognized by the GTest executable.
      */
     private String cleanFilter(String filter) {
