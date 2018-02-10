@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for VTS SelfTest Flaky HIDL Test Case(s)">
+<configuration description="Config for VTS Self Test Flaky HIDL Test Case(s)">
     <option name="config-descriptor:metadata" key="plan" value="vts-staging-selftest" />
 
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">

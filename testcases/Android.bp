@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +13,6 @@
 // limitations under the License.
 
 subdirs = [
-     "drivers",
-     "proto",
-     "compilation_tools",
-     "runners/target/vts_hal_hidl_target",
-     "testcases",
-     "utils",
+     "manual_tests/flaky_test",
+     "manual_tests/zero_testcase_binary_test",
 ]
