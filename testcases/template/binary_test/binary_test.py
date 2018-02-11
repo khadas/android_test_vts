@@ -304,6 +304,9 @@ class BinaryTest(base_test.BaseTestClass):
                 self._dut.adb.push('{src} {dst}'.format(src=src, dst=dst))
                 self.shell.Execute('ls %s' % dst)
 
+        if not hasattr(self, 'testcases'):
+            self.testcases = []
+
         # Then create test cases
         for src, dst, tag in source_list:
             if tag is not None:
@@ -320,8 +323,8 @@ class BinaryTest(base_test.BaseTestClass):
                 else:
                     self.testcases.append(testcase)
 
-        if type(self.testcases) is not list or len(self.testcases) == 0:
-            asserts.fail("No test case is found or generated.")
+        if not self.testcases:
+            logging.warn("No test case is found or generated.")
 
     def PutTag(self, name, tag):
         '''Put tag on name and return the resulting string.

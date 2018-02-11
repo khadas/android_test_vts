@@ -36,8 +36,14 @@ def ExpandBitness(input_list):
 
     If a filter item contains bitness suffix, only test name with that tag
     will be included in output.
-    Otherwise, both 32bit and 64bit suffix will be paired to the test name
-    in output list.
+    Otherwise, 2 more item with 32bit and 64bit suffix will be added to the output list.
+
+    This method removes duplicated item while keeping item order before returning output.
+
+    Examples of input -> output are:
+        [a_32bit] -> [a_32bit]
+        [a] -> [a, a_32bit, a_64bit]
+        [a_32bit, a] -> [a_32bit, a, a_64bit]
 
     Args:
         input_list: list of string, the list to expand
