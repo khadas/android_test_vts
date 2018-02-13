@@ -27,6 +27,8 @@ from vts.utils.python.web import dashboard_rest_client
 from vts.utils.python.web import feature_utils
 
 _PROFILING_POINTS = "profiling_points"
+_REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
+
 
 class WebFeature(feature_utils.Feature):
     """Feature object for web functionality.
@@ -359,6 +361,15 @@ class WebFeature(feature_utils.Feature):
             log_msg.url = url
             log_msg.name = os.path.basename(url)
 
+    def GetTestModuleKeys(self):
+        """Returns the test module name and start timestamp.
+
+        Those two values can be used to find the corresponding entry
+        in a used nosql database without having to lock all the data
+        (which is infesiable) thus are essential for strong consistency.
+        """
+        return self.report_msg.test, self.report_msg.start_timestamp
+
     def GenerateReportMessage(self, requested, executed):
         """Uploads the result to the web service.
 
@@ -408,10 +419,17 @@ class WebFeature(feature_utils.Feature):
         post_msg = ReportMsg.DashboardPostMessage()
         post_msg.test_report.extend([self.report_msg])
 
-        # Post new data to the dashboard
-        # TODO this line should be removed when report is uploaded
-        # from java side
-        self.rest_client.PostData(post_msg)
+        report_proto_path = os.path.join(logging.log_path,
+                                         _REPORT_MESSAGE_FILE_NAME)
+
+        self.rest_client.AddAuthToken(post_msg)
+
+        # Write the new address book back to disk.
+        logging.info('Result proto message path: %s',
+                     report_proto_path)
+        with open(report_proto_path, "wb") as f:
+            f.write(base64.b64encode(post_msg.SerializeToString()))
+        logging.info('Result proto message saved')
 
         self.rest_client.AddAuthToken(post_msg)
 

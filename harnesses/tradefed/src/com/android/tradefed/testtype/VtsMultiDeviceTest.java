@@ -36,17 +36,24 @@ import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.StreamUtil;
+import com.android.tradefed.util.VtsDashboardUtil;
+import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import com.android.tradefed.testtype.IAbi;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.TreeSet;
 import java.util.Set;
@@ -74,6 +81,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     static final String WINDOWS = "Windows";
     static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
+    static final String TESTMODULE = "TestModule";
+    static final String TEST_PLAN_REPORT_FILE = "TEST_PLAN_REPORT_FILE";
     static final String TEST_SUITE = "test_suite";
     static final String TEST_MAX_TIMEOUT = "test_max_timeout";
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
@@ -355,6 +364,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
+    private VtsVendorConfigFileUtil configReader = null;
+
     /**
      * @return the mRunUtil
      */
@@ -547,20 +558,11 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
      */
     private void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
-        CLog.i("Load vendor test config %s", "/config/google-tradefed-vts-config.config");
-        InputStream config = getClass().getResourceAsStream("/config/google-tradefed-vts-config.config");
-        if (config != null) {
-            try {
-                String content = StreamUtil.getStringFromStream(config);
-                CLog.i("Loaded vendor test config %s", content);
-                if (content != null) {
-                    JSONObject vendorConfigJson = new JSONObject(content);
-                    JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
-                }
-            } catch(IOException e) {
-                throw new RuntimeException("Failed to read vendor config json file");
-            } catch(JSONException e) {
-                throw new RuntimeException("Failed to build updated vendor config json data");
+        configReader = new VtsVendorConfigFileUtil();
+        if (configReader.LoadVendorConfig(mBuildInfo)) {
+            JSONObject vendorConfigJson = configReader.GetVendorConfigJson();
+            if (vendorConfigJson != null) {
+                JsonUtil.deepMergeJsonObjects(jsonObject, vendorConfigJson);
             }
         }
 
@@ -568,13 +570,14 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         String content = null;
 
         if (mTestConfigPath != null) {
-            content = FileUtil.readStringFromFile(new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+            content = FileUtil.readStringFromFile(
+                    new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+            CLog.i("Loaded original test config %s", content);
+            if (content != null) {
+                JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
+            }
         }
 
-        CLog.i("Loaded original test config %s", content);
-        if (content != null) {
-            JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
-        }
         populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
         CLog.i("Built a Json object using the loaded original test config");
 
@@ -810,6 +813,25 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
         return true;
     }
 
+    private boolean AddTestModuleKeys(String test_module_name, long test_module_timestamp) {
+        if (test_module_name.length() == 0 || test_module_timestamp == -1) {
+            CLog.e(String.format("Test module keys (%s,%d) are invalid.", test_module_name,
+                    test_module_timestamp));
+            return false;
+        }
+        File reportFile = mBuildInfo.getFile(TEST_PLAN_REPORT_FILE);
+
+        try (FileWriter fw = new FileWriter(reportFile.getAbsoluteFile(), true);
+                BufferedWriter bw = new BufferedWriter(fw); PrintWriter out = new PrintWriter(bw)) {
+            out.println(String.format("%s %s", test_module_name, test_module_timestamp));
+        } catch (IOException e) {
+            CLog.e(String.format(
+                    "Can't write to the test plan result file, %s", TEST_PLAN_REPORT_FILE));
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Create a {@link ProcessHelper} from mRunUtil.
      *
@@ -965,7 +987,7 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             }
             parser.processNewLines(commandResult.getStdout().split("\n"));
         } else {
-            // parse from test_run_summary.json instead of std:out
+            // parse from test_run_summary.json instead of stdout
             String jsonData = null;
             JSONObject object = null;
             File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
@@ -986,6 +1008,15 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
                     throw new RuntimeException("Json object is null.");
                 }
                 parser.processJsonFile(object);
+
+                try {
+                    JSONObject planObject = object.getJSONObject(TESTMODULE);
+                    String test_module_name = planObject.getString("Name");
+                    long test_module_timestamp = planObject.getLong("Timestamp");
+                    AddTestModuleKeys(test_module_name, test_module_timestamp);
+                } catch (JSONException e) {
+                    CLog.d("Key '%s' not found in result json summary", TESTMODULE);
+                }
             }
         }
         printVtsLogs(vtsRunnerLogDir);
@@ -996,7 +1027,8 @@ IRuntimeHintProvider, ITestCollector, IBuildReceiver, IAbiReceiver {
             CLog.e("Cannot find report message proto file.");
         } else if (reportMsg.length() > 0) {
             CLog.i("Uploading report message. File size: %s", reportMsg.length());
-            //TODO upload report message from here
+            VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
+            dashboardUtil.Upload(reportMsg.getAbsolutePath());
         } else {
             CLog.i("Result uploading is not enabled.");
         }
