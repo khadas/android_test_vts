@@ -65,15 +65,24 @@ public class ProcessHelper {
         private Reader mReader;
         private StringBuilder mBuffer;
 
+        static enum LogType {
+            STDOUT,
+            STDERR;
+        }
+
+        private LogType mLogType;
+
         /**
          * @param reader the input stream to read from.
          * @param buffer the buffer containing the input data.
          * @param name the name of the thread.
+         * @param logType enum, type of log output.
          */
-        public ReaderThread(Reader reader, StringBuilder buffer, String name) {
+        public ReaderThread(Reader reader, StringBuilder buffer, String name, LogType logType) {
+            super(name);
             mReader = reader;
             mBuffer = buffer;
-            setName(name);
+            mLogType = logType;
         }
 
         /**
@@ -89,7 +98,26 @@ public class ProcessHelper {
                     if (readCount < 0) {
                         break;
                     }
-                    mBuffer.append(charBuffer, 0, readCount);
+                    String newRead = new String(charBuffer, 0, readCount);
+
+                    int newLineLen = 0;
+                    if (newRead.endsWith("\r\n")) {
+                        newLineLen = 2;
+                    } else if (newRead.endsWith("\n")) {
+                        newLineLen = 1;
+                    }
+
+                    String newReadPrint = newRead.substring(0, newRead.length() - newLineLen);
+                    switch (mLogType) {
+                        case STDOUT:
+                            CLog.i(newReadPrint);
+                            break;
+                        case STDERR:
+                            CLog.e(newReadPrint);
+                            break;
+                    }
+
+                    mBuffer.append(newRead);
                 }
             } catch (IOException e) {
                 CLog.e("%s: %s", getName(), e.toString());
@@ -174,8 +202,10 @@ public class ProcessHelper {
         mStdinWriter = new OutputStreamWriter(mProcess.getOutputStream());
         mStdoutReader = new InputStreamReader(mProcess.getInputStream());
         mStderrReader = new InputStreamReader(mProcess.getErrorStream());
-        mStdoutThread = new ReaderThread(mStdoutReader, mStdout, "process-helper-stdout");
-        mStderrThread = new ReaderThread(mStderrReader, mStderr, "process-helper-stderr");
+        mStdoutThread = new ReaderThread(
+                mStdoutReader, mStdout, "process-helper-stdout", ReaderThread.LogType.STDOUT);
+        mStderrThread = new ReaderThread(
+                mStderrReader, mStderr, "process-helper-stderr", ReaderThread.LogType.STDERR);
         mStdoutThread.start();
         mStderrThread.start();
     }
