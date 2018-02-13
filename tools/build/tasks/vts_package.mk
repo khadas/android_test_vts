@@ -143,6 +143,8 @@ host_kernel_config_copy_pairs := \
   $(foreach f,$(host_kernel_config_files),\
     kernel/configs/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/config/data/$(f))
 
+ifneq ($(TARGET_BUILD_PDK),true)
+
 host_camera_its_files := \
   $(call find-files-in-subdirs,cts/apps/CameraITS,"*.py" -and -type f,.) \
   $(call find-files-in-subdirs,cts/apps/CameraITS,"*.pdf" -and -type f,.) \
@@ -151,6 +153,12 @@ host_camera_its_files := \
 host_camera_its_copy_pairs := \
   $(foreach f,$(host_camera_its_files),\
     cts/apps/CameraITS/$(f):$(VTS_TESTCASES_OUT)/CameraITS/$(f))
+
+else
+
+host_camera_its_copy_pairs :=
+
+endif  # ifneq ($(TARGET_BUILD_PDK),true)
 
 host_hc_files := \
   $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.py" -and -type f,.) \
