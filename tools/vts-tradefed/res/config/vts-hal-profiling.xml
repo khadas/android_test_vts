@@ -52,6 +52,7 @@
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0HostProfiling" />
   <option name="compatibility:include-filter" value="VtsHalSensorsV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_0TargetProfiling" />
+  <option name="compatibility:include-filter" value="VtsHalSoundtriggerV2_1TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalThermalV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalUsbV1_0TargetProfiling" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0HostProfiling" />
