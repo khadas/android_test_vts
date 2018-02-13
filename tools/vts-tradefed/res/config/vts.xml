@@ -22,7 +22,12 @@
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-replay" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-kernel" />
+  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-security" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-treble" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-vndk" />
+
+  <!-- Unapproved vts-security Tests -->
+  <option name="compatibility:exclude-filter" value="SecurityPoCKernelTest" />
+  <option name="compatibility:exclude-filter" value="VtsSecuritySelinuxPolicyHost" />
 
 </configuration>
