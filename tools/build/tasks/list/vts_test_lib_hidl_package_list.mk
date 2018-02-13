@@ -244,6 +244,7 @@ vts_hal_test_bins := \
   VtsHalSecureElementV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
   VtsHalSoundtriggerV2_0TargetTest \
+  VtsHalSoundtriggerV2_1TargetTest \
   VtsHalTetheroffloadConfigV1_0TargetTest \
   VtsHalTetheroffloadControlV1_0TargetTest \
   VtsHalThermalV1_0TargetTest \
