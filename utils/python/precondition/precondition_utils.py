@@ -111,8 +111,11 @@ def CanRunHidlHalTest(test_instance,
                 # For non compliance test, check in addition whether lshal
                 # contains the testing hal, if so, run the test (this is to test
                 # experimental hals which are not specified in manifest files).
-                results = shell.Execute("lshal --neat | grep %s" % hal)
-                if not results[const.STDOUT]:
+                results = shell.Execute("lshal --neat")
+                if any(results[const.EXIT_CODE]):
+                    logging.warn("lshal failed: %s", results)
+                    return True
+                if hal not in results[const.STDOUT][0]:
                     logging.warn("The required hal %s is not testable.", hal)
                     return False
 
