@@ -78,12 +78,26 @@ if [ -z ${VTS_ROOT} ]; then
     VTS_ROOT="$(dirname $(readlink -e $0))/../.."
 fi;
 
-JAR_DIR=${VTS_ROOT}/android-vts/tools
+VTS_JAR_DIR=${VTS_ROOT}/android-vts/tools
+STANDALONE_JAR_DIR=${ANDROID_HOST_OUT}/framework
+JAR_DIRS="$VTS_JAR_DIR
+  $STANDALONE_JAR_DIR"
 
+JAR_DIR=""
+# Wherever we find the tradefed jar is where we expect the other jars to be.
 TRADEFED_JAR="tradefed"
-if [ ! -f ${JAR_DIR}/${TRADEFED_JAR}.jar ]; then
+for CHECK_JAR_DIR in $JAR_DIRS; do
+  if [ -f ${CHECK_JAR_DIR}/${TRADEFED_JAR}.jar ]; then
+    JAR_DIR=$CHECK_JAR_DIR
+    break
+  fi;
+done
+
+# If we didn't find the TF jar, resort to tf prebuilt in VTS_JAR_DIR.
+if [ -z $JAR_DIR ]; then
+  JAR_DIR=$VTS_JAR_DIR
   TRADEFED_JAR="tradefed-prebuilt"
-fi;
+fi
 
 JARS="${TRADEFED_JAR}
   hosttestlib
