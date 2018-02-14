@@ -23,25 +23,6 @@ _WRITE_PERMISSION = 2
 _EXECUTE_PERMISSION = 1
 
 
-def Exists(filepath, shell):
-    """Determines if a file exists.
-
-    Args:
-        filepath: string, path to file
-        shell: an instance of the VTS shell
-
-    Returns:
-        True if the file exists, False otherwise
-    """
-    cmd = "ls %s" % filepath
-    results = shell.Execute(cmd)
-    if results[const.EXIT_CODE][0] != 0:
-        return False
-
-    out_str = str(results[const.STDOUT][0]).strip()
-    return out_str.find(filepath) == 0
-
-
 def _Test(shell, *args):
     """Executes test command on device.
 
@@ -55,6 +36,19 @@ def _Test(shell, *args):
     cmd = "test %s" % " ".join(args)
     results = shell.Execute(cmd)
     return results[const.EXIT_CODE][0] == 0
+
+
+def Exists(filepath, shell):
+    """Determines if a file or directory exists.
+
+    Args:
+        filepath: string, the path to a file or a directory.
+        shell: an instance of the VTS shell.
+
+    Returns:
+        True if exists, False otherwise.
+    """
+    return _Test(shell, "-e", filepath)
 
 
 def IsDirectory(path, shell):
