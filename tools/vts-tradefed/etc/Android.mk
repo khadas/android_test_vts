@@ -31,3 +31,5 @@ LOCAL_MULTILIB := first
 LOCAL_MODULE_HOST_OS := windows
 include $(BUILD_PREBUILT)
 
+.PHONY: vts-tradefed-standalone
+vts-tradefed-standalone: vts-tradefed hosttestlib compatibility-host-util tradefed

@@ -34,10 +34,6 @@ using android::vintf::gHalManifestConverter;
 using std::set;
 using std::string;
 
-extern const XmlConverter<HalManifest> &android::vintf::gHalManifestConverter;
-extern const XmlConverter<CompatibilityMatrix>
-    &android::vintf::gCompatibilityMatrixConverter;
-
 namespace android {
 namespace vts {
 
