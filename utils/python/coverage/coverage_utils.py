@@ -367,10 +367,11 @@ class CoverageFeature(feature_utils.Feature):
             self, keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT, False)
         exclude_coverage_path = getattr(
             self, keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH, [])
-        for path in exclude_coverage_path:
+        for idx, path in enumerate(exclude_coverage_path):
             base_name = os.path.basename(path)
-            if "." not in base_name:
+            if base_name and "." not in base_name:
                 path = path if path.endswith("/") else path + "/"
+                exclude_coverage_path[idx] = path
         exclude_coverage_path.extend(self._DEFAULT_EXCLUDE_PATHS)
 
         coverage_dict = dict()
