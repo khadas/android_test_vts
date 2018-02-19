@@ -125,6 +125,7 @@ void VtsHalHidlTargetTestEnvBase::listRegisteredServices() {
   for (string service : registeredHalServices_) {
     printf("hal_service: %s\n", service.c_str());
   }
+  printf("service_comb_mode: %d\n", mode_);
 }
 
 }  // namespace testing

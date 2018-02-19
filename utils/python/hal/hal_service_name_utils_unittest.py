@@ -22,7 +22,7 @@ from vts.utils.python.hal import hal_service_name_utils
 class HalServiceNameUtilsUnitTest(unittest.TestCase):
     """Tests for hal hidl gtest template"""
 
-    def testGetServiceInstancesCombinations(self):
+    def testGetServiceInstancesFullCombinations(self):
         """Test the function to get service instance combinations"""
 
         comb1 = hal_service_name_utils.GetServiceInstancesCombinations([], {})
@@ -56,6 +56,50 @@ class HalServiceNameUtilsUnitTest(unittest.TestCase):
             ["s1", "s2"], {"s1": [],
                            "s2": ["n1", "n2"]})
         self.assertEqual([["s2/n1"], ["s2/n2"]], comb9)
+
+    def testGetServiceInstancesNameMatchCombinations(self):
+        """Test the function to get service instance combinations"""
+
+        mode = hal_service_name_utils.CombMode.NAME_MATCH
+        comb1 = hal_service_name_utils.GetServiceInstancesCombinations([], {},
+                                                                       mode)
+        self.assertEquals(0, len(comb1))
+        comb2 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1"], {}, mode)
+        self.assertEquals(0, len(comb2))
+        comb3 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1"], {"s1": ["n1"]}, mode)
+        #self.assertEqual([["s1/n1"]], comb3)
+        comb4 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1"], {"s1": ["n1", "n2"]}, mode)
+        self.assertEqual([["s1/n1"], ["s1/n2"]], comb4)
+        comb5 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"]}, mode)
+        self.assertEqual(0, len(comb5))
+        comb6 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"],
+                           "s2": ["n3"]}, mode)
+        self.assertEqual(0, len(comb6))
+        comb7 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"],
+                           "s2": ["n3", "n4"]}, mode)
+        self.assertEqual(0, len(comb7))
+        comb8 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"],
+                           "s2": []}, mode)
+        self.assertEqual(0, len(comb8))
+        comb9 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": [],
+                           "s2": ["n1", "n2"]}, mode)
+        self.assertEqual(0, len(comb9))
+        comb10 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1"],
+                           "s2": ["n1", "n2"]}, mode)
+        self.assertEqual([["s1/n1", "s2/n1"]], comb10)
+        comb11 = hal_service_name_utils.GetServiceInstancesCombinations(
+            ["s1", "s2"], {"s1": ["n1", "n2"],
+                           "s2": ["n1", "n2"]}, mode)
+        self.assertEqual([["s1/n1", "s2/n1"], ["s1/n2", "s2/n2"]], comb11)
 
 
 if __name__ == '__main__':
