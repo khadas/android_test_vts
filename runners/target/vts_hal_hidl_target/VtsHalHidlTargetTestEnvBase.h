@@ -25,6 +25,22 @@ using namespace std;
 
 namespace testing {
 
+// Enum class indicates the required combination mode for registered services.
+enum HalServiceCombMode {
+  // Get the full permutation of all the registered service instances.
+  // E.g. Hal service s1 with instances (n1, n2) and s2 with instances (n3, n4),
+  // Return combination (s1/n1, s2/n3), (s1/n1, s2/n4), (s1/n2, s2/n3),
+  // (s1/n2, s2/n4).
+  FULL_PERMUTATION = 0,
+  // Get the registered service instances with the same service name.
+  // E.g. Hal service s1 with instances (n1, n2) and s2 with instances (n1, n2),
+  // Return combination (s1/n1, s2/n1), (s1/n2, s2/n2).
+  NAME_MATCH,
+  // Do not return the service instance combinations. This is used in cases when
+  // the test logic specifically handles the testing instances. E.g. drm tests.
+  NO_COMBINATION,
+};
+
 // A class for test environment setup
 class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
  public:
@@ -78,6 +94,8 @@ class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
     return getServiceName(T::descriptor, defaultName);
   }
 
+  void setServiceCombMode(HalServiceCombMode mode) { mode_ = mode; }
+
  private:
   /*
    * Parses VTS specific flags, currently support two flags:
@@ -119,6 +137,8 @@ class VtsHalHidlTargetTestEnvBase : public ::testing::Environment {
   bool listService_ = false;
   // Flag whether init is called.
   bool inited_ = false;
+  // Required combination mode for hal service instances.
+  HalServiceCombMode mode_ = HalServiceCombMode::FULL_PERMUTATION;
 };
 
 }  // namespace testing
