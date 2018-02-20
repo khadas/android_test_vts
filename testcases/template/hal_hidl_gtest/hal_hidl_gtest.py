@@ -127,14 +127,20 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                           list_service_test_case.path)
         # parse the results to get the registered service list.
         registered_services = []
+        comb_mode = hal_service_name_utils.CombMode.FULL_PERMUTATION
+        # TODO: consider to use a standard data format (e.g. json) instead of
+        # parsing the print output.
         for line in results[const.STDOUT][0].split('\n'):
             line = str(line)
             if line.startswith('hal_service: '):
                 service = line[len('hal_service: '):]
                 registered_services.append(service)
+            if line.startswith('service_comb_mode: '):
+                comb_mode = int(line[len('service_comb_mode: '):])
 
-        # If no service registered, return the initial test cases directly.
-        if not registered_services:
+        # If no service registered, or request NO_COMBINATION mode, return the
+        # initial test cases directly.
+        if not registered_services or comb_mode == hal_service_name_utils.CombMode.NO_COMBINATION:
             return initial_test_cases
 
         # find the correponding service name(s) for each registered service and
@@ -154,10 +160,11 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             else:
                 service_instances[service] = service_names
         logging.info("registered service instances: %s", service_instances)
+        logging.info("service comb mode: %d", comb_mode)
 
         # get all the combination of service instances.
         service_instance_combinations = hal_service_name_utils.GetServiceInstancesCombinations(
-            registered_services, service_instances)
+            registered_services, service_instances, comb_mode);
 
         new_test_cases = []
         for test_case in initial_test_cases:
