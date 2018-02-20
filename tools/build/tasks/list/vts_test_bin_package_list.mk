@@ -76,4 +76,8 @@ vts_test_bin_packages += \
     28838221 \
     32219453 \
     31707909 \
-    32402310
+    32402310 \
+
+# VTS DTBO verification tests
+vts_test_bin_packages += \
+    ufdt_verify_overlay
