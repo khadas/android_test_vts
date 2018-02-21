@@ -36,7 +36,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
     private static final long REBOOT_TIMEOUT = 1000 * 60 * 2; // 2 minutes.
 
     @Option(name = "disable-framework", description = "Initialize device by stopping framework.")
-    private boolean mDisableFramework = true;
+    private boolean mDisableFramework = false;
 
     static {
         BUILD_KEYS.put("cts:build_id", "ro.build.id");
