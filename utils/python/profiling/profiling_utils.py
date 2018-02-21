@@ -211,7 +211,7 @@ class ProfilingFeature(feature_utils.Feature):
         trace_processor_lib = os.path.join(data_file_path, "host", "lib64")
         trace_processor_cmd = [
             "chmod a+x %s" % trace_processor_binary,
-            "LD_LIBRARY_PATH=%s %s --profiling %s" %
+            "LD_LIBRARY_PATH=%s %s -m profiling_trace %s" %
             (trace_processor_lib, trace_processor_binary, trace_file)
         ]
 
