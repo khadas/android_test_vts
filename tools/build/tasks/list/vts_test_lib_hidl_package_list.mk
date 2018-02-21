@@ -26,7 +26,6 @@ vts_hal_driver_libs := \
   android.hardware.boot@1.0-vts.driver \
   android.hardware.broadcastradio@1.0-vts.driver \
   android.hardware.broadcastradio@1.1-vts.driver \
-  android.hardware.broadcastradio@1.2-vts.driver \
   android.hardware.broadcastradio@2.0-vts.driver \
   android.hardware.camera.common@1.0-vts.driver \
   android.hardware.camera.device@1.0-vts.driver \
@@ -118,7 +117,6 @@ vts_hal_profiler_libs := \
   android.hardware.boot@1.0-vts.profiler \
   android.hardware.broadcastradio@1.0-vts.profiler \
   android.hardware.broadcastradio@1.1-vts.profiler \
-  android.hardware.broadcastradio@1.2-vts.profiler \
   android.hardware.broadcastradio@2.0-vts.profiler \
   android.hardware.camera.common@1.0-vts.profiler \
   android.hardware.camera.device@1.0-vts.profiler \
