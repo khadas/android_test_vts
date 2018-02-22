@@ -131,8 +131,8 @@ class BaseTestClass(object):
             exclude_over_include=exclude_over_include,
             enable_negative_pattern=True,
             enable_module_name_prefix_matching=True,
-            module_name=self.test_module_name)
-        self.test_filter.ExpandBitness()
+            module_name=self.test_module_name,
+            expand_bitness=True)
         logging.info('Test filter: %s' % self.test_filter)
 
         # TODO: get abi information differently for multi-device support.
