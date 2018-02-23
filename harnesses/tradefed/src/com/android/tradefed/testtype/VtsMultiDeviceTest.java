@@ -114,6 +114,7 @@ public class VtsMultiDeviceTest
     static final String BINARY_TEST_TYPE_HAL_HIDL_REPLAY_TEST = "hal_hidl_replay_test";
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
     static final String BUG_REPORT_ON_FAILURE = "bug_report_on_failure";
+    static final String COLLECT_TESTS_ONLY = "collect_tests_only";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String EXCLUDE_COVERAGE_PATH = "exclude_coverage_path";
     static final String ENABLE_PROFILING = "enable_profiling";
@@ -396,9 +397,8 @@ public class VtsMultiDeviceTest
     private String mSystraceProcessName = null;
 
     @Option(name = "collect-tests-only",
-            description = "Only invoke the test binary to collect list of applicable test cases. "
-                    + "All test run callbacks will be triggered, but test execution will "
-                    + "not be actually carried out.")
+            description = "Only invoke setUpClass, generate*, and tearDownClass to collect list "
+                    + "of applicable test cases. All collected tests pass without being executed.")
     private boolean mCollectTestsOnly = false;
 
     @Option(name = "gtest-batch-mode", description = "Run Gtest binaries in batch mode.")
@@ -996,6 +996,11 @@ public class VtsMultiDeviceTest
         if (mPassthroughMode) {
             jsonObject.put(PASSTHROUGH_MODE, mPassthroughMode);
             CLog.i("Added %s to the Json object", PASSTHROUGH_MODE);
+        }
+
+        if (mCollectTestsOnly) {
+            jsonObject.put(COLLECT_TESTS_ONLY, mCollectTestsOnly);
+            CLog.i("Added %s to the Json object", COLLECT_TESTS_ONLY);
         }
 
         if (mGtestBatchMode) {
