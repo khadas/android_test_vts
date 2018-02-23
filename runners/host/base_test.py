@@ -158,6 +158,8 @@ class BaseTestClass(object):
             self.user_params, web=self.web)
         self.log_uploading = log_uploading_utils.LogUploadingFeature(
             self.user_params, web=self.web)
+        self.collect_tests_only = self.getUserParam(
+            keys.ConfigKeys.IKEY_COLLECT_TESTS_ONLY, default_value=False)
         self.run_as_vts_self_test = self.getUserParam(
             keys.ConfigKeys.RUN_AS_VTS_SELFTEST, default_value=False)
         self.run_as_compliance_test = self.getUserParam(
@@ -632,6 +634,9 @@ class BaseTestClass(object):
             asserts.assertTrue(ret is not False,
                                "Setup test entry for %s failed." % test_name)
             self.filterOneTest(test_name)
+            if self.collect_tests_only:
+                asserts.explicitPass("Collect tests only.")
+
             try:
                 ret = self._setUp(test_name)
                 asserts.assertTrue(ret is not False,
