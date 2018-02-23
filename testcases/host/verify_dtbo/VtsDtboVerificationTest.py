@@ -58,7 +58,7 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
             "DTBO partition does not exist")
         self.adb.pull("%s %s/dtbo" % (dtbo_path, self.temp_dir))
         dtbo_dump_cmd = [
-            "mkdtboimg.py", "dump",
+            "host/bin/mkdtboimg.py", "dump",
             "%s/dtbo" % self.temp_dir, "-b",
             "%s/dumped_dtbo" % self.temp_dir
         ]
