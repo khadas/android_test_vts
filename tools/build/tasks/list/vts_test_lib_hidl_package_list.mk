@@ -49,6 +49,7 @@ vts_hal_driver_libs := \
   android.hardware.memtrack@1.0-vts.driver \
   android.hardware.neuralnetworks@1.0-vts.driver \
   android.hardware.nfc@1.0-vts.driver \
+  android.hardware.nfc@1.1-vts.driver \
   android.hardware.oemlock@1.0-vts.driver \
   android.hardware.power@1.0-vts.driver \
   android.hardware.power@1.1-vts.driver \
@@ -112,6 +113,7 @@ vts_hal_profiler_libs := \
   android.hardware.memtrack@1.0-vts.profiler \
   android.hardware.neuralnetworks@1.0-vts.profiler \
   android.hardware.nfc@1.0-vts.profiler \
+  android.hardware.nfc@1.1-vts.profiler \
   android.hardware.oemlock@1.0-vts.profiler \
   android.hardware.power@1.0-vts.profiler \
   android.hardware.power@1.1-vts.profiler \
@@ -168,6 +170,7 @@ vts_hal_test_bins := \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNeuralnetworksV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
+  VtsHalNfcV1_1TargetTest \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \
