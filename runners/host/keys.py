@@ -134,7 +134,8 @@ class ConfigKeys(object):
     # classes without unpacking first.
     RESERVED_KEYS = (KEY_TESTBED, KEY_LOG_PATH, KEY_TEST_PATHS)
 
-    # Vts self test related keys
+    # Keys for special run modes
+    IKEY_COLLECT_TESTS_ONLY = "collect_tests_only"
     RUN_AS_VTS_SELFTEST = "run_as_vts_self_test"
 
     # Vts compliance test related keys

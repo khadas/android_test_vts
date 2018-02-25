@@ -231,6 +231,7 @@ vts_hal_test_bins := \
   VtsHalMemtrackV1_0TargetTest \
   VtsHalNeuralnetworksV1_0TargetTest \
   VtsHalNfcV1_0TargetTest \
+  VtsHalNfcV1_1TargetTest \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \

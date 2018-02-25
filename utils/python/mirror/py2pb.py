@@ -163,6 +163,11 @@ def PyDict2PbStruct(message, pb_spec, py_value):
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
                 sys.exit(-1)
+        else:
+            # TODO: instead crash the test, consider to generate default value
+            # in case not provided in the py_value.
+            logging.error("PyDict2PbStruct: attr %s not provided", attr.name)
+            sys.exit(-1)
     if len(provided_attrs) > 0:
         logging.error("PyDict2PbStruct: provided dictionary included elements" +
                       " not part of the type being converted to: %s",
