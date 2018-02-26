@@ -28,4 +28,6 @@
     <option name="compatibility:include-filter" value="VtsVndkAbi" />
     <option name="compatibility:include-filter" value="VtsVndkOpenLibraries" />
 
+    <!-- for DTBO Verification -->
+    <option name="compatibility:include-filter" value="VtsDtboVerificationTest" />
 </configuration>
