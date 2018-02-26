@@ -26,6 +26,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import const
 from vts.runners.host import test_runner
+from vts.utils.python.android import api
 from vts.utils.python.file import target_file_utils
 from vts.utils.python.os import path_utils
 
@@ -35,9 +36,14 @@ FDT_PATH = "/sys/firmware/fdt"  # path to device tree.
 
 
 class VtsDtboVerificationTest(base_test.BaseTestClass):
-    """Validates DTBO partition and DT overlay application."""
+    """Validates DTBO partition and DT overlay application.
+
+    Attributes:
+        temp_dir: The temporary directory on host.
+    """
 
     def setUpClass(self):
+        """Initializes the DUT and creates temporary directories."""
         self.dut = self.android_devices[0]
         self.shell = self.dut.shell
         self.adb = self.dut.adb
@@ -47,9 +53,27 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
             path_utils.JoinTargetPath(DEVICE_TEMP_DIR, self.abi_bitness))
         self.shell.Execute("mkdir %s -p" % device_path)
 
+    def setUp(self):
+        """Checks if the the preconditions to run the test are met."""
+        asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
+        try:
+            api_level = int(self.dut.first_api_level)
+        except ValueError as e:
+            api_level = 0
+            logging.exception(e)
+
+        if api_level == 0:
+            try:
+                api_level = int(self.getProp("ro.build.version.sdk"))
+            except ValueError as e:
+                asserts.fail("Unexpected value returned from getprop: %s" % e)
+
+        asserts.skipIf(
+            int(api_level) <= api.PLATFORM_API_LEVEL_O_MR1,
+            "Skip test for a device launched first before Android P.")
+
     def testCheckDTBOPartition(self):
         """Validates DTBO partition using mkdtboimg.py."""
-        asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
         slot_suffix = str(self.dut.getProp("ro.boot.slot_suffix"))
         dtbo_path = DTBO_PARTITION_PATH + slot_suffix
         logging.info("DTBO path %s", dtbo_path)
@@ -70,7 +94,6 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
 
     def testVerifyOverlay(self):
         """Verifies application of DT overlays."""
-        asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
         overlay_idx_string = self.adb.shell(
             "cat /proc/cmdline | "
             "grep -o \"androidboot.dtbo_idx=[^ ]*\" |"
@@ -90,7 +113,7 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
         final_dt_path = path_utils.JoinTargetPath(device_path, "final_dt")
         self.shell.Execute("cp %s %s" % (FDT_PATH, final_dt_path))
         cd_cmd = "cd %s" % (device_path)
-        verify_cmd = "ufdt_verify_overlay final_dt %s" % (
+        verify_cmd = "./ufdt_verify_overlay final_dt %s" % (
             " ".join(overlay_arg))
         cmd = str("%s && %s" % (cd_cmd, verify_cmd))
         logging.info(cmd)
@@ -99,6 +122,7 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
                             "Incorrect Overlay Application")
 
     def tearDownClass(self):
+        """Deletes temporary directories."""
         shutil.rmtree(self.temp_dir)
         device_path = str(
             path_utils.JoinTargetPath(DEVICE_TEMP_DIR, self.abi_bitness))
