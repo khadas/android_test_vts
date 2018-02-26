@@ -25,6 +25,9 @@ from vts.testcases.template.gtest_binary_test import gtest_test_case
 from vts.utils.python.cpu import cpu_frequency_scaling
 from vts.utils.python.hal import hal_service_name_utils
 
+# The pattern indicating a full hal test name including the service name info.
+# e.g. TM.TC(default)_32bit
+_HAL_TEST_NAME_PATTERN = ".*\(.*\).*"
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
     '''Base class to run a VTS target-side HIDL HAL test.
@@ -167,14 +170,19 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             registered_services, service_instances, comb_mode);
 
         new_test_cases = []
-        for test_case in initial_test_cases:
-            for instance_combination in service_instance_combinations:
+        appendix_list = []
+        for instance_combination in service_instance_combinations:
+            for test_case in initial_test_cases:
                 new_test_case = copy.copy(test_case)
+                service_name_list = []
                 for instance in instance_combination:
                     new_test_case.args += " --hal_service_instance=" + instance
-                    new_test_case.tag = instance[instance.find(
-                        '/'):] + new_test_case.tag
+                    service_name_list.append(instance[instance.find('/')+1:])
+                name_appendix = "({0})".format(",".join(service_name_list))
+                new_test_case.name_appendix = name_appendix
                 new_test_cases.append(new_test_case)
+            appendix_list.append(name_appendix)
+        self.test_filter.ExpandAppendix(appendix_list, _HAL_TEST_NAME_PATTERN)
         return new_test_cases
 
     def _EnablePassthroughMode(self):

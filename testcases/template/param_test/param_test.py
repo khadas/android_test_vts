@@ -96,8 +96,7 @@ class ParamTestClass(base_test.BaseTestClass):
         for param in self.params:
             self.cur_param = param
             for idx, (test_name, test_func) in enumerate(tests):
-                param_test_name = str(test_name + "/" + self.getParamTag(
-                    param))
+                param_test_name = str(test_name + self.getParamTag(param))
                 tests[idx] = (param_test_name, test_func)
             if not self.run_as_vts_self_test:
                 self.results.requested = [

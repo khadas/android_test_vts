@@ -61,6 +61,50 @@ def ExpandBitness(input_list):
     return list_utils.DeduplicateKeepOrder(result)
 
 
+def ExpandAppendix(input_list, appendix_list, filter_pattern):
+    '''Expand each item in input_list with appendix in the appendix_list
+
+    For each item in input_list, expand it to N items (N=size of appendix_list)
+    by attaching it with each appendix form appendix_list.
+    Note, for items end with bitness info (e.g 32bit/63bit/_32bit/_64bit),
+    attach the appendix before the bitness info. (This is to make sure the
+    bitness info is always at the end of each item since the system rely on this
+    assumption to check the bitness info)
+    There are two cases when an item will not be expanded: 1) it is a Regex
+    filter item and 2) it has the pattern described by filter_pattern.
+
+    Examples of input -> output are:
+        [a] [_default] -> [a_default]
+        [a, b] [_default] -> [a_default, b_default]
+        [a] [_default, _test] -> [a_default, a_test]
+        [a, b_32bit] [_default, _test]
+        -> [a_default, a_test, b_default_32bit, b_test_32bit]
+
+    Args:
+        input_list: list of string, the list to expand
+        appendix_list: list of string, the appendix to be append.
+        filter_pattern: string, a Regex pattern to filter out the items that
+                        should not expand.
+
+    Returns:
+        A list of string with expanded result.
+    '''
+    result = []
+    for item in input_list:
+        if IsRegexFilter(item) or re.compile(filter_pattern).match(item):
+            result.append(item)
+            continue
+        pos = len(item)
+        if (item.endswith(const.SUFFIX_32BIT) or
+                item.endswith(const.SUFFIX_64BIT)):
+            pos = len(item) - len(const.SUFFIX_32BIT)
+            if item[pos - 1] == "_":
+                pos = pos - 1
+        for appendix in appendix_list:
+            result.append(item[:pos] + appendix + item[pos:])
+    return result
+
+
 def SplitFilterList(input_list):
     '''Split filter items into exact and regex lists.
 
@@ -80,7 +124,7 @@ def SplitFilterList(input_list):
     exact = []
     regex = []
     for item in input_list:
-        if item.startswith(REGEX_PREFIX) and item.endswith(REGEX_SUFFIX):
+        if IsRegexFilter(item):
             regex_item = item[len(REGEX_PREFIX):-len(REGEX_SUFFIX)]
             try:
                 re.compile(regex_item)
@@ -138,6 +182,18 @@ def InRegexList(item, regex_list):
             return True
 
     return False
+
+
+def IsRegexFilter(item):
+    '''Checks whether the given item is a regex filter.
+
+    Args:
+        item: string, given string
+
+    Returns:
+        bool: true if the given item is a regex filter.
+    '''
+    return item.startswith(REGEX_PREFIX) and item.endswith(REGEX_SUFFIX)
 
 
 class Filter(object):
@@ -210,6 +266,24 @@ class Filter(object):
         to 3 items, 2 of which ending with bitness. This method is safe if
         called multiple times. Regex items will not be expanded
         '''
+        self.include_filter_exact = ExpandBitness(self.include_filter_exact)
+        self.exclude_filter_exact = ExpandBitness(self.exclude_filter_exact)
+
+    def ExpandAppendix(self, appendix_list, filter_pattern):
+        '''Expand filter with appendix from appendix_list.
+
+        Reset both include_filter and exclude_filter by expanding the filters
+        with appendix in appendix_list.
+
+        Args:
+            appendix_list: list of string to be append to the filters.
+            filter_pattern: string, a Regex pattern to filter out the items that
+                            should not be expanded.
+        '''
+        self.include_filter = ExpandAppendix(self.include_filter,
+                                             appendix_list, filter_pattern)
+        self.exclude_filter = ExpandAppendix(self.exclude_filter,
+                                             appendix_list, filter_pattern)
         self.include_filter_exact = ExpandBitness(self.include_filter_exact)
         self.exclude_filter_exact = ExpandBitness(self.exclude_filter_exact)
 
@@ -365,8 +439,8 @@ class Filter(object):
                 'exclude_filter_regex: {exclude_filter_regex}'.format(
                     enable_regex=self.enable_regex,
                     enable_negative_pattern=self.enable_negative_pattern,
-                    enable_module_name_prefix_matching=
-                    self.enable_module_name_prefix_matching,
+                    enable_module_name_prefix_matching=self.
+                    enable_module_name_prefix_matching,
                     module_name=self.module_name,
                     include_filter=self.include_filter,
                     exclude_filter=self.exclude_filter,
