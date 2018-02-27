@@ -34,7 +34,7 @@ def IsVndkRuntimeEnforced(dut):
                 dut.vndk_version)
 
 
-def _FormatVndkPath(pattern, bitness, version=""):
+def FormatVndkPath(pattern, bitness, version=""):
     """Formats a VNDK path.
 
     Args:
@@ -60,7 +60,7 @@ def GetVndkCoreDirectory(bitness, version):
     Returns:
         A string, the path to VNDK-core directory.
     """
-    return _FormatVndkPath("/system/{LIB}/vndk{VER}", bitness, version)
+    return FormatVndkPath("/system/{LIB}/vndk{VER}", bitness, version)
 
 
 def GetVndkSpDirectory(bitness, version):
@@ -73,16 +73,17 @@ def GetVndkSpDirectory(bitness, version):
     Returns:
         A string, the path to VNDK-SP directory.
     """
-    return _FormatVndkPath("/system/{LIB}/vndk-sp{VER}", bitness, version)
+    return FormatVndkPath("/system/{LIB}/vndk-sp{VER}", bitness, version)
 
 
-def GetVndkSpExtDirectory(bitness):
-    """Returns the path to VNDK-SP extension directory on device.
+def GetVndkSpExtDirectories(bitness):
+    """Returns the paths to VNDK-SP extension directories on device.
 
     Args:
         bitness: A string or an integer, 32 or 64.
 
     Returns:
-        A string, the path to VNDK-SP extension directory.
+        A list of strings, the paths to VNDK-SP extension directories.
     """
-    return _FormatVndkPath("/vendor/{LIB}/vndk-sp", bitness)
+    return [FormatVndkPath("/odm/{LIB}/vndk-sp", bitness),
+            FormatVndkPath("/vendor/{LIB}/vndk-sp", bitness)]
