@@ -38,6 +38,7 @@ public class VtsHalAdapterPreparer
         implements ITargetPreparer, ITargetCleaner, IMultiTargetPreparer, IAbiReceiver {
     private static final int THREAD_COUNT_DEFAULT = 1;
     private static final String SERVICE_NAME_DEFAULT = "default";
+    private static final long FRAMEWORK_START_TIMEOUT = 1000 * 60 * 2;  // 2 minutes.
     // The path of a sysprop to stop HIDL adapaters. Currently, there's one global flag for all
     // adapters.
     private static final String ADAPTER_SYSPROP = "test.hidl.adapters.deactivated";
@@ -89,6 +90,10 @@ public class VtsHalAdapterPreparer
 
         device.executeShellCommand("stop");
         device.executeShellCommand("start");
+
+        if (!device.waitForBootComplete(FRAMEWORK_START_TIMEOUT)) {
+            throw new DeviceNotAvailableException("Framework failed to start.");
+        }
 
         out = new CollectingOutputReceiver();
         device.executeShellCommand(String.format("lshal | grep %s", mInterfaceName), out);
