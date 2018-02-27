@@ -106,7 +106,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
             a string of concatenated service names. e.g. n1/n2
         """
         names = map(lambda instance: instance.split("/")[1], param)
-        return "/".join(names)
+        return "({})".format(",".join(names))
 
     def getHalServiceName(self, hal_service):
         """Get corresponding name for hal_service from the current parameter.
