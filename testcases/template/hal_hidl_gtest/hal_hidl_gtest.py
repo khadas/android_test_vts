@@ -24,13 +24,14 @@ from vts.testcases.template.gtest_binary_test import gtest_binary_test
 from vts.testcases.template.gtest_binary_test import gtest_test_case
 from vts.utils.python.cpu import cpu_frequency_scaling
 from vts.utils.python.hal import hal_service_name_utils
+from vts.utils.python.precondition import precondition_utils
 
 # The pattern indicating a full hal test name including the service name info.
 # e.g. TM.TC(default)_32bit
 _HAL_TEST_NAME_PATTERN = ".*\(.*\).*"
 
 class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
-    '''Base class to run a VTS target-side HIDL HAL test.
+    """Base class to run a VTS target-side HIDL HAL test.
 
     Attributes:
         DEVICE_TEST_DIR: string, temp location for storing binary
@@ -39,12 +40,15 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         testcases: list of GtestTestCase objects, list of test cases to run
         _cpu_freq: CpuFrequencyScalingController instance of a target device.
         _dut: AndroidDevice, the device under test as config
-        _hal_precondition: String, the name of the HAL preconditioned
-    '''
+        _target_hals: List of String, the targeting hal service of the test.
+                      e.g (["android.hardware.foo@1.0::IFoo"])
+    """
 
     def setUpClass(self):
         """Checks precondition."""
         super(HidlHalGTest, self).setUpClass()
+        if not hasattr(self, "_target_hals"):
+            self._target_hals = []
 
         opt_params = [keys.ConfigKeys.IKEY_SKIP_IF_THERMAL_THROTTLING,
                       keys.ConfigKeys.IKEY_DISABLE_CPU_FREQUENCY_SCALING]
@@ -66,22 +70,17 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         else:
             self._cpu_freq = None
 
-        self._hal_precondition = None
-        if hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL):
-            self._hal_precondition = getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_LSHAL)
-        elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF):
-            self._hal_precondition = getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_VINTF)
-        elif hasattr(self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE):
-            self._hal_precondition = getattr(
-                self, keys.ConfigKeys.IKEY_PRECONDITION_HWBINDER_SERVICE)
+        if not self._skip_all_testcases:
+            ret = precondition_utils.CanRunHidlHalTest(
+                self, self._dut, self.shell, self.run_as_compliance_test)
+            if not ret:
+                self._skip_all_testcases = True
 
-        if self.sancov.enabled and self._hal_precondition is not None:
+        if self.sancov.enabled and self._target_hals:
             self.sancov.InitializeDeviceCoverage(self._dut,
-                                                 self._hal_precondition)
-        if self.coverage.enabled and self._hal_precondition is not None:
-            self.coverage.SetHalNames([self._hal_precondition])
+                                                 self._target_hals)
+        if self.coverage.enabled and self._target_hals:
+            self.coverage.SetHalNames(self._target_hals)
             self.coverage.SetCoverageReportFilePrefix(self.test_module_name)
 
     def CreateTestCases(self):
@@ -102,7 +101,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
     # @Override
     def CreateTestCase(self, path, tag=''):
-        '''Create a list of GtestTestCase objects from a binary path.
+        """Create a list of GtestTestCase objects from a binary path.
 
         Support testing against different service names by first executing a
         dummpy test case which lists all the registered hal services. Then
@@ -116,7 +115,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
         Returns:
             A list of GtestTestCase objects.
-        '''
+        """
         initial_test_cases = super(HidlHalGTest, self).CreateTestCase(path,
                                                                       tag)
         if not initial_test_cases:
@@ -126,33 +125,40 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         list_service_test_case.args += " --list_registered_services"
         results = self.shell.Execute(list_service_test_case.GetRunCommand())
         if (results[const.EXIT_CODE][0]):
-            logging.error('Failed to list test cases from binary %s',
+            logging.error("Failed to list test cases from binary %s",
                           list_service_test_case.path)
         # parse the results to get the registered service list.
         registered_services = []
         comb_mode = hal_service_name_utils.CombMode.FULL_PERMUTATION
         # TODO: consider to use a standard data format (e.g. json) instead of
         # parsing the print output.
-        for line in results[const.STDOUT][0].split('\n'):
+        for line in results[const.STDOUT][0].split("\n"):
             line = str(line)
-            if line.startswith('hal_service: '):
-                service = line[len('hal_service: '):]
+            if line.startswith("hal_service: "):
+                service = line[len("hal_service: "):]
                 registered_services.append(service)
-            if line.startswith('service_comb_mode: '):
-                comb_mode = int(line[len('service_comb_mode: '):])
+            if line.startswith("service_comb_mode: "):
+                comb_mode = int(line[len("service_comb_mode: "):])
 
-        # If no service registered, or request NO_COMBINATION mode, return the
-        # initial test cases directly.
-        if not registered_services or comb_mode == hal_service_name_utils.CombMode.NO_COMBINATION:
+        # If no service registered, return the initial test cases directly.
+        if not registered_services:
+            logging.error("No hal service registered.")
             return initial_test_cases
+
+        self._target_hals = copy.copy(registered_services)
 
         # find the correponding service name(s) for each registered service and
         # store the mapping in dict service_instances.
         service_instances = {}
         for service in registered_services:
-            _, service_names = hal_service_name_utils.GetHalServiceName(
+            testable, service_names = hal_service_name_utils.GetHalServiceName(
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
+            if not testable:
+                logging.error("Hal: %s is not testable, skip all tests.",
+                          service)
+                self._skip_all_testcases = True
+                return initial_test_cases
             if not service_names:
                 logging.error("No service name found for: %s, skip all tests.",
                               service)
@@ -164,6 +170,10 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 service_instances[service] = service_names
         logging.info("registered service instances: %s", service_instances)
         logging.info("service comb mode: %d", comb_mode)
+
+        # If request NO_COMBINATION mode, return the initial test cases directly.
+        if comb_mode == hal_service_name_utils.CombMode.NO_COMBINATION:
+            return initial_test_cases
 
         # get all the combination of service instances.
         service_instance_combinations = hal_service_name_utils.GetServiceInstancesCombinations(
@@ -225,10 +235,10 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             logging.info("Enable CPU frequency scaling")
             self._cpu_freq.EnableCpuScaling()
 
-        if self.sancov.enabled and self._hal_precondition is not None:
-            self.sancov.FlushDeviceCoverage(self._dut, self._hal_precondition)
+        if self.sancov.enabled and self._target_hals:
+            self.sancov.FlushDeviceCoverage(self._dut, self._target_hals)
             self.sancov.ProcessDeviceCoverage(self._dut,
-                                              self._hal_precondition)
+                                              self._target_hals)
             self.sancov.Upload()
 
         super(HidlHalGTest, self).tearDownClass()
