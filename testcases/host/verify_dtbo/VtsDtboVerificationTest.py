@@ -57,6 +57,9 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
     def setUp(self):
         """Checks if the the preconditions to run the test are met."""
         asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
+        dtbo_exists, _ = self.dtboPartitionPresent()
+        if dtbo_exists:
+            return
         try:
             api_level = int(self.dut.first_api_level)
         except ValueError as e:
@@ -73,18 +76,27 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
             int(api_level) <= api.PLATFORM_API_LEVEL_O_MR1,
             "Skip test for a device launched first before Android P.")
 
-    def testCheckDTBOPartition(self):
-        """Validates DTBO partition using mkdtboimg.py."""
+    def dtboPartitionPresent(self):
+        """Checks for the presence of DTBO partition.
+
+        Returns:
+            Boolean, True if DTBO partition exists.
+            string, path to read DTBO Image from.
+        """
         try:
             slot_suffix = str(self.dut.getProp(PROPERTY_SLOT_SUFFIX))
         except ValueError as e:
             logging.exception(e)
             slot_suffix = ""
         dtbo_path = DTBO_PARTITION_PATH + slot_suffix
+        partition_exists = target_file_utils.Exists(dtbo_path, self.shell)
+        return partition_exists, dtbo_path
+
+    def testCheckDTBOPartition(self):
+        """Validates DTBO partition using mkdtboimg.py."""
+        dtbo_exists, dtbo_path = self.dtboPartitionPresent()
+        asserts.assertTrue(dtbo_exists, "DTBO Partition not present")
         logging.info("DTBO path %s", dtbo_path)
-        asserts.assertTrue(
-            target_file_utils.Exists(dtbo_path, self.shell),
-            "DTBO partition does not exist")
         self.adb.pull("%s %s/dtbo" % (dtbo_path, self.temp_dir))
         dtbo_dump_cmd = [
             "host/bin/mkdtboimg.py", "dump",
