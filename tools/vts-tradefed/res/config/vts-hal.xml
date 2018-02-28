@@ -17,7 +17,7 @@
   <include name="vts-base" />
   <target_preparer class="com.android.tradefed.targetprep.VtsCoveragePreparer" />
   <option name="plan" value="vts" />
-  <option name="test-tag" value="vts" />
+  <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-hal" />
 
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
