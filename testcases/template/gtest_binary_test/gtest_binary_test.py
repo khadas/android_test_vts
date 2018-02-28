@@ -213,7 +213,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 result = gtest_test_case.GtestTestCase(
                     test_suite.get('name'),
                     test_case.get('name'), '', test_case_original.tag,
-                    self.PutTag, name_appendex=test_case_original.name_appendix)
+                    self.PutTag, name_appendix=test_case_original.name_appendix)
 
                 failure_message = None
                 for sub in test_case:
