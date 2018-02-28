@@ -69,6 +69,7 @@ vts_test_bin_packages += \
     binderLibTest_IPC_32 \
     binderTextOutputTest \
     binderSafeInterfaceTest \
+    memunreachable_binder_test \
 
 # VTS security PoC tests
 vts_test_bin_packages += \
