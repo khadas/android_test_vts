@@ -289,8 +289,6 @@ ANDROID_TEST_XML_TEMPLATE = '''<configuration description="Config for VTS {test_
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
         <option name="push-group" value="{test_type}.push" />
     </target_preparer>
-    <multi_target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-    </multi_target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="{test_name}" />
         <option name="test-case-path" value="vts/{test_path_under_vts}/{test_case_file_without_extension}" />
