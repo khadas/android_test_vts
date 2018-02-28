@@ -224,6 +224,7 @@ vts_hal_test_bins := \
   VtsHalHealthV2_0TargetTest \
   VtsHalIrV1_0TargetTest \
   VtsHalKeymasterV3_0TargetTest \
+  VtsHalKeymasterV4_0TargetTest \
   VtsHalLightV2_0TargetTest \
   VtsHalMediaOmxV1_0TargetComponentTest \
   VtsHalMediaOmxV1_0TargetAudioEncTest \
