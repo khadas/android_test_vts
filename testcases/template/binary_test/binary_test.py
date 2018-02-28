@@ -211,12 +211,6 @@ class BinaryTest(base_test.BaseTestClass):
                          'all tests skipped.')
             self._skip_all_testcases = True
 
-        if not self._skip_all_testcases:
-            ret = precondition_utils.CanRunHidlHalTest(
-                self, self._dut, self.shell, self.run_as_compliance_test)
-            if not ret:
-                self._skip_all_testcases = True
-
         self.tags = set()
         self.CreateTestCases()
         cmd = list(
