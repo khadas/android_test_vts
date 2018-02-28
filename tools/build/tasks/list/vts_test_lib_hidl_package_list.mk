@@ -204,6 +204,7 @@ vts_hal_test_bins := \
   VtsHalBootV1_0TargetTest \
   VtsHalBroadcastradioV1_0TargetTest \
   VtsHalBroadcastradioV1_1TargetTest \
+  VtsHalBroadcastradioV2_0TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalCasV1_0TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
