@@ -45,7 +45,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         self._test_hal_services = set()
         super(HalHidlReplayTest, self).setUpClass()
 
-        if self._skip_all_testcases:
+        if self.isSkipAllTests():
             return
 
         if self.coverage.enabled and self._test_hal_services is not None:
@@ -126,7 +126,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
     def tearDownClass(self):
         """Performs clean-up tasks."""
         # Delete the pushed file.
-        if not self._skip_all_testcases:
+        if not self.isSkipAllTests():
             for trace_path in self.trace_paths:
                 trace_file_name = str(os.path.basename(trace_path))
                 target_trace_path = path_utils.JoinTargetPath(
