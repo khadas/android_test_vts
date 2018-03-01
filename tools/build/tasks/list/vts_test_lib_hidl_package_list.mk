@@ -268,6 +268,11 @@ vts_hal_test_bins := \
   VtsHalWifiSupplicantV1_0TargetTest \
   VtsHalWifiSupplicantV1_1TargetTest \
 
+# Binaries which are part of VNDK but in the form of HIDL.
+vts_hal_test_bins += \
+  VtsVndkHidlBufferpoolV1_0TargetSingleTest \
+  VtsVndkHidlBufferpoolV1_0TargetMultiTest \
+
 vts_test_lib_hidl_packages := \
   $(vts_hal_driver_libs) \
   $(vts_hal_profiler_libs) \
