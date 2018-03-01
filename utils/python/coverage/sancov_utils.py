@@ -94,62 +94,66 @@ class SancovFeature(feature_utils.Feature):
                 self._device_resource_dict[serial] = sancov_resource_path
         logging.info('Sancov enabled: %s', self.enabled)
 
-    def InitializeDeviceCoverage(self, dut, hal_name):
+    def InitializeDeviceCoverage(self, dut, hals):
         """Initializes the sanitizer coverage on the device for the provided HAL.
 
         Args:
             dut: The device under test.
-            hal_name: The HAL name and version (string) for which to measure coverage
-                      (e.g. 'android.hardware.light@2.0-service')
+            hals: A list of the HAL name and version (string) for which to
+                  measure coverage (e.g. ['android.hardware.light@2.0'])
         """
         serial = dut.adb.shell('getprop ro.serialno').strip()
         if serial not in self._device_resource_dict:
             logging.error("Invalid device provided: %s", serial)
             return
-        entries = dut.adb.shell('lshal -itp 2> /dev/null | grep {0}'.format(
-            hal_name)).splitlines()
-        pids = set([pid.strip()
-                    for pid in map(lambda entry: entry.split()[-1], entries)
-                    if pid.isdigit()])
 
-        if len(pids) == 0:
-            logging.warn('No matching processes IDs found for HAL %s',
-                         hal_name)
-            return
-        processes = dut.adb.shell('ps -p {0} -o comm='.format(' '.join(
-            pids))).splitlines()
-        process_names = set(
-            [name.strip() for name in processes
-             if name.strip() and not name.endswith(' (deleted)')])
 
-        if len(process_names) == 0:
-            logging.warn('No matching processes names found for HAL %s',
-                         hal_name)
-            return
+        for hal in hals:
+            entries = dut.adb.shell('lshal -itp 2> /dev/null | grep {0}'.format(
+                hal)).splitlines()
+            pids = set([pid.strip()
+                        for pid in map(lambda entry: entry.split()[-1], entries)
+                        if pid.isdigit()])
 
-        for process_name in process_names:
-            cmd = self._PROCESS_INIT_COMMAND.format(
-                process_name, self._TARGET_SANCOV_PATH, hal_name)
-            try:
-                dut.adb.shell(cmd.format(process_name))
-            except AdbError as e:
-                logging.error('Command failed: \"%s\"', cmd)
-                continue
+            if len(pids) == 0:
+                logging.warn('No matching processes IDs found for HAL %s',
+                             hal)
+                return
+            processes = dut.adb.shell('ps -p {0} -o comm='.format(' '.join(
+                pids))).splitlines()
+            process_names = set(
+                [name.strip() for name in processes
+                 if name.strip() and not name.endswith(' (deleted)')])
 
-    def FlushDeviceCoverage(self, dut, hal_name=None):
+            if len(process_names) == 0:
+                logging.warn('No matching processes names found for HAL %s',
+                             hal)
+                return
+
+            for process_name in process_names:
+                cmd = self._PROCESS_INIT_COMMAND.format(
+                    process_name, self._TARGET_SANCOV_PATH, hal)
+                try:
+                    dut.adb.shell(cmd.format(process_name))
+                except AdbError as e:
+                    logging.error('Command failed: \"%s\"', cmd)
+                    continue
+
+    def FlushDeviceCoverage(self, dut, hals):
         """Flushes the sanitizer coverage on the device for the provided HAL.
 
         Args:
             dut: The device under test.
-            hal_name: The HAL name and version (string) for which to flush coverage
-                      (e.g. 'android.hardware.light@2.0-service')
+            hals: A list of HAL name and version (string) for which to flush
+                  coverage (e.g. ['android.hardware.light@2.0-service'])
         """
         serial = dut.adb.shell('getprop ro.serialno').strip()
         if serial not in self._device_resource_dict:
             logging.error('Invalid device provided: %s', serial)
             return
-        dut.adb.shell(
-            self._FLUSH_COMMAND.format('' if hal_name is None else hal_name))
+        for hal in hals:
+            dut.adb.shell(
+                self._FLUSH_COMMAND.format(hal))
 
     def _InitializeFileVectors(self, serial, binary_path):
         """Parse the binary and read the debugging information.
@@ -267,7 +271,7 @@ class SancovFeature(feature_utils.Feature):
                     git_project_name, git_project_path, revision,
                     covered_count, total_count, True)
 
-    def ProcessDeviceCoverage(self, dut, hal_name):
+    def ProcessDeviceCoverage(self, dut, hals):
         """Process device coverage.
 
         Fetch sancov files from the target, parse the sancov files, symbolize the output,
@@ -275,8 +279,8 @@ class SancovFeature(feature_utils.Feature):
 
         Args:
             dut: The device under test.
-            hal_name: The HAL name and version (string) for which to process coverage
-                      (e.g. 'android.hardware.light@2.0')
+            hals: A list of HAL name and version (string) for which to process
+                  coverage (e.g. ['android.hardware.light@2.0'])
         """
         serial = dut.adb.shell('getprop ro.serialno').strip()
         product = dut.adb.shell('getprop ro.build.product').strip()
@@ -292,8 +296,11 @@ class SancovFeature(feature_utils.Feature):
             os.path.join(self._device_resource_dict[serial],
                          self._SYMBOLS_ZIP))
 
-        sancov_files = dut.adb.shell('find {0}/{1} -name \"*.sancov\"'.format(
-            self._TARGET_SANCOV_PATH, hal_name)).splitlines()
+
+        sancov_files = []
+        for hal in hals:
+            sancov_files.extend(dut.adb.shell('find {0}/{1} -name \"*.sancov\"'.format(
+                self._TARGET_SANCOV_PATH, hal)).splitlines())
         temp_dir = tempfile.mkdtemp()
 
         binary_to_sancov = {}
@@ -304,8 +311,9 @@ class SancovFeature(feature_utils.Feature):
                 os.path.join(temp_dir, os.path.basename(file)))
             binary_to_sancov[binary] = (bitness, offsets)
 
-        dut.adb.shell('rm -rf {0}/{1}'.format(self._TARGET_SANCOV_PATH,
-                                              hal_name))
+        for hal in hals:
+            dut.adb.shell('rm -rf {0}/{1}'.format(self._TARGET_SANCOV_PATH,
+                                                  hal))
 
         search_root = os.path.join('out', 'target', 'product', product,
                                    'symbols')
