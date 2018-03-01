@@ -142,11 +142,21 @@ class HalHidlHostTest(param_test.ParamTestClass):
         service_instances = {}
 
         for service in registered_services:
-            _, service_names = hal_service_name_utils.GetHalServiceName(
+            testable, service_names = hal_service_name_utils.GetHalServiceName(
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
+            if not testable:
+                logging.error("Hal: %s is not testable, skip all tests.",
+                          service)
+                self._skip_all_testcases = True
+                return []
             if service_names:
                 service_instances[service] = service_names
+            else:
+                logging.error("No service name found for: %s, skip all tests.",
+                              service)
+                self._skip_all_testcases = True
+                return []
         logging.info("registered service instances: %s", service_instances)
 
         return hal_service_name_utils.GetServiceInstancesCombinations(
