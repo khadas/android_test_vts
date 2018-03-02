@@ -33,6 +33,7 @@ from vts.utils.python.os import path_utils
 DTBO_PARTITION_PATH = "/dev/block/bootdevice/by-name/dtbo"  # path to DTBO partition.
 DEVICE_TEMP_DIR = "/data/local/tmp/"  # temporary dir in device.
 FDT_PATH = "/sys/firmware/fdt"  # path to device tree.
+PROPERTY_SLOT_SUFFIX = "ro.boot.slot_suffix"  # indicates current slot suffix for A/B devices
 
 
 class VtsDtboVerificationTest(base_test.BaseTestClass):
@@ -74,7 +75,11 @@ class VtsDtboVerificationTest(base_test.BaseTestClass):
 
     def testCheckDTBOPartition(self):
         """Validates DTBO partition using mkdtboimg.py."""
-        slot_suffix = str(self.dut.getProp("ro.boot.slot_suffix"))
+        try:
+            slot_suffix = str(self.dut.getProp(PROPERTY_SLOT_SUFFIX))
+        except ValueError as e:
+            logging.exception(e)
+            slot_suffix = ""
         dtbo_path = DTBO_PARTITION_PATH + slot_suffix
         logging.info("DTBO path %s", dtbo_path)
         asserts.assertTrue(
