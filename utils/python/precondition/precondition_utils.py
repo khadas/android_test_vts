@@ -103,21 +103,7 @@ def CanRunHidlHalTest(test_instance,
     if hal:
         testable, _ = hal_service_name_utils.GetHalServiceName(
             shell, hal, bitness, run_as_compliance_test)
-        if not testable:
-            if run_as_compliance_test:
-                logging.warn("The required hal %s is not testable.", hal)
-                return False
-            else:
-                # For non compliance test, check in addition whether lshal
-                # contains the testing hal, if so, run the test (this is to test
-                # experimental hals which are not specified in manifest files).
-                results = shell.Execute("lshal --neat")
-                if any(results[const.EXIT_CODE]):
-                    logging.warn("lshal failed: %s", results)
-                    return True
-                if hal not in results[const.STDOUT][0]:
-                    logging.warn("The required hal %s is not testable.", hal)
-                    return False
+        return testable
 
     logging.info("Precondition check pass.")
     return True
