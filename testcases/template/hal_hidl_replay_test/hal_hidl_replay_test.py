@@ -88,10 +88,13 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 test_case.envp += "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH" % self.custom_ld_library_path
                 test_case.args += " --spec_dir_path=" + self.DEVICE_VTS_SPEC_FILE_PATH
                 test_case.test_name = "replay_test_" + trace_file_name
+                service_name_list = []
                 for instance in instance_combination:
                     test_case.args += " --hal_service_instance=" + instance
                     test_case.args += " " + target_trace_path
-                    test_case.tag += instance[instance.find('/'):]
+                    service_name_list.append(instance[instance.find('/')+1:])
+                name_appendix = "({0})".format(",".join(service_name_list))
+                test_case.name_appendix = name_appendix
                 self.testcases.append(test_case)
 
     def VerifyTestResult(self, test_case, command_results):
@@ -177,12 +180,22 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 registered_services.append(service)
 
         for service in registered_services:
-            _, service_names = hal_service_name_utils.GetHalServiceName(
+            testable, service_names = hal_service_name_utils.GetHalServiceName(
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
+            if not testable:
+                logging.error("Hal: %s is not testable, skip all tests.",
+                          service)
+                self._skip_all_testcases = True
+                return []
             if service_names:
                 service_instances[service] = service_names
                 self._test_hal_services.add(service)
+            else:
+                logging.error("No service name found for: %s, skip all tests.",
+                              service)
+                self._skip_all_testcases = True
+                return []
         logging.info("registered service instances: %s", service_instances)
 
         service_instance_combinations = \
