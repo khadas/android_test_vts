@@ -12,11 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import io
 import json
 import logging
 import os
 import shutil
+import sys
 import time
 import zipfile
 
@@ -35,6 +37,7 @@ from vts.utils.python.web import feature_utils
 FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
 TARGET_COVERAGE_PATH = "/data/misc/trace/"  # location to flush coverage
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # location to pull coverage to host
+DEFAULT_COVERAGE_RESOURCE_PATH = "/tmp/coverage/"
 
 # Environment for test process
 COVERAGE_TEST_ENV = "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/misc/trace/self"
@@ -48,10 +51,11 @@ NAME = "name"
 PATH = "path"
 GEN_TAG = "/gen/"
 
-_BUILD_INFO = 'BUILD_INFO'  # name of build info artifact
+_BUILD_INFO = "BUILD_INFO"  # name of build info artifact
 _GCOV_ZIP = "gcov.zip"  # name of gcov artifact zip
-_REPO_DICT = 'repo-dict'  # name of dictionary from project to revision in BUILD_INFO
+_REPO_DICT = "repo-dict"  # name of dictionary from project to revision in BUILD_INFO
 
+_CLEAN_TRACE_COMMAND = "rm -rf /data/misc/trace/*"
 _FLUSH_COMMAND = (
     "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/local/tmp/flusher "
     "/data/local/tmp/vts_coverage_configure flush")
@@ -84,7 +88,8 @@ class CoverageFeature(feature_utils.Feature):
     ]
 
     _DEFAULT_EXCLUDE_PATHS = [
-        'bionic', 'external/libcxx', 'system/core', 'system/libhidl', 'system/libfmq'
+        "bionic", "external/libcxx", "system/core", "system/libhidl",
+        "system/libfmq"
     ]
 
     def __init__(self, user_params, web=None, local_coverage_path=None):
@@ -120,18 +125,25 @@ class CoverageFeature(feature_utils.Feature):
             android_devices = getattr(self,
                                       keys.ConfigKeys.IKEY_ANDROID_DEVICE)
             if not isinstance(android_devices, list):
-                logging.warn('Android device information not available')
+                logging.warn("Android device information not available.")
                 self.enabled = False
             for device in android_devices:
                 serial = device.get(keys.ConfigKeys.IKEY_SERIAL)
                 coverage_resource_path = device.get(
                     keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH)
-                if not serial or not coverage_resource_path:
-                    logging.warn('Missing coverage information in device: %s',
-                                 device)
+                if not serial:
+                    logging.error("Missing serial information in device: %s",
+                                  device)
                     continue
-                self._device_resource_dict[str(serial)] = str(coverage_resource_path)
-
+                if not coverage_resource_path:
+                    logging.warning(
+                        "Missing coverage resource path, use %s by default",
+                        DEFAULT_COVERAGE_RESOURCE_PATH)
+                    self._device_resource_dict[str(
+                        serial)] = DEFAULT_COVERAGE_RESOURCE_PATH
+                else:
+                    self._device_resource_dict[str(serial)] = str(
+                        coverage_resource_path)
         logging.info("Coverage enabled: %s", self.enabled)
 
     def _FindGcnoSummary(self, gcda_file_path, gcno_file_parsers):
@@ -215,11 +227,12 @@ class CoverageFeature(feature_utils.Feature):
                     checksum_gcno_dict[gcno_file_parser.checksum].append(
                         gcno_file_parser)
                 else:
-                    checksum_gcno_dict[
-                        gcno_file_parser.checksum] = [gcno_file_parser]
+                    checksum_gcno_dict[gcno_file_parser.checksum] = [
+                        gcno_file_parser
+                    ]
         return checksum_gcno_dict
 
-    def _ClearTargetGcov(self, dut, path_suffix=None):
+    def _ClearTargetGcov(self, dut, serial, path_suffix=None):
         """Removes gcov data from the device.
 
         Finds and removes all gcda files relative to TARGET_COVERAGE_PATH.
@@ -230,12 +243,9 @@ class CoverageFeature(feature_utils.Feature):
         path = TARGET_COVERAGE_PATH
         if path_suffix:
             path = path_utils.JoinTargetPath(path, path_suffix)
-        try:
-            dut.adb.shell("rm -rf %s/*" % TARGET_COVERAGE_PATH)
-        except AdbError as e:
-            logging.warn('Gcov cleanup error: \"%s\"', e)
+        self._ExecuteOneAdbShellCommand(dut, serial, _CLEAN_TRACE_COMMAND)
 
-    def InitializeDeviceCoverage(self, dut):
+    def InitializeDeviceCoverage(self, dut=None, serial=None):
         """Initializes the device for coverage before tests run.
 
         Flushes, then finds and removes all gcda files under
@@ -244,14 +254,11 @@ class CoverageFeature(feature_utils.Feature):
         Args:
             dut: the device under test.
         """
-        try:
-            dut.adb.shell(_FLUSH_COMMAND)
-        except AdbError as e:
-            logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
+        self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
         logging.info("Removing existing gcda files.")
-        self._ClearTargetGcov(dut)
+        self._ClearTargetGcov(dut, serial)
 
-    def GetGcdaDict(self, dut):
+    def _GetGcdaDict(self, dut, serial):
         """Retrieves GCDA files from device and creates a dictionary of files.
 
         Find all GCDA files on the target device, copy them to the host using
@@ -267,10 +274,8 @@ class CoverageFeature(feature_utils.Feature):
         logging.info("Creating gcda dictionary")
         gcda_dict = {}
         logging.info("Storing gcda tmp files to: %s", self.local_coverage_path)
-        try:
-            dut.adb.shell(_FLUSH_COMMAND)
-        except AdbError as e:
-            logging.warn('Command failed: \"%s\"', _FLUSH_COMMAND)
+
+        self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
 
         gcda_files = set()
         if self._hal_names:
@@ -278,16 +283,14 @@ class CoverageFeature(feature_utils.Feature):
             entries = []
             try:
                 entries = dut.adb.shell(
-                    'lshal -itp 2> /dev/null | grep -E \"{0}\"'.format(
+                    "lshal -itp 2> /dev/null | grep -E \"{0}\"".format(
                         searchString)).splitlines()
             except AdbError as e:
-                logging.error('failed to get pid entries')
+                logging.error("failed to get pid entries")
 
-            pids = set([
-                pid.strip()
-                for pid in map(lambda entry: entry.split()[-1], entries)
-                if pid.isdigit()
-            ])
+            pids = set(pid.strip()
+                       for pid in map(lambda entry: entry.split()[-1], entries)
+                       if pid.isdigit())
             pids.add(_SP_COVERAGE_PATH)
             for pid in pids:
                 path = path_utils.JoinTargetPath(TARGET_COVERAGE_PATH, pid)
@@ -295,28 +298,32 @@ class CoverageFeature(feature_utils.Feature):
                     files = dut.adb.shell("find %s -name \"*.gcda\"" % path)
                     gcda_files.update(files.split("\n"))
                 except AdbError as e:
-                    logging.info('No gcda files found in path: \"%s\"', path)
-
+                    logging.info("No gcda files found in path: \"%s\"", path)
         else:
-            try:
-                gcda_files.update(
-                    dut.adb.shell("find %s -name \"*.gcda\"" %
-                                  TARGET_COVERAGE_PATH).split("\n"))
-            except AdbError as e:
-                logging.warn('No gcda files found in path: \"%s\"',
-                            TARGET_COVERAGE_PATH)
+            cmd = ("find %s -name \"*.gcda\"" % TARGET_COVERAGE_PATH)
+            result = self._ExecuteOneAdbShellCommand(dut, serial, cmd)
+            if result:
+                gcda_files.update(result.split("\n"))
 
         for gcda in gcda_files:
             if gcda:
                 basename = os.path.basename(gcda.strip())
                 file_name = os.path.join(self.local_coverage_path, basename)
-                dut.adb.pull("%s %s" % (gcda, file_name))
+                if dut is None:
+                    results = cmd_utils.ExecuteShellCommand(
+                        "adb -s %s pull %s %s " % (serial, gcda, file_name))
+                    if (results[cmd_utils.EXIT_CODE][0]):
+                        logging.error(
+                            "Fail to execute command: %s. error: %s" %
+                            (cmd, str(results[cmd_utils.STDERR][0])))
+                else:
+                    dut.adb.pull("%s %s" % (gcda, file_name))
                 gcda_content = open(file_name, "rb").read()
                 gcda_dict[gcda.strip()] = gcda_content
-        self._ClearTargetGcov(dut)
+        self._ClearTargetGcov(dut, serial)
         return gcda_dict
 
-    def _OutputCoverageReport(self, isGlobal):
+    def _OutputCoverageReport(self, isGlobal, coverage_report_msg=None):
         logging.info("outputing coverage data")
         timestamp_seconds = str(int(time.time() * 1000000))
         coverage_report_file_name = "coverage_report_" + timestamp_seconds + ".txt"
@@ -326,17 +333,19 @@ class CoverageFeature(feature_utils.Feature):
         coverage_report_file = os.path.join(self.local_coverage_path,
                                             coverage_report_file_name)
         logging.info("Storing coverage report to: %s", coverage_report_file)
-        coverage_report_msg = ReportMsg.TestReportMessage()
-        if isGlobal:
-            for c in self.web.report_msg.coverage:
-                coverage = coverage_report_msg.coverage.add()
-                coverage.CopyFrom(c)
-        else:
-            for c in self.web.current_test_report_msg.coverage:
-                coverage = coverage_report_msg.coverage.add()
-                coverage.CopyFrom(c)
-        with open(coverage_report_file, 'w+') as f:
-            f.write(str(coverage_report_msg))
+        if self.web and self.web.enabled:
+            coverage_report_msg = ReportMsg.TestReportMessage()
+            if isGlobal:
+                for c in self.web.report_msg.coverage:
+                    coverage = coverage_report_msg.coverage.add()
+                    coverage.CopyFrom(c)
+            else:
+                for c in self.web.current_test_report_msg.coverage:
+                    coverage = coverage_report_msg.coverage.add()
+                    coverage.CopyFrom(c)
+        if coverage_report_msg is not None:
+            with open(coverage_report_file, "w+") as f:
+                f.write(str(coverage_report_msg))
 
     def _AutoProcess(self, cov_zip, revision_dict, gcda_dict, isGlobal):
         """Process coverage data and appends coverage reports to the report message.
@@ -375,6 +384,8 @@ class CoverageFeature(feature_utils.Feature):
         exclude_coverage_path.extend(self._DEFAULT_EXCLUDE_PATHS)
 
         coverage_dict = dict()
+        coverage_report_message = ReportMsg.TestReportMessage()
+
         for gcda_name in gcda_dict:
             if GEN_TAG in gcda_name:
                 # skip coverage measurement for intermediate code.
@@ -402,7 +413,7 @@ class CoverageFeature(feature_utils.Feature):
                 continue
 
             coverage_report.GenerateLineCoverageVector(
-                    gcno_summary, exclude_coverage_path, coverage_dict)
+                gcno_summary, exclude_coverage_path, coverage_dict)
 
         for src_file_path in coverage_dict:
             # Get the git project information
@@ -433,17 +444,28 @@ class CoverageFeature(feature_utils.Feature):
                 logging.info("Could not find git info for %s", src_file_path)
                 continue
 
-            if self.web and self.web.enabled:
-                coverage_vec = coverage_dict[src_file_path]
-                total_count, covered_count = coverage_report.GetCoverageStats(
+            coverage_vec = coverage_dict[src_file_path]
+            total_count, covered_count = coverage_report.GetCoverageStats(
                 coverage_vec)
+            if self.web and self.web.enabled:
                 self.web.AddCoverageReport(coverage_vec, src_file_path,
                                            git_project_name, git_project_path,
                                            revision, covered_count,
                                            total_count, isGlobal)
+            else:
+                coverage = coverage_report_message.coverage.add()
+                coverage.total_line_count = total_count
+                coverage.covered_line_count = covered_count
+                coverage.line_coverage_vector.extend(coverage_vec)
+
+                src_file_path = os.path.relpath(src_file_path,
+                                                git_project_path)
+                coverage.file_path = src_file_path
+                coverage.revision = revision
+                coverage.project_name = git_project_name
 
         if output_coverage_report:
-            self._OutputCoverageReport(isGlobal)
+            self._OutputCoverageReport(isGlobal, coverage_report_message)
 
     # TODO: consider to deprecate the manual process.
     def _ManualProcess(self, cov_zip, revision_dict, gcda_dict, isGlobal):
@@ -517,8 +539,8 @@ class CoverageFeature(feature_utils.Feature):
                     logging.error("No gcda file found %s.", gcda_name)
                     continue
 
-                src_file_path = self._ExtractSourceName(gcno_summary,
-                                                        file_name)
+                src_file_path = self._ExtractSourceName(
+                    gcno_summary, file_name)
 
                 if not src_file_path:
                     logging.error("No source file found for %s.",
@@ -547,7 +569,7 @@ class CoverageFeature(feature_utils.Feature):
         if output_coverage_report:
             self._OutputCoverageReport(isGlobal)
 
-    def SetCoverageData(self, dut, isGlobal=False):
+    def SetCoverageData(self, dut=None, serial=None, isGlobal=False):
         """Sets and processes coverage data.
 
         Organizes coverage data and processes it into a coverage report in the
@@ -563,17 +585,20 @@ class CoverageFeature(feature_utils.Feature):
         if not self.enabled:
             return
 
-        serial = dut.adb.shell('getprop ro.serialno').strip()
+        if serial is None:
+            serial = "default" if dut is None else dut.adb.shell(
+                "getprop ro.serialno").strip()
+
         if not serial in self._device_resource_dict:
-            logging.error('Invalid device provided: %s', serial)
+            logging.error("Invalid device provided: %s", serial)
             return
 
-        gcda_dict = self.GetGcdaDict(dut)
+        gcda_dict = self._GetGcdaDict(dut, serial)
         logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
 
         resource_path = self._device_resource_dict[serial]
         if not resource_path:
-            logging.error('coverage resource path not found.')
+            logging.error("coverage resource path not found.")
             return
 
         cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
@@ -589,11 +614,11 @@ class CoverageFeature(feature_utils.Feature):
             self._ManualProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
 
         # cleanup the downloaded gcda files.
-        results = cmd_utils.ExecuteShellCommand(
-            "rm -rf %s" % path_utils.JoinTargetPath(self.local_coverage_path,
-                                                    "*.gcda"))
-        if any(results[cmd_utils.EXIT_CODE]):
-            logging.error("Fail to cleanup gcda files.")
+        logging.info("cleanup gcda files.")
+        files = os.listdir(self.local_coverage_path)
+        for item in files:
+            if item.endswith(".gcda"):
+                os.remove(os.path.join(self.local_coverage_path, item))
 
     def SetHalNames(self, names=[]):
         """Sets the HAL names for which to process coverage.
@@ -610,3 +635,81 @@ class CoverageFeature(feature_utils.Feature):
             prefix: strings, prefix of the coverage report file.
         """
         self._coverage_report_file_prefix = prefix
+
+    def _ExecuteOneAdbShellCommand(self, dut, serial, cmd):
+        """Helper method to execute a shell command and return results.
+
+        Args:
+            dut: the device under test.
+            cmd: string, command to execute.
+        Returns:
+            stdout result of the command, None if command fails.
+        """
+        if dut is None:
+            results = cmd_utils.ExecuteShellCommand("adb -s %s shell %s" %
+                                                    (serial, cmd))
+            if (results[cmd_utils.EXIT_CODE][0]):
+                logging.error("Fail to execute command: %s. error: %s" %
+                              (cmd, str(results[cmd_utils.STDERR][0])))
+                return None
+            else:
+                return results[cmd_utils.STDOUT][0]
+        else:
+            try:
+                return dut.adb.shell(cmd)
+            except AdbError as e:
+                logging.warn("Fail to execute command: %s. error: %s" %
+                             (cmd, str(e)))
+                return None
+
+
+if __name__ == '__main__':
+    """ Tools to process coverage data.
+
+    Usage:
+      python coverage_utils.py operation [--serial=device_serial_number]
+      [--report_prefix=prefix_of_coverage_report]
+
+    Example:
+      python coverage_utils.py init_coverage
+      python coverage_utils.py get_coverage --serial HT7821A00243
+      python coverage_utils.py get_coverage --serial HT7821A00243 --report_prefix=test
+    """
+    logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser(description="Coverage process tool.")
+    parser.add_argument(
+        "--report_prefix",
+        dest="report_prefix",
+        required=False,
+        help="Prefix of the coverage report.")
+    parser.add_argument(
+        "--serial", dest="serial", required=True, help="Device serial number.")
+    parser.add_argument(
+        "operation",
+        help=
+        "Operation for processing coverage data, e.g. 'init_coverage', get_coverage'"
+    )
+    args = parser.parse_args()
+
+    if args.operation != "init_coverage" and args.operation != "get_coverage":
+        print "Unsupported operation. Exiting..."
+        sys.exit(1)
+    user_params = {
+        keys.ConfigKeys.IKEY_ENABLE_COVERAGE:
+        True,
+        keys.ConfigKeys.IKEY_ANDROID_DEVICE: [{
+            keys.ConfigKeys.IKEY_SERIAL:
+            args.serial
+        }],
+        keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT:
+        True,
+        keys.ConfigKeys.IKEY_GLOBAL_COVERAGE:
+        True
+    }
+    coverage = CoverageFeature(user_params)
+    if args.operation == "init_coverage":
+        coverage.InitializeDeviceCoverage(serial=args.serial)
+    elif args.operation == "get_coverage":
+        if args.report_prefix:
+            coverage.SetCoverageReportFilePrefix(args.report_prefix)
+        coverage.SetCoverageData(serial=args.serial, isGlobal=True)
