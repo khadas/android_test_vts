@@ -36,7 +36,7 @@ include $(build_utils_dir)/vts_package_utils.mk
 -include external/ltp/android/ltp_package_list.mk
 
 VTS_OUT_ROOT := $(HOST_OUT)/vts
-VTS_TESTCASES_OUT := $(HOST_OUT)/vts/android-vts/testcases
+VTS_TESTCASES_OUT := $(VTS_OUT_ROOT)/android-vts/testcases
 VTS_TOOLS_OUT := $(VTS_OUT_ROOT)/android-vts/tools
 
 # Packaging rule for android-vts.zip
@@ -47,7 +47,7 @@ test_suite_readme := test/vts/README.md
 include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 
 .PHONY: vts
-vts: $(compatibility_zip) run adb
+vts: $(compatibility_zip) vtslab adb
 $(call dist-for-goals, vts, $(compatibility_zip))
 
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
@@ -111,7 +111,6 @@ target_hostdriven_copy_pairs := \
   $(call host-native-copy-pairs,$(target_hostdriven_modules),$(VTS_TESTCASES_OUT))
 
 host_additional_deps_copy_pairs := \
-  test/vts/tools/vts-hc/run:$(VTS_TOOLS_OUT)/run \
   test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTS_TOOLS_OUT)/vts-tradefed_win.bat \
   test/vts/tools/vts-tradefed/DynamicConfig.xml:$(VTS_TESTCASES_OUT)/cts.dynamic
 
@@ -159,30 +158,6 @@ else
 host_camera_its_copy_pairs :=
 
 endif  # ifneq ($(TARGET_BUILD_PDK),true)
-
-host_hc_files := \
-  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.py" -and -type f,.) \
-  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.config" -and -type f,.) \
-  $(call find-files-in-subdirs,test/framework/harnesses/host_controller,"*.sh" -and -type f,.)
-
-host_hc_copy_pairs := \
-  $(foreach f,$(host_hc_files),\
-      test/framework/harnesses/host_controller/$(f):$(VTS_TESTCASES_OUT)/host_controller/$(f))
-
-host_acloud_files := \
-  $(call find-files-in-subdirs,tools/acloud,"*.py" -and -type f,.) \
-  $(call find-files-in-subdirs,tools/acloud,"*.config" -and -type f,.)
-
-host_acloud_copy_pairs := \
-  $(foreach f,$(host_acloud_files),\
-    tools/acloud/$(f):$(VTS_TESTCASES_OUT)/acloud/$(f))
-
-host_vti_proto_files := \
-  $(call find-files-in-subdirs,test/vti/test_serving/proto,"*.py" -and -type f,.)
-
-host_vti_proto_copy_pairs := \
-  $(foreach f,$(host_vti_proto_files),\
-    test/vti/test_serving/proto/$(f):$(VTS_TESTCASES_OUT)/vti/test_serving/proto/$(f))
 
 host_systrace_files := \
   $(filter-out .git/%, \
@@ -247,14 +222,6 @@ target_script_copy_pairs := \
 system_property_compatibility_test_res_copy_pairs := \
   system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
 
-$(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py :
-	@mkdir -p $(VTS_TESTCASES_OUT)/vti/test_serving
-	@touch $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py
-
-$(VTS_TESTCASES_OUT)/vti/__init__.py :
-	@mkdir -p $(VTS_TESTCASES_OUT)/vti
-	@touch $(VTS_TESTCASES_OUT)/vti/__init__.py
-
 vts_test_core_copy_pairs := \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
@@ -270,9 +237,6 @@ vts_copy_pairs := \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
   $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
-  $(call copy-many-files,$(host_hc_copy_pairs)) \
-  $(call copy-many-files,$(host_acloud_copy_pairs)) \
-  $(call copy-many-files,$(host_vti_proto_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
@@ -282,8 +246,6 @@ vts_copy_pairs := \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(target_script_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
-  $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py \
-  $(VTS_TESTCASES_OUT)/vti/__init__.py \
 
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs)
