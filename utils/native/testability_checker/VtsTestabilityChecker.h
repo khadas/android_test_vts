@@ -33,6 +33,7 @@ using android::vintf::MatrixHal;
 using android::vintf::Version;
 using std::set;
 using std::string;
+using std::vector;
 
 namespace android {
 namespace vts {
@@ -114,27 +115,31 @@ class VtsTestabilityChecker {
                                  const string& hal_interface_name,
                                  set<string>* instances);
 
-  // Helper method to check whether the mantifest_hal support the interface
-  // and arch (for passthrough hal). Store the corresponding
-  // instance names if supported.
-  bool CheckManifestHal(const ManifestHal* manifest_hal,
+  // Helper method to check whether the hal_manifest support the
+  // package@version::interface and arch (for passthrough hal). Store the
+  // corresponding instance names if supported.
+  bool CheckManifestHal(const HalManifest* hal_manifest,
+                        const string& hal_package_name,
+                        const Version& hal_version,
                         const string& hal_interface_name, const Arch& arch,
                         set<string>* instances);
 
-  // Helper method to get the instance name for a given hal.
-  // If both matrix_hal and manifest_hal not null (i.e. the given hal exists
-  // in both compatibilty matrix and manifest), find the instance names in both
-  // hal and return the intersection.
-  // If either matrix_hal or manifest_hal not null, return the corresponding
-  // instance names
-  void GetTestInstances(const MatrixHal* matrix_hal,
-                        const ManifestHal* manifest_hal,
-                        const string& interface_name, set<string>* instances);
-
   // Helper method to check whether a passthrough hal support the given arch
   // (32 or 64).
-  bool CheckPassthroughManifestHal(const ManifestHal* manifest_hal,
-                                   const Arch& arch);
+  bool CheckPassthroughManifestArch(const Arch& manifest_arch,
+                                    const Arch& arch);
+
+  // Helper method to find matching instances from a list of
+  // manifest_instances.
+  vector<const vintf::ManifestInstance*> FindInstance(
+      const vector<vintf::ManifestInstance>& manifest_instances,
+      const vintf::MatrixInstance& matrix_instance);
+
+  // Helper method to find matching interfaces from a list of
+  // manifest_instances.
+  vector<const vintf::ManifestInstance*> FindInterface(
+      const vector<vintf::ManifestInstance>& manifest_instances,
+      const vintf::MatrixInstance& matrix_instance);
 
   const CompatibilityMatrix* framework_comp_matrix_;  // Do not own.
   const HalManifest* framework_hal_manifest_;         // Do not own.
