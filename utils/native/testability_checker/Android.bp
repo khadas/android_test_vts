@@ -29,6 +29,7 @@ cc_defaults {
     ],
     static_libs: [
         "libvintf",
+        "libhidl-gen-utils",
     ],
     cflags: [
         "-Wall",
