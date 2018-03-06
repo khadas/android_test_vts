@@ -52,6 +52,9 @@ $(call dist-for-goals, vts, $(compatibility_zip))
 
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 target_native_modules := \
+    $(kselftest_modules) \
+    ltp \
+    $(ltp_packages) \
     $(vts_adapter_package_list) \
     $(vts_apk_packages) \
     $(vts_bin_packages) \
@@ -64,19 +67,6 @@ target_native_modules := \
 
 target_native_copy_pairs := \
   $(call target-native-copy-pairs,$(target_native_modules),$(VTS_TESTCASES_OUT))
-
-# Packaging rule for kselftest modules so that VtsKernelLinuxKselftest can
-# depend on it.
-target_native_kselftest_copy_pairs := \
-  $(call target-native-copy-pairs,$(kselftest_modules),$(VTS_TESTCASES_OUT))
-
-# Packaging rule for ltp modules so that VtsKernelLtp module can depend on it.
-target_native_ltp_modules := \
-    ltp \
-    $(ltp_packages) \
-
-target_native_ltp_copy_pairs := \
-  $(call target-native-copy-pairs,$(target_native_ltp_modules),$(VTS_TESTCASES_OUT))
 
 # Packaging rule for android-vts.zip's testcases dir (spec subdir).
 
@@ -240,8 +230,6 @@ vts_test_core_copy_pairs := \
 vts_copy_pairs := \
   $(vts_test_core_copy_pairs) \
   $(call copy-many-files,$(target_native_copy_pairs)) \
-  $(call copy-many-files,$(target_native_kselftest_copy_pairs)) \
-  $(call copy-many-files,$(target_native_ltp_copy_pairs)) \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
   $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
