@@ -445,7 +445,11 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(
 
   // Include imported classes.
   for (const auto& import : message.import()) {
-    FQName import_name = FQName(import);
+    FQName import_name;
+    if (!FQName::parse(import, &import_name)) {
+      abort();
+    }
+
     string imported_package_name = import_name.package();
     string imported_package_version = import_name.version();
     string imported_component_name = import_name.name();
