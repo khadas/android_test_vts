@@ -527,7 +527,11 @@ void HalHidlCodeGen::GenerateHeaderIncludeFiles(Formatter& out,
   out << "#include <hidl/HidlSupport.h>" << "\n";
 
   for (const auto& import : message.import()) {
-    FQName import_name = FQName(import);
+    FQName import_name;
+    if (!FQName::parse(import, &import_name)) {
+      abort();
+    }
+
     string import_package_name = import_name.package();
     string import_package_version = import_name.version();
     string import_component_name = import_name.name();
