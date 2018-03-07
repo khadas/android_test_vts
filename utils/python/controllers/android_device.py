@@ -58,6 +58,10 @@ THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
 
+# The argument to fastboot getvar command to determine whether the device has
+# the slot for vbmeta.img
+_FASTBOOT_VAR_HAS_VBMETA = "has-slot:vbmeta"
+
 
 class AndroidDeviceError(signals.ControllerError):
     pass
@@ -410,6 +414,17 @@ class AndroidDevice(object):
         if self.sl4a_host_port:
             self.adb.forward("--remove tcp:%s" % self.sl4a_host_port)
             self.sl4a_host_port = None
+
+    @property
+    def hasVbmetaSlot(self):
+        """True if the device has the slot for vbmeta."""
+        if not self.isBootloaderMode:
+            self.adb.reboot_bootloader()
+
+        out = self.fastboot.getvar(_FASTBOOT_VAR_HAS_VBMETA).strip()
+        if ("%s: yes" % _FASTBOOT_VAR_HAS_VBMETA) in out:
+            return True
+        return False
 
     @property
     def isBootloaderMode(self):
