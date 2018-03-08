@@ -22,6 +22,16 @@
 #include <vintf/HalManifest.h>
 #include <vintf/parse_xml.h>
 
+using namespace testing;
+
+using android::hidl::base::V1_0::IBase;
+using android::hidl::manager::V1_0::IServiceManager;
+using android::hidl::manager::V1_0::IServiceNotification;
+using android::hardware::hidl_array;
+using android::hardware::hidl_death_recipient;
+using android::hardware::hidl_handle;
+using android::hardware::hidl_string;
+using android::hardware::hidl_vec;
 using android::vintf::Arch;
 using android::vintf::CompatibilityMatrix;
 using android::vintf::HalManifest;
@@ -37,13 +47,48 @@ using std::string;
 namespace android {
 namespace vts {
 
+class MockServiceManager : public IServiceManager {
+ public:
+  template <typename T>
+  using R = ::android::hardware::Return<T>;
+  using String = const hidl_string &;
+  ~MockServiceManager() = default;
+
+#define MOCK_METHOD_CB(name) \
+  MOCK_METHOD1(name, R<void>(IServiceManager::name##_cb))
+
+  MOCK_METHOD2(get, R<sp<IBase>>(String, String));
+  MOCK_METHOD2(add, R<bool>(String, const sp<IBase> &));
+  MOCK_METHOD2(getTransport, R<IServiceManager::Transport>(String, String));
+  MOCK_METHOD_CB(list);
+  MOCK_METHOD2(listByInterface, R<void>(String, listByInterface_cb));
+  MOCK_METHOD3(registerForNotifications,
+               R<bool>(String, String, const sp<IServiceNotification> &));
+  MOCK_METHOD_CB(debugDump);
+  MOCK_METHOD2(registerPassthroughClient, R<void>(String, String));
+  MOCK_METHOD_CB(interfaceChain);
+  MOCK_METHOD2(debug,
+               R<void>(const hidl_handle &, const hidl_vec<hidl_string> &));
+  MOCK_METHOD_CB(interfaceDescriptor);
+  MOCK_METHOD_CB(getHashChain);
+  MOCK_METHOD0(setHalInstrumentation, R<void>());
+  MOCK_METHOD2(linkToDeath,
+               R<bool>(const sp<hidl_death_recipient> &, uint64_t));
+  MOCK_METHOD0(ping, R<void>());
+  MOCK_METHOD_CB(getDebugInfo);
+  MOCK_METHOD0(notifySyspropsChanged, R<void>());
+  MOCK_METHOD1(unlinkToDeath, R<bool>(const sp<hidl_death_recipient> &));
+};
+
 class VtsTestabilityCheckerTest : public ::testing::Test {
  public:
   virtual void SetUp() override {
     test_cm_ = testFrameworkCompMatrix();
     test_fm_ = testFrameworkManfiest();
     test_vm_ = testDeviceManifest();
-    checker_.reset(new VtsTestabilityChecker(&test_cm_, &test_fm_, &test_vm_));
+    sm_ = new NiceMock<MockServiceManager>();
+    checker_.reset(
+        new VtsTestabilityChecker(&test_cm_, &test_fm_, &test_vm_, sm_));
   }
   virtual void TearDown() override {}
 
@@ -219,166 +264,317 @@ class VtsTestabilityCheckerTest : public ::testing::Test {
   CompatibilityMatrix test_cm_;
   HalManifest test_fm_;
   HalManifest test_vm_;
+  sp<MockServiceManager> sm_;
   std::unique_ptr<VtsTestabilityChecker> checker_;
 };
 
-TEST_F(VtsTestabilityCheckerTest, CheckComplianceTestForOptionalHal) {
+TEST_F(VtsTestabilityCheckerTest, CheckComplianceTest) {
   set<string> instances;
   // Check non-existent hal.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "non-existent", {1, 0}, "None", Arch::ARCH_EMPTY, &instances));
+      "non-existent", {1, 0}, "None", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
-
-  // Check hal not required by framework
+  // Check hal with unsupported version by vendor.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.renderscript", {1, 0}, "IRenderscript",
-      Arch::ARCH_EMPTY, &instances));
+      "android.hardware.nfc", {2, 0}, "INfc", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
-
-  // Check hal with unsupported version.
+  // Check hal with unsupported interface by vendor.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {1, 0}, "ICamera", Arch::ARCH_EMPTY,
-      &instances));
+      "android.hardware.nfc", {1, 0}, "INfcTest", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
-
-  // Check hal with non-existent interface.
+  // Check hal with unsupported arch by vendor.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {1, 2}, "None", Arch::ARCH_EMPTY, &instances));
+      "android.hardware.audio", {1, 0}, "IAudio", Arch::ARCH_64, &instances));
   EXPECT_TRUE(instances.empty());
-
-  // Check an optional hal not supported by vendor.
+  // Check hal claimed by framework but not supported by vendor (error case).
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.radio", {1, 0}, "IRadio", Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_TRUE(instances.empty());
-
-  // Check an optional hal with version not supported by vendor.
-  EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {4, 5}, "ICamera", Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_TRUE(instances.empty());
-
-  // Check an optional hal with interface not supported by vendor.
-  EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.nfc", {4, 5}, "INfcTest", Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_TRUE(instances.empty());
-
-  // Check an option passthrough hal with unsupported arch.
-  EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "android.hardware.audio", {2, 0}, "IAudio", Arch::ARCH_64, &instances));
-  EXPECT_TRUE(instances.empty());
-
-  // Check an optional hal supported by vendor but with no compatible
-  // instance.
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {2, 2}, "ICamera", Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_TRUE(instances.empty());
-
-  // Check an optional hal supported by vendor.
-  instances.clear();
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {2, 2}, "IBetterCamera", Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"camera"})));
-
-  // Check an optional hal supported by vendor and framework.
-  instances.clear();
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.nfc", {1, 0}, "INfc", Arch::ARCH_EMPTY, &instances));
-  EXPECT_THAT(instances,
-              ::testing::ContainerEq(set<string>({"default", "fnfc"})));
-
-  // Check an optional passthrough hal supported by vendor.
-  instances.clear();
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.audio", {2, 0}, "IAudio", Arch::ARCH_32, &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
-
-  // Check an optional hal with empty interface (legacy input).
-  instances.clear();
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.camera", {2, 2}, "" /*interface*/, Arch::ARCH_EMPTY,
-      &instances));
-  EXPECT_TRUE(instances.empty());
-}
-
-TEST_F(VtsTestabilityCheckerTest, CheckComplianceTestForRequiredHal) {
-  set<string> instances;
-  // Check a required hal not supported by vendor.
-  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
       "android.hardware.light", {2, 0}, "ILight", Arch::ARCH_32, &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
+  EXPECT_TRUE(instances.empty());
+  // Check hal interface claimed by framework but not supported by vendor (error
+  // case).
+  EXPECT_FALSE(checker_->CheckHalForComplianceTest(
+      "android.hardware.drm", {1, 0}, "IDrmTest", Arch::ARCH_32, &instances));
+  EXPECT_TRUE(instances.empty());
 
-  // Check a required hal with version not supported by vendor.
+  // Check hal claimed by framework and supported by vendor.
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForComplianceTest("android.hardware.vibrator",
-                                                  {2, 0}, "IVibrator",
+                                                  {1, 0}, "IVibrator",
                                                   Arch::ARCH_32, &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
 
-  // Check a required hal with interface not supported by vendor.
+  // Check hal not claimed by framework but supported by vendor.
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.drm", {1, 0}, "IDrmTest", Arch::ARCH_32, &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
+      "android.hardware.renderscript", {1, 0}, "IRenderscript", Arch::ARCH_32,
+      &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
 
-  // Check a required hal supported by vendor.
+  // Check hal with version not claimed by framework by supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForComplianceTest("android.hardware.vibrator",
+                                                  {1, 0}, "IVibrator",
+                                                  Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check hal with instance not claimed by framework but supported by vendor.
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.drm", {1, 0}, "IDrm", Arch::ARCH_32, &instances));
-  EXPECT_THAT(instances,
-              ::testing::ContainerEq(set<string>({"default", "drm"})));
+      "android.hardware.camera", {2, 2}, "ICamera", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"legacy/0"})));
+
+  // Check hal with additional vendor instance not claimed by framework.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForComplianceTest("android.hardware.camera",
+                                                  {1, 2}, "IBetterCamera",
+                                                  Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "camera"})));
+
+  // Check hal supported by both framework and vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
+      "android.hardware.nfc", {1, 0}, "INfc", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "fnfc"})));
+
+  // Check hal instance claimed by framework but not supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForComplianceTest(
+      "android.hardware.drm", {2, 0}, "IDrm", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
 
   // Check an optional hal with empty interface (legacy input).
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForComplianceTest(
-      "android.hardware.vibrator", {2, 0}, "" /*interface*/, Arch::ARCH_EMPTY,
+      "android.hardware.vibrator", {1, 0}, "" /*interface*/, Arch::ARCH_EMPTY,
       &instances));
   EXPECT_TRUE(instances.empty());
 }
 
 TEST_F(VtsTestabilityCheckerTest, CheckNonComplianceTest) {
   set<string> instances;
+  ON_CALL(*sm_, listByInterface(_, _))
+      .WillByDefault(
+          Invoke([](hidl_string str, IServiceManager::listByInterface_cb cb) {
+            if (str == "android.hardware.foo@1.0::IFoo") {
+              cb({"default", "footest"});
+            } else if (str == "android.hardware.nfc@3.0::INfc") {
+              cb({"default"});
+            } else if (str == "android.hardware.drm@2.0::IDrm") {
+              cb({"drmtest"});
+            }
+            return hardware::Void();
+          }));
+
+  ON_CALL(*sm_, list(_)).WillByDefault(Invoke([](IServiceManager::list_cb cb) {
+    cb({"android.hardware.foo@1.0::IFoo/default",
+        "android.hardware.foo@1.0::IFoo/footest",
+        "android.hardware.nfc@3.0::INfc/default",
+        "android.hardware.drm@2.0::IDrm/drmtest"});
+    return hardware::Void();
+  }));
+
   // Check non-existent hal.
   EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
       "non-existent", {1, 0}, "None", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
-  // Check hal with unsupported version by vendor
+  // Check hal with unsupported version by vendor.
   EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
       "android.hardware.nfc", {2, 0}, "INfc", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
-  // Check hal with unsupported interface by vendor
+  // Check hal with unsupported interface by vendor.
   EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
       "android.hardware.nfc", {1, 0}, "INfcTest", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
+  // Check hal with unsupported arch by vendor.
+  EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.audio", {1, 0}, "IAudio", Arch::ARCH_64, &instances));
+  EXPECT_TRUE(instances.empty());
+  // Check hal claimed by framework but not supported by vendor (error case).
+  EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.light", {2, 0}, "ILight", Arch::ARCH_32, &instances));
+  EXPECT_TRUE(instances.empty());
+  // Check hal interface claimed by framework but not supported by vendor (error
+  // case).
+  EXPECT_FALSE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.drm", {1, 0}, "IDrmTest", Arch::ARCH_32, &instances));
+  EXPECT_TRUE(instances.empty());
 
-  // Check hal only supported by vendor
-  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
-      "android.hardware.renderscript", {1, 0}, "IRenderscript", Arch::ARCH_32,
-      &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
-
-  // Check a required hal with version only supported by vendor.
+  // Check hal claimed by framework and supported by vendor.
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
       "android.hardware.vibrator", {1, 0}, "IVibrator", Arch::ARCH_32,
       &instances));
-  EXPECT_THAT(instances, ::testing::ContainerEq(set<string>({"default"})));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
 
-  // Check hal with additional vendor instance
+  // Check hal not claimed by framework but supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.renderscript", {1, 0}, "IRenderscript", Arch::ARCH_32,
+      &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check hal with version not claimed by framework by supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.vibrator", {1, 0}, "IVibrator", Arch::ARCH_32,
+      &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check hal with instance not claimed by framework but supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.camera", {2, 2}, "ICamera", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"legacy/0"})));
+
+  // Check hal with additional vendor instance not claimed by framework.
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
       "android.hardware.camera", {1, 2}, "IBetterCamera", Arch::ARCH_32,
       &instances));
-  EXPECT_THAT(instances,
-              ::testing::ContainerEq(set<string>({"default", "camera"})));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "camera"})));
+
+  // Check hal supported by both framework and vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.nfc", {1, 0}, "INfc", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
 
   // Check an optional hal with empty interface (legacy input).
   instances.clear();
   EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
       "android.hardware.vibrator", {1, 0}, "" /*interface*/, Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check hal only registered with hwmanger.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.foo", {1, 0}, "IFoo", Arch::ARCH_EMPTY, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "footest"})));
+
+  // Check hal with version only registered with hwmanger.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.nfc", {3, 0}, "INfc", Arch::ARCH_EMPTY, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check hal with additional instance registered with hwmanger.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.drm", {2, 0}, "IDrm", Arch::ARCH_EMPTY, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "drmtest"})));
+
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckHalForNonComplianceTest(
+      "android.hardware.foo", {1, 0}, "", Arch::ARCH_EMPTY, &instances));
+  EXPECT_TRUE(instances.empty());
+}
+
+TEST_F(VtsTestabilityCheckerTest, CheckFrameworkCompatibleHalOptional) {
+  set<string> instances;
+  // Check non-existent hal.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "non-existent", {1, 0}, "None", Arch::ARCH_EMPTY, &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check hal not required by framework
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.renderscript", {1, 0}, "IRenderscript",
+      Arch::ARCH_EMPTY, &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check hal with unsupported version.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {1, 0}, "ICamera", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check hal with non-existent interface.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {1, 2}, "None", Arch::ARCH_EMPTY, &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an optional hal not supported by vendor.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.radio", {1, 0}, "IRadio", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an optional hal with version not supported by vendor.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {4, 5}, "ICamera", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an optional hal with interface not supported by vendor.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.nfc", {4, 5}, "INfcTest", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an option passthrough hal with unsupported arch.
+  EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.audio", {2, 0}, "IAudio", Arch::ARCH_64, &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an optional hal supported by vendor but with no compatible
+  // instance.
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {2, 2}, "ICamera", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+
+  // Check an optional hal supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {2, 2}, "IBetterCamera", Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"camera"})));
+
+  // Check an optional passthrough hal supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.audio", {2, 0}, "IAudio", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check an optional hal with empty interface (legacy input).
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.camera", {2, 2}, "" /*interface*/, Arch::ARCH_EMPTY,
+      &instances));
+  EXPECT_TRUE(instances.empty());
+}
+
+TEST_F(VtsTestabilityCheckerTest, CheckFrameworkCompatibleHalRequired) {
+  set<string> instances;
+  // Check a required hal not supported by vendor.
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.light", {2, 0}, "ILight", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check a required hal with version not supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal("android.hardware.vibrator",
+                                                    {2, 0}, "IVibrator",
+                                                    Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check a required hal with interface not supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.drm", {1, 0}, "IDrmTest", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default"})));
+
+  // Check a required hal supported by vendor.
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.drm", {1, 0}, "IDrm", Arch::ARCH_32, &instances));
+  EXPECT_THAT(instances, ContainerEq(set<string>({"default", "drm"})));
+
+  // Check an optional hal with empty interface (legacy input).
+  instances.clear();
+  EXPECT_TRUE(checker_->CheckFrameworkCompatibleHal(
+      "android.hardware.vibrator", {2, 0}, "" /*interface*/, Arch::ARCH_EMPTY,
       &instances));
   EXPECT_TRUE(instances.empty());
 }

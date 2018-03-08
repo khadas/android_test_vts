@@ -19,9 +19,12 @@ cc_defaults {
     shared_libs: [
         "libbase",
         "libcutils",
+        "libhidlbase",
+        "libhidltransport",
         "liblog",
         "libselinux",
         "libtinyxml2",
+        "libutils",
         "libz",
     ],
     static_libs: [
@@ -37,14 +40,12 @@ cc_library {
     name: "libvts_testability_checker",
     defaults : ["VtsTestabilityCheckerDefaults"],
     srcs: ["VtsTestabilityChecker.cpp"],
-    host_supported: true,
 }
 
 cc_test {
     name: "libvts_testability_checker_test",
     defaults : ["VtsTestabilityCheckerDefaults"],
     srcs: ["VtsTestabilityCheckerTest.cpp"],
-    host_supported: true,
 
     static_libs: [
         "libgmock",
