@@ -21,12 +21,15 @@
 #include <iostream>
 #include <set>
 
+#include <vintf/parse_string.h>
+
 using android::vintf::Arch;
 using android::vintf::CompatibilityMatrix;
 using android::vintf::gArchStrings;
 using android::vintf::HalManifest;
 using android::vintf::ManifestHal;
 using android::vintf::MatrixHal;
+using android::vintf::toFQNameString;
 using android::vintf::Transport;
 using android::vintf::Version;
 using std::set;
@@ -45,13 +48,13 @@ bool VtsTestabilityChecker::CheckHalForComplianceTest(
   bool check_framework_hal = CheckFrameworkManifestHal(
       hal_package_name, hal_version, hal_interface_name, arch,
       &famework_hal_instances);
-  bool check_vendor_hal_compliance = CheckFrameworkCompatibleHal(
-      hal_package_name, hal_version, hal_interface_name, arch,
-      &vendor_hal_instances);
+  bool check_vendor_hal =
+      CheckVendorManifestHal(hal_package_name, hal_version, hal_interface_name,
+                             arch, &vendor_hal_instances);
   set_union(famework_hal_instances.begin(), famework_hal_instances.end(),
             vendor_hal_instances.begin(), vendor_hal_instances.end(),
             std::inserter(*instances, instances->begin()));
-  return check_framework_hal || check_vendor_hal_compliance;
+  return check_framework_hal || check_vendor_hal;
 }
 
 bool VtsTestabilityChecker::CheckHalForNonComplianceTest(
@@ -59,8 +62,19 @@ bool VtsTestabilityChecker::CheckHalForNonComplianceTest(
     const string& hal_interface_name, const Arch& arch,
     set<string>* instances) {
   CHECK(instances) << "instances set should not be NULL.";
-  return CheckVendorManifestHal(hal_package_name, hal_version,
-                                hal_interface_name, arch, instances);
+  set<string> vendor_hal_instances;
+  set<string> test_hal_instances;
+  bool check_vendor_hal =
+      CheckVendorManifestHal(hal_package_name, hal_version, hal_interface_name,
+                             arch, &vendor_hal_instances);
+
+  bool check_test_hal = CheckTestHalWithHwManager(
+      hal_package_name, hal_version, hal_interface_name, &test_hal_instances);
+
+  set_union(vendor_hal_instances.begin(), vendor_hal_instances.end(),
+            test_hal_instances.begin(), test_hal_instances.end(),
+            std::inserter(*instances, instances->begin()));
+  return check_vendor_hal || check_test_hal;
 }
 
 bool VtsTestabilityChecker::CheckFrameworkCompatibleHal(
@@ -222,6 +236,39 @@ bool VtsTestabilityChecker::CheckManifestHal(const ManifestHal* manifest_hal,
   GetTestInstances(nullptr /*matrix_hal*/, manifest_hal, hal_interface_name,
                    instances);
   return true;
+}
+
+bool VtsTestabilityChecker::CheckTestHalWithHwManager(
+    const string& hal_package_name, const Version& hal_version,
+    const string& hal_interface_name, set<string>* instances) {
+  CHECK(instances) << "instances set should not be NULL.";
+
+  string fqName =
+      toFQNameString(hal_package_name, hal_version, hal_interface_name);
+  bool registered = false;
+  hardware::Return<void> res;
+  if (!hal_interface_name.empty()) {
+    res = sm_->listByInterface(fqName, [&](const auto& registered_instances) {
+      for (const string& instance : registered_instances) {
+        registered = true;
+        instances->insert(instance);
+      }
+    });
+  } else {  // handle legacy data without interface info.
+    res = sm_->list([&](const auto& services) {
+      for (const string& service : services) {
+        if (service.find(fqName) == 0) {
+          registered = true;
+          break;
+        }
+      }
+    });
+  }
+  if (!res.isOk()) {
+    LOG(ERROR) << "failed to check services: " << res.description();
+    return false;
+  }
+  return registered;
 }
 
 }  // namespace vts
