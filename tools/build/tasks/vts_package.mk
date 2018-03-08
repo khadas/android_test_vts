@@ -214,7 +214,7 @@ audio_test_res_copy_pairs := \
     hardware/interfaces/audio/$(f):$(VTS_TESTCASES_OUT)/DATA/hardware/interfaces/audio/$(f))
 
 vndk_test_res_copy_pairs := \
-  development/vndk/tools/definition-tool/datasets/eligible-list-master.csv:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/eligible-list.csv \
+  development/vndk/tools/definition-tool/datasets/eligible-list-p-release.csv:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/eligible-list.csv \
 
 kernel_rootdir_test_rc_files := \
   $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
