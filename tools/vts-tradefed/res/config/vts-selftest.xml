@@ -21,9 +21,11 @@
   <option name="compatibility:primary-abi-only" value="true" />
 
   <!-- VTS self test modules -->
-  <!-- option name="compatibility:include-filter" value="VtsSelfTestBaseTest" /-->
+  <!--option name="compatibility:include-filter" value="VtsSelfTestBaseTest" />
+  <option name="compatibility:include-filter" value="VtsSelfTestPythonVirtualenvPreparerTestPart1" />
+  <option name="compatibility:include-filter" value="VtsSelfTestPythonVirtualenvPreparerTestPart2" /-->
 
-  <!-- option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:run-as-vts-self-test:true" /-->
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:run-as-vts-self-test:true" />
 
   <!-- Regular test modules running in vts self test mode -->
   <option name="compatibility:include-filter" value="ShellBinaryCrashTest" />

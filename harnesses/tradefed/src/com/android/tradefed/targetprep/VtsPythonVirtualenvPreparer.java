@@ -95,6 +95,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     String mPip = PIP;
     String mLocalPypiPath = null;
 
+    // Since we allow virtual env path to be reused during a test plan/module, only the preparer
+    // which created the directory should be the one to delete it.
+    private boolean mIsDirCreator = false;
+
     /**
      * {@inheritDoc}
      */
@@ -113,7 +117,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     @Override
     public void tearDown(IInvocationContext context, Throwable e)
             throws DeviceNotAvailableException {
-        if (mVenvDir != null) {
+        if (mVenvDir != null && mIsDirCreator) {
             try {
                 recursiveDelete(mVenvDir.toPath());
                 CLog.i("Deleted the virtual env's temp working dir, %s.", mVenvDir);
@@ -264,7 +268,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
         if (!hasDependencies) {
             CLog.i("No dependencies to install");
-        } else {
+        } else if (mIsDirCreator) {
             // make the install directory of new packages available to other classes that
             // receive the build
             buildInfo.setFile(PYTHONPATH, new File(mVenvDir,
@@ -283,6 +287,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             mVenvDir = buildInfo.getFile(VIRTUAL_ENV_PATH);
             if (mVenvDir == null) {
                 mVenvDir = FileUtil.createTempDir(getMD5(buildInfo.getTestTag()) + "-virtualenv");
+                mIsDirCreator = true;
             }
             String virtualEnvPath = mVenvDir.getAbsolutePath();
             CommandResult c;
@@ -302,8 +307,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 throw new TargetSetupError("Failed to create virtualenv");
             }
             CLog.i(VIRTUAL_ENV_PATH + " = " + virtualEnvPath + "\n");
-            buildInfo.setFile(VIRTUAL_ENV_PATH, new File(virtualEnvPath),
-                              buildInfo.getBuildId());
+            if (mIsDirCreator) {
+                buildInfo.setFile(
+                        VIRTUAL_ENV_PATH, new File(virtualEnvPath), buildInfo.getBuildId());
+            }
             activate();
         } catch (IOException | RuntimeException e) {
             CLog.e("Failed to create temp directory for virtualenv");
