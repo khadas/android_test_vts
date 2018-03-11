@@ -20,9 +20,11 @@
 #include <set>
 
 #include <android-base/logging.h>
+#include <android/hidl/manager/1.0/IServiceManager.h>
 #include <vintf/CompatibilityMatrix.h>
 #include <vintf/HalManifest.h>
 
+using android::hidl::manager::V1_0::IServiceManager;
 using android::vintf::Arch;
 using android::vintf::CompatibilityMatrix;
 using android::vintf::HalManifest;
@@ -42,10 +44,12 @@ class VtsTestabilityChecker {
  public:
   VtsTestabilityChecker(const CompatibilityMatrix* framework_comp_matrix,
                         const HalManifest* framework_hal_manifest,
-                        const HalManifest* device_hal_manifest)
+                        const HalManifest* device_hal_manifest,
+                        sp<IServiceManager> sm)
       : framework_comp_matrix_(framework_comp_matrix),
         framework_hal_manifest_(framework_hal_manifest),
-        device_hal_manifest_(device_hal_manifest) {
+        device_hal_manifest_(device_hal_manifest),
+        sm_(sm) {
     CHECK(framework_comp_matrix_) << "framework_comp_matrix null.";
     CHECK(framework_hal_manifest_) << "framework_hal_manifest null.";
     CHECK(device_hal_manifest_) << "device_hal_manifest null.";
@@ -72,7 +76,6 @@ class VtsTestabilityChecker {
                                     const Version& hal_version,
                                     const string& hal_interface_name,
                                     const Arch& arch, set<string>* instances);
-
  private:
   // Internal method to check the given hal against the framework compatibility
   // matrix and device manifest.
@@ -102,6 +105,15 @@ class VtsTestabilityChecker {
                                  const string& hal_interface_name,
                                  const Arch& arch, set<string>* instances);
 
+  // Internal method to check whether the given hal is registered with
+  // hwservicemanager. Store the corresponding instance names if registered.
+  // This is used to check test hals that is not listed in manifest files.
+  // Note this could not check for passthrough hals.
+  bool CheckTestHalWithHwManager(const string& hal_package_name,
+                                 const Version& hal_version,
+                                 const string& hal_interface_name,
+                                 set<string>* instances);
+
   // Helper method to check whether the mantifest_hal support the interface
   // and arch (for passthrough hal). Store the corresponding
   // instance names if supported.
@@ -127,6 +139,12 @@ class VtsTestabilityChecker {
   const CompatibilityMatrix* framework_comp_matrix_;  // Do not own.
   const HalManifest* framework_hal_manifest_;         // Do not own.
   const HalManifest* device_hal_manifest_;            // Do not own.
+  sp<IServiceManager> sm_;
+
+  friend class
+      VtsTestabilityCheckerTest_CheckFrameworkCompatibleHalOptional_Test;
+  friend class
+      VtsTestabilityCheckerTest_CheckFrameworkCompatibleHalRequired_Test;
 };
 
 }  // namespace vts
