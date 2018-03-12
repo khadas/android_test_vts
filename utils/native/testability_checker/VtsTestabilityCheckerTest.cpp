@@ -272,7 +272,7 @@ TEST_F(VtsTestabilityCheckerTest, CheckComplianceTest) {
   set<string> instances;
   // Check non-existent hal.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
-      "non-existent", {1, 0}, "None", Arch::ARCH_32, &instances));
+      "nonexistent", {1, 0}, "None", Arch::ARCH_32, &instances));
   EXPECT_TRUE(instances.empty());
   // Check hal with unsupported version by vendor.
   EXPECT_FALSE(checker_->CheckHalForComplianceTest(
@@ -474,7 +474,7 @@ TEST_F(VtsTestabilityCheckerTest, CheckFrameworkCompatibleHalOptional) {
   set<string> instances;
   // Check non-existent hal.
   EXPECT_FALSE(checker_->CheckFrameworkCompatibleHal(
-      "non-existent", {1, 0}, "None", Arch::ARCH_EMPTY, &instances));
+      "nonexistent", {1, 0}, "None", Arch::ARCH_EMPTY, &instances));
   EXPECT_TRUE(instances.empty());
 
   // Check hal not required by framework
