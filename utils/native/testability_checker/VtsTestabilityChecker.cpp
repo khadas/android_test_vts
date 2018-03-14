@@ -21,19 +21,25 @@
 #include <iostream>
 #include <set>
 
+#include <android-base/strings.h>
 #include <vintf/parse_string.h>
 
+using android::base::Join;
 using android::vintf::Arch;
 using android::vintf::CompatibilityMatrix;
 using android::vintf::gArchStrings;
 using android::vintf::HalManifest;
 using android::vintf::ManifestHal;
+using android::vintf::ManifestInstance;
 using android::vintf::MatrixHal;
+using android::vintf::MatrixInstance;
 using android::vintf::toFQNameString;
 using android::vintf::Transport;
 using android::vintf::Version;
+using android::vintf::operator<<;
 using std::set;
 using std::string;
+using std::vector;
 
 namespace android {
 namespace vts {
@@ -77,112 +83,122 @@ bool VtsTestabilityChecker::CheckHalForNonComplianceTest(
   return check_vendor_hal || check_test_hal;
 }
 
+vector<const ManifestInstance*> VtsTestabilityChecker::FindInstance(
+    const vector<ManifestInstance>& manifest_instances,
+    const MatrixInstance& matrix_instance) {
+  vector<const ManifestInstance*> ret;
+  for (const auto& e : manifest_instances) {
+    if (e.instance() == matrix_instance.instance()) {
+      ret.push_back(&e);
+    }
+  }
+  return ret;
+}
+
+vector<const ManifestInstance*> VtsTestabilityChecker::FindInterface(
+    const vector<ManifestInstance>& manifest_instances,
+    const MatrixInstance& matrix_instance) {
+  vector<const ManifestInstance*> ret;
+  for (const auto& e : manifest_instances) {
+    if (e.interface() == matrix_instance.interface()) {
+      ret.push_back(&e);
+    }
+  }
+  return ret;
+}
+
 bool VtsTestabilityChecker::CheckFrameworkCompatibleHal(
     const string& hal_package_name, const Version& hal_version,
     const string& hal_interface_name, const Arch& arch,
     set<string>* instances) {
   CHECK(instances) << "instances set should not be NULL.";
-  const MatrixHal* matrix_hal =
-      framework_comp_matrix_->getHal(hal_package_name, hal_version);
 
-  if (!matrix_hal) {
-    LOG(DEBUG) << "Does not find hal " << hal_package_name
-               << " in compatibility matrix";
-    return false;
-  }
+  auto matrix_instances = framework_comp_matrix_->getFqInstances(
+      hal_package_name, hal_version, hal_interface_name);
+  auto manifest_instances = device_hal_manifest_->getFqInstances(
+      hal_package_name, hal_version, hal_interface_name);
 
-  if (!hal_interface_name.empty() &&
-      !matrix_hal->hasInterface(hal_interface_name)) {
-    LOG(DEBUG) << "MaxtrixHal " << hal_package_name
-               << " does not support interface " << hal_interface_name;
-    return false;
-  }
+  bool testable = false;
 
-  const ManifestHal* manifest_hal =
-      device_hal_manifest_->getHal(hal_package_name, hal_version);
-
-  if (!manifest_hal || (!hal_interface_name.empty() &&
-                        !manifest_hal->hasInterface(hal_interface_name))) {
-    if (!matrix_hal->optional) {
+  for (const auto& matrix_instance : matrix_instances) {
+    const auto& matched_instances =
+        FindInstance(manifest_instances, matrix_instance);
+    if (!matrix_instance.optional() && matched_instances.empty()) {
+      // In matrix but not in manifest.
+      // The test should still run, but expect the test
+      // to fail (due to incompatible vendor and framework HAL).
       LOG(ERROR) << "Compatibility error. Hal " << hal_package_name
                  << " is required by framework but not supported by vendor";
-      // Return true here to indicate the test should run, but expect the test
-      // to fail (due to incompatible vendor and framework HAL).
-      GetTestInstances(matrix_hal, nullptr /*ManifestHal*/, hal_interface_name,
-                       instances);
-      return true;
+      if (!hal_interface_name.empty()) {
+        instances->insert(matrix_instance.instance());
+      }
+      testable |= true;
+      continue;
     }
-    return false;
-  }
 
-  if (manifest_hal->transport() == Transport::PASSTHROUGH &&
-      !CheckPassthroughManifestHal(manifest_hal, arch)) {
-    LOG(DEBUG) << "ManfestHal " << hal_package_name
-               << " is passthrough and does not support arch "
-               << gArchStrings.at(static_cast<int>(arch));
-    return false;
-  }
+    if (hal_interface_name.empty()) {
+      testable |= !matched_instances.empty();
+      continue;
+    }
 
-  GetTestInstances(matrix_hal, manifest_hal, hal_interface_name, instances);
-  return true;
+    auto is_instance_testable = [&](const auto* manifest_instance) {
+      if (manifest_instance->transport() == Transport::PASSTHROUGH &&
+          CheckPassthroughManifestArch(manifest_instance->arch(), arch)) {
+        return true;
+      }
+      if (manifest_instance->transport() == Transport::HWBINDER) {
+        return true;
+      }
+      return false;
+    };
+    bool instance_testable =
+        std::any_of(matched_instances.begin(), matched_instances.end(),
+                    is_instance_testable);
+    if (instance_testable) {
+      instances->insert(matrix_instance.instance());
+      testable |= true;
+      continue;
+    }
+
+    // Special case: if a.h.foo@1.0::IFoo/default is in matrix but /custom
+    // is in manifest, the interface is still testable, but /default should
+    // not be added to instances.
+    const auto& matched_interface_instances =
+        FindInterface(manifest_instances, matrix_instance);
+    bool interface_testable =
+        std::any_of(matched_interface_instances.begin(),
+                    matched_interface_instances.end(), is_instance_testable);
+    if (interface_testable) {
+      testable |= true;
+      continue;
+    }
+  }
+  if (instances->empty()) {
+    LOG(ERROR) << "Hal "
+               << toFQNameString(hal_package_name, hal_version,
+                                 hal_interface_name)
+               << " has no testable instance";
+  }
+  return testable;
 }
 
-void VtsTestabilityChecker::GetTestInstances(const MatrixHal* matrix_hal,
-                                             const ManifestHal* manifest_hal,
-                                             const string& interface_name,
-                                             set<string>* instances) {
-  CHECK(matrix_hal || manifest_hal)
-      << "MatrixHal and ManifestHal should not both be NULL.";
-  CHECK(instances) << "instances set should not be NULL.";
-  if (interface_name.empty()) {
-    LOG(INFO) << "No interface name provided, return empty instances set.";
-    return;
-  }
-
-  set<string> manifest_hal_instances;
-  if (!manifest_hal || (matrix_hal && !matrix_hal->optional)) {
-    // Only matrix_hal is provided or matrix_hal is required, get instances
-    // from matrix_hal.
-    set<string> matrix_hal_instances = matrix_hal->getInstances(interface_name);
-    instances->insert(matrix_hal_instances.begin(), matrix_hal_instances.end());
-  } else if (!matrix_hal) {
-    // Only manifest_hal is provided, get instances from manifest_hal.
-    set<string> manifest_hal_instances =
-        manifest_hal->getInstances(interface_name);
-    instances->insert(manifest_hal_instances.begin(),
-                      manifest_hal_instances.end());
-  } else {
-    // Both matrix_hal and manifest_hal not null && matrix_hal is optional,
-    // get intersection of instances from both matrix_hal and manifest_hal.
-    set<string> matrix_hal_instances = matrix_hal->getInstances(interface_name);
-    set<string> manifest_hal_instances =
-        manifest_hal->getInstances(interface_name);
-    set_intersection(matrix_hal_instances.begin(), matrix_hal_instances.end(),
-                     manifest_hal_instances.begin(),
-                     manifest_hal_instances.end(),
-                     std::inserter(*instances, instances->begin()));
-  }
-}
-
-bool VtsTestabilityChecker::CheckPassthroughManifestHal(
-    const ManifestHal* manifest_hal, const Arch& arch) {
-  CHECK(manifest_hal) << "ManifestHal should not be NULL.";
+bool VtsTestabilityChecker::CheckPassthroughManifestArch(
+    const Arch& manifest_arch, const Arch& arch) {
   switch (arch) {
     case Arch::ARCH_32: {
-      if (android::vintf::has32(manifest_hal->transportArch.arch)) {
+      if (android::vintf::has32(manifest_arch)) {
         return true;
       }
       break;
     }
     case Arch::ARCH_64: {
-      if (android::vintf::has64(manifest_hal->transportArch.arch)) {
+      if (android::vintf::has64(manifest_arch)) {
         return true;
       }
       break;
     }
     default: {
-      LOG(ERROR) << "Unexpected arch to check: "
-                 << gArchStrings.at(static_cast<int>(arch));
+      LOG(ERROR) << "Unexpected arch to check: " << arch;
       break;
     }
   }
@@ -193,49 +209,52 @@ bool VtsTestabilityChecker::CheckFrameworkManifestHal(
     const string& hal_package_name, const Version& hal_version,
     const string& hal_interface_name, const Arch& arch,
     set<string>* instances) {
-  CHECK(instances) << "instances set should not be NULL.";
-  return CheckManifestHal(
-      framework_hal_manifest_->getHal(hal_package_name, hal_version),
-      hal_interface_name, arch, instances);
+  return CheckManifestHal(framework_hal_manifest_, hal_package_name,
+                          hal_version, hal_interface_name, arch, instances);
 }
 
 bool VtsTestabilityChecker::CheckVendorManifestHal(
     const string& hal_package_name, const Version& hal_version,
     const string& hal_interface_name, const Arch& arch,
     set<string>* instances) {
-  CHECK(instances) << "instances set should not be NULL.";
-  return CheckManifestHal(
-      device_hal_manifest_->getHal(hal_package_name, hal_version),
-      hal_interface_name, arch, instances);
+  return CheckManifestHal(device_hal_manifest_, hal_package_name, hal_version,
+                          hal_interface_name, arch, instances);
 }
 
-bool VtsTestabilityChecker::CheckManifestHal(const ManifestHal* manifest_hal,
+bool VtsTestabilityChecker::CheckManifestHal(const HalManifest* hal_manifest,
+                                             const string& hal_package_name,
+                                             const Version& hal_version,
                                              const string& hal_interface_name,
                                              const Arch& arch,
                                              set<string>* instances) {
   CHECK(instances) << "instances set should not be NULL.";
-  if (!manifest_hal) {
-    LOG(DEBUG) << "Does not find hal " << manifest_hal->name
+
+  const auto& manifest_instances = hal_manifest->getFqInstances(
+      hal_package_name, hal_version, hal_interface_name);
+
+  const auto& fq_instance_name =
+      toFQNameString(hal_package_name, hal_version, hal_interface_name);
+
+  if (manifest_instances.empty()) {
+    LOG(DEBUG) << "Does not find instances for " << fq_instance_name
                << " in manifest file";
     return false;
   }
-  if (!hal_interface_name.empty() &&
-      !manifest_hal->hasInterface(hal_interface_name)) {
-    LOG(DEBUG) << "ManifestHal " << manifest_hal->name
-               << " does not support interface " << hal_interface_name;
-    return false;
-  }
 
-  if (manifest_hal->transport() == Transport::PASSTHROUGH &&
-      !CheckPassthroughManifestHal(manifest_hal, arch)) {
-    LOG(DEBUG) << "ManfestHal " << manifest_hal->name
-               << " is passthrough and does not support arch "
-               << gArchStrings.at(static_cast<int>(arch));
-    return false;
+  bool testable = false;
+  for (const auto& manifest_instance : manifest_instances) {
+    if (manifest_instance.transport() == Transport::PASSTHROUGH &&
+        !CheckPassthroughManifestArch(manifest_instance.arch(), arch)) {
+      LOG(DEBUG) << "Manifest HAL " << fq_instance_name
+                 << " is passthrough and does not support arch " << arch;
+      continue;  // skip this instance
+    }
+    if (!hal_interface_name.empty()) {
+      instances->insert(manifest_instance.instance());
+    }
+    testable = true;
   }
-  GetTestInstances(nullptr /*matrix_hal*/, manifest_hal, hal_interface_name,
-                   instances);
-  return true;
+  return testable;
 }
 
 bool VtsTestabilityChecker::CheckTestHalWithHwManager(
