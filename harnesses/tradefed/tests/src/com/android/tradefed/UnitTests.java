@@ -16,6 +16,7 @@
 package com.android.tradefed;
 
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparerTest;
+import com.android.tradefed.targetprep.VtsTraceCollectPreparerTest;
 import com.android.tradefed.testtype.VtsFuzzTestResultParserTest;
 import com.android.tradefed.testtype.VtsFuzzTestTest;
 import com.android.tradefed.testtype.VtsMultiDeviceTestResultParserTest;
@@ -37,6 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
     // NOTE: please keep classes sorted lexicographically in each group
     // targetprep
     VtsPythonVirtualenvPreparerTest.class,
+    VtsTraceCollectPreparerTest.class,
 
     // testtype
     VtsFuzzTestResultParserTest.class,
