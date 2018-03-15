@@ -33,11 +33,11 @@ import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.JsonUtil;
-import com.android.tradefed.util.ProcessHelper;
 import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
+import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import com.android.tradefed.testtype.IAbi;
 import com.android.tradefed.testtype.IInvocationContextReceiver;
@@ -78,9 +78,6 @@ public class VtsMultiDeviceTest
     static final String LOG_PATH = "log_path";
     static final String LOG_SEVERITY = "log_severity";
     static final String NAME = "name";
-    static final String OS_NAME = "os.name";
-    static final String WINDOWS = "Windows";
-    static final String PYTHONPATH = "PYTHONPATH";
     static final String SERIAL = "serial";
     static final String TESTMODULE = "TestModule";
     static final String TEST_BED = "test_bed";
@@ -95,7 +92,6 @@ public class VtsMultiDeviceTest
     static final String SKIP_IF_THERMAL_THROTTLING = "skip_if_thermal_throttling";
     static final String DISABLE_CPU_FREQUENCY_SCALING = "disable_cpu_frequency_scaling";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
-    static final String VTS = "vts";
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
     static final String EXCLUDE_FILTER = "exclude_filter";
@@ -407,11 +403,6 @@ public class VtsMultiDeviceTest
     @Option(name = "log-severity", description = "Set the log severity level.")
     private String mLogSeverity = "INFO";
 
-    // This variable is set in order to include the directory that contains the
-    // python test cases. This is set before calling the method.
-    // {@link #doRunTest(IRunUtil, String, String)}.
-    public String mPythonPath = null;
-
     @Option(name = "python-binary", description = "python binary to use "
             + "(optional)")
     private String mPythonBin = null;
@@ -583,7 +574,11 @@ public class VtsMultiDeviceTest
     public void run(ITestInvocationListener listener)
             throws IllegalArgumentException, DeviceNotAvailableException {
         if (mDevice == null) {
-            throw new DeviceNotAvailableException("Device has not been set");
+            throw new DeviceNotAvailableException("Device has not been set.");
+        }
+
+        if (mBuildInfo == null) {
+            throw new RuntimeException("BuildInfo has not been set.");
         }
 
         if (mTestCasePath == null) {
@@ -616,17 +611,6 @@ public class VtsMultiDeviceTest
             } else {
                 throw new IllegalArgumentException("test-case-path is not set.");
             }
-        }
-
-        setPythonPath();
-
-        if (mPythonBin == null) {
-            mPythonBin = getPythonBinary();
-        }
-
-        if (mRunUtil == null){
-            mRunUtil = new RunUtil();
-            mRunUtil.setEnvVariable(PYTHONPATH, mPythonPath);
         }
 
         doRunTest(listener);
@@ -671,7 +655,7 @@ public class VtsMultiDeviceTest
      * @param log_path the path of a directory to store the VTS runner logs.
      * @return the updated JSONObject as the new test config.
      */
-    private void updateVtsRunnerTestConfig(JSONObject jsonObject)
+    protected void updateVtsRunnerTestConfig(JSONObject jsonObject)
             throws IOException, JSONException, RuntimeException {
         configReader = new VtsVendorConfigFileUtil();
         if (configReader.LoadVendorConfig(mBuildInfo)) {
@@ -1061,68 +1045,6 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * Create a {@link ProcessHelper} from mRunUtil.
-     *
-     * @param cmd the command to run.
-     * @throws IOException if fails to start Process.
-     */
-    protected ProcessHelper createProcessHelper(String[] cmd) throws IOException {
-        return new ProcessHelper(mRunUtil.runCmdInBackground(cmd));
-    }
-
-    /**
-     * Run VTS Python runner and handle interrupt from TradeFed.
-     *
-     * @param cmd the command to start VTS Python runner.
-     * @param commandResult the object containing the command result.
-     * @return null if the command terminates or times out; a message string if the command is
-     * interrupted by TradeFed.
-     */
-    private String runPythonRunner(String[] cmd, CommandResult commandResult) {
-        ProcessHelper process;
-        try {
-            process = createProcessHelper(cmd);
-        } catch (IOException e) {
-            CLog.e(e);
-            commandResult.setStatus(CommandStatus.EXCEPTION);
-            commandResult.setStdout("");
-            commandResult.setStderr("");
-            return null;
-        }
-
-        String interruptMessage;
-        try {
-            CommandStatus commandStatus;
-            try {
-                commandStatus = process.waitForProcess(mTestTimeout);
-                interruptMessage = null;
-            } catch (RunInterruptedException e) {
-                CLog.e("Python process is interrupted.");
-                commandStatus = CommandStatus.TIMED_OUT;
-                interruptMessage = (e.getMessage() != null ? e.getMessage() : "");
-            }
-            if (process.isRunning()) {
-                CLog.e("Cancel Python process and wait %d seconds.",
-                        TEST_ABORT_TIMEOUT_MSECS / 1000);
-                try {
-                    process.closeStdin();
-                    // Wait for the process to clean up and ignore the CommandStatus.
-                    // Propagate RunInterruptedException if this is interrupted again.
-                    process.waitForProcess(TEST_ABORT_TIMEOUT_MSECS);
-                } catch (IOException e) {
-                    CLog.e("Fail to cancel Python process.");
-                }
-            }
-            commandResult.setStatus(commandStatus);
-        } finally {
-            process.cleanUp();
-        }
-        commandResult.setStdout(process.getStdout());
-        commandResult.setStderr(process.getStderr());
-        return interruptMessage;
-    }
-
-    /**
      * This method prepares a command for the test and runs the python file as
      * given in the arguments.
      *
@@ -1132,6 +1054,8 @@ public class VtsMultiDeviceTest
      */
     private void doRunTest(ITestRunListener listener) throws RuntimeException, IllegalArgumentException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
+
+        setTestCaseDataDir();
 
         JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;
@@ -1162,10 +1086,12 @@ public class VtsMultiDeviceTest
             throw new RuntimeException("Failed to create device config json file");
         }
 
+        VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper();
+        vtsPythonRunnerHelper.setPythonVersion(mPythonVersion);
         if (mPythonBin == null){
-            mPythonBin = getPythonBinary();
+            mPythonBin = vtsPythonRunnerHelper.getPythonBinary();
         }
-        mRunUtil.setEnvVariable("VTS", "1");
+
         String[] baseOpts = {
                 mPythonBin,
         };
@@ -1188,14 +1114,15 @@ public class VtsMultiDeviceTest
         printToDeviceLogcatAboutTestModuleStatus("BEGIN");
 
         CommandResult commandResult = new CommandResult();
-        String interruptMessage = runPythonRunner(cmd, commandResult);
+        String interruptMessage =
+                vtsPythonRunnerHelper.runPythonRunner(cmd, commandResult, mTestTimeout);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
             if (commandStatus != CommandStatus.SUCCESS
                 && commandStatus != CommandStatus.TIMED_OUT) {
                 CLog.e("Python process failed");
-                CLog.e("Python path: %s", mPythonPath);
+                CLog.e("Python path: %s", vtsPythonRunnerHelper.getPythonPath());
                 printVtsLogs(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
                 throw new RuntimeException("Failed to run VTS test");
@@ -1341,92 +1268,26 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * This method returns whether the OS is Windows.
+     * Creates VtsPythonRunnerHelper.
      */
-    private static boolean isOnWindows() {
-        return System.getProperty(OS_NAME).contains(WINDOWS);
+    protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
+        return new VtsPythonRunnerHelper(mBuildInfo);
     }
 
     /**
-     * This method sets the python path. It's based on the
-     * assumption that the environment variable $ANDROID_BUILD_TOP is set.
+     * Set the path for android-vts/testcases/ which keeps the VTS python code under vts.
      */
-    private void setPythonPath() {
-        StringBuilder sb = new StringBuilder();
-        String separator = File.pathSeparator;
-        if (System.getenv(PYTHONPATH) != null) {
-            sb.append(separator);
-            sb.append(System.getenv(PYTHONPATH));
+    private void setTestCaseDataDir() {
+        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(mBuildInfo);
+        File testDir = null;
+        try {
+            testDir = buildHelper.getTestsDir();
+        } catch (FileNotFoundException e) {
+            /* pass */
         }
-
-        // to get the path for android-vts/testcases/ which keeps the VTS python code under vts.
-        if (mBuildInfo != null) {
-            CompatibilityBuildHelper mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
-
-            File testDir = null;
-            try {
-                testDir = mBuildHelper.getTestsDir();
-            } catch (FileNotFoundException e) {
-                /* pass */
-            }
-            if (testDir != null) {
-                sb.append(separator);
-                mTestCaseDataDir = testDir.getAbsolutePath();
-                sb.append(mTestCaseDataDir);
-            } else if (mBuildInfo.getFile(VTS) != null) {
-                sb.append(separator);
-                sb.append(mBuildInfo.getFile(VTS).getAbsolutePath()).append("/..");
-            }
+        if (testDir != null) {
+            mTestCaseDataDir = testDir.getAbsolutePath();
         }
-
-        // for when one uses PythonVirtualenvPreparer.
-        if (mBuildInfo.getFile(PYTHONPATH) != null) {
-            sb.append(separator);
-            sb.append(mBuildInfo.getFile(PYTHONPATH).getAbsolutePath());
-        }
-        if (System.getenv("ANDROID_BUILD_TOP") != null) {
-            sb.append(separator);
-            sb.append(System.getenv("ANDROID_BUILD_TOP")).append("/test");
-        }
-        if (sb.length() == 0) {
-            throw new RuntimeException("Could not find python path on host machine");
-        }
-        mPythonPath = sb.substring(1);
-        CLog.i("mPythonPath: %s", mPythonPath);
-    }
-
-    /**
-     * This method gets the python binary.
-     */
-    private String getPythonBinary() {
-        boolean isWindows = isOnWindows();
-        String python = (isWindows ? "python.exe" : "python" + mPythonVersion);
-        File venvDir = mBuildInfo.getFile(VIRTUAL_ENV_PATH);
-        if (venvDir != null) {
-            String binDir = (isWindows? "Scripts": "bin");
-            File pythonBinaryFile = new File(venvDir.getAbsolutePath(),
-                    binDir + File.separator + python);
-            String pythonBinPath = pythonBinaryFile.getAbsolutePath();
-            if (pythonBinaryFile.exists()) {
-                CLog.i("Python path " + pythonBinPath + ".\n");
-                return pythonBinPath;
-            }
-            CLog.e(python + " doesn't exist under the " +
-                   "created virtualenv dir (" + pythonBinPath + ").\n");
-        } else {
-          CLog.e(VIRTUAL_ENV_PATH + " not available in BuildInfo. " +
-                 "Please use VtsPythonVirtualenvPreparer tartget preparer.\n");
-        }
-
-        IRunUtil runUtil = (mRunUtil == null ? RunUtil.getDefault() : mRunUtil);
-        CommandResult c = runUtil.runTimedCmd(1000,
-                (isWindows ? "where" : "which"), python);
-        String pythonBin = c.getStdout().trim();
-        if (pythonBin.length() == 0) {
-            throw new RuntimeException("Could not find python binary on host "
-                    + "machine");
-        }
-        return pythonBin;
     }
 
     /**
