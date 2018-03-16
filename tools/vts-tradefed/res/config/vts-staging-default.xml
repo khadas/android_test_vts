@@ -33,8 +33,4 @@
     <!-- for HAL adapter tests -->
     <option name="compatibility:include-filter" value="VtsHalVibratorV1_1AdapterCtsOsTestCases" />
     <option name="compatibility:include-filter" value="VtsHalVibratorV1_1AdapterDeviceHealthTests" />
-
-    <!-- for DTBO Verification -->
-    <option name="compatibility:include-filter" value="VtsDtboVerificationTest" />
-
 </configuration>
