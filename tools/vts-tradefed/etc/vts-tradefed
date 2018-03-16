@@ -102,6 +102,7 @@ fi
 JARS="${TRADEFED_JAR}
   hosttestlib
   vts-tradefed
+  vts-tradefed-tests
   compatibility-host-util"
 
 for JAR in $JARS; do
