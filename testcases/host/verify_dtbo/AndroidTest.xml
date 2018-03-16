@@ -21,7 +21,7 @@
       <option name="push" value="DATA/nativetest/ufdt_verify_overlay/ufdt_verify_overlay->/data/local/tmp/32/ufdt_verify_overlay" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
-        <option name="test-module-name" value="VtsDtboVerificationTest"/>
-        <option name="test-case-path" value="vts/testcases/host/verify_dtbo/VtsDtboVerificationTest" />
+        <option name="test-module-name" value="VtsFirmwareDtboVerification"/>
+        <option name="test-case-path" value="vts/testcases/host/verify_dtbo/VtsFirmwareDtboVerification" />
     </test>
 </configuration>
