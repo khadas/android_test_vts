@@ -50,6 +50,7 @@ _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 _BUG_REPORT_FILE_PREFIX = "bugreport"
 _BUG_REPORT_FILE_EXTENSION = ".zip"
 _ANDROID_DEVICES = '_android_devices'
+_REASON_TO_SKIP_ALL_TESTS = '_reason_to_skip_all_tests'
 
 
 class BaseTestClass(object):
@@ -82,8 +83,6 @@ class BaseTestClass(object):
         coverage: CoverageFeature, object storing coverage feature util for test run
         sancov: SancovFeature, object storing sancov feature util for test run
         profiling: ProfilingFeature, object storing profiling feature util for test run
-        _skip_all_testcases: A boolean, can be set by a subclass in
-                             setUpClass() to skip all test cases.
         _bug_report_on_failure: bool, whether to catch bug report at the end
                                 of failed test cases.
         test_filter: Filter object to filter test names.
@@ -164,7 +163,6 @@ class BaseTestClass(object):
             keys.ConfigKeys.RUN_AS_VTS_SELFTEST, default_value=False)
         self.run_as_compliance_test = self.getUserParam(
             keys.ConfigKeys.RUN_AS_COMPLIANCE_TEST, default_value=False)
-        self._skip_all_testcases = False
         self._bug_report_on_failure = self.getUserParam(
             keys.ConfigKeys.IKEY_BUG_REPORT_ON_FAILURE, default_value=False)
 
@@ -548,9 +546,8 @@ class BaseTestClass(object):
         if include filter is empty, only tests not in exclude filter will be
         executed.
 
-        The second layer of filter is checking _skip_all_testcases flag:
-        the subclass may set _skip_all_testcases to True in its implementation
-        of setUpClass. If the flag is set, this method raises signals.TestSkip.
+        The second layer of filter is checking whether skipAllTests method is
+        called. If the flag is set, this method raises signals.TestSkip.
 
         The third layer of filter is checking abi bitness:
         if a test has a suffix indicating the intended architecture bitness,
@@ -587,8 +584,8 @@ class BaseTestClass(object):
         if not test_filter.Filter(test_name):
             raise signals.TestSilent("Test case '%s' did not pass filters.")
 
-        if self._skip_all_testcases:
-            raise signals.TestSkip("All test cases skipped.")
+        if self.isSkipAllTests():
+            raise signals.TestSkip(self.getSkipAllTestsReason())
 
     def _filterOneTestThroughAbiBitness(self, test_name):
         """Check test filter for the given test name.
@@ -909,7 +906,7 @@ class BaseTestClass(object):
                     logging.info("Finished '%s'", test_name)
                 else:
                     self.execOneTest(test_name, test_func, None)
-            if self._skip_all_testcases and not self.results.executed:
+            if self.isSkipAllTests() and not self.results.executed:
                 self.results.skipClass(
                     self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
@@ -995,3 +992,43 @@ class BaseTestClass(object):
 
             logging.info('Catching bugreport %s...' % bug_report_file_path)
             device.adb.bugreport(bug_report_file_path)
+
+    def skipAllTests(self, msg):
+        """Skip all test cases.
+
+        This method is usually called in setup functions when a precondition
+        to the test module is not met.
+
+        Args:
+            msg: string, reason why tests are skipped. If set to None or empty
+            string, a default message will be used (not recommended)
+        """
+        if not msg:
+            msg = "No reason provided."
+
+        setattr(self, _REASON_TO_SKIP_ALL_TESTS, msg)
+
+    def isSkipAllTests(self):
+        """Returns whether all tests are set to be skipped.
+
+        Note: If all tests are being skipped not due to skipAllTests
+              being called, or there is no tests defined, this method will
+              still return False (since skipAllTests is not called.)
+
+        Returns:
+            bool, True if skipAllTests has been called; False otherwise.
+        """
+        return self.getSkipAllTestsReason() is not None
+
+    def getSkipAllTestsReason(self):
+        """Returns the reason why all tests are skipped.
+
+        Note: If all tests are being skipped not due to skipAllTests
+              being called, or there is no tests defined, this method will
+              still return None (since skipAllTests is not called.)
+
+        Returns:
+            String, reason why tests are skipped. None if skipAllTests
+            is not called.
+        """
+        return getattr(self, _REASON_TO_SKIP_ALL_TESTS, None)
