@@ -30,6 +30,7 @@ vts_test_bin_packages := \
     vts_selftest_flaky_test \
     vts_selftest_zero_testcase_binary_test \
     vts_test_binary_crash_app \
+    vts_test_binary_seg_fault \
     vts_test_binary_syscall_exists \
     simpleperf_cpu_hotplug_test \
     binderThroughputTest \
