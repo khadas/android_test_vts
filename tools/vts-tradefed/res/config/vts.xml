@@ -19,6 +19,7 @@
   <option name="test-tag" value="vts" />
   <option name="vts-plan-result:plan-name" value="vts" />
 
+  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-firmware" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-replay" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-kernel" />
