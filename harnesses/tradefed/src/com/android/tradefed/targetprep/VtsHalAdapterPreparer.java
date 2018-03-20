@@ -85,7 +85,8 @@ public class VtsHalAdapterPreparer
 
         try {
             TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException ex) { /* pass */
+        } catch (InterruptedException ex) {
+            /* pass */
         }
 
         device.executeShellCommand("stop");
@@ -123,11 +124,16 @@ public class VtsHalAdapterPreparer
         device.executeShellCommand(String.format("setprop %s true", ADAPTER_SYSPROP));
         try {
             TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException ex) { /* pass */
+        } catch (InterruptedException ex) {
+            /* pass */
         }
 
         device.executeShellCommand("stop");
         device.executeShellCommand("start");
+
+        if (!device.waitForBootComplete(FRAMEWORK_START_TIMEOUT)) {
+            throw new DeviceNotAvailableException("Framework failed to start.");
+        }
 
         out = new CollectingOutputReceiver();
         device.executeShellCommand(String.format("lshal | grep %s", mInterfaceName), out);
