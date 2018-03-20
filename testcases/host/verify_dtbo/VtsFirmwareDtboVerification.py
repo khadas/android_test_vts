@@ -36,7 +36,7 @@ FDT_PATH = "/sys/firmware/fdt"  # path to device tree.
 PROPERTY_SLOT_SUFFIX = "ro.boot.slot_suffix"  # indicates current slot suffix for A/B devices
 
 
-class VtsDtboVerificationTest(base_test.BaseTestClass):
+class VtsFirmwareDtboVerification(base_test.BaseTestClass):
     """Validates DTBO partition and DT overlay application.
 
     Attributes:
