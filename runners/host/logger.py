@@ -158,7 +158,7 @@ def _initiateTestLogger(log_path, prefix=None, filename=None, log_severity="INFO
     if filename is None:
         filename = getLogFileTimestamp()
         utils.create_dir(log_path)
-    fh = logging.FileHandler(os.path.join(log_path, 'test_run_details.txt'))
+    fh = logging.FileHandler(os.path.join(log_path, filename))
     fh.setFormatter(f_formatter)
     fh.setLevel(log_severity_map.get(log_severity, logging.INFO))
     log.addHandler(ch)
@@ -208,6 +208,9 @@ def setupTestLogger(log_path, prefix=None, filename=None, log_severity="INFO"):
         prefix: A prefix for each log line in terminal.
         filename: Name of the files. The default is the time the objects
             are requested.
+
+    Returns:
+        A string, abs path to the created log file.
     """
     if filename is None:
         filename = getLogFileTimestamp()
@@ -215,6 +218,27 @@ def setupTestLogger(log_path, prefix=None, filename=None, log_severity="INFO"):
     logger = _initiateTestLogger(log_path, prefix, filename, log_severity)
     if isSymlinkSupported():
         createLatestLogAlias(log_path)
+    return os.path.join(log_path, filename)
+
+
+def addLogFile(log_path, log_severity="INFO"):
+    """Creates a log file and adds the handler to the root logger.
+
+    Args:
+        log_path: Location of the report file.
+        prefix: A prefix for each log line in terminal.
+
+    Returns:
+        A string, abs path to the created log file.
+        logging.FileHandler instance which is added to the logger.
+    """
+    filename = getLogFileTimestamp()
+    f_formatter = logging.Formatter(log_line_format, log_line_time_format)
+    fh = logging.FileHandler(os.path.join(log_path, filename))
+    fh.setFormatter(f_formatter)
+    fh.setLevel(log_severity_map.get(log_severity, logging.INFO))
+    logging.getLogger().addHandler(fh)
+    return os.path.join(log_path, filename), fh
 
 
 def normalizeLogLineTimestamp(log_line_timestamp):
