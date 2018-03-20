@@ -26,7 +26,6 @@ import time
 from googleapiclient.discovery import build
 from oauth2client import client as oauth2_client
 from oauth2client.service_account import ServiceAccountCredentials
-from vts.utils.python.retry import retry
 
 logger = logging.getLogger('artifact_fetcher')
 
@@ -48,15 +47,7 @@ class AndroidBuildClient(object):
         DEFAULT_ATTEMPT_ID: string, default attempt to request for the artifact.
         DEFAULT_CHUNK_SIZE: int, number of bytes to download at a time.
         RETRY_COUNT: int, max number of retries.
-        RETRY_BACKOFF_FACTOR: float, base of exponential determining sleep time.
-                              total_time = (backoff_factor^(attempt - 1))*sleep
-        RETRY_SLEEP_MULTIPLIER: float, multiplier for how long to sleep between
-                                attempts.
-        RETRY_HTTP_CODES: int array, HTTP codes for which a retry will be
-                          attempted.
-        RETRIABLE_AUTH_ERRORS: class tuple, list of error classes for which a
-                               retry will be attempted.
-
+        RETRY_DELAY_IN_SECS: int, time delays between retries in seconds.
     """
 
     API_NAME = "androidbuildinternal"
