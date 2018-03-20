@@ -20,6 +20,8 @@ from vts.runners.host import const
 from vts.runners.host import keys
 from vts.utils.python.common import vintf_utils
 
+HAL_INTERFACE_DELIMITER = "::"
+
 
 def CanRunHidlHalTest(test_instance, dut, shell=None):
     """Checks HAL precondition of a test instance.
@@ -85,9 +87,21 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
                          file_path_prefix)
             return False
 
-    hal = str(getattr(test_instance,
+    hal_specified = str(getattr(test_instance,
         keys.ConfigKeys.IKEY_PRECONDITION_LSHAL, ""))
-    if hal:
+
+    if hal_specified:
+        logging.info("precondition HAL name is specified: %s", hal_specified)
+        hal = hal_specified
+        interface = None
+        if HAL_INTERFACE_DELIMITER in hal:
+            items = hal.split(HAL_INTERFACE_DELIMITER)
+            if len(items) > 2:
+                logging.error("precondition HAL name format error: %s",
+                              hal_specified)
+                return False
+            hal, interface = items
+
         vintf_xml = dut.getVintfXml()
         if vintf_xml:
             hwbinder_hals, passthrough_hals = vintf_utils.GetHalDescriptions(
@@ -98,25 +112,40 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
             elif (hal not in hwbinder_hals and
                   hal not in passthrough_hals):
                 logging.warn(
-                    "The required hal %s not found by lshal.",
-                    hal)
+                    "The required HAL %s not found by lshal.",
+                    hal_specified)
                 return False
-            elif (hal not in hwbinder_hals and
-                  hal in passthrough_hals):
-                if hasattr(test_instance, keys.ConfigKeys.IKEY_ABI_BITNESS):
-                    bitness = getattr(test_instance,
-                                      keys.ConfigKeys.IKEY_ABI_BITNESS)
-                    if (bitness not in
-                        passthrough_hals[hal].hal_archs):
-                        logging.warn(
-                            "The required feature %s found as a "
-                            "passthrough hal but the client bitness %s "
-                            "not supported",
-                            hal, bitness)
-                        return False
             else:
+                if interface:
+                    if hal in hwbinder_hals:
+                        hal_info = hwbinder_hals[hal]
+                    else:
+                        if hasattr(test_instance, keys.ConfigKeys.IKEY_ABI_BITNESS):
+                            bitness = getattr(test_instance,
+                                              keys.ConfigKeys.IKEY_ABI_BITNESS)
+                            if (bitness not in
+                                passthrough_hals[hal].hal_archs):
+                                logging.warn(
+                                    "The required feature %s found as a "
+                                    "passthrough HAL but the client bitness %s "
+                                    "not supported",
+                                    hal_specified, bitness)
+                                return False
+                        hal_info = passthrough_hals[hal]
+
+                    has_interface = False
+                    for hal_interface in hal_info.hal_interfaces:
+                        if hal_interface.hal_interface_name == interface:
+                            has_interface = True
+                            break
+
+                    if not has_interface:
+                        logging.warn("The required HAL interface %s is not "
+                                     "available for HAL %s", interface, hal)
+                        return False
                 logging.info(
-                    "The feature %s found in lshal-emitted vintf xml", hal)
+                    "The feature %s found in lshal-emitted vintf xml",
+                    hal_specified)
         else:
             logging.error("No VINTF XML was retrieved.")
 
