@@ -29,6 +29,7 @@ vts_test_bin_packages := \
     vts_codelab_target_binary \
     vts_selftest_flaky_test \
     vts_test_binary_crash_app \
+    vts_test_binary_seg_fault \
     vts_test_binary_syscall_exists \
     simpleperf_cpu_hotplug_test \
     binderThroughputTest \
