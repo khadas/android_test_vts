@@ -184,17 +184,15 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
             if not testable:
-                logging.error("Hal: %s is not testable, skip all tests.",
-                          service)
-                self._skip_all_testcases = True
+                self.skipAlltests("Hal: %s is not testable, "
+                                  "skip all tests." % service)
                 return []
             if service_names:
                 service_instances[service] = service_names
                 self._test_hal_services.add(service)
             else:
-                logging.error("No service name found for: %s, skip all tests.",
-                              service)
-                self._skip_all_testcases = True
+                self.skipAlltests("No service name found for: %s, "
+                                  "skip all tests." % service)
                 return []
         logging.info("registered service instances: %s", service_instances)
 
