@@ -104,6 +104,7 @@ class ConfigKeys(object):
     IKEY_GLOBAL_COVERAGE = "global_coverage"
     IKEY_SANCOV_RESOURCES_PATH = "sancov_resources_path"
     IKEY_GCOV_RESOURCES_PATH = "gcov_resources_path"
+    IKEY_COVERAGE_REPORT_PATH = "coverage_report_path"
     IKEY_EXCLUDE_COVERAGE_PATH = "exclude_coverage_path"
 
     # Keys for the HAL HIDL GTest type (see VtsMultiDeviceTest.java).
