@@ -15,6 +15,7 @@
  */
 package com.android.tradefed;
 
+import com.android.tradefed.presubmit.VtsConfigLoadingTest;
 import com.android.tradefed.targetprep.VtsCoveragePreparerTest;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparerTest;
 import com.android.tradefed.targetprep.VtsTraceCollectPreparerTest;
@@ -37,6 +38,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     // NOTE: please keep classes sorted lexicographically in each group
+    // presubmit
+    VtsConfigLoadingTest.class,
     // targetprep
     VtsCoveragePreparerTest.class,
     VtsPythonVirtualenvPreparerTest.class,
