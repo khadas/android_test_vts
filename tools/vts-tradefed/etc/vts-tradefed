@@ -114,13 +114,17 @@ OPTIONAL_JARS="
   android-vts/tools/google-tradefed-vts-prebuilt
   google-tradefed-prebuilt
   google-tradefed-tests
-  google-tf-prod-tests"
+  google-tf-prod-tests
+  google-tradefed"
 
 for JAR in $OPTIONAL_JARS; do
-    if [ -f "${VTS_ROOT}/${JAR}.jar" ]; then
-        echo "Including optional JAR: $VTS_ROOT/$JAR.jar"
-        JAR_PATH=${JAR_PATH}:${VTS_ROOT}/${JAR}.jar
-    fi;
+    for OPT_JAR_DIR in $VTS_ROOT $JAR_DIR; do
+        if [ -f "${OPT_JAR_DIR}/${JAR}.jar" ]; then
+            echo "Including optional JAR: ${OPT_JAR_DIR}/${JAR}.jar"
+            JAR_PATH=${JAR_PATH}:${OPT_JAR_DIR}/${JAR}.jar
+            break
+        fi;
+    done
 done
 
 # load any shared libraries for host-side executables
