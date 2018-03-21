@@ -70,6 +70,7 @@ set JAR_PATH=%TRADEFED_JAR%
 set JARS=^
   hosttestlib^
   vts-tradefed^
+  vts-tradefed-tests^
   compatibility-host-util
 for %%J in (%JARS%) do (
     set JAR=%JAR_DIR%\%%J.jar
