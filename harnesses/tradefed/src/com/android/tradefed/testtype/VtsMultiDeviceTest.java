@@ -118,6 +118,7 @@ public class VtsMultiDeviceTest
     static final String GTEST_BATCH_MODE = "gtest_batch_mode";
     static final String SAVE_TRACE_FIEL_REMOTE = "save_trace_file_remote";
     static final String OUTPUT_COVERAGE_REPORT = "output_coverage_report";
+    static final String COVERAGE_REPORT_PATH = "coverage_report_path";
     static final String GLOBAL_COVERAGE = "global_coverage";
     static final String LTP_NUMBER_OF_THREADS = "ltp_number_of_threads";
     static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
@@ -781,6 +782,14 @@ public class VtsMultiDeviceTest
         suite.put(EXCLUDE_FILTER, new JSONArray(mExcludeFilters));
         CLog.i("Added exclude filter to test suite: %s", mExcludeFilters);
 
+        String coverageReportPath = mBuildInfo.getBuildAttributes().get("coverage_report_path");
+        if (coverageReportPath != null) {
+            jsonObject.put(OUTPUT_COVERAGE_REPORT, true);
+            CLog.i("Added %s to the Json object", OUTPUT_COVERAGE_REPORT);
+            jsonObject.put(COVERAGE_REPORT_PATH, coverageReportPath);
+            CLog.i("Added %s to the Json object", COVERAGE_REPORT_PATH);
+        }
+
         if (mExcludeOverInclude) {
             jsonObject.put(EXCLUDE_OVER_INCLUDE, mExcludeOverInclude);
             CLog.i("Added %s to the Json object", EXCLUDE_OVER_INCLUDE);
@@ -902,11 +911,6 @@ public class VtsMultiDeviceTest
             } else {
                 CLog.i("Device build has sancov disabled");
             }
-        }
-
-        if (mOutputCoverageReport) {
-            jsonObject.put(OUTPUT_COVERAGE_REPORT, mOutputCoverageReport);
-            CLog.i("Added %s to the Json object", OUTPUT_COVERAGE_REPORT);
         }
 
         if (mPreconditionHwBinderServiceName != null) {
