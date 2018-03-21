@@ -37,7 +37,6 @@ from vts.utils.python.web import feature_utils
 FLUSH_PATH_VAR = "GCOV_PREFIX"  # environment variable for gcov flush path
 TARGET_COVERAGE_PATH = "/data/misc/trace/"  # location to flush coverage
 LOCAL_COVERAGE_PATH = "/tmp/vts-test-coverage"  # location to pull coverage to host
-DEFAULT_COVERAGE_RESOURCE_PATH = "/tmp/coverage/"
 
 # Environment for test process
 COVERAGE_TEST_ENV = "GCOV_PREFIX_OVERRIDE=true GCOV_PREFIX=/data/misc/trace/self"
@@ -84,7 +83,8 @@ class CoverageFeature(feature_utils.Feature):
         keys.ConfigKeys.IKEY_MODULES,
         keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT,
         keys.ConfigKeys.IKEY_GLOBAL_COVERAGE,
-        keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH
+        keys.ConfigKeys.IKEY_EXCLUDE_COVERAGE_PATH,
+        keys.ConfigKeys.IKEY_COVERAGE_REPORT_PATH,
     ]
 
     _DEFAULT_EXCLUDE_PATHS = [
@@ -92,7 +92,7 @@ class CoverageFeature(feature_utils.Feature):
         "system/libfmq"
     ]
 
-    def __init__(self, user_params, web=None, local_coverage_path=None):
+    def __init__(self, user_params, web=None):
         """Initializes the coverage feature.
 
         Args:
@@ -106,17 +106,18 @@ class CoverageFeature(feature_utils.Feature):
         self._device_resource_dict = {}
         self._hal_names = None
 
-        if local_coverage_path:
-            self.local_coverage_path = local_coverage_path
-        else:
-            timestamp_seconds = str(int(time.time() * 1000000))
-            self.local_coverage_path = os.path.join(LOCAL_COVERAGE_PATH,
-                                                    timestamp_seconds)
-            if os.path.exists(self.local_coverage_path):
-                logging.info("removing existing coverage path: %s",
-                             self.local_coverage_path)
-                shutil.rmtree(self.local_coverage_path)
-            os.makedirs(self.local_coverage_path)
+        timestamp_seconds = str(int(time.time() * 1000000))
+        self.local_coverage_path = os.path.join(LOCAL_COVERAGE_PATH,
+                                                timestamp_seconds)
+        if os.path.exists(self.local_coverage_path):
+            logging.info("removing existing coverage path: %s",
+                         self.local_coverage_path)
+            shutil.rmtree(self.local_coverage_path)
+        os.makedirs(self.local_coverage_path)
+
+        self._coverage_report_dir = getattr(
+            self, keys.ConfigKeys.IKEY_COVERAGE_REPORT_PATH, None)
+
         self._coverage_report_file_prefix = ""
 
         self.global_coverage = getattr(
@@ -136,14 +137,11 @@ class CoverageFeature(feature_utils.Feature):
                                   device)
                     continue
                 if not coverage_resource_path:
-                    logging.warning(
-                        "Missing coverage resource path, use %s by default",
-                        DEFAULT_COVERAGE_RESOURCE_PATH)
-                    self._device_resource_dict[str(
-                        serial)] = DEFAULT_COVERAGE_RESOURCE_PATH
-                else:
-                    self._device_resource_dict[str(serial)] = str(
-                        coverage_resource_path)
+                    logging.error("Missing coverage resource path in device: %s",
+                                  device)
+                    continue
+                self._device_resource_dict[str(serial)] = str(
+                    coverage_resource_path)
         logging.info("Coverage enabled: %s", self.enabled)
 
     def _FindGcnoSummary(self, gcda_file_path, gcno_file_parsers):
@@ -330,8 +328,16 @@ class CoverageFeature(feature_utils.Feature):
         if self._coverage_report_file_prefix:
             coverage_report_file_name = "coverage_report_" + self._coverage_report_file_prefix + ".txt"
 
-        coverage_report_file = os.path.join(self.local_coverage_path,
+        coverage_report_file = None
+        if (self._coverage_report_dir):
+            if not os.path.exists(self._coverage_report_dir):
+                os.makedirs(self._coverage_report_dir)
+            coverage_report_file = os.path.join(self._coverage_report_dir,
                                             coverage_report_file_name)
+        else:
+            coverage_report_file = os.path.join(self.local_coverage_path,
+                                            coverage_report_file_name)
+
         logging.info("Storing coverage report to: %s", coverage_report_file)
         if self.web and self.web.enabled:
             coverage_report_msg = ReportMsg.TestReportMessage()
@@ -593,13 +599,13 @@ class CoverageFeature(feature_utils.Feature):
             logging.error("Invalid device provided: %s", serial)
             return
 
-        gcda_dict = self._GetGcdaDict(dut, serial)
-        logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
-
         resource_path = self._device_resource_dict[serial]
         if not resource_path:
             logging.error("coverage resource path not found.")
             return
+
+        gcda_dict = self._GetGcdaDict(dut, serial)
+        logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
 
         cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
 
@@ -635,6 +641,14 @@ class CoverageFeature(feature_utils.Feature):
             prefix: strings, prefix of the coverage report file.
         """
         self._coverage_report_file_prefix = prefix
+
+    def SetCoverageReportDirectory(self, corverage_report_dir):
+        """Sets the path for storing the coverage report file.
+
+        Args:
+            corverage_report_dir: strings, dir to store the coverage report file.
+        """
+        self._coverage_report_dir = corverage_report_dir
 
     def _ExecuteOneAdbShellCommand(self, dut, serial, cmd):
         """Helper method to execute a shell command and return results.
@@ -683,7 +697,17 @@ if __name__ == '__main__':
         required=False,
         help="Prefix of the coverage report.")
     parser.add_argument(
+        "--report_path",
+        dest="report_path",
+        required=False,
+        help="directory to store the coverage reports.")
+    parser.add_argument(
         "--serial", dest="serial", required=True, help="Device serial number.")
+    parser.add_argument(
+        "--gcov_rescource_path",
+        dest="gcov_rescource_path",
+        required=True,
+        help="Directory that stores gcov resource files.")
     parser.add_argument(
         "operation",
         help=
@@ -698,8 +722,8 @@ if __name__ == '__main__':
         keys.ConfigKeys.IKEY_ENABLE_COVERAGE:
         True,
         keys.ConfigKeys.IKEY_ANDROID_DEVICE: [{
-            keys.ConfigKeys.IKEY_SERIAL:
-            args.serial
+            keys.ConfigKeys.IKEY_SERIAL:args.serial,
+            keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH:args.gcov_rescource_path,
         }],
         keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT:
         True,
@@ -712,4 +736,6 @@ if __name__ == '__main__':
     elif args.operation == "get_coverage":
         if args.report_prefix:
             coverage.SetCoverageReportFilePrefix(args.report_prefix)
+        if args.report_path:
+            coverage.SetCoverageReportDirectory(args.report_path)
         coverage.SetCoverageData(serial=args.serial, isGlobal=True)
