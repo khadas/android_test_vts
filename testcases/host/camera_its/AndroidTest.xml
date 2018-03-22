@@ -30,6 +30,7 @@
         <option name="cleanup-apks" value="true" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="CameraITSTest" />
         <option name="test-case-path" value="vts/testcases/host/camera_its/CameraITSTest" />
     </test>
 </configuration>
