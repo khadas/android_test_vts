@@ -22,6 +22,7 @@
         <option name="dep-module" value="Pillow" />
     </multi_target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="CameraITSTest" />
         <option name="test-case-path" value="vts/testcases/host/camera_its/CameraITSTest" />
     </test>
 </configuration>
