@@ -88,7 +88,7 @@ vector<const ManifestInstance*> VtsTestabilityChecker::FindInstance(
     const MatrixInstance& matrix_instance) {
   vector<const ManifestInstance*> ret;
   for (const auto& e : manifest_instances) {
-    if (e.instance() == matrix_instance.instance()) {
+    if (matrix_instance.matchInstance(e.instance())) {
       ret.push_back(&e);
     }
   }
@@ -130,7 +130,12 @@ bool VtsTestabilityChecker::CheckFrameworkCompatibleHal(
       LOG(ERROR) << "Compatibility error. Hal " << hal_package_name
                  << " is required by framework but not supported by vendor";
       if (!hal_interface_name.empty()) {
-        instances->insert(matrix_instance.instance());
+        if (!matrix_instance.isRegex()) {
+          instances->insert(matrix_instance.exactInstance());
+        } else {
+          LOG(ERROR) << "Ignore regex-instance '"
+                     << matrix_instance.regexPattern();
+        }
       }
       testable |= true;
       continue;
@@ -141,21 +146,23 @@ bool VtsTestabilityChecker::CheckFrameworkCompatibleHal(
       continue;
     }
 
-    auto is_instance_testable = [&](const auto* manifest_instance) {
-      if (manifest_instance->transport() == Transport::PASSTHROUGH &&
-          CheckPassthroughManifestArch(manifest_instance->arch(), arch)) {
-        return true;
-      }
-      if (manifest_instance->transport() == Transport::HWBINDER) {
-        return true;
-      }
-      return false;
-    };
-    bool instance_testable =
-        std::any_of(matched_instances.begin(), matched_instances.end(),
-                    is_instance_testable);
-    if (instance_testable) {
-      instances->insert(matrix_instance.instance());
+    auto get_testable_instances =
+        [&](const vector<const vintf::ManifestInstance*>& manifest_instances) {
+          vector<string> ret;
+          for (const auto& manifest_instance : manifest_instances) {
+            if ((manifest_instance->transport() == Transport::PASSTHROUGH &&
+                 CheckPassthroughManifestArch(manifest_instance->arch(),
+                                              arch)) ||
+                manifest_instance->transport() == Transport::HWBINDER) {
+              ret.push_back(manifest_instance->instance());
+            }
+          }
+          return ret;
+        };
+
+    auto testable_instances = get_testable_instances(matched_instances);
+    if (!testable_instances.empty()) {
+      instances->insert(testable_instances.begin(), testable_instances.end());
       testable |= true;
       continue;
     }
@@ -165,10 +172,9 @@ bool VtsTestabilityChecker::CheckFrameworkCompatibleHal(
     // not be added to instances.
     const auto& matched_interface_instances =
         FindInterface(manifest_instances, matrix_instance);
-    bool interface_testable =
-        std::any_of(matched_interface_instances.begin(),
-                    matched_interface_instances.end(), is_instance_testable);
-    if (interface_testable) {
+    auto testable_interfaces =
+        get_testable_instances(matched_interface_instances);
+    if (!testable_interfaces.empty()) {
       testable |= true;
       continue;
     }
