@@ -154,6 +154,7 @@ vts_hal_test_bins := \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDumpstateV1_0TargetTest \
+  VtsHalEvsV1_0TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
