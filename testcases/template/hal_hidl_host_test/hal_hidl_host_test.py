@@ -51,7 +51,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
         # Testability check.
         if not precondition_utils.CanRunHidlHalTest(
                 self, self.dut, self.shell, self.run_as_compliance_test):
-            self._skip_all_testcases = True
+            self.skipAllTests("precondition check for hidl hal tests didn't pass")
             return
 
         # Initialization for coverage measurement.
@@ -73,7 +73,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
         If coverage is enabled for the test, collect the coverage data and
         upload it to dashboard.
         """
-        if self._skip_all_testcases:
+        if self.isSkipAllTests():
             return
 
         if self.coverage.enabled and self.coverage.global_coverage:
