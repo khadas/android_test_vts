@@ -22,6 +22,7 @@ LOCAL_MODULE := vts-tradefed-tests
 LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_JAVA_LIBRARIES := easymock mockito-host
 LOCAL_JAVA_LIBRARIES := tradefed vts-tradefed
+LOCAL_JAVA_RESOURCE_DIRS := res
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 

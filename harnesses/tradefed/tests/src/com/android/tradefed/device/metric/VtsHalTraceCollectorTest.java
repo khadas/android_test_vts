@@ -18,24 +18,23 @@ package com.android.tradefed.device.metric;
 
 import static org.junit.Assert.assertTrue;
 
-import com.android.tradefed.build.BuildInfo;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.FileUtil;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for {@link VtsHalTraceCollector}.
@@ -71,39 +70,45 @@ public class VtsHalTraceCollectorTest {
 
     @Test
     public void testOnTestRunEnd() throws Exception {
-        mBuildAttributes.put(TRACE_PATH, "/tmp/vts-trace");
-        EasyMock.expect(mMockBuildInfo.getBuildAttributes()).andReturn(mBuildAttributes);
-        mDevices.add(mMockDevice);
-        mBuildInfos.add(mMockBuildInfo);
-        EasyMock.expect(mMockContext.getDevices()).andReturn(mDevices);
-        EasyMock.expect(mMockContext.getBuildInfos()).andReturn(mBuildInfos);
-        String listResult = VTS_TMP_DIR + "test1.vts.trace\n" + VTS_TMP_DIR + "test2.vts.trace";
-        EasyMock.expect(mMockDevice.executeShellCommand(
-                                EasyMock.eq(String.format("ls %s/*.vts.trace", VTS_TMP_DIR))))
-                .andReturn(listResult);
-        File traceDir = new File("/tmp/vts-trace/device1_testRun/");
-        File testTrace1 = new File(traceDir, "test1.vts.trace");
-        File testTrace2 = new File(traceDir, "test2.vts.trace");
-        EasyMock.expect(mMockDevice.pullFile(EasyMock.eq(VTS_TMP_DIR + "test1.vts.trace"),
-                                EasyMock.eq(testTrace1)))
-                .andReturn(true)
-                .times(1);
-        EasyMock.expect(mMockDevice.pullFile(EasyMock.eq(VTS_TMP_DIR + "test2.vts.trace"),
-                                EasyMock.eq(testTrace2)))
-                .andReturn(true)
-                .times(1);
+        File traceBaseDir = FileUtil.createTempDir("vts-trace");
+        File traceDir = null;
+        try {
+            mBuildAttributes.put(TRACE_PATH, traceBaseDir.getAbsolutePath());
+            EasyMock.expect(mMockBuildInfo.getBuildAttributes()).andReturn(mBuildAttributes);
+            mDevices.add(mMockDevice);
+            mBuildInfos.add(mMockBuildInfo);
+            EasyMock.expect(mMockContext.getDevices()).andReturn(mDevices);
+            EasyMock.expect(mMockContext.getBuildInfos()).andReturn(mBuildInfos);
+            String listResult = VTS_TMP_DIR + "test1.vts.trace\n" + VTS_TMP_DIR + "test2.vts.trace";
+            EasyMock.expect(mMockDevice.executeShellCommand(
+                                    EasyMock.eq(String.format("ls %s/*.vts.trace", VTS_TMP_DIR))))
+                    .andReturn(listResult);
+            traceDir = new File(traceBaseDir, "device1_testRun/");
+            File testTrace1 = new File(traceDir, "test1.vts.trace");
+            File testTrace2 = new File(traceDir, "test2.vts.trace");
+            EasyMock.expect(mMockDevice.pullFile(EasyMock.eq(VTS_TMP_DIR + "test1.vts.trace"),
+                                    EasyMock.eq(testTrace1)))
+                    .andReturn(true)
+                    .times(1);
+            EasyMock.expect(mMockDevice.pullFile(EasyMock.eq(VTS_TMP_DIR + "test2.vts.trace"),
+                                    EasyMock.eq(testTrace2)))
+                    .andReturn(true)
+                    .times(1);
 
-        EasyMock.replay(mMockBuildInfo);
-        EasyMock.replay(mMockContext);
-        EasyMock.replay(mMockDevice);
+            EasyMock.replay(mMockBuildInfo);
+            EasyMock.replay(mMockContext);
+            EasyMock.replay(mMockDevice);
 
-        mCollect.onTestRunEnd(null, null);
-        assertTrue(traceDir.exists());
+            mCollect.onTestRunEnd(null, null);
+            assertTrue(traceDir.exists());
 
-        EasyMock.verify(mMockBuildInfo);
-        EasyMock.verify(mMockContext);
-        EasyMock.verify(mMockDevice);
+            EasyMock.verify(mMockBuildInfo);
+            EasyMock.verify(mMockContext);
+            EasyMock.verify(mMockDevice);
 
-        FileUtil.recursiveDelete(traceDir);
+        } finally {
+            FileUtil.recursiveDelete(traceDir);
+            FileUtil.recursiveDelete(traceBaseDir);
+        }
     }
 }
