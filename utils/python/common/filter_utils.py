@@ -14,9 +14,11 @@
 # limitations under the License.
 #
 
+import copy
 import logging
 import re
 from sre_constants import error as regex_error
+import types
 
 from vts.runners.host import const
 from vts.utils.python.common import list_utils
@@ -230,6 +232,10 @@ class Filter(object):
                                             module name prefix matching
         module_name: string, test module name for auto module name prefix
                      matching
+        expand_bitness: bool, whether to append bitness to filter items.
+                        Default is False. When set to True, bitness will
+                        be added to test name for filtering process, but
+                        the original filter list will not be changed.
     '''
     include_filter_exact = []
     include_filter_regex = []
@@ -239,18 +245,16 @@ class Filter(object):
     def __init__(self,
                  include_filter=[],
                  exclude_filter=[],
-                 enable_regex=False,
+                 enable_regex=True,
                  exclude_over_include=None,
                  enable_negative_pattern=True,
                  enable_module_name_prefix_matching=False,
-                 module_name=None):
+                 module_name=None,
+                 expand_bitness=False):
         self.enable_regex = enable_regex
+        self.expand_bitness = expand_bitness
 
         self.enable_negative_pattern = enable_negative_pattern
-        if self.enable_negative_pattern:
-            include_filter, include_filter_negative = SplitNegativePattern(
-                include_filter)
-            exclude_filter.extend(include_filter_negative)
         self.include_filter = include_filter
         self.exclude_filter = exclude_filter
         if exclude_over_include is None:
@@ -259,6 +263,8 @@ class Filter(object):
         self.enable_module_name_prefix_matching = enable_module_name_prefix_matching
         self.module_name = module_name
 
+    # @Deprecated. Use expand_bitness parameter in construction method instead.
+    # This method will be removed after all legacy usage has been cleaned up
     def ExpandBitness(self):
         '''Expand bitness from filter.
 
@@ -268,6 +274,17 @@ class Filter(object):
         '''
         self.include_filter_exact = ExpandBitness(self.include_filter_exact)
         self.exclude_filter_exact = ExpandBitness(self.exclude_filter_exact)
+        self.expand_bitness = True
+
+    def IsIncludeFilterEmpty(self):
+        '''Check whether actual include filter is specified.
+
+        Since the input include filter may contain negative patterns,
+        checking self.include_filter is not always correct.
+
+        This method checks include_filter_exact and include_filter_regex.
+        '''
+        return not self.include_filter_exact and not self.include_filter_regex
 
     def ExpandAppendix(self, appendix_list, filter_pattern):
         '''Expand filter with appendix from appendix_list.
@@ -284,16 +301,16 @@ class Filter(object):
                                              appendix_list, filter_pattern)
         self.exclude_filter = ExpandAppendix(self.exclude_filter,
                                              appendix_list, filter_pattern)
-        self.include_filter_exact = ExpandBitness(self.include_filter_exact)
-        self.exclude_filter_exact = ExpandBitness(self.exclude_filter_exact)
 
     def Filter(self, item):
         '''Filter a given string using the internal filters.
 
         Rule:
-            If include_filter is empty, only exclude_filter is checked
-            for non-passing. Otherwise, only include_filter is checked
-            (include_filter overrides exclude_filter).
+            By default, include_filter overrides exclude_filter. This means:
+            If include_filter is empty, only exclude_filter is checked.
+            Otherwise, only include_filter is checked
+            If exclude_over_include is set to True, exclude filter will first
+            be checked.
 
         Args:
             item: string, the string for filter check
@@ -301,15 +318,19 @@ class Filter(object):
         Returns:
             bool. True if it passed the filter; False otherwise
         '''
-        if not self.exclude_over_include:
-            return (self.IsInIncludeFilter(item) if self.include_filter else
-                    not self.IsInExcludeFilter(item))
+        if self.exclude_over_include:
+            if self.IsInExcludeFilter(item):
+                return False
 
-        if self.IsInExcludeFilter(item):
-            return False
+            if not self.IsIncludeFilterEmpty():
+                return self.IsInIncludeFilter(item)
 
-        if self.include_filter:
-            return self.IsInIncludeFilter(item)
+            return True
+        else:
+            if not self.IsIncludeFilterEmpty():
+                return self.IsInIncludeFilter(item)
+
+            return not self.IsInExcludeFilter(item)
 
     def IsInIncludeFilter(self, item):
         '''Check if item is in include filter.
@@ -397,33 +418,130 @@ class Filter(object):
 
     @property
     def include_filter(self):
-        '''Getter method for include_filter'''
+        '''Getter method for include_filter.
+
+        Use this method to print include_filter only.
+
+        If the items needed to be added, use add_to_exclude_filter method.
+
+        E.g.
+            self.add_to_exclude_filter('pattern1')
+
+        If the filter needs to be modified without using add_to_exclude_filter,
+        call refresh_filter() after modification. Otherwise, the change will
+        not take effect.
+
+        E.g.
+            Get and modify filter:
+                filter = Filter()
+                filter.include_filter.append('pattern1')
+            Refresh the filter:
+                filter.refresh_filter()
+        '''
         return getattr(self, _INCLUDE_FILTER, [])
 
     @include_filter.setter
     def include_filter(self, include_filter):
         '''Setter method for include_filter'''
         setattr(self, _INCLUDE_FILTER, include_filter)
-        if self.enable_regex:
-            self.include_filter_exact, self.include_filter_regex = SplitFilterList(
-                include_filter)
-        else:
-            self.include_filter_exact = include_filter
+        self.refresh_filter()
 
     @property
     def exclude_filter(self):
-        '''Getter method for exclude_filter'''
+        '''Getter method for exclude_filter.
+
+        Use this method to print exclude_filter only.
+
+        If the items needed to be added, use add_to_exclude_filter method.
+
+        E.g.
+            self.add_to_exclude_filter('pattern1')
+
+        If the filter needs to be modified without using add_to_exclude_filter,
+        call refresh_filter() after modification. Otherwise, the change will
+        not take effect.
+
+        E.g.
+            Get and modify filter:
+                filter = Filter()
+                filter.exclude_filter.append('pattern1')
+            Refresh the filter:
+                filter.refresh_filter()
+        '''
         return getattr(self, _EXCLUDE_FILTER, [])
 
     @exclude_filter.setter
     def exclude_filter(self, exclude_filter):
         '''Setter method for exclude_filter'''
         setattr(self, _EXCLUDE_FILTER, exclude_filter)
+        self.refresh_filter()
+
+    def add_to_include_filter(self, pattern, auto_refresh=True):
+        '''Add an item to include_filter.
+
+        Args:
+            pattern: string or list of string. Item(s) to add
+            auto_refresh: bool, whether to automatically call refresh_filter().
+                          Default is True. Use False only if a large number of
+                          items are added one by one in a sequence call.
+                          In that case, call refresh_filter() at the end of the
+                          sequence.
+        '''
+        if not isinstance(pattern, types.ListType):
+            pattern = [pattern]
+
+        self.include_filter.extend(pattern)
+
+        if auto_refresh:
+            self.refresh_filter()
+
+    def add_to_exclude_filter(self, pattern, auto_refresh=True):
+        '''Add an item to exclude_filter.
+
+        Args:
+            pattern: string or list of string. Item(s) to add
+            auto_refresh: bool, whether to automatically call refresh_filter().
+                          Default is True. Use False only if a large number of
+                          items are added one by one in a sequence call.
+                          In that case, call refresh_filter() at the end of the
+                          sequence.
+        '''
+        if not isinstance(pattern, types.ListType):
+            pattern = [pattern]
+
+        self.exclude_filter.extend(pattern)
+
+        if auto_refresh:
+            self.refresh_filter()
+
+    def refresh_filter(self):
+        '''Process the filter patterns.
+
+        This method splits filter into exact and regex patterns.
+        Bitness will also be appended if expand_bitness is True.
+        '''
+        include_filter = copy.copy(self.include_filter)
+        exclude_filter = copy.copy(self.exclude_filter)
+
+        if self.enable_negative_pattern:
+            include_filter, include_filter_negative = SplitNegativePattern(
+                include_filter)
+            exclude_filter.extend(include_filter_negative)
+
         if self.enable_regex:
+            self.include_filter_exact, self.include_filter_regex = SplitFilterList(
+                include_filter)
             self.exclude_filter_exact, self.exclude_filter_regex = SplitFilterList(
                 exclude_filter)
         else:
+            self.include_filter_exact = include_filter
             self.exclude_filter_exact = exclude_filter
+
+        if self.expand_bitness:
+            self.include_filter_exact = ExpandBitness(
+                self.include_filter_exact)
+            self.exclude_filter_exact = ExpandBitness(
+                self.exclude_filter_exact)
 
     def __str__(self):
         return ('Filter:\nenable_regex: {enable_regex}\n'
@@ -436,15 +554,17 @@ class Filter(object):
                 'include_filter_exact: {include_filter_exact}\n'
                 'include_filter_regex: {include_filter_regex}\n'
                 'exclude_filter_exact: {exclude_filter_exact}\n'
-                'exclude_filter_regex: {exclude_filter_regex}'.format(
+                'exclude_filter_regex: {exclude_filter_regex}\n'
+                'expand_bitness: {expand_bitness}'.format(
                     enable_regex=self.enable_regex,
                     enable_negative_pattern=self.enable_negative_pattern,
-                    enable_module_name_prefix_matching=self.
-                    enable_module_name_prefix_matching,
+                    enable_module_name_prefix_matching=
+                    self.enable_module_name_prefix_matching,
                     module_name=self.module_name,
                     include_filter=self.include_filter,
                     exclude_filter=self.exclude_filter,
                     include_filter_exact=self.include_filter_exact,
                     include_filter_regex=self.include_filter_regex,
                     exclude_filter_exact=self.exclude_filter_exact,
-                    exclude_filter_regex=self.exclude_filter_regex))
+                    exclude_filter_regex=self.exclude_filter_regex,
+                    expand_bitness=self.expand_bitness))
