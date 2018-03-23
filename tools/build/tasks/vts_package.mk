@@ -229,6 +229,9 @@ target_script_copy_pairs := \
 system_property_compatibility_test_res_copy_pairs := \
   system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
 
+$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt:
+	@echo -n $(PLATFORM_VNDK_VERSION) > $@
+
 vts_test_core_copy_pairs := \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
@@ -254,6 +257,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(target_script_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
+  $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt \
 
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs)
