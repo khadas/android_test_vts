@@ -21,6 +21,9 @@ from vts.runners.host import keys
 from vts.utils.python.common import vintf_utils
 
 
+HAL_INTERFACE_DELIMITER = "::"
+
+
 def FindHalDescription(hal_desc, hal_package_name):
     """Find a HAL description whose name is hal_package_name from hal_desc."""
     for hal_full_name in hal_desc:
@@ -43,11 +46,20 @@ def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
     Returns:
         True if found or vintf_xml is malformed, False otherwise.
     """
-    result = True
     if "@" not in hal:
         logging.error("HAL full name is invalid, %s", hal)
         return False
     hal_package, hal_version = hal.split("@")
+
+    items = hal_version.split(HAL_INTERFACE_DELIMITER)
+    if len(items) > 2:
+        logging.error("precondition HAL name format error: %s", hal)
+        return False
+    elif len(items) == 2:
+        hal_version, interface = items
+    else:
+        interface = None
+
     logging.info("HAL package, version = %s, %s", hal_package, hal_version)
     hal_version_major, hal_version_minor = vintf_utils.ParseHalVersion(
         hal_version)
@@ -63,23 +75,37 @@ def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
         return True
     elif (hwbinder_hal_desc is None and passthrough_hal_desc is None):
         logging.warn(
-            "The required HAL %s not found in VINTF XML.",
-            hal)
+            "The required HAL %s not found in VINTF XML.", hal)
         return False
-    elif (hwbinder_hal_desc is None and passthrough_hal_desc is not None):
-        if bitness:
-            if (bitness not in passthrough_hal_desc.hal_archs):
-                logging.warn(
-                    "The required feature %s found as a "
-                    "passthrough HAL but the client bitness %s "
-                    "unsupported",
-                    hal, bitness)
-                result = False
-        hal_desc = passthrough_hal_desc
     else:
-        hal_desc = hwbinder_hal_desc
+        if passthrough_hal_desc:
+            if bitness:
+                if (bitness not in passthrough_hal_desc.hal_archs):
+                    logging.warn(
+                        "The required feature %s found as a "
+                        "passthrough HAL but the client bitness %s "
+                        "unsupported",
+                        hal, bitness)
+                    return False
+            hal_desc = passthrough_hal_desc
+        else:
+            hal_desc = hwbinder_hal_desc
+
+        if interface:
+            has_interface = False
+            for hal_interface in hal_desc.hal_interfaces:
+                if hal_interface.hal_interface_name == interface:
+                    has_interface = True
+                    break
+
+            if not has_interface:
+                logging.warn("The required HAL interface %s is not "
+                             "available for HAL %s", interface, hal)
+                return False
+
         logging.info(
             "The feature %s found in VINTF XML", hal)
+
     found_version_major = hal_desc.hal_version_major
     found_version_minor = hal_desc.hal_version_minor
     if (hal_version_major != found_version_major or
@@ -87,8 +113,9 @@ def IsHalRegisteredInVintfXml(hal, vintf_xml, bitness):
         logging.warn(
             "The found HAL version %s@%s is not relevant for %s",
             found_version_major, found_version_minor, hal_version)
-        result = False
-    return result
+        return False
+
+    return True
 
 
 def CanRunHidlHalTest(test_instance, dut, shell=None):
