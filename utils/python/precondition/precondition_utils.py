@@ -93,14 +93,15 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
     if hal_specified:
         logging.info("precondition HAL name is specified: %s", hal_specified)
         hal = hal_specified
-        interface = None
-        if HAL_INTERFACE_DELIMITER in hal:
-            items = hal.split(HAL_INTERFACE_DELIMITER)
-            if len(items) > 2:
-                logging.error("precondition HAL name format error: %s",
-                              hal_specified)
-                return False
+
+        items = hal_specified.split(HAL_INTERFACE_DELIMITER)
+        if len(items) > 2:
+            logging.error("precondition HAL name format error: %s", hal_specified)
+            return False
+        elif len(items) == 2:
             hal, interface = items
+        else:
+            interface = None
 
         vintf_xml = dut.getVintfXml()
         if vintf_xml:
@@ -116,23 +117,23 @@ def CanRunHidlHalTest(test_instance, dut, shell=None):
                     hal_specified)
                 return False
             else:
-                if interface:
-                    if hal in hwbinder_hals:
-                        hal_info = hwbinder_hals[hal]
-                    else:
-                        if hasattr(test_instance, keys.ConfigKeys.IKEY_ABI_BITNESS):
-                            bitness = getattr(test_instance,
-                                              keys.ConfigKeys.IKEY_ABI_BITNESS)
-                            if (bitness not in
-                                passthrough_hals[hal].hal_archs):
-                                logging.warn(
-                                    "The required feature %s found as a "
-                                    "passthrough HAL but the client bitness %s "
-                                    "not supported",
-                                    hal_specified, bitness)
-                                return False
-                        hal_info = passthrough_hals[hal]
+                if hal in hwbinder_hals:
+                    hal_info = hwbinder_hals[hal]
+                else:
+                    hal_info = passthrough_hals[hal]
+                    if hasattr(test_instance, keys.ConfigKeys.IKEY_ABI_BITNESS):
+                        bitness = getattr(test_instance,
+                                          keys.ConfigKeys.IKEY_ABI_BITNESS)
+                        if (bitness not in
+                            passthrough_hals[hal].hal_archs):
+                            logging.warn(
+                                "The required feature %s found as a "
+                                "passthrough HAL but the client bitness %s "
+                                "not supported",
+                                hal_specified, bitness)
+                            return False
 
+                if interface:
                     has_interface = False
                     for hal_interface in hal_info.hal_interfaces:
                         if hal_interface.hal_interface_name == interface:
