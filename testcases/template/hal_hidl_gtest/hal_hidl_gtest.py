@@ -61,7 +61,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             keys.ConfigKeys.IKEY_DISABLE_CPU_FREQUENCY_SCALING,
             default_value=True)
 
-        if not self._skip_all_testcases:
+        if not self.isSkipAllTests():
             self._cpu_freq = cpu_frequency_scaling.CpuFrequencyScalingController(
                 self._dut)
             if self._disable_cpu_frequency_scaling:
@@ -70,11 +70,11 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         else:
             self._cpu_freq = None
 
-        if not self._skip_all_testcases:
+        if not self.isSkipAllTests():
             ret = precondition_utils.CanRunHidlHalTest(
                 self, self._dut, self.shell, self.run_as_compliance_test)
             if not ret:
-                self._skip_all_testcases = True
+                self.skipAllTests("HIDL HAL precondition check failed.")
 
         if self.sancov.enabled and self._target_hals:
             self.sancov.InitializeDeviceCoverage(self._dut,
@@ -155,14 +155,11 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
             if not testable:
-                logging.error("Hal: %s is not testable, skip all tests.",
-                          service)
-                self._skip_all_testcases = True
+                self.skipAllTests("Hal: %s is not testable, "
+                                  "skip all tests." % service)
                 return initial_test_cases
             if not service_names:
-                logging.error("No service name found for: %s, skip all tests.",
-                              service)
-                self._skip_all_testcases = True
+                self.skipAllTests("No service name found for: %s, skip all tests." % service)
                 # If any of the test services are not available, return the
                 # initial test cases directly.
                 return initial_test_cases
@@ -230,7 +227,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
 
     def tearDownClass(self):
         """Turns off CPU frequency scaling."""
-        if (not self._skip_all_testcases and getattr(self, "_cpu_freq", None)
+        if (not self.isSkipAllTests() and getattr(self, "_cpu_freq", None)
             and self._disable_cpu_frequency_scaling):
             logging.info("Enable CPU frequency scaling")
             self._cpu_freq.EnableCpuScaling()

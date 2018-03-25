@@ -51,7 +51,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
         # Testability check.
         if not precondition_utils.CanRunHidlHalTest(
                 self, self.dut, self.shell, self.run_as_compliance_test):
-            self._skip_all_testcases = True
+            self.skipAllTests("precondition check for hidl hal tests didn't pass")
             return
 
         # Initialization for coverage measurement.
@@ -73,7 +73,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
         If coverage is enabled for the test, collect the coverage data and
         upload it to dashboard.
         """
-        if self._skip_all_testcases:
+        if self.isSkipAllTests():
             return
 
         if self.coverage.enabled and self.coverage.global_coverage:
@@ -146,16 +146,14 @@ class HalHidlHostTest(param_test.ParamTestClass):
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
             if not testable:
-                logging.error("Hal: %s is not testable, skip all tests.",
-                          service)
-                self._skip_all_testcases = True
+                self.skipAllTests("Hal: %s is not testable, "
+                                  "skip all tests." % service)
                 return []
             if service_names:
                 service_instances[service] = service_names
             else:
-                logging.error("No service name found for: %s, skip all tests.",
-                              service)
-                self._skip_all_testcases = True
+                self.skipAllTests("No service name found for: %s, "
+                                  "skip all tests." % service)
                 return []
         logging.info("registered service instances: %s", service_instances)
 

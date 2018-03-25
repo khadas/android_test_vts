@@ -45,7 +45,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         self._test_hal_services = set()
         super(HalHidlReplayTest, self).setUpClass()
 
-        if self._skip_all_testcases:
+        if self.isSkipAllTests():
             return
 
         if self.coverage.enabled and self._test_hal_services is not None:
@@ -126,7 +126,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
     def tearDownClass(self):
         """Performs clean-up tasks."""
         # Delete the pushed file.
-        if not self._skip_all_testcases:
+        if not self.isSkipAllTests():
             for trace_path in self.trace_paths:
                 trace_file_name = str(os.path.basename(trace_path))
                 target_trace_path = path_utils.JoinTargetPath(
@@ -184,17 +184,15 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 self.shell, service, self.abi_bitness,
                 self.run_as_compliance_test)
             if not testable:
-                logging.error("Hal: %s is not testable, skip all tests.",
-                          service)
-                self._skip_all_testcases = True
+                self.skipAlltests("Hal: %s is not testable, "
+                                  "skip all tests." % service)
                 return []
             if service_names:
                 service_instances[service] = service_names
                 self._test_hal_services.add(service)
             else:
-                logging.error("No service name found for: %s, skip all tests.",
-                              service)
-                self._skip_all_testcases = True
+                self.skipAlltests("No service name found for: %s, "
+                                  "skip all tests." % service)
                 return []
         logging.info("registered service instances: %s", service_instances)
 
