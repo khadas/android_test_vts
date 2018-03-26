@@ -39,6 +39,7 @@ log_severity_map = {
     "DEBUG": logging.DEBUG,
 }
 
+
 def _parse_logline_timestamp(t):
     """Parses a logline timestamp into a tuple.
 
@@ -200,14 +201,20 @@ def createLatestLogAlias(actual_path):
     os.symlink(actual_path, link_path)
 
 
-def setupTestLogger(log_path, prefix=None, filename=None, log_severity="INFO"):
+def setupTestLogger(log_path,
+                    prefix=None,
+                    filename=None,
+                    log_severity="INFO",
+                    create_symlink=True):
     """Customizes the root logger for a test run.
 
     Args:
         log_path: Location of the report file.
         prefix: A prefix for each log line in terminal.
         filename: Name of the files. The default is the time the objects
-            are requested.
+                  are requested.
+        create_symlink: bool. determines whether to create the symlink or not.
+                        set to True as default.
 
     Returns:
         A string, abs path to the created log file.
@@ -216,7 +223,7 @@ def setupTestLogger(log_path, prefix=None, filename=None, log_severity="INFO"):
         filename = getLogFileTimestamp()
     utils.create_dir(log_path)
     logger = _initiateTestLogger(log_path, prefix, filename, log_severity)
-    if isSymlinkSupported():
+    if create_symlink and isSymlinkSupported():
         createLatestLogAlias(log_path)
     return os.path.join(log_path, filename)
 
