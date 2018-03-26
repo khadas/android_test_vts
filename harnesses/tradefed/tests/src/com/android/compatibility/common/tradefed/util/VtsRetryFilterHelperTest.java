@@ -17,25 +17,26 @@
 package com.android.compatibility.common.tradefed.util;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
-import com.android.compatibility.common.tradefed.util.RetryFilterHelper;
-import com.android.compatibility.common.tradefed.util.RetryType;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
-import java.io.File;
-import java.net.URL;
-import java.util.HashSet;
+import com.android.tradefed.util.FileUtil;
+
 import org.easymock.EasyMock;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.io.File;
+import java.util.HashSet;
 
 /**
  * Unit tests for {@link VtsRetryFilterHelper}.
  */
 @RunWith(JUnit4.class)
 public class VtsRetryFilterHelperTest {
-    private final String RESULTS_DIR = "/util/results";
+    private final String RESULTS_FILE = "/util/results/2017.09.01_17.30.00/test_result.xml";
     private final String VENDOR_FINGERPRINT =
             "Android/aosp_sailfish/sailfish:8.0.0/OC/4311111:userdebug/test-keys";
     private final String WRONG_FINGERPRINT =
@@ -44,17 +45,28 @@ public class VtsRetryFilterHelperTest {
     private CompatibilityBuildHelper mBuildHelper;
     private RetryFilterHelper mHelper;
 
+    private File mTmpDir;
+
     @Before
     public void setUp() throws Exception {
-        URL resultsDir = getClass().getResource(RESULTS_DIR);
+        mTmpDir = FileUtil.createTempDir("vts-unit-tests");
+        File invDir = new File(mTmpDir, "2017.09.01_17.30.00");
+        invDir.mkdirs();
+        FileUtil.saveResourceFile(
+                getClass().getResourceAsStream(RESULTS_FILE), invDir, "test_result.xml");
         mBuildHelper = new CompatibilityBuildHelper(null) {
             @Override
             public File getResultsDir() {
-                return new File(resultsDir.getPath());
+                return mTmpDir;
             }
         };
         mHelper = new VtsRetryFilterHelper(mBuildHelper, 0, "SUB_PLAN", new HashSet<String>(),
                 new HashSet<String>(), "ABI_NAME", "MODULE_NAME", "TEST_NAME", RetryType.FAILED);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        FileUtil.recursiveDelete(mTmpDir);
     }
 
     /**

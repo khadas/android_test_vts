@@ -16,7 +16,9 @@
 
 package com.android.tradefed.targetprep;
 
+import com.android.annotations.VisibleForTesting;
 import com.android.tradefed.build.IBuildInfo;
+import com.android.tradefed.command.remote.DeviceDescriptor;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -29,22 +31,15 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
-import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -90,8 +85,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     @Option(name = "python-version", description = "The version of a Python interpreter to use.")
     private String mPythonVersion = "";
 
-    IBuildInfo mBuildInfo = null;
-    IRunUtil mRunUtil = new RunUtil();
+    private IBuildInfo mBuildInfo = null;
+    private DeviceDescriptor mDescriptor = null;
+    private IRunUtil mRunUtil = new RunUtil();
+
     String mPip = PIP;
     String mLocalPypiPath = null;
 
@@ -106,6 +103,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     public void setUp(IInvocationContext context)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
         mBuildInfo = context.getBuildInfos().get(0);
+        ITestDevice device = context.getDevices().get(0);
+        mDescriptor = device.getDeviceDescriptor();
         startVirtualenv(mBuildInfo);
         setLocalPypiPath();
         installDeps(mBuildInfo);
@@ -131,11 +130,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     /**
      * This method sets mLocalPypiPath, the local PyPI package directory to
      * install python packages from in the installDeps method.
-     *
-     * @throws IOException
-     * @throws JSONException
      */
-    protected void setLocalPypiPath() throws RuntimeException {
+    protected void setLocalPypiPath() {
         VtsVendorConfigFileUtil configReader = new VtsVendorConfigFileUtil();
         if (configReader.LoadVendorConfig(mBuildInfo)) {
             // First try to load local PyPI directory path from vendor config file
@@ -181,7 +177,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (!isOnWindows()) {
-            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
+            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.i(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
                         path, c.getStatus(), c.getStdout(), c.getStderr()));
@@ -209,20 +205,20 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         if (!mScriptFiles.isEmpty()) {
             for (String scriptFile : mScriptFiles) {
                 CLog.i("Attempting to execute a script, %s", scriptFile);
-                CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, scriptFile);
+                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, scriptFile);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Executing script %s failed", scriptFile);
-                    throw new TargetSetupError("Failed to source a script");
+                    throw new TargetSetupError("Failed to source a script", mDescriptor);
                 }
             }
         }
         if (mRequirementsFile != null) {
-            CommandResult c = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip,
-                    "install", "-r", mRequirementsFile.getAbsolutePath());
-            if (c.getStatus() != CommandStatus.SUCCESS) {
-                CLog.e("Installing dependencies from %s failed",
-                        mRequirementsFile.getAbsolutePath());
-                throw new TargetSetupError("Failed to install dependencies with pip");
+            CommandResult c = getRunUtil().runTimedCmd(
+                    BASE_TIMEOUT * 5, mPip, "install", "-r", mRequirementsFile.getAbsolutePath());
+            if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
+                CLog.e("Installing dependencies from %s failed with error: %s",
+                        mRequirementsFile.getAbsolutePath(), c.getStderr());
+                throw new TargetSetupError("Failed to install dependencies with pip", mDescriptor);
             }
             hasDependencies = true;
         }
@@ -234,7 +230,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 CommandResult result = null;
                 if (mLocalPypiPath != null) {
                     CLog.i("Attempting installation of %s from local directory", dep);
-                    result = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep,
+                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep,
                             "--no-index", "--find-links=" + mLocalPypiPath);
                     CLog.i(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                             result.getStdout(), result.getStderr()));
@@ -244,19 +240,21 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 }
                 if (mLocalPypiPath == null || result.getStatus() != CommandStatus.SUCCESS) {
                     CLog.i("Attempting installation of %s from PyPI", dep);
-                    result = mRunUtil.runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep);
-                    CLog.i(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                            result.getStdout(), result.getStderr()));
+                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep);
+                    CLog.i("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                            result.getStdout(), result.getStderr());
                     if (result.getStatus() != CommandStatus.SUCCESS) {
                         CLog.e("Installing %s from PyPI failed.", dep);
                         CLog.i("Attempting to upgrade %s", dep);
-                        result = mRunUtil.runTimedCmd(
+                        result = getRunUtil().runTimedCmd(
                                 BASE_TIMEOUT * 5, mPip, "install", "--upgrade", dep);
                         if (result.getStatus() != CommandStatus.SUCCESS) {
-                            throw new TargetSetupError(String.format(
-                                    "Failed to install dependencies with pip. "
-                                            + "Result %s. stdout: %s, stderr: %s",
-                                    result.getStatus(), result.getStdout(), result.getStderr()));
+                            throw new TargetSetupError(
+                                    String.format("Failed to install dependencies with pip. "
+                                                    + "Result %s. stdout: %s, stderr: %s",
+                                            result.getStatus(), result.getStdout(),
+                                            result.getStderr()),
+                                    mDescriptor);
                         } else {
                             CLog.i(String.format("Result %s. stdout: %s, stderr: %s",
                                     result.getStatus(), result.getStdout(), result.getStderr()));
@@ -292,7 +290,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             String virtualEnvPath = mVenvDir.getAbsolutePath();
             CommandResult c;
             if (mPythonVersion.length() == 0) {
-                c = mRunUtil.runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
+                c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
             } else {
                 String[] cmd;
                 cmd = new String[4];
@@ -300,11 +298,11 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 cmd[1] = "-p";
                 cmd[2] = "python" + mPythonVersion;
                 cmd[3] = virtualEnvPath;
-                c = mRunUtil.runTimedCmd(BASE_TIMEOUT, cmd);
+                c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
             }
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
-                throw new TargetSetupError("Failed to create virtualenv");
+                throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
             }
             CLog.i(VIRTUAL_ENV_PATH + " = " + virtualEnvPath + "\n");
             if (mIsDirCreator) {
@@ -314,7 +312,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             activate();
         } catch (IOException | RuntimeException e) {
             CLog.e("Failed to create temp directory for virtualenv");
-            throw new TargetSetupError("Error creating virtualenv", e);
+            throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
         }
     }
 
@@ -341,6 +339,17 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
 
     protected void setRequirementsFile(File f) {
         mRequirementsFile = f;
+    }
+
+    /**
+     * Get an instance of {@link IRunUtil}.
+     */
+    @VisibleForTesting
+    IRunUtil getRunUtil() {
+        if (mRunUtil == null) {
+            mRunUtil = new RunUtil();
+        }
+        return mRunUtil;
     }
 
     /**
@@ -377,9 +386,9 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
 
     private void activate() {
         File binDir = new File(mVenvDir, isOnWindows() ? "Scripts" : "bin");
-        mRunUtil.setWorkingDir(binDir);
+        getRunUtil().setWorkingDir(binDir);
         String path = System.getenv(PATH);
-        mRunUtil.setEnvVariable(PATH, binDir + File.pathSeparator + path);
+        getRunUtil().setEnvVariable(PATH, binDir + File.pathSeparator + path);
         File pipFile = new File(binDir, PIP);
         pipFile.setExecutable(true);
         mPip = pipFile.getAbsolutePath();
