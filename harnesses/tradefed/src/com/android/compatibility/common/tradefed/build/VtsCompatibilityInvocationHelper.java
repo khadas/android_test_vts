@@ -15,6 +15,7 @@
  */
 package com.android.compatibility.common.tradefed.build;
 
+import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.testtype.suite.TestSuiteInfo;
 
 import java.io.File;

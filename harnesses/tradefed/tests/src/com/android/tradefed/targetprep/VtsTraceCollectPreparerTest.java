@@ -16,7 +16,6 @@
 
 package com.android.tradefed.targetprep;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
@@ -24,10 +23,6 @@ import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionSetter;
 import com.android.tradefed.device.ITestDevice;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.NoSuchElementException;
 import junit.framework.AssertionFailedError;
 
 import org.easymock.EasyMock;
@@ -35,6 +30,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.NoSuchElementException;
 
 /**
  * Unit tests for {@link VtsTraceCollectPreparer},
