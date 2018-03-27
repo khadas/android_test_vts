@@ -17,15 +17,12 @@
 package com.android.tradefed.device.metric;
 
 import com.android.tradefed.build.IBuildInfo;
-import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
-import com.android.tradefed.device.CollectingOutputReceiver;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.tradefed.result.FileInputStreamSource;
-import com.android.tradefed.result.LogDataType;
 import com.android.tradefed.util.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -45,7 +42,7 @@ public class VtsHalTraceCollector extends BaseDeviceMetricCollector {
     // VTS profiling configure binary name.
     static final String PROFILING_CONFIGURE_BINARY = "vts_profiling_configure";
     // Prefix of temp directory that stores the trace files.
-    static final String TRACE_DIR_PREFIX = "/tmp/vts-profiling/";
+    static final String TRACE_DIR_PREFIX = System.getProperty("java.io.tmpdir") + "/vts-profiling/";
     static final String TRACE_PATH = "trace_path";
 
     @Override

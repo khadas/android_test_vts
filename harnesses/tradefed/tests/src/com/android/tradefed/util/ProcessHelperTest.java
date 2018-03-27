@@ -16,26 +16,30 @@
 
 package com.android.tradefed.util;
 
-import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.ProcessHelper;
-import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.RunUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 
 /**
  * Test cases for {@link ProcessHelper}.
  */
-public class ProcessHelperTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ProcessHelperTest {
     private ProcessHelper mProcess;
 
     /**
      * Reset the ProcessHelper
      */
-    @Override
+    @Before
     public void setUp() {
         mProcess = null;
     }
@@ -43,7 +47,7 @@ public class ProcessHelperTest extends TestCase {
     /**
      * Terminate the process, join threads and close IO streams.
      */
-    @Override
+    @After
     public void tearDown() {
         if (mProcess != null) {
             mProcess.cleanUp();
@@ -53,6 +57,7 @@ public class ProcessHelperTest extends TestCase {
     /**
      * Test running a process that returns zero.
      */
+    @Test
     public void testSuccess() throws IOException {
         mProcess = new ProcessHelper(new ProcessBuilder("echo", "123").start());
         CommandStatus status = mProcess.waitForProcess(1000);
@@ -65,18 +70,21 @@ public class ProcessHelperTest extends TestCase {
     /**
      * Test running a process that returns non-zero.
      */
+    @Test
     public void testFailure() throws IOException {
         mProcess = new ProcessHelper(new ProcessBuilder("ls", "--WRONG-OPTION").start());
         CommandStatus status = mProcess.waitForProcess(1000);
         assertEquals(CommandStatus.FAILED, status);
         assertFalse(mProcess.isRunning());
         assertTrue(mProcess.getStdout().isEmpty());
-        assertTrue(mProcess.getStderr().contains("unrecognized option"));
+        String stderr = mProcess.getStderr();
+        assertTrue(stderr.contains("unrecognized option"));
     }
 
     /**
      * Test running a process that times out.
      */
+    @Test
     public void testTimeout() throws IOException {
         mProcess = new ProcessHelper(new ProcessBuilder("cat").start());
         CommandStatus status = mProcess.waitForProcess(30);
@@ -87,6 +95,7 @@ public class ProcessHelperTest extends TestCase {
     /**
      * Test running a process and being interrupted.
      */
+    @Test
     public void testInterrupt() throws IOException, InterruptedException {
         mProcess = new ProcessHelper(new ProcessBuilder("cat").start());
         IRunUtil runUtil = RunUtil.getDefault();
