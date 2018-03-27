@@ -59,6 +59,6 @@ import org.junit.runners.Suite.SuiteClasses;
     ProcessHelperTest.class,
     VtsPythonRunnerHelperTest.class,
 })
-public class UnitTests {
+public class VtsUnitTests {
     // empty on purpose
 }
