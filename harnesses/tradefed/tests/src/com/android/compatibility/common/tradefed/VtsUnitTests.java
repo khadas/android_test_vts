@@ -37,6 +37,6 @@ import org.junit.runners.Suite.SuiteClasses;
     // util
     VtsRetryFilterHelperTest.class,
 })
-public class UnitTests {
+public class VtsUnitTests {
     // empty on purpose
 }
