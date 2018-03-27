@@ -16,14 +16,15 @@
 
 package com.android.tradefed.targetprep;
 
+import com.android.annotations.VisibleForTesting;
 import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
-import com.android.tradefed.device.CollectingOutputReceiver;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -73,7 +74,7 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
             throws DeviceNotAvailableException, RuntimeException {
-        VtsCompatibilityInvocationHelper invocationHelper = new VtsCompatibilityInvocationHelper();
+        VtsCompatibilityInvocationHelper invocationHelper = createVtsHelper();
         try {
             // adb root.
             device.enableAdbRoot();
@@ -118,6 +119,14 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     }
 
     /**
+     * Create and return a {@link VtsCompatibilityInvocationHelper} to use during the preparer.
+     */
+    @VisibleForTesting
+    VtsCompatibilityInvocationHelper createVtsHelper() {
+        return new VtsCompatibilityInvocationHelper();
+    }
+
+    /**
      * Push all the profiler libraries (with pattern *.vts-profiler.so) and VTS
      * profiling related libraries (with pattern libvts*.so) to device.
      *
@@ -129,6 +138,10 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     private void pushProfilerLib(ITestDevice device, File profilerLibDir, String destDirName)
             throws DeviceNotAvailableException {
         File[] files = profilerLibDir.listFiles();
+        if (files == null) {
+            CLog.d("No files found in %s", profilerLibDir.getAbsolutePath());
+            return;
+        }
         for (File f : files) {
             String fileName = f.getName();
             if (f.isFile()
