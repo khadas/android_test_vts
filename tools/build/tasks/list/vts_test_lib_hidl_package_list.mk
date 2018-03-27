@@ -197,7 +197,9 @@ vts_hal_profiler_libs := \
 
 vts_hal_test_bins := \
   VtsHalAudioV2_0TargetTest \
+  VtsHalAudioV4_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
+  VtsHalAudioEffectV4_0TargetTest \
   VtsHalAuthSecretV1_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
   VtsHalBluetoothV1_0TargetTest \
