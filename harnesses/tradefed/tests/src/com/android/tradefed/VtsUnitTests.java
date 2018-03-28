@@ -19,12 +19,14 @@ import com.android.tradefed.device.metric.VtsCoverageCollectorTest;
 import com.android.tradefed.device.metric.VtsHalTraceCollectorTest;
 import com.android.tradefed.presubmit.VtsConfigLoadingTest;
 import com.android.tradefed.targetprep.VtsCoveragePreparerTest;
+import com.android.tradefed.targetprep.VtsHalAdapterPreparerTest;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparerTest;
 import com.android.tradefed.targetprep.VtsTraceCollectPreparerTest;
 import com.android.tradefed.testtype.VtsFuzzTestResultParserTest;
 import com.android.tradefed.testtype.VtsFuzzTestTest;
 import com.android.tradefed.testtype.VtsMultiDeviceTestResultParserTest;
 import com.android.tradefed.testtype.VtsMultiDeviceTestTest;
+import com.android.tradefed.util.CmdUtilTest;
 import com.android.tradefed.util.ProcessHelperTest;
 import com.android.tradefed.util.VtsPythonRunnerHelperTest;
 
@@ -48,6 +50,7 @@ import org.junit.runners.Suite.SuiteClasses;
     VtsConfigLoadingTest.class,
     // targetprep
     VtsCoveragePreparerTest.class,
+    VtsHalAdapterPreparerTest.class,
     VtsPythonVirtualenvPreparerTest.class,
     VtsTraceCollectPreparerTest.class,
 
@@ -58,9 +61,10 @@ import org.junit.runners.Suite.SuiteClasses;
     VtsMultiDeviceTestTest.class,
 
     // util
+    CmdUtilTest.class,
     ProcessHelperTest.class,
     VtsPythonRunnerHelperTest.class,
 })
-public class UnitTests {
+public class VtsUnitTests {
     // empty on purpose
 }
