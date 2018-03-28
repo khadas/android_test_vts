@@ -17,8 +17,8 @@
     <option name="null-device" value="true" />
     <build_provider class="com.android.tradefed.build.StubBuildProvider" />
     <test class="com.android.tradefed.testtype.HostTest" >
-        <option name="class" value="com.android.tradefed.UnitTests" />
-        <option name="class" value="com.android.compatibility.common.tradefed.UnitTests" />
+        <option name="class" value="com.android.tradefed.VtsUnitTests" />
+        <option name="class" value="com.android.compatibility.common.tradefed.VtsUnitTests" />
     </test>
     <logger class="com.android.tradefed.log.FileLogger" />
 
