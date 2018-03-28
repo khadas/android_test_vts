@@ -21,6 +21,7 @@
         <option name="push" value="spec/test/vts/specification/lib/ndk/bionic/1.0/libcV1.vts->/data/local/tmp/spec/lib/ndk/bionic/1.0/libcV1.vts" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="LibcTest" />
         <option name="test-case-path" value="vts/testcases/system/libc/LibcTest" />
     </test>
 </configuration>
