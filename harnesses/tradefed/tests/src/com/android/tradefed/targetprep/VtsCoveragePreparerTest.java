@@ -17,7 +17,13 @@
 package com.android.tradefed.targetprep;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionSetter;
@@ -27,33 +33,28 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 /**
- * Unit tests for {@link VtsCoveragePreparer},
+ * Unit tests for {@link VtsCoveragePreparer}.
  */
 @RunWith(JUnit4.class)
 public final class VtsCoveragePreparerTest {
     private String BUILD_INFO_ARTIFACT = VtsCoveragePreparer.BUILD_INFO_ARTIFACT;
     private String GCOV_PROPERTY = VtsCoveragePreparer.GCOV_PROPERTY;
-    private String GCOV_ARTIFACT = VtsCoveragePreparer.GCOV_ARTIFACT;
     private String GCOV_FILE_NAME = VtsCoveragePreparer.GCOV_FILE_NAME;
-    private String SYMBOLS_ARTIFACT = VtsCoveragePreparer.SYMBOLS_ARTIFACT;
     private String SYMBOLS_FILE_NAME = VtsCoveragePreparer.SYMBOLS_FILE_NAME;
-    private String SANCOV_FLAVOR = VtsCoveragePreparer.SANCOV_FLAVOR;
     private String COVERAGE_REPORT_PATH = VtsCoveragePreparer.COVERAGE_REPORT_PATH;
 
     // Path to store coverage test files.
@@ -88,7 +89,7 @@ public final class VtsCoveragePreparerTest {
         mDeviceInfoPath.mkdirs();
         CommandResult commandResult = new CommandResult();
         commandResult.setStatus(CommandStatus.SUCCESS);
-        doReturn(commandResult).when(mRunUtil).runTimedCmd(anyLong(), anyObject());
+        doReturn(commandResult).when(mRunUtil).runTimedCmd(anyLong(), any());
     }
 
     @After
@@ -102,7 +103,7 @@ public final class VtsCoveragePreparerTest {
         doReturn("None").when(mDevice).getProperty(GCOV_PROPERTY);
 
         mPreparer.setUp(mDevice, mBuildInfo);
-        verify(mBuildInfo, never()).setFile(anyObject(), anyObject(), anyObject());
+        verify(mBuildInfo, never()).setFile(any(), any(), any());
     }
 
     @Test
@@ -152,7 +153,7 @@ public final class VtsCoveragePreparerTest {
         doReturn("1").when(mDevice).getProperty(GCOV_PROPERTY);
 
         mPreparer.setUp(mDevice, mBuildInfo);
-        verify(mBuildInfo, never()).setFile(anyObject(), anyObject(), anyObject());
+        verify(mBuildInfo, never()).setFile(any(), any(), any());
     }
 
     @Test
