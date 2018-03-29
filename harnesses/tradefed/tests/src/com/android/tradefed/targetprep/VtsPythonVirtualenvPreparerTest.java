@@ -37,7 +37,8 @@ import org.junit.runners.JUnit4;
 import java.io.File;
 
 /**
- * Unit tests for {@link VtsPythonVirtualenvPreparer}.
+ * Unit tests for {@link VtsPythonVirtualenvPreparer}.</p>
+ * TODO: add tests to cover a full end-to-end scenario.
  */
 @RunWith(JUnit4.class)
 public class VtsPythonVirtualenvPreparerTest {
@@ -75,7 +76,6 @@ public class VtsPythonVirtualenvPreparerTest {
             EasyMock.replay(mMockRunUtil);
             IBuildInfo buildInfo = new BuildInfo();
             mPreparer.installDeps(buildInfo);
-            assertTrue(buildInfo.getFile("PYTHONPATH") != null);
             EasyMock.verify(mMockRunUtil);
         } finally {
             FileUtil.deleteFile(requirementFile);
@@ -100,7 +100,6 @@ public class VtsPythonVirtualenvPreparerTest {
         EasyMock.replay(mMockRunUtil);
         IBuildInfo buildInfo = new BuildInfo();
         mPreparer.installDeps(buildInfo);
-        assertTrue(buildInfo.getFile("PYTHONPATH") != null);
         EasyMock.verify(mMockRunUtil);
     }
 
