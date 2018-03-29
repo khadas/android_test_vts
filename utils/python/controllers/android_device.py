@@ -848,19 +848,22 @@ class AndroidDevice(object):
         Returns:
             Vendor interface manifest string.
         """
-        try:
-            if use_lshal:
-                stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
-                return str(stdout)
-            else:
+        manifest_paths = [
+            "/odm/manifest.xml",
+            "/vendor/manifest.xml",
+        ]
+        if use_lshal:
+            stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
+            return str(stdout)
+
+        else:
+            for manifest in manifest_paths:
                 try:
-                    stdout = self.adb.shell('cat /odm/manifest.xml')
+                    stdout = self.adb.shell('cat %s' % manifest)
+                    return str(stdout)
                 except adb.AdbError as e:
-                    logging.debug("Can't read /odm/manifest.xml; fall back to "
-                                  "use /vendor/manifest.xml instead.")
-                    stdout = self.adb.shell('cat /vendor/manifest.xml')
-                return str(stdout)
-        except adb.AdbError as e:
+                    logging.debug("Can't read %s", manifest)
+            logging.error("Can't find manifest in these paths: %s", manifest_paths)
             return None
 
     def _getSl4aEventDispatcher(self, droid):
