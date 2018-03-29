@@ -19,6 +19,7 @@ import logging
 import os
 import time
 import types
+import yaml
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
@@ -38,7 +39,9 @@ LIST_TEST_OUTPUT_END = ' <=========='
 # the set value for tradefed to skip reading contents as logs.
 TEMP_DIR_NAME = 'temp'
 CONFIG_FILE_NAME = 'test_config.yaml'
-MOBLY_RESULT_FILE_NAME = 'test_run_summary.json'
+MOBLY_RESULT_JSON_FILE_NAME = 'test_run_summary.json'
+MOBLY_RESULT_YAML_FILE_NAME = 'test_summary.yaml'
+
 
 MOBLY_CONFIG_TEXT = '''TestBeds:
   - Name: {module_name}
@@ -56,6 +59,12 @@ MoblyParams:
 # 2. add include filter function
 DEVICES_REQUIRED = 2
 
+RESULT_KEY_TYPE = 'Type'
+RESULT_TYPE_SUMMARY = 'Summary'
+RESULT_TYPE_RECORD = 'Record'
+RESULT_TYPE_TEST_NAME_LIST = 'TestNameList'
+RESULT_TYPE_CONTROLLER_INFO = 'ControllerInfo'
+
 
 class MoblyTest(base_test.BaseTestClass):
     '''Template class for running mobly test cases.
@@ -63,6 +72,7 @@ class MoblyTest(base_test.BaseTestClass):
     Attributes:
         mobly_dir: string, mobly test temp directory for mobly runner
         mobly_config_file_path: string, mobly test config file path
+        result_handlers: dict, map of result type and handler functions
     '''
     def setUpClass(self):
         asserts.assertEqual(
@@ -81,6 +91,13 @@ class MoblyTest(base_test.BaseTestClass):
         file_util.Makedirs(self.mobly_dir)
 
         logging.info('mobly log path: %s' % self.mobly_dir)
+
+        self.result_handlers = {
+            RESULT_TYPE_SUMMARY: self.HandleSimplePrint,
+            RESULT_TYPE_RECORD: self.HandleRecord,
+            RESULT_TYPE_TEST_NAME_LIST: self.HandleSimplePrint,
+            RESULT_TYPE_CONTROLLER_INFO: self.HandleSimplePrint,
+        }
 
     def tearDownClass(self):
         ''' Clear the mobly directory.'''
@@ -144,14 +161,36 @@ class MoblyTest(base_test.BaseTestClass):
         #TODO(yuexima): currently this only support one mobly module per vts
         # module. If multiple mobly module per vts module is needed in the
         # future, here is where it should be changed.
-        path = file_util.FindFile(self.mobly_dir, MOBLY_RESULT_FILE_NAME)
+        file_handlers = (
+            (MOBLY_RESULT_YAML_FILE_NAME, self.ParseYamlResults),
+            (MOBLY_RESULT_JSON_FILE_NAME, self.ParseJsonResults),
+        )
 
-        if not path:
-            logging.error('No results are generated from mobly tests')
-            return
+        for pair in file_handlers:
+            file_path = file_util.FindFile(self.mobly_dir, pair[0])
 
-        logging.info('Mobly test result path: %s', path)
+            if file_path:
+                logging.info('Mobly test yaml result path: %s', file_path)
+                pair[1](file_path)
+                return
 
+        asserts.fail('Mobly test result file not found.')
+
+    def generateAllTests(self):
+        '''Run the mobly test module and parse results.'''
+        #TODO(yuexima): report test names
+
+        self.PrepareConfigFile()
+        self.RunMoblyModule()
+        #TODO(yuexima): check whether DEBUG logs from mobly run are included
+        self.GetMoblyResults()
+
+    def ParseJsonResults(self, result_path):
+        '''Parse mobly test json result.
+
+        Args:
+            result_path: string, result yaml file path.
+        '''
         with open(path, 'r') as f:
             mobly_summary = json.load(f)
 
@@ -170,14 +209,66 @@ class MoblyTest(base_test.BaseTestClass):
 
             self.results.addRecord(record)
 
-    def generateAllTests(self):
-        '''Run the mobly test module and parse results.'''
-        #TODO(yuexima): report test names
+    def ParseYamlResults(self, result_path):
+        '''Parse mobly test yaml result.
 
-        self.PrepareConfigFile()
-        self.RunMoblyModule()
-        #TODO(yuexima): check whether DEBUG logs from mobly run are included
-        self.GetMoblyResults()
+        Args:
+            result_path: string, result yaml file path.
+        '''
+        with open(result_path, 'r') as stream:
+            try:
+                docs = yaml.load_all(stream)
+                for doc in docs:
+                    type = doc.get(RESULT_KEY_TYPE)
+                    if type is None:
+                        logging.warn(
+                            'Mobly result document type unrecognized: %s', doc)
+                        continue
+
+                    logging.info('Parsing result type: %s' + type)
+
+                    handler = self.result_handlers.get(type)
+                    if handler is None:
+                        logging.info('Unknown result type: %s', type)
+                        handler = self.HandleSimplePrint
+
+                    handler(doc)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+    def HandleRecord(self, doc):
+        '''Handle record result document type.
+
+        Args:
+            doc: dict, result document item
+        '''
+        for k, v in doc.items():
+            print k, "->", v
+
+        logging.info('Adding result for %s' % doc.get(records.TestResultEnums.RECORD_NAME))
+        record = records.TestResultRecord(doc.get(records.TestResultEnums.RECORD_NAME))
+        record.test_class = doc.get(records.TestResultEnums.RECORD_CLASS)
+        record.begin_time = doc.get(records.TestResultEnums.RECORD_BEGIN_TIME)
+        record.end_time = doc.get(records.TestResultEnums.RECORD_END_TIME)
+        record.result = doc.get(records.TestResultEnums.RECORD_RESULT)
+        record.uid = doc.get(records.TestResultEnums.RECORD_UID)
+        record.extras = doc.get(records.TestResultEnums.RECORD_EXTRAS)
+        record.details = doc.get(records.TestResultEnums.RECORD_DETAILS)
+        record.extra_errors = doc.get(records.TestResultEnums.RECORD_EXTRA_ERRORS)
+
+        # 'Stacktrace' in yaml result is ignored. 'Stacktrace' is a more
+        # detailed version of record.details when exception is emitted.
+
+        self.results.addRecord(record)
+
+    def HandleSimplePrint(self, doc):
+        '''Simply print result document to log.
+
+        Args:
+            doc: dict, result document item
+        '''
+        for k, v in doc.items():
+            logging.info(str(k) + ": " + str(v))
 
 
 if __name__ == "__main__":
