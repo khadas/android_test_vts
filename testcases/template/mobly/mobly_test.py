@@ -241,9 +241,6 @@ class MoblyTest(base_test.BaseTestClass):
         Args:
             doc: dict, result document item
         '''
-        for k, v in doc.items():
-            print k, "->", v
-
         logging.info('Adding result for %s' % doc.get(records.TestResultEnums.RECORD_NAME))
         record = records.TestResultRecord(doc.get(records.TestResultEnums.RECORD_NAME))
         record.test_class = doc.get(records.TestResultEnums.RECORD_CLASS)
