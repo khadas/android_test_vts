@@ -20,13 +20,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
+import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionSetter;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.IAbi;
 import com.android.tradefed.util.CmdUtil;
+import com.android.tradefed.util.FileUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,11 +40,13 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 /**
- * Unit tests for {@link VtsHalAdapterPreparer},
+ * Unit tests for {@link VtsHalAdapterPreparer}.
  */
 @RunWith(JUnit4.class)
 public final class VtsHalAdapterPreparerTest {
@@ -50,6 +55,8 @@ public final class VtsHalAdapterPreparerTest {
     private String SCRIPT_PATH = VtsHalAdapterPreparer.SCRIPT_PATH;
     private String LIST_HAL_CMD = VtsHalAdapterPreparer.LIST_HAL_CMD;
 
+    private String VTS_NATIVE_TEST_DIR = "DATA/nativetest64/";
+    private String TARGET_NATIVE_TEST_DIR = "/data/nativetest64/";
     private String TEST_HAL_ADAPTER_BINARY = "android.hardware.foo@1.0-adapter";
     private String TEST_HAL_PACKAGE = "android.hardware.foo@1.1";
 
@@ -61,17 +68,33 @@ public final class VtsHalAdapterPreparerTest {
             return mCmdSuccess;
         }
     }
-
     private TestCmdUtil mCmdUtil = new TestCmdUtil();
+    VtsCompatibilityInvocationHelper mMockHelper = null;
+    private class TestPreparer extends VtsHalAdapterPreparer {
+        @Override
+        VtsCompatibilityInvocationHelper createVtsHelper() {
+            return mMockHelper;
+        }
+    }
+    File mTestDir = null;
 
     @Mock private IBuildInfo mBuildInfo;
     @Mock private ITestDevice mDevice;
     @Mock private IAbi mAbi;
-    @InjectMocks private VtsHalAdapterPreparer mPreparer;
+    @InjectMocks private TestPreparer mPreparer = new TestPreparer();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        // Create the base dirs
+        mTestDir = FileUtil.createTempDir("vts-hal-adapter-preparer-unit-tests");
+        new File(mTestDir, VTS_NATIVE_TEST_DIR).mkdirs();
+        mMockHelper = new VtsCompatibilityInvocationHelper() {
+            @Override
+            public File getTestsDir() throws FileNotFoundException {
+                return mTestDir;
+            }
+        };
         mPreparer.setCmdUtil(mCmdUtil);
         OptionSetter setter = new OptionSetter(mPreparer);
         setter.setOptionValue("adapter-binary-name", TEST_HAL_ADAPTER_BINARY);
@@ -80,13 +103,22 @@ public final class VtsHalAdapterPreparerTest {
         doReturn("64").when(mAbi).getBitness();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        FileUtil.recursiveDelete(mTestDir);
+    }
+
     @Test
     public void testOnSetUpAdapterSingleInstance() throws Exception {
+        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
+        testAdapter.createNewFile();
         String output = "android.hardware.foo@1.1::IFoo/default";
         doReturn(output).when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
 
         mPreparer.setUp(mDevice, mBuildInfo);
+        verify(mDevice, times(1))
+                .pushFile(eq(testAdapter), eq(TARGET_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY));
         String adapterCmd = String.format("%s /data/nativetest64/%s %s %s %d", SCRIPT_PATH,
                 TEST_HAL_ADAPTER_BINARY, "IFoo", "default", THREAD_COUNT_DEFAULT);
         verify(mDevice, times(1)).executeShellCommand(eq(adapterCmd));
@@ -94,6 +126,8 @@ public final class VtsHalAdapterPreparerTest {
 
     @Test
     public void testOnSetUpAdapterMultipleInstance() throws Exception {
+        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
+        testAdapter.createNewFile();
         String output = "android.hardware.foo@1.1::IFoo/default\n"
                 + "android.hardware.foo@1.1::IFoo/test\n"
                 + "android.hardware.foo@1.1::IFooSecond/default\n"
@@ -119,15 +153,27 @@ public final class VtsHalAdapterPreparerTest {
     }
 
     @Test
+    public void testOnSetupAdapterNotFound() throws Exception {
+        try {
+            mPreparer.setUp(mDevice, mBuildInfo);
+        } catch (TargetSetupError e) {
+            assertEquals("Could not push adapter.", e.getMessage());
+            return;
+        }
+        fail();
+    }
+    @Test
     public void testOnSetUpAdapterFailed() throws Exception {
+        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
+        testAdapter.createNewFile();
         String output = "android.hardware.foo@1.1::IFoo/default";
         doReturn(output).when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
         mCmdUtil.mCmdSuccess = false;
         try {
             mPreparer.setUp(mDevice, mBuildInfo);
-        } catch (RuntimeException e) {
-            assertEquals("Hal adapter failed.", e.getMessage());
+        } catch (TargetSetupError e) {
+            assertEquals("HAL adapter failed.", e.getMessage());
             return;
         }
         fail();
@@ -139,7 +185,7 @@ public final class VtsHalAdapterPreparerTest {
         try {
             mPreparer.tearDown(mDevice, mBuildInfo, null);
         } catch (RuntimeException e) {
-            assertEquals("Hal restore failed.", e.getMessage());
+            assertEquals("HAL restore failed.", e.getMessage());
             return;
         }
         fail();
