@@ -18,13 +18,10 @@ import json
 import logging
 import os
 import time
-import types
 import yaml
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
-from vts.runners.host import const
-from vts.runners.host import keys
 from vts.runners.host import records
 from vts.runners.host import test_runner
 from vts.utils.python.io import capture_printout
@@ -133,6 +130,8 @@ class MoblyTest(base_test.BaseTestClass):
             if (not line.startswith(LIST_TEST_OUTPUT_START)
                 and line.endswith(LIST_TEST_OUTPUT_END)):
                 test_names.append(line)
+                tr_record = records.TestResultRecord(line, self.test_module_name)
+                self.results.requested.append(tr_record)
 
         return test_names
 
