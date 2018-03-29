@@ -20,5 +20,6 @@
   <option name="vts-plan-result:plan-name" value="vts-firmware" />
 
   <option name="compatibility:include-filter" value="VtsFirmwareDtboVerification" />
+  <option name="compatibility:include-filter" value="VtsFirmwareBootHeaderVerification" />
 
 </configuration>
