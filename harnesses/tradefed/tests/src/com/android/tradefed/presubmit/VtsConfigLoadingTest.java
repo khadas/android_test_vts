@@ -43,6 +43,7 @@ public class VtsConfigLoadingTest {
      * List of the officially supported runners in VTS.
      */
     private static final Set<String> SUPPORTED_VTS_TEST_TYPE = new HashSet<>(Arrays.asList(
+            "com.android.compatibility.common.tradefed.testtype.JarHostTest",
             "com.android.tradefed.testtype.AndroidJUnitTest",
             "com.android.tradefed.testtype.GTest",
             "com.android.tradefed.testtype.VtsMultiDeviceTest"));
