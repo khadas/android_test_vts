@@ -27,6 +27,7 @@ sudo apt-get -y install python-setuptools
 sudo apt-get -y install python-pip
 sudo apt-get -y install python3-pip
 sudo apt-get -y install python-virtualenv
+sudo apt-get -y install build-essential
 
 echo "Install packages for Camera ITS tests"
 sudo apt-get -y install python-tk
