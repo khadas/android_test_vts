@@ -63,7 +63,8 @@ class ConfigKeys(object):
     IKEY_BUILD = "build"
     IKEY_DATA_FILE_PATH = "data_file_path"
 
-    IKEY_BUG_REPORT_ON_FAILURE = "bug_report_on_failure"
+    IKEY_BUG_REPORT_ON_FAILURE = "BUG_REPORT_ON_FAILURE"
+    IKEY_LOGCAT_ON_FAILURE = "LOGCAT_ON_FAILURE"
 
     # sub fields of test_bed
     IKEY_ANDROID_DEVICE = "AndroidDevice"
