@@ -49,8 +49,18 @@ STR_GENERATE = "generate"
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 _BUG_REPORT_FILE_PREFIX = "bugreport"
 _BUG_REPORT_FILE_EXTENSION = ".zip"
+_LOGCAT_FILE_PREFIX = "logcat"
+_LOGCAT_FILE_EXTENSION = ".txt"
 _ANDROID_DEVICES = '_android_devices'
 _REASON_TO_SKIP_ALL_TESTS = '_reason_to_skip_all_tests'
+
+LOGCAT_BUFFERS = [
+    'radio',
+    'events',
+    'main',
+    'system',
+    'crash'
+]
 
 
 class BaseTestClass(object):
@@ -84,7 +94,9 @@ class BaseTestClass(object):
         sancov: SancovFeature, object storing sancov feature util for test run
         profiling: ProfilingFeature, object storing profiling feature util for test run
         _bug_report_on_failure: bool, whether to catch bug report at the end
-                                of failed test cases.
+                                of failed test cases. Default is False
+        _logcat_on_failure: bool, whether to dump logcat at the end
+                                of failed test cases. Default is True
         test_filter: Filter object to filter test names.
     """
 
@@ -165,6 +177,8 @@ class BaseTestClass(object):
             keys.ConfigKeys.RUN_AS_COMPLIANCE_TEST, default_value=False)
         self._bug_report_on_failure = self.getUserParam(
             keys.ConfigKeys.IKEY_BUG_REPORT_ON_FAILURE, default_value=False)
+        self._logcat_on_failure = self.getUserParam(
+            keys.ConfigKeys.IKEY_LOGCAT_ON_FAILURE, default_value=True)
 
     @property
     def android_devices(self):
@@ -393,6 +407,8 @@ class BaseTestClass(object):
         if self._bug_report_on_failure:
             self.DumpBugReport(
                 '%s-%s' % (self.test_module_name, record.test_name))
+        if self._logcat_on_failure:
+            self.DumpLogcat('%s-%s' % (self.TAG, record.test_name))
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -487,6 +503,8 @@ class BaseTestClass(object):
         if self._bug_report_on_failure:
             self.DumpBugReport(
                 '%s-%s' % (self.test_module_name, record.test_name))
+        if self._logcat_on_failure:
+            self.DumpLogcat('%s-%s' % (self.TAG, record.test_name))
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -982,16 +1000,16 @@ class BaseTestClass(object):
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
         for device in self.android_devices:
-            bug_report_file_name = (prefix
-                                    + _BUG_REPORT_FILE_PREFIX
-                                    + device.serial
-                                    + _BUG_REPORT_FILE_EXTENSION)
+            file_name = (prefix
+                         + _BUG_REPORT_FILE_PREFIX
+                         + '_%s' % device.serial
+                         + _BUG_REPORT_FILE_EXTENSION)
 
-            bug_report_file_path = os.path.join(logging.log_path,
-                                                bug_report_file_name)
+            file_path = os.path.join(logging.log_path,
+                                     file_name)
 
-            logging.info('Catching bugreport %s...' % bug_report_file_path)
-            device.adb.bugreport(bug_report_file_path)
+            logging.info('Catching bugreport %s...' % file_path)
+            device.adb.bugreport(file_path)
 
     def skipAllTests(self, msg):
         """Skip all test cases.
@@ -1032,3 +1050,27 @@ class BaseTestClass(object):
             is not called.
         """
         return getattr(self, _REASON_TO_SKIP_ALL_TESTS, None)
+
+    def DumpLogcat(self, prefix=''):
+        """Dumps device logcat outputs to log directory.
+
+        Args:
+            prefix: string, file name prefix. Usually in format of
+                    <test_module>-<test_case>
+        """
+        if prefix:
+            prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
+
+        for device in self.android_devices:
+            for buffer in LOGCAT_BUFFERS:
+                file_name = (prefix
+                             + _LOGCAT_FILE_PREFIX
+                             + '_%s_' % buffer
+                             + device.serial
+                             + _LOGCAT_FILE_EXTENSION)
+
+                file_path = os.path.join(logging.log_path,
+                                         file_name)
+
+                logging.info('Dumping logcat %s...' % file_path)
+                device.adb.logcat('-b', buffer, '-d', '>', file_path)
