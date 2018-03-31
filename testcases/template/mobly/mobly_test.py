@@ -224,7 +224,7 @@ class MoblyTest(base_test.BaseTestClass):
                             'Mobly result document type unrecognized: %s', doc)
                         continue
 
-                    logging.info('Parsing result type: %s' + type)
+                    logging.info('Parsing result type: %s', type)
 
                     handler = self.result_handlers.get(type)
                     if handler is None:
