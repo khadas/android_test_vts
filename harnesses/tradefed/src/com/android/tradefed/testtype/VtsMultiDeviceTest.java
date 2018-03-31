@@ -122,6 +122,7 @@ public class VtsMultiDeviceTest
     static final String COVERAGE_REPORT_PATH = "coverage_report_path";
     static final String GLOBAL_COVERAGE = "global_coverage";
     static final String LTP_NUMBER_OF_THREADS = "ltp_number_of_threads";
+    static final String MOBLY_TEST_MODULE = "MOBLY_TEST_MODULE";
     static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
@@ -140,6 +141,7 @@ public class VtsMultiDeviceTest
     static final String TEMPLATE_BINARY_TEST_PATH = "vts/testcases/template/binary_test/binary_test";
     static final String TEMPLATE_GTEST_BINARY_TEST_PATH = "vts/testcases/template/gtest_binary_test/gtest_binary_test";
     static final String TEMPLATE_LLVMFUZZER_TEST_PATH = "vts/testcases/template/llvmfuzzer_test/llvmfuzzer_test";
+    static final String TEMPLATE_MOBLY_TEST_PATH = "vts/testcases/template/mobly/mobly_test";
     static final String TEMPLATE_HAL_HIDL_GTEST_PATH = "vts/testcases/template/hal_hidl_gtest/hal_hidl_gtest";
     static final String TEMPLATE_HAL_HIDL_REPLAY_TEST_PATH = "vts/testcases/template/hal_hidl_replay_test/hal_hidl_replay_test";
     static final String TEMPLATE_HOST_BINARY_TEST_PATH = "vts/testcases/template/host_binary_test/host_binary_test";
@@ -427,6 +429,13 @@ public class VtsMultiDeviceTest
                     + "Used only when enable-coverage is true.")
     private Collection<String> mExcludeCoveragePath = new ArrayList<>();
 
+    @Option(name = "mobly-test-module",
+            description = "Mobly test module name. "
+                    + "If this value is specified, VTS will use mobly test template "
+                    + "with the configurations."
+                    + "Multiple values can be added by repeatly using this option.")
+    private Collection<String> mMoblyTestModule = new ArrayList<>();
+
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
@@ -616,6 +625,8 @@ public class VtsMultiDeviceTest
             } else if (mBinaryTestType.equals(BINARY_TEST_TYPE_LLVMFUZZER)) {
                 // Fuzz test don't need test-case-path.
                 setTestCasePath(TEMPLATE_LLVMFUZZER_TEST_PATH);
+            } else if (!mMoblyTestModule.isEmpty()) {
+                setTestCasePath(TEMPLATE_MOBLY_TEST_PATH);
             } else {
                 throw new IllegalArgumentException("test-case-path is not set.");
             }
@@ -1021,6 +1032,11 @@ public class VtsMultiDeviceTest
         if ("vts".equals(mBuildInfo.getTestTag())) {
             jsonObject.put(RUN_AS_COMPLIANCE_TEST, true);
             CLog.i("Added %s to the Json object", RUN_AS_COMPLIANCE_TEST);
+        }
+
+        if (!mMoblyTestModule.isEmpty()) {
+            jsonObject.put(MOBLY_TEST_MODULE, new JSONArray(mMoblyTestModule));
+            CLog.i("Added %s to the Json object", MOBLY_TEST_MODULE);
         }
     }
 
