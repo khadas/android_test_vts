@@ -255,6 +255,9 @@ $(VTS_TESTCASES_OUT)/vti/__init__.py :
 	@mkdir -p $(VTS_TESTCASES_OUT)/vti
 	@touch $(VTS_TESTCASES_OUT)/vti/__init__.py
 
+$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt:
+	@echo -n $(PLATFORM_VNDK_VERSION) > $@
+
 vts_test_core_copy_pairs := \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
@@ -284,6 +287,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
   $(VTS_TESTCASES_OUT)/vti/test_serving/__init__.py \
   $(VTS_TESTCASES_OUT)/vti/__init__.py \
+  $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt \
 
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs)
