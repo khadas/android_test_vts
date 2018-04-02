@@ -82,7 +82,7 @@ public class CmdUtilTest {
     }
 
     @Test
-    public void testRetrySuccessFail() throws Exception {
+    public void testRetryFail() throws Exception {
         doReturn("something").when(mDevice).executeShellCommand(TEST_CMD);
         assertFalse(mCmdUtil.retry(mDevice, RUN_CMD, TEST_CMD, mCheckEmpty));
         verify(mDevice, times(mCmdUtil.MAX_RETRY_COUNT)).executeShellCommand(eq(RUN_CMD));
