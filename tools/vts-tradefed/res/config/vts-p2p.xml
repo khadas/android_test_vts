@@ -18,6 +18,7 @@
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-p2p" />
+  <option name="compatibility:primary-abi-only" value="true" />
 
   <device name="device1">
     <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
@@ -50,8 +51,5 @@
   </device>
 
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-p2p" />
-
-  <!-- VtsNbuBle is not verified as a stable test module yet -->
-  <option name="compatibility:exclude-filter" value="VtsNbuBle" />
 
 </configuration>
