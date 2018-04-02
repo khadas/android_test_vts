@@ -14,14 +14,18 @@
 # limitations under the License.
 #
 
+import importlib
 import json
 import logging
 import os
+import sys
 import time
 import yaml
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
+from vts.runners.host import config_parser
+from vts.runners.host import keys
 from vts.runners.host import records
 from vts.runners.host import test_runner
 from vts.utils.python.io import capture_printout
@@ -266,6 +270,19 @@ class MoblyTest(base_test.BaseTestClass):
         for k, v in doc.items():
             logging.info(str(k) + ": " + str(v))
 
+def GetTestModuleNames():
+    '''Returns a list of mobly test module specified in test configuration.'''
+    configs = config_parser.load_test_config_file(sys.argv[1])
+    reduce_func = lambda x, y: x + y.get(keys.ConfigKeys.MOBLY_TEST_MODULE, [])
+    return reduce(reduce_func, configs, [])
+
+def ImportTestModules():
+    '''Dynamically import mobly test modules.'''
+    for module_name in GetTestModuleNames():
+        module, cls = module_name.rsplit('.', 1)
+        sys.modules['__main__'].__dict__[cls] = getattr(
+            importlib.import_module(module), cls)
 
 if __name__ == "__main__":
+    ImportTestModules()
     test_runner.main()

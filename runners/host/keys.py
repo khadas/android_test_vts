@@ -142,3 +142,6 @@ class ConfigKeys(object):
 
     # Vts compliance test related keys
     RUN_AS_COMPLIANCE_TEST = "run_as_compliance_test"
+
+    # Mobly test related keys
+    MOBLY_TEST_MODULE = "MOBLY_TEST_MODULE"
