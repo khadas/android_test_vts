@@ -775,7 +775,7 @@ class AndroidDevice(object):
         self.adb.shell("start")
 
         if wait_for_completion:
-            return self.waitForFrameworkStartComplete(wait_for_completion_timeout):
+            return self.waitForFrameworkStartComplete(wait_for_completion_timeout)
 
         return True
 
