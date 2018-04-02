@@ -32,9 +32,12 @@ import com.android.tradefed.testtype.IAbiReceiver;
 import com.android.tradefed.util.CmdUtil;
 import com.android.tradefed.util.FileUtil;
 
+import org.junit.Assert;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Vector;
 import java.util.function.Predicate;
 
 /**
@@ -44,7 +47,6 @@ import java.util.function.Predicate;
 public class VtsHalAdapterPreparer
         implements ITargetPreparer, ITargetCleaner, IMultiTargetPreparer, IAbiReceiver {
     static final int THREAD_COUNT_DEFAULT = 1;
-    static final long FRAMEWORK_START_TIMEOUT = 1000 * 60 * 2; // 2 minutes.
 
     static final String HAL_INTERFACE_SEP = "::";
     static final String HAL_INSTANCE_SEP = "/";
@@ -82,6 +84,8 @@ public class VtsHalAdapterPreparer
     private Predicate<String> mCheckNonEmpty = (String str) -> {
         return !str.isEmpty();
     };
+    private Vector<String> commands = new Vector<String>();
+
     /**
      * {@inheritDoc}
      */
@@ -96,7 +100,10 @@ public class VtsHalAdapterPreparer
             CLog.e("Could not push adapter: " + e.toString());
             throw new TargetSetupError("Could not push adapter.");
         }
-        device.executeShellCommand(String.format("setprop %s false", ADAPTER_SYSPROP));
+
+        mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
+        mCmdUtil.setSystemProperty(device, ADAPTER_SYSPROP, "false");
+
         String out = device.executeShellCommand(String.format(LIST_HAL_CMD, mPackageName));
         for (String line : out.split("\n")) {
             if (!line.isEmpty()) {
@@ -114,23 +121,18 @@ public class VtsHalAdapterPreparer
                         bitness, mAdapterBinaryName, interfaceName, instanceName, mThreadCount);
                 CLog.i("Trying to adapter for %s",
                         mPackageName + "::" + interfaceName + "/" + instanceName);
-                device.executeShellCommand(command);
+                commands.add(command);
             }
         }
-
-        mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
-        if (!mCmdUtil.waitCmdResultWithDelay(
-                    device, String.format(LIST_HAL_CMD, mPackageName), mCheckEmpty)) {
-            throw new TargetSetupError("HAL adapter failed.");
+        if (commands.isEmpty()) {
+            throw new TargetSetupError("The specific HAL service is not running.");
+        }
+        if (!mCmdUtil.retry(
+                    device, commands, String.format(LIST_HAL_CMD, mPackageName), mCheckEmpty)) {
+            throw new TargetSetupError("HAL adapter setup failed.");
         }
 
-        device.executeShellCommand("stop");
-        device.executeShellCommand("start");
-
-        if (!device.waitForBootComplete(FRAMEWORK_START_TIMEOUT)) {
-            throw new DeviceNotAvailableException("Framework failed to start.");
-        }
-
+        mCmdUtil.restartFramework(device);
         if (!mCmdUtil.waitCmdResultWithDelay(
                     device, "service list | grep IPackageManager", mCheckNonEmpty)) {
             throw new TargetSetupError("Failed to start package service");
@@ -152,19 +154,16 @@ public class VtsHalAdapterPreparer
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
-        // stops adapter
-        device.executeShellCommand(String.format("setprop %s true", ADAPTER_SYSPROP));
-        mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
-        if (!mCmdUtil.waitCmdResultWithDelay(
-                    device, String.format(LIST_HAL_CMD, mPackageName), mCheckNonEmpty)) {
-            throw new RuntimeException("HAL restore failed.");
-        }
+        if (!commands.isEmpty()) {
+            // stops adapter(s)
+            String command = String.format("setprop %s %s", ADAPTER_SYSPROP, "true");
+            mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
+            Assert.assertTrue("HAL restore failed.",
+                    mCmdUtil.retry(device, command, String.format(LIST_HAL_CMD, mPackageName),
+                            mCheckNonEmpty, commands.size() + mCmdUtil.MAX_RETRY_COUNT));
 
-        device.executeShellCommand("stop");
-        device.executeShellCommand("start");
-
-        if (!device.waitForBootComplete(FRAMEWORK_START_TIMEOUT)) {
-            throw new DeviceNotAvailableException("Framework failed to start.");
+            // TODO: cleanup the pushed adapter files.
+            mCmdUtil.restartFramework(device);
         }
     }
 
@@ -228,5 +227,10 @@ public class VtsHalAdapterPreparer
     @VisibleForTesting
     void setCmdUtil(CmdUtil cmdUtil) {
         mCmdUtil = cmdUtil;
+    }
+
+    @VisibleForTesting
+    void addCommand(String command) {
+        commands.add(command);
     }
 }
