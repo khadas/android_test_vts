@@ -51,7 +51,6 @@ import java.util.function.Predicate;
 @RunWith(JUnit4.class)
 public final class VtsHalAdapterPreparerTest {
     private int THREAD_COUNT_DEFAULT = VtsHalAdapterPreparer.THREAD_COUNT_DEFAULT;
-    private long FRAMEWORK_START_TIMEOUT = VtsHalAdapterPreparer.FRAMEWORK_START_TIMEOUT;
     private String SCRIPT_PATH = VtsHalAdapterPreparer.SCRIPT_PATH;
     private String LIST_HAL_CMD = VtsHalAdapterPreparer.LIST_HAL_CMD;
 
@@ -67,6 +66,13 @@ public final class VtsHalAdapterPreparerTest {
                 Predicate<String> predicate) throws DeviceNotAvailableException {
             return mCmdSuccess;
         }
+
+        @Override
+        public void restartFramework(ITestDevice device) throws DeviceNotAvailableException {}
+
+        @Override
+        public void setSystemProperty(ITestDevice device, String name, String value)
+                throws DeviceNotAvailableException {}
     }
     private TestCmdUtil mCmdUtil = new TestCmdUtil();
     VtsCompatibilityInvocationHelper mMockHelper = null;
@@ -99,7 +105,6 @@ public final class VtsHalAdapterPreparerTest {
         OptionSetter setter = new OptionSetter(mPreparer);
         setter.setOptionValue("adapter-binary-name", TEST_HAL_ADAPTER_BINARY);
         setter.setOptionValue("hal-package-name", TEST_HAL_PACKAGE);
-        doReturn(true).when(mDevice).waitForBootComplete(FRAMEWORK_START_TIMEOUT);
         doReturn("64").when(mAbi).getBitness();
     }
 
@@ -113,7 +118,7 @@ public final class VtsHalAdapterPreparerTest {
         File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
         testAdapter.createNewFile();
         String output = "android.hardware.foo@1.1::IFoo/default";
-        doReturn(output).when(mDevice).executeShellCommand(
+        doReturn(output).doReturn("").when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
 
         mPreparer.setUp(mDevice, mBuildInfo);
@@ -132,7 +137,7 @@ public final class VtsHalAdapterPreparerTest {
                 + "android.hardware.foo@1.1::IFoo/test\n"
                 + "android.hardware.foo@1.1::IFooSecond/default\n"
                 + "android.hardware.foo@1.1::IFooSecond/slot/1\n";
-        doReturn(output).when(mDevice).executeShellCommand(
+        doReturn(output).doReturn("").when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
 
         mPreparer.setUp(mDevice, mBuildInfo);
@@ -162,6 +167,7 @@ public final class VtsHalAdapterPreparerTest {
         }
         fail();
     }
+
     @Test
     public void testOnSetUpAdapterFailed() throws Exception {
         File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
@@ -173,7 +179,7 @@ public final class VtsHalAdapterPreparerTest {
         try {
             mPreparer.setUp(mDevice, mBuildInfo);
         } catch (TargetSetupError e) {
-            assertEquals("HAL adapter failed.", e.getMessage());
+            assertEquals("HAL adapter setup failed.", e.getMessage());
             return;
         }
         fail();
@@ -183,8 +189,10 @@ public final class VtsHalAdapterPreparerTest {
     public void testOnTearDownRestoreFailed() throws Exception {
         mCmdUtil.mCmdSuccess = false;
         try {
+            mPreparer.setCmdUtil(mCmdUtil);
+            mPreparer.addCommand("one");
             mPreparer.tearDown(mDevice, mBuildInfo, null);
-        } catch (RuntimeException e) {
+        } catch (AssertionError | DeviceNotAvailableException e) {
             assertEquals("HAL restore failed.", e.getMessage());
             return;
         }

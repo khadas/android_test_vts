@@ -13,13 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS System Firmware Test Plan">
-  <include name="vts-base" />
-  <option name="plan" value="vts" />
-  <option name="test-tag" value="vts-star" />
-  <option name="vts-plan-result:plan-name" value="vts-firmware" />
-
-  <option name="compatibility:include-filter" value="VtsFirmwareDtboVerification" />
-  <option name="compatibility:include-filter" value="VtsFirmwareBootHeaderVerification" />
-
+<configuration description="Config for VTS Boot Header Verification Test">
+    <option name="config-descriptor:metadata" key="plan" value="vts-firmware" />
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
+      <option name="push-group" value="HostDrivenTest.push" />
+      <option name="cleanup" value="true" />
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsFirmwareBootHeaderVerification"/>
+        <option name="test-case-path" value="vts/testcases/host/verify_boot_header/VtsFirmwareBootHeaderVerification" />
+    </test>
 </configuration>
