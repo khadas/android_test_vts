@@ -18,7 +18,7 @@
     <include name="cts-base" />
     <option name="plan" value="cts-coverage" />
     <target_preparer class="com.android.tradefed.targetprep.VtsCoveragePreparer" >
-        <option name="coverage-report-dir" value="/tmp/vts-coverage" />
+        <option name="coverage-report-dir" value="vts-coverage" />
     </target_preparer>
     <metrics_collector class="com.android.tradefed.device.metric.VtsCoverageCollector" />
 </configuration>
