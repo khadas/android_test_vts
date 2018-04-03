@@ -107,9 +107,10 @@ public class VtsHalTraceCollector extends BaseDeviceMetricCollector {
         CLog.i("Storing trace files to: " + localTracedDir.getAbsolutePath());
         String out = device.executeShellCommand(String.format("ls %s/*.vts.trace", VTS_TMP_DIR));
         for (String line : out.split("\n")) {
+            line = line.trim();
             File trace_file = new File(
                     localTracedDir.getAbsolutePath(), line.substring(VTS_TMP_DIR.length()));
-            device.pullFile(line.trim(), trace_file);
+            device.pullFile(line, trace_file);
         }
     }
 }
