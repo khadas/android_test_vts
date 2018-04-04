@@ -21,6 +21,7 @@ import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.metrics.proto.MetricMeasurement.Metric;
 import com.android.tradefed.util.FileUtil;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public class VtsHalTraceCollector extends BaseDeviceMetricCollector {
 
     @Override
     public void onTestRunEnd(
-            DeviceMetricData testData, final Map<String, String> currentTestCaseMetrics) {
+            DeviceMetricData testData, final Map<String, Metric> currentTestCaseMetrics) {
         String moduleName = getRunName().replace(' ', '_');
         CLog.i("Test module name: " + moduleName);
         for (ITestDevice device : getDevices()) {
