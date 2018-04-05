@@ -67,6 +67,8 @@ import java.util.TreeSet;
 public class VtsMultiDeviceTest
         implements IDeviceTest, IRemoteTest, ITestFilterReceiver, IRuntimeHintProvider,
                    ITestCollector, IBuildReceiver, IAbiReceiver, IInvocationContextReceiver {
+    static final String ACTS_TEST_MODULE = "ACTS_TEST_MODULE";
+    static final String ADAPTER_ACTS_PATH = "vts/runners/adapters/acts/acts_adapter";
     static final String ANDROIDDEVICE = "AndroidDevice";
     static final String BUILD = "build";
     static final String BUILD_ID = "build_id";
@@ -434,6 +436,13 @@ public class VtsMultiDeviceTest
                     + "Multiple values can be added by repeatly using this option.")
     private Collection<String> mMoblyTestModule = new ArrayList<>();
 
+    @Option(name = "acts-test-module",
+            description = "Acts test module name. "
+                    + "If this value is specified, VTS will use acts test adapter "
+                    + "with the configurations."
+                    + "Multiple values can be added by repeatly using this option.")
+    private String mActsTestModule = null;
+
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
@@ -625,6 +634,8 @@ public class VtsMultiDeviceTest
                 setTestCasePath(TEMPLATE_LLVMFUZZER_TEST_PATH);
             } else if (!mMoblyTestModule.isEmpty()) {
                 setTestCasePath(TEMPLATE_MOBLY_TEST_PATH);
+            } else if (mActsTestModule != null) {
+                setTestCasePath(ADAPTER_ACTS_PATH);
             } else {
                 throw new IllegalArgumentException("test-case-path is not set.");
             }
@@ -1035,6 +1046,11 @@ public class VtsMultiDeviceTest
         if (!mMoblyTestModule.isEmpty()) {
             jsonObject.put(MOBLY_TEST_MODULE, new JSONArray(mMoblyTestModule));
             CLog.i("Added %s to the Json object", MOBLY_TEST_MODULE);
+        }
+
+        if (mActsTestModule != null) {
+            jsonObject.put(ACTS_TEST_MODULE, mActsTestModule);
+            CLog.i("Added %s to the Json object", ACTS_TEST_MODULE);
         }
     }
 
