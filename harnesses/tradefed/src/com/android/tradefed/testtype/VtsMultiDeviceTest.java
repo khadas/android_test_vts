@@ -1164,6 +1164,10 @@ public class VtsMultiDeviceTest
                 && commandStatus != CommandStatus.TIMED_OUT) {
                 CLog.e("Python process failed");
                 CLog.e("Python path: %s", vtsPythonRunnerHelper.getPythonPath());
+                CLog.e("Command stdout: " + commandResult.getStdout());
+                CLog.e("Command stderr: " + commandResult.getStderr());
+                CLog.e("Command status: " + commandStatus);
+                CLog.e("Python log: ");
                 printVtsLogs(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
                 throw new RuntimeException("Failed to run VTS test");
