@@ -17,6 +17,7 @@
 <configuration description="Running CTS test modules with hal trace profiling">
     <include name="cts-base" />
     <option name="plan" value="cts-profiling" />
+    <option name="enable-root" value="true" />
     <target_preparer class="com.android.tradefed.targetprep.VtsTraceCollectPreparer" />
     <metrics_collector class="com.android.tradefed.device.metric.VtsHalTraceCollector" />
 </configuration>
