@@ -64,8 +64,6 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     protected static final String PYTHONPATH = "PYTHONPATH";
     protected static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
-    private static final String[] DEFAULT_DEP_MODULES = {"enum", "future", "futures",
-            "google-api-python-client", "httplib2", "oauth2client", "protobuf", "requests"};
 
     @Option(name = "venv-dir", description = "path of an existing virtualenv to use")
     private File mVenvDir = null;
@@ -77,7 +75,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private Collection<String> mScriptFiles = new TreeSet<>();
 
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
-    private Collection<String> mDepModules = new TreeSet<>(Arrays.asList(DEFAULT_DEP_MODULES));
+    private Collection<String> mDepModules = new TreeSet<>();
 
     @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
     private Collection<String> mNoDepModules = new TreeSet<>(Arrays.asList());
