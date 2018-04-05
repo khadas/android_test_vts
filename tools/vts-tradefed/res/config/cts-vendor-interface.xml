@@ -22,7 +22,6 @@
     <option name="plan" value="cts-vendor-interface" />
 
     <!-- Include test modules -->
-    <option name="compatibility:include-filter" value="CtsAadbHostTestCases" />
     <option name="compatibility:include-filter" value="CtsAccessibilityServiceTestCases" />
     <option name="compatibility:include-filter" value="CtsAccountManagerTestCases" />
     <option name="compatibility:include-filter" value="CtsAnimationTestCases" />
