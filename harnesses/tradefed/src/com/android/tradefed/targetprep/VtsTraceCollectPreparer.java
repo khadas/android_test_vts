@@ -17,18 +17,18 @@
 package com.android.tradefed.targetprep;
 
 import com.android.annotations.VisibleForTesting;
-import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.targetprep.TargetSetupError;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.NoSuchElementException;
 
 /**
@@ -58,7 +58,7 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     // Path of vts test directory on target device.
     static final String VTS_TMP_DIR = "/data/local/tmp/";
     // Default path to store trace files locally.
-    static final String LOCAL_TRACE_DIR = "/tmp/vts-profiling/";
+    static final String LOCAL_TRACE_DIR = "vts-profiling";
 
     static final String VTS_PROFILER_SUFFIX = "vts.profiler.so";
     static final String VTS_LIB_PREFIX = "libvts";
@@ -73,24 +73,36 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     /** {@inheritDoc} */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
-            throws DeviceNotAvailableException, RuntimeException {
-        VtsCompatibilityInvocationHelper invocationHelper = createVtsHelper();
+            throws DeviceNotAvailableException, TargetSetupError {
+        CompatibilityBuildHelper buildHelper = createBuildHelper(buildInfo);
         try {
             // adb root.
             device.enableAdbRoot();
             // Push 32 bit profiler libs.
-            pushProfilerLib(device, new File(invocationHelper.getTestsDir(), VTS_LIB_DIR_32),
+            pushProfilerLib(device, new File(buildHelper.getTestsDir(), VTS_LIB_DIR_32),
                     VTS_TMP_LIB_DIR_32);
             // Push 64 bit profiler libs.
-            pushProfilerLib(device, new File(invocationHelper.getTestsDir(), VTS_LIB_DIR_64),
+            pushProfilerLib(device, new File(buildHelper.getTestsDir(), VTS_LIB_DIR_64),
                     VTS_TMP_LIB_DIR_64);
             // Push vts_profiling_configure
-            device.pushFile(new File(invocationHelper.getTestsDir(),
+            device.pushFile(new File(buildHelper.getTestsDir(),
                                     VTS_BINARY_DIR + PROFILING_CONFIGURE_BINARY),
                     VTS_TMP_DIR + PROFILING_CONFIGURE_BINARY);
         } catch (IOException | NoSuchElementException e) {
-            CLog.e("Could not push profiler: " + e.toString());
-            throw new RuntimeException(e);
+            // Cleanup profiler libs.
+            removeProfilerLib(device);
+            throw new TargetSetupError("Could not push profiler.");
+        }
+        // Create directory to store the trace files.
+        try {
+            File resultDir = buildHelper.getResultDir();
+            File traceDir = new File(resultDir, mLocalTraceDir);
+            buildInfo.addBuildAttribute(TRACE_PATH, traceDir.getAbsolutePath());
+        } catch (FileNotFoundException e) {
+            CLog.e("Failed to get traceDir: " + e.getMessage());
+            // Cleanup profiler libs.
+            removeProfilerLib(device);
+            throw new TargetSetupError("Failed to get traceDir.");
         }
         // Set selinux permissive mode.
         mEnforcingState = device.executeShellCommand("getenforce");
@@ -99,11 +111,6 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
                            && !mEnforcingState.equals(SELINUX_PERMISSIVE))) {
             device.executeShellCommand("setenforce " + SELINUX_PERMISSIVE);
         }
-        // Create directory to store the trace files.
-        Date today = new Date(System.currentTimeMillis());
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(today);
-        File traceDir = new File(mLocalTraceDir, currentDate);
-        buildInfo.addBuildAttribute(TRACE_PATH, traceDir.getAbsolutePath());
     }
 
     /** {@inheritDoc} */
@@ -119,11 +126,11 @@ public class VtsTraceCollectPreparer implements ITargetPreparer, ITargetCleaner 
     }
 
     /**
-     * Create and return a {@link VtsCompatibilityInvocationHelper} to use during the preparer.
+     * Create and return a {@link CompatibilityBuildHelper} to use during the preparer.
      */
     @VisibleForTesting
-    VtsCompatibilityInvocationHelper createVtsHelper() {
-        return new VtsCompatibilityInvocationHelper();
+    CompatibilityBuildHelper createBuildHelper(IBuildInfo buildInfo) {
+        return new CompatibilityBuildHelper(buildInfo);
     }
 
     /**
