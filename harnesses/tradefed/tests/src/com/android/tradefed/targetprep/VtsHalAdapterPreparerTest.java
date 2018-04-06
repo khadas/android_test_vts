@@ -42,8 +42,10 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Predicate;
 /**
  * Unit tests for {@link VtsHalAdapterPreparer}.
@@ -64,6 +66,22 @@ public final class VtsHalAdapterPreparerTest {
         @Override
         public boolean waitCmdResultWithDelay(ITestDevice device, String cmd,
                 Predicate<String> predicate) throws DeviceNotAvailableException {
+            return mCmdSuccess;
+        }
+
+        @Override
+        public boolean retry(ITestDevice device, String cmd, String validation_cmd,
+                Predicate<String> predicate, int retry_count) throws DeviceNotAvailableException {
+            device.executeShellCommand(cmd);
+            return mCmdSuccess;
+        }
+
+        @Override
+        public boolean retry(ITestDevice device, Vector<String> cmds, String validation_cmd,
+                Predicate<String> predicate) throws DeviceNotAvailableException {
+            for (String cmd : cmds) {
+                device.executeShellCommand(cmd);
+            }
             return mCmdSuccess;
         }
 
@@ -115,8 +133,7 @@ public final class VtsHalAdapterPreparerTest {
 
     @Test
     public void testOnSetUpAdapterSingleInstance() throws Exception {
-        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
-        testAdapter.createNewFile();
+        File testAdapter = createTestAdapter();
         String output = "android.hardware.foo@1.1::IFoo/default";
         doReturn(output).doReturn("").when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
@@ -131,8 +148,7 @@ public final class VtsHalAdapterPreparerTest {
 
     @Test
     public void testOnSetUpAdapterMultipleInstance() throws Exception {
-        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
-        testAdapter.createNewFile();
+        File testAdapter = createTestAdapter();
         String output = "android.hardware.foo@1.1::IFoo/default\n"
                 + "android.hardware.foo@1.1::IFoo/test\n"
                 + "android.hardware.foo@1.1::IFooSecond/default\n"
@@ -169,9 +185,16 @@ public final class VtsHalAdapterPreparerTest {
     }
 
     @Test
+    public void testOnSetupServiceNotAvailable() throws Exception {
+        File testAdapter = createTestAdapter();
+        doReturn("").when(mDevice).executeShellCommand(
+                String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
+        mPreparer.setUp(mDevice, mBuildInfo);
+    }
+
+    @Test
     public void testOnSetUpAdapterFailed() throws Exception {
-        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
-        testAdapter.createNewFile();
+        File testAdapter = createTestAdapter();
         String output = "android.hardware.foo@1.1::IFoo/default";
         doReturn(output).when(mDevice).executeShellCommand(
                 String.format(LIST_HAL_CMD, TEST_HAL_PACKAGE));
@@ -197,5 +220,16 @@ public final class VtsHalAdapterPreparerTest {
             return;
         }
         fail();
+    }
+
+    /**
+     * Helper method to create a test adapter under mTestDir.
+     *
+     * @return created test file.
+     */
+    private File createTestAdapter() throws IOException {
+        File testAdapter = new File(mTestDir, VTS_NATIVE_TEST_DIR + TEST_HAL_ADAPTER_BINARY);
+        testAdapter.createNewFile();
+        return testAdapter;
     }
 }
