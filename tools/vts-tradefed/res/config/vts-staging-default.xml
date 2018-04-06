@@ -31,7 +31,7 @@
     <option name="compatibility:include-filter" value="VtsHalThermalV1_0TargetReplay" />
 
     <!-- for HAL adapter tests -->
-    <option name="compatibility:include-filter" value="VtsHalVibratorV1_1AdapterCtsOsTestCases" />
-    <option name="compatibility:include-filter" value="VtsHalVibratorV1_1AdapterDeviceHealthTests" />
+    <option name="compatibility:include-filter" value="VtsHalVibratorV1_1Adapter" />
+    <option name="compatibility:include-filter" value="VtsHalVibratorV1_2Adapter" />
 
 </configuration>
