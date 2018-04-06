@@ -108,14 +108,14 @@ class MoblyTest(base_test.BaseTestClass):
         '''Prepare mobly config file for running test.'''
         self.mobly_config_file_path = os.path.join(self.mobly_dir,
                                                    CONFIG_FILE_NAME)
-        config_test = MOBLY_CONFIG_TEXT.format(
+        config_text = MOBLY_CONFIG_TEXT.format(
               module_name=self.test_module_name,
               serial1=self.android_devices[0].serial,
               serial2=self.android_devices[1].serial,
               log_path=self.mobly_dir
         )
         with open(self.mobly_config_file_path, 'w') as f:
-            f.write(config_test)
+            f.write(config_text)
 
     def ListTestCases(self):
         '''List test cases.
@@ -161,9 +161,6 @@ class MoblyTest(base_test.BaseTestClass):
 
     def GetMoblyResults(self):
         '''Get mobly module run results and put in vts results.'''
-        #TODO(yuexima): currently this only support one mobly module per vts
-        # module. If multiple mobly module per vts module is needed in the
-        # future, here is where it should be changed.
         file_handlers = (
             (MOBLY_RESULT_YAML_FILE_NAME, self.ParseYamlResults),
             (MOBLY_RESULT_JSON_FILE_NAME, self.ParseJsonResults),
@@ -192,7 +189,7 @@ class MoblyTest(base_test.BaseTestClass):
         '''Parse mobly test json result.
 
         Args:
-            result_path: string, result yaml file path.
+            result_path: string, result json file path.
         '''
         with open(path, 'r') as f:
             mobly_summary = json.load(f)
