@@ -106,14 +106,6 @@ def runTestClass(test_class):
     test_identifiers = [(test_cls_name, None)]
 
     for config in test_configs:
-        if keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT in config:
-            timeout_sec = int(config[
-                keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT]) / 1000.0
-        else:
-            timeout_sec = 60 * 60 * 3
-            logging.warning("%s unspecified. Set timeout to %s seconds.",
-                            keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT, timeout_sec)
-
         watcher_enabled = threading.Event()
 
         def watchStdin():
