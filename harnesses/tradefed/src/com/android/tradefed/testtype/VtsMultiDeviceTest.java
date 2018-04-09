@@ -83,7 +83,6 @@ public class VtsMultiDeviceTest
     static final String TEST_BED = "test_bed";
     static final String TEST_PLAN_REPORT_FILE = "TEST_PLAN_REPORT_FILE";
     static final String TEST_SUITE = "test_suite";
-    static final String TEST_MAX_TIMEOUT = "test_max_timeout";
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
@@ -155,9 +154,9 @@ public class VtsMultiDeviceTest
 
     @Option(name = "test-timeout",
             description = "The amount of time (in milliseconds) for a test invocation. "
-                    + "If the test cannot finish before timeout, it should interrupt itself and "
-                    + "clean up in " + TEST_ABORT_TIMEOUT_MSECS + "ms. Hence the actual timeout "
-                    + "is the specified value + " + TEST_ABORT_TIMEOUT_MSECS + "ms.",
+                    + "If the test cannot finish before timeout, it is interrupted and cleans up "
+                    + "in " + TEST_ABORT_TIMEOUT_MSECS + "ms. Hence the actual timeout is the "
+                    + "specified value + " + TEST_ABORT_TIMEOUT_MSECS + "ms.",
             isTimeVal = true)
     private long mTestTimeout = 1000 * 60 * 60 * 3;
 
@@ -824,9 +823,6 @@ public class VtsMultiDeviceTest
 
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
-
-        jsonObject.put(TEST_MAX_TIMEOUT, mTestTimeout);
-        CLog.i("Added %s to the Json object: %d", TEST_MAX_TIMEOUT, mTestTimeout);
 
         if (!mLogSeverity.isEmpty()) {
             String logSeverity = mLogSeverity.toUpperCase();
