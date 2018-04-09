@@ -84,7 +84,7 @@ public class VtsHalAdapterPreparer
     private Predicate<String> mCheckNonEmpty = (String str) -> {
         return !str.isEmpty();
     };
-    private Vector<String> commands = new Vector<String>();
+    private Vector<String> mCommands = new Vector<String>();
 
     /**
      * {@inheritDoc}
@@ -121,14 +121,15 @@ public class VtsHalAdapterPreparer
                         bitness, mAdapterBinaryName, interfaceName, instanceName, mThreadCount);
                 CLog.i("Trying to adapter for %s",
                         mPackageName + "::" + interfaceName + "/" + instanceName);
-                commands.add(command);
+                mCommands.add(command);
             }
         }
-        if (commands.isEmpty()) {
-            throw new TargetSetupError("The specific HAL service is not running.");
+        if (mCommands.isEmpty()) {
+            CLog.w("The specific HAL service is not running.");
+            return;
         }
         if (!mCmdUtil.retry(
-                    device, commands, String.format(LIST_HAL_CMD, mPackageName), mCheckEmpty)) {
+                    device, mCommands, String.format(LIST_HAL_CMD, mPackageName), mCheckEmpty)) {
             throw new TargetSetupError("HAL adapter setup failed.");
         }
 
@@ -154,13 +155,13 @@ public class VtsHalAdapterPreparer
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
-        if (!commands.isEmpty()) {
+        if (!mCommands.isEmpty()) {
             // stops adapter(s)
             String command = String.format("setprop %s %s", ADAPTER_SYSPROP, "true");
             mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
             Assert.assertTrue("HAL restore failed.",
                     mCmdUtil.retry(device, command, String.format(LIST_HAL_CMD, mPackageName),
-                            mCheckNonEmpty, commands.size() + mCmdUtil.MAX_RETRY_COUNT));
+                            mCheckNonEmpty, mCommands.size() + mCmdUtil.MAX_RETRY_COUNT));
 
             // TODO: cleanup the pushed adapter files.
             mCmdUtil.restartFramework(device);
@@ -231,6 +232,6 @@ public class VtsHalAdapterPreparer
 
     @VisibleForTesting
     void addCommand(String command) {
-        commands.add(command);
+        mCommands.add(command);
     }
 }
