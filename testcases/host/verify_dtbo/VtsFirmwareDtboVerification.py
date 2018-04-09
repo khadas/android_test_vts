@@ -30,7 +30,7 @@ from vts.utils.python.android import api
 from vts.utils.python.file import target_file_utils
 from vts.utils.python.os import path_utils
 
-DTBO_PARTITION_PATH = "/dev/block/bootdevice/by-name/dtbo"  # path to DTBO partition.
+BLOCK_DEV_PATH = "/dev/block/platform"  # path to platform block devices
 DEVICE_TEMP_DIR = "/data/local/tmp/"  # temporary dir in device.
 FDT_PATH = "/sys/firmware/fdt"  # path to device tree.
 PROPERTY_SLOT_SUFFIX = "ro.boot.slot_suffix"  # indicates current slot suffix for A/B devices
@@ -80,12 +80,13 @@ class VtsFirmwareDtboVerification(base_test.BaseTestClass):
         except ValueError as e:
             logging.exception(e)
             slot_suffix = ""
-        dtbo_path = DTBO_PARTITION_PATH + slot_suffix
+        current_dtbo_partition = "dtbo" + slot_suffix
+        dtbo_path = target_file_utils.FindFiles(
+            self.shell, BLOCK_DEV_PATH, current_dtbo_partition, "-type l")
         logging.info("DTBO path %s", dtbo_path)
-        asserts.assertTrue(
-            target_file_utils.Exists(dtbo_path, self.shell),
-            "DTBO partition does not exist")
-        self.adb.pull("%s %s/dtbo" % (dtbo_path, self.temp_dir))
+        if not dtbo_path:
+            asserts.fail("Unable to find path to dtbo image on device.")
+        self.adb.pull("%s %s/dtbo" % (dtbo_path[0], self.temp_dir))
         dtbo_dump_cmd = [
             "host/bin/mkdtboimg.py", "dump",
             "%s/dtbo" % self.temp_dir, "-b",
