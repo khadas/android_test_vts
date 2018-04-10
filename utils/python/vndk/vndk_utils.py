@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+import logging
+
 from vts.utils.python.android import api
 
 
@@ -30,8 +32,12 @@ def IsVndkRuntimeEnforced(dut):
     Returns:
         A boolean, whether VNDK runtime should be enabled.
     """
-    return bool(int(dut.first_api_level) > api.PLATFORM_API_LEVEL_O_MR1 or
-                dut.vndk_version)
+    api_level = dut.getLaunchApiLevel(strict=False)
+    if not api_level:
+        logging.error("Cannot get first API level. "
+                      "Assume VNDK runtime to be enforced.")
+        return True
+    return bool(api_level > api.PLATFORM_API_LEVEL_O_MR1 or dut.vndk_version)
 
 
 def FormatVndkPath(pattern, bitness, version=""):
