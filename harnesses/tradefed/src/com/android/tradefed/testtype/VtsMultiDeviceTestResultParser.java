@@ -322,10 +322,16 @@ public class VtsMultiDeviceTestResultParser {
                     listener.testEnded(test.getKey(), Collections.<String, String>emptyMap());
                 } else if (test.getValue() == TIMEOUT) {
                     listener.testFailed(test.getKey(), test.getValue());
+                    // Always call testEnded at the end of the test case
+                    listener.testEnded(test.getKey(), Collections.emptyMap());
                 } else if (test.getValue() == SKIP) {
                     listener.testAssumptionFailure(test.getKey(), test.getValue());
+                    // Always call testEnded at the end of the test case
+                    listener.testEnded(test.getKey(), Collections.emptyMap());
                 } else {
                     listener.testFailed(test.getKey(), test.getValue());
+                    // Always call testEnded at the end of the test case
+                    listener.testEnded(test.getKey(), Collections.emptyMap());
                 }
             }
             listener.testRunEnded(mTotalElapsedTime, Collections.<String, String>emptyMap());
@@ -414,6 +420,8 @@ public class VtsMultiDeviceTestResultParser {
                                recognized in TF, it is converted to FAIL. */
                             listener.testFailed(
                                     testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
+                            // Always call testEnded at the end of the test case
+                            listener.testEnded(testIdentifier, Collections.emptyMap());
                         case PASS :
                             listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
                             break;
@@ -421,6 +429,8 @@ public class VtsMultiDeviceTestResultParser {
                             /* Timeout is not recognized in TF. Use FAIL instead. */
                             listener.testFailed(
                                     testIdentifier, details.isEmpty() ? UNKNOWN_TIMEOUT : details);
+                            // Always call testEnded at the end of the test case
+                            listener.testEnded(testIdentifier, Collections.emptyMap());
                             break;
                         case SKIP :
                             /* Skip is not recognized in TF */
@@ -429,6 +439,8 @@ public class VtsMultiDeviceTestResultParser {
                             /* Indicates a test failure. */
                             listener.testFailed(
                                     testIdentifier, details.isEmpty() ? UNKNOWN_FAILURE : details);
+                            // Always call testEnded at the end of the test case
+                            listener.testEnded(testIdentifier, Collections.emptyMap());
                         default:
                             break;
                     }
