@@ -22,5 +22,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsFirmwareBootHeaderVerification"/>
         <option name="test-case-path" value="vts/testcases/host/verify_boot_header/VtsFirmwareBootHeaderVerification" />
+        <option name="precondition-first-api-level" value="28" />
     </test>
 </configuration>

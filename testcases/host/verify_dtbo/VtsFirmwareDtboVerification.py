@@ -57,21 +57,6 @@ class VtsFirmwareDtboVerification(base_test.BaseTestClass):
     def setUp(self):
         """Checks if the the preconditions to run the test are met."""
         asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
-        try:
-            api_level = int(self.dut.first_api_level)
-        except ValueError as e:
-            api_level = 0
-            logging.exception(e)
-
-        if api_level == 0:
-            try:
-                api_level = int(self.getProp("ro.build.version.sdk"))
-            except ValueError as e:
-                asserts.fail("Unexpected value returned from getprop: %s" % e)
-
-        asserts.skipIf(
-            int(api_level) <= api.PLATFORM_API_LEVEL_O_MR1,
-            "Skip test for a device launched first before Android P.")
 
     def testCheckDTBOPartition(self):
         """Validates DTBO partition using mkdtboimg.py."""
