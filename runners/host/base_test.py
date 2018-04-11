@@ -412,7 +412,7 @@ class BaseTestClass(object):
             self.DumpBugReport(
                 '%s-%s' % (self.test_module_name, record.test_name))
         if self._logcat_on_failure:
-            self.DumpLogcat('%s-%s' % (self.TAG, record.test_name))
+            self.DumpLogcat('%s-%s' % (self.test_module_name, record.test_name))
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -508,7 +508,7 @@ class BaseTestClass(object):
             self.DumpBugReport(
                 '%s-%s' % (self.test_module_name, record.test_name))
         if self._logcat_on_failure:
-            self.DumpLogcat('%s-%s' % (self.TAG, record.test_name))
+            self.DumpLogcat('%s-%s' % (self.test_module_name, record.test_name))
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
