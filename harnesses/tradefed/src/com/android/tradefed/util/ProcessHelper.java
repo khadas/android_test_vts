@@ -17,10 +17,6 @@
 package com.android.tradefed.util;
 
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.RunUtil;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -116,11 +112,11 @@ public class ProcessHelper {
                             CLog.e(newReadPrint);
                             break;
                     }
-
                     mBuffer.append(newRead);
                 }
             } catch (IOException e) {
-                CLog.e("%s: %s", getName(), e.toString());
+                CLog.e("IOException during ProcessHelper#ReaderThread run.");
+                CLog.e(e);
             }
         }
     }
@@ -234,6 +230,10 @@ public class ProcessHelper {
                 joinThread(execThread, THREAD_JOIN_TIMEOUT_MSECS);
             }
             throw e;
+        } finally {
+            // Join the receiver threads otherwise output might not be available yet.
+            joinThread(mStdoutThread, THREAD_JOIN_TIMEOUT_MSECS);
+            joinThread(mStderrThread, THREAD_JOIN_TIMEOUT_MSECS);
         }
     }
 
