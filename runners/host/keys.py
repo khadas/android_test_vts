@@ -111,6 +111,7 @@ class ConfigKeys(object):
     IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
     IKEY_PRECONDITION_FEATURE = "precondition_feature"
     IKEY_PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix"
+    IKEY_PRECONDITION_FIRST_API_LEVEL = "precondition_first_api_level"
     IKEY_PRECONDITION_LSHAL = "precondition_lshal"
     IKEY_PRECONDITION_SYSPROP = "precondition_sysprop"
     IKEY_PRECONDITION_VINTF = "precondition_vintf"
