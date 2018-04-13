@@ -54,6 +54,7 @@ public class VtsPythonVirtualenvPreparerTest {
                 return mMockRunUtil;
             }
         };
+        mPreparer.mDepModules.add("enum");
     }
 
     /**
@@ -74,8 +75,7 @@ public class VtsPythonVirtualenvPreparerTest {
             // Check that all default modules are installed
             addDefaultModuleExpectations(mMockRunUtil, result);
             EasyMock.replay(mMockRunUtil);
-            IBuildInfo buildInfo = new BuildInfo();
-            mPreparer.installDeps(buildInfo);
+            mPreparer.installDeps();
             EasyMock.verify(mMockRunUtil);
         } finally {
             FileUtil.deleteFile(requirementFile);
@@ -98,8 +98,7 @@ public class VtsPythonVirtualenvPreparerTest {
                 .andReturn(result);
 
         EasyMock.replay(mMockRunUtil);
-        IBuildInfo buildInfo = new BuildInfo();
-        mPreparer.installDeps(buildInfo);
+        mPreparer.installDeps();
         EasyMock.verify(mMockRunUtil);
     }
 
@@ -120,7 +119,7 @@ public class VtsPythonVirtualenvPreparerTest {
             EasyMock.replay(mMockRunUtil);
             IBuildInfo buildInfo = new BuildInfo();
             try {
-                mPreparer.installDeps(buildInfo);
+                mPreparer.installDeps();
                 fail("installDeps succeeded despite a failed command");
             } catch (TargetSetupError e) {
                 assertTrue(buildInfo.getFile("PYTHONPATH") == null);
@@ -149,7 +148,8 @@ public class VtsPythonVirtualenvPreparerTest {
         EasyMock.replay(mMockRunUtil);
         IBuildInfo buildInfo = new BuildInfo();
         try {
-            mPreparer.installDeps(buildInfo);
+            mPreparer.installDeps();
+            mPreparer.addPathToBuild(buildInfo);
             fail("installDeps succeeded despite a failed command");
         } catch (TargetSetupError e) {
             assertTrue(buildInfo.getFile("PYTHONPATH") == null);
@@ -160,27 +160,6 @@ public class VtsPythonVirtualenvPreparerTest {
     private void addDefaultModuleExpectations(IRunUtil mockRunUtil, CommandResult result) {
         expect(mockRunUtil.runTimedCmd(
                        anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"), EasyMock.eq("enum")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("future")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("futures")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("google-api-python-client")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("httplib2")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("oauth2client")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("protobuf")))
-                .andReturn(result);
-        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("requests")))
                 .andReturn(result);
     }
 }
