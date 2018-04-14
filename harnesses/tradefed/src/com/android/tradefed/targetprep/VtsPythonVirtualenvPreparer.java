@@ -75,7 +75,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private Collection<String> mScriptFiles = new TreeSet<>();
 
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
-    private Collection<String> mDepModules = new TreeSet<>();
+    protected Collection<String> mDepModules = new TreeSet<>();
 
     @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
     private Collection<String> mNoDepModules = new TreeSet<>(Arrays.asList());
@@ -94,26 +94,39 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     // which created the directory should be the one to delete it.
     private boolean mIsDirCreator = false;
 
+    // If the same object is used in multiple threads (in sharding mode), the class
+    // needs to know when it is safe to call the teardown method.
+    private int mNumOfInstances = 0;
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setUp(IInvocationContext context)
+    public synchronized void setUp(IInvocationContext context)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
+        ++mNumOfInstances;
         mBuildInfo = context.getBuildInfos().get(0);
-        ITestDevice device = context.getDevices().get(0);
-        mDescriptor = device.getDeviceDescriptor();
-        startVirtualenv(mBuildInfo);
-        setLocalPypiPath();
-        installDeps(mBuildInfo);
+        if (mNumOfInstances == 1) {
+            ITestDevice device = context.getDevices().get(0);
+            mDescriptor = device.getDeviceDescriptor();
+            createVirtualenv(mBuildInfo);
+            setLocalPypiPath();
+            installDeps();
+        }
+        addPathToBuild(mBuildInfo);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void tearDown(IInvocationContext context, Throwable e)
+    public synchronized void tearDown(IInvocationContext context, Throwable e)
             throws DeviceNotAvailableException {
+        --mNumOfInstances;
+        if (mNumOfInstances > 0) {
+            // Since this is a host side preparer, no need to repeat
+            return;
+        }
         if (mVenvDir != null && mIsDirCreator) {
             try {
                 recursiveDelete(mVenvDir.toPath());
@@ -198,7 +211,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
     }
 
-    protected void installDeps(IBuildInfo buildInfo) throws TargetSetupError {
+    protected void installDeps() throws TargetSetupError {
         boolean hasDependencies = false;
         if (!mScriptFiles.isEmpty()) {
             for (String scriptFile : mScriptFiles) {
@@ -264,54 +277,63 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
         if (!hasDependencies) {
             CLog.i("No dependencies to install");
-        } else if (mIsDirCreator) {
-            // make the install directory of new packages available to other classes that
-            // receive the build
-            buildInfo.setFile(PYTHONPATH, new File(mVenvDir,
-                    "local/lib/python2.7/site-packages"),
-                    buildInfo.getBuildId());
         }
     }
 
-    protected void startVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
-        if (mVenvDir != null) {
-            CLog.i("Using existing virtualenv based at %s", mVenvDir.getAbsolutePath());
-            activate();
-            return;
+    /**
+     * Add PYTHONPATH and VIRTUAL_ENV_PATH to BuildInfo.
+     * @param buildInfo
+     */
+    protected void addPathToBuild(IBuildInfo buildInfo) {
+        if (buildInfo.getFile(PYTHONPATH) == null) {
+            // make the install directory of new packages available to other classes that
+            // receive the build
+            buildInfo.setFile(PYTHONPATH, new File(mVenvDir, "local/lib/python2.7/site-packages"),
+                    buildInfo.getBuildId());
         }
-        try {
+
+        if (buildInfo.getFile(VIRTUAL_ENV_PATH) == null) {
+            buildInfo.setFile(
+                    VIRTUAL_ENV_PATH, new File(mVenvDir.getAbsolutePath()), buildInfo.getBuildId());
+        }
+    }
+
+    /**
+     * Create virtualenv directory by executing virtualenv command.
+     * @param buildInfo
+     * @throws TargetSetupError
+     */
+    protected void createVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
+        if (mVenvDir == null) {
             mVenvDir = buildInfo.getFile(VIRTUAL_ENV_PATH);
-            if (mVenvDir == null) {
+        }
+
+        if (mVenvDir == null) {
+            CLog.i("Creating virtualenv");
+            try {
                 mVenvDir = FileUtil.createTempDir(getMD5(buildInfo.getTestTag()) + "-virtualenv");
                 mIsDirCreator = true;
+                String virtualEnvPath = mVenvDir.getAbsolutePath();
+                CommandResult c;
+                if (mPythonVersion.length() == 0) {
+                    c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
+                } else {
+                    String[] cmd = new String[] {
+                            "virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
+                    c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
+                }
+                if (c.getStatus() != CommandStatus.SUCCESS) {
+                    CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
+                    throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
+                }
+            } catch (IOException | RuntimeException e) {
+                CLog.e("Failed to create temp directory for virtualenv");
+                throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
             }
-            String virtualEnvPath = mVenvDir.getAbsolutePath();
-            CommandResult c;
-            if (mPythonVersion.length() == 0) {
-                c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
-            } else {
-                String[] cmd;
-                cmd = new String[4];
-                cmd[0] = "virtualenv";
-                cmd[1] = "-p";
-                cmd[2] = "python" + mPythonVersion;
-                cmd[3] = virtualEnvPath;
-                c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
-            }
-            if (c.getStatus() != CommandStatus.SUCCESS) {
-                CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
-                throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
-            }
-            CLog.i(VIRTUAL_ENV_PATH + " = " + virtualEnvPath + "\n");
-            if (mIsDirCreator) {
-                buildInfo.setFile(
-                        VIRTUAL_ENV_PATH, new File(virtualEnvPath), buildInfo.getBuildId());
-            }
-            activate();
-        } catch (IOException | RuntimeException e) {
-            CLog.e("Failed to create temp directory for virtualenv");
-            throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
         }
+
+        CLog.i("Python virtualenv path is: " + mVenvDir);
+        activate();
     }
 
     /**
