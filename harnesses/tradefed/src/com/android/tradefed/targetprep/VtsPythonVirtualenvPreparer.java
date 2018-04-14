@@ -28,9 +28,12 @@ import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.targetprep.multi.IMultiTargetPreparer;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
+import com.android.tradefed.util.EnvUtil;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
+import com.android.tradefed.util.VtsFileUtil;
+import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 
 import java.io.File;
@@ -55,18 +58,14 @@ import java.util.TreeSet;
  */
 @OptionClass(alias = "python-venv")
 public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
-    private static final String PIP = "pip";
-    private static final String PATH = "PATH";
-    private static final String OS_NAME = "os.name";
-    private static final String WINDOWS = "Windows";
     private static final String LOCAL_PYPI_PATH_ENV_VAR_NAME = "VTS_PYPI_PATH";
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
-    protected static final String PYTHONPATH = "PYTHONPATH";
-    protected static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     private static final int BASE_TIMEOUT = 1000 * 60;
+    public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
+    public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
     @Option(name = "venv-dir", description = "path of an existing virtualenv to use")
-    private File mVenvDir = null;
+    protected File mVenvDir = null;
 
     @Option(name = "requirements-file", description = "pip-formatted requirements file")
     private File mRequirementsFile = null;
@@ -80,15 +79,18 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
     private Collection<String> mNoDepModules = new TreeSet<>(Arrays.asList());
 
-    @Option(name = "python-version", description = "The version of a Python interpreter to use.")
-    private String mPythonVersion = "";
+    @Option(name = "python-version",
+            description = "The version of a Python interpreter to use."
+                    + "Currently, only major version number is fully supported."
+                    + "Example: \"2\", or \"3\".")
+    private String mPythonVersion = "2";
 
     private IBuildInfo mBuildInfo = null;
     private DeviceDescriptor mDescriptor = null;
     private IRunUtil mRunUtil = new RunUtil();
 
-    String mPip = PIP;
     String mLocalPypiPath = null;
+    String mPipPath = null;
 
     // Since we allow virtual env path to be reused during a test plan/module, only the preparer
     // which created the directory should be the one to delete it.
@@ -110,6 +112,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             ITestDevice device = context.getDevices().get(0);
             mDescriptor = device.getDeviceDescriptor();
             createVirtualenv(mBuildInfo);
+            VtsPythonRunnerHelper.activateVirtualenv(getRunUtil(), mVenvDir.getAbsolutePath());
             setLocalPypiPath();
             installDeps();
         }
@@ -187,7 +190,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             return false;
         }
 
-        if (!isOnWindows()) {
+        if (!EnvUtil.isOnWindows()) {
             CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.i(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
@@ -224,8 +227,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             }
         }
         if (mRequirementsFile != null) {
-            CommandResult c = getRunUtil().runTimedCmd(
-                    BASE_TIMEOUT * 5, mPip, "install", "-r", mRequirementsFile.getAbsolutePath());
+            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
+                    "-r", mRequirementsFile.getAbsolutePath());
             if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
                 CLog.e("Installing dependencies from %s failed with error: %s",
                         mRequirementsFile.getAbsolutePath(), c.getStderr());
@@ -241,8 +244,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 CommandResult result = null;
                 if (mLocalPypiPath != null) {
                     CLog.i("Attempting installation of %s from local directory", dep);
-                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep,
-                            "--no-index", "--find-links=" + mLocalPypiPath);
+                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
+                            dep, "--no-index", "--find-links=" + mLocalPypiPath);
                     CLog.i(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                             result.getStdout(), result.getStderr()));
                     if (result.getStatus() != CommandStatus.SUCCESS) {
@@ -251,14 +254,15 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 }
                 if (mLocalPypiPath == null || result.getStatus() != CommandStatus.SUCCESS) {
                     CLog.i("Attempting installation of %s from PyPI", dep);
-                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, mPip, "install", dep);
+                    result = getRunUtil().runTimedCmd(
+                            BASE_TIMEOUT * 5, getPipPath(), "install", dep);
                     CLog.i("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                             result.getStdout(), result.getStderr());
                     if (result.getStatus() != CommandStatus.SUCCESS) {
                         CLog.e("Installing %s from PyPI failed.", dep);
                         CLog.i("Attempting to upgrade %s", dep);
                         result = getRunUtil().runTimedCmd(
-                                BASE_TIMEOUT * 5, mPip, "install", "--upgrade", dep);
+                                BASE_TIMEOUT * 5, getPipPath(), "install", "--upgrade", dep);
                         if (result.getStatus() != CommandStatus.SUCCESS) {
                             throw new TargetSetupError(
                                     String.format("Failed to install dependencies with pip. "
@@ -281,20 +285,63 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     }
 
     /**
-     * Add PYTHONPATH and VIRTUAL_ENV_PATH to BuildInfo.
-     * @param buildInfo
+     * This method returns absolute pip path in virtualenv.
+     *
+     * This method is needed because although PATH is set in IRunUtil, IRunUtil will still
+     * use pip from system path.
+     *
+     * @return absolute pip path in virtualenv. null if virtualenv not available.
      */
-    protected void addPathToBuild(IBuildInfo buildInfo) {
-        if (buildInfo.getFile(PYTHONPATH) == null) {
-            // make the install directory of new packages available to other classes that
-            // receive the build
-            buildInfo.setFile(PYTHONPATH, new File(mVenvDir, "local/lib/python2.7/site-packages"),
-                    buildInfo.getBuildId());
+    public String getPipPath() {
+        if (mPipPath != null) {
+            return mPipPath;
         }
 
-        if (buildInfo.getFile(VIRTUAL_ENV_PATH) == null) {
-            buildInfo.setFile(
-                    VIRTUAL_ENV_PATH, new File(mVenvDir.getAbsolutePath()), buildInfo.getBuildId());
+        String virtualenvPath = mVenvDir.getAbsolutePath();
+        if (virtualenvPath == null) {
+            return null;
+        }
+        mPipPath = new File(VtsPythonRunnerHelper.getPythonBinDir(virtualenvPath), "pip")
+                           .getAbsolutePath();
+        return mPipPath;
+    }
+
+    /**
+     * Get the major python version from option.
+     *
+     * Currently, only 2 and 3 are supported.
+     *
+     * @return major version number
+     * @throws TargetSetupError
+     */
+    protected int getConfiguredPythonVersionMajor() throws TargetSetupError {
+        if (mPythonVersion.startsWith("3.") || mPythonVersion.equals("3")) {
+            return 3;
+        } else if (mPythonVersion.startsWith("2.") || mPythonVersion.equals("2")) {
+            return 2;
+        } else {
+            throw new TargetSetupError("Unsupported python version " + mPythonVersion);
+        }
+    }
+
+    /**
+     * Add PYTHONPATH and VIRTUAL_ENV_PATH to BuildInfo.
+     * @param buildInfo
+     * @throws TargetSetupError
+     */
+    protected void addPathToBuild(IBuildInfo buildInfo) throws TargetSetupError {
+        String target = null;
+        switch (getConfiguredPythonVersionMajor()) {
+            case 2:
+                target = VtsPythonVirtualenvPreparer.VIRTUAL_ENV;
+                break;
+            case 3:
+                target = VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3;
+                break;
+        }
+
+        if (buildInfo.getFile(target) == null) {
+            buildInfo.setFile(target, new File(mVenvDir.getAbsolutePath()), buildInfo.getBuildId());
         }
     }
 
@@ -305,23 +352,26 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      */
     protected void createVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
         if (mVenvDir == null) {
-            mVenvDir = buildInfo.getFile(VIRTUAL_ENV_PATH);
+            switch (getConfiguredPythonVersionMajor()) {
+                case 2:
+                    mVenvDir = buildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV);
+                    break;
+                case 3:
+                    mVenvDir = buildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3);
+                    break;
+            }
         }
 
         if (mVenvDir == null) {
-            CLog.i("Creating virtualenv");
+            CLog.i("Creating virtualenv for version " + mPythonVersion);
             try {
-                mVenvDir = FileUtil.createTempDir(getMD5(buildInfo.getTestTag()) + "-virtualenv");
+                mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
+                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
                 mIsDirCreator = true;
                 String virtualEnvPath = mVenvDir.getAbsolutePath();
-                CommandResult c;
-                if (mPythonVersion.length() == 0) {
-                    c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "virtualenv", virtualEnvPath);
-                } else {
-                    String[] cmd = new String[] {
-                            "virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-                    c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
-                }
+                String[] cmd = new String[] {
+                        "virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
+                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
                     throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
@@ -333,24 +383,6 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         CLog.i("Python virtualenv path is: " + mVenvDir);
-        activate();
-    }
-
-    /**
-     * This method returns a MD5 hash string for the given string.
-     */
-    private String getMD5(String str) throws RuntimeException {
-        try {
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-            byte[] array = md.digest(str.getBytes());
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < array.length; ++i) {
-                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
-            }
-            return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generating MD5 hash.", e);
-        }
     }
 
     protected void addDepModule(String module) {
@@ -395,22 +427,5 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 return FileVisitResult.CONTINUE;
             }
         });
-    }
-
-    /**
-     * This method returns whether the OS is Windows.
-     */
-    private static boolean isOnWindows() {
-        return System.getProperty(OS_NAME).contains(WINDOWS);
-    }
-
-    private void activate() {
-        File binDir = new File(mVenvDir, isOnWindows() ? "Scripts" : "bin");
-        getRunUtil().setWorkingDir(binDir);
-        String path = System.getenv(PATH);
-        getRunUtil().setEnvVariable(PATH, binDir + File.pathSeparator + path);
-        File pipFile = new File(binDir, PIP);
-        pipFile.setExecutable(true);
-        mPip = pipFile.getAbsolutePath();
     }
 }
