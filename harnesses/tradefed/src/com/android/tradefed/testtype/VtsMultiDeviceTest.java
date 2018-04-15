@@ -125,6 +125,7 @@ public class VtsMultiDeviceTest
     static final String PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service";
     static final String PRECONDITION_FEATURE = "precondition_feature";
     static final String PRECONDITION_FILE_PATH_PREFIX = "precondition_file_path_prefix";
+    static final String PRECONDITION_FIRST_API_LEVEL = "precondition_first_api_level";
     static final String PRECONDITION_LSHAL = "precondition_lshal";
     static final String PRECONDITION_SYSPROP = "precondition_sysprop";
     static final String PRECONDITION_VINTF = "precondition_vintf";
@@ -193,6 +194,10 @@ public class VtsMultiDeviceTest
                     + "Format of each source string:"
                     + "    <source>: absolute path of file prefix on device")
     private Collection<String> mPreconditionFilePathPrefix = new ArrayList<>();
+
+    @Option(name = "precondition-first-api-level",
+            description = "The lowest first API level required to run the test.")
+    private int mPreconditionFirstApiLevel = 0;
 
     @Option(name = "precondition-lshal",
         description = "The name of a `lshal`-listable feature needed to run the test.")
@@ -937,6 +942,11 @@ public class VtsMultiDeviceTest
             jsonObject.put(
                     PRECONDITION_FILE_PATH_PREFIX, new JSONArray(mPreconditionFilePathPrefix));
             CLog.i("Added %s to the Json object", PRECONDITION_FILE_PATH_PREFIX);
+        }
+
+        if (mPreconditionFirstApiLevel != 0) {
+            jsonObject.put(PRECONDITION_FIRST_API_LEVEL, mPreconditionFirstApiLevel);
+            CLog.i("Added %s to the Json object", PRECONDITION_FIRST_API_LEVEL);
         }
 
         if (mPreconditionLshal != null) {
