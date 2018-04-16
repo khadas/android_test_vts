@@ -16,6 +16,16 @@
 
 # launcher script for vts-tradefed harness
 # can be used from an Android build environment, or a standalone vts zip
+#
+# Usage:
+#   # to test a device with system.img = v9.0 and vendor.img = v9.0
+#       $ vts-tradefed
+#
+#   # to test a device with system.img = v9.0 and vendor.img = v8.1
+#       $ vts-tradefed -v=8.1
+#
+#   # all other cases are unsupported
+#
 
 checkFile() {
     if [ ! -f "$1" ]; then
@@ -143,4 +153,30 @@ for j in ${VTS_ROOT}/android-vts/testcases/*.jar; do
     JAR_PATH=${JAR_PATH}:$j
 done
 
-cd ${VTS_ROOT}/android-vts/testcases/; java $RDBG_FLAG -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "$@"
+ARGS=()
+for var in "$@"
+do
+case $var in
+    -v=*|--vendor-image=*)
+    VENDOR="${var#*=}"
+    if [ "${VENDOR}" == "9.0" ]; then
+        VENDOR=""
+    elif [ "${VENDOR}" != "8.1" ]; then
+        echo "Supports only --vendor-image=8.1."
+        echo "By default, 9.0 is the supported vendor.img version."
+        exit 1
+    fi
+    ;;
+    *)
+    ARGS+=("$var")
+    ;;
+esac
+done
+
+if [ -z "${VENDOR}" ]; then
+    VTS_TESTCASES=${VTS_ROOT}/android-vts/testcases/
+else
+    VTS_TESTCASES=${VTS_ROOT}/android-vts/${VENDOR}/testcases/
+fi
+
+cd ${VTS_TESTCASES}; VTS_TESTCASES=${VTS_TESTCASES} java $RDBG_FLAG -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "${ARGS[@]}"
