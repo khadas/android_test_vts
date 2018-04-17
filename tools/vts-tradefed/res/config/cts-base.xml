@@ -103,4 +103,6 @@
     <option name="compatibility:module-metadata-include-filter" key="component" value="vr" />
     <option name="compatibility:module-metadata-include-filter" key="component" value="webview" />
 
+    <!-- Exclude vts-hal-adapter tests -->
+    <option name="compatibility:module-metadata-exclude-filter" key="plan" value="vts-hal-adapter" />
 </configuration>
