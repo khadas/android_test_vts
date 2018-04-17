@@ -47,7 +47,10 @@ class WebFeature(feature_utils.Feature):
         keys.ConfigKeys.IKEY_ANDROID_DEVICE, keys.ConfigKeys.IKEY_ABI_NAME,
         keys.ConfigKeys.IKEY_ABI_BITNESS
     ]
-    _OPTIONAL_PARAMS = [keys.ConfigKeys.RUN_AS_VTS_SELFTEST]
+    _OPTIONAL_PARAMS = [
+        keys.ConfigKeys.RUN_AS_VTS_SELFTEST,
+        keys.ConfigKeys.IKEY_ENABLE_PROFILING,
+    ]
 
     def __init__(self, user_params):
         """Initializes the web feature.
@@ -77,6 +80,11 @@ class WebFeature(feature_utils.Feature):
         self.report_msg = ReportMsg.TestReportMessage()
         self.report_msg.test = str(
             getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME))
+
+        if getattr(self, keys.ConfigKeys.IKEY_ENABLE_PROFILING, False):
+            logging.info("Profiling test")
+            self.report_msg.test += "Profiling"
+
         self.report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
         self.report_msg.start_timestamp = feature_utils.GetTimestamp()
         self.report_msg.host_info.hostname = socket.gethostname()
