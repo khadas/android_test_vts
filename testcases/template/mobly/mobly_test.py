@@ -14,14 +14,18 @@
 # limitations under the License.
 #
 
+import importlib
 import json
 import logging
 import os
+import sys
 import time
 import yaml
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
+from vts.runners.host import config_parser
+from vts.runners.host import keys
 from vts.runners.host import records
 from vts.runners.host import test_runner
 from vts.utils.python.io import capture_printout
@@ -104,14 +108,14 @@ class MoblyTest(base_test.BaseTestClass):
         '''Prepare mobly config file for running test.'''
         self.mobly_config_file_path = os.path.join(self.mobly_dir,
                                                    CONFIG_FILE_NAME)
-        config_test = MOBLY_CONFIG_TEXT.format(
+        config_text = MOBLY_CONFIG_TEXT.format(
               module_name=self.test_module_name,
               serial1=self.android_devices[0].serial,
               serial2=self.android_devices[1].serial,
               log_path=self.mobly_dir
         )
         with open(self.mobly_config_file_path, 'w') as f:
-            f.write(config_test)
+            f.write(config_text)
 
     def ListTestCases(self):
         '''List test cases.
@@ -157,9 +161,6 @@ class MoblyTest(base_test.BaseTestClass):
 
     def GetMoblyResults(self):
         '''Get mobly module run results and put in vts results.'''
-        #TODO(yuexima): currently this only support one mobly module per vts
-        # module. If multiple mobly module per vts module is needed in the
-        # future, here is where it should be changed.
         file_handlers = (
             (MOBLY_RESULT_YAML_FILE_NAME, self.ParseYamlResults),
             (MOBLY_RESULT_JSON_FILE_NAME, self.ParseJsonResults),
@@ -188,7 +189,7 @@ class MoblyTest(base_test.BaseTestClass):
         '''Parse mobly test json result.
 
         Args:
-            result_path: string, result yaml file path.
+            result_path: string, result json file path.
         '''
         with open(path, 'r') as f:
             mobly_summary = json.load(f)
@@ -224,7 +225,7 @@ class MoblyTest(base_test.BaseTestClass):
                             'Mobly result document type unrecognized: %s', doc)
                         continue
 
-                    logging.info('Parsing result type: %s' + type)
+                    logging.info('Parsing result type: %s', type)
 
                     handler = self.result_handlers.get(type)
                     if handler is None:
@@ -266,6 +267,19 @@ class MoblyTest(base_test.BaseTestClass):
         for k, v in doc.items():
             logging.info(str(k) + ": " + str(v))
 
+def GetTestModuleNames():
+    '''Returns a list of mobly test module specified in test configuration.'''
+    configs = config_parser.load_test_config_file(sys.argv[1])
+    reduce_func = lambda x, y: x + y.get(keys.ConfigKeys.MOBLY_TEST_MODULE, [])
+    return reduce(reduce_func, configs, [])
+
+def ImportTestModules():
+    '''Dynamically import mobly test modules.'''
+    for module_name in GetTestModuleNames():
+        module, cls = module_name.rsplit('.', 1)
+        sys.modules['__main__'].__dict__[cls] = getattr(
+            importlib.import_module(module), cls)
 
 if __name__ == "__main__":
+    ImportTestModules()
     test_runner.main()

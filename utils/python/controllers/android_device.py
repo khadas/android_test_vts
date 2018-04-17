@@ -363,9 +363,8 @@ class AndroidDevice(object):
         self._product_type = product_type
         self.device_command_port = None
         self.device_callback_port = device_callback_port
-        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(), {
-            "serial": self.serial
-        })
+        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
+                                              {"serial": self.serial})
         base_log_path = getattr(logging, "log_path", "/tmp/logs/")
         self.log_path = os.path.join(base_log_path, "AndroidDevice%s" % serial)
         self.adb_logcat_process = None
@@ -714,15 +713,24 @@ class AndroidDevice(object):
             logging.exception(e)
             return False
 
-        while not self.hasBooted():
+        while not self.isBootCompleted():
             if time.time() - start >= timeout:
                 logging.error("Timeout while waiting for boot completion.")
                 return False
-            time.sleep(3)
+            time.sleep(1)
 
         return True
 
+    # Deprecated. Use isBootCompleted instead
     def hasBooted(self):
+        """Checks whether the device has booted.
+
+        Returns:
+            True if booted, False otherwise.
+        """
+        return self.isBootCompleted()
+
+    def isBootCompleted(self):
         """Checks whether the device has booted.
 
         Returns:
@@ -735,23 +743,117 @@ class AndroidDevice(object):
         except adb.AdbError:
             # adb shell calls may fail during certain period of booting
             # process, which is normal. Ignoring these errors.
+            pass
+
+        return False
+
+    def isFrameworkRunning(self, check_boot_completion=True):
+        """Checks whether Android framework is started.
+
+        This function will first check boot_completed prop. If boot_completed
+        is 0, then return False meaning framework not started.
+        Then this function will check whether system_server process is running.
+        If yes, then return True meaning framework is started.
+
+        The assumption here is if prop boot_completed is 0 then framework
+        is stopped.
+
+        There are still cases which can make this function return wrong
+        result. For example, boot_completed is set to 0 manually without
+        without stopping framework.
+
+        Args:
+            check_boot_completion: bool, whether to check boot completion
+                                   before checking framework status. This is an
+                                   important step for ensuring framework is
+                                   started. Under most circumstances this value
+                                   should be set to True.
+                                   Default True.
+
+        Returns:
+            True if started, False otherwise.
+        """
+        # First, check whether boot has completed.
+        if check_boot_completion and not self.isBootCompleted():
             return False
 
-    def start(self):
-        """Starts Android runtime and waits for ACTION_BOOT_COMPLETED."""
-        logging.info("starting Android Runtime")
-        self.adb.shell("start")
-        if self.waitForBootCompletion(60 * 2):
-            logging.info("Android Runtime started")
-        else:
-            logging.error("Failed to start Android Runtime.")
+        cmd = 'ps -g system | grep system_server'
+        res = self.adb.shell(cmd)
 
-    def stop(self):
-        """Stops Android runtime."""
-        logging.info("stopping Android Runtime")
+        return 'system_server' in res
+
+    def startFramework(self,
+                       wait_for_completion=True,
+                       wait_for_completion_timeout=120):
+        """Starts Android framework.
+
+        By default this function will wait for framework starting process to
+        finish before returning.
+
+        Args:
+            wait_for_completion: bool, whether to wait for framework to complete
+                                 starting. Default: True
+            wait_for_completion_timeout: timeout in seconds for waiting framework
+                                 to start. Default: 2 minutes
+
+        Returns:
+            bool, True if framework start success. False otherwise.
+        """
+        logging.info("starting Android framework")
+        self.adb.shell("start")
+
+        if wait_for_completion:
+            return self.waitForFrameworkStartComplete(wait_for_completion_timeout)
+
+        return True
+
+    def start(self):
+        """Starts Android framework and waits for ACTION_BOOT_COMPLETED.
+
+        Returns:
+            bool, True if framework start success. False otherwise.
+        """
+        return self.startFramework()
+
+    def stopFramework(self):
+        """Stops Android framework.
+
+        Method will block until stop is complete.
+        """
+        logging.info("stopping Android framework")
         self.adb.shell("stop")
         self.setProp("sys.boot_completed", 0)
-        logging.info("Android Runtime stopped")
+        logging.info("Android framework stopped")
+
+    def stop(self):
+        """Stops Android framework.
+
+        Method will block until stop is complete.
+        """
+        self.stopFramework()
+
+    def waitForFrameworkStartComplete(self, timeout_secs=120):
+        """Wait for Android framework to complete starting.
+
+        Args:
+            timeout_secs: int, seconds to wait for boot completion. Default is
+                          2 minutes.
+
+        Returns:
+            bool, True if framework is started. False otherwise or timeout
+        """
+        start = time.time()
+
+        # First, wait for boot completion and checks
+        self.waitForBootCompletion(timeout_secs)
+
+        while not self.isFrameworkRunning(check_boot_completion=False):
+            if time.time() - start >= timeout_secs:
+                logging.error("Timeout while waiting for framework to start.")
+                return False
+            time.sleep(1)
+
+        return True
 
     def setProp(self, name, value):
         """Calls setprop shell command.
@@ -1097,8 +1199,8 @@ class AndroidDevice(object):
     @property
     def droid(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if not hasattr(self, "_sl4a_sessions") or len(
-                self._sl4a_sessions) == 0:
+        if not hasattr(self,
+                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
             return None
         try:
             session_id = sorted(self._sl4a_sessions)[0]
@@ -1112,8 +1214,8 @@ class AndroidDevice(object):
     @property
     def droids(self):
         """A list of the active SL4A sessions on this device."""
-        if not hasattr(self, "_sl4a_sessions") or len(
-                self._sl4a_sessions) == 0:
+        if not hasattr(self,
+                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
             return None
         keys = sorted(self._sl4a_sessions)
         results = []
@@ -1124,8 +1226,8 @@ class AndroidDevice(object):
     @property
     def ed(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if (not hasattr(self, "_sl4a_event_dispatchers")
-                or len(self._sl4a_event_dispatchers) == 0):
+        if (not hasattr(self, "_sl4a_event_dispatchers") or
+                len(self._sl4a_event_dispatchers) == 0):
             return None
         logging.info("self._sl4a_event_dispatchers: %s",
                      self._sl4a_event_dispatchers)
