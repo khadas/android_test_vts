@@ -17,6 +17,7 @@
 package com.android.tradefed.util;
 
 import com.android.annotations.VisibleForTesting;
+import com.android.ddmlib.CollectingOutputReceiver;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -168,6 +169,21 @@ public class CmdUtil {
         setSystemProperty(device, BOOTCOMPLETE_PROP, "0");
         device.executeShellCommand("start");
         device.waitForDeviceAvailable(FRAMEWORK_START_TIMEOUT);
+    }
+
+    /**
+     * Gets a sysprop from the device.
+     *
+     * @param device the test device instance.
+     * @param name the name of a sysprop.
+     * @return the device sysprop value.
+     * @throws DeviceNotAvailableException
+     */
+    public String getSystemProperty(ITestDevice device, String name)
+            throws DeviceNotAvailableException {
+        CollectingOutputReceiver receiver = new CollectingOutputReceiver();
+        device.executeShellCommand(String.format("getprop %s", name), receiver);
+        return receiver.getOutput();
     }
 
     /**
