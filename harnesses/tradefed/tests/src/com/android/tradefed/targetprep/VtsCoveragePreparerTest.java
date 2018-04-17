@@ -16,7 +16,9 @@
 
 package com.android.tradefed.targetprep;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,9 +27,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionSetter;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.targetprep.TargetSetupError;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
@@ -43,9 +47,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 /**
  * Unit tests for {@link VtsCoveragePreparer}.
  */
@@ -57,13 +60,21 @@ public final class VtsCoveragePreparerTest {
     private String SYMBOLS_FILE_NAME = VtsCoveragePreparer.SYMBOLS_FILE_NAME;
     private String COVERAGE_REPORT_PATH = VtsCoveragePreparer.COVERAGE_REPORT_PATH;
 
-    // Path to store coverage test files.
-    private static final String TEST_COVERAGE_RESOURCE_PATH = "/tmp/test-coverage/";
+    // Path to store coverage report files.
+    private static final String TEST_COVERAGE_REPORT_PATH = "/tmp/test-coverage";
+
+    private File mTestDir;
+    private CompatibilityBuildHelper mMockHelper;
 
     private class TestCoveragePreparer extends VtsCoveragePreparer {
         @Override
+        CompatibilityBuildHelper createBuildHelper(IBuildInfo buildInfo) {
+            return mMockHelper;
+        }
+
+        @Override
         File createTempDir(ITestDevice device) {
-            return new File(TEST_COVERAGE_RESOURCE_PATH);
+            return mTestDir;
         }
 
         @Override
@@ -71,7 +82,6 @@ public final class VtsCoveragePreparerTest {
             return "fetcher --bid %s --target %s %s %s";
         }
     }
-    private File mDeviceInfoPath = null;
 
     @Mock private IBuildInfo mBuildInfo;
     @Mock private ITestDevice mDevice;
@@ -81,12 +91,20 @@ public final class VtsCoveragePreparerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mTestDir = FileUtil.createTempDir("vts-coverage-preparer-unit-tests");
+        mMockHelper = new CompatibilityBuildHelper(mBuildInfo) {
+            @Override
+            public File getTestsDir() throws FileNotFoundException {
+                return mTestDir;
+            }
+            public File getResultDir() throws FileNotFoundException {
+                return mTestDir;
+            }
+        };
         doReturn("build_id").when(mDevice).getBuildId();
         doReturn("1234").when(mDevice).getSerialNumber();
         doReturn("enforcing").when(mDevice).executeShellCommand("getenforce");
         doReturn("build_id").when(mBuildInfo).getBuildId();
-        mDeviceInfoPath = new File(TEST_COVERAGE_RESOURCE_PATH);
-        mDeviceInfoPath.mkdirs();
         CommandResult commandResult = new CommandResult();
         commandResult.setStatus(CommandStatus.SUCCESS);
         doReturn(commandResult).when(mRunUtil).runTimedCmd(anyLong(), any());
@@ -94,7 +112,7 @@ public final class VtsCoveragePreparerTest {
 
     @After
     public void tearDown() throws Exception {
-        FileUtil.recursiveDelete(mDeviceInfoPath);
+        FileUtil.recursiveDelete(mTestDir);
     }
 
     @Test
@@ -114,8 +132,8 @@ public final class VtsCoveragePreparerTest {
 
         mPreparer.setUp(mDevice, mBuildInfo);
         verify(mBuildInfo, times(1))
-                .setFile(eq(VtsCoveragePreparer.getSancovResourceDirKey(mDevice)),
-                        eq(mDeviceInfoPath), eq("build_id"));
+                .setFile(eq(VtsCoveragePreparer.getSancovResourceDirKey(mDevice)), eq(mTestDir),
+                        eq("build_id"));
     }
 
     @Test
@@ -126,51 +144,58 @@ public final class VtsCoveragePreparerTest {
         createTestFile(BUILD_INFO_ARTIFACT);
         mPreparer.setUp(mDevice, mBuildInfo);
         verify(mBuildInfo, times(1))
-                .setFile(eq(VtsCoveragePreparer.getGcovResourceDirKey(mDevice)),
-                        eq(mDeviceInfoPath), eq("build_id"));
+                .setFile(eq(VtsCoveragePreparer.getGcovResourceDirKey(mDevice)), eq(mTestDir),
+                        eq("build_id"));
     }
 
     @Test
     public void testOnSetUpLocalArtifectsNormal() throws Exception {
         OptionSetter setter = new OptionSetter(mPreparer);
         setter.setOptionValue("use-local-artifects", "true");
-        setter.setOptionValue("local-coverage-resource-path", "/tmp/test-coverage/");
+        setter.setOptionValue("local-coverage-resource-path", mTestDir.getAbsolutePath());
         doReturn("1").when(mDevice).getProperty(GCOV_PROPERTY);
         createTestFile(GCOV_FILE_NAME);
         createTestFile(BUILD_INFO_ARTIFACT);
 
         mPreparer.setUp(mDevice, mBuildInfo);
         verify(mBuildInfo, times(1))
-                .setFile(eq(VtsCoveragePreparer.getGcovResourceDirKey(mDevice)),
-                        eq(mDeviceInfoPath), eq("build_id"));
+                .setFile(eq(VtsCoveragePreparer.getGcovResourceDirKey(mDevice)), eq(mTestDir),
+                        eq("build_id"));
     }
 
     @Test
     public void testOnSetUpLocalArtifectsNotExists() throws Exception {
         OptionSetter setter = new OptionSetter(mPreparer);
         setter.setOptionValue("use-local-artifects", "true");
-        setter.setOptionValue("local-coverage-resource-path", TEST_COVERAGE_RESOURCE_PATH);
+        setter.setOptionValue("local-coverage-resource-path", mTestDir.getAbsolutePath());
         doReturn("1").when(mDevice).getProperty(GCOV_PROPERTY);
 
-        mPreparer.setUp(mDevice, mBuildInfo);
-        verify(mBuildInfo, never()).setFile(any(), any(), any());
+        try {
+            mPreparer.setUp(mDevice, mBuildInfo);
+        } catch (TargetSetupError e) {
+            // Expected.
+            assertEquals(String.format("Could not find %s under %s.", GCOV_FILE_NAME,
+                                 mTestDir.getAbsolutePath()),
+                    e.getMessage());
+            verify(mBuildInfo, never()).setFile(any(), any(), any());
+            return;
+        }
+        fail();
     }
 
     @Test
     public void testOnSetUpOutputCoverageReport() throws Exception {
         OptionSetter setter = new OptionSetter(mPreparer);
-        setter.setOptionValue("coverage-report-dir", TEST_COVERAGE_RESOURCE_PATH);
+        setter.setOptionValue("coverage-report-dir", TEST_COVERAGE_REPORT_PATH);
         doReturn("walleye_coverage-userdebug").when(mDevice).getBuildFlavor();
         doReturn("1").when(mDevice).getProperty(GCOV_PROPERTY);
         createTestFile(GCOV_FILE_NAME);
         createTestFile(BUILD_INFO_ARTIFACT);
 
         mPreparer.setUp(mDevice, mBuildInfo);
-        String currentDate =
-                new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
         verify(mBuildInfo, times(1))
-                .addBuildAttribute(
-                        eq(COVERAGE_REPORT_PATH), eq(TEST_COVERAGE_RESOURCE_PATH + currentDate));
+                .addBuildAttribute(eq(COVERAGE_REPORT_PATH),
+                        eq(mTestDir.getAbsolutePath() + TEST_COVERAGE_REPORT_PATH));
     }
 
     @Test
@@ -187,13 +212,13 @@ public final class VtsCoveragePreparerTest {
     }
 
     /**
-     * Helper method to create a test file under mDeviceInfoPath.
+     * Helper method to create a test file under mTestDir.
      *
-     * @fileName test file name.
+     * @param fileName test file name.
      * @return created test file.
      */
     private File createTestFile(String fileName) throws IOException {
-        File testFile = new File(mDeviceInfoPath, fileName);
+        File testFile = new File(mTestDir, fileName);
         testFile.createNewFile();
         return testFile;
     }
