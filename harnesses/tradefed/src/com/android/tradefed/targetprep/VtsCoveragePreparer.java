@@ -17,13 +17,14 @@
 package com.android.tradefed.targetprep;
 
 import com.android.annotations.VisibleForTesting;
-import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.targetprep.TargetSetupError;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
@@ -34,8 +35,6 @@ import com.android.tradefed.util.VtsVendorConfigFileUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 /**
  * Preparer class for sanitizer and gcov coverage.
  *
@@ -99,7 +98,8 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
 
     /** {@inheritDoc} */
     @Override
-    public void setUp(ITestDevice device, IBuildInfo buildInfo) throws DeviceNotAvailableException {
+    public void setUp(ITestDevice device, IBuildInfo buildInfo)
+            throws DeviceNotAvailableException, TargetSetupError {
         String flavor = device.getBuildFlavor();
         String buildId = device.getBuildId();
 
@@ -127,23 +127,23 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
         if (mRunUtil == null) {
             mRunUtil = new RunUtil();
         }
-        VtsCompatibilityInvocationHelper invocationHelper = new VtsCompatibilityInvocationHelper();
 
+        CompatibilityBuildHelper buildHelper = createBuildHelper(buildInfo);
         if (!mUseLocalArtifects) {
             // Load the vendor configuration
             String artifactFetcher = getArtifactFetcher(buildInfo);
             if (artifactFetcher == null) {
-                CLog.e("Vendor configuration with build_artifact_fetcher required.");
-                return;
+                throw new TargetSetupError(
+                        "Vendor configuration with build_artifact_fetcher required.");
             }
 
             try {
                 // Create a temporary coverage directory
                 mDeviceInfoPath = createTempDir(device);
             } catch (IOException e) {
-                CLog.e("Failed to create temp dir to store coverage resource files: "
-                        + e.toString());
-                return;
+                cleanupCoverageData(device);
+                throw new TargetSetupError(
+                        "Failed to create temp dir to store coverage resource files.");
             }
 
             if (sancovEnabled) {
@@ -158,8 +158,8 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
                 CommandResult commandResult = mRunUtil.runTimedCmd(BASE_TIMEOUT, cmd);
                 if (commandResult == null || commandResult.getStatus() != CommandStatus.SUCCESS
                         || !artifactFile.exists()) {
-                    CLog.e("Could not fetch unstripped binaries.");
-                    return;
+                    cleanupCoverageData(device);
+                    throw new TargetSetupError("Could not fetch unstripped binaries.");
                 }
             }
 
@@ -175,8 +175,8 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
                 CommandResult commandResult = mRunUtil.runTimedCmd(BASE_TIMEOUT, cmd);
                 if (commandResult == null || commandResult.getStatus() != CommandStatus.SUCCESS
                         || !artifactFile.exists()) {
-                    CLog.e("Could not fetch gcov build artifacts.");
-                    return;
+                    cleanupCoverageData(device);
+                    throw new TargetSetupError("Could not fetch gcov build artifacts.");
                 }
             }
 
@@ -188,36 +188,46 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
             File artifactFile = new File(mDeviceInfoPath, BUILD_INFO_ARTIFACT);
             if (commandResult == null || commandResult.getStatus() != CommandStatus.SUCCESS
                     || !artifactFile.exists()) {
-                CLog.e("Could not fetch build info.");
-                mDeviceInfoPath = null;
-                return;
+                cleanupCoverageData(device);
+                throw new TargetSetupError("Could not fetch build info.");
             }
         } else {
             mDeviceInfoPath = new File(mLocalCoverageResourcePath);
             String fileName = sancovEnabled ? SYMBOLS_FILE_NAME : GCOV_FILE_NAME;
             File artifactFile = new File(mDeviceInfoPath, fileName);
             if (!artifactFile.exists()) {
-                CLog.e("Could not find %s under %s.", GCOV_FILE_NAME,
-                        mDeviceInfoPath.getAbsolutePath());
-                return;
+                cleanupCoverageData(device);
+                throw new TargetSetupError(String.format("Could not find %s under %s.",
+                        GCOV_FILE_NAME, mDeviceInfoPath.getAbsolutePath()));
             }
             File buildInfoArtifact = new File(mDeviceInfoPath, BUILD_INFO_ARTIFACT);
             if (!buildInfoArtifact.exists()) {
-                CLog.e("Could not find %s under %s.", BUILD_INFO_ARTIFACT,
-                        mDeviceInfoPath.getAbsolutePath());
-                return;
+                cleanupCoverageData(device);
+                throw new TargetSetupError(String.format("Could not find %s under %s.",
+                        BUILD_INFO_ARTIFACT, mDeviceInfoPath.getAbsolutePath()));
             }
         }
 
         try {
             // Push the coverage configure tool
-            File configureSrc = new File(invocationHelper.getTestsDir(), COVERAGE_CONFIGURE_SRC);
+            File configureSrc = new File(buildHelper.getTestsDir(), COVERAGE_CONFIGURE_SRC);
             device.pushFile(configureSrc, COVERAGE_CONFIGURE_DST);
         } catch (FileNotFoundException e) {
-            CLog.e("Fails to push the vts coverage configure tool: " + e.toString());
-            mDeviceInfoPath = null;
-            return;
+            cleanupCoverageData(device);
+            throw new TargetSetupError("Failed to push the vts coverage configure tool.");
         }
+
+        if (mCoverageReportDir != null) {
+            try {
+                File resultDir = buildHelper.getResultDir();
+                File coverageDir = new File(resultDir, mCoverageReportDir);
+                buildInfo.addBuildAttribute(COVERAGE_REPORT_PATH, coverageDir.getAbsolutePath());
+            } catch (FileNotFoundException e) {
+                cleanupCoverageData(device);
+                throw new TargetSetupError("Failed to get coverageDir.");
+            }
+        }
+
         device.executeShellCommand(String.format("rm -rf %s/*", COVERAGE_DATA_PATH));
         mEnforcingState = device.executeShellCommand("getenforce");
         if (!mEnforcingState.equals(SELINUX_DISABLED)
@@ -234,29 +244,16 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
             buildInfo.setFile(
                     getGcovResourceDirKey(device), mDeviceInfoPath, buildInfo.getBuildId());
         }
-
-        if (mCoverageReportDir != null) {
-            // Create directory to store the coverage reports.
-            String currentDate =
-                    new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
-            File coverageReportDir = new File(mCoverageReportDir, currentDate);
-            buildInfo.addBuildAttribute(COVERAGE_REPORT_PATH, coverageReportDir.getAbsolutePath());
-        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
-        // Clear the temporary directories.
         if (mEnforcingState != null && !mEnforcingState.equals(SELINUX_DISABLED)) {
             device.executeShellCommand("setenforce " + mEnforcingState);
         }
-        if (mDeviceInfoPath != null) {
-            FileUtil.recursiveDelete(mDeviceInfoPath);
-            device.executeShellCommand("rm -r " + COVERAGE_CONFIGURE_DST);
-        }
-        device.executeShellCommand(String.format("rm -rf %s/*", COVERAGE_DATA_PATH));
+        cleanupCoverageData(device);
     }
 
     /**
@@ -279,6 +276,19 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
         return String.format(GCOV_RESOURCES_KEY, device.getSerialNumber());
     }
 
+    /**
+     * Cleanup the coverage data on target and host.
+     *
+     * @param device the target device.
+     */
+    private void cleanupCoverageData(ITestDevice device) throws DeviceNotAvailableException {
+        if (mDeviceInfoPath != null) {
+            FileUtil.recursiveDelete(mDeviceInfoPath);
+        }
+        device.executeShellCommand("rm -r " + COVERAGE_CONFIGURE_DST);
+        device.executeShellCommand(String.format("rm -rf %s/*", COVERAGE_DATA_PATH));
+    }
+
     @VisibleForTesting
     File createTempDir(ITestDevice device) throws IOException {
         return FileUtil.createTempDir(device.getSerialNumber());
@@ -291,5 +301,13 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
             return configFileUtil.GetVendorConfigVariable("build_artifact_fetcher");
         }
         return null;
+    }
+
+    /**
+     * Create and return a {@link CompatibilityBuildHelper} to use during the preparer.
+     */
+    @VisibleForTesting
+    CompatibilityBuildHelper createBuildHelper(IBuildInfo buildInfo) {
+        return new CompatibilityBuildHelper(buildInfo);
     }
 }
