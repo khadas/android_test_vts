@@ -217,9 +217,10 @@ public class ProcessHelper {
      */
     public CommandStatus waitForProcess(long timeoutMsecs) throws RunInterruptedException {
         VtsRunnable vtsRunnable = new VtsRunnable();
+        CommandStatus status;
         // Use default RunUtil because it can receive the notification of "invocation stop".
         try {
-            return RunUtil.getDefault().runTimed(timeoutMsecs, vtsRunnable, true);
+            status = RunUtil.getDefault().runTimed(timeoutMsecs, vtsRunnable, true);
         } catch (RunInterruptedException e) {
             // clear the flag set by default RunUtil.
             Thread.interrupted();
@@ -230,11 +231,15 @@ public class ProcessHelper {
                 joinThread(execThread, THREAD_JOIN_TIMEOUT_MSECS);
             }
             throw e;
-        } finally {
+        }
+        if (CommandStatus.SUCCESS.equals(status) || CommandStatus.FAILED.equals(status)) {
             // Join the receiver threads otherwise output might not be available yet.
             joinThread(mStdoutThread, THREAD_JOIN_TIMEOUT_MSECS);
             joinThread(mStderrThread, THREAD_JOIN_TIMEOUT_MSECS);
+        } else {
+            CLog.w("Process status is %s", status);
         }
+        return status;
     }
 
     /**
@@ -258,16 +263,18 @@ public class ProcessHelper {
     }
 
     /**
-     * @return the stdout of the process. As the buffer is not thread safe, this method should be
-     * called after {@link #cleanUp()}.
+     * @return the stdout of the process. As the buffer is not thread safe, the caller must call
+     * {@link #cleanUp()} or {@link #waitForProcess(long)} to ensure process termination before
+     * calling this method.
      */
     public String getStdout() {
         return mStdout.toString();
     }
 
     /**
-     * @return the stderr of the process. As the buffer is not thread safe, this method should be
-     * called after {@link #cleanUp()}.
+     * @return the stderr of the process. As the buffer is not thread safe, the caller must call
+     * {@link #cleanUp()} or {@link #waitForProcess(long)} to ensure process termination before
+     * calling this method.
      */
     public String getStderr() {
         return mStderr.toString();
