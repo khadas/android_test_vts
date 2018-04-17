@@ -60,7 +60,7 @@ public class VtsPythonVirtualenvPreparerTest {
     /**
      * Test that the installation of dependencies and requirements file is as expected.
      */
-    /**@Test
+    @Test
     public void testInstallDeps_reqFile_success() throws Exception {
         File requirementFile = FileUtil.createTempFile("reqfile", ".txt");
         try {
@@ -80,12 +80,12 @@ public class VtsPythonVirtualenvPreparerTest {
         } finally {
             FileUtil.deleteFile(requirementFile);
         }
-    }*/
+    }
 
     /**
      * Test that if an extra dependency module is required, we install it too.
      */
-    /**@Test
+    @Test
     public void testInstallDeps_depModule_success() throws Exception {
         mPreparer.addDepModule("blahblah");
         CommandResult result = new CommandResult(CommandStatus.SUCCESS);
@@ -100,7 +100,7 @@ public class VtsPythonVirtualenvPreparerTest {
         EasyMock.replay(mMockRunUtil);
         mPreparer.installDeps();
         EasyMock.verify(mMockRunUtil);
-    }*/
+    }
 
     /**
      * Test that an installation failure of the requirements file throws a {@link TargetSetupError}.
@@ -133,7 +133,7 @@ public class VtsPythonVirtualenvPreparerTest {
     /**
      * Test that an installation failure of the dep module throws a {@link TargetSetupError}.
      */
-    /**@Test
+    @Test
     public void testInstallDeps_depModule_failure() throws Exception {
         CommandResult result = new CommandResult(CommandStatus.TIMED_OUT);
         result.setStdout("output");
@@ -155,7 +155,7 @@ public class VtsPythonVirtualenvPreparerTest {
             assertTrue(buildInfo.getFile("PYTHONPATH") == null);
         }
         EasyMock.verify(mMockRunUtil);
-    }*/
+    }
 
     private void addDefaultModuleExpectations(IRunUtil mockRunUtil, CommandResult result) {
         expect(mockRunUtil.runTimedCmd(
