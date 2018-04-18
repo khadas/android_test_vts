@@ -109,6 +109,49 @@ def CanRunHidlHalTest(test_instance,
     return True
 
 
+def MeetFirstApiLevelPrecondition(test_instance, dut=None):
+    """Checks first API level precondition of a test instance.
+
+    If the device's ro.product.first_api_level is 0, this function checks
+    ro.build.version.sdk.
+
+    Args:
+        test_instance: the test instance which inherits BaseTestClass.
+        dut: the AndroidDevice under test.
+
+    Returns:
+        True if the device's first API level is greater than or equal to the
+        value of the precondition; False otherwise.
+    """
+    opt_params = [keys.ConfigKeys.IKEY_PRECONDITION_FIRST_API_LEVEL]
+    test_instance.getUserParams(opt_param_names=opt_params)
+    if not hasattr(test_instance,
+                   keys.ConfigKeys.IKEY_PRECONDITION_FIRST_API_LEVEL):
+        return True
+
+    precond_level_attr = getattr(
+        test_instance, keys.ConfigKeys.IKEY_PRECONDITION_FIRST_API_LEVEL, 0)
+    try:
+        precond_level = int(precond_level_attr)
+    except ValueError:
+        logging.error("Cannot parse first API level precondition: %s",
+                      precond_level_attr)
+        return True
+
+    if not dut:
+        logging.info("Read first API level from the first device.")
+        dut = test_instance.android_devices[0]
+    device_level = dut.getLaunchApiLevel(strict=False)
+    if not device_level:
+        logging.error("Cannot read first API level from device. "
+                      "Assume it meets the precondition.")
+        return True
+
+    logging.info("Device's first API level=%d; precondition=%d",
+                 device_level, precond_level)
+    return device_level >= precond_level
+
+
 def CheckSysPropPrecondition(test_instance,
                              dut,
                              shell=None):
