@@ -24,5 +24,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsFirmwareDtboVerification"/>
         <option name="test-case-path" value="vts/testcases/host/verify_dtbo/VtsFirmwareDtboVerification" />
+        <option name="precondition-first-api-level" value="28" />
     </test>
 </configuration>
