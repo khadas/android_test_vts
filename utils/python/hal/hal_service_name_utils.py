@@ -49,7 +49,7 @@ def GetHalServiceName(shell, hal, bitness="64", run_as_compliance_test=False):
     cmd_results = shell.Execute(str(cmd))
     asserts.assertFalse(
         any(cmd_results[const.EXIT_CODE]),
-        "Failed to run vts_testability_checker.")
+        "Failed to run vts_testability_checker. Error: %s" % cmd_results[const.STDERR][0])
     result = json.loads(cmd_results[const.STDOUT][0])
     if str(result['Testable']).lower() == "true":
         return True, set(result['instances'])
