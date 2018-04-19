@@ -21,9 +21,8 @@ import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.OptionClass;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.device.metric.DeviceMetricData;
-import com.android.tradefed.device.metric.BaseDeviceMetricCollector;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.metrics.proto.MetricMeasurement.Metric;
 import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -54,7 +53,7 @@ public class VtsCoverageCollector extends BaseDeviceMetricCollector {
 
     @Override
     public void onTestRunEnd(DeviceMetricData testData,
-            final Map<String, String> currentTestCaseMetrics) throws RunInterruptedException {
+            final Map<String, Metric> currentTestCaseMetrics) throws RunInterruptedException {
         String moduleName = getRunName().replace(' ', '_');
         CLog.i("Test module name: " + moduleName);
         IBuildInfo buildInfo = getBuildInfos().get(0);
