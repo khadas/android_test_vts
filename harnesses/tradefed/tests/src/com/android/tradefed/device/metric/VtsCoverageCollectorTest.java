@@ -76,10 +76,6 @@ public class VtsCoverageCollectorTest {
                 commandResult.setStatus(CommandStatus.SUCCESS);
                 return null;
             }
-            @Override
-            public String getPythonBinary() {
-                return "python";
-            }
         };
     }
 
