@@ -83,8 +83,7 @@ public class VtsCoverageCollector extends BaseDeviceMetricCollector {
             }
             File local_coverage_report_dir = new File(coverage_report_dir, moduleName);
 
-            String pythonBin = mPythonRunnerHelper.getPythonBinary();
-            String cmdString = pythonBin
+            String cmdString = "python"
                     + " -m vts.utils.python.coverage.coverage_utils get_coverage --serial " + serial
                     + " --gcov_rescource_path " + gcovDirPath + " --report_path "
                     + local_coverage_report_dir.getAbsolutePath() + " --report_prefix "
