@@ -72,10 +72,10 @@ class VtsFirmwareDtboVerification(base_test.BaseTestClass):
         logging.info("DTBO path %s", dtbo_path)
         if not dtbo_path:
             asserts.fail("Unable to find path to dtbo image on device.")
-        host_dtbo_image = os.path.join(self.temp_dir, "dtbo");
+        host_dtbo_image = os.path.join(self.temp_dir, "dtbo")
         self.adb.pull("%s %s" % (dtbo_path[0], host_dtbo_image))
         mkdtboimg_bin_path = os.path.join("host", "bin", "mkdtboimg.py")
-        unpacked_dtbo_path = os.path.join(self.temp_dir, "dumped_dtbo");
+        unpacked_dtbo_path = os.path.join(self.temp_dir, "dumped_dtbo")
         dtbo_dump_cmd = [
             "python", "%s" % mkdtboimg_bin_path, "dump",
             "%s" % host_dtbo_image, "-b",
@@ -106,6 +106,11 @@ class VtsFirmwareDtboVerification(base_test.BaseTestClass):
             overlay_arg.append(overlay_file)
         final_dt_path = path_utils.JoinTargetPath(self.device_path, "final_dt")
         self.shell.Execute("cp %s %s" % (FDT_PATH, final_dt_path))
+        verification_test_path = path_utils.JoinTargetPath(
+            self.device_path, "ufdt_verify_overlay")
+        chmod_cmd = "chmod 755 %s" % verification_test_path
+        results = self.shell.Execute(chmod_cmd)
+        asserts.assertEqual(results[const.EXIT_CODE][0], 0, "Unable to chmod")
         cd_cmd = "cd %s" % (self.device_path)
         verify_cmd = "./ufdt_verify_overlay final_dt %s" % (
             " ".join(overlay_arg))
