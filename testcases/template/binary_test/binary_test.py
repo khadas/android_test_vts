@@ -77,8 +77,6 @@ class BinaryTest(base_test.BaseTestClass):
             keys.ConfigKeys.IKEY_BINARY_TEST_ARGS,
             keys.ConfigKeys.IKEY_BINARY_TEST_LD_LIBRARY_PATH,
             keys.ConfigKeys.IKEY_BINARY_TEST_PROFILING_LIBRARY_PATH,
-            keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
-            keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
             keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
             keys.ConfigKeys.IKEY_PRECONDITION_FILE_PATH_PREFIX,
             keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP,
@@ -221,37 +219,6 @@ class BinaryTest(base_test.BaseTestClass):
             logging.error('Failed to set permission to some of the binaries:\n'
                           '%s\n%s', cmd, cmd_results)
 
-        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
-                   False):
-            # Disable the framework if requested.
-            self._dut.stop()
-        else:
-            # Enable the framework if requested.
-            self._dut.start()
-
-        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
-                   False):
-            logging.debug("Stops all properly configured native servers.")
-            results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
-            native_server_process_names = getattr(
-                self, keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME, [])
-            if native_server_process_names:
-                for native_server_process_name in native_server_process_names:
-                    while True:
-                        cmd_result = self.shell.Execute("ps -A")
-                        if cmd_result[const.EXIT_CODE][0] != 0:
-                            logging.error("ps command failed (exit code: %s",
-                                          cmd_result[const.EXIT_CODE][0])
-                            break
-                        if (native_server_process_name not in cmd_result[
-                                const.STDOUT][0]):
-                            logging.info("Process %s not running",
-                                         native_server_process_name)
-                            break
-                        logging.info("Checking process %s",
-                                     native_server_process_name)
-                        time.sleep(1)
-
     def CreateTestCases(self):
         '''Push files to device and create test case objects.'''
         source_list = list(map(self.ParseTestSource, self.binary_test_source))
@@ -359,11 +326,6 @@ class BinaryTest(base_test.BaseTestClass):
 
     def tearDownClass(self):
         '''Perform clean-up tasks'''
-        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
-                   False):
-            logging.debug("Restarts all properly configured native servers.")
-            results = self._dut.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "0")
-
         # Retrieve coverage if applicable
         if self.coverage.enabled and self.coverage.global_coverage:
             if not self.isSkipAllTests():
