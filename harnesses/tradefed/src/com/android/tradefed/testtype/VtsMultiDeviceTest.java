@@ -153,7 +153,8 @@ public class VtsMultiDeviceTest
     static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 15;
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
-    static final String DEFAULT_TESTCASE_CONFIG_PATH = "vts/tools/vts-tradefed/res/default/DefaultTestCase.config";
+    static final String DEFAULT_TESTCASE_CONFIG_PATH =
+            "vts/tools/vts-tradefed/res/default/DefaultTestCase.runner_conf";
 
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;
