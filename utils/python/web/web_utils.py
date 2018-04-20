@@ -33,7 +33,7 @@ class WebFeature(feature_utils.Feature):
     """Feature object for web functionality.
 
     Attributes:
-        enabled: boolean, True if systrace is enabled, False otherwise
+        enabled: boolean, True if web feature is enabled, False otherwise
         report_msg: TestReportMessage, Proto summarizing the test run
         current_test_report_msg: TestCaseReportMessage, Proto summarizing the current test case
         rest_client: DashboardRestClient, client to which data will be posted
