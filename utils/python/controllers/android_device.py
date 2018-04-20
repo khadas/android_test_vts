@@ -347,6 +347,9 @@ class AndroidDevice(object):
                   via fastboot.
         customflasher: A CustomFlasherProxy object used for interacting with
                        the device via user defined flashing binary.
+        enable_vts_agent: bool, whether VTS agent is used.
+        enable_sl4a: bool, whether SL4A is used.
+        enable_sl4a_ed: bool, whether SL4A Event Dispatcher is used.
         host_command_port: the host-side port for runner to agent sessions
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
@@ -957,15 +960,15 @@ class AndroidDevice(object):
         2. Start VtsAgent and create HalMirror unless disabled in config.
         3. If enabled in config, start sl4a service and create sl4a clients.
         """
-        enable_vts_agent = getattr(self, "enable_vts_agent", True)
-        enable_sl4a = getattr(self, "enable_sl4a", False)
-        enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
+        self.enable_vts_agent = getattr(self, "enable_vts_agent", True)
+        self.enable_sl4a = getattr(self, "enable_sl4a", False)
+        self.enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
         try:
             self.startAdbLogcat()
         except:
             self.log.exception("Failed to start adb logcat!")
             raise
-        if enable_vts_agent:
+        if self.enable_vts_agent:
             self.startVtsAgent()
             self.device_command_port = int(
                 self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
@@ -979,9 +982,9 @@ class AndroidDevice(object):
             self.lib = mirror_tracker.MirrorTracker(self.host_command_port)
             self.shell = mirror_tracker.MirrorTracker(
                 host_command_port=self.host_command_port, adb=self.adb)
-        if enable_sl4a:
+        if self.enable_sl4a:
             try:
-                self.startSl4aClient(enable_sl4a_ed)
+                self.startSl4aClient(eself.enable_sl4a_ed)
             except Exception as e:
                 self.log.exception("Failed to start SL4A!")
                 self.log.exception(e)
@@ -992,9 +995,11 @@ class AndroidDevice(object):
         """
         if self.adb_logcat_process:
             self.stopAdbLogcat()
-        self._terminateAllSl4aSessions()
-        self.stopSl4a()
-        self.stopVtsAgent()
+        if self.enable_sl4a:
+            self._terminateAllSl4aSessions()
+            self.stopSl4a()
+        if self.enable_vts_agent:
+            self.stopVtsAgent()
         if self.hal:
             self.hal.CleanUp()
 
