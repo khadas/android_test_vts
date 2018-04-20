@@ -90,6 +90,8 @@ public class VtsMultiDeviceTest
     static final String SKIP_ON_64BIT_ABI = "skip_on_64bit_abi";
     static final String SKIP_IF_THERMAL_THROTTLING = "skip_if_thermal_throttling";
     static final String DISABLE_CPU_FREQUENCY_SCALING = "disable_cpu_frequency_scaling";
+    static final String DISABLE_FRAMEWORK = "DISABLE_FRAMEWORK";
+    static final String STOP_NATIVE_SERVERS = "STOP_NATIVE_SERVERS";
     static final String RUN_32BIT_ON_64BIT_ABI = "run_32bit_on_64bit_abi";
     static final String CONFIG_FILE_EXTENSION = ".config";
     static final String INCLUDE_FILTER = "include_filter";
@@ -101,7 +103,8 @@ public class VtsMultiDeviceTest
     static final String BINARY_TEST_ARGS = "binary_test_args";
     static final String BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path";
     static final String BINARY_TEST_PROFILING_LIBRARY_PATH = "binary_test_profiling_library_path";
-    static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
+    @Deprecated static final String BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework";
+    @Deprecated
     static final String BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers";
     static final String BINARY_TEST_TYPE_GTEST = "gtest";
     static final String BINARY_TEST_TYPE_LLVMFUZZER = "llvmfuzzer";
@@ -368,12 +371,22 @@ public class VtsMultiDeviceTest
             + "specified, default directories will be used for files with different tags.")
     private Collection<String> mBinaryTestProfilingLibraryPath = new ArrayList<>();
 
-    @Option(name = "binary-test-disable-framework", description = "Adb stop/start before/after test.")
+    @Deprecated
+    @Option(name = "binary-test-disable-framework",
+            description = "Adb stop/start before/after test.")
     private boolean mBinaryTestDisableFramework = false;
 
+    @Deprecated
     @Option(name = "binary-test-stop-native-servers",
             description = "Set to stop all properly configured native servers during the testing.")
     private boolean mBinaryTestStopNativeServers = false;
+
+    @Option(name = "disable-framework", description = "Adb stop/start before/after test.")
+    private boolean mDisableFramework = false;
+
+    @Option(name = "stop-native-servers",
+            description = "Set to stop all properly configured native servers during the testing.")
+    private boolean mStopNativeServers = false;
 
     @Option(name = "bug-report-on-failure",
             description = "To catch bugreport zip file at the end of failed test cases. "
@@ -986,6 +999,16 @@ public class VtsMultiDeviceTest
             jsonObject.put(BINARY_TEST_PROFILING_LIBRARY_PATH,
                     new JSONArray(mBinaryTestProfilingLibraryPath));
             CLog.i("Added %s to the Json object", BINARY_TEST_PROFILING_LIBRARY_PATH);
+        }
+
+        if (mDisableFramework) {
+            jsonObject.put(DISABLE_FRAMEWORK, mDisableFramework);
+            CLog.i("Added %s to the Json object", DISABLE_FRAMEWORK);
+        }
+
+        if (mStopNativeServers) {
+            jsonObject.put(STOP_NATIVE_SERVERS, mStopNativeServers);
+            CLog.i("Added %s to the Json object", STOP_NATIVE_SERVERS);
         }
 
         if (mBinaryTestDisableFramework) {
