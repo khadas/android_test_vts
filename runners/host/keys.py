@@ -42,10 +42,15 @@ class ConfigKeys(object):
     IKEY_BINARY_TEST_ENVP = "binary_test_envp"
     IKEY_BINARY_TEST_ARGS = "binary_test_args"
     IKEY_BINARY_TEST_LD_LIBRARY_PATH = "binary_test_ld_library_path"
-    IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
-    IKEY_BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers"
     IKEY_NATIVE_SERVER_PROCESS_NAME = "native_server_process_name"
     IKEY_GTEST_BATCH_MODE = "gtest_batch_mode"
+
+    # @Deprecated use IKEY_DISABLE_FRAMEWORK
+    IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
+    IKEY_DISABLE_FRAMEWORK = "DISABLE_FRAMEWORK "
+    # @Deprecated use IKEY_STOP_NATIVE_SERVERS
+    IKEY_BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers"
+    IKEY_STOP_NATIVE_SERVERS = "STOP_NATIVE_SERVERS"
 
     # Internal keys, used internally, not exposed to user's config files.
     IKEY_USER_PARAM = "user_params"

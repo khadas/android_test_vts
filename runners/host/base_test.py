@@ -28,6 +28,7 @@ from vts.runners.host import logger
 from vts.runners.host import records
 from vts.runners.host import signals
 from vts.runners.host import utils
+from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import filter_utils
 from vts.utils.python.common import list_utils
@@ -302,6 +303,49 @@ class BaseTestClass(object):
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
+
+        if (self.getUserParam(keys.ConfigKeys.IKEY_DISABLE_FRAMEWORK,
+                              default_value=False) or
+            # @Deprecated Legacy configuration option name.
+            self.getUserParam(keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
+                              default_value=False)):
+            # Disable the framework if requested.
+            for device in self.android_devices:
+                device.stop()
+        else:
+            # Enable the framework if requested.
+            for device in self.android_devices:
+                device.start()
+
+        if (self.getUserParam(keys.ConfigKeys.IKEY_STOP_NATIVE_SERVERS,
+                              default_value=False) or
+            # @Deprecated Legacy configuration option name.
+            self.getUserParam(keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                              default_value=False)):
+            for device in self.android_devices:
+                logging.debug("Stops all properly configured native servers "
+                              "on device %s", device.serial)
+                results = device.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
+                native_server_process_names = self.getUserParam(
+                    keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
+                    default_value=[])
+                if native_server_process_names:
+                    for native_server_process_name in native_server_process_names:
+                        while True:
+                            cmd_result = device.shell.Execute("ps -A")
+                            if cmd_result[const.EXIT_CODE][0] != 0:
+                                logging.error("ps command failed (exit code: %s",
+                                              cmd_result[const.EXIT_CODE][0])
+                                break
+                            if (native_server_process_name not in cmd_result[
+                                    const.STDOUT][0]):
+                                logging.info("Process %s not running",
+                                             native_server_process_name)
+                                break
+                            logging.info("Checking process %s",
+                                         native_server_process_name)
+                            time.sleep(1)
+
         return self.setUpClass()
 
     def setUpClass(self):
@@ -337,6 +381,16 @@ class BaseTestClass(object):
 
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
+
+        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                   False):
+            logging.debug("Restarts all properly configured native servers.")
+            for device in self.android_devices:
+                try:
+                    self.device.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "0")
+                except adb.AdbError:
+                    logging.error("failed to restore native servers for device "
+                                  + device.serial)
 
         return ret
 
