@@ -25,6 +25,6 @@
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsCodelabHelloWorldSl4aTest"/>
         <option name="test-case-path" value="vts/testcases/codelab/hello_world_sl4a/VtsCodelabHelloWorldSl4aTest" />
-        <option name="test-config-path" value="vts/testcases/codelab/hello_world_sl4a/VtsCodelabHelloWorldSl4aTest.config" />
+        <option name="test-config-path" value="vts/testcases/codelab/hello_world_sl4a/VtsCodelabHelloWorldSl4aTest.runner_conf" />
     </test>
 </configuration>
