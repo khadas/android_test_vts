@@ -17,6 +17,7 @@
 import logging
 import os
 import re
+import stat
 
 from vts.runners.host import utils
 from vts.utils.python.common import cmd_utils
@@ -53,7 +54,18 @@ class VtableParser(object):
             "^(\\d+) +" + re.escape("(int (*)(...))") + " (.+)$")
 
     def __init__(self, dumper_path):
+        """Initializes the dumper path and its permission."""
         self._dumper_path = dumper_path
+
+        if not utils.is_on_windows():
+            bin_path = os.path.join(
+                self._dumper_path, "bin", self.VNDK_VTABLE_DUMPER)
+            try:
+                mode = os.stat(bin_path).st_mode
+                os.chmod(bin_path,
+                         mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            except OSError as e:
+                logging.warning("Fail to chmod vtable dumper: %s", e)
 
     def CallVtableDumper(self, lib_path):
         """Calls vndk-vtable-dumper and returns its output.
