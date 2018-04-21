@@ -32,4 +32,4 @@ LOCAL_MODULE_HOST_OS := windows
 include $(BUILD_PREBUILT)
 
 .PHONY: vts-tradefed-standalone
-vts-tradefed-standalone: vts-tradefed vts-tradefed-tests hosttestlib compatibility-host-util tradefed
+vts-tradefed-standalone: vts-tradefed vts-tradefed-tests loganalysis hosttestlib compatibility-host-util tradefed
