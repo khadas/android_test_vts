@@ -118,7 +118,7 @@ host_additional_deps_copy_pairs := \
 
 host_framework_files := \
   $(call find-files-in-subdirs,test/vts,"*.py" -and -type f,.) \
-  $(call find-files-in-subdirs,test/vts,"*.config" -and -type f,.) \
+  $(call find-files-in-subdirs,test/vts,"*.runner_conf" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts,"*.push" -and -type f,.)
 
 host_framework_copy_pairs := \
@@ -127,7 +127,7 @@ host_framework_copy_pairs := \
 
 host_testcase_files := \
   $(call find-files-in-subdirs,test/vts-testcase,"*.py" -and -type f,.) \
-  $(call find-files-in-subdirs,test/vts-testcase,"*.config" -and -type f,.) \
+  $(call find-files-in-subdirs,test/vts-testcase,"*.runner_conf" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.push" -and -type f,.) \
   $(call find-files-in-subdirs,test/vts-testcase,"*.dump" -and -type f,.)
 
