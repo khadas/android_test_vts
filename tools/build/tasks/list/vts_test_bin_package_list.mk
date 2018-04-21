@@ -51,6 +51,8 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     vts_ibase_test \
     vts_treble_vintf_test \
+    vts_treble_vintf_framework_test \
+    vts_treble_vintf_vendor_test  \
 
 # Netd tests
 vts_test_bin_packages += \
