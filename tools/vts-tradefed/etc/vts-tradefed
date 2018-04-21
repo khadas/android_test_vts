@@ -110,6 +110,7 @@ if [ -z $JAR_DIR ]; then
 fi
 
 JARS="${TRADEFED_JAR}
+  loganalysis
   hosttestlib
   vts-tradefed
   vts-tradefed-tests

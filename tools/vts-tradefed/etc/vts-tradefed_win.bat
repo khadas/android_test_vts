@@ -68,6 +68,7 @@ set JAR_PATH=%TRADEFED_JAR%
 
 :: other required jars
 set JARS=^
+  loganalysis^
   hosttestlib^
   vts-tradefed^
   vts-tradefed-tests^
