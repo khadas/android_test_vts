@@ -13,4 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+PLATFORM_API_LEVEL_O = 26
 PLATFORM_API_LEVEL_O_MR1 = 27
+PLATFORM_API_LEVEL_P = 28
