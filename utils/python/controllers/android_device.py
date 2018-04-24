@@ -995,10 +995,10 @@ class AndroidDevice(object):
         """
         if self.adb_logcat_process:
             self.stopAdbLogcat()
-        if self.enable_sl4a:
+        if getattr(self, "enable_sl4a", False):
             self._terminateAllSl4aSessions()
             self.stopSl4a()
-        if self.enable_vts_agent:
+        if getattr(self, "enable_vts_agent", True):
             self.stopVtsAgent()
         if self.hal:
             self.hal.CleanUp()
