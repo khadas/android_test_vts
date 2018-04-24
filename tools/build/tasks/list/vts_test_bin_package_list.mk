@@ -50,7 +50,7 @@ vts_test_bin_packages += \
 # VTS Treble VINTF Test
 vts_test_bin_packages += \
     vts_ibase_test \
-    vts_treble_vintf_test \
+    vts_treble_vintf_test_o_mr1 \
     vts_treble_vintf_framework_test \
     vts_treble_vintf_vendor_test  \
 
