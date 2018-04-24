@@ -64,7 +64,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         self.abi_bitness = str(self.abi_bitness)
         self.trace_paths = map(str, self.hal_hidl_replay_test_trace_paths)
 
-        self.driver_binary_path = path_utils.JoinTargetPath(
+        self.replayer_binary_path = path_utils.JoinTargetPath(
             self.DEVICE_TMP_DIR, self.abi_bitness,
             "vts_hal_replayer%s" % self.abi_bitness)
         self.custom_ld_library_path = path_utils.JoinTargetPath(
@@ -78,33 +78,49 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 path_utils.JoinTargetPath(self.data_file_path,
                                           "hal-hidl-trace", trace_path),
                 target_trace_path)
-
             service_instance_combinations = self._GetServiceInstanceCombinations(
                 target_trace_path)
 
-            for instance_combination in service_instance_combinations:
-                test_case = super(HalHidlReplayTest, self).CreateTestCase(
-                    self.driver_binary_path, '')
-                test_case.envp += "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH" % self.custom_ld_library_path
-                test_case.args += " --spec_dir_path=" + self.DEVICE_VTS_SPEC_FILE_PATH
-                test_case.test_name = "replay_test_" + trace_file_name
-                service_name_list = []
-                for instance in instance_combination:
-                    test_case.args += " --hal_service_instance=" + instance
-                    test_case.args += " " + target_trace_path
-                    service_name_list.append(instance[instance.find('/')+1:])
-                name_appendix = "({0})".format(",".join(service_name_list))
-                test_case.name_appendix = name_appendix
+            if service_instance_combinations:
+                for instance_combination in service_instance_combinations:
+                    test_case = self.CreateReplayTestCase(
+                        trace_file_name, target_trace_path)
+                    service_name_list = []
+                    for instance in instance_combination:
+                        test_case.args += " --hal_service_instance=" + instance
+                        service_name_list.append(
+                            instance[instance.find('/') + 1:])
+                    name_appendix = "({0})".format(",".join(service_name_list))
+                    test_case.name_appendix = name_appendix
+                    self.testcases.append(test_case)
+            else:
+                test_case = self.CreateReplayTestCase(trace_file_name,
+                                                      target_trace_path)
                 self.testcases.append(test_case)
 
-    def VerifyTestResult(self, test_case, command_results):
-        '''Parse Gtest xml result output.
+    def CreateReplayTestCase(self, trace_file_name, target_trace_path):
+        """Create a replay test case object.
 
         Args:
-            test_case: GtestTestCase object, the test being run. This param
+            trace_file_name: string, name of the trace file used in the test.
+            target_trace_path: string, full path of the trace file or the target device.
+        """
+        test_case = super(HalHidlReplayTest, self).CreateTestCase(
+            self.replayer_binary_path, '')
+        test_case.envp += "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH" % self.custom_ld_library_path
+        test_case.args += " --spec_dir_path=" + self.DEVICE_VTS_SPEC_FILE_PATH
+        test_case.args += " " + target_trace_path
+        test_case.test_name = "replay_test_" + trace_file_name
+        return test_case
+
+    def VerifyTestResult(self, test_case, command_results):
+        """Parse Gtest xml result output.
+
+        Args:
+            test_case: BinaryTestCase object, the test being run. This param
                        is not currently used in this method.
             command_results: dict of lists, shell command result
-        '''
+        """
         asserts.assertTrue(command_results, 'Empty command response.')
         asserts.assertEqual(
             len(command_results), 3, 'Abnormal command response.')
@@ -120,7 +136,8 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 if stderr and stderr.strip():
                     for line in stderr.split('\n'):
                         logging.error(line)
-            asserts.fail('Test {} failed with the following results: {}'.format(
+            asserts.fail(
+                'Test {} failed with the following results: {}'.format(
                     test_case, command_results))
 
     def tearDownClass(self):
@@ -131,8 +148,8 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                 trace_file_name = str(os.path.basename(trace_path))
                 target_trace_path = path_utils.JoinTargetPath(
                     self.DEVICE_TMP_DIR, "vts_replay_trace", trace_file_name)
-                cmd_results = self.shell.Execute("rm -f %s" %
-                                                 target_trace_path)
+                cmd_results = self.shell.Execute(
+                    "rm -f %s" % target_trace_path)
                 if not cmd_results or any(cmd_results[const.EXIT_CODE]):
                     logging.warning("Failed to remove: %s", cmd_results)
 
@@ -164,13 +181,17 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         """
         registered_services = []
         service_instances = {}
+        self.shell.Execute("chmod 755 %s" % self.replayer_binary_path)
         results = self.shell.Execute(
             "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s --list_service %s" %
-            (self.custom_ld_library_path, self.driver_binary_path, trace_path))
+            (self.custom_ld_library_path, self.replayer_binary_path,
+             trace_path))
 
-        if (results[const.EXIT_CODE][0]):
-            logging.error('Failed to list test cases.')
-            return None
+        asserts.assertFalse(
+            results[const.EXIT_CODE][0],
+            'Failed to list test cases. EXIT_CODE: %s\n STDOUT: %s\n STDERR: %s\n'
+            % (results[const.EXIT_CODE][0], results[const.STDOUT][0],
+               results[const.STDERR][0]))
 
         # parse the results to get the registered service list.
         for line in results[const.STDOUT][0].split('\n'):
