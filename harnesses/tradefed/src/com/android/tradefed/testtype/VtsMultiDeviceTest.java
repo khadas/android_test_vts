@@ -28,14 +28,12 @@ import com.android.tradefed.log.LogUtil.CLog;
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.targetprep.VtsCoveragePreparer;
-import com.android.tradefed.util.ArrayUtil;
+import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
@@ -47,16 +45,16 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import java.io.BufferedWriter;
+import java.util.Collection;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.Set;
-import java.util.Collection;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -85,7 +83,6 @@ public class VtsMultiDeviceTest
     static final String TEST_BED = "test_bed";
     static final String TEST_PLAN_REPORT_FILE = "TEST_PLAN_REPORT_FILE";
     static final String TEST_SUITE = "test_suite";
-    static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
     static final String SKIP_ON_32BIT_ABI = "skip_on_32bit_abi";
@@ -178,9 +175,6 @@ public class VtsMultiDeviceTest
     @Option(name = "test-case-path-type",
             description = "The type of test case path ('module' by default or 'file').")
     private String mTestCasePathType = null;
-
-    @Option(name = "python-version", description = "The version of a Python interpreter to use.")
-    private String mPythonVersion = "";
 
     @Option(name = "test-config-path",
             description = "The path for test case config file.")
@@ -433,10 +427,6 @@ public class VtsMultiDeviceTest
     @Option(name = "log-severity", description = "Set the log severity level.")
     private String mLogSeverity = "INFO";
 
-    @Option(name = "python-binary", description = "python binary to use "
-            + "(optional)")
-    private String mPythonBin = null;
-
     @Option(name = "run-as-vts-self-test",
             description = "Run the module as vts-selftest. "
                     + "When the value is set to true, only setUpClass and tearDownClass function "
@@ -463,7 +453,6 @@ public class VtsMultiDeviceTest
                     + "Multiple values can be added by repeatly using this option.")
     private String mActsTestModule = null;
 
-    private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
     // the path of a dir which contains the test data files.
@@ -487,20 +476,6 @@ public class VtsMultiDeviceTest
      */
     public IInvocationContext getInvocationContext() {
         return mInvocationContext;
-    }
-
-    /**
-     * @return the mRunUtil
-     */
-    public IRunUtil getRunUtil() {
-        return mRunUtil;
-    }
-
-    /**
-     * @param mRunUtil the mRunUtil to set
-     */
-    public void setRunUtil(IRunUtil mRunUtil) {
-        this.mRunUtil = mRunUtil;
     }
 
     /**
@@ -1084,6 +1059,17 @@ public class VtsMultiDeviceTest
             jsonObject.put(ACTS_TEST_MODULE, mActsTestModule);
             CLog.i("Added %s to the Json object", ACTS_TEST_MODULE);
         }
+
+        if (mBuildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV) != null) {
+            jsonObject.put(VtsPythonVirtualenvPreparer.VIRTUAL_ENV,
+                    mBuildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV).getAbsolutePath());
+        }
+
+        if (mBuildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3) != null) {
+            jsonObject.put(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3,
+                    mBuildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3)
+                            .getAbsolutePath());
+        }
     }
 
     /**
@@ -1165,42 +1151,32 @@ public class VtsMultiDeviceTest
         }
 
         VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper();
-        vtsPythonRunnerHelper.setPythonVersion(mPythonVersion);
-        if (mPythonBin == null){
-            mPythonBin = vtsPythonRunnerHelper.getPythonBinary();
-        }
 
-        String[] baseOpts = {
-                mPythonBin,
-        };
-        String[] testModule = new String[2];
-        String[] cmd;
+        List<String> cmd = new ArrayList<>();
+        cmd.add("python");
         if (mTestCasePathType != null && mTestCasePathType.toLowerCase().equals("file")) {
-            testModule[0] = mTestCasePath;
-            if (!mTestCasePath.endsWith(".py")) {
-                testModule[0] += ".py";
+            String testScript = mTestCasePath;
+            if (!testScript.endsWith(".py")) {
+                testScript += ".py";
             }
+            cmd.add(testScript);
         } else {
-            baseOpts = new String[2];
-            baseOpts[0] = mPythonBin;
-            baseOpts[1] = "-m";
-            testModule[0] = mTestCasePath.replace("/", ".");
+            cmd.add("-m");
+            cmd.add(mTestCasePath.replace("/", "."));
         }
-        testModule[1] = jsonFilePath;
-        cmd = ArrayUtil.buildArray(baseOpts, testModule);
+        cmd.add(jsonFilePath);
 
         printToDeviceLogcatAboutTestModuleStatus("BEGIN");
 
         CommandResult commandResult = new CommandResult();
-        String interruptMessage =
-                vtsPythonRunnerHelper.runPythonRunner(cmd, commandResult, mTestTimeout);
+        String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
+                cmd.toArray(new String[0]), commandResult, mTestTimeout);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
             if (commandStatus != CommandStatus.SUCCESS
                 && commandStatus != CommandStatus.TIMED_OUT) {
                 CLog.e("Python process failed");
-                CLog.e("Python path: %s", vtsPythonRunnerHelper.getPythonPath());
                 CLog.e("Command stdout: " + commandResult.getStdout());
                 CLog.e("Command stderr: " + commandResult.getStderr());
                 CLog.e("Command status: " + commandStatus);
@@ -1350,13 +1326,6 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * Creates VtsPythonRunnerHelper.
-     */
-    protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
-        return new VtsPythonRunnerHelper(mBuildInfo);
-    }
-
-    /**
      * Set the path for android-vts/testcases/ which keeps the VTS python code under vts.
      */
     private void setTestCaseDataDir() {
@@ -1378,5 +1347,12 @@ public class VtsMultiDeviceTest
     @Override
     public void setAbi(IAbi abi){
         mAbi = abi;
+    }
+
+    /**
+     * Creates VtsPythonRunnerHelper.
+     */
+    protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
+        return new VtsPythonRunnerHelper(mBuildInfo);
     }
 }
