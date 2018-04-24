@@ -27,7 +27,6 @@ import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
-
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +53,7 @@ public class VtsPythonVirtualenvPreparerTest {
                 return mMockRunUtil;
             }
         };
+        mPreparer.mVenvDir = new File("");
         mPreparer.mDepModules.add("enum");
     }
 
@@ -69,8 +69,9 @@ public class VtsPythonVirtualenvPreparerTest {
             result.setStdout("output");
             result.setStderr("std err");
             // First check that the install requirements was attempted.
-            expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                           EasyMock.eq("-r"), EasyMock.eq(requirementFile.getAbsolutePath())))
+            expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                           EasyMock.eq("install"), EasyMock.eq("-r"),
+                           EasyMock.eq(requirementFile.getAbsolutePath())))
                     .andReturn(result);
             // Check that all default modules are installed
             addDefaultModuleExpectations(mMockRunUtil, result);
@@ -93,8 +94,8 @@ public class VtsPythonVirtualenvPreparerTest {
         result.setStderr("std err");
         addDefaultModuleExpectations(mMockRunUtil, result);
         // The non default module provided is also attempted to be installed.
-        expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("blahblah")))
+        expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                       EasyMock.eq("install"), EasyMock.eq("blahblah")))
                 .andReturn(result);
 
         EasyMock.replay(mMockRunUtil);
@@ -113,8 +114,9 @@ public class VtsPythonVirtualenvPreparerTest {
             CommandResult result = new CommandResult(CommandStatus.TIMED_OUT);
             result.setStdout("output");
             result.setStderr("std err");
-            expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                           EasyMock.eq("-r"), EasyMock.eq(requirementFile.getAbsolutePath())))
+            expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                           EasyMock.eq("install"), EasyMock.eq("-r"),
+                           EasyMock.eq(requirementFile.getAbsolutePath())))
                     .andReturn(result);
             EasyMock.replay(mMockRunUtil);
             IBuildInfo buildInfo = new BuildInfo();
@@ -138,12 +140,12 @@ public class VtsPythonVirtualenvPreparerTest {
         CommandResult result = new CommandResult(CommandStatus.TIMED_OUT);
         result.setStdout("output");
         result.setStderr("std err");
-        expect(mMockRunUtil.runTimedCmd(
-                       anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"), EasyMock.eq("enum")))
+        expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                       EasyMock.eq("install"), EasyMock.eq("enum")))
                 .andReturn(result);
         // If installing the dependency failed, an upgrade is attempted:
-        expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"),
-                       EasyMock.eq("--upgrade"), EasyMock.eq("enum")))
+        expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                       EasyMock.eq("install"), EasyMock.eq("--upgrade"), EasyMock.eq("enum")))
                 .andReturn(result);
         EasyMock.replay(mMockRunUtil);
         IBuildInfo buildInfo = new BuildInfo();
@@ -158,8 +160,8 @@ public class VtsPythonVirtualenvPreparerTest {
     }
 
     private void addDefaultModuleExpectations(IRunUtil mockRunUtil, CommandResult result) {
-        expect(mockRunUtil.runTimedCmd(
-                       anyLong(), EasyMock.eq("pip"), EasyMock.eq("install"), EasyMock.eq("enum")))
+        expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
+                       EasyMock.eq("install"), EasyMock.eq("enum")))
                 .andReturn(result);
     }
 }

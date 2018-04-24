@@ -23,7 +23,7 @@ from vts.runners.host import const
 from vts.runners.host import test_runner
 
 
-class VtsSelfTestPythonVirtualenvPreparerTestPart2(base_test.BaseTestClass):
+class VtsSelfTestPythonVirtualenvPreparerTestPart1(base_test.BaseTestClass):
     '''Tests plan and module level VirtualenvPreparer.'''
 
     def setUpClass(self):
@@ -31,12 +31,18 @@ class VtsSelfTestPythonVirtualenvPreparerTestPart2(base_test.BaseTestClass):
         # must be set to False.
         self.run_as_vts_self_test = False
 
-    def testExistingModule(self):
-        '''Test previously installed module's availability.'''
+    def testNonExistingModule(self):
+        '''Test whether numpy is not installed from default packages.
+
+        In the future, if this test fail due to numpy being added to default
+        pip packages, we should pick another module that's not in default
+        pip package list.
+        '''
         try:
             import numpy
+            asserts.fail('numpy should not have been not installed yet.')
         except ImportError:
-            asserts.fail('numpy should have been installed in Part1.')
+            pass
 
 
 if __name__ == "__main__":

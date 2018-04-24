@@ -26,13 +26,11 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
@@ -53,14 +51,12 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class VtsMultiDeviceTestTest {
     private static final String PYTHON_BINARY = "python";
-    private static final String PYTHON_PATH = "python/path";
     private static final String PYTHON_DIR = "mock/";
     private static final String TEST_CASE_PATH =
         "vts/testcases/host/sample/SampleLightTest";
 
     private ITestInvocationListener mMockInvocationListener = null;
     private VtsMultiDeviceTest mTest = null;
-    private VtsPythonRunnerHelper mVtsPythonRunnerHelper = null;
     /**
      * Helper to initialize the various EasyMocks we'll need.
      */
@@ -75,7 +71,7 @@ public class VtsMultiDeviceTestTest {
             }
             @Override
             protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
-                return mVtsPythonRunnerHelper;
+                return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS);
             }
         };
         mTest.setBuild(createMockBuildInfo());
@@ -87,7 +83,7 @@ public class VtsMultiDeviceTestTest {
      * Check VTS Python command strings.
      */
     private void assertCommand(String[] cmd) {
-        assertEquals(cmd[0], PYTHON_DIR + PYTHON_BINARY);
+        assertEquals(cmd[0], PYTHON_BINARY);
         assertEquals(cmd[1], "-m");
         assertEquals(cmd[2], TEST_CASE_PATH.replace("/", "."));
         assertTrue(cmd[3].endsWith(".json"));
@@ -161,8 +157,7 @@ public class VtsMultiDeviceTestTest {
      * Create a process helper which mocks status of a running process.
      */
     private VtsPythonRunnerHelper createMockVtsPythonRunnerHelper(CommandStatus status) {
-        IBuildInfo buildInfo = createMockBuildInfo();
-        return new VtsPythonRunnerHelper(buildInfo) {
+        return new VtsPythonRunnerHelper(new File(PYTHON_DIR)) {
             @Override
             public String runPythonRunner(
                     String[] cmd, CommandResult commandResult, long testTimeout) {
@@ -175,14 +170,6 @@ public class VtsMultiDeviceTestTest {
                 commandResult.setStatus(status);
                 return null;
             }
-            @Override
-            public String getPythonBinary() {
-                return PYTHON_DIR + PYTHON_BINARY;
-            }
-            @Override
-            public String getPythonPath() {
-                return PYTHON_PATH;
-            }
         };
     }
 
@@ -191,7 +178,6 @@ public class VtsMultiDeviceTestTest {
      */
     @Test
     public void testRunNormalInput() {
-        mVtsPythonRunnerHelper = createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS);
         mTest.setDevice(createMockDevice());
         try {
             mTest.run(mMockInvocationListener);
