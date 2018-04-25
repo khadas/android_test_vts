@@ -47,14 +47,7 @@ class BinaryTest(base_test.BaseTestClass):
         tags: all the tags that appeared in binary list
         DEVICE_TMP_DIR: string, temp location for storing binary
         TAG_DELIMITER: string, separator used to separate tag and path
-        SYSPROP_VTS_NATIVE_SERVER: string, the name of a system property which
-                                   tells whether to stop properly configured
-                                   native servers where properly configured
-                                   means a server's init.rc is configured to
-                                   stop when that property's value is 1.
     '''
-    SYSPROP_VTS_NATIVE_SERVER = "vts.native_server.on"
-
     DEVICE_TMP_DIR = '/data/local/tmp'
     TAG_DELIMITER = '::'
     PUSH_DELIMITER = '->'
