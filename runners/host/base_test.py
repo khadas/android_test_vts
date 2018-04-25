@@ -55,6 +55,10 @@ _LOGCAT_FILE_PREFIX = "logcat"
 _LOGCAT_FILE_EXTENSION = ".txt"
 _ANDROID_DEVICES = '_android_devices'
 _REASON_TO_SKIP_ALL_TESTS = '_reason_to_skip_all_tests'
+# the name of a system property which tells whether to stop properly configured
+# native servers where properly configured means a server's init.rc is
+# configured to stop when that property's value is 1.
+SYSPROP_VTS_NATIVE_SERVER = "vts.native_server.on"
 
 LOGCAT_BUFFERS = [
     'radio',
@@ -329,7 +333,7 @@ class BaseTestClass(object):
             for device in self.android_devices:
                 logging.debug("Stops all properly configured native servers "
                               "on device %s", device.serial)
-                results = device.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "1")
+                results = device.setProp(SYSPROP_VTS_NATIVE_SERVER, "1")
                 native_server_process_names = self.getUserParam(
                     keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
                     default_value=[])
@@ -391,7 +395,7 @@ class BaseTestClass(object):
             logging.debug("Restarts all properly configured native servers.")
             for device in self.android_devices:
                 try:
-                    self.device.setProp(self.SYSPROP_VTS_NATIVE_SERVER, "0")
+                    self.device.setProp(SYSPROP_VTS_NATIVE_SERVER, "0")
                 except adb.AdbError:
                     logging.error("failed to restore native servers for device "
                                   + device.serial)

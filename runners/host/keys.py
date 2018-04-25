@@ -47,7 +47,7 @@ class ConfigKeys(object):
 
     # @Deprecated use IKEY_DISABLE_FRAMEWORK
     IKEY_BINARY_TEST_DISABLE_FRAMEWORK = "binary_test_disable_framework"
-    IKEY_DISABLE_FRAMEWORK = "DISABLE_FRAMEWORK "
+    IKEY_DISABLE_FRAMEWORK = "DISABLE_FRAMEWORK"
     # @Deprecated use IKEY_STOP_NATIVE_SERVERS
     IKEY_BINARY_TEST_STOP_NATIVE_SERVERS = "binary_test_stop_native_servers"
     IKEY_STOP_NATIVE_SERVERS = "STOP_NATIVE_SERVERS"
