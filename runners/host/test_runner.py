@@ -191,7 +191,10 @@ class TestRunner(object):
         self.log_severity = self.test_configs.get(
             keys.ConfigKeys.KEY_LOG_SEVERITY, "INFO").upper()
         logger.setupTestLogger(
-            self.log_path, self.testbed_name, log_severity=self.log_severity)
+            self.log_path,
+            self.testbed_name,
+            filename="test_run_details.txt",
+            log_severity=self.log_severity)
         self.controller_registry = {}
         self.controller_destructors = {}
         self.run_list = run_list
