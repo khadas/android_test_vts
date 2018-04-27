@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include <utils/Log.h>
+#include <log/log.h>
 
 static constexpr const char* kListFlag = "--list_registered_services";
 static constexpr const char* kServiceInstanceFlag = "--hal_service_instance";
