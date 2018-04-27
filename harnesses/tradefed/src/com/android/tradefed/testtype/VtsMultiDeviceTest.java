@@ -51,11 +51,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Set;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
@@ -111,6 +115,9 @@ public class VtsMultiDeviceTest
     static final String BINARY_TEST_TYPE_HOST_BINARY_TEST = "host_binary_test";
     static final String BUG_REPORT_ON_FAILURE = "BUG_REPORT_ON_FAILURE";
     static final String COLLECT_TESTS_ONLY = "collect_tests_only";
+    static final String CONFIG_STR = "CONFIG_STR";
+    static final String CONFIG_INT = "CONFIG_INT";
+    static final String CONFIG_BOOL = "CONFIG_BOOL";
     static final String LOGCAT_ON_FAILURE = "LOGCAT_ON_FAILURE";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String EXCLUDE_COVERAGE_PATH = "exclude_coverage_path";
@@ -451,6 +458,30 @@ public class VtsMultiDeviceTest
                     + "with the configurations."
                     + "Multiple values can be added by repeatly using this option.")
     private String mActsTestModule = null;
+
+    @Option(name = "config-str",
+            description = "Key-value map of custom config string. "
+                    + "The map will be passed directly to python runner and test module. "
+                    + "Only one value per key is stored."
+                    + "If the value for the same key is set multiple times, only the last value is "
+                    + "used.")
+    private TreeMap<String, String> mConfigStr = new TreeMap<>();
+
+    @Option(name = "config-int",
+            description = "Key-value map of custom config integer. "
+                    + "The map will be passed directly to python runner and test module. "
+                    + "Only one value per key is stored."
+                    + "If the value for the same key is set multiple times, only the last value is "
+                    + "used.")
+    private TreeMap<String, Integer> mConfigInt = new TreeMap<>();
+
+    @Option(name = "config-bool",
+            description = "Key-value map of custom config boolean. "
+                    + "The map will be passed directly to python runner and test module. "
+                    + "Only one value per key is stored."
+                    + "If the value for the same key is set multiple times, only the last value is "
+                    + "used.")
+    private TreeMap<String, Boolean> mConfigBool = new TreeMap<>();
 
     private IBuildInfo mBuildInfo = null;
     private String mRunName = "VtsHostDrivenTest";
@@ -1068,6 +1099,21 @@ public class VtsMultiDeviceTest
             jsonObject.put(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3,
                     mBuildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3)
                             .getAbsolutePath());
+        }
+
+        if (!mConfigStr.isEmpty()) {
+            jsonObject.put(CONFIG_STR, new JSONObject(mConfigStr));
+            CLog.i("Added %s to the Json object", CONFIG_STR);
+        }
+
+        if (!mConfigInt.isEmpty()) {
+            jsonObject.put(CONFIG_INT, new JSONObject(mConfigInt));
+            CLog.i("Added %s to the Json object", CONFIG_INT);
+        }
+
+        if (!mConfigBool.isEmpty()) {
+            jsonObject.put(CONFIG_BOOL, new JSONObject(mConfigBool));
+            CLog.i("Added %s to the Json object", CONFIG_BOOL);
         }
     }
 
