@@ -24,9 +24,9 @@
 #include <iostream>
 #include <string>
 
-#include <utils/RefBase.h>
 #define LOG_TAG "VtsFuzzerBinderServer"
-#include <utils/Log.h>
+#include <log/log.h>
+#include <utils/RefBase.h>
 #include <utils/String8.h>
 
 #include <binder/IBinder.h>
