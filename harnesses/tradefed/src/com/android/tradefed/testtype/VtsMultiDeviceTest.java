@@ -1198,6 +1198,27 @@ public class VtsMultiDeviceTest
 
         VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper();
 
+        String[][] debugCommands = new String[][] {
+                new String[] {"pwd"}, new String[] {"ls"}, new String[] {"python", "--version"},
+                new String[] {"which", "python"},
+                new String[] {"python", "-c", "\"import sys; print('\\n'.join(sys.path))\""},
+                new String[] {"ls vts/runners/host/base_test.py"},
+                new String[] {"python", "-c", "import vts.runners.host.base_test"},
+        };
+        for (String[] cmd : debugCommands) {
+            CLog.e("Executing debug command: " + cmd);
+            CommandResult commandResult = new CommandResult();
+            String interruptMessage =
+                    vtsPythonRunnerHelper.runPythonRunner(cmd, commandResult, mTestTimeout);
+
+            if (commandResult != null) {
+                CommandStatus commandStatus = commandResult.getStatus();
+                CLog.e("Command stdout: " + commandResult.getStdout());
+                CLog.e("Command stderr: " + commandResult.getStderr());
+                CLog.e("Command status: " + commandStatus);
+            }
+        }
+
         List<String> cmd = new ArrayList<>();
         cmd.add("python");
         if (mTestCasePathType != null && mTestCasePathType.toLowerCase().equals("file")) {
