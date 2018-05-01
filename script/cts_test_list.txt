@@ -68,7 +68,6 @@ CtsKernelConfigTestCases
 CtsKeystoreTestCases
 CtsLeanbackJankTestCases
 CtsLibcoreFileIOTestCases
-CtsLibcoreJavaUtilCollectionsTestCases
 CtsLibcoreJsr166TestCases
 CtsLibcoreLegacy22TestCases
 CtsLibcoreOjTestCases
