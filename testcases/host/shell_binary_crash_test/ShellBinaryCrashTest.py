@@ -31,7 +31,7 @@ class ShellBinaryCrashTest(base_test.BaseTestClass):
     EXIT_CODE_SEGFAULT = 139
 
     def setUpClass(self):
-        self.dut = self.registerController(android_device)[0]
+        self.dut = self.android_devices[0]
 
     def testCrashBinary(self):
         """Tests whether the agent survives when a called binary crashes."""
