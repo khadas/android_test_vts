@@ -218,6 +218,8 @@ class TestResult(object):
         self.passed: A list of records for tests passed.
         self.skipped: A list of records for tests skipped.
         self.error: A list of records for tests with error result token.
+        self.class_errors: A list of strings, the errors that occurred during
+                            class setup.
         self._test_module_name: A string, test module's name.
         self._test_module_timestamp: An integer, test module's execution start
                                      timestamp.
@@ -232,6 +234,7 @@ class TestResult(object):
         self.error = []
         self._test_module_name = None
         self._test_module_timestamp = None
+        self.class_errors = []
 
     def __add__(self, r):
         """Overrides '+' operator for TestResult class.
@@ -356,11 +359,7 @@ class TestResult(object):
             class_name: A string that is the name of the failed test class.
             e: An exception object.
         """
-        record = TestResultRecord("setup_class", class_name)
-        record.testBegin()
-        record.testFail(e)
-        self.executed.append(record)
-        self.failed.append(record)
+        self.class_errors.append("%s: %s" % (class_name, e))
 
     def passClass(self, class_name, e=None):
         """Add a record to indicate a test class setup has passed and no test
@@ -413,6 +412,8 @@ class TestResult(object):
         d["Results"] = executed
         d["Summary"] = self.summaryDict()
         d["TestModule"] = self.testModuleDict()
+        d["Class Errors"] = ("\n".join(self.class_errors)
+                             if self.class_errors else None)
         jsonString = json.dumps(d, indent=4, sort_keys=True)
         return jsonString
 
