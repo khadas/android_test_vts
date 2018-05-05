@@ -16,6 +16,7 @@
 
 package com.android.tradefed.util;
 
+import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer;
@@ -27,6 +28,7 @@ import com.android.tradefed.util.ProcessHelper;
 import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.RunUtil;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -50,6 +52,13 @@ public class VtsPythonRunnerHelper {
         mVirtualenvPath = virtualEnvPath;
         mRunUtil = new RunUtil();
         activateVirtualenv(mRunUtil, getPythonVirtualEnv());
+        VtsCompatibilityInvocationHelper invocationHelper = new VtsCompatibilityInvocationHelper();
+        try {
+            mRunUtil.setWorkingDir(invocationHelper.getTestsDir());
+        } catch (FileNotFoundException e) {
+            CLog.e("VtsCompatibilityInvocationHelper cannot find test case directory. "
+                    + "Command working directory not set.");
+        }
     }
 
     /**
