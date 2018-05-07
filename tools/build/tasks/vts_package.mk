@@ -76,7 +76,10 @@ target_spec_modules := \
 target_spec_copy_pairs :=
 $(foreach m,$(target_spec_modules),\
   $(eval my_spec_copy_dir :=\
-    spec/hardware/interfaces/$(word 2,$(subst android/hardware/, ,$(dir $(m))))/vts)\
+    spec/$(word 2,$(subst android/frameworks/, frameworks/hardware/interfaces/,\
+                    $(subst android/hardware/, hardware/interfaces/,\
+                      $(subst android/hidl/, system/libhidl/transport/,\
+                        $(subst android/system/, system/hardware/interfaces/,$(dir $(m)))))))/vts)\
   $(eval my_spec_copy_file := $(notdir $(m)))\
   $(eval my_spec_copy_dest := $(my_spec_copy_dir)/$(my_spec_copy_file))\
   $(eval target_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/$(my_spec_copy_dest)))
