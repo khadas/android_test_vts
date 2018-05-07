@@ -24,6 +24,7 @@ import threading
 import time
 import traceback
 
+from vts.runners.host import asserts
 from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.runners.host import logger as vts_logger
@@ -476,6 +477,48 @@ class AndroidDevice(object):
     def first_api_level(self):
         """Gets the API level that the device was initially launched with."""
         return self.getProp("ro.product.first_api_level")
+
+    @property
+    def sdk_version(self):
+        """Gets the SDK version that the device is running with."""
+        return self.getProp("ro.build.version.sdk")
+
+    def getLaunchApiLevel(self, strict=True):
+        """Gets the API level that the device was initially launched with.
+
+        This method reads ro.product.first_api_level from the device. If the
+        value is 0, it then reads ro.build.version.sdk.
+
+        Args:
+            strict: A boolean, whether to fail the test if the property is
+                    not an integer or not defined.
+
+        Returns:
+            An integer, the API level.
+            0 if the property is not an integer or not defined.
+        """
+        level_str = self.first_api_level
+        try:
+            level = int(level_str)
+        except ValueError:
+            error_msg = "Cannot parse first_api_level: %s" % level_str
+            if strict:
+                asserts.fail(error_msg)
+            logging.error(error_msg)
+            return 0
+
+        if level != 0:
+            return level
+
+        level_str = self.sdk_version
+        try:
+            return int(level_str)
+        except ValueError:
+            error_msg = "Cannot parse version.sdk: %s" % level_str
+            if strict:
+                asserts.fail(error_msg)
+            logging.error(error_msg)
+            return 0
 
     @property
     def vndk_version(self):
