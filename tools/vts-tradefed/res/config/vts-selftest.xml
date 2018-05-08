@@ -22,6 +22,7 @@
 
   <!-- VTS self test modules -->
   <option name="compatibility:include-filter" value="VtsSelfTestBaseTest" />
+  <option name="compatibility:include-filter" value="VtsSelfTestPythonVirtualenvPreparerTestPart0" />
   <option name="compatibility:include-filter" value="VtsSelfTestPythonVirtualenvPreparerTestPart1" />
   <option name="compatibility:include-filter" value="VtsSelfTestPythonVirtualenvPreparerTestPart2" />
 

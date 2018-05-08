@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright (C) 2018 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
         <option name="test-module-name" value="VtsSelfTestPythonVirtualenvPreparerTestPart0"/>
-        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/python_virtualenv_preparer_test/part1/VtsSelfTestPythonVirtualenvPreparerTestPart0" />
+        <option name="test-case-path" value="vts/testcases/vts_selftest/test_framework/python_virtualenv_preparer_test/part0/VtsSelfTestPythonVirtualenvPreparerTestPart0" />
     </test>
 </configuration>
