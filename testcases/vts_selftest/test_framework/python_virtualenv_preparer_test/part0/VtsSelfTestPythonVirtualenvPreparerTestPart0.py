@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2017 The Android Open Source Project
+# Copyright (C) 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from vts.runners.host import const
 from vts.runners.host import test_runner
 
 
-class VtsSelfTestPythonVirtualenvPreparerTestPart1(base_test.BaseTestClass):
+class VtsSelfTestPythonVirtualenvPreparerTestPart0(base_test.BaseTestClass):
     '''Tests plan and module level VirtualenvPreparer.'''
 
     def setUpClass(self):
@@ -34,9 +34,8 @@ class VtsSelfTestPythonVirtualenvPreparerTestPart1(base_test.BaseTestClass):
     def testNonExistingModule(self):
         '''Test whether numpy is not installed from default packages.
 
-        In the future, if this test fail due to numpy being added to default
-        pip packages, we should pick another module that's not in default
-        pip package list.
+        This test assumes numpy is not in default package install list.
+        If this turned otherwise, test logic here should be updated.
         '''
         try:
             import numpy
