@@ -30,7 +30,6 @@
   <option name="compatibility:include-filter" value="VtsKernelLibcutilsTest" />
   <option name="compatibility:include-filter" value="VtsKernelNetBpfTest" />
   <option name="compatibility:include-filter" value="VtsKernelNetTest" />
-  <option name="compatibility:include-filter" value="VtsKernelNetdTest" />
   <option name="compatibility:include-filter" value="VtsKernelProcFileApi" />
   <option name="compatibility:include-filter" value="VtsKernelQtaguidTest" />
   <option name="compatibility:include-filter" value="VtsKernelSelinuxFileApi" />
