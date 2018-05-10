@@ -35,7 +35,6 @@
 
   <!-- specific to retry -->
   <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest" />
-  <option name="plan" value="vts" />
-  <option name="test-tag" value="vts" />
-  <option name="vts-plan-result:plan-name" value="vts" />
+  <option name="plan" value="cts-on-gsi-retry" />
+  <option name="test-tag" value="cts" />
 </configuration>
