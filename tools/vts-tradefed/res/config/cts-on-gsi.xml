@@ -16,6 +16,8 @@
 <configuration description="Runs a subset of CTS tests using a general system image (GSI)">
     <include name="cts-base" />
 
+    <option name="plan" value="cts-on-gsi" />
+
     <!-- Tell all AndroidJUnitTests to exclude certain annotations -->
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:exclude-annotation:android.platform.test.annotations.RestrictedBuildTest" />
 
