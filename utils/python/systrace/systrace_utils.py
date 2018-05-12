@@ -111,8 +111,7 @@ class SystraceFeature(feature_utils.Feature):
             process = controller.process_name
             time = feature_utils.GetTimestamp()
             report_path = getattr(self, keys.ConfigKeys.IKEY_SYSTRACE_REPORT_PATH)
-            report_destination_file_name = '{module}_{test}_{process}_{time}.html'.format(
-                module=test_module_name,
+            report_destination_file_name = 'systrace_{test}_{process}_{time}.html'.format(
                 test=test_name,
                 process=process,
                 time=time)
