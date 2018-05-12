@@ -1044,7 +1044,7 @@ class AndroidDevice(object):
         bits = ['64', '32'] if self.is64Bit else ['32']
         for bitness in bits:
             vts_agent_log_path = os.path.join(self.log_path,
-                                              "vts_agent_" + bitness + ".log")
+                'vts_agent_%s_%s.log' % (bitness, self.serial))
             cmd = ('adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                    '{path}/{bitness}/vts_hal_agent{bitness} '
                    '--hal_driver_path_32={path}/32/vts_hal_driver32 '
