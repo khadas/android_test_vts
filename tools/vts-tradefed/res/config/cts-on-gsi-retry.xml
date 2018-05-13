@@ -34,7 +34,9 @@
   <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
 
   <!-- specific to retry -->
-  <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest" />
+  <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest">
+    <option name="primary-abi-only" value="true" />
+  </test>
   <option name="plan" value="cts-on-gsi-retry" />
   <option name="test-tag" value="cts" />
 </configuration>
