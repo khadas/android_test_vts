@@ -20,6 +20,7 @@
 
     <!-- Include vintf related tests which only belongs to cts-on-gsi -->
     <option name="compatibility:module-metadata-include-filter" key="component" value="vintf" />
+    <option name="compatibility:module-metadata-include-filter" key="component" value="kernel" />
 
     <!-- Tell all AndroidJUnitTests to exclude certain annotations -->
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:exclude-annotation:android.platform.test.annotations.RestrictedBuildTest" />
