@@ -221,10 +221,10 @@ def load_config(file_full_path):
         pypath = os.environ['PYTHONPATH']
         if pypath:
             for base_path in pypath.split(':'):
-                logging.info('checking %s', base_path)
+                logging.debug('checking base_path %s', base_path)
                 new_path = os.path.join(base_path, file_full_path)
                 if os.path.isfile(new_path):
-                    logging.info('found')
+                    logging.debug('new_path %s found', new_path)
                     file_full_path = new_path
                     break
 

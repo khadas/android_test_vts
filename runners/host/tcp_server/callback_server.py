@@ -167,7 +167,7 @@ class CallbackServer(object):
             server_thread = threading.Thread(target=self._server.serve_forever)
             server_thread.daemon = True
             server_thread.start()
-            logging.info('TcpServer %s started (%s:%s)', server_thread.name,
+            logging.debug('TcpServer %s started (%s:%s)', server_thread.name,
                          self._ip, self._port)
             return self._ip, self._port
         except (RuntimeError, IOError, socket.error) as e:

@@ -305,7 +305,7 @@ class TestRunner(object):
             ControllerError is raised if no corresponding config can be found,
             or if the controller module has already been registered.
         """
-        logging.info("cwd: %s", os.getcwd())
+        logging.debug("cwd: %s", os.getcwd())
         logging.info("adb devices: %s", module.list_adb_devices())
         self.verifyControllerModule(module)
         module_ref_name = module.__name__.split('.')[-1]
@@ -330,7 +330,7 @@ class TestRunner(object):
                 for config in controller_config:
                     if isinstance(config, dict):
                         config["log_severity"] = self.log_severity
-            logging.info("controller_config: %s", controller_config)
+            logging.debug("controller_config: %s", controller_config)
             if "use_vts_agent" not in self.testbed_configs:
                 objects = create(controller_config, start_services)
             else:
