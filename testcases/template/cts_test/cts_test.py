@@ -54,7 +54,7 @@ class CtsTest(base_test.BaseTestClass):
     def CreateTestCases(self):
         '''Create test configs.'''
         for testcase in self.CTS_TESTS:
-            logging.info('Creating test case %s.', testcase["name"])
+            logging.debug('Creating test case %s.', testcase["name"])
             self.testcases.append(testcase)
 
     def RunTestCase(self, test_case):

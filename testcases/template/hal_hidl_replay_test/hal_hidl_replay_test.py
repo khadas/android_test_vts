@@ -128,7 +128,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         for stdout in command_results[const.STDOUT]:
             if stdout and stdout.strip():
                 for line in stdout.split('\n'):
-                    logging.info(line)
+                    logging.debug(line)
 
         if any(command_results[const.EXIT_CODE]):
             # print stderr only when test fails.
