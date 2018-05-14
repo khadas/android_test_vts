@@ -44,8 +44,8 @@ from vts.utils.python.web import web_utils
 from acts import signals as acts_signals
 
 # Macro strings for test result reporting
-TEST_CASE_TOKEN = "[Test Case]"
-RESULT_LINE_TEMPLATE = TEST_CASE_TOKEN + " %s %s"
+TEST_CASE_TEMPLATE = "[Test Case] %s %s"
+RESULT_LINE_TEMPLATE = TEST_CASE_TEMPLATE + " %s"
 STR_TEST = "test"
 STR_GENERATE = "generate"
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
@@ -548,7 +548,8 @@ class BaseTestClass(object):
         record = self._current_record
         logging.error(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
-        logging.info(RESULT_LINE_TEMPLATE, record.test_name, record.result)
+        logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
+                     record.test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(record.test_name, begin_time)
@@ -577,7 +578,8 @@ class BaseTestClass(object):
         msg = record.details
         if msg:
             logging.debug(msg)
-        logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
+        logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
+                     test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_PASS)
         self.onPass(test_name, begin_time)
@@ -599,7 +601,8 @@ class BaseTestClass(object):
         record = self._current_record
         test_name = record.test_name
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
-        logging.info(RESULT_LINE_TEMPLATE, test_name, record.result)
+        logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
+                     test_name, record.result)
         logging.debug("Reason to skip: %s", record.details)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_SKIP)
@@ -787,7 +790,7 @@ class BaseTestClass(object):
         is_silenced = False
         tr_record = records.TestResultRecord(test_name, self.test_module_name)
         tr_record.testBegin()
-        logging.info("%s %s", TEST_CASE_TOKEN, test_name)
+        logging.info(TEST_CASE_TEMPLATE, self.results.progressStr, test_name)
         verdict = None
         finished = False
         try:

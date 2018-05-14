@@ -433,6 +433,17 @@ class TestResult(object):
         msg = ", ".join(sorted(l))
         return msg
 
+    @property
+    def progressStr(self):
+        """Gets a string that shows test progress.
+
+        Format of the string is:
+          x/n, where x is number of executed + skipped + 1,
+          and n is number of requested tests.
+        """
+        return '%s/%s' % (len(self.executed) + len(self.skipped) + 1,
+                          len(self.requested))
+
     def summaryDict(self):
         """Gets a dictionary that summarizes the stats of this test result.
 
