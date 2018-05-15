@@ -139,17 +139,17 @@ public class ProcessHelper {
             synchronized (mLock) {
                 mExecutionThread = Thread.currentThread();
                 if (mCancelled) {
-                    CLog.i("Process was cancelled before being awaited.");
+                    CLog.w("Process was cancelled before being awaited.");
                     return false;
                 }
             }
             boolean success;
             try {
                 success = (mProcess.waitFor() == 0);
-                CLog.i("Process terminates normally.");
+                CLog.d("Process terminates normally.");
             } catch (InterruptedException e) {
                 success = false;
-                CLog.i("Process is interrupted.");
+                CLog.e("Process is interrupted.");
             }
             return success;
         }
@@ -161,17 +161,17 @@ public class ProcessHelper {
          */
         @Override
         public void cancel() {
-            CLog.i("Attempt to interrupt execution thread.");
+            CLog.w("Attempt to interrupt execution thread.");
             synchronized (mLock) {
                 if (!mCancelled) {
                     mCancelled = true;
                     if (mExecutionThread != null) {
                         mExecutionThread.interrupt();
                     } else {
-                        CLog.i("Execution thread has not started.");
+                        CLog.d("Execution thread has not started.");
                     }
                 } else {
-                    CLog.i("Execution thread has been cancelled.");
+                    CLog.e("Execution thread has been cancelled.");
                 }
             }
         }
