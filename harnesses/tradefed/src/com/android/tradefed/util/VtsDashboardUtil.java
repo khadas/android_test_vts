@@ -124,7 +124,7 @@ public class VtsDashboardUtil {
             commandTemplate = commandTemplate.replace("{path}", messageFilePath);
             // removes ', while keeping any substrings quoted by "".
             commandTemplate = commandTemplate.replace("'", "");
-            CLog.i(String.format("Upload command: %s", commandTemplate));
+            CLog.d(String.format("Upload command: %s", commandTemplate));
             List<String> commandList = new ArrayList<String>();
             Matcher matcher = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(commandTemplate);
             while (matcher.find()) {
