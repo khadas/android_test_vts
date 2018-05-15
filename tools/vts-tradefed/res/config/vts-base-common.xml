@@ -19,7 +19,7 @@
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:rerun-from-file:true" />
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:fallback-to-serial-rerun:false" />
   <logger class="com.android.tradefed.log.FileLogger">
-    <option name="log-level-display" value="WARN" />
+    <option name="log-level-display" value="INFO" />
   </logger>
   <option name="compatibility:skip-all-system-status-check" value="true" />
   <option name="max-log-size" value="200" />
