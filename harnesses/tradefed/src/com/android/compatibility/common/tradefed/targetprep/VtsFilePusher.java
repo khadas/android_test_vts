@@ -236,13 +236,15 @@ public class VtsFilePusher extends PushFilePreparer implements IAbiReceiver {
      */
     @Override
     public File resolveRelativeFilePath(IBuildInfo buildInfo, String fileName) {
+        File f = null;
         try {
-            File f = new File(mInvocationHelper.getTestsDir(),
+            f = new File(mInvocationHelper.getTestsDir(),
                     String.format("%s%s", fileName, mAppendBitness ? mAbi.getBitness() : ""));
-            CLog.logAndDisplay(LogLevel.INFO, "Copying from %s", f.getAbsolutePath());
+            CLog.d("Copying from %s", f.getAbsolutePath());
             return f;
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            CLog.e(e);
+            CLog.e("File not found: %s", f);
         }
         return null;
     }
