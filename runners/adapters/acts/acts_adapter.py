@@ -78,7 +78,7 @@ class ActsAdapter(base_test.BaseTestClass):
         self.result_path = os.path.join(logging.log_path, TEMP_DIR_NAME,
                                         self.test_type, str(time.time()))
         file_util.Makedirs(self.result_path)
-        logging.info('Result path for %s: %s' % (self.test_type,
+        logging.debug('Result path for %s: %s' % (self.test_type,
                                                  self.result_path))
         self.test_path, self.module_name = self.getUserParam(
             ACTS_TEST_MODULE).rsplit('/', 1)
@@ -86,7 +86,8 @@ class ActsAdapter(base_test.BaseTestClass):
         self.config_path = os.path.join(self.result_path, CONFIG_FILE_NAME)
         self.GenerateConfigFile()
 
-        logging.info('Test cases: %s' % self.ListTestCases())
+        testcases = self.ListTestCases()
+        logging.debug('ACTS Test cases: %s', testcases)
 
     def tearDownClass(self):
         '''Clear the result path.'''
@@ -125,7 +126,7 @@ class ActsAdapter(base_test.BaseTestClass):
 
         cmd = '{bin} -c {config} -tb {module_name} -tc {module_name}'.format(
             bin=bin, config=self.config_path, module_name=self.module_name)
-        logging.info('cmd is: %s', cmd)
+        logging.debug('cmd is: %s', cmd)
 
         # Calling through subprocess is required because ACTS requires python3
         # while VTS is currently using python2. In the future, ACTS runner
@@ -159,7 +160,7 @@ class ActsAdapter(base_test.BaseTestClass):
         file_path = file_util.FindFile(self.result_path, RESULT_FILE_NAME)
 
         if file_path:
-            logging.info('ACTS test result path: %s', file_path)
+            logging.debug('ACTS test result path: %s', file_path)
             self.ParseJsonResults(file_path)
         else:
             logging.error('Cannot find result file name %s in %s',
@@ -181,7 +182,7 @@ class ActsAdapter(base_test.BaseTestClass):
 
         results = summary['Results']
         for result in results:
-            logging.info('Adding result for %s' %
+            logging.debug('Adding result for %s' %
                          result[records.TestResultEnums.RECORD_NAME])
             record = records.TestResultRecord(
                 result[records.TestResultEnums.RECORD_NAME])
