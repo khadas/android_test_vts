@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Runs a subset of CTS tests using a general system image (GSI)">
+    <include name="common-preparers" />
     <include name="cts-base" />
 
     <option name="plan" value="cts-on-gsi" />

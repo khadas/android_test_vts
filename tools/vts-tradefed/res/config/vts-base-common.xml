@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Main Test Plan">
+  <include name="common-preparers" />
   <device_recovery class="com.android.tradefed.device.WaitDeviceRecovery" />
 
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:rerun-from-file:true" />
@@ -28,15 +29,5 @@
   <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
   <multi_target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
-  <multi_target_preparer class="com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer">
-        <option name="dep-module" value="enum" />
-        <option name="dep-module" value="future" />
-        <option name="dep-module" value="futures" />
-        <option name="dep-module" value="google-api-python-client" />
-        <option name="dep-module" value="httplib2" />
-        <option name="dep-module" value="oauth2client" />
-        <option name="dep-module" value="protobuf" />
-        <option name="dep-module" value="requests" />
-  </multi_target_preparer>
   <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 </configuration>
