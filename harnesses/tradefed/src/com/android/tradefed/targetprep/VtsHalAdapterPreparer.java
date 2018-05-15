@@ -119,7 +119,7 @@ public class VtsHalAdapterPreparer
                 // starts adapter
                 String command = String.format("%s /data/nativetest%s/%s %s %s %d", SCRIPT_PATH,
                         bitness, mAdapterBinaryName, interfaceName, instanceName, mThreadCount);
-                CLog.i("Trying to adapter for %s",
+                CLog.d("Trying to adapter for %s",
                         mPackageName + "::" + interfaceName + "/" + instanceName);
                 mCommands.add(command);
             }
@@ -209,7 +209,7 @@ public class VtsHalAdapterPreparer
                 invocationHelper.getTestsDir(), String.format(VTS_NATIVE_TEST_DIR, bitness));
         File adapter = FileUtil.findFile(adapterDir, mAdapterBinaryName);
         if (adapter != null) {
-            CLog.i("Pushing %s", mAdapterBinaryName);
+            CLog.d("Pushing %s", mAdapterBinaryName);
             device.pushFile(
                     adapter, String.format(TARGET_NATIVE_TEST_DIR, bitness) + mAdapterBinaryName);
         } else {
