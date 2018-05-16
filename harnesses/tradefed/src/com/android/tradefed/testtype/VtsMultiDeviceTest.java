@@ -1142,13 +1142,18 @@ public class VtsMultiDeviceTest
         }
         File reportFile = mBuildInfo.getFile(TEST_PLAN_REPORT_FILE);
 
-        try (FileWriter fw = new FileWriter(reportFile.getAbsoluteFile(), true);
-                BufferedWriter bw = new BufferedWriter(fw); PrintWriter out = new PrintWriter(bw)) {
-            out.println(String.format("%s %s", test_module_name, test_module_timestamp));
-        } catch (IOException e) {
-            CLog.e(String.format(
-                    "Can't write to the test plan result file, %s", TEST_PLAN_REPORT_FILE));
-            return false;
+        if (reportFile != null) {
+            try (FileWriter fw = new FileWriter(reportFile.getAbsoluteFile(), true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    PrintWriter out = new PrintWriter(bw)) {
+                out.println(String.format("%s %s", test_module_name, test_module_timestamp));
+            } catch (IOException e) {
+                CLog.e(String.format(
+                        "Can't write to the test plan result file, %s", TEST_PLAN_REPORT_FILE));
+                return false;
+            }
+        } else {
+            CLog.w("No test plan report file configured.");
         }
         return true;
     }
