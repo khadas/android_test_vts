@@ -371,7 +371,7 @@ public class VtsMultiDeviceTestResultParser {
             }
             sb.append("\n");
         }
-        CLog.logAndDisplay(LogLevel.INFO, sb.toString());
+        CLog.d("JSON table: %s", sb.toString());
     }
 
     /**
