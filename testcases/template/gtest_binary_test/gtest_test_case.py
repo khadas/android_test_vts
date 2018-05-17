@@ -88,12 +88,12 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
             output_base_name = '{}.xml'.format(uuid.uuid4())
             output_file_path = path_utils.JoinTargetPath(
                 output_dir_name, output_base_name)
-            logging.info('Output file path is set as "%s".', output_file_path)
+            logging.debug('Output file path is set as "%s".', output_file_path)
 
         if len(output_file_path) > utils.MAX_PATH_LEN:
             logging.warn('File path of output file "{}" is longer than {}.'.
                          format(output_file_path, utils.MAX_PATH_LEN))
             output_file_path = output_base_name
-            logging.info('Output file path is set as "%s".', output_file_path)
+            logging.debug('Output file path is set as "%s".', output_file_path)
 
         self._output_file_path = output_file_path
