@@ -20,11 +20,12 @@ from vts.utils.python.android import api
 
 
 def IsVndkRuntimeEnforced(dut):
-    """Returns whether VNDK runtime should be enabled on the device.
+    """Returns whether VNDK run-time enforcement is enabled on the device.
 
-    VNDK runtime is optional in O-MR1 (API 27); enforced after O-MR1. If it is
-    enabled, the device has the property of vndk_version.
-    The usage of this function is to decide whether to skip VNDK test cases.
+    VNDK run-time enforcement is optional in O-MR1 (API 27); mandatory after P.
+    If VNDK run-time enforcement is disabled, the system property named
+    ro.vndk.lite must be set to true. The usage of this function is to decide
+    whether to skip VNDK test cases.
 
     Args:
         dut: The AndroidDevice under test.
@@ -37,7 +38,10 @@ def IsVndkRuntimeEnforced(dut):
         logging.error("Cannot get first API level. "
                       "Assume VNDK runtime to be enforced.")
         return True
-    return bool(api_level > api.PLATFORM_API_LEVEL_O_MR1 or dut.vndk_version)
+    if api_level <= api.PLATFORM_API_LEVEL_O_MR1:
+        return not dut.vndk_lite
+    # For P-launching devices, VNDK run-time enforcement is mandatory.
+    return True
 
 
 def FormatVndkPath(pattern, bitness, version=""):
