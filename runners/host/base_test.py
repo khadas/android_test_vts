@@ -558,10 +558,9 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(record.test_name, begin_time)
         if self._bug_report_on_failure:
-            self.DumpBugReport(
-                '%s-%s' % (self.test_module_name, record.test_name))
+            self.DumpBugReport(ecord.test_name)
         if self._logcat_on_failure:
-            self.DumpLogcat('%s-%s' % (self.test_module_name, record.test_name))
+            self.DumpLogcat(record.test_name)
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -654,10 +653,9 @@ class BaseTestClass(object):
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
         self.onException(test_name, begin_time)
         if self._bug_report_on_failure:
-            self.DumpBugReport(
-                '%s-%s' % (self.test_module_name, record.test_name))
+            self.DumpBugReport(ecord.test_name)
         if self._logcat_on_failure:
-            self.DumpLogcat('%s-%s' % (self.test_module_name, record.test_name))
+            self.DumpLogcat(record.test_name)
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -1163,8 +1161,8 @@ class BaseTestClass(object):
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
         for device in self.android_devices:
-            file_name = (prefix
-                         + _BUG_REPORT_FILE_PREFIX
+            file_name = (_BUG_REPORT_FILE_PREFIX
+                         + prefix
                          + '_%s' % device.serial
                          + _BUG_REPORT_FILE_EXTENSION)
 
@@ -1226,8 +1224,8 @@ class BaseTestClass(object):
 
         for device in self.android_devices:
             for buffer in LOGCAT_BUFFERS:
-                file_name = (prefix
-                             + _LOGCAT_FILE_PREFIX
+                file_name = (_LOGCAT_FILE_PREFIX
+                             + prefix
                              + '_%s_' % buffer
                              + device.serial
                              + _LOGCAT_FILE_EXTENSION)
