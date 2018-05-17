@@ -51,10 +51,10 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
 
         self._testcases = map(lambda x: str(x), self.fuzzer_configs.keys())
 
-        logging.info("Testcases: %s", self._testcases)
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+        logging.debug("Testcases: %s", self._testcases)
+        logging.debug("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                      self.data_file_path)
-        logging.info("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
+        logging.debug("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
                      self.fuzzer_configs)
 
         self._dut = self.android_devices[0]
@@ -73,7 +73,7 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
         push_src = os.path.join(self.data_file_path, config.FUZZER_SRC_DIR,
                                 testcase)
         self._dut.adb.push("%s %s" % (push_src, config.FUZZER_TEST_DIR))
-        logging.info("Adb pushed: %s", testcase)
+        logging.debug("Adb pushed: %s", testcase)
 
     def CreateFuzzerFlags(self, fuzzer_config):
         """Creates flags for the fuzzer executable.
@@ -180,7 +180,7 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
         fuzz_cmd = "%s && %s %s %s %s > /dev/null" % (cd_cmd, ld_path,
                                                       test_cmd, corpus_dir,
                                                       test_flags)
-        logging.info("Executing: %s", fuzz_cmd)
+        logging.debug("Executing: %s", fuzz_cmd)
         # TODO(trong): vts shell doesn't handle timeouts properly, change this after it does.
         try:
             stdout = self._dut.adb.shell("'%s'" % fuzz_cmd)
@@ -220,7 +220,7 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
         for offset in xrange(0, len(output), 2):
             crash_report += "\\x%s" % output[offset:offset + 2]
 
-        logging.info('FUZZER_TEST_CRASH_REPORT for %s: "%s"', fuzzer,
+        logging.debug('FUZZER_TEST_CRASH_REPORT for %s: "%s"', fuzzer,
                      crash_report)
 
     # TODO(trong): differentiate between crashes and sanitizer rule violations.
@@ -235,7 +235,7 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
             fuzzer: string, name of fuzzer executable.
             result: dict(str, str, int), command results from shell.
         """
-        logging.info("Test result: %s" % result)
+        logging.debug("Test result: %s" % result)
         if not self._dut.hasBooted():
             self._dut.waitForBootCompletion()
             asserts.fail("%s left the device in unresponsive state." % fuzzer)
