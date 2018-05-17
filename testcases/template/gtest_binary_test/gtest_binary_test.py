@@ -199,7 +199,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                     if success:
                         logging.debug(line)
                     else:
-                        logging.info(line)
+                        logging.error(line)
 
         if not success:
             asserts.fail('\n'.join([x for x in messages if x]))
