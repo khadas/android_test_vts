@@ -53,7 +53,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
         if self.batch_mode:
             if self.collect_tests_only:
                 self.batch_mode = False
-                logging.info("Disable batch mode when collecting tests.")
+                logging.debug("Disable batch mode when collecting tests.")
             else:
                 self._gtest_results = []
 
@@ -121,7 +121,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                     test_suite, test_name, path, tag, self.PutTag,
                     working_directory, ld_library_path, profiling_library_path,
                     envp=envp, args=args)
-                logging.info('Gtest test case: %s' % test_case)
+                logging.debug('Gtest test case: %s' % test_case)
                 test_cases.append(test_case)
             else:  # Test suite name
                 test_suite = line.strip()
@@ -182,20 +182,28 @@ class GtestBinaryTest(binary_test.BinaryTest):
             self._ParseBatchResults(test_case, xml_str)
             return
 
-        for stdout in command_results[const.STDOUT]:
-            if stdout and stdout.strip():
-                for line in stdout.split('\n'):
-                    logging.info(line)
-
         asserts.assertFalse(
             command_results[const.EXIT_CODE][1],
             'Failed to show Gtest XML output: %s' % command_results)
 
         root = xml.etree.ElementTree.fromstring(xml_str)
         asserts.assertEqual(root.get('tests'), '1', 'No tests available')
+        success = True
         if root.get('errors') != '0' or root.get('failures') != '0':
             messages = [x.get('message') for x in root.findall('.//failure')]
+            success = False
+
+        for stdout in command_results[const.STDOUT]:
+            if stdout and stdout.strip():
+                for line in stdout.split('\n'):
+                    if success:
+                        logging.debug(line)
+                    else:
+                        logging.info(line)
+
+        if not success:
             asserts.fail('\n'.join([x for x in messages if x]))
+
         asserts.skipIf(root.get('disabled') == '1', 'Gtest test case disabled')
 
     def _ParseBatchResults(self, test_case_original, xml_str):
@@ -208,7 +216,9 @@ class GtestBinaryTest(binary_test.BinaryTest):
         root = xml.etree.ElementTree.fromstring(xml_str)
 
         for test_suite in root:
-            print test_suite.tag, test_suite.attrib
+            logging.debug('Test tag: %s, attribute: %s',
+                          test_suite.tag,
+                          test_suite.attrib)
             for test_case in test_suite:
                 result = gtest_test_case.GtestTestCase(
                     test_suite.get('name'),

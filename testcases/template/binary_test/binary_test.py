@@ -81,7 +81,7 @@ class BinaryTest(base_test.BaseTestClass):
         self.getUserParam(
             keys.ConfigKeys.KEY_TESTBED_NAME, error_if_not_found=True)
 
-        logging.info("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
+        logging.debug("%s: %s", keys.ConfigKeys.IKEY_DATA_FILE_PATH,
                      self.data_file_path)
 
         self.binary_test_source = self.getUserParam(
@@ -198,7 +198,7 @@ class BinaryTest(base_test.BaseTestClass):
         self.testcases = []
         if not precondition_utils.CheckSysPropPrecondition(
                 self, self._dut, self.shell):
-            logging.info('Precondition sysprop not met; '
+            logging.warn('Precondition sysprop not met; '
                          'all tests skipped.')
             self.skipAllTests('precondition sysprop not met')
 
@@ -239,22 +239,23 @@ class BinaryTest(base_test.BaseTestClass):
             if (tag.endswith(const.SUFFIX_32BIT) and self.abi_bitness == '64'
                 ) or (tag.endswith(const.SUFFIX_64BIT) and
                       self.abi_bitness == '32'):
-                logging.info('Bitness of test source, %s, does not match the '
-                             'abi_bitness, %s, of test run.', str(source[0]),
+                logging.debug('Bitness of test source, %s, does not match the '
+                             'abi_bitness, %s, of test run. Skipping',
+                             str(source[0]),
                              self.abi_bitness)
                 return False
 
             return True
 
         source_list = filter(isValidSource, source_list)
-        logging.info('Parsed test sources: %s', source_list)
+        logging.debug('Parsed test sources: %s', source_list)
 
         # Push source files first
         for src, dst, tag in source_list:
             if src:
                 if os.path.isdir(src):
                     src = os.path.join(src, '.')
-                logging.info('Pushing from %s to %s.', src, dst)
+                logging.debug('Pushing from %s to %s.', src, dst)
                 self._dut.adb.push('{src} {dst}'.format(src=src, dst=dst))
                 self.shell.Execute('ls %s' % dst)
 
@@ -266,7 +267,7 @@ class BinaryTest(base_test.BaseTestClass):
             if tag is not None:
                 # tag not being None means to create a test case
                 self.tags.add(tag)
-                logging.info('Creating test case from %s with tag %s', dst,
+                logging.debug('Creating test case from %s with tag %s', dst,
                              tag)
                 testcase = self.CreateTestCase(dst, tag)
                 if not testcase:
@@ -325,7 +326,7 @@ class BinaryTest(base_test.BaseTestClass):
                 self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
         # Clean up the pushed binaries
-        logging.info('Start class cleaning up jobs.')
+        logging.debug('Start class cleaning up jobs.')
         # Delete pushed files
 
         sources = [
@@ -351,7 +352,7 @@ class BinaryTest(base_test.BaseTestClass):
         if not self.isSkipAllTests() and self.profiling.enabled:
             self.profiling.ProcessAndUploadTraceData()
 
-        logging.info('Finished class cleaning up jobs.')
+        logging.debug('Finished class cleaning up jobs.')
 
     def ParseTestSource(self, source):
         '''Convert host side binary path to device side path.
@@ -478,7 +479,7 @@ class BinaryTest(base_test.BaseTestClass):
                                               test_case.profiling_library_path)
 
         cmd = test_case.GetRunCommand()
-        logging.info("Executing binary test command: %s", cmd)
+        logging.debug("Executing binary test command: %s", cmd)
         command_results = self.shell.Execute(cmd)
 
         self.VerifyTestResult(test_case, command_results)
