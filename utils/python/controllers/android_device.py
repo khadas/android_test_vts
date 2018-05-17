@@ -511,6 +511,20 @@ class AndroidDevice(object):
         return self.getProp("ro.vndk.version")
 
     @property
+    def vndk_lite(self):
+        """Checks whether the vendor partition requests lite VNDK
+        enforcement.
+
+        Returns:
+            bool, True for lite vndk enforcement.
+        """
+        vndk_lite_str = self.getProp("ro.vndk.lite")
+        if vndk_lite_str is None:
+            logging.debug('ro.vndk.lite: %s' % vndk_lite_str)
+            return False
+        return vndk_lite_str.lower() == "true"
+
+    @property
     def cpu_abi(self):
         """CPU ABI (Application Binary Interface) of the device."""
         out = self.getProp("ro.product.cpu.abi")
