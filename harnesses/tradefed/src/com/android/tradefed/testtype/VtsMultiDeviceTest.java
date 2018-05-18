@@ -34,6 +34,7 @@ import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.JsonUtil;
+import com.android.tradefed.util.OutputUtil;
 import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
@@ -490,6 +491,7 @@ public class VtsMultiDeviceTest
 
     private VtsVendorConfigFileUtil configReader = null;
     private IInvocationContext mInvocationContext = null;
+    private OutputUtil mOutputUtil = null;
 
     /**
      * {@inheritDoc}
@@ -628,6 +630,12 @@ public class VtsMultiDeviceTest
 
         if (mBuildInfo == null) {
             throw new RuntimeException("BuildInfo has not been set.");
+        }
+
+        mOutputUtil = new OutputUtil(listener);
+        mOutputUtil.setTestModuleName(mTestModuleName);
+        if (mAbi != null) {
+            mOutputUtil.setAbiName(mAbi.getName());
         }
 
         if (mTestCasePath == null) {
@@ -1232,7 +1240,7 @@ public class VtsMultiDeviceTest
                 CLog.e("Command stderr: " + commandResult.getStderr());
                 CLog.e("Command status: " + commandStatus);
                 CLog.e("Python log: ");
-                printVtsLogs(vtsRunnerLogDir);
+                mOutputUtil.collectVtsRunnerOutputs(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
                 throw new RuntimeException("Failed to run VTS test");
             }
@@ -1281,7 +1289,7 @@ public class VtsMultiDeviceTest
                 }
             }
         }
-        printVtsLogs(vtsRunnerLogDir);
+        mOutputUtil.collectVtsRunnerOutputs(vtsRunnerLogDir);
 
         File reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME);
         CLog.d("Report message path: %s", reportMsg);
@@ -1336,44 +1344,6 @@ public class VtsMultiDeviceTest
             }
         }
         return null;
-    }
-
-    /**
-     * The method prints all VTS runner log files
-     *
-     * @param logDir the File instance of the base log dir.
-     */
-    private void printVtsLogs(File logDir) {
-        File[] children;
-        if (logDir == null) {
-            CLog.e("Scan VTS log dir: null\n");
-            return;
-        }
-        CLog.i("Scan VTS log dir %s\n", logDir.getAbsolutePath());
-        children = logDir.listFiles();
-        if (children != null) {
-            for (File child : children) {
-                if (child.isDirectory()) {
-                    if (!child.getName().equals("temp")) {
-                        // temp in python log directory is for temp files produced by test module
-                        // and thus should not be included in log printout
-                        printVtsLogs(child);
-                    }
-                } else {
-                    CLog.i("VTS log file %s\n", child.getAbsolutePath());
-                    try {
-                        if (child.getName().startsWith("vts_agent") &&
-                                child.getName().endsWith(".log")) {
-                            CLog.i("Content: %s\n", FileUtil.readStringFromFile(child));
-                        } else {
-                            CLog.i("skip %s\n", child.getName());
-                        }
-                    } catch (IOException e) {
-                        CLog.e("I/O error\n");
-                    }
-                }
-            }
-        }
     }
 
     /**
