@@ -57,6 +57,8 @@ public class VtsHalTraceCollector extends BaseDeviceMetricCollector {
                 // Cleanup existing traces.
                 device.executeShellCommand(String.format("rm -rf %s/*.vts.trace", VTS_TMP_DIR));
                 device.executeShellCommand("chmod 777 " + VTS_TMP_DIR);
+                device.executeShellCommand("chmod 777 " + VTS_TMP_LIB_DIR_32);
+                device.executeShellCommand("chmod 777 " + VTS_TMP_LIB_DIR_64);
                 device.executeShellCommand(
                         String.format("%s enable %s %s", VTS_TMP_DIR + PROFILING_CONFIGURE_BINARY,
                                 VTS_TMP_LIB_DIR_32, VTS_TMP_LIB_DIR_64));
