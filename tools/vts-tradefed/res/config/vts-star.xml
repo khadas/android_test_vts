@@ -33,7 +33,6 @@
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-codelab" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-device-health" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-fuzz" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-adapter" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-profiling" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-host" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-library" />
