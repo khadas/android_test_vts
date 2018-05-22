@@ -47,7 +47,7 @@ class MirrorTracker(object):
                  host_command_port,
                  host_callback_port=None,
                  start_callback_server=False,
-                 adb = None):
+                 adb=None):
         self._host_command_port = host_command_port
         self._host_callback_port = host_callback_port
         self._adb = adb
@@ -173,13 +173,13 @@ class MirrorTracker(object):
         if not instance_name:
             raise error.ComponentLoadingError("instance_name is None")
         if bits not in [32, 64]:
-            raise error.ComponentLoadingError("Invalid value for bits: %s" %
-                                              bits)
+            raise error.ComponentLoadingError(
+                "Invalid value for bits: %s" % bits)
 
         client = vts_tcp_client.VtsTcpClient()
         client.Connect(command_port=self._host_command_port)
 
-        logging.info("Init the driver service for shell, %s", instance_name)
+        logging.debug("Init the driver service for shell, %s", instance_name)
         launched = client.LaunchDriverService(
             driver_type=ASysCtrlMsg.VTS_DRIVER_TYPE_SHELL,
             service_name="shell_" + instance_name,

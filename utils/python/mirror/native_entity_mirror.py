@@ -43,7 +43,7 @@ class VtsEnum(object):
     """Enum's host-side mirror instance."""
 
     def __init__(self, attribute):
-        logging.info(attribute)
+        logging.debug(attribute)
         for enumerator, scalar_value in zip(attribute.enum_value.enumerator,
                                             attribute.enum_value.scalar_value):
             setattr(self, enumerator,
@@ -114,15 +114,15 @@ class NativeEntityMirror(mirror_object.MirrorObject):
         if self._if_spec_msg.attribute:
             for attribute in self._if_spec_msg.attribute:
                 if (not attribute.is_const and
-                    (attribute.name == attribute_name or
-                     attribute.name.endswith("::" + attribute_name))):
+                    (attribute.name == attribute_name
+                     or attribute.name.endswith("::" + attribute_name))):
                     return attribute
-        if (self._if_spec_msg.interface and
-                self._if_spec_msg.interface.attribute):
+        if (self._if_spec_msg.interface
+                and self._if_spec_msg.interface.attribute):
             for attribute in self._if_spec_msg.interface.attribute:
                 if (not attribute.is_const and
-                    (attribute.name == attribute_name or
-                     attribute.name.endswith("::" + attribute_name))):
+                    (attribute.name == attribute_name
+                     or attribute.name.endswith("::" + attribute_name))):
                     return attribute
         return None
 
@@ -140,15 +140,15 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                 for attribute in self._if_spec_msg.attribute:
                     if attribute.is_const and attribute.name == type_name:
                         return attribute
-                    elif (attribute.type == CompSpecMsg.TYPE_ENUM and
-                          attribute.name.endswith(type_name)):
+                    elif (attribute.type == CompSpecMsg.TYPE_ENUM
+                          and attribute.name.endswith(type_name)):
                         return attribute
             if self._if_spec_msg.interface and self._if_spec_msg.interface.attribute:
                 for attribute in self._if_spec_msg.interface.attribute:
                     if attribute.is_const and attribute.name == type_name:
                         return attribute
-                    elif (attribute.type == CompSpecMsg.TYPE_ENUM and
-                          attribute.name.endswith(type_name)):
+                    elif (attribute.type == CompSpecMsg.TYPE_ENUM
+                          and attribute.name.endswith(type_name)):
                         return attribute
             return None
         except AttributeError as e:
@@ -187,7 +187,7 @@ class NativeEntityMirror(mirror_object.MirrorObject):
             if not func_msg:
                 raise MirrorObjectError("api %s unknown", func_msg)
 
-            logging.info("remote call %s%s", api_name, args)
+            logging.debug("remote call %s%s", api_name, args)
             if args:
                 for arg_msg, value_msg in zip(func_msg.arg, args):
                     logging.debug("arg msg %s", arg_msg)
@@ -200,8 +200,8 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                 # TODO: use kwargs
                 for arg in func_msg.arg:
                     # TODO: handle other
-                    if (arg.type == CompSpecMsg.TYPE_SCALAR and
-                            arg.scalar_type == "pointer"):
+                    if (arg.type == CompSpecMsg.TYPE_SCALAR
+                            and arg.scalar_type == "pointer"):
                         arg.scalar_value.pointer = 0
                 logging.debug(func_msg)
 
@@ -210,18 +210,19 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                 call_msg.component_class = self._if_spec_msg.component_class
             call_msg.hal_driver_id = self._driver_id
             call_msg.api.CopyFrom(func_msg)
-            logging.info("final msg %s", call_msg)
+            logging.debug("final msg %s", call_msg)
             result = self._client.CallApi(
                 text_format.MessageToString(call_msg), self._caller_uid)
             logging.debug(result)
-            if (isinstance(result, tuple) and len(result) == 2 and
-                    isinstance(result[1], dict) and "coverage" in result[1]):
+            if (isinstance(result, tuple) and len(result) == 2
+                    and isinstance(result[1], dict)
+                    and "coverage" in result[1]):
                 self._last_raw_code_coverage_data = result[1]["coverage"]
                 result = result[0]
 
-            if (result and isinstance(
-                    result, CompSpecMsg.VariableSpecificationMessage) and
-                    result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
+            if (result and isinstance(result,
+                                      CompSpecMsg.VariableSpecificationMessage)
+                    and result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
                 if result.hidl_interface_id <= -1:
                     return None
                 driver_id = result.hidl_interface_id
@@ -263,14 +264,14 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                             else:
                                 struct_value.scalar_value.int32_t ^= mask
                         else:
-                            raise MirrorObjectError("support %s" %
-                                                    struct_value.scalar_type)
+                            raise MirrorObjectError(
+                                "support %s" % struct_value.scalar_type)
                         break
                     count += 1
                 logging.debug("fuzzed %s", arg_msg)
             else:
-                raise MirrorObjectError("unsupported fuzz message type %s." %
-                                        arg_msg.type)
+                raise MirrorObjectError(
+                    "unsupported fuzz message type %s." % arg_msg.type)
             return arg_msg
 
         def ConstGenerator():
@@ -283,8 +284,9 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                 ret_v = getattr(arg_msg.scalar_value, arg_msg.scalar_type,
                                 None)
                 if ret_v is None:
-                    raise MirrorObjectError("No value found for type %s in %s."
-                                            % (arg_msg.scalar_type, api_name))
+                    raise MirrorObjectError(
+                        "No value found for type %s in %s." %
+                        (arg_msg.scalar_type, api_name))
                 return ret_v
             elif arg_msg.type == CompSpecMsg.TYPE_STRING:
                 return arg_msg.string_value.message

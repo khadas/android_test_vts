@@ -110,8 +110,8 @@ class CoverageFeature(feature_utils.Feature):
         self.local_coverage_path = os.path.join(LOCAL_COVERAGE_PATH,
                                                 timestamp_seconds)
         if os.path.exists(self.local_coverage_path):
-            logging.info("removing existing coverage path: %s",
-                         self.local_coverage_path)
+            logging.debug("removing existing coverage path: %s",
+                          self.local_coverage_path)
             shutil.rmtree(self.local_coverage_path)
         os.makedirs(self.local_coverage_path)
 
@@ -137,12 +137,16 @@ class CoverageFeature(feature_utils.Feature):
                                   device)
                     continue
                 if not coverage_resource_path:
-                    logging.error("Missing coverage resource path in device: %s",
-                                  device)
+                    logging.error(
+                        "Missing coverage resource path in device: %s", device)
                     continue
                 self._device_resource_dict[str(serial)] = str(
                     coverage_resource_path)
-        logging.info("Coverage enabled: %s", self.enabled)
+
+        if self.enabled:
+            logging.info("Coverage is enabled")
+        else:
+            logging.debug("Coverage is disabled.")
 
     def _FindGcnoSummary(self, gcda_file_path, gcno_file_parsers):
         """Find the corresponding gcno summary for given gcda file.
@@ -253,7 +257,7 @@ class CoverageFeature(feature_utils.Feature):
             dut: the device under test.
         """
         self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
-        logging.info("Removing existing gcda files.")
+        logging.debug("Removing existing gcda files.")
         self._ClearTargetGcov(dut, serial)
 
     def _GetGcdaDict(self, dut, serial):
@@ -269,9 +273,10 @@ class CoverageFeature(feature_utils.Feature):
         Returns:
             A dictionary with gcda basenames as keys and contents as the values.
         """
-        logging.info("Creating gcda dictionary")
+        logging.debug("Creating gcda dictionary")
         gcda_dict = {}
-        logging.info("Storing gcda tmp files to: %s", self.local_coverage_path)
+        logging.debug("Storing gcda tmp files to: %s",
+                      self.local_coverage_path)
 
         self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
 
@@ -322,7 +327,7 @@ class CoverageFeature(feature_utils.Feature):
         return gcda_dict
 
     def _OutputCoverageReport(self, isGlobal, coverage_report_msg=None):
-        logging.info("outputing coverage data")
+        logging.info("Outputing coverage data")
         timestamp_seconds = str(int(time.time() * 1000000))
         coverage_report_file_name = "coverage_report_" + timestamp_seconds + ".txt"
         if self._coverage_report_file_prefix:
@@ -333,10 +338,10 @@ class CoverageFeature(feature_utils.Feature):
             if not os.path.exists(self._coverage_report_dir):
                 os.makedirs(self._coverage_report_dir)
             coverage_report_file = os.path.join(self._coverage_report_dir,
-                                            coverage_report_file_name)
+                                                coverage_report_file_name)
         else:
             coverage_report_file = os.path.join(self.local_coverage_path,
-                                            coverage_report_file_name)
+                                                coverage_report_file_name)
 
         logging.info("Storing coverage report to: %s", coverage_report_file)
         if self.web and self.web.enabled:
@@ -431,8 +436,8 @@ class CoverageFeature(feature_utils.Feature):
                     git_project_name = str(project_name)
                     git_project_path = str(project_name)
                     revision = str(revision_dict[project_name])
-                    logging.info("Source file '%s' matched with project '%s'",
-                                 src_file_path, git_project_name)
+                    logging.debug("Source file '%s' matched with project '%s'",
+                                  src_file_path, git_project_name)
                     break
 
                 parts = os.path.normpath(str(project_name)).split(os.sep, 1)
@@ -442,8 +447,8 @@ class CoverageFeature(feature_utils.Feature):
                     git_project_name = str(project_name)
                     git_project_path = parts[-1]
                     revision = str(revision_dict[project_name])
-                    logging.info("Source file '%s' matched with project '%s'",
-                                 src_file_path, git_project_name)
+                    logging.debug("Source file '%s' matched with project '%s'",
+                                  src_file_path, git_project_name)
                     break
 
             if not revision:
@@ -601,11 +606,11 @@ class CoverageFeature(feature_utils.Feature):
 
         resource_path = self._device_resource_dict[serial]
         if not resource_path:
-            logging.error("coverage resource path not found.")
+            logging.error("Coverage resource path not found.")
             return
 
         gcda_dict = self._GetGcdaDict(dut, serial)
-        logging.info("coverage file paths %s", str([fp for fp in gcda_dict]))
+        logging.debug("Coverage file paths %s", str([fp for fp in gcda_dict]))
 
         cov_zip = zipfile.ZipFile(os.path.join(resource_path, _GCOV_ZIP))
 
@@ -620,7 +625,7 @@ class CoverageFeature(feature_utils.Feature):
             self._ManualProcess(cov_zip, revision_dict, gcda_dict, isGlobal)
 
         # cleanup the downloaded gcda files.
-        logging.info("cleanup gcda files.")
+        logging.debug("Cleaning up gcda files.")
         files = os.listdir(self.local_coverage_path)
         for item in files:
             if item.endswith(".gcda"):
@@ -722,8 +727,10 @@ if __name__ == '__main__':
         keys.ConfigKeys.IKEY_ENABLE_COVERAGE:
         True,
         keys.ConfigKeys.IKEY_ANDROID_DEVICE: [{
-            keys.ConfigKeys.IKEY_SERIAL:args.serial,
-            keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH:args.gcov_rescource_path,
+            keys.ConfigKeys.IKEY_SERIAL:
+            args.serial,
+            keys.ConfigKeys.IKEY_GCOV_RESOURCES_PATH:
+            args.gcov_rescource_path,
         }],
         keys.ConfigKeys.IKEY_OUTPUT_COVERAGE_REPORT:
         True,

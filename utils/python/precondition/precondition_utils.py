@@ -79,15 +79,15 @@ def CanRunHidlHalTest(test_instance,
                           feature)
         else:
             cmd_results = shell.Execute("pm list features")
-            if (any(cmd_results[const.EXIT_CODE]) or
-                    feature not in cmd_results[const.STDOUT][0]):
+            if (any(cmd_results[const.EXIT_CODE])
+                    or feature not in cmd_results[const.STDOUT][0]):
                 logging.warn("The required feature %s not found.", feature)
                 return False
 
     file_path_prefix = getattr(test_instance, "file_path_prefix", "")
     if file_path_prefix and bitness:
-        logging.info("FILE_PATH_PREFIX: %s", file_path_prefix)
-        logging.info("Test bitness: %s", bitness)
+        logging.debug("FILE_PATH_PREFIX: %s", file_path_prefix)
+        logging.debug("Test bitness: %s", bitness)
         tag = "_" + bitness + "bit"
         if tag in file_path_prefix:
             for path_prefix in file_path_prefix[tag]:
@@ -105,7 +105,7 @@ def CanRunHidlHalTest(test_instance,
             shell, hal, bitness, run_as_compliance_test)
         return testable
 
-    logging.info("Precondition check pass.")
+    logging.debug("Precondition check pass.")
     return True
 
 
@@ -139,7 +139,7 @@ def MeetFirstApiLevelPrecondition(test_instance, dut=None):
         return True
 
     if not dut:
-        logging.info("Read first API level from the first device.")
+        logging.debug("Read first API level from the first device.")
         dut = test_instance.android_devices[0]
     device_level = dut.getLaunchApiLevel(strict=False)
     if not device_level:
@@ -147,14 +147,12 @@ def MeetFirstApiLevelPrecondition(test_instance, dut=None):
                       "Assume it meets the precondition.")
         return True
 
-    logging.info("Device's first API level=%d; precondition=%d",
-                 device_level, precond_level)
+    logging.debug("Device's first API level=%d; precondition=%d", device_level,
+                  precond_level)
     return device_level >= precond_level
 
 
-def CheckSysPropPrecondition(test_instance,
-                             dut,
-                             shell=None):
+def CheckSysPropPrecondition(test_instance, dut, shell=None):
     """Checks sysprop precondition of a test instance.
 
     Args:
@@ -173,8 +171,8 @@ def CheckSysPropPrecondition(test_instance,
     if not hasattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP):
         return True
 
-    precond_sysprop = str(getattr(
-        test_instance, keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP, ''))
+    precond_sysprop = str(
+        getattr(test_instance, keys.ConfigKeys.IKEY_PRECONDITION_SYSPROP, ''))
     if "=" not in precond_sysprop:
         logging.error("precondition-sysprop value is invalid.")
         return True

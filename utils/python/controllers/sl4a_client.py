@@ -82,7 +82,7 @@ def start_sl4a(adb_proxy,
         raise StartError("SL4A is not installed on %s" % adb_proxy.serial)
     for _ in range(retries):
         cmd = _SL4A_LAUNCH_CMD.format(device_side_port)
-        logging.info("sl4a launch cmd: %s", cmd)
+        logging.debug("sl4a launch cmd: %s", cmd)
         adb_proxy.shell(cmd)
         for _ in range(wait_time):
             time.sleep(1)
@@ -138,18 +138,17 @@ def is_sl4a_running(adb_proxy):
     # Grep for process with a preceding S which means it is truly started.
     PROCESS_NAME = 'com.googlecode.android_scripting'
     try:
-        out = adb_proxy.shell(
-            'ps -A | grep "S %s"' % PROCESS_NAME)
+        out = adb_proxy.shell('ps -A | grep "S %s"' % PROCESS_NAME)
     except adb.AdbError as e:
         logging.debug('is_sl4a_running: exception %s', e)
         logging.debug('trying "ps" without -A')
         try:
-            out = adb_proxy.shell(
-                'ps | grep "S %s"' % PROCESS_NAME)
+            out = adb_proxy.shell('ps | grep "S %s"' % PROCESS_NAME)
         except adb.AdbError as e:
             logging.exception('is_sl4a_running: exception %s', e)
             return False
     return True if PROCESS_NAME in out else False
+
 
 class Sl4aCommand(object):
     """Commands that can be invoked on the sl4a client.
@@ -268,8 +267,7 @@ class Sl4aClient(object):
                 time.sleep(1)
 
         if not resp:
-            raise ProtocolError(
-                ProtocolError.NO_RESPONSE_FROM_HANDSHAKE)
+            raise ProtocolError(ProtocolError.NO_RESPONSE_FROM_HANDSHAKE)
         result = json.loads(str(resp, encoding="utf8"))
         if result['status']:
             self.uid = result['uid']
@@ -355,8 +353,7 @@ class Sl4aClient(object):
                     logging.error(
                         "No response for RPC method %s on iteration %s",
                         method, i)
-                    raise ProtocolError(
-                        ProtocolError.NO_RESPONSE_FROM_SERVER)
+                    raise ProtocolError(ProtocolError.NO_RESPONSE_FROM_SERVER)
             else:
                 break
         result = json.loads(str(response, encoding="utf8"))

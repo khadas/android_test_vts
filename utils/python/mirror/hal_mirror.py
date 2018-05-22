@@ -98,8 +98,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
         #      multiple HALs together.
         found_api_spec = self._client.ListApis()
         if not found_api_spec:
-            raise errors.ComponentLoadingError("No API found for %s" %
-                                               target_type)
+            raise errors.ComponentLoadingError(
+                "No API found for %s" % target_type)
         if_spec_msg = CompSpecMsg.ComponentSpecificationMessage()
         text_format.Merge(found_api_spec, if_spec_msg)
 
@@ -142,7 +142,7 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
         specification = self._client.ReadSpecification(
             interface_name, msg.component_class, msg.component_type,
             msg.component_type_version, msg.package)
-        logging.info("specification: %s", specification)
+        logging.debug("specification: %s", specification)
         interface = getattr(specification, INTERFACE, None)
         apis = getattr(interface, API, [])
         for api in apis:
@@ -153,10 +153,10 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
 
                 def dummy(*args):
                     """Dummy implementation for any callback function."""
-                    logging.info("Entering dummy implementation"
-                                 " for callback function: %s", api.name)
+                    logging.debug("Entering dummy implementation"
+                                  " for callback function: %s", api.name)
                     for arg_index in range(len(args)):
-                        logging.info("arg%s: %s", arg_index, args[arg_index])
+                        logging.debug("arg%s: %s", arg_index, args[arg_index])
 
                 function_pointer = dummy
             func_pt_msg = var_msg.function_pointer.add()
@@ -190,7 +190,7 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             msg.package,
             recursive=True)
 
-        logging.info("found_api_spec %s", found_api_spec)
+        logging.debug("found_api_spec %s", found_api_spec)
         if not driver_id:
             driver_id = self._driver_id
         # Instantiate a MirrorObject and return it.
