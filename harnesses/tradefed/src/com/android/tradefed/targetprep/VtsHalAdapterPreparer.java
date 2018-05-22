@@ -60,7 +60,7 @@ public class VtsHalAdapterPreparer
     static final String SCRIPT_PATH = "/data/local/tmp/vts_adapter.sh";
     // Command to list the registered instance for the given hal@version.
     static final String LIST_HAL_CMD =
-            "lshal -ti --neat | grep -E '^hwbinder' | awk '{print $2}' | grep %s";
+            "lshal -ti --neat | grep -e '^hwbinder' | awk '{print $2}' | grep %s";
 
     @Option(name = "adapter-binary-name",
             description = "Adapter binary file name (typically under /data/nativetest*/)")
