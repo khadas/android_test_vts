@@ -15,7 +15,8 @@
 -->
 <configuration description="VTS HAL Adapter Test Plan">
   <include name="vts-base" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsCoveragePreparer" />
+  <include name="cts-preconditions" />
+  <option name="dynamic-config-pusher:dynamic-resource-name" value="vts-tradefed" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-hal-adapter" />
