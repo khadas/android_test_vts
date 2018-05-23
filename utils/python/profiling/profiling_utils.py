@@ -90,7 +90,10 @@ class ProfilingFeature(feature_utils.Feature):
         self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS,
                              self._OPTIONAL_PARAMS, user_params)
         self.web = web
-        logging.info("Profiling enabled: %s", self.enabled)
+        if self.enabled:
+            logging.info("Profiling is enabled.")
+        else:
+            logging.debug("Profiling is disabled.")
 
     def _IsEventFromBinderizedHal(self, event_type):
         """Returns True if the event type is from a binderized HAL."""
@@ -124,7 +127,7 @@ class ProfilingFeature(feature_utils.Feature):
         results = dut.shell.profiling_shell.Execute("ls " + target_trace_file)
         asserts.assertTrue(results, "failed to find trace file")
         stdout_lines = results[const.STDOUT][0].split("\n")
-        logging.info("stdout: %s", stdout_lines)
+        logging.debug("stdout: %s", stdout_lines)
         trace_files = []
         for line in stdout_lines:
             if line:
@@ -169,7 +172,7 @@ class ProfilingFeature(feature_utils.Feature):
         # cleanup any existing traces.
         shell.Execute("rm " + os.path.join(TARGET_PROFILING_TRACE_PATH,
                                            "*.vts.trace"))
-        logging.info("enable VTS profiling.")
+        logging.debug("enabling VTS profiling.")
 
         # give permission to write the trace file.
         shell.Execute("chmod 777 " + TARGET_PROFILING_TRACE_PATH)

@@ -117,15 +117,15 @@ class MirrorObject(object):
             create a MirrorObject.
         """
         if bits not in [32, 64]:
-            raise error.ComponentLoadingError("Invalid value for bits: %s" %
-                                              bits)
+            raise error.ComponentLoadingError(
+                "Invalid value for bits: %s" % bits)
         if not handler_name:
             handler_name = target_type
         if not service_name:
             service_name = "vts_driver_%s" % handler_name
 
         # Launch the corresponding driver of the requested HAL on the target.
-        logging.info("Init the driver service for %s", target_type)
+        logging.debug("Init the driver service for %s", target_type)
         target_class_id = COMPONENT_CLASS_DICT[target_class.lower()]
         target_type_id = COMPONENT_TYPE_DICT[target_type.lower()]
 
