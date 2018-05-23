@@ -56,9 +56,11 @@ class LogUploadingFeature(feature_utils.Feature):
             optional_param_names=self._OPTIONAL_PARAMS,
             user_params=user_params)
         self.web = web
-        logging.info("Log uploading enabled: %s", self.enabled)
 
-        if not self.enabled:
+        if self.enabled:
+            logging.info("Log uploading is enabled")
+        else:
+            logging.debug("Log uploading is disabled")
             return
 
         self._report_file_util = report_file_utils.ReportFileUtil(
@@ -76,9 +78,9 @@ class LogUploadingFeature(feature_utils.Feature):
         if not self.enabled:
             return
 
-        file_name_prefix = '%s_%s_' % (getattr(
-            self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
-                                       self.web.report_msg.start_timestamp)
+        file_name_prefix = '%s_%s_' % (
+            getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
+            self.web.report_msg.start_timestamp)
 
         def path_filter(path):
             '''filter to exclude proto files in log uploading'''
