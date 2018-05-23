@@ -33,5 +33,6 @@
 
   <!-- VtsTrebleVintfTest is deprecated, run VtsTrebleVendorVintfTest instead -->
   <option name="compatibility:exclude-filter" value="VtsTrebleVintfTest" />
+  <option name="compatibility:exclude-filter" value="VtsTrebleVintfTestOMr1" />
 
 </configuration>
