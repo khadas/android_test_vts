@@ -548,8 +548,8 @@ class BaseTestClass(object):
         record = self._current_record
         logging.error(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
-        logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
-                     record.test_name, record.result)
+        logging.error(RESULT_LINE_TEMPLATE, self.results.progressStr,
+                      record.test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
         self.onFail(record.test_name, begin_time)
