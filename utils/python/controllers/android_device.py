@@ -370,8 +370,9 @@ class AndroidDevice(object):
         self._product_type = product_type
         self.device_command_port = None
         self.device_callback_port = device_callback_port
-        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(),
-                                              {"serial": self.serial})
+        self.log = AndroidDeviceLoggerAdapter(logging.getLogger(), {
+            "serial": self.serial
+        })
         base_log_path = getattr(logging, "log_path", "/tmp/logs/")
         self.log_path = os.path.join(base_log_path, "AndroidDevice%s" % serial)
         self.adb_logcat_process = None
@@ -831,11 +832,12 @@ class AndroidDevice(object):
         Returns:
             bool, True if framework start success. False otherwise.
         """
-        logging.info("starting Android framework")
+        logging.debug("starting Android framework")
         self.adb.shell("start")
 
         if wait_for_completion:
-            return self.waitForFrameworkStartComplete(wait_for_completion_timeout)
+            return self.waitForFrameworkStartComplete(
+                wait_for_completion_timeout)
 
         return True
 
@@ -852,7 +854,7 @@ class AndroidDevice(object):
 
         Method will block until stop is complete.
         """
-        logging.info("stopping Android framework")
+        logging.debug("stopping Android framework")
         self.adb.shell("stop")
         self.setProp("sys.boot_completed", 0)
         logging.info("Android framework stopped")
@@ -986,7 +988,7 @@ class AndroidDevice(object):
             self.startVtsAgent()
             self.device_command_port = int(
                 self.adb.shell("cat /data/local/tmp/vts_tcp_server_port"))
-            logging.info("device_command_port: %s", self.device_command_port)
+            logging.debug("device_command_port: %s", self.device_command_port)
             if not self.host_command_port:
                 self.host_command_port = adb.get_available_host_port()
             self.adb.tcp_forward(self.host_command_port,
@@ -1057,8 +1059,8 @@ class AndroidDevice(object):
         log_severity = getattr(self, keys.ConfigKeys.KEY_LOG_SEVERITY, "INFO")
         bits = ['64', '32'] if self.is64Bit else ['32']
         for bitness in bits:
-            vts_agent_log_path = os.path.join(self.log_path,
-                'vts_agent_%s_%s.log' % (bitness, self.serial))
+            vts_agent_log_path = os.path.join(
+                self.log_path, 'vts_agent_%s_%s.log' % (bitness, self.serial))
             cmd = ('adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
                    '{path}/{bitness}/vts_hal_agent{bitness} '
                    '--hal_driver_path_32={path}/32/vts_hal_driver32 '
@@ -1146,8 +1148,8 @@ class AndroidDevice(object):
             if not self.sl4a_host_port or not adb.is_port_available(
                     self.sl4a_host_port):
                 self.sl4a_host_port = adb.get_available_host_port()
-            logging.info("sl4a port host %s target %s", self.sl4a_host_port,
-                         self.sl4a_target_port)
+            logging.debug("sl4a port host %s target %s", self.sl4a_host_port,
+                          self.sl4a_target_port)
             try:
                 self.adb.tcp_forward(self.sl4a_host_port,
                                      self.sl4a_target_port)
@@ -1233,13 +1235,13 @@ class AndroidDevice(object):
     @property
     def droid(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if not hasattr(self,
-                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self, "_sl4a_sessions") or len(
+                self._sl4a_sessions) == 0:
             return None
         try:
             session_id = sorted(self._sl4a_sessions)[0]
             result = self._sl4a_sessions[session_id][0]
-            logging.info("key %s val %s", session_id, result)
+            logging.debug("key %s val %s", session_id, result)
             return result
         except IndexError as e:
             logging.exception(e)
@@ -1248,8 +1250,8 @@ class AndroidDevice(object):
     @property
     def droids(self):
         """A list of the active SL4A sessions on this device."""
-        if not hasattr(self,
-                       "_sl4a_sessions") or len(self._sl4a_sessions) == 0:
+        if not hasattr(self, "_sl4a_sessions") or len(
+                self._sl4a_sessions) == 0:
             return None
         keys = sorted(self._sl4a_sessions)
         results = []
@@ -1260,11 +1262,11 @@ class AndroidDevice(object):
     @property
     def ed(self):
         """The default SL4A session to the device if exist, None otherwise."""
-        if (not hasattr(self, "_sl4a_event_dispatchers") or
-                len(self._sl4a_event_dispatchers) == 0):
+        if (not hasattr(self, "_sl4a_event_dispatchers")
+                or len(self._sl4a_event_dispatchers) == 0):
             return None
-        logging.info("self._sl4a_event_dispatchers: %s",
-                     self._sl4a_event_dispatchers)
+        logging.debug("self._sl4a_event_dispatchers: %s",
+                      self._sl4a_event_dispatchers)
         try:
             session_id = sorted(self._sl4a_event_dispatchers)[0]
             return self._sl4a_event_dispatchers[session_id]
