@@ -44,7 +44,7 @@
 
     <option name="test-tag" value="cts" />
 
-    <option name="enable-root" value="false" />
+    <option name="enable-root" value="true" />
     <!-- retain 200MB of host log -->
     <option name="max-log-size" value="200" />
     <!--  retain 200MB of logcat -->
