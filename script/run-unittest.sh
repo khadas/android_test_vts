@@ -24,4 +24,6 @@ PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.buil
 PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.build.build_provider_test
 PYTHONPATH=$PYTHONPATH:..:../framework/harnesses/ python -m host_controller.console_test
 PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.io.file_util_test
+PYTHONPATH=$PYTHONPATH:.. python -m vts.utils.python.instrumentation.test_framework_instrumentation_test
+
 popd
