@@ -72,7 +72,7 @@ class ShellMirror(mirror_object.MirrorObject):
                 # to result.
                 if pattern.match(val):
                     tmp_file = os.path.join(tmp_dir, result_type + str(index))
-                    logging.info("pulling file: %s to %s", val, tmp_file)
+                    logging.debug("pulling file: %s to %s", val, tmp_file)
                     self._adb.pull(val, tmp_file)
                     result_val[index] = open(tmp_file, "r").read()
                     self._adb.shell("rm -f %s" % val)

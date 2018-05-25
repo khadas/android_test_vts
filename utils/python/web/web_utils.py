@@ -82,7 +82,6 @@ class WebFeature(feature_utils.Feature):
             getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME))
 
         if getattr(self, keys.ConfigKeys.IKEY_ENABLE_PROFILING, False):
-            logging.info("Profiling test")
             self.report_msg.test += "Profiling"
 
         self.report_msg.test_type = ReportMsg.VTS_HOST_DRIVEN_STRUCTURAL
@@ -395,7 +394,7 @@ class WebFeature(feature_utils.Feature):
 
         # Handle case when runner fails, tests aren't executed
         if (not getattr(self, keys.ConfigKeys.RUN_AS_VTS_SELFTEST, False)
-            and executed and executed[-1].test_name == "setup_class"):
+                and executed and executed[-1].test_name == "setup_class"):
             # Test failed during setup, all tests were not executed
             start_index = 0
         else:
@@ -416,11 +415,11 @@ class WebFeature(feature_utils.Feature):
             build_id = str(build[keys.ConfigKeys.IKEY_BUILD_ID])
             self.report_msg.build_info.id = build_id
 
-        logging.info("_tearDownClass hook: start (username: %s)",
-                     getpass.getuser())
+        logging.debug("_tearDownClass hook: start (username: %s)",
+                      getpass.getuser())
 
         if len(self.report_msg.test_case) == 0:
-            logging.info("_tearDownClass hook: skip uploading (no test case)")
+            logging.warn("_tearDownClass hook: skip uploading (no test case)")
             return ''
 
         post_msg = ReportMsg.DashboardPostMessage()
@@ -430,10 +429,10 @@ class WebFeature(feature_utils.Feature):
 
         message_b = base64.b64encode(post_msg.SerializeToString())
 
-        logging.info('Result proto message generated. size: %s',
-                     len(message_b))
+        logging.debug('Result proto message generated. size: %s',
+                      len(message_b))
 
-        logging.info("_tearDownClass hook: status upload time stamp %s",
-                     str(self.report_msg.start_timestamp))
+        logging.debug("_tearDownClass hook: status upload time stamp %s",
+                      str(self.report_msg.start_timestamp))
 
         return message_b
