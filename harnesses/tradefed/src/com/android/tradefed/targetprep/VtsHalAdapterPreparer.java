@@ -42,10 +42,11 @@ import java.util.function.Predicate;
 
 /**
  * Starts and stops a HAL (Hardware Abstraction Layer) adapter.
+ * Only used for single-device testing or the primary device in multi-device
+ * testing.
  */
 @OptionClass(alias = "vts-hal-adapter-preparer")
-public class VtsHalAdapterPreparer
-        implements ITargetPreparer, ITargetCleaner, IMultiTargetPreparer, IAbiReceiver {
+public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
     static final int THREAD_COUNT_DEFAULT = 1;
 
     static final String HAL_INTERFACE_SEP = "::";
@@ -144,15 +145,6 @@ public class VtsHalAdapterPreparer
      * {@inheritDoc}
      */
     @Override
-    public void setUp(IInvocationContext context)
-            throws TargetSetupError, BuildError, DeviceNotAvailableException {
-        setUp(context.getDevices().get(0), context.getBuildInfos().get(0));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
         if (!mCommands.isEmpty()) {
@@ -166,15 +158,6 @@ public class VtsHalAdapterPreparer
             // TODO: cleanup the pushed adapter files.
             mCmdUtil.restartFramework(device);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void tearDown(IInvocationContext context, Throwable e)
-            throws DeviceNotAvailableException {
-        tearDown(context.getDevices().get(0), context.getBuildInfos().get(0), e);
     }
 
     /**
