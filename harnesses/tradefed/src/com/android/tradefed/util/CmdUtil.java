@@ -75,7 +75,8 @@ public class CmdUtil {
         for (int count = 0; count < MAX_RETRY_COUNT; count++) {
             for (String cmd : cmds) {
                 CLog.i("Running a command: %s", cmd);
-                device.executeShellCommand(cmd);
+                String out = device.executeShellCommand(cmd);
+                CLog.i("Command output: %s", out);
             }
             if (validateCmdSuccess(device, validation_cmd, predicate)) {
                 return true;
