@@ -142,7 +142,10 @@ class CallbackServer(object):
         Returns:
             string, Id of the callback function if found, None otherwise.
         """
-        return _functions.get(callback_func, None)
+        # dict _functions is { id : func }
+        for id, func in _functions.items():
+          if func is callback_func:
+            return id
 
     def Start(self, port=0):
         """Starts the server.
