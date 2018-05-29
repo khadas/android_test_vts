@@ -117,8 +117,10 @@ public class VtsHalAdapterPreparer
                 String interfaceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[0];
                 String instanceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[1];
                 // starts adapter
-                String command = String.format("%s /data/nativetest%s/%s %s %s %d", SCRIPT_PATH,
-                        bitness, mAdapterBinaryName, interfaceName, instanceName, mThreadCount);
+                String command = String.format("chmod a+x %s", SCRIPT_PATH);
+                mCommands.add(command);
+                command = String.format("%s /data/nativetest%s/%s %s %s %d", SCRIPT_PATH, bitness,
+                        mAdapterBinaryName, interfaceName, instanceName, mThreadCount);
                 CLog.d("Trying to adapter for %s",
                         mPackageName + "::" + interfaceName + "/" + instanceName);
                 mCommands.add(command);
