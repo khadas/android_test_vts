@@ -193,7 +193,6 @@ class TestMethods(unittest.TestCase):
 
         # Function should be registered with RegisterCallback
         func_id = self._callback_server.RegisterCallback(callback_func)
-
         found_func_id = self._callback_server.GetCallbackId(callback_func)
         self.assertEqual(func_id, found_func_id)
 
