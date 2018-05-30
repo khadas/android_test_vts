@@ -17,10 +17,12 @@
 import logging
 
 from vts.utils.python.instrumentation import test_framework_instrumentation_event as tfie
+from vts.utils.python.instrumentation import test_framework_instrumentation_categories as tfic
 
 
 # global instance of TestFrameworkInstrumentation class
 global_instance = None
+categories = tfic.TestFrameworkInstrumentationCategories()
 
 
 def GetInstance():
