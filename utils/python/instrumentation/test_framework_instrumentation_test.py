@@ -75,6 +75,44 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         self.assertFalse(tfi.categories.Add(None, self.name))
         self.assertFalse(tfi.categories.Add('1a', self.name))
 
+    def testCheckEnded(self):
+        """Tests the CheckEnded method of TestFrameworkInstrumentationEvent"""
+        event = tfi.Begin(self.category, self.name)
+
+        # Verify initial condition
+        self.assertTrue(bool(tfie.event_stack))
+        self.assertEqual(event.status, 1)
+
+        event.CheckEnded()
+        # Check event status is Remove
+        self.assertEqual(event.status, 3)
+
+        # Check event is removed from stack
+        self.assertFalse(bool(tfie.event_stack))
+
+        # Check whether duplicate calls doesn't give error
+        event.CheckEnded()
+        self.assertEqual(event.status, 3)
+
+    def testRemove(self):
+        """Tests the Remove method of TestFrameworkInstrumentationEvent"""
+        event = tfi.Begin(self.category, self.name)
+
+        # Verify initial condition
+        self.assertTrue(bool(tfie.event_stack))
+        self.assertEqual(event.status, 1)
+
+        event.Remove()
+        # Check event status is Remove
+        self.assertEqual(event.status, 3)
+
+        # Check event is removed from stack
+        self.assertFalse(bool(tfie.event_stack))
+
+        # Check whether duplicate calls doesn't give error
+        event.Remove()
+        self.assertEqual(event.status, 3)
+
 
 if __name__ == "__main__":
     unittest.main()
