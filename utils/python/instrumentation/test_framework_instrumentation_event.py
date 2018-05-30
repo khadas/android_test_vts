@@ -25,7 +25,10 @@ LOGGING_TEMPLATE = LOGGING_PREFIX + ' {category}: {name} {status}'
 # Characters not allowed in provided event category or name
 # In event init method, these characters are joint by '|' as regex. Modifications to
 # the replacing logic be required if escape character is needed.
-ILLEGAL_CHARS = ':\t\r\n '
+ILLEGAL_CHARS = ':\t\r\n'
+
+# A list of Event objects: events that has began and not ended.
+event_stack = []
 
 
 class TestFrameworkInstrumentationEvent(object):
@@ -58,7 +61,7 @@ class TestFrameworkInstrumentationEvent(object):
         self.category = category
         self.name = name
 
-    def Match(self, category, name=''):
+    def Match(self, category, name):
         """Checks whether the given category and name matches this event."""
         return category == self.category and name == self.name
 
@@ -80,6 +83,8 @@ class TestFrameworkInstrumentationEvent(object):
                                               status='BEGIN'))
 
         self.status = 1
+        global event_stack
+        event_stack.append(self)
 
     def End(self):
         """Performs logging action for the end of this event."""
@@ -98,7 +103,8 @@ class TestFrameworkInstrumentationEvent(object):
                                               name=self.name,
                                               status='END'))
         self.status = 2
+        global event_stack
+        event_stack.remove(self)
 
     def __str__(self):
         return 'Event object: @%s #%s' % (self.category, self.name)
-
