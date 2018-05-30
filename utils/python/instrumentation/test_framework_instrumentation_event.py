@@ -43,16 +43,21 @@ class TestFrameworkInstrumentationEvent(object):
         status: int, 0 for not started, 1 for started, 2 for ended, 3 for removed.
         error: string, None if no error. Otherwise contains error messages such
                as duplicated Begin or End.
+        _enable_logging: bool or None. Whether to put the event in logging.
+                         Should be set to False when timing small pieces of code that could take
+                         very short time to run.
+                         If is None, global configuration will be used.
     """
     category = None
     name = None
     status = 0
     error = None
+    _enable_logging = False
     # TODO(yuexima): add on/off toggle param for logging.
 
     def __init__(self, category, name):
         if set(ILLEGAL_CHARS) & set(category + name):
-            logging.warn('TestFrameworkInstrumentation: illegal character detected in '
+            self.LogW('TestFrameworkInstrumentation: illegal character detected in '
                           'category or name string. Provided category: %s, name: %s. '
                           'Replacing them as "_"', category, name)
             category = re.sub('|'.join(ILLEGAL_CHARS), '_', category)
@@ -65,27 +70,38 @@ class TestFrameworkInstrumentationEvent(object):
         """Checks whether the given category and name matches this event."""
         return category == self.category and name == self.name
 
-    def Begin(self):
-        """Performs logging action for the beginning of this event."""
+    def Begin(self, enable_logging=None):
+        """Performs logging action for the beginning of this event.
+
+        Args:
+            enable_logging: bool or None. Whether to put the event in logging.
+                            Should be set to False when timing small pieces of code that could take
+                            very short time to run.
+                            If not specified or is None, global configuration will be used.
+                            This value can only be set in Begin method to make logging consistent.
+        """
+        if enable_logging is not None:
+            self._enable_logging = enable_logging
+
         if self.status == 1:
-            logging.error('TestFrameworkInstrumentation: event %s has already began. '
-                          'Skipping Begin.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has already began. '
+                      'Skipping Begin.', self)
             self.error = 'Tried to Begin but already began'
             return
         elif self.status == 2:
-            logging.error('TestFrameworkInstrumentation: event %s has already ended. '
-                          'Skipping Begin.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has already ended. '
+                      'Skipping Begin.', self)
             self.error = 'Tried to Begin but already ended'
             return
         elif self.status == 3:
-            logging.error('TestFrameworkInstrumentation: event %s has already been removed. '
-                          'Skipping Begin.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has already been removed. '
+                      'Skipping Begin.', self)
             self.error = 'Tried to Begin but already been removed'
             return
 
-        logging.debug(LOGGING_TEMPLATE.format(category=self.category,
-                                              name=self.name,
-                                              status='BEGIN'))
+        self.LogD(LOGGING_TEMPLATE.format(category=self.category,
+                                          name=self.name,
+                                          status='BEGIN'))
 
         self.status = 1
         global event_stack
@@ -94,24 +110,25 @@ class TestFrameworkInstrumentationEvent(object):
     def End(self):
         """Performs logging action for the end of this event."""
         if self.status == 0:
-            logging.error('TestFrameworkInstrumentation: event %s has not yet began. '
-                          'Skipping End.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has not yet began. '
+                      'Skipping End.', self)
             self.error = 'Tried to End but have not began'
             return
         elif self.status == 2:
-            logging.error('TestFrameworkInstrumentation: event %s has already ended. '
-                          'Skipping End.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has already ended. '
+                      'Skipping End.', self)
             self.error = 'Tried to End but already ended'
             return
         elif self.status == 3:
-            logging.error('TestFrameworkInstrumentation: event %s has already been removed. '
-                          'Skipping End.', self)
+            self.LogE('TestFrameworkInstrumentation: event %s has already been removed. '
+                      'Skipping End.', self)
             self.error = 'Tried to End but already been removed'
             return
 
-        logging.debug(LOGGING_TEMPLATE.format(category=self.category,
-                                              name=self.name,
-                                              status='END'))
+        self.LogD(LOGGING_TEMPLATE.format(category=self.category,
+                                          name=self.name,
+                                          status='END'))
+
         self.status = 2
         global event_stack
         event_stack.remove(self)
@@ -150,15 +167,35 @@ class TestFrameworkInstrumentationEvent(object):
         if self.status == 3:
             return
 
-        logging.debug(LOGGING_TEMPLATE.format(category=self.category,
-                                              name=self.name,
-                                              status='REMOVE') +
-                      ' | Reason: %s' % remove_reason)
+        self.LogD(LOGGING_TEMPLATE.format(category=self.category,
+                                          name=self.name,
+                                          status='REMOVE') +
+                  ' | Reason: %s' % remove_reason)
 
         self.error = remove_reason
         self.status = 3
         global event_stack
         event_stack.remove(self)
+
+    def LogD(self, *args):
+        """Wrapper function for logging.debug"""
+        self._Log(logging.debug, *args)
+
+    def LogI(self, *args):
+        """Wrapper function for logging.info"""
+        self._Log(logging.info, *args)
+
+    def LogW(self, *args):
+        """Wrapper function for logging.warn"""
+        self._Log(logging.warn, *args)
+
+    def LogE(self, *args):
+        """Wrapper function for logging.error"""
+        self._Log(logging.error, *args)
+
+    def _Log(self, log_func, *args):
+        if self._enable_logging != False:
+            log_func(*args)
 
     def __str__(self):
         return 'Event object: @%s #%s' % (self.category, self.name)

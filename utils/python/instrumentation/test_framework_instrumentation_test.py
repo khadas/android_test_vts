@@ -113,6 +113,34 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         event.Remove()
         self.assertEqual(event.status, 3)
 
+    def testEndAlreadyRemoved(self):
+        """Tests End command on already ended event."""
+        event = tfi.Begin(self.category, self.name, enable_logging=False)
+        reason = 'no reason'
+        event.Remove(reason)
+        self.assertEqual(event.status, 3)
+        self.assertEqual(event.error, reason)
+        event.End()
+        self.assertEqual(event.status, 3)
+        self.assertNotEqual(event.error, reason)
+
+    def testEnableLogging(self):
+        """Tests the enable_logging option."""
+        # Test not specified case
+        event = tfi.Begin(self.category, self.name)
+        self.assertFalse(event._enable_logging)
+        event.End()
+
+        # Test set to True case
+        event = tfi.Begin(self.category, self.name, enable_logging=True)
+        self.assertTrue(event._enable_logging)
+        event.End()
+
+        # Test set to False case
+        event = tfi.Begin(self.category, self.name, enable_logging=None)
+        self.assertFalse(event._enable_logging)
+        event.End()
+
 
 if __name__ == "__main__":
     unittest.main()
