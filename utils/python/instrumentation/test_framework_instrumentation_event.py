@@ -46,13 +46,18 @@ class TestFrameworkInstrumentationEvent(object):
         _enable_logging: bool or None. Whether to put the event in logging.
                          Should be set to False when timing small pieces of code that could take
                          very short time to run.
+                         This value should only be set once for log consistency.
                          If is None, global configuration will be used.
+        _disable_subevent_logging: bool, whether to disable logging for events created after this
+                                   event begins and before this event ends. This will overwrite
+                                   subevent's logging setting if set to True.
     """
     category = None
     name = None
     status = 0
     error = None
     _enable_logging = False
+    _disable_subevent_logging = False
     # TODO(yuexima): add on/off toggle param for logging.
 
     def __init__(self, category, name):
@@ -70,7 +75,7 @@ class TestFrameworkInstrumentationEvent(object):
         """Checks whether the given category and name matches this event."""
         return category == self.category and name == self.name
 
-    def Begin(self, enable_logging=None):
+    def Begin(self, enable_logging=None, disable_subevent_logging=False):
         """Performs logging action for the beginning of this event.
 
         Args:
@@ -79,9 +84,18 @@ class TestFrameworkInstrumentationEvent(object):
                             very short time to run.
                             If not specified or is None, global configuration will be used.
                             This value can only be set in Begin method to make logging consistent.
+            disable_subevent_logging: bool, whether to disable logging for events created after this
+                                      event begins and before this event ends. This will overwrite
+                                      subevent's logging setting if set to True.
         """
-        if enable_logging is not None:
-            self._enable_logging = enable_logging
+        global event_stack
+        if event_stack and event_stack[-1]._disable_subevent_logging:
+            self._enable_logging = False
+            self._disable_subevent_logging = True
+        else:
+            if enable_logging is not None:
+                self._enable_logging = enable_logging
+            self._disable_subevent_logging = disable_subevent_logging
 
         if self.status == 1:
             self.LogE('TestFrameworkInstrumentation: event %s has already began. '
@@ -104,7 +118,6 @@ class TestFrameworkInstrumentationEvent(object):
                                           status='BEGIN'))
 
         self.status = 1
-        global event_stack
         event_stack.append(self)
 
     def End(self):
