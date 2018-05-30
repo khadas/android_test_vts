@@ -214,4 +214,24 @@
     <option name="compatibility:exclude-filter" value="CtsAutoFillServiceTestCases android.autofillservice.cts.VirtualContainerActivityTest#testAutofillManuallyTwoDatasetsPickSecond" />
     <option name="compatibility:exclude-filter" value="CtsAutoFillServiceTestCases android.autofillservice.cts.VirtualContainerActivityTest#testAutofillTwoDatasets" />
 
+    <!-- b/80390042: CtsContentTestCases failure flaky -->
+    <option name="compatibility:exclude-filter" value="CtsContentTestCases android.content.cts.ContentProviderCursorWindowTest#testQuery" />
+    <option name="compatibility:exclude-filter" value="CtsContentTestCases android.content.res.cts.PrivateAttributeTest#testNoAttributesAfterLastPublicAttribute" />
+
+    <!-- b/80388296: CtsDevicePolicyManagerTestCases failure flaky -->
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testDisallowAutofill_allowed" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testPackageInstallUserRestrictions" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testPermissionAppUpdate" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testPermissionGrant" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testPermissionMixedPolicies" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testPermissionPolicy" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testSuspendPackage" />
+
+    <!-- b/80407835: CtsServicesHostTestCases failure flaky -->
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.KeyguardTests#testDialogShowWhenLockedActivity" />
+    <option name="compatibility:exclude-filter" value="CtsServicesHostTestCases android.server.cts.KeyguardTests#testTranslucentShowWhenLockedActivity" />
+
+    <!-- b/80388295: CtsAccessibilityServiceTestCases failure flaky -->
+    <option name="compatibility:exclude-filter" value="CtsAccessibilityServiceTestCases android.accessibilityservice.cts.AccessibilityGestureDispatchTest#testClickWhenMagnified_matchesActualTouch" />
+
 </configuration>
