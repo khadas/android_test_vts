@@ -28,7 +28,7 @@ class TestFrameworkInstrumentationCategories(object):
     TEST_CASE_TEARDOWN = 'Test case tearDown'
     DEVICE_SETUP = 'Device setUp'
     DEVICE_CLEANUP = 'Device cleanUp'
-    FAILED_TEST_CASE_TEARDOWN = 'Failed test case tearDown'
+    FAILED_TEST_CASE_PROCESSING = 'Failed test case processing'
     TEST_CASE_EXECUTION = 'Test case execution'
     RESULT_PROCESSING = 'Result processing'
     WAITING_FOR_DEVICE_RESPOND = 'Waiting for device respond'
