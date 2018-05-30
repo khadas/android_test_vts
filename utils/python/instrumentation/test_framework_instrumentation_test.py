@@ -67,6 +67,13 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         self.assertEqual(event.status, 2)
         self.assertIsNone(event.error)
 
+    def testCategories(self):
+        """Tests access to TestFrameworkInstrumentationCategories object"""
+        self.assertTrue(tfi.categories.Add(self.category, self.name))
+        self.assertFalse(tfi.categories.Add('', self.name))
+        self.assertFalse(tfi.categories.Add(None, self.name))
+        self.assertFalse(tfi.categories.Add('1a', self.name))
+
 
 if __name__ == "__main__":
     unittest.main()
