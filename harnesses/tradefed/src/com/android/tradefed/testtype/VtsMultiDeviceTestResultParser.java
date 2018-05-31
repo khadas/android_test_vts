@@ -376,6 +376,7 @@ public class VtsMultiDeviceTestResultParser {
                                recognized in TF, it is converted to FAIL. */
                             listener.testFailed(
                                     testIdentifier, details.isEmpty() ? UNKNOWN_ERROR : details);
+                            break;
                         case PASS :
                             listener.testEnded(testIdentifier, Collections.<String, String>emptyMap());
                             break;
