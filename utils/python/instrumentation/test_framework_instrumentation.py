@@ -45,8 +45,15 @@ def Begin(category, name=None):
 def End(category, name=None):
     """Marks the end of an event.
 
-    When category string is provided, it will be matched to an event in
-    internal event stack.
+    This function tries to find an event in internal event stack by calling FindEvent
+    method with the given category and name.
+
+    Will log error and return None if no match is found.
+
+    If multiple event with the same category and name are found, the last one will be used.
+
+    Use this function with caution if there are multiple events began with the same name and
+    category. It is highly recommended to call End() method from the Event object directly.
 
     Params:
         category: string, category of the event
@@ -70,6 +77,9 @@ def End(category, name=None):
 
 def FindEvent(category, name=None):
     """Finds an existing event that has started given the names.
+
+    Use this function with caution if there are multiple events began with the same name and
+    category. It is highly recommended to call End() method from the Event object directly.
 
     Params:
         category: string, category of the event
