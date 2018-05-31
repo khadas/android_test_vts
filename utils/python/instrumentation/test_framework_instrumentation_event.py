@@ -40,7 +40,7 @@ class TestFrameworkInstrumentationEvent(object):
         name: string, a string to mark specific name of an event for human
               reading. Final performance analysis will mostly focus on category
               granularity instead of name granularity.
-        status: int, 0 for not started, 1 for started, 2 for ended.
+        status: int, 0 for not started, 1 for started, 2 for ended, 3 for removed.
         error: string, None if no error. Otherwise contains error messages such
                as duplicated Begin or End.
     """
@@ -77,6 +77,11 @@ class TestFrameworkInstrumentationEvent(object):
                           'Skipping Begin.', self)
             self.error = 'Tried to Begin but already ended'
             return
+        elif self.status == 3:
+            logging.error('TestFrameworkInstrumentation: event %s has already been removed. '
+                          'Skipping Begin.', self)
+            self.error = 'Tried to Begin but already been removed'
+            return
 
         logging.debug(LOGGING_TEMPLATE.format(category=self.category,
                                               name=self.name,
@@ -88,21 +93,70 @@ class TestFrameworkInstrumentationEvent(object):
 
     def End(self):
         """Performs logging action for the end of this event."""
-        if self.status > 1:
+        if self.status == 0:
+            logging.error('TestFrameworkInstrumentation: event %s has not yet began. '
+                          'Skipping End.', self)
+            self.error = 'Tried to End but have not began'
+            return
+        elif self.status == 2:
             logging.error('TestFrameworkInstrumentation: event %s has already ended. '
                           'Skipping End.', self)
             self.error = 'Tried to End but already ended'
             return
-        elif self.status < 1:
-            logging.error('TestFrameworkInstrumentation: event %s has not yet began. '
+        elif self.status == 3:
+            logging.error('TestFrameworkInstrumentation: event %s has already been removed. '
                           'Skipping End.', self)
-            self.error = 'Tried to End but have not began'
+            self.error = 'Tried to End but already been removed'
             return
 
         logging.debug(LOGGING_TEMPLATE.format(category=self.category,
                                               name=self.name,
                                               status='END'))
         self.status = 2
+        global event_stack
+        event_stack.remove(self)
+
+    def CheckEnded(self, remove_reason=''):
+        """Checks whether this event has ended and remove it if not.
+
+        This method is designed to be used in a try-catch exception block, where it is
+        not obvious whether the End() method has ever been called. In such case, if
+        End() has not been called, it usually means exception has happened and the event
+        should either be removed or automatically ended. Here we choose remove because
+        this method could be called in the finally block in a try-catch block, and there
+        could be a lot of noise before reaching the finally block.
+
+        This method does not support being called directly in test_framework_instrumentation
+        module with category and name lookup, because there can be events with same names.
+
+        Calling this method multiple times on the same Event object is ok.
+
+        Args:
+            remove_reason: string, reason to remove to be recorded when the event was
+                           not properly ended. Default is empty string.
+        """
+        if self.status < 2:
+            self.Remove(remove_reason)
+
+    def Remove(self, remove_reason=''):
+        """Removes this event from reports and record the reason.
+
+        Calling this method multiple times on the same Event object is ok.
+
+        Args:
+            remove_reason: string, reason to remove to be recorded when the event was
+                           not properly ended. Default is empty string.
+        """
+        if self.status == 3:
+            return
+
+        logging.debug(LOGGING_TEMPLATE.format(category=self.category,
+                                              name=self.name,
+                                              status='REMOVE') +
+                      ' | Reason: %s' % remove_reason)
+
+        self.error = remove_reason
+        self.status = 3
         global event_stack
         event_stack.remove(self)
 
