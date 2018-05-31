@@ -17,9 +17,7 @@
 
     <option name="dynamic-sharding" value="false" />
     <device_recovery class="com.android.tradefed.device.WaitDeviceRecovery" />
-    <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider">
-        <option name="url-suite-name-override" value="CTS" />
-    </build_provider>
+    <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
     <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:rerun-from-file:true" />
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:fallback-to-serial-rerun:false" />
@@ -33,7 +31,6 @@
     <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
 
     <include name="cts-preconditions" />
-    <option name="dynamic-config-pusher:dynamic-resource-name" value="vts-tradefed" />
     <include name="cts-system-checkers" />
     <include name="cts-known-failures" />
 
