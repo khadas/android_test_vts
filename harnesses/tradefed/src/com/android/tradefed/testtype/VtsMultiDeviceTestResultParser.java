@@ -422,6 +422,7 @@ public class VtsMultiDeviceTestResultParser {
                                     TestDescription, details.isEmpty() ? UNKNOWN_ERROR : details);
                             // Always call testEnded at the end of the test case
                             listener.testEnded(TestDescription, Collections.emptyMap());
+                            break;
                         case PASS :
                             listener.testEnded(
                                     TestDescription, Collections.<String, String>emptyMap());
