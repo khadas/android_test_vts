@@ -472,12 +472,15 @@ class BaseTestClass(object):
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
 
-        if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
-                   False):
+        if (self.getUserParam(
+                keys.ConfigKeys.IKEY_STOP_NATIVE_SERVERS, default_value=False)
+                or self.getUserParam(
+                    keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                    default_value=False)):
             logging.debug("Restarts all properly configured native servers.")
             for device in self.android_devices:
                 try:
-                    self.device.setProp(SYSPROP_VTS_NATIVE_SERVER, "0")
+                    device.setProp(SYSPROP_VTS_NATIVE_SERVER, "0")
                 except adb.AdbError:
                     logging.error("failed to restore native servers for device "
                                   + device.serial)
