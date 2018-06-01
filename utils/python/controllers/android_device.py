@@ -63,6 +63,12 @@ MAX_AGENT_CONNECT_RETRIES = 10
 # System property for product sku.
 PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 
+# the name of a system property which tells whether to stop properly configured
+# native servers where properly configured means a server's init.rc is
+# configured to stop when that property's value is 1.
+SYSPROP_VTS_NATIVE_SERVER = "vts.native_server.on"
+# Maximum time in seconds to wait for process/system status change.
+WAIT_TIMEOUT_SEC = 120
 
 class AndroidDeviceError(signals.ControllerError):
     pass
@@ -850,7 +856,7 @@ class AndroidDevice(object):
 
     def startFramework(self,
                        wait_for_completion=True,
-                       wait_for_completion_timeout=120):
+                       wait_for_completion_timeout=WAIT_TIMEOUT_SEC):
         """Starts Android framework.
 
         By default this function will wait for framework starting process to
@@ -869,8 +875,11 @@ class AndroidDevice(object):
         self.adb.shell("start")
 
         if wait_for_completion:
-            return self.waitForFrameworkStartComplete(wait_for_completion_timeout)
+            if not self.waitForFrameworkStartComplete(
+                    wait_for_completion_timeout):
+                return False
 
+        logging.info("Android framework started.")
         return True
 
     def start(self):
@@ -879,6 +888,7 @@ class AndroidDevice(object):
         Returns:
             bool, True if framework start success. False otherwise.
         """
+        self.startNativeServer()
         return self.startFramework()
 
     def stopFramework(self):
@@ -897,8 +907,9 @@ class AndroidDevice(object):
         Method will block until stop is complete.
         """
         self.stopFramework()
+        self.stopNativeServer()
 
-    def waitForFrameworkStartComplete(self, timeout_secs=120):
+    def waitForFrameworkStartComplete(self, timeout_secs=WAIT_TIMEOUT_SEC):
         """Wait for Android framework to complete starting.
 
         Args:
@@ -911,13 +922,66 @@ class AndroidDevice(object):
         start = time.time()
 
         # First, wait for boot completion and checks
-        self.waitForBootCompletion(timeout_secs)
+        if not self.waitForBootCompletion(timeout_secs):
+            return False
 
         while not self.isFrameworkRunning(check_boot_completion=False):
             if time.time() - start >= timeout_secs:
                 logging.error("Timeout while waiting for framework to start.")
                 return False
             time.sleep(1)
+        return True
+
+    def startNativeServer(self):
+        """Starts all native servers."""
+        self.setProp(SYSPROP_VTS_NATIVE_SERVER, "0")
+
+    def stopNativeServer(self):
+        """Stops all native servers."""
+        self.setProp(SYSPROP_VTS_NATIVE_SERVER, "1")
+
+    def isProcessRunning(self, process_name):
+        """Check whether the given process is running.
+        Args:
+            process_name: string, name of the process.
+
+        Returns:
+            bool, True if the process is running.
+
+        Raises:
+            AndroidDeviceError, if ps command failed.
+        """
+        logging.debug("Checking process %s", process_name)
+        cmd_result = self.adb.shell.Execute("ps -A")
+        if cmd_result[const.EXIT_CODE][0] != 0:
+            logging.error("ps command failed (exit code: %s",
+                          cmd_result[const.EXIT_CODE][0])
+            raise AndroidDeviceError("ps command failed.")
+        if (process_name not in cmd_result[const.STDOUT][0]):
+            logging.debug("Process %s not running", process_name)
+            return False
+        return True
+
+    def waitForProcessStop(self, process_names, timeout_secs=WAIT_TIMEOUT_SEC):
+        """Wait until the given process is stopped or timeout.
+
+        Args:
+            process_names: list of string, name of the processes.
+            timeout_secs: int, timeout in secs.
+
+        Returns:
+            bool, True if the process stopped within timeout.
+        """
+        if process_names:
+            for process_name in process_names:
+                start = time.time()
+                while self.isProcessRunning(process_name):
+                    if time.time() - start >= timeout_secs:
+                        logging.error(
+                            "Timeout while waiting for process %s stop.",
+                            process_name)
+                        return False
+                    time.sleep(1)
 
         return True
 

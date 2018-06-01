@@ -337,6 +337,10 @@ class BaseTestClass(object):
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
+        for device in self.android_devices:
+            if not precondition_utils.CheckFeaturePrecondition(self, device):
+                self.skipAllTests("Precondition feature check fail.")
+
         return self.setUpClass()
 
     def setUpClass(self):
