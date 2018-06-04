@@ -24,22 +24,25 @@ from vts.utils.python.instrumentation import test_framework_instrumentation_even
 categories = tfic.TestFrameworkInstrumentationCategories()
 
 
-def Begin(category, name):
+def Begin(category, name=None):
     """Marks the beginning of an event.
 
     Params:
         category: string, category of the event
-        name: string, name of the event
+        name: string, name of the event. If None or empty, the value category will be copied.
 
     Returns:
         Event object representing the event
     """
+    if not name:
+        name = category
+
     event = tfie.TestFrameworkInstrumentationEvent(category, name)
     event.Begin()
     return event
 
 
-def End(category, name):
+def End(category, name=None):
     """Marks the end of an event.
 
     When category string is provided, it will be matched to an event in
@@ -47,11 +50,14 @@ def End(category, name):
 
     Params:
         category: string, category of the event
-        name: string, name of the event
+        name: string, name of the event. If None or empty, the value category will be copied.
 
     Returns:
         Event object representing the event. None if cannot find an active matching event
     """
+    if not name:
+        name = category
+
     event = FindEvent(category, name)
     if not event:
         logging.error('Event with category %s and name %s either does not '
@@ -62,16 +68,19 @@ def End(category, name):
     return event
 
 
-def FindEvent(category, name):
+def FindEvent(category, name=None):
     """Finds an existing event that has started given the names.
 
     Params:
         category: string, category of the event
-        name: string, name of the event, default is empty string.
+        name: string, name of the event. If None or empty, the value category will be copied.
 
     Returns:
         TestFrameworkInstrumentationEvent object if found; None otherwise.
     """
+    if not name:
+        name = category
+
     for event in reversed(tfie.event_stack):
         if event.Match(category, name):
             return event
