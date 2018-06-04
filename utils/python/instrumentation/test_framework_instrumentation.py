@@ -24,12 +24,19 @@ from vts.utils.python.instrumentation import test_framework_instrumentation_even
 categories = tfic.TestFrameworkInstrumentationCategories()
 
 
-def Begin(category, name=None):
+def Begin(category, name=None, enable_logging=None, disable_subevent_logging=False):
     """Marks the beginning of an event.
 
     Params:
         category: string, category of the event
         name: string, name of the event. If None or empty, the value category will be copied.
+        enable_logging: bool or None. Whether to put the event in logging.
+                        Should be set to False when timing small pieces of code that could take
+                        very short time to run.
+                        If not specified or is None, global configuration will be used.
+        disable_subevent_logging: bool, whether to disable logging for events created after this
+                                  event begins and before this event ends. This will overwrite
+                                  subevent's logging setting if set to True.
 
     Returns:
         Event object representing the event
@@ -38,7 +45,7 @@ def Begin(category, name=None):
         name = category
 
     event = tfie.TestFrameworkInstrumentationEvent(category, name)
-    event.Begin()
+    event.Begin(enable_logging=enable_logging, disable_subevent_logging=disable_subevent_logging)
     return event
 
 
