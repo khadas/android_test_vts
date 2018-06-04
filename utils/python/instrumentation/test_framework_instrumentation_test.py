@@ -33,6 +33,7 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
     def testEventName(self):
         """Tests whether illegal characters are being recognized and replaced."""
         for name in tfie.ILLEGAL_CHARS:
+            # TODO(yuexima): disable error logging for this test case
             event = tfie.TestFrameworkInstrumentationEvent(name, '')
             self.assertNotEqual(event.category, name, 'name %s should not be accepted.' % name)
 
@@ -46,10 +47,12 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
 
     def testEndAlreadyEnded(self):
         """Tests End command on already ended event."""
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.category, self.name, enable_logging=False)
         event.End()
+        self.assertEqual(event.status, 2)
         self.assertIsNone(event.error)
         event.End()
+        self.assertEqual(event.status, 2)
         self.assertTrue(event.error)
 
     def testEndMatch(self):
@@ -112,6 +115,87 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         # Check whether duplicate calls doesn't give error
         event.Remove()
         self.assertEqual(event.status, 3)
+
+    def testEndAlreadyRemoved(self):
+        """Tests End command on already ended event."""
+        event = tfi.Begin(self.category, self.name, enable_logging=False)
+        reason = 'no reason'
+        event.Remove(reason)
+        self.assertEqual(event.status, 3)
+        self.assertEqual(event.error, reason)
+        event.End()
+        self.assertEqual(event.status, 3)
+        self.assertNotEqual(event.error, reason)
+
+    def testEnableLogging(self):
+        """Tests the enable_logging option."""
+        # Test not specified case
+        event = tfi.Begin(self.category, self.name)
+        self.assertFalse(event._enable_logging)
+        event.End()
+
+        # Test set to True case
+        event = tfi.Begin(self.category, self.name, enable_logging=True)
+        self.assertTrue(event._enable_logging)
+        event.End()
+
+        # Test set to False case
+        event = tfi.Begin(self.category, self.name, enable_logging=None)
+        self.assertFalse(event._enable_logging)
+        event.End()
+
+    def testDisableSubEventLoggingOverwriting(self):
+        """Tests the disable_subevent_logging option's overwriting feature.
+
+        Tests whether the top event's disable_subevent_logging overwrite
+        subevent's disable_subevent_logging option only when it is set to True
+        """
+        # Test top event disable_subevent_logging option not specified case
+        event = tfi.Begin(self.category, self.name)
+        self.assertFalse(event._disable_subevent_logging)
+        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        self.assertTrue(event_sub._disable_subevent_logging)
+        event_sub.End()
+        event.End()
+
+        # Test top event disable_subevent_logging option set to False
+        event = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        self.assertFalse(event._disable_subevent_logging)
+        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        self.assertTrue(event_sub._disable_subevent_logging)
+        event_sub.End()
+        event.End()
+
+        # Test top event disable_subevent_logging option set to True
+        event = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        self.assertTrue(event._disable_subevent_logging)
+        event_sub1 = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        self.assertTrue(event_sub1._disable_subevent_logging)
+        event_sub1.End()
+        event_sub2 = tfi.Begin(self.category, self.name)
+        self.assertTrue(event_sub2._disable_subevent_logging)
+        event_sub2.End()
+        event.End()
+
+    def testDisableSubEventLoggingNesting(self):
+        """Tests the disable_subevent_logging option.
+
+        Tests whether the top event's disable_subevent_logging can overwrite
+        subevents of deeper levels when set to True.
+        """
+        # Test top event disable_subevent_logging option set to True
+        event = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        self.assertTrue(event._disable_subevent_logging)
+        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        self.assertTrue(event_sub._disable_subevent_logging)
+        event_sub_sub1 = tfi.Begin(self.category, self.name)
+        self.assertTrue(event_sub_sub1._disable_subevent_logging)
+        event_sub_sub1.End()
+        event_sub_sub2 = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        self.assertTrue(event_sub_sub2._disable_subevent_logging)
+        event_sub_sub2.End()
+        event_sub.End()
+        event.End()
 
 
 if __name__ == "__main__":
