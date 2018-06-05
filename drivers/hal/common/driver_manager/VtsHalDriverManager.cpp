@@ -42,28 +42,32 @@ VtsHalDriverManager::VtsHalDriverManager(const string& spec_dir,
 
 DriverId VtsHalDriverManager::LoadTargetComponent(
     const string& dll_file_name, const string& spec_lib_file_path,
-    const int component_class, const int component_type, const float version,
+    const int component_class, const int component_type,
+    const int version_major, const int version_minor,
     const string& package_name, const string& component_name,
     const string& hw_binder_service_name) {
   LOG(DEBUG) << "dll_file_name = " << dll_file_name;
   ComponentSpecificationMessage spec_message;
   if (!hal_driver_loader_.FindComponentSpecification(
-          component_class, package_name, version, component_name,
-          component_type, &spec_message)) {
+          component_class, package_name, version_major, version_minor,
+          component_name, component_type, &spec_message)) {
     LOG(ERROR) << "Failed to load specification for component: "
-               << GetComponentDebugMsg(component_class, component_type,
-                                       std::to_string(version), package_name,
-                                       component_name);
+               << GetComponentDebugMsg(
+                      component_class, component_type,
+                      GetVersionString(version_major, version_minor),
+                      package_name, component_name);
     return kInvalidDriverId;
   }
   LOG(INFO) << "Loaded specification for component: "
-            << GetComponentDebugMsg(component_class, component_type,
-                                    std::to_string(version), package_name,
-                                    component_name);
+            << GetComponentDebugMsg(
+                   component_class, component_type,
+                   GetVersionString(version_major, version_minor), package_name,
+                   component_name);
 
   string driver_lib_path = "";
   if (component_class == HAL_HIDL) {
-    driver_lib_path = GetHidlHalDriverLibName(package_name, version);
+    driver_lib_path =
+        GetHidlHalDriverLibName(package_name, version_major, version_minor);
   } else {
     driver_lib_path = spec_lib_file_path;
   }
@@ -76,15 +80,17 @@ DriverId VtsHalDriverManager::LoadTargetComponent(
                                                 false, dll_file_name));
   if (!hal_driver) {
     LOG(ERROR) << "Can't load driver for component: "
-               << GetComponentDebugMsg(component_class, component_type,
-                                       std::to_string(version), package_name,
-                                       component_name);
+               << GetComponentDebugMsg(
+                      component_class, component_type,
+                      GetVersionString(version_major, version_minor),
+                      package_name, component_name);
     return kInvalidDriverId;
   } else {
     LOG(INFO) << "Loaded driver for component: "
-              << GetComponentDebugMsg(component_class, component_type,
-                                      std::to_string(version), package_name,
-                                      component_name);
+              << GetComponentDebugMsg(
+                     component_class, component_type,
+                     GetVersionString(version_major, version_minor),
+                     package_name, component_name);
   }
   // TODO (zhuoyao): get hidl_proxy_pointer for loaded hidl hal dirver.
   uint64_t interface_pt = 0;
@@ -98,7 +104,9 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
     LOG(ERROR) << "can't find driver for component: "
                << GetComponentDebugMsg(
                       call_msg->component_class(), call_msg->component_type(),
-                      call_msg->component_type_version(),
+                      GetVersionString(
+                          call_msg->component_type_version_major(),
+                          call_msg->component_type_version_minor()),
                       call_msg->package_name(), call_msg->component_name());
     return kErrorString;
   }
@@ -115,8 +123,12 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
       if (arg->type() == TYPE_HIDL_INTERFACE) {
         string type_name = arg->predefined_type();
         ComponentSpecificationMessage spec_msg;
+        string version_str = GetVersion(type_name);
+        int version_major = GetVersionMajor(version_str, true);
+        int version_minor = GetVersionMinor(version_str, true);
         spec_msg.set_package(GetPackageName(type_name));
-        spec_msg.set_component_type_version(GetVersion(type_name));
+        spec_msg.set_component_type_version_major(version_major);
+        spec_msg.set_component_type_version_minor(version_minor);
         spec_msg.set_component_name(GetComponentName(type_name));
         DriverId driver_id = FindDriverIdInternal(spec_msg);
         // If found a registered driver for the interface, set the pointer in
@@ -152,19 +164,21 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
           uint64_t interface_pt = return_val->hidl_interface_pointer();
           std::unique_ptr<DriverBase> driver;
           ComponentSpecificationMessage spec_msg;
+          string version_str = GetVersion(type_name);
+          int version_major = GetVersionMajor(version_str, true);
+          int version_minor = GetVersionMinor(version_str, true);
           string package_name = GetPackageName(type_name);
-          float version = GetVersion(type_name);
           string component_name = GetComponentName(type_name);
           if (!hal_driver_loader_.FindComponentSpecification(
-                  HAL_HIDL, package_name, version, component_name, 0,
-                  &spec_msg)) {
+                  HAL_HIDL, package_name, version_major, version_minor,
+                  component_name, 0, &spec_msg)) {
             LOG(ERROR)
                 << "Failed to load specification for generated interface :"
                 << type_name;
             return kErrorString;
           }
-          string driver_lib_path =
-              GetHidlHalDriverLibName(package_name, version);
+          string driver_lib_path = GetHidlHalDriverLibName(
+              package_name, version_major, version_minor);
           // TODO(zhuoyao): figure out a way to get the service_name.
           string hw_binder_service_name = "default";
           driver.reset(hal_driver_loader_.GetDriver(driver_lib_path, spec_msg,
@@ -205,7 +219,9 @@ string VtsHalDriverManager::GetAttribute(FunctionCallMessage* call_msg) {
     LOG(ERROR) << "Can't find driver for component: "
                << GetComponentDebugMsg(
                       call_msg->component_class(), call_msg->component_type(),
-                      call_msg->component_type_version(),
+                      GetVersionString(
+                          call_msg->component_type_version_major(),
+                          call_msg->component_type_version_minor()),
                       call_msg->package_name(), call_msg->component_name());
     return kErrorString;
   }
@@ -272,30 +288,34 @@ uint64_t VtsHalDriverManager::GetDriverPointerById(const DriverId id) {
 }
 
 DriverId VtsHalDriverManager::GetDriverIdForHidlHalInterface(
-    const string& package_name, const float version,
-    const string& interface_name, const string& hal_service_name) {
+    const string& package_name, const int version_major,
+    const int version_minor, const string& interface_name,
+    const string& hal_service_name) {
   ComponentSpecificationMessage spec_msg;
   spec_msg.set_component_class(HAL_HIDL);
   spec_msg.set_package(package_name);
-  spec_msg.set_component_type_version(version);
+  spec_msg.set_component_type_version_major(version_major);
+  spec_msg.set_component_type_version_minor(version_minor);
   spec_msg.set_component_name(interface_name);
   DriverId driver_id = FindDriverIdInternal(spec_msg);
   if (driver_id == kInvalidDriverId) {
-    string driver_lib_path = GetHidlHalDriverLibName(package_name, version);
-    driver_id =
-        LoadTargetComponent("", driver_lib_path, HAL_HIDL, 0, version,
-                            package_name, interface_name, hal_service_name);
+    string driver_lib_path =
+        GetHidlHalDriverLibName(package_name, version_major, version_minor);
+    driver_id = LoadTargetComponent("", driver_lib_path, HAL_HIDL, 0,
+                                    version_major, version_minor, package_name,
+                                    interface_name, hal_service_name);
   }
   return driver_id;
 }
 
 bool VtsHalDriverManager::FindComponentSpecification(
-    const int component_class, const int component_type, const float version,
+    const int component_class, const int component_type,
+    const int version_major, const int version_minor,
     const string& package_name, const string& component_name,
     ComponentSpecificationMessage* spec_msg) {
   return hal_driver_loader_.FindComponentSpecification(
-      component_class, package_name, version, component_name, component_type,
-      spec_msg);
+      component_class, package_name, version_major, version_minor,
+      component_name, component_type, spec_msg);
 }
 
 ComponentSpecificationMessage*
@@ -319,7 +339,8 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
       LOG(ERROR) << "Package name is required but not specified.";
       return kInvalidDriverId;
     }
-    if (!spec_msg.has_component_type_version()) {
+    if (!spec_msg.has_component_type_version_major() ||
+        !spec_msg.has_component_type_version_minor()) {
       LOG(ERROR) << "Package version is required but not specified.";
       return kInvalidDriverId;
     }
@@ -341,10 +362,14 @@ DriverId VtsHalDriverManager::FindDriverIdInternal(
       }
     }
     // If version is specified, match version.
-    if (spec_msg.has_component_type_version()) {
-      if (!cur_spec_msg.has_component_type_version() ||
-          cur_spec_msg.component_type_version() !=
-              spec_msg.component_type_version()) {
+    if (spec_msg.has_component_type_version_major() &&
+        spec_msg.has_component_type_version_minor()) {
+      if (!cur_spec_msg.has_component_type_version_major() ||
+          !cur_spec_msg.has_component_type_version_minor() ||
+          cur_spec_msg.component_type_version_major() !=
+              spec_msg.component_type_version_major() ||
+          cur_spec_msg.component_type_version_minor() !=
+              spec_msg.component_type_version_minor()) {
         continue;
       }
     }
@@ -382,16 +407,19 @@ DriverBase* VtsHalDriverManager::GetDriverWithCallMsg(
     ComponentSpecificationMessage spec_msg;
     spec_msg.set_component_class(call_msg.component_class());
     spec_msg.set_package(call_msg.package_name());
-    spec_msg.set_component_type_version(
-        stof(call_msg.component_type_version()));
+    spec_msg.set_component_type_version_major(
+        call_msg.component_type_version_major());
+    spec_msg.set_component_type_version_minor(
+        call_msg.component_type_version_minor());
     spec_msg.set_component_name(call_msg.component_name());
     driver_id = FindDriverIdInternal(spec_msg);
   }
 
   if (driver_id == kInvalidDriverId) {
     LOG(ERROR) << "Can't find driver ID for package: "
-               << call_msg.package_name()
-               << " version: " << call_msg.component_type_version();
+               << call_msg.package_name() << " version: "
+               << GetVersionString(call_msg.component_type_version_major(),
+                                   call_msg.component_type_version_minor());
     return nullptr;
   } else {
     return GetDriverById(driver_id);
