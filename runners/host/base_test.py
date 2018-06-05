@@ -393,6 +393,9 @@ class BaseTestClass(object):
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
+        for device in self.android_devices:
+            if not precondition_utils.CheckFeaturePrecondition(self, device):
+                self.skipAllTests("Precondition feature check fail.")
 
         if (self.getUserParam(keys.ConfigKeys.IKEY_DISABLE_FRAMEWORK,
                               default_value=False) or
@@ -407,34 +410,12 @@ class BaseTestClass(object):
             for device in self.android_devices:
                 device.start()
 
-        if (self.getUserParam(keys.ConfigKeys.IKEY_STOP_NATIVE_SERVERS,
-                              default_value=False) or
-            # @Deprecated Legacy configuration option name.
-            self.getUserParam(keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
-                              default_value=False)):
-            for device in self.android_devices:
-                logging.debug("Stops all properly configured native servers "
-                              "on device %s", device.serial)
-                results = device.setProp(SYSPROP_VTS_NATIVE_SERVER, "1")
-                native_server_process_names = self.getUserParam(
+        # Wait for the native service process to stop.
+        native_server_process_names = self.getUserParam(
                     keys.ConfigKeys.IKEY_NATIVE_SERVER_PROCESS_NAME,
                     default_value=[])
-                if native_server_process_names:
-                    for native_server_process_name in native_server_process_names:
-                        while True:
-                            logging.info("Checking process %s",
-                                         native_server_process_name)
-                            cmd_result = device.shell.Execute("ps -A")
-                            if cmd_result[const.EXIT_CODE][0] != 0:
-                                logging.error("ps command failed (exit code: %s",
-                                              cmd_result[const.EXIT_CODE][0])
-                                break
-                            if (native_server_process_name not in cmd_result[
-                                    const.STDOUT][0]):
-                                logging.debug("Process %s not running",
-                                             native_server_process_name)
-                                break
-                            time.sleep(1)
+        for device in self.android_devices:
+            device.waitForProcessStop(native_server_process_names)
 
         return self.setUpClass()
 
@@ -471,19 +452,6 @@ class BaseTestClass(object):
 
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
-
-        if (self.getUserParam(
-                keys.ConfigKeys.IKEY_STOP_NATIVE_SERVERS, default_value=False)
-                or self.getUserParam(
-                    keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
-                    default_value=False)):
-            logging.debug("Restarts all properly configured native servers.")
-            for device in self.android_devices:
-                try:
-                    device.setProp(SYSPROP_VTS_NATIVE_SERVER, "0")
-                except adb.AdbError:
-                    logging.error("failed to restore native servers for device "
-                                  + device.serial)
 
         return ret
 
