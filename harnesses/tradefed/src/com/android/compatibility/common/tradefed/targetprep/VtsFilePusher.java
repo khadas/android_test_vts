@@ -190,6 +190,7 @@ public class VtsFilePusher extends PushFilePreparer implements IAbiReceiver {
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
+        device.enableAdbRoot();
         mInvocationHelper = new VtsCompatibilityInvocationHelper();
         pushFileGroups(device, buildInfo);
 
@@ -204,6 +205,7 @@ public class VtsFilePusher extends PushFilePreparer implements IAbiReceiver {
             throws DeviceNotAvailableException {
 
         if (!(e instanceof DeviceNotAvailableException) && mPushGroupCleanup && mFilesPushed != null) {
+            device.enableAdbRoot();
             if (mPushGroupRemount) {
                 device.remountSystemWritable();
             }
