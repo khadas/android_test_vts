@@ -37,19 +37,19 @@ bool VtsDriverSocketClient::Exit() {
   return true;
 }
 
-int32_t VtsDriverSocketClient::LoadHal(const string& file_path,
-                                       int target_class, int target_type,
-                                       float target_version,
-                                       const string& target_package,
-                                       const string& target_component_name,
-                                       const string& hw_binder_service_name,
-                                       const string& module_name) {
+int32_t VtsDriverSocketClient::LoadHal(
+    const string& file_path, int target_class, int target_type,
+    int target_version_major, int target_version_minor,
+    const string& target_package, const string& target_component_name,
+    const string& hw_binder_service_name, const string& module_name) {
   VtsDriverControlCommandMessage command_message;
+
   command_message.set_command_type(LOAD_HAL);
   command_message.set_file_path(file_path);
   command_message.set_target_class(target_class);
   command_message.set_target_type(target_type);
-  command_message.set_target_version(target_version);
+  command_message.set_target_version_major(target_version_major);
+  command_message.set_target_version_minor(target_version_minor);
   command_message.set_target_package(target_package);
   command_message.set_target_component_name(target_component_name);
   command_message.set_module_name(module_name);
@@ -84,15 +84,18 @@ string VtsDriverSocketClient::GetFunctions() {
 string VtsDriverSocketClient::ReadSpecification(const string& component_name,
                                                 int target_class,
                                                 int target_type,
-                                                float target_version,
+                                                int target_version_major,
+                                                int target_version_minor,
                                                 const string& target_package) {
   VtsDriverControlCommandMessage command_message;
+
   command_message.set_command_type(
       VTS_DRIVER_COMMAND_READ_SPECIFICATION);
   command_message.set_module_name(component_name);
   command_message.set_target_class(target_class);
   command_message.set_target_type(target_type);
-  command_message.set_target_version(target_version);
+  command_message.set_target_version_major(target_version_major);
+  command_message.set_target_version_minor(target_version_minor);
   command_message.set_target_package(target_package);
 
   if (!VtsSocketSendMessage(command_message)) {
