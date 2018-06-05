@@ -42,13 +42,21 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
 
   // Load a Hal driver with the given info (package, version etc.),
   // returns the loaded hal driver id if scuccess, -1 otherwise.
+  // Args:
+  //   target_version_major: int, hal major version, e.g. 1.0 -> 1.
+  //   target_version_minor: int, hal minor version, e.g. 1.0 -> 0.
   int32_t LoadHal(const string& path, int target_class, int target_type,
-                  float target_version, const string& target_package,
+                  int target_version_major, int target_version_minor,
+                  const string& target_package,
                   const string& target_component_name,
                   const string& hw_binder_service_name,
                   const string& module_name);
+  // Args:
+  //   target_version_major: int, hal major version, e.g. 1.0 -> 1.
+  //   target_version_minor: int, hal minor version, e.g. 1.0 -> 0.
   string ReadSpecification(const string& name, int target_class,
-                           int target_type, float target_version,
+                           int target_type, int target_version_major,
+                           int target_version_minor,
                            const string& target_package);
   string Call(const string& arg);
   string GetAttribute(const string& arg);

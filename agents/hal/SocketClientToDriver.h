@@ -40,8 +40,12 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   bool Exit();
 
   // Sends a LOAD_HAL request.
+  // Args:
+  //   target_version_major: int, hal major version
+  //   target_version_minor: int, hal minor version
   int32_t LoadHal(const string& file_path, int target_class, int target_type,
-                  float target_version, const string& target_package,
+                  int target_version_major, int target_version_minor,
+                  const string& target_package,
                   const string& target_component_name,
                   const string& hw_binder_service_name,
                   const string& module_name);
@@ -50,8 +54,12 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   string GetFunctions();
 
   // Sends a VTS_DRIVER_COMMAND_READ_SPECIFICATION request.
+  // Args:
+  //   target_version_major: int, hal major version
+  //   target_version_minor: int, hal minor version
   string ReadSpecification(const string& component_name, int target_class,
-                           int target_type, float target_version,
+                           int target_type, int target_version_major,
+                           int target_version_minor,
                            const string& target_package);
 
   // Sends a CALL_FUNCTION request.
