@@ -59,7 +59,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
                                         caller_uid)
         self._callback_server = callback_server
 
-    def InitHalDriver(self, target_type, target_version, target_package,
+    def InitHalDriver(self, target_type, target_version_major,
+                      target_version_minor, target_package,
                       target_component_name, hw_binder_service_name,
                       handler_name, bits):
         """Initiates the driver for a HIDL HAL on the target device and loads
@@ -67,7 +68,10 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
 
         Args:
             target_type: string, the target type name (e.g., light, camera).
-            target_version: float, the target component version (e.g., 1.0).
+            target_version_major:
+              int, the target component major version (e.g., 1.0 -> 1).
+            target_version_minor:
+              int, the target component minor version (e.g., 1.0 -> 0).
             target_package: . separated string (e.g., a.b.c) to denote the
                             package name of target component.
             target_component_name: string, the target componet name (e.g., INfc).
@@ -85,7 +89,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             ASysCtrlMsg.VTS_DRIVER_TYPE_HAL_HIDL,
             "hal_hidl",
             target_type,
-            target_version,
+            target_version_major,
+            target_version_minor,
             target_package=target_package,
             target_component_name=target_component_name,
             handler_name=handler_name,
@@ -141,7 +146,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
         msg = self._if_spec_msg
         specification = self._client.ReadSpecification(
             interface_name, msg.component_class, msg.component_type,
-            msg.component_type_version, msg.package)
+            msg.component_type_version_major, msg.component_type_version_minor,
+            msg.package)
         logging.debug("specification: %s", specification)
         interface = getattr(specification, INTERFACE, None)
         apis = getattr(interface, API, [])
@@ -153,8 +159,9 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
 
                 def dummy(*args):
                     """Dummy implementation for any callback function."""
-                    logging.debug("Entering dummy implementation"
-                                  " for callback function: %s", api.name)
+                    logging.debug(
+                        "Entering dummy implementation"
+                        " for callback function: %s", api.name)
                     for arg_index in range(len(args)):
                         logging.debug("arg%s: %s", arg_index, args[arg_index])
 
@@ -166,7 +173,11 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
         return var_msg
 
     def GetHidlTypeInterface(self, interface_name):
-        """Gets a HalMirror for HIDL HAL types specification. """
+        """Gets a HalMirror for HIDL HAL types specification.
+
+        Args:
+            interface_name: string, the name of a target interface to read.
+        """
         return self.GetHalMirrorForInterface(interface_name)
 
     def GetHalMirrorForInterface(self, interface_name, driver_id=None):
@@ -186,7 +197,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             interface_name,
             msg.component_class,
             msg.component_type,
-            msg.component_type_version,
+            msg.component_type_version_major,
+            msg.component_type_version_minor,
             msg.package,
             recursive=True)
 
