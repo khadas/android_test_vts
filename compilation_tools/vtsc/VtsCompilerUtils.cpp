@@ -574,17 +574,16 @@ string GetPackageNamespaceToken(const ComponentSpecificationMessage& message) {
 
 string GetVersion(const ComponentSpecificationMessage& message,
                   bool for_macro) {
-  return GetVersionString(message.component_type_version(), for_macro);
+  return GetVersionString(message.component_type_version_major(),
+                          message.component_type_version_minor(), for_macro);
 }
 
 int GetMajorVersion(const ComponentSpecificationMessage& message) {
-  string version = GetVersion(message);
-  return stoi(version.substr(0, version.find('.')));
+  return message.component_type_version_major();
 }
 
 int GetMinorVersion(const ComponentSpecificationMessage& message) {
-  string version = GetVersion(message);
-  return stoi(version.substr(version.find('.') + 1));
+  return message.component_type_version_minor();
 }
 
 string GetComponentBaseName(const ComponentSpecificationMessage& message) {
@@ -615,7 +614,8 @@ string GetComponentName(const ComponentSpecificationMessage& message) {
 
 FQName GetFQName(const ComponentSpecificationMessage& message) {
   return FQName(message.package(),
-                GetVersionString(message.component_type_version()),
+                GetVersionString(message.component_type_version_major(),
+                                 message.component_type_version_minor()),
                 GetComponentName(message));
 }
 
