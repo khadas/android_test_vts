@@ -87,7 +87,8 @@ class MirrorObject(object):
                            driver_type,
                            target_class,
                            target_type,
-                           target_version,
+                           target_version_major,
+                           target_version_minor,
                            target_package="",
                            target_filename=None,
                            target_component_name=None,
@@ -102,7 +103,10 @@ class MirrorObject(object):
             driver_type: type of
             target_class: string, the target class name (e.g., lib).
             target_type: string, the target type name (e.g., light, camera).
-            target_version: float, the target component version (e.g., 1.0).
+            target_version_major:
+              int, the target component major version (e.g. 1.0 -> 1).
+            target_version_minor:
+              int, the target component minor version (e.g. 1.0 -> 0).
             target_basepaths: list of strings, the paths to look for target
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             target_package: . separated string (e.g., a.b.c) to denote the
@@ -111,7 +115,6 @@ class MirrorObject(object):
             handler_name: string, the name of the handler. target_type is used
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
-
         Raises:
             errors.ComponentLoadingError is raised when error occurs trying to
             create a MirrorObject.
@@ -136,7 +139,8 @@ class MirrorObject(object):
             file_path=target_filename,
             target_class=target_class_id,
             target_type=target_type_id,
-            target_version=target_version,
+            target_version_major=target_version_major,
+            target_version_minor=target_version_minor,
             target_package=target_package,
             target_component_name=target_component_name,
             hw_binder_service_name=hw_binder_service_name)
