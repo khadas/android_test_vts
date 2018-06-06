@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import copy
 import logging
 
 from vts.runners.host import base_test
@@ -59,6 +59,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
             self.coverage.InitializeDeviceCoverage(self.dut)
             if self.TEST_HAL_SERVICES:
                 self.coverage.SetHalNames(self.TEST_HAL_SERVICES)
+                self.coverage.SetCoverageReportFilePrefix(self.test_module_name + self.abi_bitness)
 
         # Enable profiling.
         if self.profiling.enabled:
@@ -138,7 +139,7 @@ class HalHidlHostTest(param_test.ParamTestClass):
         Returns:
             A list of instance combination for registered HAL.
         """
-        registered_services = self.TEST_HAL_SERVICES
+        registered_services = copy.copy(self.TEST_HAL_SERVICES)
         service_instances = {}
 
         for service in registered_services:
