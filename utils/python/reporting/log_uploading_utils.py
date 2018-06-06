@@ -18,6 +18,7 @@ import os
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import keys
+from vts.utils.python.gcs import gcs_utils
 from vts.utils.python.reporting import report_file_utils
 from vts.utils.python.systrace import systrace_controller
 from vts.utils.python.web import feature_utils
@@ -30,6 +31,7 @@ class LogUploadingFeature(feature_utils.Feature):
         enabled: boolean, True if log uploading is enabled, False otherwise
         web: (optional) WebFeature, object storing web feature util for test run
         _report_file_util: report file util object for uploading logs
+        _report_file_util_gcs: report file util object for uploading logs to gcs
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_LOG_UPLOADING
@@ -71,6 +73,20 @@ class LogUploadingFeature(feature_utils.Feature):
             url_prefix=getattr(
                 self, keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX, None))
 
+        gcs_destination_dir = "gs://vts-log"
+        gcs_url_prefix = "https://storage.cloud.google.com/vts-log/"
+
+        self._report_file_util_gcs = report_file_utils.ReportFileUtil(
+            flatten_source_dir=True,
+            use_destination_date_dir=getattr(
+                self, keys.ConfigKeys.IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY,
+                True),
+            destination_dir=gcs_destination_dir,
+            url_prefix=gcs_url_prefix)
+
+        self._gcs_utils = gcs_utils.GcsUtils(user_params)
+        self._gcs_utils.GetGcloudAuth()
+
     def UploadLogs(self, prefix=None):
         """Save test logs and add log urls to report message"""
         if not self.enabled:
@@ -87,10 +103,18 @@ class LogUploadingFeature(feature_utils.Feature):
         urls = self._report_file_util.SaveReportsFromDirectory(
             source_dir=logging.log_path,
             file_name_prefix=file_name_prefix,
-            file_path_filters=path_filter)
+            file_path_filters=path_filter,
+            use_gcs=False)
+
+        gcs_urls = self._report_file_util_gcs.SaveReportsFromDirectory(
+            source_dir=logging.log_path,
+            file_name_prefix=file_name_prefix,
+            file_path_filters=path_filter,
+            use_gcs=True)
 
         if urls is None:
             logging.error('Error happened when saving logs.')
 
         if urls and self.web and self.web.enabled:
             self.web.AddLogUrls(urls)
+            self.web.AddLogGcsUrls(gcs_urls)

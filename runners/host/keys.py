@@ -132,6 +132,7 @@ class ConfigKeys(object):
     IKEY_LOG_UPLOADING_PATH = "log_uploading_path"
     IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY = "log_uploading_use_date_directory"
     IKEY_LOG_UPLOADING_URL_PREFIX = "log_uploading_url_prefix"
+    IKEY_LOG_UPLOADING_GCS_BUCKET_NAME = "log_uploading_gcs_bucket_name"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.

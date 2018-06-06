@@ -19,6 +19,11 @@ import logging
 import os
 import shutil
 
+from vts.utils.python.common import cmd_utils
+from vts.utils.python.gcs import gcs_utils
+
+PYTHON_OUTPUT_ADDITIONAL = 'additional_output_files'
+
 
 def NotNoneStr(item):
     '''Convert a veriable to string only if it is not None'''
@@ -122,6 +127,27 @@ class ReportFileUtil(object):
                 logging.exception(e)
         shutil.copy(src_path, dest_path)
 
+    def _PushReportFileGcs(self, src_path, dest_path):
+        """Upload args src file to the bucket in Google Cloud Storage.
+
+        Args:
+            src_path: string, source path of report file
+            dest_path: string, destination path of report file
+        """
+        src_path = NotNoneStr(src_path)
+        dest_path = NotNoneStr(dest_path)
+
+        gsutil_path = gcs_utils.GcsUtils.GetGsutilPath()
+        if not gsutil_path:
+            logging.error("Please check gsutil is installed and on your PATH")
+            return False
+
+        copy_command = "{} cp {} {}".format(gsutil_path, src_path, dest_path)
+        _, stderr, err_code = cmd_utils.ExecuteOneShellCommand(copy_command)
+
+        if err_code:
+            logging.error(stderr)
+
     def SaveReport(self, src_path, new_file_name=None, file_name_prefix=None):
         '''Save report file to destination.
 
@@ -156,7 +182,8 @@ class ReportFileUtil(object):
     def SaveReportsFromDirectory(self,
                                  source_dir=None,
                                  file_name_prefix=None,
-                                 file_path_filters=None):
+                                 file_path_filters=None,
+                                 use_gcs=True):
         '''Save report files from source directory to destination.
 
         Args:
@@ -194,9 +221,21 @@ class ReportFileUtil(object):
                         continue
 
                     #TODO(yuexima): handle duplicated destination file names
-                    self._PushReportFile(src_path, dest_path)
+                    self._PushReportFileGcs(
+                        src_path,
+                        dest_path) if use_gcs else self._PushReportFile(
+                            src_path, dest_path)
                     urls.append(url)
 
             return urls
         except IOError as e:
             logging.exception(e)
+
+    def GetAdditioanlOutputDirectory(self):
+        '''Returns a directory to store additional output files.
+
+        Files under this directory will be included in log output folder.
+        All files will be uploaded to VTS dashboard if enabled;
+        Only files with recognized file types will be included in TradeFed output.
+        '''
+        return os.path.join(logging.log_path, PYTHON_OUTPUT_ADDITIONAL)
