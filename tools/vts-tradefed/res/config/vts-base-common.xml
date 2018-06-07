@@ -22,6 +22,7 @@
     <option name="log-level-display" value="WARN" />
   </logger>
   <option name="compatibility:skip-all-system-status-check" value="true" />
+  <option name="enable-root" value="true" />
   <option name="max-log-size" value="200" />
   <object type="vts-vendor-config" class="com.android.tradefed.util.VtsVendorConfigFileUtil" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
