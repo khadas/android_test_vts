@@ -61,7 +61,7 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
     static final String SCRIPT_PATH = "/data/local/tmp/vts_adapter.sh";
     // Command to list the registered instance for the given hal@version.
     static final String LIST_HAL_CMD =
-            "lshal -ti --neat | grep -e '^hwbinder' | awk '{print $2}' | grep %s";
+            "lshal -ti --neat 2>/dev/null | grep -e '^hwbinder' | awk '{print $2}' | grep %s";
 
     @Option(name = "adapter-binary-name",
             description = "Adapter binary file name (typically under /data/nativetest*/)")
@@ -92,7 +92,9 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
      */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
-            throws TargetSetupError, BuildError, DeviceNotAvailableException, RuntimeException {
+            throws TargetSetupError, BuildError, DeviceNotAvailableException {
+        // adb root.
+        device.enableAdbRoot();
         String bitness =
                 (mAbi != null) ? ((mAbi.getBitness() == "32") ? "" : mAbi.getBitness()) : "";
         try {
@@ -109,11 +111,11 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
         for (String line : out.split("\n")) {
             if (!line.isEmpty()) {
                 if (!line.contains(HAL_INTERFACE_SEP)) {
-                    throw new RuntimeException("HAL instance with wrong format.");
+                    throw new TargetSetupError("HAL instance with wrong format.");
                 }
                 String interfaceInstance = line.split(HAL_INTERFACE_SEP, 2)[1];
                 if (!interfaceInstance.contains(HAL_INSTANCE_SEP)) {
-                    throw new RuntimeException("HAL instance with wrong format.");
+                    throw new TargetSetupError("HAL instance with wrong format.");
                 }
                 String interfaceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[0];
                 String instanceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[1];
