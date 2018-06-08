@@ -15,10 +15,9 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.ITestRunListener;
-import com.android.ddmlib.testrunner.TestIdentifier;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 import com.android.tradefed.util.FileUtil;
-import com.android.tradefed.util.VtsFileUtil;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
@@ -60,14 +59,14 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testFailed(test1, "TIMEOUT");
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
@@ -89,13 +88,13 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
@@ -117,7 +116,7 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(null, 0);
         mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 
@@ -153,7 +152,7 @@ public class VtsMultiDeviceTestResultParserTest {
         BufferedReader br = null;
         String output = null;
         try {
-            File resFile = VtsFileUtil.saveResourceFile(
+            File resFile = FileUtil.saveResourceFile(
                     this.getClass().getResourceAsStream(filePath), tmpDir, "test-file");
             br = new BufferedReader(new FileReader(resFile));
             StringBuilder sb = new StringBuilder();

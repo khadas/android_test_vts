@@ -55,6 +55,7 @@ _LOGCAT_FILE_PREFIX = "logcat_"
 _LOGCAT_FILE_EXTENSION = ".txt"
 _ANDROID_DEVICES = '_android_devices'
 _REASON_TO_SKIP_ALL_TESTS = '_reason_to_skip_all_tests'
+_SETUP_RETRY_NUMBER = 5
 # the name of a system property which tells whether to stop properly configured
 # native servers where properly configured means a server's init.rc is
 # configured to stop when that property's value is 1.
@@ -208,6 +209,10 @@ class BaseTestClass(object):
 
     def __exit__(self, *args):
         self._exec_func(self.cleanUp)
+
+    def unpack_userparams(self, req_param_names=[], opt_param_names=[], **kwargs):
+        """Wrapper for test cases using ACTS runner API."""
+        return self.getUserParams(req_param_names, opt_param_names, **kwargs)
 
     def getUserParams(self, req_param_names=[], opt_param_names=[], **kwargs):
         """Unpacks user defined parameters in test config into individual
@@ -1016,16 +1021,26 @@ class BaseTestClass(object):
         Returns:
             The test results object of this class.
         """
-        # Setup for the class.
-        try:
-            if self._setUpClass() is False:
-                raise signals.TestFailure(
-                    "Failed to setup %s." % self.test_module_name)
-        except Exception as e:
-            logging.exception("Failed to setup %s.", self.test_module_name)
-            self.results.failClass(self.test_module_name, e)
-            self._exec_func(self._tearDownClass)
-            return self.results
+        # Setup for the class with retry.
+        for i in xrange(_SETUP_RETRY_NUMBER):
+            try:
+                if self._setUpClass() is False:
+                    raise signals.TestFailure(
+                        "Failed to setup %s." % self.test_module_name)
+                else:
+                    break
+            except Exception as e:
+                logging.exception("Failed to setup %s.", self.test_module_name)
+                if i + 1 == _SETUP_RETRY_NUMBER:
+                    self.results.failClass(self.test_module_name, e)
+                    self._exec_func(self._tearDownClass)
+                    return self.results
+                else:
+                    # restart services before retry setup.
+                    for device in self.android_devices:
+                        logging.info("restarting service on device %s", device.serial)
+                        device.stopServices()
+                        device.startServices()
 
         # Run tests in order.
         try:

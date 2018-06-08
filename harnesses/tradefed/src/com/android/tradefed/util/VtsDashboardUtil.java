@@ -102,13 +102,20 @@ public class VtsDashboardUtil {
      * @param message, DashboardPostMessage that keeps the result to upload.
      */
     public void Upload(DashboardPostMessage message) {
-        message.setAccessToken(GetToken());
+        String token = GetToken();
+        if (token == null) {
+            CLog.d("Token is not available for DashboardPostMessage.");
+            return;
+        }
+        message.setAccessToken(token);
         try {
             String messageFilePath = WriteToTempFile(
                     Base64.getEncoder().encodeToString(message.toByteArray()).getBytes());
             Upload(messageFilePath);
         } catch (IOException e) {
             CLog.e("Couldn't write a proto message to a temp file.");
+        } catch (NullPointerException e) {
+            CLog.e("Couldn't serialize proto message.");
         }
     }
 

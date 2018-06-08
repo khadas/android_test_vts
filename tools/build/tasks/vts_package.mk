@@ -76,7 +76,10 @@ target_spec_modules := \
 target_spec_copy_pairs :=
 $(foreach m,$(target_spec_modules),\
   $(eval my_spec_copy_dir :=\
-    spec/hardware/interfaces/$(word 2,$(subst android/hardware/, ,$(dir $(m))))/vts)\
+    spec/$(word 2,$(subst android/frameworks/, frameworks/hardware/interfaces/,\
+                    $(subst android/hardware/, hardware/interfaces/,\
+                      $(subst android/hidl/, system/libhidl/transport/,\
+                        $(subst android/system/, system/hardware/interfaces/,$(dir $(m)))))))/vts)\
   $(eval my_spec_copy_file := $(notdir $(m)))\
   $(eval my_spec_copy_dest := $(my_spec_copy_dir)/$(my_spec_copy_file))\
   $(eval target_spec_copy_pairs += $(m):$(VTS_TESTCASES_OUT)/$(my_spec_copy_dest)))
@@ -195,6 +198,9 @@ audio_test_res_copy_pairs := \
   $(foreach f,$(audio_test_res_files),\
     hardware/interfaces/audio/$(f):$(VTS_TESTCASES_OUT)/DATA/hardware/interfaces/audio/$(f))
 
+vndk_test_res_copy_pairs := \
+  development/vndk/tools/definition-tool/datasets/eligible-list-28.csv:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/eligible-list.csv \
+
 kernel_rootdir_test_rc_files := \
   $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
 
@@ -249,6 +255,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(nbu_p2p_apk_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
+  $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(target_script_copy_pairs)) \

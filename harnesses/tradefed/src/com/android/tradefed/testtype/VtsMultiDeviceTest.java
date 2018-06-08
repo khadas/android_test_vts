@@ -16,8 +16,8 @@
 
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -25,8 +25,9 @@ import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
-import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.result.ITestInvocationListener;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 import com.android.tradefed.targetprep.VtsCoveragePreparer;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer;
 import com.android.tradefed.util.CommandResult;
@@ -38,12 +39,10 @@ import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
-import com.android.tradefed.testtype.IAbi;
-import com.android.tradefed.testtype.IInvocationContextReceiver;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.util.Collection;
@@ -60,6 +59,7 @@ import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A Test that runs a vts multi device test package (part of Vendor Test Suite,
@@ -569,8 +569,8 @@ public class VtsMultiDeviceTest
         }
     }
 
-    /*
-     * Conforms filters using a {@link com.android.ddmlib.testrunner.TestIdentifier} format
+    /**
+     * Conforms filters using a {@link TestDescription} format
      * to be recognized by the GTest executable.
      */
     private String cleanFilter(String filter) {
@@ -1173,7 +1173,8 @@ public class VtsMultiDeviceTest
      * @throws RuntimeException
      * @throws IllegalArgumentException
      */
-    private void doRunTest(ITestRunListener listener) throws RuntimeException, IllegalArgumentException {
+    private void doRunTest(ITestLifeCycleReceiver listener)
+            throws RuntimeException, IllegalArgumentException {
         CLog.d("Device serial number: " + mDevice.getSerialNumber());
 
         setTestCaseDataDir();

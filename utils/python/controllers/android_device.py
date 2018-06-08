@@ -16,10 +16,12 @@
 from builtins import str
 from builtins import open
 
+import gzip
 import logging
 import os
 import socket
 import subprocess
+import tempfile
 import threading
 import time
 import traceback
@@ -532,6 +534,20 @@ class AndroidDevice(object):
         return self.getProp("ro.vndk.version")
 
     @property
+    def vndk_lite(self):
+        """Checks whether the vendor partition requests lite VNDK
+        enforcement.
+
+        Returns:
+            bool, True for lite vndk enforcement.
+        """
+        vndk_lite_str = self.getProp("ro.vndk.lite")
+        if vndk_lite_str is None:
+            logging.debug('ro.vndk.lite: %s' % vndk_lite_str)
+            return False
+        return vndk_lite_str.lower() == "true"
+
+    @property
     def cpu_abi(self):
         """CPU ABI (Application Binary Interface) of the device."""
         out = self.getProp("ro.product.cpu.abi")
@@ -637,6 +653,51 @@ class AndroidDevice(object):
         """The SIM operator of the device.
         """
         return self.getProp('gsm.operator.alpha')
+
+    def getKernelConfig(self, config_name):
+        """Gets kernel config from the device.
+
+        Args:
+            config_name: A string, the name of the configuration.
+
+        Returns:
+            "y" or "m" if the config is set.
+            "" if the config is not set.
+            None if fails to read config.
+        """
+        line_prefix = config_name + "="
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            config_path = temp_file.name
+        try:
+            logging.debug("Pull config.gz to %s", config_path)
+            self.adb.pull("/proc/config.gz", config_path)
+            with gzip.GzipFile(config_path, "rb") as config_file:
+                for line in config_file:
+                    if line.strip().startswith(line_prefix):
+                        logging.debug("Found config: %s", line)
+                        return line.strip()[len(line_prefix):]
+            logging.debug("%s is not set.", config_name)
+            return ""
+        except (adb.AdbError, IOError) as e:
+            logging.exception("Cannot read kernel config.", e)
+            return None
+        finally:
+            os.remove(config_path)
+
+    def getBinderBitness(self):
+        """Returns the value of BINDER_IPC_32BIT in kernel config.
+
+        Returns:
+            32 or 64, binder bitness of the device.
+            None if fails to read config.
+        """
+        config_value = self.getKernelConfig("CONFIG_ANDROID_BINDER_IPC_32BIT")
+        if config_value is None:
+            return None
+        elif config_value:
+            return 32
+        else:
+            return 64
 
     def loadConfig(self, config):
         """Add attributes to the AndroidDevice object based on json config.

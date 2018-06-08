@@ -31,4 +31,11 @@
   <option name="compatibility:exclude-filter" value="SecurityPoCKernelTest" />
   <option name="compatibility:exclude-filter" value="VtsSecuritySelinuxPolicyHost" />
 
+  <!-- VtsTrebleVintfTest is deprecated, run VtsTrebleVendorVintfTest instead -->
+  <option name="compatibility:exclude-filter" value="VtsTrebleVintfTest" />
+  <option name="compatibility:exclude-filter" value="VtsTrebleVintfTestOMr1" />
+
+  <!-- Tests for libraries not on GSI -->
+  <option name="compatibility:exclude-filter" value="VtsVndkHidlBufferpoolV1_0Target" />
+
 </configuration>
