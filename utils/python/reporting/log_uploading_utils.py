@@ -38,6 +38,7 @@ class LogUploadingFeature(feature_utils.Feature):
     _REQUIRED_PARAMS = [
         keys.ConfigKeys.IKEY_ANDROID_DEVICE,
         keys.ConfigKeys.IKEY_LOG_UPLOADING_PATH,
+        keys.ConfigKeys.IKEY_LOG_UPLOADING_GCS_BUCKET_NAME
     ]
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.KEY_TESTBED_NAME,
@@ -73,8 +74,10 @@ class LogUploadingFeature(feature_utils.Feature):
             url_prefix=getattr(
                 self, keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX, None))
 
-        gcs_destination_dir = "gs://vts-log"
-        gcs_url_prefix = "https://storage.cloud.google.com/vts-log/"
+        gcs_bucket_name = getattr(
+            self, keys.ConfigKeys.IKEY_LOG_UPLOADING_GCS_BUCKET_NAME)
+        gcs_destination_dir = "gs://" + gcs_bucket_name
+        gcs_url_prefix = "https://storage.cloud.google.com/" + gcs_bucket_name + "/"
 
         self._report_file_util_gcs = report_file_utils.ReportFileUtil(
             flatten_source_dir=True,
