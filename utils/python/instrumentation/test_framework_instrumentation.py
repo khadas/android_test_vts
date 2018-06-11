@@ -23,13 +23,15 @@ from vts.utils.python.instrumentation import test_framework_instrumentation_even
 # global category listing
 categories = tfic.TestFrameworkInstrumentationCategories()
 
+DEFAULT_CATEGORY = 'Misc'
 
-def Begin(category, name=None, enable_logging=None, disable_subevent_logging=False):
+
+def Begin(name, category=DEFAULT_CATEGORY, enable_logging=None, disable_subevent_logging=False):
     """Marks the beginning of an event.
 
     Params:
-        category: string, category of the event
-        name: string, name of the event. If None or empty, the value category will be copied.
+        name: string, name of the event.
+        category: string, category of the event. Default category will be used if not specified.
         enable_logging: bool or None. Whether to put the event in logging.
                         Should be set to False when timing small pieces of code that could take
                         very short time to run.
@@ -41,15 +43,12 @@ def Begin(category, name=None, enable_logging=None, disable_subevent_logging=Fal
     Returns:
         Event object representing the event
     """
-    if not name:
-        name = category
-
-    event = tfie.TestFrameworkInstrumentationEvent(category, name)
+    event = tfie.TestFrameworkInstrumentationEvent(name, category)
     event.Begin(enable_logging=enable_logging, disable_subevent_logging=disable_subevent_logging)
     return event
 
 
-def End(category, name=None):
+def End(name, category=DEFAULT_CATEGORY):
     """Marks the end of an event.
 
     This function tries to find an event in internal event stack by calling FindEvent
@@ -63,43 +62,37 @@ def End(category, name=None):
     category. It is highly recommended to call End() method from the Event object directly.
 
     Params:
-        category: string, category of the event
-        name: string, name of the event. If None or empty, the value category will be copied.
+        name: string, name of the event.
+        category: string, category of the event. Default category will be used if not specified.
 
     Returns:
         Event object representing the event. None if cannot find an active matching event
     """
-    if not name:
-        name = category
-
-    event = FindEvent(category, name)
+    event = FindEvent(name, category)
     if not event:
         logging.error('Event with category %s and name %s either does not '
-                      'exists or has already ended. Skipping...', category, name)
+                      'exists or has already ended. Skipping...', name, category)
         return None
 
     event.End()
     return event
 
 
-def FindEvent(category, name=None):
+def FindEvent(name, category=DEFAULT_CATEGORY):
     """Finds an existing event that has started given the names.
 
     Use this function with caution if there are multiple events began with the same name and
     category. It is highly recommended to call End() method from the Event object directly.
 
     Params:
-        category: string, category of the event
-        name: string, name of the event. If None or empty, the value category will be copied.
+        name: string, name of the event.
+        category: string, category of the event. Default category will be used if not specified.
 
     Returns:
         TestFrameworkInstrumentationEvent object if found; None otherwise.
     """
-    if not name:
-        name = category
-
     for event in reversed(tfie.event_stack):
-        if event.Match(category, name):
+        if event.Match(name, category):
             return event
 
     return None
