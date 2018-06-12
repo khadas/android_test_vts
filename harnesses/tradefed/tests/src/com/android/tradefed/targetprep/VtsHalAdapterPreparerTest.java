@@ -211,15 +211,9 @@ public final class VtsHalAdapterPreparerTest {
     @Test
     public void testOnTearDownRestoreFailed() throws Exception {
         mCmdUtil.mCmdSuccess = false;
-        try {
-            mPreparer.setCmdUtil(mCmdUtil);
-            mPreparer.addCommand("one");
-            mPreparer.tearDown(mDevice, mBuildInfo, null);
-        } catch (AssertionError | DeviceNotAvailableException e) {
-            assertEquals("HAL restore failed.", e.getMessage());
-            return;
-        }
-        fail();
+        mPreparer.setCmdUtil(mCmdUtil);
+        mPreparer.addCommand("one");
+        mPreparer.tearDown(mDevice, mBuildInfo, null);
     }
 
     /**
