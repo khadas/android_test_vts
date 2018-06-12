@@ -15,6 +15,7 @@
 
 
 import logging
+import time
 
 from vts.utils.python.instrumentation import test_framework_instrumentation_categories as tfic
 from vts.utils.python.instrumentation import test_framework_instrumentation_event as tfie
@@ -22,6 +23,7 @@ from vts.utils.python.instrumentation import test_framework_instrumentation_even
 
 # global category listing
 categories = tfic.TestFrameworkInstrumentationCategories()
+counts = {}
 
 DEFAULT_CATEGORY = 'Misc'
 
@@ -96,3 +98,20 @@ def FindEvent(name, category=DEFAULT_CATEGORY):
             return event
 
     return None
+
+
+def Count(name, category=DEFAULT_CATEGORY):
+    """Counts the occurrence of an event.
+
+    Events will be mapped using name and category as key.
+
+    Params:
+        name: string, name of the event.
+        category: string, category of the event. Default category will be used if not specified.
+    """
+    name, category = tfie.NormalizeNameCategory(name, category)
+    # TODO(yuexima): give warning when there's illegal char, but only once for each combination.'
+    if (name, category) not in counts:
+        counts[(name, category)] = [time.clock()]
+    else:
+        counts[name, category].append(time.clock())

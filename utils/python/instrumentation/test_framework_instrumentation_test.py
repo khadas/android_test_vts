@@ -197,6 +197,14 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         event_sub.End()
         event.End()
 
+    def testCount(self):
+        """Tests the count API."""
+        tfi.Count(self.name, self.category)
+        tfi.Count(self.name, self.category)
+        self.assertEqual(len(tfi.counts), 1)
+        self.assertEqual(len(tfi.counts[self.name, self.category]), 2)
+        tfi.Count(self.name)
+        self.assertEqual(len(tfi.counts), 2)
 
 if __name__ == "__main__":
     unittest.main()

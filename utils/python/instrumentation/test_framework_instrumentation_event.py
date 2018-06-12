@@ -31,6 +31,25 @@ ILLEGAL_CHARS = ':\t\r\n'
 event_stack = []
 
 
+def NormalizeNameCategory(name, category):
+    """Replaces illegal characters in name and category.
+
+    Illegal characters defined in ILLEGAL_CHARS will be replaced with '_'.
+
+    Args:
+        name: string
+        category: string
+
+    Returns:
+        a tuple (string, string), name and category
+    """
+    if set(ILLEGAL_CHARS) & set(category + name):
+        category = re.sub('|'.join(ILLEGAL_CHARS), '_', category)
+        name = re.sub('|'.join(ILLEGAL_CHARS), '_', name)
+
+    return name, category
+
+
 class TestFrameworkInstrumentationEvent(object):
     """An object that represents an event.
 
@@ -61,15 +80,12 @@ class TestFrameworkInstrumentationEvent(object):
     # TODO(yuexima): add on/off toggle param for logging.
 
     def __init__(self, name, category):
-        if set(ILLEGAL_CHARS) & set(category + name):
+        self.name, self.category = NormalizeNameCategory(name, category)
+
+        if (name, category) != (self.name, self.category):
             self.LogW('TestFrameworkInstrumentation: illegal character detected in '
                           'category or name string. Provided name: %s, category: %s. '
                           'Replacing them as "_"', name, category)
-            category = re.sub('|'.join(ILLEGAL_CHARS), '_', category)
-            name = re.sub('|'.join(ILLEGAL_CHARS), '_', name)
-
-        self.category = category
-        self.name = name
 
     def Match(self, name, category):
         """Checks whether the given category and name matches this event."""
