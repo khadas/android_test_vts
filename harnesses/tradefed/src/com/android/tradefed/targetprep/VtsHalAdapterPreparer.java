@@ -32,8 +32,6 @@ import com.android.tradefed.testtype.IAbiReceiver;
 import com.android.tradefed.util.CmdUtil;
 import com.android.tradefed.util.FileUtil;
 
-import org.junit.Assert;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -155,10 +153,10 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
             // stops adapter(s)
             String command = String.format("setprop %s %s", ADAPTER_SYSPROP, "true");
             mCmdUtil = mCmdUtil != null ? mCmdUtil : new CmdUtil();
-            Assert.assertTrue("HAL restore failed.",
-                    mCmdUtil.retry(device, command, String.format(LIST_HAL_CMD, mPackageName),
-                            mCheckNonEmpty, mCommands.size() + mCmdUtil.MAX_RETRY_COUNT));
-
+            if (!mCmdUtil.retry(device, command, String.format(LIST_HAL_CMD, mPackageName),
+                        mCheckNonEmpty, mCommands.size() + mCmdUtil.MAX_RETRY_COUNT)) {
+                CLog.e("HAL restore failed.");
+            }
             // TODO: cleanup the pushed adapter files.
             mCmdUtil.restartFramework(device);
         }
