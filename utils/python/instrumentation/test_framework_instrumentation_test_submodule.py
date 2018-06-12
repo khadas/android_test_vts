@@ -19,6 +19,6 @@ from vts.utils.python.instrumentation import test_framework_instrumentation as t
 class TestFrameworkInstrumentationTestSubmodule(object):
     """Unit test submodule for test_framework_instrumentation module"""
 
-    def End(self, category, name):
+    def End(self, name, category):
         """Use End command on an event started from other module given category and name ."""
-        tfi.End(category, name)
+        tfi.End(name, category)

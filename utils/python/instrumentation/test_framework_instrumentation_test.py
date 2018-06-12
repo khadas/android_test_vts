@@ -35,19 +35,19 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         for name in tfie.ILLEGAL_CHARS:
             # TODO(yuexima): disable error logging for this test case
             event = tfie.TestFrameworkInstrumentationEvent(name, '')
-            self.assertNotEqual(event.category, name, 'name %s should not be accepted.' % name)
+            self.assertNotEqual(event.name, name, 'name %s should not be accepted.' % name)
 
     def testEventMatch(self):
         """Tests whether Event object can match with a category and name."""
         category = '1'
         name = '2'
-        event = tfie.TestFrameworkInstrumentationEvent(category, name)
-        self.assertTrue(event.Match(category, name))
-        self.assertFalse(event.Match(category, '3'))
+        event = tfie.TestFrameworkInstrumentationEvent(name, category)
+        self.assertTrue(event.Match(name, category))
+        self.assertFalse(event.Match('3', category))
 
     def testEndAlreadyEnded(self):
         """Tests End command on already ended event."""
-        event = tfi.Begin(self.category, self.name, enable_logging=False)
+        event = tfi.Begin(self.name, self.category, enable_logging=False)
         event.End()
         self.assertEqual(event.status, 2)
         self.assertIsNone(event.error)
@@ -57,30 +57,30 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
 
     def testEndMatch(self):
         """Tests End command with name matching."""
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
         self.assertEqual(event.status, 1)
-        tfi.End(self.category, self.name)
+        tfi.End(self.name, self.category)
         self.assertEqual(event.status, 2)
         self.assertIsNone(event.error)
 
     def testEndFromOtherModule(self):
         """Tests the use of End command from another module."""
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
         self.assertEqual(event.status, 1)
-        tfits.TestFrameworkInstrumentationTestSubmodule().End(self.category, self.name)
+        tfits.TestFrameworkInstrumentationTestSubmodule().End(self.name, self.category)
         self.assertEqual(event.status, 2)
         self.assertIsNone(event.error)
 
     def testCategories(self):
         """Tests access to TestFrameworkInstrumentationCategories object"""
-        self.assertTrue(tfi.categories.Add(self.category, self.name))
+        self.assertTrue(tfi.categories.Add(self.name, self.category))
         self.assertFalse(tfi.categories.Add('', self.name))
         self.assertFalse(tfi.categories.Add(None, self.name))
         self.assertFalse(tfi.categories.Add('1a', self.name))
 
     def testCheckEnded(self):
         """Tests the CheckEnded method of TestFrameworkInstrumentationEvent"""
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
 
         # Verify initial condition
         self.assertTrue(bool(tfie.event_stack))
@@ -99,7 +99,7 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
 
     def testRemove(self):
         """Tests the Remove method of TestFrameworkInstrumentationEvent"""
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
 
         # Verify initial condition
         self.assertTrue(bool(tfie.event_stack))
@@ -118,7 +118,7 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
 
     def testEndAlreadyRemoved(self):
         """Tests End command on already ended event."""
-        event = tfi.Begin(self.category, self.name, enable_logging=False)
+        event = tfi.Begin(self.name, self.category, enable_logging=False)
         reason = 'no reason'
         event.Remove(reason)
         self.assertEqual(event.status, 3)
@@ -130,17 +130,17 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
     def testEnableLogging(self):
         """Tests the enable_logging option."""
         # Test not specified case
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
         self.assertFalse(event._enable_logging)
         event.End()
 
         # Test set to True case
-        event = tfi.Begin(self.category, self.name, enable_logging=True)
+        event = tfi.Begin(self.name, self.category, enable_logging=True)
         self.assertTrue(event._enable_logging)
         event.End()
 
         # Test set to False case
-        event = tfi.Begin(self.category, self.name, enable_logging=None)
+        event = tfi.Begin(self.name, self.category, enable_logging=None)
         self.assertFalse(event._enable_logging)
         event.End()
 
@@ -151,28 +151,28 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         subevent's disable_subevent_logging option only when it is set to True
         """
         # Test top event disable_subevent_logging option not specified case
-        event = tfi.Begin(self.category, self.name)
+        event = tfi.Begin(self.name, self.category)
         self.assertFalse(event._disable_subevent_logging)
-        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        event_sub = tfi.Begin(self.name, self.category, disable_subevent_logging=True)
         self.assertTrue(event_sub._disable_subevent_logging)
         event_sub.End()
         event.End()
 
         # Test top event disable_subevent_logging option set to False
-        event = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        event = tfi.Begin(self.name, self.category, disable_subevent_logging=False)
         self.assertFalse(event._disable_subevent_logging)
-        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        event_sub = tfi.Begin(self.name, self.category, disable_subevent_logging=True)
         self.assertTrue(event_sub._disable_subevent_logging)
         event_sub.End()
         event.End()
 
         # Test top event disable_subevent_logging option set to True
-        event = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        event = tfi.Begin(self.name, self.category, disable_subevent_logging=True)
         self.assertTrue(event._disable_subevent_logging)
-        event_sub1 = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        event_sub1 = tfi.Begin(self.name, self.category, disable_subevent_logging=False)
         self.assertTrue(event_sub1._disable_subevent_logging)
         event_sub1.End()
-        event_sub2 = tfi.Begin(self.category, self.name)
+        event_sub2 = tfi.Begin(self.name, self.category)
         self.assertTrue(event_sub2._disable_subevent_logging)
         event_sub2.End()
         event.End()
@@ -184,14 +184,14 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         subevents of deeper levels when set to True.
         """
         # Test top event disable_subevent_logging option set to True
-        event = tfi.Begin(self.category, self.name, disable_subevent_logging=True)
+        event = tfi.Begin(self.name, self.category, disable_subevent_logging=True)
         self.assertTrue(event._disable_subevent_logging)
-        event_sub = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        event_sub = tfi.Begin(self.name, self.category, disable_subevent_logging=False)
         self.assertTrue(event_sub._disable_subevent_logging)
-        event_sub_sub1 = tfi.Begin(self.category, self.name)
+        event_sub_sub1 = tfi.Begin(self.name, self.category)
         self.assertTrue(event_sub_sub1._disable_subevent_logging)
         event_sub_sub1.End()
-        event_sub_sub2 = tfi.Begin(self.category, self.name, disable_subevent_logging=False)
+        event_sub_sub2 = tfi.Begin(self.name, self.category, disable_subevent_logging=False)
         self.assertTrue(event_sub_sub2._disable_subevent_logging)
         event_sub_sub2.End()
         event_sub.End()
