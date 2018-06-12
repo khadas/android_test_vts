@@ -31,7 +31,7 @@ import com.android.tradefed.testtype.suite.module.BaseModuleController;
 public class VtsHalAdapterModuleController extends BaseModuleController {
     // Command to list the registered instance for the given hal@version.
     static final String LIST_HAL_CMD =
-            "lshal -ti --neat | grep -e '^hwbinder' | awk '{print $2}' | grep %s";
+            "lshal -ti --neat 2>/dev/null | grep -e '^hwbinder' | awk '{print $2}' | grep %s";
 
     @Option(name = "hal-package-name",
             description =
