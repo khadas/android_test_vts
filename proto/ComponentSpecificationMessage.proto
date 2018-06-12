@@ -188,14 +188,17 @@ message FunctionCallMessage {
   // Component type, e.g., BLUETOOTH, used for Conventional HAL only.
   optional ComponentType component_type = 22;
   // Component version (e.g., 1.0).
+  // Deprecated, use component_type_version_major and component_type_version_minor instead.
   optional bytes component_type_version = 23 [deprecated = true];
   // Component name (e.g., INfc), used for HIDL HALs only.
   optional bytes component_name = 24;
   // Component package name (e.g., android.hardware.nfc).
   optional bytes package_name = 25;
   // Component major and minor versions stored separately.
-  optional uint32 component_type_version_major = 26;
-  optional uint32 component_type_version_minor = 27;
+  // HAL major version of component (e.g. 1.0 -> 1).
+  optional int32 component_type_version_major = 26 [default = -1];
+  // HAL minor version of component (e.g. 1.0 -> 0).
+  optional int32 component_type_version_minor = 27 [default = -1];
 
   // Specifies API function and inputs.
   optional FunctionSpecificationMessage api = 100;
@@ -498,13 +501,21 @@ message ComponentSpecificationMessage {
   // Class, type, and version of a target component.
   optional ComponentClass component_class = 1;
   optional ComponentType component_type = 2;
-  optional float component_type_version = 3 [default = 1.0];
+  // component HAL version (e.g. 1.0).
+  // Deprecated, use component_type_version_major and component_type_version_minor instead.
+  optional float component_type_version = 3 [deprecated = true];
 
   // The name of a target component (used for HIDL HALs).
   optional bytes component_name = 4;
 
   // for the target processor architecture.
   optional TargetArch target_arch = 5;
+
+  // use two ints to represent major and minor versions separately.
+  // HAL major version of component (e.g. 1.0 -> 1).
+  optional int32 component_type_version_major = 6 [default = -1];
+  // HAL minor version of component (e.g. 1.0 -> 0).
+  optional int32 component_type_version_minor = 7 [default = -1];
 
   // The package path of a target component (e.g., android.hardware.name).
   // name implies the component_type field.

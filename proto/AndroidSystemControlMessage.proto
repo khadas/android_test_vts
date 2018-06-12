@@ -105,7 +105,8 @@ message AndroidSystemControlCommandMessage {
   optional int32 target_type = 3005;
   // target version (should be divided by 100) - float has a compatibility issue
   // between C/C++ and python protoc.
-  optional int32 target_version = 3006;
+  // Deprecated, use target_version_major and target_version_minor instead.
+  optional int32 target_version = 3006 [deprecated = true];
 
   // the name of a HAL module to open.
   optional bytes module_name = 3007;
@@ -115,6 +116,12 @@ message AndroidSystemControlCommandMessage {
 
   // the name of a target component (currently used for HIDL HALs only).
   optional bytes target_component_name = 3009;
+
+  // use two ints to represent major and minor versions separately.
+  // HAL major version of the target component (e.g. 1.0 -> 1).
+  optional int32 target_version_major = 3010 [default = -1];
+  // HAL minor version of the target component (e.g. 1.0 -> 0).
+  optional int32 target_version_minor = 3011 [default = -1];
 
   // the name of a HW Binder service to use (only needed for HIDL HAL).
   optional bytes hw_binder_service_name = 3021;

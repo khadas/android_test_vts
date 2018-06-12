@@ -28,6 +28,7 @@
 #include "VtsProfilingUtil.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
 #include "test/vts/proto/VtsProfilingMessage.pb.h"
+#include "utils/InterfaceSpecUtil.h"
 
 using namespace std;
 
@@ -110,12 +111,16 @@ void VtsProfilingInterface::AddTraceEvent(
     android::hardware::details::HidlInstrumentor::InstrumentationEvent event,
     const char* package, const char* version, const char* interface,
     const FunctionSpecificationMessage& message) {
+  std::string version_str = std::string(version);
+  int version_major = GetVersionMajor(version_str);
+  int version_minor = GetVersionMinor(version_str);
   // Build the VTSProfilingRecord and print it to string.
   VtsProfilingRecord record;
   record.set_timestamp(NanoTime());
   record.set_event((InstrumentationEventType) static_cast<int>(event));
   record.set_package(package);
-  record.set_version(stof(version));
+  record.set_version_major(version_major);
+  record.set_version_minor(version_minor);
   record.set_interface(interface);
   *record.mutable_func_msg() = message;
 

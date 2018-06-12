@@ -89,13 +89,15 @@ class MirrorTracker(object):
 
     def InitHidlHal(self,
                     target_type,
-                    target_version,
+                    target_version=None,
                     target_package=None,
                     target_component_name=None,
                     target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                     handler_name=None,
                     hw_binder_service_name=_DEFAULT_HWBINDER_SERVICE,
-                    bits=64):
+                    bits=64,
+                    target_version_major=None,
+                    target_version_minor=None):
         """Initiates a handler for a particular HIDL HAL.
 
         This will initiate a driver service for a HAL on the target side, create
@@ -103,7 +105,8 @@ class MirrorTracker(object):
 
         Args:
             target_type: string, the target type name (e.g., light, camera).
-            target_version: float, the target component version (e.g., 1.0).
+            target_version (deprecated, now use major and minor versions):
+              float, the target component version (e.g., 1.0).
             target_package: string, the package name of a target HIDL HAL.
             target_basepaths: list of strings, the paths to look for target
                               files in. Default is _DEFAULT_TARGET_BASE_PATHS.
@@ -111,8 +114,18 @@ class MirrorTracker(object):
                           by default.
             hw_binder_service_name: string, the name of a HW binder service.
             bits: integer, processor architecture indicator: 32 or 64.
-        """
+            target_version_major:
+              int, the target component major version (e.g., 1.0 -> 1).
+            target_version_minor:
+              int, the target component minor version (e.g., 1.0 -> 0).
+            If host doesn't provide major and minor versions separately,
+            parse it from the float version of target_version.
 
+        Raises:
+            USERError if user doesn't provide a version of the HAL service.
+        """
+        target_version_major, target_version_minor = self.GetTargetVersion(
+            target_version, target_version_major, target_version_minor)
         if not handler_name:
             handler_name = target_type
         client = vts_tcp_client.VtsTcpClient()
@@ -120,19 +133,22 @@ class MirrorTracker(object):
             command_port=self._host_command_port,
             callback_port=self._host_callback_port)
         mirror = hal_mirror.HalMirror(client, self._callback_server)
-        mirror.InitHalDriver(target_type, target_version, target_package,
+        mirror.InitHalDriver(target_type, target_version_major,
+                             target_version_minor, target_package,
                              target_component_name, hw_binder_service_name,
                              handler_name, bits)
         self._registered_mirrors[target_type] = mirror
 
     def InitSharedLib(self,
                       target_type,
-                      target_version,
+                      target_version=None,
                       target_basepaths=_DEFAULT_TARGET_BASE_PATHS,
                       target_package="",
                       target_filename=None,
                       handler_name=None,
-                      bits=64):
+                      bits=64,
+                      target_version_major=None,
+                      target_version_minor=None):
         """Initiates a handler for a particular lib.
 
         This will initiate a driver service for a lib on the target side, create
@@ -140,7 +156,8 @@ class MirrorTracker(object):
 
         Args:
             target_type: string, the target type name (e.g., light, camera).
-            target_version: float, the target component version (e.g., 1.0).
+            target_version (deprecated, now use major and minor versions):
+              float, the target component version (e.g., 1.0).
             target_basepaths: list of strings, the paths to look for target
                              files in. Default is _DEFAULT_TARGET_BASE_PATHS.
             target_package: . separated string (e.g., a.b.c) to denote the
@@ -149,13 +166,25 @@ class MirrorTracker(object):
             handler_name: string, the name of the handler. target_type is used
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
+            target_version_major:
+              int, the target component major version (e.g., 1.0 -> 1).
+            target_version_minor:
+              int, the target component minor version (e.g., 1.0 -> 0).
+            If host doesn't provide major and minor versions separately,
+            parse it from the float version of target_version.
+
+        Raises:
+            USERError if user doesn't provide a version of the HAL service.
         """
+        target_version_major, target_version_minor = self.GetTargetVersion(
+            target_version, target_version_major, target_version_minor)
         if not handler_name:
             handler_name = target_type
         client = vts_tcp_client.VtsTcpClient()
         client.Connect(command_port=self._host_command_port)
         mirror = lib_mirror.LibMirror(client)
-        mirror.InitLibDriver(target_type, target_version, target_package,
+        mirror.InitLibDriver(target_type, target_version_major,
+                             target_version_minor, target_package,
                              target_filename, target_basepaths, handler_name,
                              bits)
         self._registered_mirrors[handler_name] = mirror
@@ -215,6 +244,39 @@ class MirrorTracker(object):
         if _DEFAULT_SHELL_NAME not in self._registered_mirrors:
             self.InvokeTerminal(_DEFAULT_SHELL_NAME)
         getattr(self, _DEFAULT_SHELL_NAME).SetConnTimeout(timeout)
+
+    def GetTargetVersion(self, target_version, target_version_major,
+                         target_version_minor):
+        """Get the actual target version provided by the host.
+
+        If the host provides major and minor versions separately, directly return them.
+        Otherwise, manually parse it from the float version.
+        If all of them are None, raise a user error.
+
+        Args:
+            target_version: float, the target component HAL version (e.g. 1.0).
+            target_version_major:
+                int, the target component HAL major version (e.g. 1.0 -> 1).
+            target_version_minor:
+                int, the target component HAL minor version (e.g. 1.0 -> 0).
+
+        Returns:
+            two integers, actual major and minor HAL versions.
+
+        Raises: user error, if no version is provided.
+        """
+        # Check if host provides major and minor versions separately
+        if (target_version_minor != None and target_version_minor != None):
+            return target_version_major, target_version_minor
+
+        # If not, manually parse it from float version
+        if (target_version != None):
+            target_version_str = str(target_version)
+            [target_version_major,
+             target_version_minor] = target_version_str.split(".")
+            return int(target_version_major), int(target_version_minor)
+
+        raise errors.USERError("User has to provide a target version.")
 
     def __getattr__(self, name):
         if name in self._registered_mirrors:
