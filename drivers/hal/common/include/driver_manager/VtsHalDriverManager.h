@@ -41,10 +41,15 @@ class VtsHalDriverManager {
   // driver instance, assign it a driver id and registers the created driver
   // instance in hal_driver_map_.
   // Returns the generated driver id.
+  // Args:
+  //   version_major: int, hal major version, e.g. 1.0 -> 1.
+  //   version_minor: int, hal minor version, e.g. 1.0 -> 0.
+  //
   DriverId LoadTargetComponent(const string& dll_file_name,
                                const string& spec_lib_file_path,
                                const int component_class,
-                               const int component_type, const float version,
+                               const int component_type,
+                               const int version_major, const int version_minor,
                                const string& package_name,
                                const string& component_name,
                                const string& hw_binder_service_name);
@@ -66,8 +71,13 @@ class VtsHalDriverManager {
   // the correponding driver instance, otherwise, creates a new driver instance
   // with the given info, registers it in hal_driver_map_ and returns the
   // generated driver instance. This is used by VTS replay test.
+  // Args:
+  //   version_major: int, hal major version, e.g. 1.0 -> 1.
+  //   version_minor: int, hal minor version, e.g. 1.0 -> 0.
+  //
   DriverId GetDriverIdForHidlHalInterface(const string& package_name,
-                                          const float version,
+                                          const int version_major,
+                                          const int version_minor,
                                           const string& interface_name,
                                           const string& hal_service_name);
 
@@ -81,8 +91,14 @@ class VtsHalDriverManager {
   // such as component_class etc. Used to server the ReadSpecification request
   // from host.
   // Returns true if load successfully, false otherwise.
+  // Args:
+  //   version_major: int, hal major version, e.g. 1.0 -> 1.
+  //   version_minor: int, hal minor version, e.g. 1.0 -> 0.
+  //
   bool FindComponentSpecification(const int component_class,
-                                  const int component_type, const float version,
+                                  const int component_type,
+                                  const int version_major,
+                                  const int version_minor,
                                   const string& package_name,
                                   const string& component_name,
                                   ComponentSpecificationMessage* spec_msg);

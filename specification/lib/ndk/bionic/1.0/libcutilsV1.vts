@@ -1,6 +1,8 @@
 component_class: LIB_SHARED
 component_type: VNDK_LIBCUTILS
 component_type_version: 1.0
+component_type_version_major: 1
+component_type_version_minor: 0
 component_name: "libcutils"
 
 header: "<unistd.h>"
