@@ -156,12 +156,14 @@ void VtsTraceProcessor::CleanupTraceFile(const string& trace_file) {
   bool first_record = true;
   enum TRACE_TYPE { server_trace, client_trace, passthrough_trace };
   string package;
-  float version;
+  int version_major;
+  int version_minor;
   TRACE_TYPE trace_type;
   for (const auto& record : profiling_msg.records()) {
     if (first_record) {
       package = record.package();
-      version = record.version();
+      version_major = record.version_major();
+      version_minor = record.version_minor();
       // determine trace type based on the event of the first record.
       switch (record.event()) {
         case InstrumentationEventType::SERVER_API_ENTRY:
@@ -180,7 +182,9 @@ void VtsTraceProcessor::CleanupTraceFile(const string& trace_file) {
       first_record = false;
     }
     // If trace contains records for a different hal, remove it.
-    if (record.package() != package || record.version() != version) {
+    if (record.package() != package ||
+        record.version_major() != version_major ||
+        record.version_minor() != version_minor) {
       cerr << "Unexpected record: " << record.DebugString() << endl;
       continue;
     }
@@ -502,7 +506,8 @@ bool VtsTraceProcessor::isEntryEvent(const InstrumentationEventType& event) {
 bool VtsTraceProcessor::isPairedRecord(const VtsProfilingRecord& entry_record,
                                        const VtsProfilingRecord& exit_record) {
   if (entry_record.package() != exit_record.package() ||
-      entry_record.version() != exit_record.version() ||
+      entry_record.version_major() != exit_record.version_major() ||
+      entry_record.version_minor() != exit_record.version_minor() ||
       entry_record.interface() != exit_record.interface() ||
       entry_record.func_msg().name() != exit_record.func_msg().name()) {
     return false;
@@ -628,7 +633,7 @@ void VtsTraceProcessor::GetHalTraceMapping(
   for (const TraceSummary& trace_summary : trace_summaries) {
     string test_name = trace_summary.test_name;
     stringstream stream;
-    stream << fixed << setprecision(1) << trace_summary.version;
+    stream << trace_summary.version_major << "." << trace_summary.version_minor;
     string hal_name = trace_summary.package + "@" + stream.str();
     if (hal_trace_mapping->find(hal_name) != hal_trace_mapping->end()) {
       (*hal_trace_mapping)[hal_name].push_back(trace_summary);
@@ -659,14 +664,17 @@ void VtsTraceProcessor::GetHalTraceSummary(
   }
   for (const auto& record : profiling_msg.records()) {
     string package = record.package();
-    float version = record.version();
+    int version_major = record.version_major();
+    int version_minor = record.version_minor();
     string func_name = record.func_msg().name();
-    auto found = find_if(trace_summaries->begin(), trace_summaries->end(),
-                         [&](const TraceSummary& trace_summary) {
-                           return (test_name == trace_summary.test_name &&
-                                   package == trace_summary.package &&
-                                   version == trace_summary.version);
-                         });
+    auto found =
+        find_if(trace_summaries->begin(), trace_summaries->end(),
+                [&](const TraceSummary& trace_summary) {
+                  return (test_name == trace_summary.test_name &&
+                          package == trace_summary.package &&
+                          version_major == trace_summary.version_major &&
+                          version_minor == trace_summary.version_minor);
+                });
     if (found != trace_summaries->end()) {
       found->total_api_count++;
       if (found->api_stats.find(func_name) != found->api_stats.end()) {
@@ -678,7 +686,8 @@ void VtsTraceProcessor::GetHalTraceSummary(
     } else {
       map<string, long> api_stats;
       api_stats[func_name] = 1;
-      TraceSummary trace_summary(test_name, package, version, 1, 1, api_stats);
+      TraceSummary trace_summary(test_name, package, version_major,
+                                 version_minor, 1, 1, api_stats);
       trace_summaries->push_back(trace_summary);
     }
   }
