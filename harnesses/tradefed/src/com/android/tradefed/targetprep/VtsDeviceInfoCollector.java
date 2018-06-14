@@ -48,7 +48,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
         BUILD_KEYS.put("cts:build_model", "ro.product.model");
         BUILD_KEYS.put("cts:build_type", "ro.build.type");
         BUILD_KEYS.put("cts:build_tags", "ro.build.tags");
-        BUILD_KEYS.put("cts:build_fingerprint", "ro.vendor.build.fingerprint");
+        BUILD_KEYS.put("cts:build_fingerprint", "ro.odm.build.fingerprint");
         BUILD_KEYS.put("cts:build_abi", "ro.product.cpu.abi");
         BUILD_KEYS.put("cts:build_abi2", "ro.product.cpu.abi2");
         BUILD_KEYS.put("cts:build_abis", "ro.product.cpu.abilist");
@@ -68,6 +68,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
         BUILD_LEGACY_PROPERTIES.put(
                 "ro.product.vendor.manufacturer", "ro.vendor.product.manufacturer");
         BUILD_LEGACY_PROPERTIES.put("ro.product.vendor.model", "ro.vendor.product.model");
+        BUILD_LEGACY_PROPERTIES.put("ro.odm.build.fingerprint", "ro.vendor.build.fingerprint");
     }
 
     @Override
