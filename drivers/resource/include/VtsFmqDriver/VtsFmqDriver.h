@@ -121,6 +121,19 @@ union RequestResult {
 // A fast message queue class that manages all fast message queues created
 // on the target side. Reader and writer use their id to read from and write
 // into the queue.
+// Example:
+//   VtsFmqDriver manager;
+//   // creates one reader and one writer.
+//   QueueId writer_id = manager.CreateFmq("uint16_t", true, NUM_ELEMS, false);
+//   QueueId reader_id = manager.CreateFmq("uint16_t", true, writer_id);
+//   // write some data
+//   uint16_t write_data[5] {1, 2, 3, 4, 5};
+//   manager.WriteFmq("uint16_t", true, writer_id,
+//                    static_cast<void*>(write_data), 5);
+//   // read the same data back
+//   uint16_t read_data[5];
+//   manager.ReadFmq("uint16_t", true, reader_id,
+//                   static_cast<void*>(read_data), 5);
 class VtsFmqDriver {
  public:
   // Constructor to initialize a Fast Message Queue (FMQ) manager.
