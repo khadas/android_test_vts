@@ -1110,7 +1110,7 @@ class AndroidDevice(object):
                 host_command_port=self.host_command_port, adb=self.adb)
         if self.enable_sl4a:
             try:
-                self.startSl4aClient(eself.enable_sl4a_ed)
+                self.startSl4aClient(self.enable_sl4a_ed)
             except Exception as e:
                 self.log.exception("Failed to start SL4A!")
                 self.log.exception(e)
