@@ -99,6 +99,7 @@ def create(configs, start_services=True):
         ads = get_instances_with_configs(configs)
     connected_ads = list_adb_devices()
     for ad in ads:
+        ad.enable_vts_agent = start_services
         if ad.serial not in connected_ads:
             raise DoesNotExistError(("Android device %s is specified in config"
                                      " but is not attached.") % ad.serial)
