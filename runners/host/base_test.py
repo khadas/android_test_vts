@@ -397,14 +397,23 @@ class BaseTestClass(object):
             if not precondition_utils.CheckFeaturePrecondition(self, device):
                 self.skipAllTests("Precondition feature check fail.")
 
-        if (self.getUserParam(keys.ConfigKeys.IKEY_DISABLE_FRAMEWORK,
-                              default_value=False) or
-            # @Deprecated Legacy configuration option name.
-            self.getUserParam(keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
-                              default_value=False)):
+        if (self.getUserParam(
+                keys.ConfigKeys.IKEY_DISABLE_FRAMEWORK, default_value=False) or
+                # @Deprecated Legacy configuration option name.
+                self.getUserParam(
+                    keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
+                    default_value=False)):
+            stop_native_server = (
+                self.getUserParam(
+                    keys.ConfigKeys.IKEY_STOP_NATIVE_SERVERS,
+                    default_value=False) or
+                # @Deprecated Legacy configuration option name.
+                self.getUserParam(
+                    keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                    default_value=False))
             # Disable the framework if requested.
             for device in self.android_devices:
-                device.stop()
+                device.stop(stop_native_server)
         else:
             # Enable the framework if requested.
             for device in self.android_devices:
