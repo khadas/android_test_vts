@@ -129,6 +129,29 @@ class VtsFmqDriver {
   // Virtual destructor to clean up the class.
   ~VtsFmqDriver();
 
+  // Creates a brand new FMQ, i.e. the "first message queue object".
+  //
+  // @param type       type of data in the queue.
+  // @param sync       whether queue is synchronized (only has one reader).
+  // @param queue_size number of elements in the queue.
+  // @param blocking   whether to enable blocking within the queue.
+  //
+  // @return message queue object id associated with the caller on success,
+  //         -1 on failure.
+  QueueId CreateFmq(string type, bool sync, size_t queue_size, bool blocking);
+
+  // Creates a new FMQ object based on an existing message queue.
+  //
+  // @param type           string, queue data type.
+  // @param sync           whether queue is synchronized (only has one reader).
+  // @param queue_id       identifies the message queue object.
+  // @param reset_pointers whether to reset read and write pointers.
+  //
+  // @return message queue object id associated with the caller on success,
+  //         -1 on failure.
+  QueueId CreateFmq(string type, bool sync, QueueId queue_id,
+                    bool reset_pointers = true);
+
  private:
   // Finds the queue in the map based on the input queue ID.
   //
@@ -201,6 +224,14 @@ class VtsFmqDriver {
   //         false otherwise.
   template <typename T>
   bool ExecuteBlockingOperation(const OperationParam& op_param, T* data);
+
+  // Inserts QueueInfo object into fmq_map_, while ensuring thread safety on
+  // fmq_map_.
+  //
+  // @param queue_info QueueInfo object.
+  //
+  // @return id associated with the queue.
+  QueueId InsertQueue(unique_ptr<QueueInfo> queue_info);
 
   // a hashtable to keep track of all ongoing FMQ's.
   // The key of the hashtable is the queue ID.

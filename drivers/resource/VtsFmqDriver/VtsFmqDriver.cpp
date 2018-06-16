@@ -41,6 +41,32 @@ VtsFmqDriver::~VtsFmqDriver() {
   fmq_map_.clear();
 }
 
+QueueId VtsFmqDriver::CreateFmq(string type, bool sync, size_t queue_size,
+                                bool blocking) {
+  OperationParam params;
+  params.op = FMQ_OP_CREATE;
+  params.queue_size = queue_size;
+  params.blocking = blocking;
+  RequestResult result;
+
+  bool success = ProcessRequest(type, sync, params, &result);
+  if (success) return result.int_val;
+  return -1;
+}
+
+QueueId VtsFmqDriver::CreateFmq(string type, bool sync, QueueId queue_id,
+                                bool reset_pointers) {
+  OperationParam params;
+  params.op = FMQ_OP_CREATE;
+  params.queue_id = queue_id;
+  params.reset_pointers = reset_pointers;
+  RequestResult result;
+
+  bool success = ProcessRequest(type, sync, params, &result);
+  if (success) return result.int_val;
+  return -1;
+}
+
 template <typename T, hardware::MQFlavor flavor>
 MessageQueue<T, flavor>* VtsFmqDriver::FindQueue(QueueId queue_id) {
   auto iterator = fmq_map_.find(queue_id);
@@ -167,7 +193,30 @@ bool VtsFmqDriver::ExecuteNonBlockingOperation(const OperationParam& op_param,
 
   switch (op_param.op) {
     case FMQ_OP_CREATE:
-      result->int_val = -1;  // to be implemented later
+      if (op_param.queue_id == -1) {
+        // creates a new queue, use smart pointers to avoid memory leak
+        shared_ptr<MessageQueue<T, flavor>> new_queue(
+            new (std::nothrow) MessageQueue<T, flavor>(op_param.queue_size,
+                                                       op_param.blocking));
+        unique_ptr<QueueInfo> new_queue_info(new QueueInfo{
+            typeid(T), flavor, static_pointer_cast<void>(new_queue)});
+        result->int_val = InsertQueue(move(new_queue_info));
+      } else {  // create a queue object based on an existing queue
+        const hardware::MQDescriptor<T, flavor>* descriptor =
+            queue_object->getDesc();
+        if (descriptor == nullptr) {
+          LOG(ERROR)
+              << "Cannot find descriptor for the specified Fast Message Queue";
+          return false;  // likely not the first message queue object
+        }
+
+        shared_ptr<MessageQueue<T, flavor>> new_queue(
+            new (std::nothrow)
+                MessageQueue<T, flavor>(*descriptor, op_param.reset_pointers));
+        unique_ptr<QueueInfo> new_queue_info(new QueueInfo{
+            typeid(T), flavor, static_pointer_cast<void>(new_queue)});
+        result->int_val = InsertQueue(move(new_queue_info));
+      }
       break;
     case FMQ_OP_READ:
       return queue_object->read(data, op_param.data_size);
@@ -227,6 +276,14 @@ bool VtsFmqDriver::ExecuteBlockingOperation(const OperationParam& op_param,
 
   LOG(ERROR) << "unknown operation";
   return false;
+}
+
+QueueId VtsFmqDriver::InsertQueue(unique_ptr<QueueInfo> queue_info) {
+  map_mutex_.lock();
+  size_t new_queue_id = fmq_map_.size();
+  fmq_map_.emplace(new_queue_id, move(queue_info));
+  map_mutex_.unlock();
+  return new_queue_id;
 }
 
 }  // namespace vts
