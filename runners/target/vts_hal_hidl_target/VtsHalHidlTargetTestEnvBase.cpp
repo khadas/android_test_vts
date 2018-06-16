@@ -93,7 +93,6 @@ void VtsHalHidlTargetTestEnvBase::addHalServiceInstance(
   // hal_service_instance follows the format:
   // package@version::interface/instance e.g.:
   // android.hardware.vibrator@1.0::IVibrator/default
-  ::android::FqInstance fqInstance;
   if (!isValidInstance(halServiceInstance)) {
     cerr << "Input instance " << halServiceInstance
          << "does not confirm to the HAL instance format. "
@@ -101,7 +100,8 @@ void VtsHalHidlTargetTestEnvBase::addHalServiceInstance(
     exit(-1);
   }
   string halName = halServiceInstance.substr(0, halServiceInstance.find('/'));
-  string instanceName = fqInstance.getInstance();
+  string instanceName =
+      halServiceInstance.substr(halServiceInstance.find('/') + 1);
   // Fail the process if trying to pass multiple service names for the same
   // service instance.
   if (halServiceInstances_.find(halName) != halServiceInstances_.end()) {
