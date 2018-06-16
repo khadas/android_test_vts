@@ -67,6 +67,102 @@ QueueId VtsFmqDriver::CreateFmq(string type, bool sync, QueueId queue_id,
   return -1;
 }
 
+bool VtsFmqDriver::ReadFmq(string type, bool sync, QueueId queue_id,
+                           void* data) {
+  return ReadFmq(type, sync, queue_id, data, 1);
+}
+
+bool VtsFmqDriver::ReadFmq(string type, bool sync, QueueId queue_id, void* data,
+                           size_t data_size) {
+  OperationParam params;
+  params.op = FMQ_OP_READ;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
+bool VtsFmqDriver::ReadFmqBlocking(string type, bool sync, QueueId queue_id,
+                                   void* data, size_t data_size,
+                                   int64_t time_out_nanos) {
+  OperationParam params;
+  params.op = FMQ_OP_READ_BLOCKING;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  params.time_out_nanos = time_out_nanos;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
+bool VtsFmqDriver::ReadFmqBlocking(string type, bool sync, QueueId queue_id,
+                                   void* data, size_t data_size,
+                                   uint32_t read_notification,
+                                   uint32_t write_notification,
+                                   int64_t time_out_nanos,
+                                   atomic<uint32_t>* event_flag_word) {
+  OperationParam params;
+  params.op = FMQ_OP_READ_BLOCKING_LONG;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  params.read_notification = read_notification;
+  params.write_notification = write_notification;
+  params.time_out_nanos = time_out_nanos;
+  params.event_flag_word = event_flag_word;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
+bool VtsFmqDriver::WriteFmq(string type, bool sync, QueueId queue_id,
+                            void* data) {
+  return WriteFmq(type, sync, queue_id, data, 1);
+}
+
+bool VtsFmqDriver::WriteFmq(string type, bool sync, QueueId queue_id,
+                            void* data, size_t data_size) {
+  OperationParam params;
+  params.op = FMQ_OP_WRITE;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
+bool VtsFmqDriver::WriteFmqBlocking(string type, bool sync, QueueId queue_id,
+                                    void* data, size_t data_size,
+                                    int64_t time_out_nanos) {
+  OperationParam params;
+  params.op = FMQ_OP_WRITE_BLOCKING;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  params.time_out_nanos = time_out_nanos;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
+bool VtsFmqDriver::WriteFmqBlocking(string type, bool sync, QueueId queue_id,
+                                    void* data, size_t data_size,
+                                    uint32_t read_notification,
+                                    uint32_t write_notification,
+                                    int64_t time_out_nanos,
+                                    atomic<uint32_t>* event_flag_word) {
+  OperationParam params;
+  params.op = FMQ_OP_WRITE_BLOCKING_LONG;
+  params.queue_id = queue_id;
+  params.data_size = data_size;
+  params.read_notification = read_notification;
+  params.write_notification = write_notification;
+  params.time_out_nanos = time_out_nanos;
+  params.event_flag_word = event_flag_word;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result, data);
+}
+
 template <typename T, hardware::MQFlavor flavor>
 MessageQueue<T, flavor>* VtsFmqDriver::FindQueue(QueueId queue_id) {
   auto iterator = fmq_map_.find(queue_id);
@@ -259,6 +355,8 @@ bool VtsFmqDriver::ExecuteBlockingOperation(const OperationParam& op_param,
   if (queue_object == nullptr)
     return false;  // queue not found, or type mismatch
 
+  hardware::EventFlag* ef_group = nullptr;
+  status_t status;
   switch (op_param.op) {
     case FMQ_OP_READ_BLOCKING:
       return queue_object->readBlocking(data, op_param.data_size,
@@ -267,9 +365,27 @@ bool VtsFmqDriver::ExecuteBlockingOperation(const OperationParam& op_param,
       return queue_object->writeBlocking(data, op_param.data_size,
                                          op_param.time_out_nanos);
     case FMQ_OP_READ_BLOCKING_LONG:
-      return false;  // to be implemented later
+      // create an event flag out of the event flag word
+      status = hardware::EventFlag::createEventFlag(op_param.event_flag_word,
+                                                    &ef_group);
+      if (status != NO_ERROR) {  // check status
+        LOG(ERROR) << "Creating event flag failure with code " << status;
+        return false;
+      }
+      return queue_object->readBlocking(
+          data, op_param.data_size, op_param.read_notification,
+          op_param.write_notification, op_param.time_out_nanos, ef_group);
     case FMQ_OP_WRITE_BLOCKING_LONG:
-      return false;  // to be implemented later
+      // create an event flag out of the event flag word
+      status = hardware::EventFlag::createEventFlag(op_param.event_flag_word,
+                                                    &ef_group);
+      if (status != NO_ERROR) {  // check status
+        LOG(ERROR) << "Creating event flag failure with code " << status;
+        return false;
+      }
+      return queue_object->writeBlocking(
+          data, op_param.data_size, op_param.read_notification,
+          op_param.write_notification, op_param.time_out_nanos, ef_group);
     default:
       break;
   }
