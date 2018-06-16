@@ -163,6 +163,50 @@ bool VtsFmqDriver::WriteFmqBlocking(string type, bool sync, QueueId queue_id,
   return ProcessRequest(type, sync, params, &result, data);
 }
 
+bool VtsFmqDriver::AvailableToWrite(string type, bool sync, QueueId queue_id,
+                                    size_t* result) {
+  return ProcessUtilMethod(type, sync, FMQ_OP_AVAILABLE_WRITE, queue_id,
+                           result);
+}
+
+bool VtsFmqDriver::AvailableToRead(string type, bool sync, QueueId queue_id,
+                                   size_t* result) {
+  return ProcessUtilMethod(type, sync, FMQ_OP_AVAILABLE_READ, queue_id, result);
+}
+
+bool VtsFmqDriver::GetQuantumSize(string type, bool sync, QueueId queue_id,
+                                  size_t* result) {
+  return ProcessUtilMethod(type, sync, FMQ_OP_GET_QUANTUM_SIZE, queue_id,
+                           result);
+}
+
+bool VtsFmqDriver::GetQuantumCount(string type, bool sync, QueueId queue_id,
+                                   size_t* result) {
+  return ProcessUtilMethod(type, sync, FMQ_OP_GET_QUANTUM_COUNT, queue_id,
+                           result);
+}
+
+bool VtsFmqDriver::IsValid(string type, bool sync, QueueId queue_id) {
+  OperationParam params;
+  params.op = FMQ_OP_IS_VALID;
+  params.queue_id = queue_id;
+  RequestResult result;
+
+  return ProcessRequest(type, sync, params, &result);
+}
+
+bool VtsFmqDriver::GetEventFlagWord(string type, bool sync, QueueId queue_id,
+                                    atomic<uint32_t>** result) {
+  OperationParam params;
+  params.op = FMQ_OP_GET_EVENT_FLAG_WORD;
+  params.queue_id = queue_id;
+  RequestResult request_result;
+
+  bool success = ProcessRequest(type, sync, params, &request_result);
+  if (success) *result = request_result.pointer_val;  // store result in pointer
+  return success;
+}
+
 template <typename T, hardware::MQFlavor flavor>
 MessageQueue<T, flavor>* VtsFmqDriver::FindQueue(QueueId queue_id) {
   auto iterator = fmq_map_.find(queue_id);
@@ -400,6 +444,18 @@ QueueId VtsFmqDriver::InsertQueue(unique_ptr<QueueInfo> queue_info) {
   fmq_map_.emplace(new_queue_id, move(queue_info));
   map_mutex_.unlock();
   return new_queue_id;
+}
+
+bool VtsFmqDriver::ProcessUtilMethod(string type, bool sync, FmqOperation op,
+                                     QueueId queue_id, size_t* result) {
+  OperationParam params;
+  params.op = op;
+  params.queue_id = queue_id;
+  RequestResult request_result;
+
+  bool success = ProcessRequest(type, sync, params, &request_result);
+  if (success) *result = request_result.sizet_val;  // store result in pointer
+  return success;
 }
 
 }  // namespace vts

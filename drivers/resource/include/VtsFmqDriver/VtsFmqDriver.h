@@ -274,6 +274,87 @@ class VtsFmqDriver {
                         uint32_t write_notification, int64_t time_out_nanos,
                         atomic<uint32_t>* event_flag_word);
 
+  // Gets space available to write in the queue.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer to the result. Use pointer to store result because
+  //                 the return value signals if the queue is found correctly.
+  //
+  // @return true if queue is found and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool AvailableToWrite(string type, bool sync, QueueId queue_id,
+                        size_t* result);
+
+  // Gets number of items available to read in the queue.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer to the result. Use pointer to store result because
+  //                 the return value signals if the queue is found correctly.
+  //
+  // @return true if queue is found and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool AvailableToRead(string type, bool sync, QueueId queue_id,
+                       size_t* result);
+
+  // Gets size of item in the queue.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer to the result. Use pointer to store result because
+  //                 the return value signals if the queue is found correctly.
+  //
+  // @return true if queue is found and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool GetQuantumSize(string type, bool sync, QueueId queue_id, size_t* result);
+
+  // Gets number of items that fit in the queue.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer to the result. Use pointer to store result because
+  //                 the return value signals if the queue is found correctly.
+  //
+  // @return true if queue is found and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool GetQuantumCount(string type, bool sync, QueueId queue_id,
+                       size_t* result);
+
+  // Checks if the queue associated with queue_id is valid.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  //
+  // @return true if the queue object is valid, false otherwise.
+  bool IsValid(string type, bool sync, QueueId queue_id);
+
+  // Gets event flag word of the queue, which allows multiple queues
+  // to communicate (i.e. blocking).
+  // The returned event flag word can be passed into readBlocking() and
+  // writeBlocking() to achieve blocking among multiple queues.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer to the result. Use pointer to store result because
+  //                 the return value signals if the queue is found correctly.
+  //
+  // @return true if queue is found and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool GetEventFlagWord(string type, bool sync, QueueId queue_id,
+                        atomic<uint32_t>** result);
+
  private:
   // Finds the queue in the map based on the input queue ID.
   //
@@ -354,6 +435,21 @@ class VtsFmqDriver {
   //
   // @return id associated with the queue.
   QueueId InsertQueue(unique_ptr<QueueInfo> queue_info);
+
+  // Processes util methods that return size_t (AvailableToWrite,
+  // AvailableToRead, GetQuantumCount, GetQuantumSize).
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether the queue is synchronized (only has one reader).
+  // @param op       operation on the queue.
+  // @param queue_id identifies the message queue object.
+  // @param result   pointer that stores result.
+  //
+  // @return true if queue is found and type checking passes, and stores the
+  //              result in result pointer,
+  //         false otherwise.
+  bool ProcessUtilMethod(string type, bool sync, FmqOperation op,
+                         QueueId queue_id, size_t* result);
 
   // a hashtable to keep track of all ongoing FMQ's.
   // The key of the hashtable is the queue ID.
