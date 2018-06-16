@@ -152,6 +152,128 @@ class VtsFmqDriver {
   QueueId CreateFmq(string type, bool sync, QueueId queue_id,
                     bool reset_pointers = true);
 
+  // Reads one item from FMQ (no blocking at all).
+  //
+  // @param type     type of data in the queue data type.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param data     pointer to the start of data to be filled.
+  //
+  // @return true if no error happens when reading from FMQ,
+  //         false otherwise.
+  bool ReadFmq(string type, bool sync, QueueId queue_id, void* data);
+
+  // Reads data_size items from FMQ (no blocking at all).
+  //
+  // @param type      type of data in the queue.
+  // @param sync      whether queue is synchronized (only has one reader).
+  // @param queue_id  identifies the message queue object.
+  // @param data      pointer to the start of data to be filled.
+  // @param data_size number of items to read.
+  //
+  // @return true if no error happens when reading from FMQ,
+  //         false otherwise.
+  bool ReadFmq(string type, bool sync, QueueId queue_id, void* data,
+               size_t data_size);
+
+  // Reads data_size items from FMQ, block if there is not enough data to
+  // read.
+  // This method can only be called if blocking=true on creation of the "first
+  // message queue object" of the FMQ.
+  //
+  // @param type           type of data in the queue.
+  // @param sync           whether queue is synchronized (only has one reader).
+  // @param queue_id       identifies the message queue object.
+  // @param data           pointer to the start of data to be filled.
+  // @param data_size      number of items to read.
+  // @param time_out_nanos wait time when blocking.
+  //
+  // Returns: true if no error happens when reading from FMQ,
+  //          false otherwise.
+  bool ReadFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+                       size_t data_size, int64_t time_out_nanos);
+
+  // Reads data_size items from FMQ, possibly block on other queues.
+  //
+  // @param type               type of data in the queue.
+  // @param sync               whether queue is synchronized.
+  // @param queue_id           identifies the message queue object.
+  // @param data               pointer to the start of data to be filled.
+  // @param data_size          number of items to read.
+  // @param read_notification  notification bits to set when finish reading.
+  // @param write_notification notification bits to wait on when blocking.
+  //                           Read will fail if this argument is 0.
+  // @param time_out_nanos     wait time when blocking.
+  // @param event_flag_word    event flag word shared by multiple queues.
+  //
+  // @return true if no error happens when reading from FMQ,
+  //         false otherwise.
+  bool ReadFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+                       size_t data_size, uint32_t read_notification,
+                       uint32_t write_notification, int64_t time_out_nanos,
+                       atomic<uint32_t>* event_flag_word);
+
+  // Writes one item to FMQ (no blocking at all).
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the message queue object.
+  // @param data     pointer to the start of data to be written.
+  //
+  // @return true if no error happens when writing to FMQ,
+  //         false otherwise.
+  bool WriteFmq(string type, bool sync, QueueId queue_id, void* data);
+
+  // Writes data_size items to FMQ (no blocking at all).
+  //
+  // @param type      type of data in the queue.
+  // @param sync      whether queue is synchronized (only has one reader).
+  // @param queue_id  identifies the message queue object.
+  // @param data      pointer to the start of data to be written.
+  // @param data_size number of items to write.
+  //
+  // @return true if no error happens when writing to FMQ,
+  //         false otherwise.
+  bool WriteFmq(string type, bool sync, QueueId queue_id, void* data,
+                size_t data_size);
+
+  // Writes data_size items to FMQ, block if there is not enough space in
+  // the queue.
+  // This method can only be called if blocking=true on creation of the "first
+  // message queue object" of the FMQ.
+  //
+  // @param type           type of data in the queue.
+  // @param sync           whether queue is synchronized (only has one reader).
+  // @param queue_id       identifies the message queue object.
+  // @param data           pointer to the start of data to be written.
+  // @param data_size      number of items to write.
+  // @param time_out_nanos wait time when blocking.
+  //
+  // @returns true if no error happens when writing to FMQ,
+  //          false otherwise
+  bool WriteFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+                        size_t data_size, int64_t time_out_nanos);
+
+  // Writes data_size items to FMQ, possibly block on other queues.
+  //
+  // @param type               type of data in the queue.
+  // @param sync               whether queue is synchronized.
+  // @param queue_id           identifies the message queue object.
+  // @param data               pointer to the start of data to be written.
+  // @param data_size          number of items to write.
+  // @param read_notification  notification bits to wait on when blocking.
+  //                           Write will fail if this argument is 0.
+  // @param write_notification notification bits to set when finish writing.
+  // @param time_out_nanos     wait time when blocking.
+  // @param event_flag_word    event flag word shared by multiple queues.
+  //
+  // @return true if no error happens when writing to FMQ,
+  //         false otherwise.
+  bool WriteFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+                        size_t data_size, uint32_t read_notification,
+                        uint32_t write_notification, int64_t time_out_nanos,
+                        atomic<uint32_t>* event_flag_word);
+
  private:
   // Finds the queue in the map based on the input queue ID.
   //
