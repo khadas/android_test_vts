@@ -21,3 +21,6 @@ ply
 
 # Required packages for USB gadget tests
 libusb1
+
+# Required packages for unit tests
+mock
