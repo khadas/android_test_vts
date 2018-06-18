@@ -97,10 +97,6 @@
     <!-- b/69329663: DirectBootHostTest#testDirectBootNative flaky -->
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootNative" />
 
-    <!-- b/74341290: CtsDevicePolicyManagerTestCases flaky -->
-    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.DeviceOwnerTest#testLockTask_deviceOwnerUser" />
-    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.ManagedProfileTest#testCrossProfileContent" />
-
     <!-- b/74375238: CtsAppSecurityHostTestCases imcomplete test failure -->
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DocumentsTest#testCreateDocumentAtInitialLocation" />
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DocumentsTest#testCreateExisting" />
