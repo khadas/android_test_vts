@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <thread>
 
 #include <fmq/MessageQueue.h>
 #include <gtest/gtest.h>
@@ -44,6 +44,28 @@ class SyncReadWrites : public ::testing::Test {
 
     // initialize a writer
     writer_id_ = manager_.CreateFmq("uint16_t", true, NUM_ELEMS, false);
+    ASSERT_NE(writer_id_, -1);
+
+    // initialize a reader
+    reader_id_ = manager_.CreateFmq("uint16_t", true, writer_id_);
+    ASSERT_NE(reader_id_, -1);
+  }
+
+  virtual void TearDown() {}
+
+  VtsFmqDriver manager_;
+  QueueId writer_id_;
+  QueueId reader_id_;
+};
+
+// A test that initializes a single writer and a single reader.
+class BlockingReadWrites : public ::testing::Test {
+ protected:
+  virtual void SetUp() {
+    static constexpr size_t NUM_ELEMS = 2048;
+
+    // initialize a writer
+    writer_id_ = manager_.CreateFmq("uint16_t", true, NUM_ELEMS, true);
     ASSERT_NE(writer_id_, -1);
 
     // initialize a reader
@@ -109,6 +131,13 @@ TEST_F(SyncReadWrites, SetupBasicTest) {
 void init_data(uint16_t* data, size_t len, size_t offset = 0) {
   for (size_t i = 0; i < len; i++) {
     data[i] = (uint16_t)(i + offset);
+  }
+}
+
+// util method to verify data
+void verifyData(uint16_t* data, size_t len, size_t offset = 0) {
+  for (size_t i = 0; i < len; i++) {
+    ASSERT_EQ(data[i], (uint16_t)(i + offset));
   }
 }
 
@@ -228,6 +257,47 @@ TEST_F(SyncReadWrites, ConsecutiveReadWrite) {
   ASSERT_TRUE(manager_.AvailableToRead("uint16_t", true, reader_id_,
                                        &reader_available_reads));
   ASSERT_EQ(0, reader_available_reads);
+}
+
+// Tests reader waiting for data to be available.
+// Writer waits for 0.05s and writes the data.
+// Reader blocks for at most 0.1s and reads the data if it is available.
+TEST_F(BlockingReadWrites, ReadWriteSuccess) {
+  static constexpr size_t DATA_SIZE = 64;
+
+  uint16_t read_data[DATA_SIZE];
+  uint16_t write_data[DATA_SIZE];
+
+  // initialize data to transfer
+  init_data(write_data, DATA_SIZE);
+
+  pid_t pid = fork();
+  if (pid == 0) {  // child process is a reader, blocking for at most 0.1s.
+    ASSERT_TRUE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
+                                         static_cast<void*>(read_data),
+                                         DATA_SIZE, 100 * 1000000));
+    verifyData(read_data, DATA_SIZE);  // Since we know what we have written,
+                                       // just manually check it.
+    exit(0);
+  } else if (pid > 0) {
+    // parent process is a writer, waits for 0.05s and writes.
+    struct timespec writer_wait_time = {0, 50 * 1000000};
+    nanosleep(&writer_wait_time, NULL);
+    ASSERT_TRUE(manager_.WriteFmqBlocking("uint16_t", true, writer_id_,
+                                          static_cast<void*>(write_data),
+                                          DATA_SIZE, 1000000));
+  }
+}
+
+// Tests reader blocking times out.
+TEST_F(BlockingReadWrites, BlockingTimeOut) {
+  static constexpr size_t DATA_SIZE = 64;
+  uint16_t read_data[DATA_SIZE];
+
+  // block for 0.05s, timeout
+  ASSERT_FALSE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
+                                        static_cast<void*>(read_data),
+                                        DATA_SIZE, 50 * 1000000));
 }
 
 }  // namespace vts
