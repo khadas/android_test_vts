@@ -247,6 +247,32 @@ class CoverageFeature(feature_utils.Feature):
             path = path_utils.JoinTargetPath(path, path_suffix)
         self._ExecuteOneAdbShellCommand(dut, serial, _CLEAN_TRACE_COMMAND)
 
+    def _GetHalPids(self, dut, hal_names):
+        """Get the process id for the given hal names.
+
+        Args:
+            dut: the device under test.
+            hal_names: list of strings for targeting hal names.
+
+        Returns:
+            list of strings for the corresponding pids.
+        """
+        logging.debug("hal_names: %s", str(hal_names))
+        searchString = "|".join(hal_names)
+        entries = []
+        try:
+            dut.rootAdb()
+            entries = dut.adb.shell(
+                "lshal -itp 2> /dev/null | grep -E \"{0}\"".format(
+                    searchString)).splitlines()
+        except AdbError as e:
+            logging.error("failed to get pid entries")
+
+        pids = set(pid.strip()
+                   for pid in map(lambda entry: entry.split()[-1], entries)
+                   if pid.isdigit())
+        return pids
+
     def InitializeDeviceCoverage(self, dut=None, serial=None):
         """Initializes the device for coverage before tests run.
 
@@ -259,6 +285,13 @@ class CoverageFeature(feature_utils.Feature):
         self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
         logging.debug("Removing existing gcda files.")
         self._ClearTargetGcov(dut, serial)
+
+        # restart HALs to include coverage for initialization code.
+        if self._hal_names:
+            pids = self._GetHalPids(dut, self._hal_names)
+            for pid in pids:
+                cmd = "kill -9 " + pid
+                self._ExecuteOneAdbShellCommand(dut, serial, cmd)
 
     def _GetGcdaDict(self, dut, serial):
         """Retrieves GCDA files from device and creates a dictionary of files.
@@ -282,18 +315,7 @@ class CoverageFeature(feature_utils.Feature):
 
         gcda_files = set()
         if self._hal_names:
-            searchString = "|".join(self._hal_names)
-            entries = []
-            try:
-                entries = dut.adb.shell(
-                    "lshal -itp 2> /dev/null | grep -E \"{0}\"".format(
-                        searchString)).splitlines()
-            except AdbError as e:
-                logging.error("failed to get pid entries")
-
-            pids = set(pid.strip()
-                       for pid in map(lambda entry: entry.split()[-1], entries)
-                       if pid.isdigit())
+            pids = self._GetHalPids(dut, self._hal_names)
             pids.add(_SP_COVERAGE_PATH)
             for pid in pids:
                 path = path_utils.JoinTargetPath(TARGET_COVERAGE_PATH, pid)
