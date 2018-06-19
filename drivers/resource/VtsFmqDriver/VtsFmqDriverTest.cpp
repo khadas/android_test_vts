@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
+#include <thread>
 
 #include <fmq/MessageQueue.h>
 #include <gtest/gtest.h>
@@ -103,6 +105,13 @@ TEST_F(SyncReadWrites, SetupBasicTest) {
   ASSERT_EQ(0, reader_available_reads);
 }
 
+// util method to initialize data
+void init_data(uint16_t* data, size_t len, size_t offset = 0) {
+  for (size_t i = 0; i < len; i++) {
+    data[i] = (uint16_t)(i + offset);
+  }
+}
+
 // Tests a basic writer and reader interaction.
 // Reader reads back data written by the writer correctly.
 TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
@@ -111,9 +120,7 @@ TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
   uint16_t read_data[DATA_SIZE];
 
   // initialize the data to transfer
-  for (uint16_t i = 0; i < DATA_SIZE; i++) {
-    write_data[i] = i;
-  }
+  init_data(write_data, DATA_SIZE);
 
   // writer should succeed
   ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
@@ -125,6 +132,102 @@ TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
 
   // check if the data is read back correctly
   ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+}
+
+// Tests reading from an empty queue.
+TEST_F(SyncReadWrites, ReadEmpty) {
+  static constexpr size_t DATA_SIZE = 64;
+  uint16_t read_data[DATA_SIZE];
+
+  // attempt to read from an empty queue
+  ASSERT_FALSE(manager_.ReadFmq("uint16_t", true, reader_id_,
+                                static_cast<void*>(read_data), DATA_SIZE));
+}
+
+// Tests writing to a full queue.
+TEST_F(SyncReadWrites, WriteFull) {
+  static constexpr size_t DATA_SIZE = 2048;
+  uint16_t write_data[DATA_SIZE];
+  uint16_t read_data[DATA_SIZE];
+
+  // initialize the data to transfer
+  init_data(write_data, DATA_SIZE);
+
+  // This write succeeds, filling up the queue
+  ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
+                                static_cast<void*>(write_data), DATA_SIZE));
+
+  // This write fails, queue is full
+  ASSERT_FALSE(manager_.WriteFmq("uint16_t", true, writer_id_,
+                                 static_cast<void*>(write_data), DATA_SIZE));
+
+  // checks space available is 0
+  size_t writer_available_writes;
+  ASSERT_TRUE(manager_.AvailableToWrite("uint16_t", true, writer_id_,
+                                        &writer_available_writes));
+  ASSERT_EQ(0, writer_available_writes);
+
+  // reader succeeds, reads the entire queue back correctly
+  ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
+                               static_cast<void*>(read_data), DATA_SIZE));
+
+  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+}
+
+// Attempt to write more than the size of the queue.
+TEST_F(SyncReadWrites, WriteTooLarge) {
+  static constexpr size_t LARGE_DATA_SIZE = 2049;
+  uint16_t write_data[LARGE_DATA_SIZE];
+
+  // initialize data to transfer
+  init_data(write_data, LARGE_DATA_SIZE);
+
+  // write more than the queue size
+  ASSERT_FALSE(manager_.WriteFmq("uint16_t", true, writer_id_,
+                                 static_cast<void*>(write_data),
+                                 LARGE_DATA_SIZE));
+}
+
+// Pass the wrong type.
+TEST_F(SyncReadWrites, WrongType) {
+  static constexpr size_t DATA_SIZE = 2;
+  uint16_t write_data[DATA_SIZE];
+
+  // initialize data to transfer
+  init_data(write_data, DATA_SIZE);
+
+  // attempt to write uint32_t type
+  ASSERT_FALSE(manager_.WriteFmq("uint32_t", true, writer_id_,
+                                 static_cast<void*>(write_data), DATA_SIZE));
+
+  // attempt to specify wrong queue flavor
+  ASSERT_FALSE(manager_.WriteFmq("uint16_t", false, writer_id_,
+                                 static_cast<void*>(write_data), DATA_SIZE));
+}
+
+// Tests consecutive interaction between writer and reader.
+// Reader immediately reads back what writer writes.
+TEST_F(SyncReadWrites, ConsecutiveReadWrite) {
+  static constexpr size_t DATA_SIZE = 64;
+  static constexpr size_t BATCH_SIZE = 10;
+  uint16_t read_data[DATA_SIZE];
+  uint16_t write_data[DATA_SIZE];
+
+  // 10 consecutive writes and reads
+  for (size_t i = 0; i < BATCH_SIZE; i++) {
+    init_data(write_data, DATA_SIZE, DATA_SIZE * i);
+    ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
+                                  static_cast<void*>(write_data), DATA_SIZE));
+
+    ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
+                                 static_cast<void*>(read_data), DATA_SIZE));
+  }
+
+  // no more available to read
+  size_t reader_available_reads;
+  ASSERT_TRUE(manager_.AvailableToRead("uint16_t", true, reader_id_,
+                                       &reader_available_reads));
+  ASSERT_EQ(0, reader_available_reads);
 }
 
 }  // namespace vts
