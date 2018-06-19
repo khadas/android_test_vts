@@ -233,4 +233,43 @@
     <!-- b/80388295: CtsAccessibilityServiceTestCases failure flaky -->
     <option name="compatibility:exclude-filter" value="CtsAccessibilityServiceTestCases android.accessibilityservice.cts.AccessibilityGestureDispatchTest#testClickWhenMagnified_matchesActualTouch" />
 
+    <!-- b/80284482: Flaky tests -->
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testAllowWhileIdleAlarms" />
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testBucketUpgradeToNoDelay" />
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testBucketUpgradeToSmallerDelay" />
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testFrequentDelay" />
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testRareDelay" />
+    <option name="compatibility:exclude-filter" value="CtsAlarmManagerTestCases android.alarmmanager.cts.AppStandbyTests#testWorkingSetDelay" />
+
+    <!-- b/110260628: A confirmed GSI incompatibility (waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.DeviceOwnerTest#testCreateAndManageUser_DontSkipSetupWizard" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.DeviceOwnerTest#testSecurityLoggingWithSingleUser" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedDeviceOwnerTest#testKeyManagement" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedProfileOwnerTest#testKeyManagement" />
+    <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testKeyManagement" />
+
+    <!-- b/110235498: Instant App is irrelevant and thus excluded -->
+    <option name="compatibility:exclude-filter" value="CtsExternalSourcesTestCases android.packageinstaller.externalsources.cts.ExternalSourcesInstantAppsTest#allowedSourceTest" />
+
+    <!-- b/110405497: Flaky tests (waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsKeystoreTestCases android.keystore.cts.KeyAttestationTest#testDeviceIdAttestation" />
+
+    <!-- b/110385515: Flaky due to a particular SIM card requirement (excluded) -->
+    <option name="compatibility:exclude-filter" value="CtsNetTestCases android.net.cts.ConnectivityManagerTest#testOpenConnection" />
+    <option name="compatibility:exclude-filter" value="CtsNetTestCases android.net.wifi.rtt.cts.WifiRttTest#testRangingToTestAp" />
+
+    <!-- b/110261912: Flaky tests -->
+    <option name="compatibility:exclude-filter" value="CtsProviderTestCases android.provider.cts.BlockedNumberContractTest#testProviderInteractionsAsRegularApp_fails" />
+
+    <!-- b/80077839: Incompatibility with GSI (waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsStatsdHostTestCases android.cts.statsd.atom.HostAtomTests#testBluetoothActivityInfo" />
+    <option name="compatibility:exclude-filter" value="CtsStatsdHostTestCases android.cts.statsd.atom.HostAtomTests#testScreenStateChangedAtom" />
+    <option name="compatibility:exclude-filter" value="CtsStatsdHostTestCases android.cts.statsd.validation.ValidationTests#testPartialWakelock" />
+
+     <!-- b/110417203: Flaky tests -->
+    <option name="compatibility:exclude-filter" value="CtsUsageStatsTestCases android.app.usage.cts.NetworkUsageStatsTest#testUidTagStateDetails" />
+
+    <!-- b/110375762: A regression in a security PoC test which is irrelevant -->
+    <option name="compatibility:exclude-filter" value="CtsSecurityHostTestCases android.security.cts.Poc17_05#testPocCVE_2017_0630" />
+
 </configuration>
