@@ -59,6 +59,8 @@ class SyncReadWrites : public ::testing::Test {
 };
 
 // A test that initializes a single writer and a single reader.
+// TODO: add tests for blocking between multiple queues later when there is more
+// use case.
 class BlockingReadWrites : public ::testing::Test {
  protected:
   virtual void SetUp() {
@@ -78,6 +80,31 @@ class BlockingReadWrites : public ::testing::Test {
   VtsFmqDriver manager_;
   QueueId writer_id_;
   QueueId reader_id_;
+};
+
+// A test that initializes a single writer and two readers.
+class UnsynchronizedWrites : public ::testing::Test {
+ protected:
+  virtual void SetUp() {
+    static constexpr size_t NUM_ELEMS = 2048;
+
+    // initialize a writer
+    writer_id_ = manager_.CreateFmq("uint16_t", false, NUM_ELEMS, false);
+    ASSERT_NE(writer_id_, -1);
+
+    // initialize two readers
+    reader_id1_ = manager_.CreateFmq("uint16_t", false, writer_id_);
+    reader_id2_ = manager_.CreateFmq("uint16_t", false, writer_id_);
+    ASSERT_NE(reader_id1_, -1);
+    ASSERT_NE(reader_id2_, -1);
+  }
+
+  virtual void TearDown() {}
+
+  VtsFmqDriver manager_;
+  QueueId writer_id_;
+  QueueId reader_id1_;
+  QueueId reader_id2_;
 };
 
 // Tests the reader and writer are set up correctly.
@@ -298,6 +325,48 @@ TEST_F(BlockingReadWrites, BlockingTimeOut) {
   ASSERT_FALSE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
                                         static_cast<void*>(read_data),
                                         DATA_SIZE, 50 * 1000000));
+}
+
+// Tests two readers read separate part of the data and are able to retrieve
+// what the writer writes.
+TEST_F(UnsynchronizedWrites, ReadWriteSuccess) {
+  static constexpr size_t DATA_SIZE = 64;
+  static constexpr size_t READER_SIZE = 32;
+  uint16_t write_data[DATA_SIZE];
+  uint16_t read_data[DATA_SIZE];
+
+  // initialize data to transfer
+  init_data(write_data, DATA_SIZE);
+
+  // writer writes 64 items
+  ASSERT_TRUE(manager_.WriteFmq("uint16_t", false, writer_id_,
+                                static_cast<void*>(write_data), DATA_SIZE));
+
+  // reader 1 reads the first 32 items
+  ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id1_,
+                               static_cast<void*>(read_data), READER_SIZE));
+
+  // reader 2 reads the second 32 items
+  ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id2_,
+                               static_cast<void*>(read_data + READER_SIZE),
+                               READER_SIZE));
+
+  // check if the data are equal
+  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+}
+
+// Tests that blocking is not allowed on unsynchronized queue.
+TEST_F(UnsynchronizedWrites, IllegalBlocking) {
+  static constexpr size_t DATA_SIZE = 64;
+  uint16_t write_data[DATA_SIZE];
+
+  // initialize data to transfer
+  init_data(write_data, DATA_SIZE);
+
+  // should fail immediately, instead of blocking
+  ASSERT_FALSE(manager_.WriteFmqBlocking("uint16_t", false, writer_id_,
+                                         static_cast<void*>(write_data),
+                                         DATA_SIZE, 1000000));
 }
 
 }  // namespace vts
