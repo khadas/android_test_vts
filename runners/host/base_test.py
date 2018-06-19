@@ -94,6 +94,8 @@ class BaseTestClass(object):
         web: WebFeature, object storing web feature util for test run
         coverage: CoverageFeature, object storing coverage feature util for test run
         sancov: SancovFeature, object storing sancov feature util for test run
+        start_vts_agents: whether to start vts agents when registering new
+                          android devices.
         profiling: ProfilingFeature, object storing profiling feature util for test run
         _bug_report_on_failure: bool, whether to catch bug report at the end
                                 of failed test cases. Default is False
@@ -101,6 +103,7 @@ class BaseTestClass(object):
                                 of failed test cases. Default is True
         test_filter: Filter object to filter test names.
     """
+    start_vts_agents = True
 
     def __init__(self, configs):
         self.tests = []
@@ -187,7 +190,8 @@ class BaseTestClass(object):
         """Returns a list of AndroidDevice objects"""
         if not hasattr(self, _ANDROID_DEVICES):
             setattr(self, _ANDROID_DEVICES,
-                    self.registerController(android_device))
+                    self.registerController(android_device,
+                                            start_services=self.start_vts_agents))
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter
