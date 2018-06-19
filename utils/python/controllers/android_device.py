@@ -896,13 +896,16 @@ class AndroidDevice(object):
         logging.info("Android framework started.")
         return True
 
-    def start(self):
+    def start(self, start_native_server=True):
         """Starts Android framework and waits for ACTION_BOOT_COMPLETED.
 
+        Args:
+            start_native_server: bool, whether to start the native server.
         Returns:
             bool, True if framework start success. False otherwise.
         """
-        self.startNativeServer()
+        if start_native_server:
+            self.startNativeServer()
         return self.startFramework()
 
     def stopFramework(self):
@@ -915,13 +918,17 @@ class AndroidDevice(object):
         self.setProp("sys.boot_completed", 0)
         logging.info("Android framework stopped")
 
-    def stop(self):
+    def stop(self, stop_native_server=False):
         """Stops Android framework.
 
         Method will block until stop is complete.
+
+        Args:
+            stop_native_server: bool, whether to stop the native server.
         """
         self.stopFramework()
-        self.stopNativeServer()
+        if stop_native_server:
+            self.stopNativeServer()
 
     def waitForFrameworkStartComplete(self, timeout_secs=WAIT_TIMEOUT_SEC):
         """Wait for Android framework to complete starting.
