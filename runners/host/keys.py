@@ -107,6 +107,7 @@ class ConfigKeys(object):
     IKEY_GCOV_RESOURCES_PATH = "gcov_resources_path"
     IKEY_COVERAGE_REPORT_PATH = "coverage_report_path"
     IKEY_EXCLUDE_COVERAGE_PATH = "exclude_coverage_path"
+    IKEY_FUZZING_GCS_BUCKET_NAME = "fuzzing_gcs_bucket_name"
 
     # Keys for the HAL HIDL GTest type (see VtsMultiDeviceTest.java).
     IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
