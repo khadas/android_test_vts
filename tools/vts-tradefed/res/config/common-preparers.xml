@@ -19,9 +19,12 @@
         <option name="dep-module" value="future" />
         <option name="dep-module" value="futures" />
         <option name="dep-module" value="google-api-python-client" />
+        <option name="dep-module" value="google-cloud" />
+        <option name="dep-module" value="google.auth" />
         <option name="dep-module" value="httplib2" />
         <option name="dep-module" value="oauth2client" />
         <option name="dep-module" value="protobuf" />
+        <option name="dep-module" value="pyasn1>=0.4.1" />
         <option name="dep-module" value="requests" />
   </multi_target_preparer>
 </configuration>
