@@ -1,0 +1,81 @@
+// Copyright 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package android.vts;
+option java_package = "com.android.vts.proto";
+option java_outer_classname = "VtsResourceControllerMessage";
+
+import "test/vts/proto/ComponentSpecificationMessage.proto";
+
+enum FmqOp {
+    FMQ_PROTO_UNKNOWN = 0;
+    FMQ_PROTO_CREATE = 1;
+    FMQ_PROTO_READ = 2;
+    FMQ_PROTO_READ_BLOCKING = 3;
+    FMQ_PROTO_READ_BLOCKING_LONG = 4; // TODO: support this from host side in the future
+    FMQ_PROTO_WRITE = 5;
+    FMQ_PROTO_WRITE_BLOCKING = 6;
+    FMQ_PROTO_WRITE_BLOCKING_LONG = 7; // TODO: support this from host side in the future
+    FMQ_PROTO_AVAILABLE_WRITE = 8;
+    FMQ_PROTO_AVAILABLE_READ = 9;
+    FMQ_PROTO_GET_QUANTUM_SIZE = 10;
+    FMQ_PROTO_GET_QUANTUM_COUNT = 11;
+    FMQ_PROTO_IS_VALID = 12;
+}
+
+// The arguments for a FMQ operation.
+message FmqRequestMessage {
+    // operation to be performed
+    optional FmqOp operation = 1;
+
+    // string to represent type of data in the queue
+    // TODO: support user-defined types
+    optional bytes data_type = 2;
+    // queue flavor
+    optional bool sync = 3;
+
+    // queue id
+    optional int32 queue_id = 4 [default = -1];
+
+    // queue size
+    optional uint64 queue_size = 5;
+    // whether to enable blocking
+    optional bool blocking = 6;
+    // whether to reset read/write pointers
+    optional bool reset_pointers = 7;
+
+    // data to be written
+    repeated VariableSpecificationMessage write_data = 8;
+    // length of data to be read
+    optional uint64 read_data_size = 9;
+    // wait time when blocking
+    optional int64 time_out_nanos = 10;
+}
+
+// The response for a FMQ operation,
+// including scalar values and data read back from the queue.
+message FmqResponseMessage {
+    // data read from the queue
+    repeated VariableSpecificationMessage read_data = 1;
+
+    // three possible return types from FMQ
+    // basic util function return values
+    optional uint64 sizet_return_val = 2;
+    // function that returns a queue id
+    optional int32 queue_id = 3;
+    // signal if the operation succeeds on target side
+    optional bool success = 4;
+}
