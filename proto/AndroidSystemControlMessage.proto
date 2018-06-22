@@ -17,6 +17,7 @@ syntax = "proto2";
 package android.vts;
 
 import "test/vts/proto/ComponentSpecificationMessage.proto";
+import "test/vts/proto/VtsResourceControllerMessage.proto";
 
 
 // Type of a command.
@@ -45,6 +46,9 @@ enum CommandType {
 
   // To execute a shell command;
   VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND = 301;
+
+  // To request FMQ resource.
+  VTS_FMQ_COMMAND = 401;
 }
 
 
@@ -137,6 +141,9 @@ message AndroidSystemControlCommandMessage {
 
   // for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND
   repeated bytes shell_command = 5001;
+
+  // for specifying requests to FMQ driver
+  optional FmqRequestMessage fmq_request = 6001;
 }
 
 
@@ -161,6 +168,9 @@ message AndroidSystemControlResponseMessage {
   repeated bytes stdout = 2001;
   repeated bytes stderr = 2002;
   repeated int32 exit_code = 2003;
+
+  // read data and return value from FMQ driver
+  optional FmqResponseMessage fmq_response = 3001;
 }
 
 
