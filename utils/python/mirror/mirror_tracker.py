@@ -23,6 +23,7 @@ from vts.runners.host.tcp_server import callback_server
 from vts.utils.python.mirror import hal_mirror
 from vts.utils.python.mirror import lib_mirror
 from vts.utils.python.mirror import shell_mirror
+from vts.utils.python.mirror import resource_mirror
 
 _DEFAULT_TARGET_BASE_PATHS = ["/system/lib64/hw"]
 _DEFAULT_HWBINDER_SERVICE = "default"
@@ -86,6 +87,85 @@ class MirrorTracker(object):
             raise errors.ComponentLoadingError(
                 "Failed to start a callback TcpServer at port %s" %
                 self._host_callback_port)
+
+    def InitFmq(self,
+                existing_queue=None,
+                new_queue_name=None,
+                data_type="uint16_t",
+                sync=True,
+                queue_size=0,
+                blocking=False,
+                reset_pointers=True,
+                client=None):
+        """Initiates a fast message queue object.
+
+        This method will initiate a fast message queue object on the target side,
+        create a mirror object for the FMQ, and register it in the tracker.
+
+        Args:
+            existing_queue: string or MirrorObject.
+                This argument identifies an existing queue mirror object.
+                If specified, it will tell the target driver to create a
+                new message queue object based on an existing message queue.
+                If it is None, that means creating a brand new message queue.
+            new_queue_name: string, name of the new queue, used as key in the tracker.
+                If not specified, this function dynamically generates a name.
+            data_type: string, type of data in the queue.
+            sync: bool, whether the queue is synchronized (only has one reader).
+            queue_size: int, size of the queue.
+            blocking: bool, whether blocking is enabled.
+            reset_pointers: bool, whether to reset read/write pointers when
+                creating a new message queue object based on an existing message queue.
+            client: VtsTcpClient, if an existing session should be used.
+                If not specified, creates a new one.
+
+        Returns:
+            ResourceMirror object, it allows users to directly call methods on
+                                   ResourceMirror object.
+        """
+        # Need to initialize a client if caller doesn't provide one.
+        if not client:
+            client = vts_tcp_client.VtsTcpClient()
+            client.Connect(
+                command_port=self._host_command_port,
+                callback_port=self._host_callback_port)
+
+        # Create a resource mirror object.
+        mirror = resource_mirror.ResourceMirror(client)
+
+        # Create a new queue by default.
+        existing_queue_id = -1
+        # Check if caller wants to create a queue object based on
+        # an existing queue object.
+        if (existing_queue != None):
+            # Check if caller provides a string.
+            if (type(existing_queue) == str):
+                if existing_queue in self._registered_mirrors:
+                    data_type = self._registered_mirrors[
+                        existing_queue]._data_type
+                    sync = self._registered_mirrors[existing_queue]._sync
+                    existing_queue_id = self._registered_mirrors[
+                        existing_queue]._driver_id
+                else:
+                    raise errors.USERError(
+                        "Nonexisting queue name in mirror_tracker.")
+            # Check if caller provides a resource mirror object.
+            elif (isinstance(existing_queue, resource_mirror.ResourceMirror)
+                  and existing_queue._res_type == "fmq"):
+                data_type = existing_queue._data_type
+                sync = existing_queue._sync
+                existing_queue_id = existing_queue._driver_id
+            else:
+                raise errors.USERError(
+                    "Unsupported way of finding an existing queue object.")
+
+        mirror.initFmq(data_type, sync, existing_queue_id, queue_size,
+                       blocking, reset_pointers)
+        # Needs to dynamically generate queue name if caller doesn't provide one
+        if (new_queue_name == None):
+            new_queue_name = "queue_id_" + str(mirror._driver_id)
+        self._registered_mirrors[new_queue_name] = mirror
+        return mirror
 
     def InitHidlHal(self,
                     target_type,
@@ -277,6 +357,17 @@ class MirrorTracker(object):
             return int(target_version_major), int(target_version_minor)
 
         raise errors.USERError("User has to provide a target version.")
+
+    def GetTcpClient(self, mirror_name):
+        """Gets the TCP client used in this tracker.
+        Useful for reusing session to access shared data.
+
+        Args:
+            mirror_name: used to identify mirror object.
+        """
+        if mirror_name in self._registered_mirrors:
+            return self._registered_mirrors[mirror_name]._client
+        return None
 
     def __getattr__(self, name):
         if name in self._registered_mirrors:

@@ -23,6 +23,7 @@ import types
 
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg_pb2
+from vts.proto import VtsResourceControllerMessage_pb2 as ResControlMsg_pb2
 from vts.runners.host import const
 from vts.runners.host import errors
 from vts.utils.python.mirror import mirror_object
@@ -43,7 +44,8 @@ COMMAND_TYPE_NAME = {
     201: "LIST_APIS",
     202: "CALL_API",
     203: "VTS_AGENT_COMMAND_GET_ATTRIBUTE",
-    301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND"
+    301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND",
+    401: "VTS_FMQ_COMMAND"
 }
 
 
@@ -437,6 +439,29 @@ class VtsTcpClient(object):
             const.EXIT_CODE: exit_code
         }
 
+    def SendFmqRequest(self, message):
+        """Sends a command to the FMQ driver and receives the response.
+
+        Args:
+            message: FmqRequestMessage, message that contains the arguments
+                     in the FMQ request.
+
+        Returns:
+            FmqResponseMessage, which includes all possible return value types,
+            including int, bool, and data read from the queue.
+        """
+        self.SendCommand(SysMsg_pb2.VTS_FMQ_COMMAND, fmq_request=message)
+        resp = self.RecvResponse()
+        logging.debug("resp for VTS_FMQ_COMMAND: %s", resp)
+
+        if not resp:
+            logging.error("TCP client did not receive a response from agent.")
+        elif resp.response_code != SysMsg_pb2.SUCCESS:
+            logging.error(
+                "TCP client received unsuccessful response code from agent.")
+        else:
+            return resp.fmq_response
+
     def Ping(self):
         """RPC to send a PING request.
 
@@ -530,7 +555,8 @@ class VtsTcpClient(object):
                     driver_type=None,
                     shell_command=None,
                     caller_uid=None,
-                    arg=None):
+                    arg=None,
+                    fmq_request=None):
         """Sends a command.
 
         Args:
@@ -602,6 +628,9 @@ class VtsTcpClient(object):
                 command_msg.shell_command.extend(shell_command)
             else:
                 command_msg.shell_command.append(shell_command)
+
+        if fmq_request is not None:
+            command_msg.fmq_request.CopyFrom(fmq_request)
 
         logging.debug("command %s" % command_msg)
         message = command_msg.SerializeToString()
