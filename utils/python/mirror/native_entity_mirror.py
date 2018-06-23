@@ -211,27 +211,33 @@ class NativeEntityMirror(mirror_object.MirrorObject):
             call_msg.hal_driver_id = self._driver_id
             call_msg.api.CopyFrom(func_msg)
             logging.info("final msg %s", call_msg)
-            result = self._client.CallApi(
+            results = self._client.CallApi(
                 text_format.MessageToString(call_msg), self._caller_uid)
-            logging.debug(result)
-            if (isinstance(result, tuple) and len(result) == 2 and
-                    isinstance(result[1], dict) and "coverage" in result[1]):
-                self._last_raw_code_coverage_data = result[1]["coverage"]
-                result = result[0]
+            if (isinstance(results, tuple) and len(results) == 2
+                    and isinstance(results[1], dict)
+                    and "coverage" in results[1]):
+                self._last_raw_code_coverage_data = results[1]["coverage"]
+                results = results[0]
 
-            if (result and isinstance(
-                    result, CompSpecMsg.VariableSpecificationMessage) and
-                    result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
-                if result.hidl_interface_id <= -1:
-                    return None
-                driver_id = result.hidl_interface_id
-                nested_interface_name = result.predefined_type.split("::")[-1]
-                logging.debug("Nested interface name: %s",
-                              nested_interface_name)
-                nested_interface = self.GetHalMirrorForInterface(
-                    nested_interface_name, driver_id)
-                return nested_interface
-            return result
+            if isinstance(results, list):  # Non-HIDL HAL does not return list.
+              # Translate TYPE_HIDL_INTERFACE to halMirror.
+              for i, _ in enumerate(results):
+                  result = results[i]
+                  if (result and isinstance(result,
+                                          CompSpecMsg.VariableSpecificationMessage)
+                        and result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
+                    if result.hidl_interface_id <= -1:
+                      results[i] = None
+                    driver_id = result.hidl_interface_id
+                    nested_interface_name = result.predefined_type.split("::")[-1]
+                    logging.debug("Nested interface name: %s",
+                                  nested_interface_name)
+                    nested_interface = self.GetHalMirrorForInterface(
+                        nested_interface_name, driver_id)
+                    results[i] = nested_interface
+              if len(results) == 1: # singe return result, return the value direcly.
+                  return results[0]
+            return results
 
         def MessageGenerator(*args, **kwargs):
             """Dynamically generates a custom message instance."""
