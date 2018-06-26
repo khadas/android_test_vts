@@ -191,7 +191,7 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             a host-side mirror of a HIDL HAL interface.
         """
         if not self._if_spec_msg:
-            raise MirrorObjectError("spcification is not loaded")
+            raise MirrorObjectError("specification is not loaded")
         msg = self._if_spec_msg
         found_api_spec = self._client.ReadSpecification(
             interface_name,
