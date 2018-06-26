@@ -84,6 +84,10 @@ class AgentRequestHandler : public VtsDriverCommUtil {
   bool SendApiResult(const string& func_name, const string& result,
                      const string& spec = "");
 
+  // for processing commands for FMQ.
+  bool ProcessFmqCommand(
+      const AndroidSystemControlCommandMessage& command_message);
+
  protected:
   // the currently opened, connected service name.
   string service_name_;

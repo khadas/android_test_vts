@@ -160,6 +160,26 @@ VtsDriverSocketClient::ExecuteShellCommand(
   return response_message;
 }
 
+bool VtsDriverSocketClient::ProcessFmqCommand(
+    const FmqRequestMessage& fmq_request, FmqResponseMessage* fmq_response) {
+  VtsDriverControlCommandMessage command_message;
+  VtsDriverControlResponseMessage response_message;
+  command_message.set_command_type(FMQ_OPERATION);
+  (command_message.mutable_fmq_request())->CopyFrom(fmq_request);
+
+  if (!VtsSocketSendMessage(command_message)) {
+    LOG(ERROR) << "Unable to send command from agent to driver.";
+    return false;
+  }
+  if (!VtsSocketRecvMessage(&response_message)) {
+    LOG(ERROR) << "Unable to receive message from driver to agent";
+    return false;
+  }
+
+  fmq_response->CopyFrom(response_message.fmq_response());
+  return true;
+}
+
 int32_t VtsDriverSocketClient::Status(int32_t type) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);

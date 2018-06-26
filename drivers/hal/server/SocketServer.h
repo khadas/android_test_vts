@@ -20,6 +20,7 @@
 #define __VTS_DRIVER_HAL_SOCKET_SERVER_
 
 #include <VtsDriverCommUtil.h>
+#include <resource_manager/VtsResourceManager.h>
 
 #include "driver_manager/VtsHalDriverManager.h"
 
@@ -29,9 +30,11 @@ namespace vts {
 class VtsDriverHalSocketServer : public VtsDriverCommUtil {
  public:
   VtsDriverHalSocketServer(VtsHalDriverManager* driver_manager,
+                           VtsResourceManager* resource_manager,
                            const char* lib_path)
       : VtsDriverCommUtil(),
         driver_manager_(driver_manager),
+        resource_manager_(resource_manager),
         lib_path_(lib_path) {}
 
   // Start a session to handle a new request.
@@ -64,11 +67,13 @@ class VtsDriverHalSocketServer : public VtsDriverCommUtil {
 
  private:
   android::vts::VtsHalDriverManager* driver_manager_;
+  android::vts::VtsResourceManager* resource_manager_;
   const char* lib_path_;
 };
 
 extern int StartSocketServer(const string& socket_port_file,
                              VtsHalDriverManager* driver_manager,
+                             VtsResourceManager* resource_manager,
                              const char* lib_path);
 
 }  // namespace vts
