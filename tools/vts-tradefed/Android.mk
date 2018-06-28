@@ -29,6 +29,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     libvts_protos_host \
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
+    gson-prebuilt-jar \
     google-api-java-client-min-repackaged \
     cts-tradefed-harness
 
