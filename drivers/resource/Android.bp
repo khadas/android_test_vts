@@ -23,8 +23,6 @@ cc_defaults {
         "-Werror",
     ],
 
-    srcs: ["fmq_driver/VtsFmqDriver.cpp"],
-
     local_include_dirs: ["include"],
 
     shared_libs: [
@@ -33,26 +31,56 @@ cc_defaults {
         "libfmq",
         "libhidlbase",
         "liblog",
+        "libprotobuf-cpp-full",
         "libutils",
     ],
 
-    rtti: true,
-
     export_include_dirs: ["include"],
+
+    export_shared_lib_headers: [
+        "libcutils",
+        "libfmq",
+        "libhidlbase",
+        "libutils",
+    ],
 }
 
 cc_library_shared {
-    name: "libvts_resource",
+    name: "libvts_resource_driver",
 
     defaults: ["libvts_resource-defaults"],
+
+    rtti: true,
+
+    srcs: [
+        "fmq_driver/VtsFmqDriver.cpp",
+    ],
+}
+
+cc_library_shared {
+    name: "libvts_resource_manager",
+
+    defaults: ["libvts_resource-defaults"],
+
+    srcs: [
+        "resource_manager/VtsResourceManager.cpp",
+    ],
+
+    shared_libs: [
+        "libvts_multidevice_proto",
+        "libvts_resource_driver",
+    ],
 }
 
 cc_test {
     name: "vts_resource_fmq_test",
+
     defaults: ["libvts_resource-defaults"],
 
+    rtti: true,
+
     srcs: [
+        "fmq_driver/VtsFmqDriver.cpp",
         "fmq_driver/VtsFmqDriverTest.cpp"
     ],
 }
-
