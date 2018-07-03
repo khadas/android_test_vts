@@ -1,4 +1,5 @@
 # Required packages for VTS Runner
+pip>=9.0.0
 enum
 future
 futures
@@ -7,6 +8,7 @@ google-cloud
 google.auth
 httplib2
 protobuf
+pyserial
 requests
 setuptools
 
