@@ -144,12 +144,122 @@ void VtsResourceManager::ProcessFmqWrite(const FmqRequestMessage& fmq_request,
   size_t write_data_size = fmq_request.write_data_size();
   int64_t time_out_nanos = fmq_request.time_out_nanos();
 
-  if (!data_type.compare("uint16_t")) {
+  if (!data_type.compare("int8_t")) {
+    vector<int8_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().int8_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("uint8_t")) {
+    vector<uint8_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().uint8_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("int16_t")) {
+    vector<int16_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().int16_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("uint16_t")) {
     vector<uint16_t> write_data(write_data_size);
     transform(fmq_request.write_data().cbegin(),
               fmq_request.write_data().cend(), write_data.begin(),
               [](const VariableSpecificationMessage& item) {
                 return item.scalar_value().uint16_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("int32_t")) {
+    vector<int32_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().int32_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("uint32_t")) {
+    vector<uint32_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().uint32_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("int64_t")) {
+    vector<int64_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().int64_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("uint64_t")) {
+    vector<uint64_t> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().uint64_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("float_t")) {
+    vector<float> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().float_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("double_t")) {
+    vector<double> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().double_t();
+              });
+    data_buffer = static_cast<void*>(&write_data[0]);
+    success =
+        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
+                                    write_data_size, time_out_nanos);
+  } else if (!data_type.compare("bool_t")) {
+    vector<char> write_data(write_data_size);
+    transform(fmq_request.write_data().cbegin(),
+              fmq_request.write_data().cend(), write_data.begin(),
+              [](const VariableSpecificationMessage& item) {
+                return item.scalar_value().bool_t();
               });
     data_buffer = static_cast<void*>(&write_data[0]);
     success =
@@ -170,7 +280,43 @@ void VtsResourceManager::ProcessFmqRead(const FmqRequestMessage& fmq_request,
   size_t read_data_size = fmq_request.read_data_size();
   int64_t time_out_nanos = fmq_request.time_out_nanos();
 
-  if (!data_type.compare("uint16_t")) {
+  if (!data_type.compare("int8_t")) {
+    int8_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_int8_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("uint8_t")) {
+    uint8_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_uint8_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("int16_t")) {
+    int16_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_int16_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("uint16_t")) {
     uint16_t data_buffer[read_data_size];
     success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
                                           static_cast<void*>(data_buffer),
@@ -181,6 +327,90 @@ void VtsResourceManager::ProcessFmqRead(const FmqRequestMessage& fmq_request,
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
       (item->mutable_scalar_value())->set_uint16_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("int32_t")) {
+    int32_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_int32_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("uint32_t")) {
+    uint32_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_uint32_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("int64_t")) {
+    int64_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_int64_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("uint64_t")) {
+    uint64_t data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_uint64_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("float_t")) {
+    float data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_float_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("double_t")) {
+    double data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_double_t(data_buffer[i]);
+    }
+  } else if (!data_type.compare("bool_t")) {
+    bool data_buffer[read_data_size];
+    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
+                                          static_cast<void*>(data_buffer),
+                                          read_data_size, time_out_nanos);
+    fmq_response->clear_read_data();
+    for (size_t i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      item->set_type(TYPE_SCALAR);
+      item->set_scalar_type(data_type);
+      (item->mutable_scalar_value())->set_bool_t(data_buffer[i]);
     }
   }
   fmq_response->set_success(success);
