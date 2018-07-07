@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "VtsFmqDriver/VtsFmqDriver.h"
+#include "fmq_driver/VtsFmqDriver.h"
 
 #include <errno.h>
 #include <limits.h>

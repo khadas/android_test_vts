@@ -23,7 +23,7 @@ cc_defaults {
         "-Werror",
     ],
 
-    srcs: ["VtsFmqDriver/VtsFmqDriver.cpp"],
+    srcs: ["fmq_driver/VtsFmqDriver.cpp"],
 
     local_include_dirs: ["include"],
 
@@ -52,7 +52,7 @@ cc_test {
     defaults: ["libvts_resource-defaults"],
 
     srcs: [
-        "VtsFmqDriver/VtsFmqDriverTest.cpp"
+        "fmq_driver/VtsFmqDriverTest.cpp"
     ],
 }
 
