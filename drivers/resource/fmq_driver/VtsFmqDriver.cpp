@@ -15,7 +15,7 @@
 //
 #define LOG_TAG "VtsFmqDriver"
 
-#include "VtsFmqDriver/VtsFmqDriver.h"
+#include "fmq_driver/VtsFmqDriver.h"
 
 #include <string>
 #include <typeinfo>
