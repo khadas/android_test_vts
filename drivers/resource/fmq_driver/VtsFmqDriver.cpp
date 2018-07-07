@@ -280,15 +280,15 @@ bool VtsFmqDriver::ProcessRequest(string type, bool sync,
     return ExecuteOperationHelper<int8_t>(sync, op_param, result,
                                           static_cast<int8_t*>(data),
                                           is_blocking_operation);
-  } else if (!type.compare("float")) {
+  } else if (!type.compare("float_t")) {
     return ExecuteOperationHelper<float>(sync, op_param, result,
                                          static_cast<float*>(data),
                                          is_blocking_operation);
-  } else if (!type.compare("double")) {
+  } else if (!type.compare("double_t")) {
     return ExecuteOperationHelper<double>(sync, op_param, result,
                                           static_cast<double*>(data),
                                           is_blocking_operation);
-  } else if (!type.compare("bool")) {
+  } else if (!type.compare("bool_t")) {
     return ExecuteOperationHelper<bool>(sync, op_param, result,
                                         static_cast<bool*>(data),
                                         is_blocking_operation);

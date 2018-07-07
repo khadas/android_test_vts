@@ -155,16 +155,9 @@ TEST_F(SyncReadWrites, SetupBasicTest) {
 }
 
 // util method to initialize data
-void init_data(uint16_t* data, size_t len, size_t offset = 0) {
+void InitData(uint16_t* data, size_t len) {
   for (size_t i = 0; i < len; i++) {
-    data[i] = (uint16_t)(i + offset);
-  }
-}
-
-// util method to verify data
-void verifyData(uint16_t* data, size_t len, size_t offset = 0) {
-  for (size_t i = 0; i < len; i++) {
-    ASSERT_EQ(data[i], (uint16_t)(i + offset));
+    data[i] = rand() % 100 + 1;  // a random value between 1 and 100
   }
 }
 
@@ -176,7 +169,7 @@ TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
   uint16_t read_data[DATA_SIZE];
 
   // initialize the data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   // writer should succeed
   ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
@@ -187,7 +180,7 @@ TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
                                static_cast<void*>(read_data), DATA_SIZE));
 
   // check if the data is read back correctly
-  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
 }
 
 // Tests reading from an empty queue.
@@ -207,7 +200,7 @@ TEST_F(SyncReadWrites, WriteFull) {
   uint16_t read_data[DATA_SIZE];
 
   // initialize the data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   // This write succeeds, filling up the queue
   ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
@@ -227,7 +220,7 @@ TEST_F(SyncReadWrites, WriteFull) {
   ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
                                static_cast<void*>(read_data), DATA_SIZE));
 
-  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
 }
 
 // Attempt to write more than the size of the queue.
@@ -236,7 +229,7 @@ TEST_F(SyncReadWrites, WriteTooLarge) {
   uint16_t write_data[LARGE_DATA_SIZE];
 
   // initialize data to transfer
-  init_data(write_data, LARGE_DATA_SIZE);
+  InitData(write_data, LARGE_DATA_SIZE);
 
   // write more than the queue size
   ASSERT_FALSE(manager_.WriteFmq("uint16_t", true, writer_id_,
@@ -250,7 +243,7 @@ TEST_F(SyncReadWrites, WrongType) {
   uint16_t write_data[DATA_SIZE];
 
   // initialize data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   // attempt to write uint32_t type
   ASSERT_FALSE(manager_.WriteFmq("uint32_t", true, writer_id_,
@@ -271,12 +264,13 @@ TEST_F(SyncReadWrites, ConsecutiveReadWrite) {
 
   // 10 consecutive writes and reads
   for (size_t i = 0; i < BATCH_SIZE; i++) {
-    init_data(write_data, DATA_SIZE, DATA_SIZE * i);
+    InitData(write_data, DATA_SIZE);
     ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
                                   static_cast<void*>(write_data), DATA_SIZE));
 
     ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
                                  static_cast<void*>(read_data), DATA_SIZE));
+    ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
   }
 
   // no more available to read
@@ -296,15 +290,14 @@ TEST_F(BlockingReadWrites, ReadWriteSuccess) {
   uint16_t write_data[DATA_SIZE];
 
   // initialize data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   pid_t pid = fork();
   if (pid == 0) {  // child process is a reader, blocking for at most 0.1s.
     ASSERT_TRUE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
                                          static_cast<void*>(read_data),
                                          DATA_SIZE, 100 * 1000000));
-    verifyData(read_data, DATA_SIZE);  // Since we know what we have written,
-                                       // just manually check it.
+    ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
     exit(0);
   } else if (pid > 0) {
     // parent process is a writer, waits for 0.05s and writes.
@@ -327,32 +320,29 @@ TEST_F(BlockingReadWrites, BlockingTimeOut) {
                                         DATA_SIZE, 50 * 1000000));
 }
 
-// Tests two readers read separate part of the data and are able to retrieve
-// what the writer writes.
+// Tests two readers can both read back what writer writes correctly.
 TEST_F(UnsynchronizedWrites, ReadWriteSuccess) {
   static constexpr size_t DATA_SIZE = 64;
-  static constexpr size_t READER_SIZE = 32;
   uint16_t write_data[DATA_SIZE];
-  uint16_t read_data[DATA_SIZE];
+  uint16_t read_data1[DATA_SIZE];
+  uint16_t read_data2[DATA_SIZE];
 
   // initialize data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   // writer writes 64 items
   ASSERT_TRUE(manager_.WriteFmq("uint16_t", false, writer_id_,
                                 static_cast<void*>(write_data), DATA_SIZE));
 
-  // reader 1 reads the first 32 items
+  // reader 1 reads back data correctly
   ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id1_,
-                               static_cast<void*>(read_data), READER_SIZE));
+                               static_cast<void*>(read_data1), DATA_SIZE));
+  ASSERT_EQ(0, memcmp(write_data, read_data1, DATA_SIZE * sizeof(uint16_t)));
 
-  // reader 2 reads the second 32 items
+  // reader 2 reads back data correctly
   ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id2_,
-                               static_cast<void*>(read_data + READER_SIZE),
-                               READER_SIZE));
-
-  // check if the data are equal
-  ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE));
+                               static_cast<void*>(read_data2), DATA_SIZE));
+  ASSERT_EQ(0, memcmp(write_data, read_data2, DATA_SIZE * sizeof(uint16_t)));
 }
 
 // Tests that blocking is not allowed on unsynchronized queue.
@@ -361,7 +351,7 @@ TEST_F(UnsynchronizedWrites, IllegalBlocking) {
   uint16_t write_data[DATA_SIZE];
 
   // initialize data to transfer
-  init_data(write_data, DATA_SIZE);
+  InitData(write_data, DATA_SIZE);
 
   // should fail immediately, instead of blocking
   ASSERT_FALSE(manager_.WriteFmqBlocking("uint16_t", false, writer_id_,
