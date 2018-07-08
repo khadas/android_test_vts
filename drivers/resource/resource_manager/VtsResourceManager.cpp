@@ -107,6 +107,34 @@ void VtsResourceManager::ProcessFmqCommand(const FmqRequestMessage& fmq_request,
   }
 }
 
+int VtsResourceManager::RegisterFmq(
+    const VariableSpecificationMessage& queue_msg) {
+  bool sync = queue_msg.type() == TYPE_FMQ_SYNC;
+  // TODO: support user-defined types in the future, only support scalar types
+  // for now.
+  string data_type = queue_msg.fmq_value(0).scalar_type();
+
+  size_t queue_desc_addr = queue_msg.fmq_value(0).fmq_desc_address();
+  if (queue_desc_addr == 0) {
+    LOG(ERROR) << "Invalid queue descriptor address."
+               << "vtsc either didn't set the address or set a null pointer.";
+    return -1;  // check for null pointer
+  }
+  return fmq_driver_.CreateFmq(data_type, sync, queue_desc_addr);
+}
+
+bool VtsResourceManager::GetQueueDescAddress(
+    const VariableSpecificationMessage& queue_msg, size_t* result) {
+  bool sync = queue_msg.type() == TYPE_FMQ_SYNC;
+  // TODO: support user-defined types in the future, only support scalar types
+  // for now.
+  const string& data_type = queue_msg.fmq_value(0).scalar_type();
+  int queue_id = queue_msg.fmq_value(0).fmq_id();
+  bool success =
+      fmq_driver_.GetQueueDescAddress(data_type, sync, queue_id, result);
+  return success;
+}
+
 bool VtsResourceManager::ProcessFmqReadWriteInternal(
     FmqOp op, const string& data_type, bool sync, int queue_id, void* data,
     size_t data_size, int64_t time_out_nanos) {
