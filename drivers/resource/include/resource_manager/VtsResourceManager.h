@@ -22,6 +22,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "fmq_driver/VtsFmqDriver.h"
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsResourceControllerMessage.pb.h"
 
 using namespace std;
@@ -63,6 +64,33 @@ class VtsResourceManager {
   // @param fmq_response to be filled by the function.
   void ProcessFmqCommand(const FmqRequestMessage& fmq_request,
                          FmqResponseMessage* fmq_response);
+
+  // Registers a fmq in fmq_driver_ given the information provided in
+  // queue_msg.
+  // This message stores queue data_type, sync option, and existing
+  // descriptor address. This method recasts the address into a pointer
+  // and passes it to fmq_driver_.
+  //
+  // @param queue_msg stores queue information, data_type, sync option,
+  //                  and queue descriptor address.
+  //
+  // @return queue_id assigned to the new queue object.
+  int RegisterFmq(const VariableSpecificationMessage& queue_msg);
+
+  // Gets queue descriptor address specified in VariableSpecificationMessage.
+  // The message contains type of data in the queue, queue flavor,
+  // and queue id. The method calls fmq_driver to locate the address of the
+  // descriptor using these information, then stores the address in
+  // result pointer.
+  //
+  // @param queue_msg contains queue information.
+  // @param result    to store queue descriptor pointer address.
+  //
+  // @return true if queue is found and type matches, and stores the descriptor
+  //              address in result.
+  //         false otherwise.
+  bool GetQueueDescAddress(const VariableSpecificationMessage& queue_msg,
+                           size_t* result);
 
  private:
   // Calls internal methods in fmq_driver to execute FMQ read/write operations.

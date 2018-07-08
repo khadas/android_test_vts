@@ -67,6 +67,18 @@ QueueId VtsFmqDriver::CreateFmq(string type, bool sync, QueueId queue_id,
   return -1;
 }
 
+QueueId VtsFmqDriver::CreateFmq(string type, bool sync,
+                                size_t queue_descriptor) {
+  OperationParam params;
+  params.op = FMQ_OP_CREATE;
+  params.queue_descriptor = queue_descriptor;
+  RequestResult result;
+
+  bool success = ProcessRequest(type, sync, params, &result);
+  if (success) return result.int_val;
+  return -1;
+}
+
 bool VtsFmqDriver::ReadFmq(string type, bool sync, QueueId queue_id,
                            void* data) {
   return ReadFmq(type, sync, queue_id, data, 1);
@@ -207,6 +219,12 @@ bool VtsFmqDriver::GetEventFlagWord(string type, bool sync, QueueId queue_id,
   return success;
 }
 
+bool VtsFmqDriver::GetQueueDescAddress(string type, bool sync, QueueId queue_id,
+                                       size_t* result) {
+  return ProcessUtilMethod(type, sync, FMQ_OP_GET_QUEUE_DESC_ADDR, queue_id,
+                           result);
+}
+
 template <typename T, hardware::MQFlavor flavor>
 MessageQueue<T, flavor>* VtsFmqDriver::FindQueue(QueueId queue_id) {
   auto iterator = fmq_map_.find(queue_id);
@@ -334,10 +352,22 @@ bool VtsFmqDriver::ExecuteNonBlockingOperation(const OperationParam& op_param,
   switch (op_param.op) {
     case FMQ_OP_CREATE:
       if (op_param.queue_id == -1) {
-        // creates a new queue, use smart pointers to avoid memory leak
-        shared_ptr<MessageQueue<T, flavor>> new_queue(
-            new (std::nothrow) MessageQueue<T, flavor>(op_param.queue_size,
-                                                       op_param.blocking));
+        shared_ptr<MessageQueue<T, flavor>> new_queue;
+        if (op_param.queue_descriptor == 0) {
+          // no descriptor provided, create a brand new queue.
+          new_queue.reset(new (std::nothrow) MessageQueue<T, flavor>(
+              op_param.queue_size, op_param.blocking));
+        } else {
+          // descriptor is provided, create a queue using the descriptor.
+          hardware::MQDescriptor<T, flavor>* descriptor_addr =
+              reinterpret_cast<hardware::MQDescriptor<T, flavor>*>(
+                  op_param.queue_descriptor);
+          new_queue.reset(new (std::nothrow) MessageQueue<T, flavor>(
+              *descriptor_addr, op_param.reset_pointers));
+          // need to delete this pointer, because vtsc allocates it
+          // as a raw pointer.
+          delete descriptor_addr;
+        }
         unique_ptr<QueueInfo> new_queue_info(new QueueInfo{
             typeid(T), flavor, static_pointer_cast<void>(new_queue)});
         result->int_val = InsertQueue(move(new_queue_info));
@@ -378,6 +408,9 @@ bool VtsFmqDriver::ExecuteNonBlockingOperation(const OperationParam& op_param,
       return queue_object->isValid();
     case FMQ_OP_GET_EVENT_FLAG_WORD:
       result->pointer_val = queue_object->getEventFlagWord();
+      break;
+    case FMQ_OP_GET_QUEUE_DESC_ADDR:
+      result->sizet_val = reinterpret_cast<size_t>(queue_object->getDesc());
       break;
     default:
       LOG(ERROR) << "unknown operation";
