@@ -109,7 +109,8 @@ int main(int argc, char** argv) {
 
   android::vts::VtsResourceManager resource_manager;
   android::vts::VtsHalDriverManager driver_manager(
-      spec_dir_path, kDefaultEpochCount, callback_socket_name);
+      spec_dir_path, kDefaultEpochCount, callback_socket_name,
+      &resource_manager);
 
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
   android::vts::StartSocketServer(server_socket_path, &driver_manager,
