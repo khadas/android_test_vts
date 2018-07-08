@@ -418,6 +418,17 @@ message VariableSpecificationMessage {
 
   // for the definition/value of TYPE_FMQ_SYNC and TYPE_FMQ_UNSYNC.
   repeated VariableSpecificationMessage fmq_value = 161;
+  // for queue identifier of TYPE_FMQ_SYNC and TYPE_FMQ_UNSYNC,
+  // when caller wants to use an existing FMQ.
+  optional int32 fmq_id = 162 [default = -1];
+  // descriptor of an existing queue.
+  // The descriptor can be passed in hidl and be used to create new
+  // FMQ objects. We use uint64 to represent the address of the descriptor,
+  // which allows vtsc to reinterpret the address when callers wants to use
+  // an existing FMQ.
+  // This field is updated by driver_manager when the descriptor of
+  // an queue object is located in memory.
+  optional uint64 fmq_desc_address = 163;
 
   // for TYPE_REF.
   optional VariableSpecificationMessage ref_value = 171;
