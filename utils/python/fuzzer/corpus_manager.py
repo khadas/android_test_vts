@@ -22,6 +22,11 @@ from vts.runners.host import keys
 from vts.utils.python.gcs import gcs_api_utils
 from vts.utils.python.web import feature_utils
 
+CORPUS_STATES = [
+    'corpus_seed', 'corpus_inuse', 'corpus_complete', 'corpus_crash',
+    'corpus_error'
+]
+
 
 class CorpusManager(feature_utils.Feature):
     """Manages corpus for fuzzing.
@@ -73,14 +78,14 @@ class CorpusManager(feature_utils.Feature):
         to {temp_dir}_{test_name}_corpus_seed in host machine.
 
         Args:
-            test_name: name of the current fuzzing test.
-            local_temp_dir: path to temporary directory for this test
+            test_name: string, name of the current fuzzing test.
+            local_temp_dir: string, path to temporary directory for this test
                             on the host machine.
 
         Returns:
-            inuse_seed, GCS file path of the seed in use for test case,
+            inuse_seed, GCS file path of the seed in use for test case
                         if fetch was successful.
-            None, otherwise.
+            None otherwise.
         """
         if self.enabled:
             logging.debug('Attempting to fetch corpus seed for %s.', test_name)
@@ -134,12 +139,12 @@ class CorpusManager(feature_utils.Feature):
         was generated.
 
         Args:
-            src_dir: source directory in local.
-            dest_dir: destination directory in GCS.
+            src_dir: string, source directory in local.
+            dest_dir: string, destination directory in GCS.
 
         Returns:
-            True, if successfully uploaded.
-            False, otherwise.
+            True if successfully uploaded.
+            False otherwise.
         """
         if self.enabled:
             logging.debug('Attempting to upload corpus output for %s.',
@@ -159,6 +164,45 @@ class CorpusManager(feature_utils.Feature):
             return True
         else:
             logging.error('Failed to upload corpus output for %s.', test_name)
+            return False
+
+    def InuseToDest(self, test_name, inuse_seed, destination):
+        """Moves the a corpus from corpus_inuse to destination.
+
+        Destinations are as follows:
+        corpus_seed directory is the directory for corpus that are ready
+        to be used as input corpus seed.
+        corpus_complete directory is the directory for corpus that have
+        been used as an input, succeeded, and the test exited normally.
+        corpus_crash directory is the directory for corpus whose mutant have
+        caused a fuzz test crash.
+        corpus_error directory is the directory for corpus that have
+        caused an error in executing the fuzz test.
+
+        Args:
+            test_name: string, name of the current test.
+            inuse_seed: string, path to corpus seed currently in use.
+            destination: string, destination of the seed.
+
+        Returns:
+            True if move was successful.
+            False otherwise.
+        """
+        if not self.enabled:
+            return False
+
+        if self._gcs_api_utils.FileExists(inuse_seed):
+            if destination in CORPUS_STATES:
+                corpus_destination = self._GetFilePaths(
+                    destination, test_name, inuse_seed)
+                return self._gcs_api_utils.MoveFile(inuse_seed,
+                                                    corpus_destination, True)
+            else:
+                logging.error(
+                    'destination is not one of the predefined states')
+                return False
+        else:
+            logging.error('seed in use %s does not exist', inuse_seed)
             return False
 
     def InuseToSeed(self, test_name, inuse_seed):
@@ -242,9 +286,9 @@ class CorpusManager(feature_utils.Feature):
         """Classifies each of newly genereated corpus into different priorities.
 
         Args:
-            test_name: name of the current test.
-            local_temp_dir: path to temporary directory for this test
-                            on the host machine.
+            test_name: string, name of the current test.
+            local_temp_dir: string, path to temporary directory for this
+                            test on the host machine.
         """
         incoming_child_dir = self._GetDirPaths('incoming_child', test_name,
                                                local_temp_dir)
@@ -258,14 +302,14 @@ class CorpusManager(feature_utils.Feature):
         """Generates the required directory path name for the given information.
 
         Args:
-            dir_type: type of the directory requested.
-            test_name: name of the current test.
-            local_temp_dir: path to temporary directory for this test
-                            on the host machine.
+            dir_type: string, type of the directory requested.
+            test_name: string, name of the current test.
+            local_temp_dir: string, path to temporary directory for this
+                            test on the host machine.
 
         Returns:
-            dir_path, generated directory path, if dir_type supported.
-            Empty string, if dir_type not supported.
+            dir_path, generated directory path if dir_type supported.
+            Empty string if dir_type not supported.
         """
         dir_path = ''
 
@@ -291,34 +335,19 @@ class CorpusManager(feature_utils.Feature):
         """Generates the required file path name for the given information.
 
         Args:
-            file_type: type of the file requested.
-            test_name: name of the current test.
-            seed: seed to base new file path name upon.
+            file_type: string, type of the file requested.
+            test_name: string, name of the current test.
+            seed: string, seed to base new file path name upon.
 
         Returns:
-            file_path, generated file path, if file_type supported.
-            Empty string, if file_type not supported.
+            file_path, generated file path if file_type supported.
+            Empty string if file_type not supported.
         """
-        file_path = ''
-
         # ex: corpus/ILight/ILight_corpus_seed/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
-        if file_type == 'corpus_seed':
-            file_path = 'corpus/%s/%s_corpus_seed/%s' % (
-                test_name, test_name, os.path.basename(seed))
-
-        # ex: corpus/ILight/ILight_corpus_inuse/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
-        elif file_type == 'corpus_inuse':
-            file_path = 'corpus/%s/%s_corpus_inuse/%s' % (
-                test_name, test_name, os.path.basename(seed))
-
-        # ex: corpus/ILight/ILight_corpus_complete/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
-        elif file_type == 'corpus_complete':
-            file_path = 'corpus/%s/%s_corpus_complete/%s' % (
-                test_name, test_name, os.path.basename(seed))
-
-        # ex: corpus/ILight/ILight_corpus_crash/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
-        elif file_type == 'corpus_crash':
-            file_path = 'corpus/%s/%s_corpus_crash/%s' % (
-                test_name, test_name, os.path.basename(seed))
-
-        return file_path
+        if file_type in CORPUS_STATES:
+            file_path = 'corpus/%s/%s_%s/%s' % (
+                test_name, test_name, file_type, os.path.basename(seed))
+            return file_path
+        else:
+            logging.error('invalid file_type argument entered.')
+            return ''
