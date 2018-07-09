@@ -56,6 +56,8 @@ DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
 THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
+# System property for product sku.
+PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 
 class AndroidDeviceError(signals.ControllerError):
     pass
@@ -867,6 +869,10 @@ class AndroidDevice(object):
             return str(stdout)
 
         else:
+            product_sku = self.getProp(PROPERTY_PRODUCT_SKU)
+            if product_sku:
+                odm_prod_sku_manifest = "/odm/etc/vintf/manifest_{sku}.xml".format(sku=product_sku)
+                manifest_paths.insert(0, odm_prod_sku_manifest)
             for manifest in manifest_paths:
                 try:
                     stdout = self.adb.shell('cat %s' % manifest)
