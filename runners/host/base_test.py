@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import sys
+import threading
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -48,9 +49,11 @@ TEST_CASE_TEMPLATE = "[Test Case] %s %s"
 RESULT_LINE_TEMPLATE = TEST_CASE_TEMPLATE + " %s"
 STR_TEST = "test"
 STR_GENERATE = "generate"
+TEARDOWN_CLASS_TIMEOUT_SECS = 30
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 _BUG_REPORT_FILE_PREFIX = "bugreport_"
 _BUG_REPORT_FILE_EXTENSION = ".zip"
+_DEFAULT_TEST_TIMEOUT_SECS = 60 * 3
 _LOGCAT_FILE_PREFIX = "logcat_"
 _LOGCAT_FILE_EXTENSION = ".txt"
 _ANDROID_DEVICES = '_android_devices'
@@ -90,6 +93,11 @@ class BaseTestClass(object):
         _current_record: A records.TestResultRecord object for the test case
                          currently being executed. If no test is running, this
                          should be None.
+        _interrupted: Whether the test execution has been interrupted.
+        _interrupt_lock: The threading.Lock object that protects _interrupted.
+        _timer: The threading.Timer object that interrupts main thread when
+                timeout.
+        timeout: A float, the timeout, in seconds, configured for this object.
         include_filer: A list of string, each representing a test case name to
                        include.
         exclude_filer: A list of string, each representing a test case name to
@@ -118,6 +126,22 @@ class BaseTestClass(object):
         self.results = records.TestResult()
         self.log = logger.LoggerProxy()
         self._current_record = None
+
+        # Timeout
+        self._interrupted = False
+        self._interrupt_lock = threading.Lock()
+        self._timer = None
+        self.timeout = self.getUserParam(
+            keys.ConfigKeys.KEY_TEST_TIMEOUT,
+            default_value=_DEFAULT_TEST_TIMEOUT_SECS * 1000.0)
+        try:
+            self.timeout = float(self.timeout) / 1000.0
+        except (TypeError, ValueError):
+            logging.error("Cannot parse timeout: %s", self.timeout)
+            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
+        if self.timeout <= 0:
+            logging.error("Invalid timeout: %s", self.timeout)
+            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
 
         # Setup test filters
         self.include_filter = self.getUserParam(
@@ -391,6 +415,8 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
+        self.resetTimeout(self.timeout)
+
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
@@ -446,6 +472,8 @@ class BaseTestClass(object):
         is called.
         """
         ret = self.tearDownClass()
+
+        self.resetTimeout(TEARDOWN_CLASS_TIMEOUT_SECS)
         if self.log_uploading.enabled:
             self.log_uploading.UploadLogs()
         if self.web.enabled:
@@ -472,6 +500,40 @@ class BaseTestClass(object):
         Implementation is optional.
         """
         pass
+
+    def interrupt(self):
+        """Interrupts test execution and terminates process."""
+        with self._interrupt_lock:
+            if self._interrupted:
+                logging.warning("Cannot interrupt more than once.")
+                return
+            self._interrupted = True
+
+        utils.stop_current_process(TEARDOWN_CLASS_TIMEOUT_SECS)
+
+    def resetTimeout(self, timeout):
+        """Restarts the timer that will interrupt the main thread.
+
+        This class starts the timer before setUpClass. As the timeout depends
+        on number of generated tests, the subclass can restart the timer.
+
+        Args:
+            timeout: A float, wait time in seconds before interrupt.
+        """
+        with self._interrupt_lock:
+            if self._interrupted:
+                logging.warning("Test execution has been interrupted. "
+                                "Cannot reset timeout.")
+                return
+
+        if self._timer:
+            logging.info("Cancel timer.")
+            self._timer.cancel()
+
+        logging.info("Start timer with timeout=%ssec.", timeout)
+        self._timer = threading.Timer(timeout, self.interrupt)
+        self._timer.daemon = True
+        self._timer.start()
 
     def _testEntry(self, test_record):
         """Internal function to be called upon entry of a test case.
@@ -1028,16 +1090,23 @@ class BaseTestClass(object):
         """
         # Setup for the class with retry.
         for i in xrange(_SETUP_RETRY_NUMBER):
+            setup_done = False
+            caught_exception = None
             try:
                 if self._setUpClass() is False:
                     raise signals.TestFailure(
                         "Failed to setup %s." % self.test_module_name)
                 else:
-                    break
+                    setup_done = True
             except Exception as e:
+                caught_exception = e
                 logging.exception("Failed to setup %s.", self.test_module_name)
-                if i + 1 == _SETUP_RETRY_NUMBER:
-                    self.results.failClass(self.test_module_name, e)
+            finally:
+                if setup_done:
+                    break
+                elif not caught_exception or i + 1 == _SETUP_RETRY_NUMBER:
+                    self.results.failClass(self.test_module_name,
+                                           caught_exception)
                     self._exec_func(self._tearDownClass)
                     return self.results
                 else:
