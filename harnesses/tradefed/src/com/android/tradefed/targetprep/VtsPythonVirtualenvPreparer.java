@@ -40,8 +40,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
@@ -75,10 +75,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private Collection<String> mScriptFiles = new TreeSet<>();
 
     @Option(name = "dep-module", description = "modules which need to be installed by pip")
-    protected Collection<String> mDepModules = new TreeSet<>();
+    protected Collection<String> mDepModules = new LinkedHashSet<>();
 
     @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
-    private Collection<String> mNoDepModules = new TreeSet<>(Arrays.asList());
+    private Collection<String> mNoDepModules = new TreeSet<>();
 
     @Option(name = "python-version", description = "The version of a Python interpreter to use.")
     private String mPythonVersion = "";
