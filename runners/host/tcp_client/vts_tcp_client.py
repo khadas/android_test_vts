@@ -177,7 +177,8 @@ class VtsTcpClient(object):
                             target_version_minor=None,
                             target_package=None,
                             target_component_name=None,
-                            hw_binder_service_name=None):
+                            hw_binder_service_name=None,
+                            is_test_hal=None):
         """RPC to LAUNCH_DRIVER_SERVICE.
 
            Args:
@@ -192,6 +193,8 @@ class VtsTcpClient(object):
                target_package: string, package name of a HIDL HAL.
                target_component_name: string, name of a target component.
                hw_binder_service_name: name of a HW Binder service to use.
+               is_test_hal: bool, whether the HAL service is a test HAL
+                            (e.g. msgq).
 
            Returns:
                response code, -1 or 0 on failure, other values on success.
@@ -212,7 +215,8 @@ class VtsTcpClient(object):
             target_version_minor=target_version_minor,
             target_package=target_package,
             target_component_name=target_component_name,
-            hw_binder_service_name=hw_binder_service_name)
+            hw_binder_service_name=hw_binder_service_name,
+            is_test_hal=is_test_hal)
         resp = self.RecvResponse()
         logging.debug("resp for LAUNCH_DRIVER_SERVICE: %s", resp)
         if driver_type == SysMsg_pb2.VTS_DRIVER_TYPE_HAL_HIDL \
@@ -297,7 +301,9 @@ class VtsTcpClient(object):
                 result.append(
                     self.GetPythonDataOfVariableSpecMsg(vector_value))
             return result
-        elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_INTERFACE):
+        elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_INTERFACE
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_SYNC
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_UNSYNC):
             logging.debug("var_spec_msg: %s", var_spec_msg)
             return var_spec_msg
 
@@ -549,6 +555,7 @@ class VtsTcpClient(object):
                     target_package=None,
                     target_component_name=None,
                     hw_binder_service_name=None,
+                    is_test_hal=None,
                     module_name=None,
                     service_name=None,
                     callback_port=None,
@@ -595,6 +602,9 @@ class VtsTcpClient(object):
 
         if hw_binder_service_name is not None:
             command_msg.hw_binder_service_name = hw_binder_service_name
+
+        if is_test_hal is not None:
+            command_msg.is_test_hal = is_test_hal
 
         if module_name is not None:
             command_msg.module_name = module_name

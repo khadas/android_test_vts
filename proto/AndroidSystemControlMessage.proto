@@ -126,6 +126,9 @@ message AndroidSystemControlCommandMessage {
   optional int32 target_version_major = 3010 [default = -1];
   // HAL minor version of the target component (e.g. 1.0 -> 0).
   optional int32 target_version_minor = 3011 [default = -1];
+  // Specify if a HAL service is test HAL.
+  // Need to add flag TREBLE_TESTING_OVERRIDE=true in environment if it is.
+  optional bool is_test_hal = 3012;
 
   // the name of a HW Binder service to use (only needed for HIDL HAL).
   optional bytes hw_binder_service_name = 3021;

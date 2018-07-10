@@ -52,6 +52,7 @@ COMPONENT_TYPE_DICT = {
     "contexthub": 22,
     "graphics_composer": 23,
     "media_omx": 24,
+    "tests_msgq": 25,
     "bionic_libm": 1001,
     "bionic_libc": 1002,
     "vndk_libcutils": 1101
@@ -95,7 +96,8 @@ class MirrorObject(object):
                            handler_name=None,
                            service_name=None,
                            hw_binder_service_name=_DEFAULT_HWBINDER_SERVICE,
-                           bits=64):
+                           bits=64,
+                           is_test_hal=False):
         """Initiates the driver for a lib on the target device and creates a top
         level MirroObject for it.
 
@@ -115,6 +117,10 @@ class MirrorObject(object):
             handler_name: string, the name of the handler. target_type is used
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
+                  Default is 64 bits.
+            is_test_hal: bool, whether the HAL service is a test HAL
+                         (e.g. msgq).
+
         Raises:
             errors.ComponentLoadingError is raised when error occurs trying to
             create a MirrorObject.
@@ -143,7 +149,8 @@ class MirrorObject(object):
             target_version_minor=target_version_minor,
             target_package=target_package,
             target_component_name=target_component_name,
-            hw_binder_service_name=hw_binder_service_name)
+            hw_binder_service_name=hw_binder_service_name,
+            is_test_hal=is_test_hal)
 
         if driver_id == -1:
             raise errors.ComponentLoadingError(

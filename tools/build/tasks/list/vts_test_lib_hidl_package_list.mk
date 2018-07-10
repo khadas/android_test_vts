@@ -82,6 +82,7 @@ vts_hal_driver_libs := \
   android.hardware.sensors@1.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
   android.hardware.soundtrigger@2.1-vts.driver \
+  android.hardware.tests.msgq@1.0-vts.driver \
   android.hardware.tetheroffload.config@1.0-vts.driver \
   android.hardware.tetheroffload.control@1.0-vts.driver \
   android.hardware.thermal@1.0-vts.driver \
@@ -175,6 +176,7 @@ vts_hal_profiler_libs := \
   android.hardware.sensors@1.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
   android.hardware.soundtrigger@2.1-vts.profiler \
+  android.hardware.tests.msgq@1.0-vts.profiler \
   android.hardware.tetheroffload.config@1.0-vts.profiler \
   android.hardware.tetheroffload.control@1.0-vts.profiler \
   android.hardware.thermal@1.0-vts.profiler \

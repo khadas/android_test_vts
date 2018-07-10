@@ -177,7 +177,8 @@ class MirrorTracker(object):
                     hw_binder_service_name=_DEFAULT_HWBINDER_SERVICE,
                     bits=64,
                     target_version_major=None,
-                    target_version_minor=None):
+                    target_version_minor=None,
+                    is_test_hal=False):
         """Initiates a handler for a particular HIDL HAL.
 
         This will initiate a driver service for a HAL on the target side, create
@@ -198,8 +199,10 @@ class MirrorTracker(object):
               int, the target component major version (e.g., 1.0 -> 1).
             target_version_minor:
               int, the target component minor version (e.g., 1.0 -> 0).
-            If host doesn't provide major and minor versions separately,
-            parse it from the float version of target_version.
+              If host doesn't provide major and minor versions separately,
+              parse it from the float version of target_version.
+            is_test_hal: bool, whether the HAL service is a test HAL
+                         (e.g. msgq).
 
         Raises:
             USERError if user doesn't provide a version of the HAL service.
@@ -216,7 +219,7 @@ class MirrorTracker(object):
         mirror.InitHalDriver(target_type, target_version_major,
                              target_version_minor, target_package,
                              target_component_name, hw_binder_service_name,
-                             handler_name, bits)
+                             handler_name, bits, is_test_hal)
         self._registered_mirrors[target_type] = mirror
 
     def InitSharedLib(self,
