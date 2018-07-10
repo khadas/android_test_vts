@@ -198,8 +198,15 @@ audio_test_res_copy_pairs := \
   $(foreach f,$(audio_test_res_files),\
     hardware/interfaces/audio/$(f):$(VTS_TESTCASES_OUT)/DATA/hardware/interfaces/audio/$(f))
 
+ifeq (REL,$(PLATFORM_VERSION_CODENAME))
+LATEST_VNDK_LIB_EXTRA_LIST := development/vndk/tools/definition-tool/datasets/vndk-lib-extra-list-$(PLATFORM_VNDK_VERSION).txt
+else
+LATEST_VNDK_LIB_EXTRA_LIST := development/vndk/tools/definition-tool/datasets/vndk-lib-extra-list-current.txt
+endif
+
 vndk_test_res_copy_pairs := \
-  development/vndk/tools/definition-tool/datasets/eligible-list-29.csv:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/eligible-list.csv \
+  $(LATEST_VNDK_LIB_LIST):$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/vndk-lib-list.txt \
+  $(LATEST_VNDK_LIB_EXTRA_LIST):$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/vndk-lib-extra-list.txt \
 
 kernel_rootdir_test_rc_files := \
   $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
