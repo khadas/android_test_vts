@@ -16,6 +16,7 @@ syntax = "proto2";
 
 package android.vts;
 
+import "test/vts/proto/VtsResourceControllerMessage.proto";
 
 // Type of a command.
 enum VtsDriverCommandType {
@@ -44,6 +45,9 @@ enum VtsDriverCommandType {
 
   // To invoke a system call.
   INVOKE_SYSCALL = 202;
+
+  // To request FMQ resource
+  FMQ_OPERATION = 301;
 }
 
 
@@ -106,6 +110,9 @@ message VtsDriverControlCommandMessage {
 
   // for EXECUTE_COMMAND
   repeated bytes shell_command = 2001;
+
+  // Arguments for operation on FMQ
+  optional FmqRequestMessage fmq_request = 3001;
 }
 
 
@@ -128,4 +135,7 @@ message VtsDriverControlResponseMessage {
 
   // The retrieved specifications.
   repeated bytes spec = 2001;
+
+  // read data and return values from FMQ driver
+  optional FmqResponseMessage fmq_response = 3001;
 }
