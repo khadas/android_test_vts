@@ -375,6 +375,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
+                    CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
+                            c.getStdout(), c.getStderr()));
                     throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
                 }
             } catch (IOException | RuntimeException e) {
