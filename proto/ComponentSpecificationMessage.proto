@@ -93,6 +93,8 @@ enum ComponentType {
   GRAPHICS_COMPOSER = 23;
   // For a media omx submodule.
   MEDIA_OMX = 24;
+  // For msgq test HAL.
+  TESTS_MSGQ = 25;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;

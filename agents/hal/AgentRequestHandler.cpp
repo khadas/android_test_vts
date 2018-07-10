@@ -113,6 +113,8 @@ bool AgentRequestHandler::LaunchDriverService(
   const string& module_name = command_msg.module_name();
   const string& hw_binder_service_name = command_msg.hw_binder_service_name();
   int bits = command_msg.bits();
+  const string& test_hal_flag =
+      command_msg.is_test_hal() ? "TREBLE_TESTING_OVERRIDE=true " : "";
 
   LOG(DEBUG) << "file_path=" << file_path;
   ResponseCode result = FAIL;
@@ -156,11 +158,12 @@ bool AgentRequestHandler::LaunchDriverService(
         if (driver_hal_spec_dir_path_.length() < 1) {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
           asprintf(&cmd,
-                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
+                   "%sLD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
                    "--server_socket_path=%s "
                    "--callback_socket_name=%s",
-                   ld_dir_path.c_str(), driver_binary_path.c_str(),
-                   socket_port_flie_path.c_str(), callback_socket_name.c_str());
+                   test_hal_flag.c_str(), ld_dir_path.c_str(),
+                   driver_binary_path.c_str(), socket_port_flie_path.c_str(),
+                   callback_socket_name.c_str());
 #else  // binder
           asprintf(&cmd,
                    "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
@@ -172,11 +175,11 @@ bool AgentRequestHandler::LaunchDriverService(
         } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
           asprintf(&cmd,
-                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
+                   "%sLD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
                    "--server_socket_path=%s "
                    "--spec_dir_path=%s --callback_socket_name=%s",
-                   ld_dir_path.c_str(), driver_binary_path.c_str(),
-                   socket_port_flie_path.c_str(),
+                   test_hal_flag.c_str(), ld_dir_path.c_str(),
+                   driver_binary_path.c_str(), socket_port_flie_path.c_str(),
                    driver_hal_spec_dir_path_.c_str(),
                    callback_socket_name.c_str());
 #else  // binder
