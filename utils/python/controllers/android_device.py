@@ -60,6 +60,8 @@ DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
 THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
+# System property for product sku.
+PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 
 
 class AndroidDeviceError(signals.ControllerError):
