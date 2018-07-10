@@ -16,18 +16,6 @@
 
 package com.android.tradefed.targetprep;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.Base64;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -36,16 +24,17 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.targetprep.multi.IMultiTargetPreparer;
-import com.android.tradefed.util.CommandResult;
-import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
-
 import com.android.vts.proto.VtsReportMessage.DashboardPostMessage;
 import com.android.vts.proto.VtsReportMessage.TestPlanReportMessage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Uploads the VTS test plan execution result to the web DB using a RESTful API and
@@ -73,12 +62,13 @@ public class VtsTestPlanResultReporter
             description = "The default config file type, e.g., `prod` or `staging`.")
     private String mDefaultType = VtsVendorConfigFileUtil.VENDOR_TEST_CONFIG_DEFAULT_TYPE;
 
+    private File mStatusDir;
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo) {
-        File mStatusDir = null;
         try {
             mStatusDir = FileUtil.createTempDir(TEST_PLAN_EXECUTION_RESULT);
             if (mStatusDir != null) {
@@ -115,6 +105,13 @@ public class VtsTestPlanResultReporter
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e) {
         File reportFile = buildInfo.getFile(TEST_PLAN_REPORT_FILE);
+        if (reportFile == null) {
+            CLog.e("Couldn't find %s to post results. Skipping tearDown.",
+                    TEST_PLAN_REPORT_FILE_NAME);
+            // Just in case clean up the directory.
+            FileUtil.recursiveDelete(mStatusDir);
+            return;
+        }
         String repotFilePath = reportFile.getAbsolutePath();
         DashboardPostMessage postMessage = new DashboardPostMessage();
         TestPlanReportMessage testPlanMessage = new TestPlanReportMessage();
@@ -133,12 +130,11 @@ public class VtsTestPlanResultReporter
                 found = true;
             }
         } catch (IOException ex) {
-            CLog.d(String.format("Can't read the test plan result file %s", repotFilePath));
+            CLog.d("Can't read the test plan result file %s", repotFilePath);
             return;
         }
-        File reportDir = reportFile.getParentFile();
-        CLog.d(String.format("Delete report dir %s", reportDir.getAbsolutePath()));
-        FileUtil.recursiveDelete(reportDir);
+        CLog.d("Delete report dir %s", mStatusDir.getAbsolutePath());
+        FileUtil.recursiveDelete(mStatusDir);
         postMessage.addTestPlanReport(testPlanMessage);
         if (found) {
             dashboardUtil.Upload(postMessage);
