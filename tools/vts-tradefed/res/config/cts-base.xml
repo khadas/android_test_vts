@@ -17,6 +17,10 @@
 
     <include name="cts-base-common" />
 
+    <test class="com.android.compatibility.common.tradefed.testtype.suite.CompatibilityTestSuite">
+      <option name="run-suite-tag" value="cts" />
+    </test>
+
     <!-- Explicitly include CTS components listed in CtsConfigLoadingTest.java -->
     <option name="compatibility:module-metadata-include-filter" key="component" value="abuse" />
     <option name="compatibility:module-metadata-include-filter" key="component" value="art" />
