@@ -84,35 +84,38 @@ class CorpusManagerTest(unittest.TestCase):
         _corpus_manager._gcs_api_utils.ListFilesWithPrefix.assert_called_with(
             'corpus/ILight/incoming/tmpDir1/ILight_corpus_out')
 
-    def testInuseToSeed(self):
-        """Tests the InuseToSeed function of a CorpusManager object."""
+    def testInuseToDestSeed(self):
+        """Tests the InuseToDest function of a CorpusManager object."""
         _corpus_manager = corpus_manager.CorpusManager({})
         _corpus_manager.enabled = True
         _corpus_manager._gcs_api_utils = mock.MagicMock()
-        _corpus_manager.InuseToSeed(
-            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1')
+        _corpus_manager.InuseToDest(
+            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
+            'corpus_seed')
         _corpus_manager._gcs_api_utils.MoveFile.assert_called_with(
             'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
             'corpus/ILight/ILight_corpus_seed/corpus_number_1', True)
 
-    def testInuseToComplete(self):
-        """Tests the InuseToComplete function of a CorpusManager object."""
+    def testInuseToDestComplete(self):
+        """Tests the InuseToDest function of a CorpusManager object."""
         _corpus_manager = corpus_manager.CorpusManager({})
         _corpus_manager.enabled = True
         _corpus_manager._gcs_api_utils = mock.MagicMock()
-        _corpus_manager.InuseToComplete(
-            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1')
+        _corpus_manager.InuseToDest(
+            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
+            'corpus_complete')
         _corpus_manager._gcs_api_utils.MoveFile.assert_called_with(
             'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
             'corpus/ILight/ILight_corpus_complete/corpus_number_1', True)
 
-    def testInuseToCrash(self):
-        """Tests the InuseToCrash function of a CorpusManager object."""
+    def testInuseToDestCrash(self):
+        """Tests the InuseToDest function of a CorpusManager object."""
         _corpus_manager = corpus_manager.CorpusManager({})
         _corpus_manager.enabled = True
         _corpus_manager._gcs_api_utils = mock.MagicMock()
-        _corpus_manager.InuseToCrash(
-            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1')
+        _corpus_manager.InuseToDest(
+            'ILight', 'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
+            'corpus_crash')
         _corpus_manager._gcs_api_utils.MoveFile.assert_called_with(
             'corpus/ILight/ILight_corpus_inuse/corpus_number_1',
             'corpus/ILight/ILight_corpus_crash/corpus_number_1', True)
