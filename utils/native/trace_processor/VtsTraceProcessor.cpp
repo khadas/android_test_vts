@@ -287,16 +287,17 @@ void VtsTraceProcessor::ProcessTraceForLatencyProfiling(
         // Found the paired entry record, calculate the latency.
         VtsProfilingRecord entry_record = seen_records.back();
         seen_records.pop_back();
-        string api = record.func_msg().name();
+        string full_api_name = GetFullApiStr(record);
         int64_t start_timestamp = entry_record.timestamp();
         int64_t end_timestamp = record.timestamp();
         int64_t latency = end_timestamp - start_timestamp;
         // sanity check.
         if (latency < 0) {
-          cerr << __func__ << ": got negative latency for " << api << endl;
+          cerr << __func__ << ": got negative latency for " << full_api_name
+               << endl;
           exit(-1);
         }
-        cout << api << ":" << latency << endl;
+        cout << full_api_name << ":" << latency << endl;
         while (!pending_records.empty()) {
           seen_records.emplace_back(pending_records.back());
           pending_records.pop_back();
@@ -691,6 +692,12 @@ void VtsTraceProcessor::GetHalTraceSummary(
       trace_summaries->push_back(trace_summary);
     }
   }
+}
+
+string VtsTraceProcessor::GetFullApiStr(const VtsProfilingRecord& record) {
+  return record.package() + '@' + std::to_string(record.version_major()) + '.' +
+         std::to_string(record.version_minor()) + "::" + record.interface() +
+         "::" + record.func_msg().name();
 }
 
 }  // namespace vts

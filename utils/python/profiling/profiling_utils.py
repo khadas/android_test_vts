@@ -17,6 +17,7 @@ import logging
 import os
 
 from google.protobuf import text_format
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from vts.proto import VtsProfilingMessage_pb2 as VtsProfilingMsg
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -30,6 +31,7 @@ LOCAL_PROFILING_TRACE_PATH = "/tmp/vts-test-trace"
 TARGET_PROFILING_TRACE_PATH = "/data/local/tmp/"
 HAL_INSTRUMENTATION_LIB_PATH_32 = "/data/local/tmp/32/"
 HAL_INSTRUMENTATION_LIB_PATH_64 = "/data/local/tmp/64/"
+DEFAULT_HAL_ROOT = "android.hardware."
 
 _PROFILING_DATA = "profiling_data"
 _HOST_PROFILING_DATA = "host_profiling_data"
@@ -63,6 +65,28 @@ EVENT_TYPE_DICT = {
 }
 
 
+class VTSApiCoverageData(object):
+    """Class to store the API coverage data.
+
+    Attributes:
+        package_name: sting, HAL package name (e.g. android.hardware.foo).
+        version_major: string, HAL major version (e.g. 1).
+        version_minor: string, HAL minor version (e.g. 0).
+        interface_name: string, HAL interface name (e.g. IFoo).
+        total_apis: A set of strings, each string represents an API name defined
+                    in the given HAL.
+        covered_apis: A set of strings, each string represents an API name
+                      covered by the test.
+    """
+
+    def __init__(self, package_name, version, interface_name):
+        self.package_name = package_name
+        self.version_major, self.version_minor = version.split(".")
+        self.interface_name = interface_name
+        self.total_apis = set()
+        self.covered_apis = set()
+
+
 class ProfilingFeature(feature_utils.Feature):
     """Feature object for profiling functionality.
 
@@ -86,6 +110,9 @@ class ProfilingFeature(feature_utils.Feature):
         Args:
             user_params: A dictionary from parameter name (String) to parameter value.
             web: (optional) WebFeature, object storing web feature util for test run
+            data_file_path: Path to the data directory within vts package.
+            api_coverage_data: A dictionary from full HAL interface name
+            (e.g. android.hardware.foo@1.0::IFoo) to VtsApiCoverageData.
         """
         self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS,
                              self._OPTIONAL_PARAMS, user_params)
@@ -94,6 +121,10 @@ class ProfilingFeature(feature_utils.Feature):
             logging.info("Profiling is enabled.")
         else:
             logging.debug("Profiling is disabled.")
+
+        self.data_file_path = getattr(self,
+                                      keys.ConfigKeys.IKEY_DATA_FILE_PATH)
+        self.api_coverage_data = {}
 
     def _IsEventFromBinderizedHal(self, event_type):
         """Returns True if the event type is from a binderized HAL."""
@@ -170,8 +201,8 @@ class ProfilingFeature(feature_utils.Feature):
                               'instrumentation lib path.', bitness)
 
         # cleanup any existing traces.
-        shell.Execute("rm " + os.path.join(TARGET_PROFILING_TRACE_PATH,
-                                           "*.vts.trace"))
+        shell.Execute(
+            "rm " + os.path.join(TARGET_PROFILING_TRACE_PATH, "*.vts.trace"))
         logging.debug("enabling VTS profiling.")
 
         # give permission to write the trace file.
@@ -193,12 +224,13 @@ class ProfilingFeature(feature_utils.Feature):
         shell.Execute("setprop hal.instrumentation.lib.path \"\"")
         shell.Execute("setprop hal.instrumentation.enable false")
 
-    def _ParseTraceData(self, trace_file):
+    def _ParseTraceData(self, trace_file, measure_api_coverage):
         """Parses the data stored in trace_file, calculates the avg/max/min
         latency for each API.
 
         Args:
             trace_file: file that stores the trace data.
+            measure_api_coverage: whether to measure the api coverage data.
 
         Returns:
             VTSProfilingData which contain the list of API names and the avg/max/min
@@ -208,10 +240,10 @@ class ProfilingFeature(feature_utils.Feature):
         api_timestamps = {}
         api_latencies = {}
 
-        data_file_path = getattr(self, keys.ConfigKeys.IKEY_DATA_FILE_PATH)
-        trace_processor_binary = os.path.join(data_file_path, "host", "bin",
-                                              "trace_processor")
-        trace_processor_lib = os.path.join(data_file_path, "host", "lib64")
+        trace_processor_binary = os.path.join(self.data_file_path, "host",
+                                              "bin", "trace_processor")
+        trace_processor_lib = os.path.join(self.data_file_path, "host",
+                                           "lib64")
         trace_processor_cmd = [
             "chmod a+x %s" % trace_processor_binary,
             "LD_LIBRARY_PATH=%s %s -m profiling_trace %s" %
@@ -233,13 +265,68 @@ class ProfilingFeature(feature_utils.Feature):
                 profiling_data.options.add("hidl_hal_mode=%s" % mode)
                 first_line = False
             else:
-                api, latency = line.split(":")
-                if profiling_data.values.get(api):
-                    profiling_data.values[api].append(long(latency))
+                full_api, latency = line.rsplit(":", 1)
+                full_interface, api_name = full_api.rsplit("::", 1)
+                if profiling_data.values.get(api_name):
+                    profiling_data.values[api_name].append(long(latency))
                 else:
-                    profiling_data.values[api] = [long(latency)]
+                    profiling_data.values[api_name] = [long(latency)]
+
+                if measure_api_coverage:
+                    package, interface_name = full_interface.split("::")
+                    package_name, version = package.split("@")
+
+                    if full_interface in self.api_coverage_data:
+                        self.api_coverage_data[
+                            full_interface].covered_apis.add(api_name)
+                    else:
+                        total_apis = self._GetTotalApis(
+                            package_name, version, interface_name)
+                        if total_apis:
+                            vts_api_coverage = VTSApiCoverageData(
+                                package_name, version, interface_name)
+                            vts_api_coverage.total_apis = total_apis
+                            if api_name in total_apis:
+                                vts_api_coverage.covered_apis.add(api_name)
+                            else:
+                                logging.warning("API %s is not supported by %s",
+                                                api_name, full_interface)
+                            self.api_coverage_data[
+                                full_interface] = vts_api_coverage
 
         return profiling_data
+
+    def _GetTotalApis(self, package_name, version, interface_name):
+        """Parse the specified vts spec and get all APIs defined in the spec.
+
+        Args:
+            package_name: string, HAL package name.
+            version: string, HAL version.
+            interface_name: string, HAL interface name.
+
+        Returns:
+            A set of strings, each string represents an API defined in the spec.
+        """
+        total_apis = set()
+        spec_proto = CompSpecMsg.ComponentSpecificationMessage()
+        # TODO: support general package that does not start with android.hardware.
+        if not package_name.startswith(DEFAULT_HAL_ROOT):
+            logging.warning("Unsupported hal package: %s", package_name)
+            return total_apis
+
+        hal_package_path = package_name[len(DEFAULT_HAL_ROOT):].replace(
+            ".", "/")
+        vts_spec_path = os.path.join(
+            self.data_file_path, "spec/hardware/interfaces", hal_package_path,
+            version, "vts", interface_name[1:] + ".vts")
+        logging.debug("vts_spec_path: %s", vts_spec_path)
+        with open(vts_spec_path, 'r') as spec_file:
+            spec_string = spec_file.read()
+            text_format.Merge(spec_string, spec_proto)
+        for api in spec_proto.interface.api:
+            if not api.is_inherited:
+                total_apis.add(api.name)
+        return total_apis
 
     def StartHostProfiling(self, name):
         """Starts a profiling operation.
@@ -289,7 +376,7 @@ class ProfilingFeature(feature_utils.Feature):
                                                end_timestamp)
         return True
 
-    def ProcessTraceDataForTestCase(self, dut):
+    def ProcessTraceDataForTestCase(self, dut, measure_api_coverage=True):
         """Pulls the generated trace file to the host, parses the trace file to
         get the profiling data (e.g. latency of each API call) and stores these
         data in _profiling_data.
@@ -321,11 +408,11 @@ class ProfilingFeature(feature_utils.Feature):
 
         for file in trace_files:
             logging.info("parsing trace file: %s.", file)
-            data = self._ParseTraceData(file)
+            data = self._ParseTraceData(file, measure_api_coverage)
             if data:
                 profiling_data.append(data)
 
-    def ProcessAndUploadTraceData(self):
+    def ProcessAndUploadTraceData(self, upload_api_coverage=True):
         """Process and upload profiling trace data.
 
         Requires the feature to be enabled; no-op otherwise.
@@ -333,6 +420,9 @@ class ProfilingFeature(feature_utils.Feature):
         Merges the profiling data generated by each test case, calculates the
         aggregated max/min/avg latency for each API and uploads these latency
         metrics to webdb.
+
+        Args:
+            upload_api_coverage: whether to upload the API coverage data.
         """
         if not self.enabled:
             return
@@ -356,3 +446,6 @@ class ProfilingFeature(feature_utils.Feature):
                 merged_profiling_data.options,
                 x_axis_label="API processing latency (nano secs)",
                 y_axis_label="Frequency")
+
+        if upload_api_coverage:
+            self.web.AddApiCoverageReport(self.api_coverage_data.values())
