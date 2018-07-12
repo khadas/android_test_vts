@@ -266,4 +266,11 @@
 
     <!-- b/80077786: MyVerizonServices fail -->
     <option name="compatibility:exclude-filter" value="CtsPermission2TestCases android.permission2.cts.PrivappPermissionsTest#testPrivappPermissionsEnforcement" />
+
+    <!-- b/111101428: [C1][CtsOnGsi 9.0_R3] CtsOsTestCases fail -->
+    <option name="compatibility:exclude-filter" value="CtsOsTestCases android.os.cts.BuildTest#testIsSecureUserBuild" />
+    <option name="compatibility:exclude-filter" value="CtsOsTestCases android.os.cts.BuildVersionTest#testBuildFingerprint" />
+
+    <!-- b/111147583: [B1/C1][CtsOnGsi 9.0_R3]CtsSecurityTestCases-android.security.cts.VerifiedBootTest#testVerifiedBootSupport failure -->
+    <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.VerifiedBootTest#testVerifiedBootSupport" />
 </configuration>
