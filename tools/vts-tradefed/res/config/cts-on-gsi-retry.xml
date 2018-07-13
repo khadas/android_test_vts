@@ -15,6 +15,7 @@
 -->
 <configuration description="Runs a retry of a previous cts-on-gsi session.">
     <include name="cts-base-common" />
+    <include name="cts-on-gsi-exclude" />
 
     <option name="plan" value="cts-on-gsi-retry" />
 
