@@ -127,6 +127,8 @@ class ConfigKeys(object):
 
     # Keys for special test cases
     IKEY_FFMPEG_BINARY_PATH = "ffmpeg_binary_path"
+    IKEY_SYZKALLER_PACKAGES_PATH = "syzkaller_packages_path"
+    IKEY_SYZKALLER_TEMPLATE_PATH = "syzkaller_template_path"
 
     # Keys for log uploading
     IKEY_ENABLE_LOG_UPLOADING = "enable_log_uploading"
