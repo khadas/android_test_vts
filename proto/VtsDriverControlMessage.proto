@@ -46,8 +46,10 @@ enum VtsDriverCommandType {
   // To invoke a system call.
   INVOKE_SYSCALL = 202;
 
-  // To request FMQ resource
+  // To request FMQ resource.
   FMQ_OPERATION = 301;
+  // To request hidl_memory resource.
+  HIDL_MEMORY_OPERATION = 302;
 }
 
 
@@ -113,6 +115,8 @@ message VtsDriverControlCommandMessage {
 
   // Arguments for operation on FMQ
   optional FmqRequestMessage fmq_request = 3001;
+  // Arguments for operation on hidl_memory
+  optional HidlMemoryRequestMessage hidl_memory_request = 3002;
 }
 
 
@@ -138,4 +142,6 @@ message VtsDriverControlResponseMessage {
 
   // read data and return values from FMQ driver
   optional FmqResponseMessage fmq_response = 3001;
+  // response from hidl_memory driver
+  optional HidlMemoryResponseMessage hidl_memory_response = 3002;
 }

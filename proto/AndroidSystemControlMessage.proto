@@ -49,6 +49,8 @@ enum CommandType {
 
   // To request FMQ resource.
   VTS_FMQ_COMMAND = 401;
+  // To request hidl_memory resource.
+  VTS_HIDL_MEMORY_COMMAND = 402;
 }
 
 
@@ -147,6 +149,8 @@ message AndroidSystemControlCommandMessage {
 
   // for specifying requests to FMQ driver
   optional FmqRequestMessage fmq_request = 6001;
+  // for specifying requests to hidl_memory driver
+  optional HidlMemoryRequestMessage hidl_memory_request = 6002;
 }
 
 
@@ -174,6 +178,8 @@ message AndroidSystemControlResponseMessage {
 
   // read data and return value from FMQ driver
   optional FmqResponseMessage fmq_response = 3001;
+  // response from hidl_memory driver
+  optional HidlMemoryResponseMessage hidl_memory_response = 3002;
 }
 
 
