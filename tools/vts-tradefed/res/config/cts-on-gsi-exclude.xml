@@ -263,4 +263,7 @@
 
     <!-- b/110375762: A regression in a security PoC test which is irrelevant -->
     <option name="compatibility:exclude-filter" value="CtsSecurityHostTestCases android.security.cts.Poc17_05#testPocCVE_2017_0630" />
+
+    <!-- b/80077786: MyVerizonServices fail -->
+    <option name="compatibility:exclude-filter" value="CtsPermission2TestCases android.permission2.cts.PrivappPermissionsTest#testPrivappPermissionsEnforcement" />
 </configuration>
