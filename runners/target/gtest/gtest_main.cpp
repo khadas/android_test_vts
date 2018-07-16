@@ -53,13 +53,38 @@ static constexpr const char* COLOR_RED = "\033[0;31m";
 static constexpr const char* COLOR_GREEN = "\033[0;32m";
 static constexpr const char* COLOR_YELLOW = "\033[0;33m";
 
+static bool ShouldUseColor() {
+  const auto& gtest_color = ::testing::GTEST_FLAG(color);
+  if (gtest_color == "yes" || gtest_color == "true" || gtest_color == "t") {
+    return true;
+  }
+
+  bool stdout_is_tty = isatty(STDOUT_FILENO) != 0;
+  if (!stdout_is_tty) {
+    return false;
+  }
+
+  if (gtest_color != "auto") {
+    return false;
+  }
+
+  const char* const term = getenv("COLORTERM");
+  return term != nullptr && term[0] != 0;
+}
+
 static void ColoredPrintf(const char* const color, const char* fmt, ...) {
+  static const bool use_color = ShouldUseColor();
+
   va_list args;
   va_start(args, fmt);
 
-  printf("%s", color);
-  vprintf(fmt, args);
-  printf("%s", COLOR_RESET);
+  if (!use_color) {
+    vprintf(fmt, args);
+  } else {
+    printf("%s", color);
+    vprintf(fmt, args);
+    printf("%s", COLOR_RESET);
+  }
 
   va_end(args);
 }
