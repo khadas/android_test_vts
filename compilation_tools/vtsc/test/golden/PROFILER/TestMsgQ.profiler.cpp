@@ -55,9 +55,27 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_msgq_V1_0_ITestMsgQ(
                 case details::HidlInstrumentor::SERVER_API_ENTRY:
                 case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
                 {
-                    if ((*args).size() != 0) {
-                        LOG(ERROR) << "Number of arguments does not match. expect: 0, actual: " << (*args).size() << ", method name: configureFmqSyncReadWrite, event type: " << event;
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: configureFmqSyncReadWrite, event type: " << event;
                         break;
+                    }
+                    auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
+                    ::android::hardware::MQDescriptorSync<uint16_t> *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::MQDescriptorSync<uint16_t>*> ((*args)[0]);
+                    if (arg_val_0 != nullptr) {
+                        arg_0->set_type(TYPE_FMQ_SYNC);
+                        MessageQueue<uint16_t, kSynchronizedReadWrite> arg_0_q((*arg_val_0), false);
+                        if (arg_0_q.isValid()) {
+                            for (int i = 0; i < (int)arg_0_q.availableToRead(); i++) {
+                                auto *arg_0_item_i = arg_0->add_fmq_value();
+                                uint16_t arg_0_result;
+                                arg_0_q.read(&arg_0_result);
+                                arg_0_q.write(&arg_0_result);
+                                arg_0_item_i->set_type(TYPE_SCALAR);
+                                arg_0_item_i->mutable_scalar_value()->set_uint16_t(arg_0_result);
+                            }
+                        }
+                    } else {
+                        LOG(WARNING) << "argument 0 is null.";
                     }
                     break;
                 }
@@ -65,8 +83,8 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_msgq_V1_0_ITestMsgQ(
                 case details::HidlInstrumentor::SERVER_API_EXIT:
                 case details::HidlInstrumentor::PASSTHROUGH_EXIT:
                 {
-                    if ((*args).size() != 2) {
-                        LOG(ERROR) << "Number of return values does not match. expect: 2, actual: " << (*args).size() << ", method name: configureFmqSyncReadWrite, event type: " << event;
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: configureFmqSyncReadWrite, event type: " << event;
                         break;
                     }
                     auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
@@ -76,24 +94,6 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_msgq_V1_0_ITestMsgQ(
                         result_0->mutable_scalar_value()->set_bool_t((*result_val_0));
                     } else {
                         LOG(WARNING) << "return value 0 is null.";
-                    }
-                    auto *result_1 __attribute__((__unused__)) = msg.add_return_type_hidl();
-                    ::android::hardware::MQDescriptorSync<uint16_t> *result_val_1 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::MQDescriptorSync<uint16_t>*> ((*args)[1]);
-                    if (result_val_1 != nullptr) {
-                        result_1->set_type(TYPE_FMQ_SYNC);
-                        MessageQueue<uint16_t, kSynchronizedReadWrite> result_1_q((*result_val_1), false);
-                        if (result_1_q.isValid()) {
-                            for (int i = 0; i < (int)result_1_q.availableToRead(); i++) {
-                                auto *result_1_item_i = result_1->add_fmq_value();
-                                uint16_t result_1_result;
-                                result_1_q.read(&result_1_result);
-                                result_1_q.write(&result_1_result);
-                                result_1_item_i->set_type(TYPE_SCALAR);
-                                result_1_item_i->mutable_scalar_value()->set_uint16_t(result_1_result);
-                            }
-                        }
-                    } else {
-                        LOG(WARNING) << "return value 1 is null.";
                     }
                     break;
                 }
