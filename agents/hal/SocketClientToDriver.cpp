@@ -167,16 +167,26 @@ bool VtsDriverSocketClient::ProcessFmqCommand(
   command_message.set_command_type(FMQ_OPERATION);
   (command_message.mutable_fmq_request())->CopyFrom(fmq_request);
 
-  if (!VtsSocketSendMessage(command_message)) {
-    LOG(ERROR) << "Unable to send command from agent to driver.";
-    return false;
-  }
-  if (!VtsSocketRecvMessage(&response_message)) {
-    LOG(ERROR) << "Unable to receive message from driver to agent";
-    return false;
-  }
+  if (!VtsSocketSendMessage(command_message)) return false;
+  if (!VtsSocketRecvMessage(&response_message)) return false;
 
   fmq_response->CopyFrom(response_message.fmq_response());
+  return true;
+}
+
+bool VtsDriverSocketClient::ProcessHidlMemoryCommand(
+    const HidlMemoryRequestMessage& hidl_memory_request,
+    HidlMemoryResponseMessage* hidl_memory_response) {
+  VtsDriverControlCommandMessage command_message;
+  VtsDriverControlResponseMessage response_message;
+  command_message.set_command_type(HIDL_MEMORY_OPERATION);
+  (command_message.mutable_hidl_memory_request())
+      ->CopyFrom(hidl_memory_request);
+
+  if (!VtsSocketSendMessage(command_message)) return false;
+  if (!VtsSocketRecvMessage(&response_message)) return false;
+
+  hidl_memory_response->CopyFrom(response_message.hidl_memory_response());
   return true;
 }
 
