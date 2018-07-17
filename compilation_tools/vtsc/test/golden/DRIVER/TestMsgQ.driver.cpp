@@ -49,15 +49,17 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::GetService(bool 
 }
 
 
-::android::hardware::Return<void> Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite(
-    std::function<void(bool arg0,const ::android::hardware::MQDescriptorSync<uint16_t>& arg1)> cb) {
+::android::hardware::Return<bool> Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite(
+    const ::android::hardware::MQDescriptorSync<uint16_t>& arg0 __attribute__((__unused__))) {
     LOG(INFO) << "configureFmqSyncReadWrite called";
     AndroidSystemCallbackRequestMessage callback_message;
     callback_message.set_id(GetCallbackID("configureFmqSyncReadWrite"));
     callback_message.set_name("Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite");
+    VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
+    var_msg0->set_type(TYPE_FMQ_SYNC);
+    /* ERROR: TYPE_FMQ_SYNC is not supported yet. */
     RpcCallToAgent(callback_message, callback_socket_name_);
-    cb(static_cast<bool>(0), ::android::hardware::MQDescriptorSync<uint16_t>());
-    return ::android::hardware::Void();
+    return static_cast<bool>(0);
 }
 
 ::android::hardware::Return<void> Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::getFmqUnsyncWrite(
@@ -205,22 +207,21 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         return false;
     }
     if (!strcmp(func_name, "configureFmqSyncReadWrite")) {
+        ::android::hardware::MessageQueue<uint16_t, ::android::hardware::kSynchronizedReadWrite> arg0_sync_q(1024);
+        for (int i = 0; i < (int)func_msg.arg(0).fmq_value_size(); i++) {
+            uint16_t arg0_sync_q_item;
+            arg0_sync_q_item = func_msg.arg(0).fmq_value(i).scalar_value().uint16_t();
+            arg0_sync_q.write(&arg0_sync_q_item);
+        }
+        ::android::hardware::MQDescriptorSync<uint16_t> arg0(*arg0_sync_q.getDesc());
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         bool result0;
-        std::unique_ptr<::android::hardware::MQDescriptorSync<uint16_t>> result1;
-        hw_binder_proxy_->configureFmqSyncReadWrite([&](bool arg0,const ::android::hardware::MQDescriptorSync<uint16_t>& arg1){
-            LOG(INFO) << "callback configureFmqSyncReadWrite called";
-            result0 = arg0;
-            result1.reset(new (std::nothrow) ::android::hardware::MQDescriptorSync<uint16_t>(arg1));
-        });
+        result0 = hw_binder_proxy_->configureFmqSyncReadWrite(arg0);
         result_msg->set_name("configureFmqSyncReadWrite");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
         result_val_0->set_scalar_type("bool_t");
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
-        VariableSpecificationMessage* result_val_1 = result_msg->add_return_type_hidl();
-        result_val_1->set_type(TYPE_FMQ_SYNC);
-        /* ERROR: TYPE_FMQ_SYNC is not supported yet. */
         return true;
     }
     if (!strcmp(func_name, "getFmqUnsyncWrite")) {
@@ -336,7 +337,6 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::VerifyResults(co
     if (!strcmp(actual_result.name().c_str(), "configureFmqSyncReadWrite")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
         if (actual_result.return_type_hidl(0).scalar_value().bool_t() != expected_result.return_type_hidl(0).scalar_value().bool_t()) { return false; }
-        /* ERROR: TYPE_FMQ_SYNC is not supported yet. */
         return true;
     }
     if (!strcmp(actual_result.name().c_str(), "getFmqUnsyncWrite")) {
