@@ -120,6 +120,7 @@ class VtsTcpClient(object):
             try:
                 self.connection = socket.create_connection(
                     (ip, command_port), timeout=connection_timeout)
+                break
             except socket.error as e:
                 # Wait a bit and retry.
                 logging.exception("Connect failed %s", e)
