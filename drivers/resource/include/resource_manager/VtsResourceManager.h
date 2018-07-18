@@ -22,6 +22,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "fmq_driver/VtsFmqDriver.h"
+#include "hidl_memory_driver/VtsHidlMemoryDriver.h"
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsResourceControllerMessage.pb.h"
 
@@ -57,6 +58,14 @@ class VtsResourceManager {
 
   // Destructor to clean up the resource manager.
   ~VtsResourceManager();
+
+  // Processes command for operations on hidl_memory.
+  //
+  // @param hidl_memory_request  contains arguments for the operation.
+  // @param hidl_memory_response to be filled by the function.
+  void ProcessHidlMemoryCommand(
+      const HidlMemoryRequestMessage& hidl_memory_request,
+      HidlMemoryResponseMessage* hidl_memory_response);
 
   // Processes command for operations on Fast Message Queue.
   //
@@ -131,6 +140,8 @@ class VtsResourceManager {
 
   // Manages Fast Message Queue (FMQ) driver.
   VtsFmqDriver fmq_driver_;
+  // Manages hidl_memory driver.
+  VtsHidlMemoryDriver hidl_memory_driver_;
 };
 
 }  // namespace vts
