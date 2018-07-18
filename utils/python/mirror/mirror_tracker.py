@@ -97,9 +97,9 @@ class MirrorTracker(object):
                 blocking=False,
                 reset_pointers=True,
                 client=None):
-        """Initiates a fast message queue object.
+        """Initializes a fast message queue object.
 
-        This method will initiate a fast message queue object on the target side,
+        This method will initialize a fast message queue object on the target side,
         create a mirror object for the FMQ, and register it in the tracker.
 
         Args:
@@ -120,8 +120,8 @@ class MirrorTracker(object):
                 If not specified, creates a new one.
 
         Returns:
-            ResourceMirror object, it allows users to directly call methods on
-                                   ResourceMirror object.
+            ResourcFmqMirror object,
+            it allows users to directly call methods on the mirror object.
         """
         # Need to initialize a client if caller doesn't provide one.
         if not client:
@@ -131,7 +131,7 @@ class MirrorTracker(object):
                 callback_port=self._host_callback_port)
 
         # Create a resource mirror object.
-        mirror = resource_mirror.ResourceMirror(client)
+        mirror = resource_mirror.ResourceFmqMirror(client)
 
         # Create a new queue by default.
         existing_queue_id = -1
@@ -145,25 +145,28 @@ class MirrorTracker(object):
                         existing_queue]._data_type
                     sync = self._registered_mirrors[existing_queue]._sync
                     existing_queue_id = self._registered_mirrors[
-                        existing_queue]._driver_id
+                        existing_queue]._queue_id
                 else:
                     raise errors.USERError(
                         "Nonexisting queue name in mirror_tracker.")
             # Check if caller provides a resource mirror object.
-            elif (isinstance(existing_queue, resource_mirror.ResourceMirror)
-                  and existing_queue._res_type == "fmq"):
+            elif (isinstance(existing_queue, resource_mirror.ResourceFmqMirror)):
                 data_type = existing_queue._data_type
                 sync = existing_queue._sync
-                existing_queue_id = existing_queue._driver_id
+                existing_queue_id = existing_queue._queue_id
             else:
                 raise errors.USERError(
                     "Unsupported way of finding an existing queue object.")
 
-        mirror.initFmq(data_type, sync, existing_queue_id, queue_size,
+        mirror._create(data_type, sync, existing_queue_id, queue_size,
                        blocking, reset_pointers)
+        if (mirror._queue_id == -1):
+            # Failed to create queue object, error logged in resource_mirror.
+            return None
+
         # Needs to dynamically generate queue name if caller doesn't provide one
         if (new_queue_name == None):
-            new_queue_name = "queue_id_" + str(mirror._driver_id)
+            new_queue_name = "queue_id_" + str(mirror._queue_id)
         self._registered_mirrors[new_queue_name] = mirror
         return mirror
 

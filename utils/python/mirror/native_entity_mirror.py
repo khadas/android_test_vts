@@ -228,6 +228,7 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                             result, CompSpecMsg.VariableSpecificationMessage)):
                         # no need to process the return values.
                         continue
+                    
                     if (result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
                         if result.hidl_interface_id <= -1:
                             results[i] = None
@@ -245,10 +246,9 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                             logging.error("Invalid new queue_id.")
                             results[i] = None
                         else:
-                            res_mirror = resource_mirror.ResourceMirror(
+                            res_mirror = resource_mirror.ResourceFmqMirror(
                                 self._client)
-                            res_mirror._res_type = "fmq"
-                            res_mirror._driver_id = result.fmq_value[0].fmq_id
+                            res_mirror._queue_id = result.fmq_value[0].fmq_id
                             # TODO: support user-defined types in the future.
                             res_mirror._data_type = result.fmq_value[0].scalar_type
                             res_mirror._sync = result.type == CompSpecMsg.TYPE_FMQ_SYNC
