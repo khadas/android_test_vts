@@ -40,12 +40,14 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         testcases: list of GtestTestCase objects, list of test cases to run
         _cpu_freq: CpuFrequencyScalingController instance of a target device.
         _dut: AndroidDevice, the device under test as config
+        _initial_test_case_cnt: Number of initial test cases.
         _target_hals: List of String, the targeting hal service of the test.
                       e.g (["android.hardware.foo@1.0::IFoo"])
     """
 
     def setUpClass(self):
         """Checks precondition."""
+        self._initial_test_case_cnt = 0
         super(HidlHalGTest, self).setUpClass()
         if not hasattr(self, "_target_hals"):
             self._target_hals = []
@@ -75,6 +77,12 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
                 self, self._dut, self.shell, self.run_as_compliance_test)
             if not ret:
                 self.skipAllTests("HIDL HAL precondition check failed.")
+
+        # Extend timeout if there are multiple service instance combinations.
+        if (not self.isSkipAllTests() and self._initial_test_case_cnt and
+                len(self.testcases) > self._initial_test_case_cnt):
+            self.resetTimeout(self.timeout * len(self.testcases) /
+                              float(self._initial_test_case_cnt))
 
         if self.sancov.enabled and self._target_hals:
             self.sancov.InitializeDeviceCoverage(self._dut,
@@ -119,6 +127,7 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
         """
         initial_test_cases = super(HidlHalGTest, self).CreateTestCase(path,
                                                                       tag)
+        self._initial_test_case_cnt += len(initial_test_cases)
         if not initial_test_cases:
             return initial_test_cases
         # first, run one test with --list_registered_services.

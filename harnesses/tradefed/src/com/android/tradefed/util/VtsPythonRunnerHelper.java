@@ -38,7 +38,7 @@ public class VtsPythonRunnerHelper {
     static final String PATH = "PATH";
     static final String PYTHONHOME = "PYTHONHOME";
     static final String VTS = "vts";
-    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 15;
+    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 40;
 
     // Python virtual environment root path
     private File mVirtualenvPath;
