@@ -37,7 +37,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
     callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::haveSomeMemory");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_MEMORY);
-    /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+    var_msg0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(arg0)));
     RpcCallToAgent(callback_message, callback_socket_name_);
     cb(::android::hardware::hidl_memory());
     return ::android::hardware::Void();
@@ -52,7 +52,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
     callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::fillMemory");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_MEMORY);
-    /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+    var_msg0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(arg0)));
     VariableSpecificationMessage* var_msg1 = callback_message.add_arg();
     var_msg1->set_type(TYPE_SCALAR);
     var_msg1->set_scalar_type("uint8_t");
@@ -83,7 +83,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::GetService(b
     callback_message.set_name("Vts_android_hardware_tests_memory_V1_0_IMemoryTest::set");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_MEMORY);
-    /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+    var_msg0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(arg0)));
     RpcCallToAgent(callback_message, callback_socket_name_);
     return ::android::hardware::Void();
 }
@@ -126,19 +126,23 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     }
     if (!strcmp(func_name, "haveSomeMemory")) {
         ::android::hardware::hidl_memory arg0;
-        sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
-        if (ashmemAllocator == nullptr) {
-            LOG(ERROR) << "Failed to get ashmemAllocator! ";
-            exit(-1);
-        }
-        auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
-            if (!success) {
-                LOG(ERROR) << "Failed to allocate memory! ";
-                arg0 = ::android::hardware::hidl_memory();
-                return;
+        if (func_msg.arg(0).hidl_memory_value().has_hidl_mem_address()) {
+            arg0 = *(reinterpret_cast<android::hardware::hidl_memory*>(func_msg.arg(0).hidl_memory_value().hidl_mem_address()));
+        } else {
+            sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
+            if (ashmemAllocator == nullptr) {
+                LOG(ERROR) << "Failed to get ashmemAllocator! ";
+                exit(-1);
             }
-            arg0 = memory;
-        });
+            auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
+                if (!success) {
+                    LOG(ERROR) << "Failed to allocate memory! ";
+                    arg0 = ::android::hardware::hidl_memory();
+                    return;
+                }
+                arg0 = memory;
+            });
+        }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hardware::hidl_memory result0;
         hw_binder_proxy_->haveSomeMemory(arg0, [&](const ::android::hardware::hidl_memory& arg0){
@@ -148,24 +152,28 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         result_msg->set_name("haveSomeMemory");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_HIDL_MEMORY);
-        /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+        result_val_0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(result0)));
         return true;
     }
     if (!strcmp(func_name, "fillMemory")) {
         ::android::hardware::hidl_memory arg0;
-        sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
-        if (ashmemAllocator == nullptr) {
-            LOG(ERROR) << "Failed to get ashmemAllocator! ";
-            exit(-1);
-        }
-        auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
-            if (!success) {
-                LOG(ERROR) << "Failed to allocate memory! ";
-                arg0 = ::android::hardware::hidl_memory();
-                return;
+        if (func_msg.arg(0).hidl_memory_value().has_hidl_mem_address()) {
+            arg0 = *(reinterpret_cast<android::hardware::hidl_memory*>(func_msg.arg(0).hidl_memory_value().hidl_mem_address()));
+        } else {
+            sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
+            if (ashmemAllocator == nullptr) {
+                LOG(ERROR) << "Failed to get ashmemAllocator! ";
+                exit(-1);
             }
-            arg0 = memory;
-        });
+            auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
+                if (!success) {
+                    LOG(ERROR) << "Failed to allocate memory! ";
+                    arg0 = ::android::hardware::hidl_memory();
+                    return;
+                }
+                arg0 = memory;
+            });
+        }
         uint8_t arg1 = 0;
         arg1 = func_msg.arg(1).scalar_value().uint8_t();
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
@@ -190,19 +198,23 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     }
     if (!strcmp(func_name, "set")) {
         ::android::hardware::hidl_memory arg0;
-        sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
-        if (ashmemAllocator == nullptr) {
-            LOG(ERROR) << "Failed to get ashmemAllocator! ";
-            exit(-1);
-        }
-        auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
-            if (!success) {
-                LOG(ERROR) << "Failed to allocate memory! ";
-                arg0 = ::android::hardware::hidl_memory();
-                return;
+        if (func_msg.arg(0).hidl_memory_value().has_hidl_mem_address()) {
+            arg0 = *(reinterpret_cast<android::hardware::hidl_memory*>(func_msg.arg(0).hidl_memory_value().hidl_mem_address()));
+        } else {
+            sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator = ::android::hidl::allocator::V1_0::IAllocator::getService("ashmem");
+            if (ashmemAllocator == nullptr) {
+                LOG(ERROR) << "Failed to get ashmemAllocator! ";
+                exit(-1);
             }
-            arg0 = memory;
-        });
+            auto res = ashmemAllocator->allocate(func_msg.arg(0).hidl_memory_value().size(), [&](bool success, const hardware::hidl_memory& memory) {
+                if (!success) {
+                    LOG(ERROR) << "Failed to allocate memory! ";
+                    arg0 = ::android::hardware::hidl_memory();
+                    return;
+                }
+                arg0 = memory;
+            });
+        }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         hw_binder_proxy_->set(arg0);
         result_msg->set_name("set");
