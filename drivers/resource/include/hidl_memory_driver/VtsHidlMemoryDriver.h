@@ -81,6 +81,14 @@ class VtsHidlMemoryDriver {
   //              -1 if allocation fails.
   MemoryId Allocate(size_t mem_size);
 
+  // Registers a memory object in the driver.
+  //
+  // @param hidl_mem_address address of hidl_memory pointer.
+  //
+  // @return id to be used to reference the memory region later.
+  //         -1 if registration fails.
+  MemoryId RegisterHidlMemory(size_t hidl_mem_address);
+
   // Notify that caller will possibly write to all memory region with id mem_id.
   //
   // @param mem_id identifies the memory object.
@@ -154,6 +162,14 @@ class VtsHidlMemoryDriver {
   //
   // @return true if memory object is found, false otherwise.
   bool GetSize(MemoryId mem_id, size_t* result);
+
+  // Get hidl_memory pointer address of memory object with mem_id.
+  //
+  // @param mem_id identifies the memory object.
+  // @param result stores the hidl_memory pointer address.
+  //
+  // @return true if memory object is found, false otherwise.
+  bool GetHidlMemoryAddress(MemoryId mem_id, size_t* result);
 
  private:
   // Finds the memory object with ID mem_id.
