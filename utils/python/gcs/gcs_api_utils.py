@@ -208,12 +208,13 @@ class GcsApiUtils(object):
         """
         if os.path.exists(src_dir):
             logging.info('successfully found the local directory.')
-            for file_basename in os.listdir(src_dir):
-                src_file_path = os.path.join(src_dir, file_basename)
-                dest_file_path = os.path.join(
-                    dest_dir,
-                    os.path.join(os.path.basename(src_dir), file_basename))
-                self.UploadFile(src_file_path, dest_file_path)
+            src_basedir = os.path.basename(src_dir)
+            for dirpath, _, filenames in os.walk(src_dir):
+                for filename in filenames:
+                    src_file_path = os.path.join(dirpath, filename)
+                    dest_file_path = os.path.join(
+                        dest_dir, src_file_path.replace(src_dir, src_basedir))
+                    self.UploadFile(src_file_path, dest_file_path)
             return True
         else:
             logging.error('requested local directory does not exist.')

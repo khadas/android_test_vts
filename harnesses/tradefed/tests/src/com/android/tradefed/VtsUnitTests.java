@@ -17,6 +17,7 @@ package com.android.tradefed;
 
 import com.android.tradefed.device.metric.VtsCoverageCollectorTest;
 import com.android.tradefed.device.metric.VtsHalTraceCollectorTest;
+import com.android.tradefed.module.VtsHalAdapterModuleControllerTest;
 import com.android.tradefed.presubmit.VtsConfigLoadingTest;
 import com.android.tradefed.targetprep.VtsCoveragePreparerTest;
 import com.android.tradefed.targetprep.VtsHalAdapterPreparerTest;
@@ -41,29 +42,31 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    // NOTE: please keep classes sorted lexicographically in each group
-    //device
-    VtsCoverageCollectorTest.class,
-    VtsHalTraceCollectorTest.class,
+        // NOTE: please keep classes sorted lexicographically in each group
+        // device
+        VtsCoverageCollectorTest.class,
+        VtsHalTraceCollectorTest.class,
 
-    // presubmit
-    VtsConfigLoadingTest.class,
-    // targetprep
-    VtsCoveragePreparerTest.class,
-    VtsHalAdapterPreparerTest.class,
-    VtsPythonVirtualenvPreparerTest.class,
-    VtsTraceCollectPreparerTest.class,
+        // module
+        VtsHalAdapterModuleControllerTest.class,
+        // presubmit
+        VtsConfigLoadingTest.class,
+        // targetprep
+        VtsCoveragePreparerTest.class,
+        VtsHalAdapterPreparerTest.class,
+        VtsPythonVirtualenvPreparerTest.class,
+        VtsTraceCollectPreparerTest.class,
 
-    // testtype
-    VtsFuzzTestResultParserTest.class,
-    VtsFuzzTestTest.class,
-    VtsMultiDeviceTestResultParserTest.class,
-    VtsMultiDeviceTestTest.class,
+        // testtype
+        VtsFuzzTestResultParserTest.class,
+        VtsFuzzTestTest.class,
+        VtsMultiDeviceTestResultParserTest.class,
+        VtsMultiDeviceTestTest.class,
 
-    // util
-    CmdUtilTest.class,
-    ProcessHelperTest.class,
-    VtsPythonRunnerHelperTest.class,
+        // util
+        CmdUtilTest.class,
+        ProcessHelperTest.class,
+        VtsPythonRunnerHelperTest.class,
 })
 public class VtsUnitTests {
     // empty on purpose

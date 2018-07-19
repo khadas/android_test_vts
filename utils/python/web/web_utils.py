@@ -367,6 +367,25 @@ class WebFeature(feature_utils.Feature):
             log_msg.url = url
             log_msg.name = os.path.basename(url)
 
+    def AddLogGcsUrls(self, urls):
+        """Creates a log message with log file GCS_URLs.
+
+        Adds a log message to the current test module report and supplies the
+        url to the log files.
+
+        Requires the feature to be enabled; no-op otherwise.
+
+        Args:
+            gcs_urls: list of string, the GCS_URLs of the logs.
+        """
+        if not self.enabled or urls is None:
+            return
+
+        for url in urls:
+            log_msg = self.report_msg.log.add()
+            log_msg.url = url
+            log_msg.name = "gcs_" + os.path.basename(url)
+
     def GetTestModuleKeys(self):
         """Returns the test module name and start timestamp.
 

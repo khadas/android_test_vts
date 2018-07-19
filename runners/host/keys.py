@@ -138,6 +138,7 @@ class ConfigKeys(object):
     IKEY_LOG_UPLOADING_PATH = "log_uploading_path"
     IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY = "log_uploading_use_date_directory"
     IKEY_LOG_UPLOADING_URL_PREFIX = "log_uploading_url_prefix"
+    IKEY_LOG_UPLOADING_GCS_BUCKET_NAME = "log_uploading_gcs_bucket_name"
 
     # Keys for general user config types
     IKEY_USER_CONFIG_STR = 'CONFIG_STR'
