@@ -31,8 +31,9 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         _sync: bool, whether the queue is synchronized.
     """
 
-    def __init__(self, client):
+    def __init__(self, client, queue_id=-1):
         super(ResourceFmqMirror, self).__init__(client)
+        self._queue_id = queue_id
 
     def _create(self, data_type, sync, queue_id, queue_size, blocking,
                 reset_pointers):
@@ -332,9 +333,9 @@ class ResourceHidlMemoryMirror(mirror_object.MirrorObject):
         _mem_id: int, used to identify the memory region on the target side.
     """
 
-    def __init__(self, client):
+    def __init__(self, client, mem_id=-1):
         super(ResourceHidlMemoryMirror, self).__init__(client)
-        self._mem_id = -1
+        self._mem_id = mem_id
 
     def _allocate(self, mem_size):
         """Initiate a hidl_memory region on the target side.
