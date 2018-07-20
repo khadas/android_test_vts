@@ -95,6 +95,8 @@ enum ComponentType {
   MEDIA_OMX = 24;
   // For msgq test HAL.
   TESTS_MSGQ = 25;
+  // For memory test HAL.
+  TESTS_MEMORY = 26;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
