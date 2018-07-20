@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 
+#include <resource_manager/VtsResourceManager.h>
 #include "component_loader/HalDriverLoader.h"
 #include "driver_base/DriverBase.h"
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
@@ -35,7 +36,8 @@ class VtsHalDriverManager {
   // Constructor where the first argument is the path of a dir which contains
   // all available interface specification files.
   VtsHalDriverManager(const string& spec_dir, const int epoch_count,
-                      const string& callback_socket_name);
+                      const string& callback_socket_name,
+                      VtsResourceManager* resource_manager);
 
   // Loads the driver library for the target HAL, creates the corresponding
   // driver instance, assign it a driver id and registers the created driver
@@ -175,6 +177,13 @@ class VtsHalDriverManager {
   // TODO(zhuoyao): consider to use unordered_map for performance optimization.
   map<DriverId, HalDriverInfo> hal_driver_map_;
   // TODO(zhuoyao): use mutex to protect hal_driver_map_;
+
+  // Hold onto a resource_manager because some function calls need to reference
+  // resources allocated on the target side.
+  // driver_manager doesn't own resource_manager because driver_manager and
+  // resource_manager are both started by the agent. driver_manager only holds
+  // this pointer because it is easy to call functions in resource_manager.
+  VtsResourceManager* resource_manager_;
 };
 
 }  // namespace vts

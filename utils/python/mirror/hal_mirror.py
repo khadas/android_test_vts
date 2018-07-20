@@ -62,7 +62,7 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
     def InitHalDriver(self, target_type, target_version_major,
                       target_version_minor, target_package,
                       target_component_name, hw_binder_service_name,
-                      handler_name, bits):
+                      handler_name, bits, is_test_hal):
         """Initiates the driver for a HIDL HAL on the target device and loads
         the interface specification message.
 
@@ -80,6 +80,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             handler_name: string, the name of the handler. target_type is used
                           by default.
             bits: integer, processor architecture indicator: 32 or 64.
+            is_test_hal: bool, whether the HAL service is a test HAL
+                         (e.g. msgq).
 
         Raises:
             errors.ComponentLoadingError is raised when error occurs trying to
@@ -95,7 +97,8 @@ class HalMirror(native_entity_mirror.NativeEntityMirror):
             target_component_name=target_component_name,
             handler_name=handler_name,
             hw_binder_service_name=hw_binder_service_name,
-            bits=bits)
+            bits=bits,
+            is_test_hal=is_test_hal)
         self._driver_id = driver_id
 
         #TODO: ListApis assumes only one HAL is loaded at a time, need to

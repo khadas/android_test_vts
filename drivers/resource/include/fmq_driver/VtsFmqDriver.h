@@ -78,7 +78,9 @@ enum FmqOperation {
   // checks if the queue is valid.
   FMQ_OP_IS_VALID,
   // gets event flag word, which allows multiple queue blocking.
-  FMQ_OP_GET_EVENT_FLAG_WORD
+  FMQ_OP_GET_EVENT_FLAG_WORD,
+  // gets address of the queue.
+  FMQ_OP_GET_QUEUE_DESC_ADDR
 };
 
 // struct to store parameters in an operation.
@@ -86,6 +88,7 @@ struct OperationParam {
   OperationParam()
       : op(FMQ_OP_UNKNOWN),
         queue_id(-1),
+        queue_descriptor(0),
         queue_size(0),
         blocking(false),
         reset_pointers(true),
@@ -96,6 +99,7 @@ struct OperationParam {
         event_flag_word(nullptr){};
   FmqOperation op;      // operation to perform on FMQ.
   QueueId queue_id;     // identifies the message queue object.
+  size_t queue_descriptor;  // pointer to descriptor of an existing queue.
   size_t queue_size;    // size of the queue.
   bool blocking;        // whether to enable blocking in the queue.
   bool reset_pointers;  // whether to reset read/write pointers when creating a
@@ -153,7 +157,8 @@ class VtsFmqDriver {
   //         -1 on failure.
   QueueId CreateFmq(string type, bool sync, size_t queue_size, bool blocking);
 
-  // Creates a new FMQ object based on an existing message queue.
+  // Creates a new FMQ object based on an existing message queue
+  // (Using queue_id assigned by fmq_driver.).
   //
   // @param type           string, queue data type.
   // @param sync           whether queue is synchronized (only has one reader).
@@ -164,6 +169,19 @@ class VtsFmqDriver {
   //         -1 on failure.
   QueueId CreateFmq(string type, bool sync, QueueId queue_id,
                     bool reset_pointers = true);
+
+  // Creates a new FMQ object based on an existing message queue
+  // (Using queue descriptor.).
+  // This method will reset read/write pointers in the new queue object.
+  //
+  // @param type             string, queue data type.
+  // @param sync             whether queue is synchronized
+  //                         (only has one reader).
+  // @param queue_descriptor pointer to descriptor of an existing queue.
+  //
+  // @return message queue object id associated with the caller on success,
+  //         -1 on failure.
+  QueueId CreateFmq(string type, bool sync, size_t queue_descriptor);
 
   // Reads one item from FMQ (no blocking at all).
   //
@@ -367,6 +385,20 @@ class VtsFmqDriver {
   //         false otherwise.
   bool GetEventFlagWord(string type, bool sync, QueueId queue_id,
                         atomic<uint32_t>** result);
+
+  // Gets the address of queue descriptor in memory. This function is called by
+  // driver_manager to preprocess arguments that are FMQs.
+  //
+  // @param type     type of data in the queue.
+  // @param sync     whether queue is synchronized (only has one reader).
+  // @param queue_id identifies the queue object.
+  // @param result   pointer to store result.
+  //
+  // @return true if queue is found, and type matches, and puts actual result in
+  //              result pointer,
+  //         false otherwise.
+  bool GetQueueDescAddress(string type, bool sync, QueueId queue_id,
+                           size_t* result);
 
  private:
   // Finds the queue in the map based on the input queue ID.

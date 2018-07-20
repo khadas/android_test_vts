@@ -57,7 +57,10 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::GetService(bool 
     callback_message.set_name("Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ::configureFmqSyncReadWrite");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_FMQ_SYNC);
-    /* ERROR: TYPE_FMQ_SYNC is not supported yet. */
+    VariableSpecificationMessage* var_msg0_item = var_msg0->add_fmq_value();
+    var_msg0_item->set_type(TYPE_SCALAR);
+    var_msg0_item->set_scalar_type("uint16_t");
+    var_msg0_item->set_fmq_desc_address(reinterpret_cast<size_t>(new (std::nothrow) ::android::hardware::MQDescriptorSync<uint16_t>(arg0)));
     RpcCallToAgent(callback_message, callback_socket_name_);
     return static_cast<bool>(0);
 }
@@ -207,16 +210,21 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         return false;
     }
     if (!strcmp(func_name, "configureFmqSyncReadWrite")) {
-        ::android::hardware::MessageQueue<uint16_t, ::android::hardware::kSynchronizedReadWrite> arg0_sync_q(1024);
-        for (int i = 0; i < (int)func_msg.arg(0).fmq_value_size(); i++) {
-            uint16_t arg0_sync_q_item;
-            arg0_sync_q_item = func_msg.arg(0).fmq_value(i).scalar_value().uint16_t();
-            arg0_sync_q.write(&arg0_sync_q_item);
+        const ::android::hardware::MQDescriptorSync<uint16_t>* arg0;
+        if (func_msg.arg(0).fmq_value_size() > 0 && func_msg.arg(0).fmq_value(0).has_fmq_desc_address()) {
+            arg0 = reinterpret_cast<::android::hardware::MQDescriptorSync<uint16_t>*>(func_msg.arg(0).fmq_value(0).fmq_desc_address());
+        } else {
+            ::android::hardware::MessageQueue<uint16_t, ::android::hardware::kSynchronizedReadWrite> arg0_sync_q(1024);
+            for (int i = 0; i < (int)func_msg.arg(0).fmq_value_size(); i++) {
+                uint16_t arg0_sync_q_item;
+                arg0_sync_q_item = func_msg.arg(0).fmq_value(i).scalar_value().uint16_t();
+                arg0_sync_q.write(&arg0_sync_q_item);
+            }
+            arg0 = arg0_sync_q.getDesc();
         }
-        ::android::hardware::MQDescriptorSync<uint16_t> arg0(*arg0_sync_q.getDesc());
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         bool result0;
-        result0 = hw_binder_proxy_->configureFmqSyncReadWrite(arg0);
+        result0 = hw_binder_proxy_->configureFmqSyncReadWrite(*arg0);
         result_msg->set_name("configureFmqSyncReadWrite");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_SCALAR);
@@ -229,7 +237,7 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         arg0 = func_msg.arg(0).scalar_value().bool_t();
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         bool result0;
-        std::unique_ptr<::android::hardware::MQDescriptorUnsync<uint16_t>> result1;
+        unique_ptr<::android::hardware::MQDescriptorUnsync<uint16_t>> result1;
         hw_binder_proxy_->getFmqUnsyncWrite(arg0, [&](bool arg0,const ::android::hardware::MQDescriptorUnsync<uint16_t>& arg1){
             LOG(INFO) << "callback getFmqUnsyncWrite called";
             result0 = arg0;
@@ -242,7 +250,10 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::CallFunction(
         result_val_0->mutable_scalar_value()->set_bool_t(result0);
         VariableSpecificationMessage* result_val_1 = result_msg->add_return_type_hidl();
         result_val_1->set_type(TYPE_FMQ_UNSYNC);
-        /* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */
+        VariableSpecificationMessage* result_val_1_item = result_val_1->add_fmq_value();
+        result_val_1_item->set_type(TYPE_SCALAR);
+        result_val_1_item->set_scalar_type("uint16_t");
+        result_val_1_item->set_fmq_desc_address(reinterpret_cast<size_t>(new (std::nothrow) ::android::hardware::MQDescriptorUnsync<uint16_t>(*result1.get())));
         return true;
     }
     if (!strcmp(func_name, "requestWriteFmqSync")) {
