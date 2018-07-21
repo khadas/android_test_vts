@@ -21,26 +21,28 @@ from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from vts.utils.python.mirror import mirror_object
 
 
-class ResourceMirror(mirror_object.MirrorObject):
-    """This is a class that acts as a mirror object that represents resource
-       allocated on the target side.
+class ResourceFmqMirror(mirror_object.MirrorObject):
+    """This is a class that mirrors FMQ resource allocated on the target side.
 
     Attributes:
         _client: the TCP client instance.
-        _driver_id: int, used to identify the driver on the target side.
-        _res_type: string, identifies the resource type of the current mirror
-          (e.g. "fmq", "hidl_memory", "hidl_handle")
+        _queue_id: int, used to identify the queue object on the target side.
         _data_type: type of data in the queue.
-        _sync: bool, whether the queue is synchronized
+        _sync: bool, whether the queue is synchronized.
     """
 
     def __init__(self, client):
-        super(ResourceMirror, self).__init__(client)
+        super(ResourceFmqMirror, self).__init__(client)
 
-    def initFmq(self, data_type, sync, queue_id, queue_size, blocking,
+    def _create(self, data_type, sync, queue_id, queue_size, blocking,
                 reset_pointers):
         """Initiate a fast message queue object on the target side,
            and stores the queue_id in the class attribute.
+           User should not directly call this method because it will overwrite
+           the original queue_id stored in the mirror object, leaving that
+           queue object out of reference.
+           User should always call InitFmq() in mirror_tracker.py to obtain a
+           new queue object.
 
         Args:
             data_type: string, type of data in the queue (e.g. "uint32_t", "int16_t").
@@ -52,12 +54,11 @@ class ResourceMirror(mirror_object.MirrorObject):
               creating a message queue object based on an existing message queue.
         """
         # Sets some configuration for the current resource mirror.
-        self._res_type = "fmq"
         self._data_type = data_type
         self._sync = sync
 
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
+        request_msg = self._createTemplateRequestMessage(
             ResControlMsg.FMQ_PROTO_CREATE, queue_id)
         request_msg.queue_size = queue_size
         request_msg.blocking = blocking
@@ -65,10 +66,11 @@ class ResourceMirror(mirror_object.MirrorObject):
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None):
-            self._driver_id = fmq_response.queue_id
+        if (fmq_response != None and fmq_response.queue_id != -1):
+            self._queue_id = fmq_response.queue_id
         else:
-            self._driver_id = -1
+            self._queue_id = -1
+            logging.error("Failed to create a new queue object.")
 
     def read(self, data, data_size):
         """Initiate a non-blocking read request to FMQ driver.
@@ -86,14 +88,14 @@ class ResourceMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         del data[:]
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_READ, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_READ, self._queue_id)
         request_msg.read_data_size = data_size
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
         if fmq_response is not None and fmq_response.success:
-            self.extractReadData(fmq_response, data)
+            self._extractReadData(fmq_response, data)
             return True
         return False
 
@@ -116,15 +118,15 @@ class ResourceMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         del data[:]
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_READ_BLOCKING, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_READ_BLOCKING, self._queue_id)
         request_msg.read_data_size = data_size
         request_msg.time_out_nanos = time_out_nanos
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
         if fmq_response is not None and fmq_response.success:
-            self.extractReadData(fmq_response, data)
+            self._extractReadData(fmq_response, data)
             return True
         return False
 
@@ -142,9 +144,9 @@ class ResourceMirror(mirror_object.MirrorObject):
                   false otherwise.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_WRITE, self._driver_id)
-        self.prepareWriteData(request_msg, data[:data_size])
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_WRITE, self._queue_id)
+        self._prepareWriteData(request_msg, data[:data_size])
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
@@ -169,9 +171,9 @@ class ResourceMirror(mirror_object.MirrorObject):
                   false otherwise.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_WRITE_BLOCKING, self._driver_id)
-        self.prepareWriteData(request_msg, data[:data_size])
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_WRITE_BLOCKING, self._queue_id)
+        self._prepareWriteData(request_msg, data[:data_size])
         request_msg.time_out_nanos = time_out_nanos
 
         # Send and receive data.
@@ -187,11 +189,11 @@ class ResourceMirror(mirror_object.MirrorObject):
             int, number of slots available.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_AVAILABLE_WRITE, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_AVAILABLE_WRITE, self._queue_id)
 
         # Send and receive data.
-        return self.processUtilMethod(request_msg)
+        return self._processUtilMethod(request_msg)
 
     def availableToRead(self):
         """Gets number of items available to read.
@@ -200,11 +202,11 @@ class ResourceMirror(mirror_object.MirrorObject):
             int, number of items.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_AVAILABLE_READ, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_AVAILABLE_READ, self._queue_id)
 
         # Send and receive data.
-        return self.processUtilMethod(request_msg)
+        return self._processUtilMethod(request_msg)
 
     def getQuantumSize(self):
         """Gets size of item in the queue.
@@ -213,11 +215,11 @@ class ResourceMirror(mirror_object.MirrorObject):
             int, size of item.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_GET_QUANTUM_SIZE, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_GET_QUANTUM_SIZE, self._queue_id)
 
         # send and receive data
-        return self.processUtilMethod(request_msg)
+        return self._processUtilMethod(request_msg)
 
     def getQuantumCount(self):
         """Gets number of items that fit in the queue.
@@ -226,11 +228,11 @@ class ResourceMirror(mirror_object.MirrorObject):
             int, number of items.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_GET_QUANTUM_COUNT, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_GET_QUANTUM_COUNT, self._queue_id)
 
         # Send and receive data.
-        return self.processUtilMethod(request_msg)
+        return self._processUtilMethod(request_msg)
 
     def isValid(self):
         """Check if the queue is valid.
@@ -239,8 +241,8 @@ class ResourceMirror(mirror_object.MirrorObject):
             bool, true if the queue is valid.
         """
         # Prepare arguments.
-        request_msg = self.createTemplateFmqRequestMessage(
-            ResControlMsg.FMQ_PROTO_IS_VALID, self._driver_id)
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.FMQ_PROTO_IS_VALID, self._queue_id)
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
@@ -254,9 +256,9 @@ class ResourceMirror(mirror_object.MirrorObject):
         Returns:
             int, id of the queue.
         """
-        return self._driver_id
+        return self._queue_id
 
-    def createTemplateFmqRequestMessage(self, operation, queue_id):
+    def _createTemplateRequestMessage(self, operation, queue_id):
         """Creates a template FmqRequestMessage with common arguments among
            all FMQ operations.
 
@@ -279,7 +281,7 @@ class ResourceMirror(mirror_object.MirrorObject):
     # Converts a python list into protobuf message.
     # TODO: Consider use py2pb once we know how to support user-defined types.
     #       This method only supports primitive types like int32_t, bool_t.
-    def prepareWriteData(self, request_msg, data):
+    def _prepareWriteData(self, request_msg, data):
         """Prepares write data by converting python list into
            repeated protobuf field.
 
@@ -293,7 +295,7 @@ class ResourceMirror(mirror_object.MirrorObject):
             new_message.scalar_type = self._data_type
             setattr(new_message.scalar_value, self._data_type, curr_value)
 
-    def extractReadData(self, response_msg, data):
+    def _extractReadData(self, response_msg, data):
         """Extracts read data from the response message returned by client.
 
         Args:
@@ -305,7 +307,7 @@ class ResourceMirror(mirror_object.MirrorObject):
         for item in response_msg.read_data:
             data.append(self._client.GetPythonDataOfVariableSpecMsg(item))
 
-    def processUtilMethod(self, request_msg):
+    def _processUtilMethod(self, request_msg):
         """Sends request message and process response message for util methods
            that return an unsigned integer,
            e.g. availableToWrite, availableToRead.
