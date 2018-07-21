@@ -218,6 +218,9 @@ message FunctionSpecificationMessage {
   // using a VTS HAL driver (for HIDL HAL). 0 for the main interface.
   optional int32 hidl_interface_id = 3;
 
+  // whether the function is inherited from another class.
+  optional bool is_inherited = 4;
+
   // data type of the return value (for legacy HALs and shared libraries).
   optional VariableSpecificationMessage return_type = 11;
 
