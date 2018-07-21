@@ -59,6 +59,7 @@ cc_library_shared {
 
     srcs: [
         "fmq_driver/VtsFmqDriver.cpp",
+        "hidl_handle_driver/VtsHidlHandleDriver.cpp",
         "hidl_memory_driver/VtsHidlMemoryDriver.cpp",
     ],
 }
