@@ -79,6 +79,12 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     @Option(name = "no-dep-module", description = "modules which should not be installed by pip")
     private Collection<String> mNoDepModules = new TreeSet<>();
 
+    @Option(name = "reuse",
+            description = "Reuse an exising virtualenv path if exists in "
+                    + "temp directory. When this option is enabled, virtualenv directory used or "
+                    + "created by this preparer will not be deleted after tests complete.")
+    protected boolean mReuse = false;
+
     @Option(name = "python-version",
             description = "The version of a Python interpreter to use."
                     + "Currently, only major version number is fully supported."
@@ -113,6 +119,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             ITestDevice device = context.getDevices().get(0);
             mDescriptor = device.getDeviceDescriptor();
             createVirtualenv(mBuildInfo);
+            CLog.d("Python virtualenv path is: " + mVenvDir);
             VtsPythonRunnerHelper.activateVirtualenv(getRunUtil(), mVenvDir.getAbsolutePath());
             setLocalPypiPath();
             installDeps();
@@ -131,7 +138,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             // Since this is a host side preparer, no need to repeat
             return;
         }
-        if (mVenvDir != null && mIsDirCreator) {
+        if (!mReuse && mVenvDir != null && mIsDirCreator) {
             try {
                 recursiveDelete(mVenvDir.toPath());
                 CLog.d("Deleted the virtual env's temp working dir, %s.", mVenvDir);
@@ -363,29 +370,39 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             }
         }
 
-        if (mVenvDir == null) {
-            CLog.d("Creating virtualenv for version " + mPythonVersion);
-            try {
-                mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
-                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
-                mIsDirCreator = true;
-                String virtualEnvPath = mVenvDir.getAbsolutePath();
-                String[] cmd = new String[] {
-                        "virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 3, cmd);
-                if (c.getStatus() != CommandStatus.SUCCESS) {
-                    CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
-                    CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
-                            c.getStdout(), c.getStderr()));
-                    throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
-                }
-            } catch (IOException | RuntimeException e) {
-                CLog.e("Failed to create temp directory for virtualenv");
-                throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
-            }
+        if (mVenvDir != null) {
+            return;
         }
 
-        CLog.d("Python virtualenv path is: " + mVenvDir);
+        try {
+            if (mReuse) {
+                String tempDir = System.getProperty("java.io.tmpdir");
+                mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
+                if (mVenvDir.exists()) {
+                    CLog.d("Using existing virtualenv for version " + mPythonVersion);
+                    // TODO(yuexima): handle multiple TF instance case race condition
+                    return;
+                }
+            } else {
+                mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
+                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+            }
+            CLog.d("Creating virtualenv for version " + mPythonVersion);
+            mIsDirCreator = true;
+            String virtualEnvPath = mVenvDir.getAbsolutePath();
+            String[] cmd =
+                    new String[] {"virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
+            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 3, cmd);
+            if (c.getStatus() != CommandStatus.SUCCESS) {
+                CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
+                CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
+                        c.getStdout(), c.getStderr()));
+                throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
+            }
+        } catch (IOException | RuntimeException e) {
+            CLog.e("Failed to create temp directory for virtualenv");
+            throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
+        }
     }
 
     protected void addDepModule(String module) {
