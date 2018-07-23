@@ -267,10 +267,27 @@
     <!-- b/80077786: MyVerizonServices fail -->
     <option name="compatibility:exclude-filter" value="CtsPermission2TestCases android.permission2.cts.PrivappPermissionsTest#testPrivappPermissionsEnforcement" />
 
-    <!-- b/111101428: [C1][CtsOnGsi 9.0_R3] CtsOsTestCases fail -->
+    <!-- b/111101428: CtsOsTestCases irrelevant test cases -->
     <option name="compatibility:exclude-filter" value="CtsOsTestCases android.os.cts.BuildTest#testIsSecureUserBuild" />
     <option name="compatibility:exclude-filter" value="CtsOsTestCases android.os.cts.BuildVersionTest#testBuildFingerprint" />
 
-    <!-- b/111147583: [B1/C1][CtsOnGsi 9.0_R3]CtsSecurityTestCases-android.security.cts.VerifiedBootTest#testVerifiedBootSupport failure -->
+    <!-- b/111147583: CtsSecurityTestCases irrelevant test cases -->
     <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.VerifiedBootTest#testVerifiedBootSupport" />
+
+    <!-- b/111451322: CtsLocationTestCases regression (9.0 R3 waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRates" />
+    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRatesOnOff" />
+    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRatesRepetitive" />
+
+    <!-- b/111510520: CtsMediaTestCases regression (9.0 R3 waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VpxEncoderTest#testBasicVP9" />
+
+    <!-- b/110405126: CtsPermissionTestCases flaky (due to SIM card setting) -->
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetDeviceId" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetImei" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetLine1Number" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetSimSerialNumber" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetSubscriberId" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testSetDataEnabled" />
+    <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testVoiceMailNumber" />
 </configuration>
