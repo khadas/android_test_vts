@@ -147,6 +147,39 @@ class WebFeature(feature_utils.Feature):
         self.current_test_report_msg.start_timestamp = feature_utils.GetTimestamp(
         )
 
+    def AddApiCoverageReport(self, api_coverage_data_vec, isGlobal=True):
+        """Adds an API coverage report to the VtsReportMessage.
+
+        Translate each element in the give coverage data vector into a
+        ApiCoverageReportMessage within the report message.
+
+        Args:
+            api_coverage_data_vec: list of VTSApiCoverageData which contains
+                                   the metadata (e.g. package_name, version)
+                                   and the total/covered api names.
+            isGlobal: boolean, True if the coverage data is for the entire test,
+                      False if only for the current test case.
+        """
+
+        if not self.enabled:
+            return
+
+        if isGlobal:
+            report = self.report_msg
+        else:
+            report = self.current_test_report_msg
+
+        for api_coverage_data in api_coverage_data_vec:
+            api_coverage = report.api_coverage.add()
+            api_coverage.hal_interface.hal_package_name = api_coverage_data.package_name
+            api_coverage.hal_interface.hal_version_major = int(
+                api_coverage_data.version_major)
+            api_coverage.hal_interface.hal_version_minor = int(
+                api_coverage_data.version_minor)
+            api_coverage.hal_interface.hal_interface_name = api_coverage_data.interface_name
+            api_coverage.hal_api.extend(api_coverage_data.total_apis)
+            api_coverage.covered_hal_api.extend(api_coverage_data.covered_apis)
+
     def AddCoverageReport(self,
                           coverage_vec,
                           src_file_path,

@@ -109,6 +109,9 @@ class VtsTraceProcessor {
   // have corresponding entry/exit events.
   bool isPairedRecord(const VtsProfilingRecord& entry_record,
                       const VtsProfilingRecord& exit_record);
+  // Util method to get the string representing the full API name, e.g.
+  // android.hardware.foo@1.0::IFoo:open
+  std::string GetFullApiStr(const VtsProfilingRecord& record);
 
   // Struct to store the coverage data.
   struct CoverageInfo {
