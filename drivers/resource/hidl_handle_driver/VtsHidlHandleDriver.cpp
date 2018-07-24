@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include <vector>
 
 #include <android-base/logging.h>
@@ -86,6 +87,49 @@ bool VtsHidlHandleDriver::UnregisterHidlHandle(HandleId handle_id) {
   if (handle_obj == nullptr) return false;  // unable to find handle object.
   delete handle_obj;  // This closes open file descriptors in the handle object.
   return true;
+}
+
+ssize_t VtsHidlHandleDriver::ReadFile(HandleId handle_id, void* read_data,
+                                      size_t num_bytes) {
+  hidl_handle* handle_obj = FindHandle(handle_id);
+  if (handle_obj == nullptr) return -1;
+
+  const native_handle_t* native_handle = handle_obj->getNativeHandle();
+  // Check if a file descriptor exists.
+  if (native_handle->numFds == 0) {
+    LOG(ERROR) << "Read from file failure: handle object with id " << handle_id
+               << " has no file descriptor.";
+    return -1;
+  }
+  int fd = native_handle->data[0];
+  ssize_t read_result = read(fd, read_data, num_bytes);
+  if (read_result == -1) {
+    LOG(ERROR) << "Read from file failure: read from file with descriptor "
+               << fd << " failure: " << strerror(errno);
+  }
+  return read_result;
+}
+
+ssize_t VtsHidlHandleDriver::WriteFile(HandleId handle_id,
+                                       const void* write_data,
+                                       size_t num_bytes) {
+  hidl_handle* handle_obj = FindHandle(handle_id);
+  if (handle_obj == nullptr) return -1;
+
+  const native_handle_t* native_handle = handle_obj->getNativeHandle();
+  // Check if a file descriptor exists.
+  if (native_handle->numFds == 0) {
+    LOG(ERROR) << "Write to file failure: handle object with id " << handle_id
+               << " has no file descriptor.";
+    return -1;
+  }
+  int fd = native_handle->data[0];
+  ssize_t write_result = write(fd, write_data, num_bytes);
+  if (write_result == -1) {
+    LOG(ERROR) << "Write to file failure: write to file with descriptor " << fd
+               << " failure: " << strerror(errno);
+  }
+  return write_result;
 }
 
 hidl_handle* VtsHidlHandleDriver::FindHandle(HandleId handle_id, bool release) {
