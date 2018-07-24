@@ -361,6 +361,10 @@ class BaseTestClass(object):
         if self.log_uploading.enabled:
             self.log_uploading.UploadLogs()
         if self.web.enabled:
+            if self.results.class_errors:
+                # Create a result to make the module shown as failure.
+                self.web.AddTestReport("setup_class")
+                self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
             message_b = self.web.GenerateReportMessage(self.results.requested,
                                                        self.results.executed)
         else:
@@ -999,6 +1003,7 @@ class BaseTestClass(object):
                         device.stopServices()
                         device.startServices()
 
+        class_error = None
         # Run tests in order.
         try:
             # Check if module is running in self test mode.
@@ -1021,11 +1026,13 @@ class BaseTestClass(object):
                     self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
             return self.results
-        except (signals.TestAbortClass, acts_signals.TestAbortClass):
+        except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             logging.info("Received TestAbortClass signal")
+            class_error = e
             return self.results
         except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
             logging.info("Received TestAbortAll signal")
+            class_error = e
             # Piggy-back test results on this exception object so we don't lose
             # results from this test class.
             setattr(e, "results", self.results)
@@ -1033,8 +1040,11 @@ class BaseTestClass(object):
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
+            class_error = e
             raise e
         finally:
+            if class_error:
+                self.results.failClass(self.test_module_name, class_error)
             self._exec_func(self._tearDownClass)
             if self.web.enabled:
                 name, timestamp = self.web.GetTestModuleKeys()
