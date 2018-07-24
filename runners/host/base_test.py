@@ -1147,7 +1147,7 @@ class BaseTestClass(object):
                     self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
             return self.results
-        except (signals.TestAbortClass, acts_signals.TestAbortClass):
+        except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             logging.error("Received TestAbortClass signal")
             class_error = e
             return self.results
