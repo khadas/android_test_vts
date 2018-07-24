@@ -79,6 +79,33 @@ class VtsHidlHandleDriver {
   // @return true if the handle object is found, false otherwise.
   bool UnregisterHidlHandle(HandleId handle_id);
 
+  // Reads a file in the handle object.
+  // Caller specifies the handle_id and number of bytes to read.
+  // This function assumes caller only wants to read from a single file,
+  // so it will access the first file descriptor in the native_handle_t struct,
+  // and the first descriptor must be a file.
+  //
+  // @param handle_id identifies the handle object.
+  // @param read_data data read back from file.
+  // @param num_bytes number of bytes to read.
+  //
+  // @return number of bytes read, -1 to signal failure.
+  ssize_t ReadFile(HandleId handle_id, void* read_data, size_t num_bytes);
+
+  // Writes to a file in the handle object.
+  // Caller specifies the handle_id and number of bytes to write.
+  // This function assumes caller only wants to write to a single file,
+  // so it will access the first file descriptor in the native_handle_t struct,
+  // and the first descriptor must be a file.
+  //
+  // @param handle_id  identifies the handle object.
+  // @param write_data data to be written into to file.
+  // @param num_bytes  number of bytes to write.
+  //
+  // @return number of bytes written, -1 to signal failure.
+  ssize_t WriteFile(HandleId handle_id, const void* write_data,
+                    size_t num_bytes);
+
  private:
   // Finds the handle object with ID handle_id.
   // Logs error if handle_id is not found.
