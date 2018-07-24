@@ -48,6 +48,12 @@ class HalHidlReplayTest(binary_test.BinaryTest):
         if self.isSkipAllTests():
             return
 
+        # Extend timeout if there are multiple service instance combinations.
+        if (len(self.trace_paths) and
+                len(self.testcases) > len(self.trace_paths)):
+            self.resetTimeout(self.timeout * len(self.testcases) /
+                              float(len(self.trace_paths)))
+
         if self.coverage.enabled and self._test_hal_services is not None:
             self.coverage.SetHalNames(self._test_hal_services)
 
