@@ -444,16 +444,7 @@ class WebFeature(feature_utils.Feature):
         if not self.enabled:
             return None
 
-        # Handle case when runner fails, tests aren't executed
-        if (not getattr(self, keys.ConfigKeys.RUN_AS_VTS_SELFTEST, False)
-                and executed and executed[-1].test_name == "setup_class"):
-            # Test failed during setup, all tests were not executed
-            start_index = 0
-        else:
-            # Runner was aborted. Remaining tests weren't executed
-            start_index = len(executed)
-
-        for test in requested[start_index:]:
+        for test in requested[len(executed):]:
             msg = self.report_msg.test_case.add()
             msg.name = test.test_name
             msg.start_timestamp = feature_utils.GetTimestamp()
