@@ -158,8 +158,6 @@ public class VtsMultiDeviceTest
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH =
             "vts/tools/vts-tradefed/res/default/DefaultTestCase.runner_conf";
-    // TODO(hsinyichen): Read max-test-timeout from configuration
-    static final long MAX_TEST_TIMEOUT_MSECS = 1000 * 60 * 60 * 10;
 
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;
@@ -171,6 +169,12 @@ public class VtsMultiDeviceTest
                     + "value for each generated test set.",
             isTimeVal = true)
     private long mTestTimeout = 1000 * 60 * 3;
+
+    @Option(name = "max-test-timeout",
+            description = "The maximum amount of time (in milliseconds) for a test invocation. "
+                    + "This timeout value doesn't change with number of generated test sets.",
+            isTimeVal = true)
+    private long mMaxTestTimeout = 1000 * 60 * 60 * 3;
 
     @Option(name = "test-module-name",
         description = "The name for a test module.")
@@ -1212,6 +1216,14 @@ public class VtsMultiDeviceTest
             throw new RuntimeException("Failed to create device config json file");
         }
 
+        long timeout = mMaxTestTimeout;
+        if (mMaxTestTimeout < mTestTimeout) {
+            // The Python runner will receive 2 interrupts.
+            // Delay the 2nd one to avoid interrupting the runner's teardown procedure.
+            timeout = mTestTimeout + VtsPythonRunnerHelper.TEST_ABORT_TIMEOUT_MSECS;
+            CLog.w("max-test-timeout is less than test-timeout. Set max timeout to %dms.", timeout);
+        }
+
         VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper();
 
         List<String> cmd = new ArrayList<>();
@@ -1232,7 +1244,7 @@ public class VtsMultiDeviceTest
 
         CommandResult commandResult = new CommandResult();
         String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
-                cmd.toArray(new String[0]), commandResult, MAX_TEST_TIMEOUT_MSECS);
+                cmd.toArray(new String[0]), commandResult, timeout);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
