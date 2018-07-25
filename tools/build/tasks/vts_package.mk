@@ -136,7 +136,7 @@ host_testcase_copy_pairs := \
     test/vts-testcase/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/$(f))
 
 host_kernel_config_files :=\
-  $(call find-files-in-subdirs,kernel/configs,"android-base*.cfg" -and -type f,.)
+  $(call find-files-in-subdirs,kernel/configs,"android-base*.config" -and -type f,.)
 
 host_kernel_config_copy_pairs := \
   $(foreach f,$(host_kernel_config_files),\
