@@ -251,7 +251,8 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
             return fmq_response.success
         return False
 
-    def getQueueId(self):
+    @property
+    def queueId(self):
         """Gets the id assigned from the target side.
 
         Returns:
@@ -554,7 +555,8 @@ class ResourceHidlMemoryMirror(mirror_object.MirrorObject):
                           self._mem_id)
         return -1
 
-    def getMemId(self):
+    @property    
+    def memId(self):
         """Gets the id assigned from the target side.
 
         Returns:
@@ -579,4 +581,146 @@ class ResourceHidlMemoryMirror(mirror_object.MirrorObject):
         request_msg = ResControlMsg.HidlMemoryRequestMessage()
         request_msg.operation = operation
         request_msg.mem_id = self._mem_id
+        return request_msg
+
+
+class ResourceHidlHandleMirror(mirror_object.MirrorObject):
+    """This class mirrors hidl_handle resource allocated on the target side.
+
+    TODO: support more than file types in the future, e.g. socket, pipe.
+
+    Attributes:
+        _client: the TCP client instance.
+        _handle_id: int, used to identify the handle object on the target side.
+    """
+
+    def __init__(self, client, handle_id=-1):
+        super(ResourceHidlHandleMirror, self).__init__(client)
+        self._handle_id = handle_id
+
+    def CleanUp(self):
+        """Close open file descriptors on target-side drivers.
+
+        Developers can call this method to close open file descriptors
+        in all handle objects.
+        Note: This method needs to be called before self._client
+        is disconnected. self._client is most likely initialized in
+        one of the hal_mirror.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.HANDLE_PROTO_DELETE)
+        self._client.SendHidlHandleRequest(request_msg)
+
+    def _createHandleForSingleFile(self, filepath, mode, int_data):
+        """Initiate a hidl_handle object containing a single file descriptor.
+
+        This method stores the handle_id in the class attribute.
+        Users should not directly call this method to create a new
+        handle object, because it will overwrite the original handle object,
+        making that handle object out of reference.
+        Users should always call InitHidlHandle() in mirror_tracker.py to get
+        a new handle object.
+
+        Args:
+            filepath: string, path to the file to be opened.
+            mode: string, specifying the mode to open the file.
+            int_data: int list, useful integers to store in the handle object.
+        """
+        # Prepare arguments.
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.HANDLE_PROTO_CREATE_FILE)
+        request_msg.handle_info.num_fds = 1
+        request_msg.handle_info.num_ints = len(int_data)
+
+        # TODO: support more than one file descriptors at once.
+        # Add the file information into proto message.
+        fd_message = request_msg.handle_info.fd_val.add()
+        fd_message.type = CompSpecMsg.FILE_TYPE
+        fd_message.file_mode_str = mode
+        fd_message.file_name = filepath
+
+        # Add the integers into proto message.
+        request_msg.handle_info.int_val.extend(int_data)
+
+        # Send and receive data.
+        response_msg = self._client.SendHidlHandleRequest(request_msg)
+        if response_msg is not None and response_msg.new_handle_id != -1:
+            self._handle_id = response_msg.new_handle_id
+        else:
+            logging.error("Failed to create handle object.")
+
+    def readFile(self, read_data_size, index=0):
+        """Reads from a given file in the handle object.
+
+        Args:
+            read_data_size: int, number of bytes to read.
+            index: int, index of file among all files in the handle object.
+                        Optional if host only wants to read from one file.
+
+        Returns:
+            string, data read from the file.
+        """
+        # Prepare arguments.
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.HANDLE_PROTO_READ_FILE)
+        request_msg.read_data_size = read_data_size
+
+        # Send and receive data.
+        response_msg = self._client.SendHidlHandleRequest(request_msg)
+        if response_msg is not None and response_msg.success:
+            return response_msg.read_data
+        # TODO: more detailed error message.
+        logging.error("Failed to read from the file.")
+        return None
+
+    def writeFile(self, write_data, index=0):
+        """Writes to a given file to the handle object.
+
+        Args:
+            write_data: string, data to be written into file.
+            index: int, index of file among all files in the handle object.
+                        Optional if host only wants to write into one file.
+
+        Returns:
+            int, number of bytes written.
+        """
+        # Prepare arguments.
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.HANDLE_PROTO_WRITE_FILE)
+        request_msg.write_data = write_data
+
+        # Send and receive data.
+        response_msg = self._client.SendHidlHandleRequest(request_msg)
+        if response_msg is not None and response_msg.success:
+            return response_msg.write_data_size
+        # TODO: more detailed error message.
+        logging.error("Failed to write into the file.")
+        return None
+
+    @property
+    def handleId(self):
+        """Gets the id assigned from the target side.
+
+        Returns:
+            int, id of the handle object.
+        """
+        return self._handle_id
+
+    def _createTemplateRequestMessage(self, operation):
+        """Creates a template HidlHandleRequestMessage.
+
+        This method creates a HidlHandleRequestMessage with common arguments
+        among all hidl_handle operations.
+
+        Args:
+            operation: HidlHandleOp, hidl_handle operations.
+                       (see test/vts/proto/VtsResourceControllerMessage.proto).
+
+        Returns:
+            HidlHandleRequestMessage, hidl_handle request message.
+                (See test/vts/proto/VtsResourceControllerMessage.proto).
+        """
+        request_msg = ResControlMsg.HidlHandleRequestMessage()
+        request_msg.operation = operation
+        request_msg.handle_id = self._handle_id
         return request_msg

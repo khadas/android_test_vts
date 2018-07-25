@@ -197,7 +197,7 @@ class VtsCodelabHidlMemoryTest(base_test.BaseTestClass):
 
         # Tell HAL server to fill the memory, should be seen by the client,
         # because they use shared memory.
-        var_msg = self.prepareHidlMemoryArgument(self._mem_obj.getMemId())
+        var_msg = self.prepareHidlMemoryArgument(self._mem_obj.memId)
         # Fill the memory with each byte be integer value 42.
         self._tests_memory.fillMemory(var_msg, 42)
         self._mem_obj.read()
@@ -222,17 +222,17 @@ class VtsCodelabHidlMemoryTest(base_test.BaseTestClass):
         They have different id, but they share the same memory region.
         """
         # Prepare a hidl_memory argument.
-        var_msg = self.prepareHidlMemoryArgument(self._mem_obj.getMemId())
+        var_msg = self.prepareHidlMemoryArgument(self._mem_obj.memId)
 
         # memory_client2 is identical to self._mem_obj because
         # haveSomeMemory() API in the server just returns the input
         # hidl_memory reference directly.
         memory_client2 = self._tests_memory.haveSomeMemory(var_msg)
         asserts.assertNotEqual(memory_client2, None)
-        asserts.assertNotEqual(memory_client2.getMemId(), -1)
+        asserts.assertNotEqual(memory_client2.memId, -1)
         # Check these two clients are stored as different objects.
-        asserts.assertNotEqual(memory_client2.getMemId(),
-                               self._mem_obj.getMemId())
+        asserts.assertNotEqual(memory_client2.memId,
+                               self._mem_obj.memId)
 
         # Fill the memory with each byte being integer value 50.
         self._tests_memory.fillMemory(var_msg, 50)
