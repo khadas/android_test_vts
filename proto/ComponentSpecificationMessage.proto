@@ -368,6 +368,9 @@ message FdMessage {
   optional uint32 mode = 2;
   optional int32 flags = 3;
   optional bytes file_name = 4;
+  // When opening a file in host side, user specifies file
+  // access mode in string.
+  optional bytes file_mode_str = 5;
   // For shared memory.
   optional MemoryDataValueMessage memory = 6;
 }
