@@ -35,10 +35,12 @@ import java.io.IOException;
  * A helper class for executing VTS python scripts.
  */
 public class VtsPythonRunnerHelper {
+    // The timeout for the runner's teardown prodedure.
+    public static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 40;
+
     static final String PATH = "PATH";
     static final String PYTHONHOME = "PYTHONHOME";
     static final String VTS = "vts";
-    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 40;
 
     // Python virtual environment root path
     private File mVirtualenvPath;
