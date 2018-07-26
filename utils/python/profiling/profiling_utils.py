@@ -92,7 +92,10 @@ class ProfilingFeature(feature_utils.Feature):
 
     Attributes:
         enabled: boolean, True if profiling is enabled, False otherwise
-        web: (optional) WebFeature, object storing web feature util for test run
+        web: (optional) WebFeature, object storing web feature util for test run.
+        data_file_path: Path to the data directory within vts package.
+        api_coverage_data: A dictionary from full HAL interface name
+        (e.g. android.hardware.foo@1.0::IFoo) to VtsApiCoverageData.
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_PROFILING
@@ -110,9 +113,6 @@ class ProfilingFeature(feature_utils.Feature):
         Args:
             user_params: A dictionary from parameter name (String) to parameter value.
             web: (optional) WebFeature, object storing web feature util for test run
-            data_file_path: Path to the data directory within vts package.
-            api_coverage_data: A dictionary from full HAL interface name
-            (e.g. android.hardware.foo@1.0::IFoo) to VtsApiCoverageData.
         """
         self.ParseParameters(self._TOGGLE_PARAM, self._REQUIRED_PARAMS,
                              self._OPTIONAL_PARAMS, user_params)
@@ -123,7 +123,7 @@ class ProfilingFeature(feature_utils.Feature):
             logging.debug("Profiling is disabled.")
 
         self.data_file_path = getattr(self,
-                                      keys.ConfigKeys.IKEY_DATA_FILE_PATH)
+                                      keys.ConfigKeys.IKEY_DATA_FILE_PATH, None)
         self.api_coverage_data = {}
 
     def _IsEventFromBinderizedHal(self, event_type):
