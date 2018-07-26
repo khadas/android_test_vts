@@ -760,6 +760,7 @@ class AndroidDevice(object):
             raise AndroidDeviceError(
                 "Android device %s does not have an ongoing adb logcat collection."
                 % self.serial)
+
         try:
             utils.stop_standing_subprocess(self.adb_logcat_process)
         except utils.VTSUtilsError as e:
@@ -1154,42 +1155,41 @@ class AndroidDevice(object):
             "rm -f /data/local/tmp/vts_driver_*",
             "rm -f /data/local/tmp/vts_agent_callback*"
         ]
-        kill_commands = [
-            "killall vts_hal_agent32", "killall vts_hal_agent64",
-            "killall vts_hal_driver32", "killall vts_hal_driver64",
-            "killall vts_shell_driver32", "killall vts_shell_driver64"
-        ]
-        cleanup_commands.extend(kill_commands)
-        chmod_commands = [
-            "chmod 755 %s/32/vts_hal_agent32" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/64/vts_hal_agent64" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/32/vts_hal_driver32" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/64/vts_hal_driver64" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/32/vts_shell_driver32" % DEFAULT_AGENT_BASE_DIR,
-            "chmod 755 %s/64/vts_shell_driver64" % DEFAULT_AGENT_BASE_DIR
-        ]
-        cleanup_commands.extend(chmod_commands)
-        for cmd in cleanup_commands:
-            try:
-                self.adb.shell(cmd)
-            except adb.AdbError as e:
-                self.log.warning(
-                    "A command to setup the env to start the VTS Agent failed %s",
-                    e)
+
+        kill_command = "pgrep -f 'vts_*' | xargs kill"
+        cleanup_commands.append(kill_command)
+        try:
+            self.adb.shell("\"" + " && ".join(cleanup_commands) + "\"")
+        except adb.AdbError as e:
+            self.log.warning(
+                "A command to setup the env to start the VTS Agent failed %s",
+                e)
+
         log_severity = getattr(self, keys.ConfigKeys.KEY_LOG_SEVERITY, "INFO")
         bits = ['64', '32'] if self.is64Bit else ['32']
+        file_names = ['vts_hal_agent', 'vts_hal_driver', 'vts_shell_driver']
         for bitness in bits:
             vts_agent_log_path = os.path.join(
                 self.log_path, 'vts_agent_%s_%s.log' % (bitness, self.serial))
-            cmd = ('adb -s {s} shell LD_LIBRARY_PATH={path}/{bitness} '
+
+            chmod_file_names = ' '.join(
+                map(lambda file_name: '{path}/{bit}/{file_name}{bit}'.format(
+                        path=DEFAULT_AGENT_BASE_DIR,
+                        bit=bitness,
+                        file_name=file_name),
+                    file_names))
+            chmod_cmd = 'chmod 755 %s && ' % chmod_file_names
+
+            cmd = ('adb -s {s} shell "{chmod} LD_LIBRARY_PATH={path}/{bitness} '
                    '{path}/{bitness}/vts_hal_agent{bitness} '
                    '--hal_driver_path_32={path}/32/vts_hal_driver32 '
                    '--hal_driver_path_64={path}/64/vts_hal_driver64 '
                    '--spec_dir={path}/spec '
                    '--shell_driver_path_32={path}/32/vts_shell_driver32 '
                    '--shell_driver_path_64={path}/64/vts_shell_driver64 '
-                   '-l {severity} >> {log} 2>&1').format(
+                   '-l {severity}" >> {log} 2>&1').format(
                        s=self.serial,
+                       chmod=chmod_cmd,
                        bitness=bitness,
                        path=DEFAULT_AGENT_BASE_DIR,
                        log=vts_agent_log_path,
