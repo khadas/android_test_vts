@@ -260,6 +260,14 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                             mem_mirror = resource_mirror.ResourceHidlMemoryMirror(
                                 self._client, result.hidl_memory_value.mem_id)
                             results[i] = mem_mirror
+                    elif (result.type == CompSpecMsg.TYPE_HANDLE):
+                        if (result.handle_value.handle_id == -1):
+                            logging.error("Invalid new handle_id.")
+                            results[i] = None
+                        else:
+                            handle_mirror = resource_mirror.ResourceHidlHandleMirror(
+                                self._client, result.handle_value.handle_id)
+                            results[i] = handle_mirror
                 if len(results) == 1:
                     # single return result, return the value directly.
                     return results[0]
