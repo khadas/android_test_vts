@@ -228,8 +228,7 @@ class GcsApiUtils(object):
             dest_dest_path: destination file path in GCS.
 
         Returns:
-            True, if the move was susccessful.
-            False, if the move failed.
+            True if susccessful, False otherwise.
         """
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
@@ -240,5 +239,24 @@ class GcsApiUtils(object):
             if log_error:
                 logging.exception('file move was unsuccessful with error %s.',
                                   e)
+            return False
+        return True
+
+    def DeleteFile(self, file_path):
+        """Deletes a blob, which effectively deletes its corresponding file.
+
+        Args:
+            file_path: string, path to the file to remove.
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        client = storage.Client(credentials=self._credentials)
+        bucket = client.get_bucket(self._bucket_name)
+        blob = bucket.blob(file_path)
+        try:
+            blob.delete()
+        except exceptions.NotFound as e:
+            logging.exception('file delete was unsuccessful with error %s.', e)
             return False
         return True

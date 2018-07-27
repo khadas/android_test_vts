@@ -29,6 +29,12 @@ import subprocess
 import time
 import traceback
 
+try:
+    # TODO: remove when we stop supporting Python 2
+    import thread
+except ImportError as e:
+    import _thread as thread
+
 # File name length is limited to 255 chars on some OS, so we need to make sure
 # the file names we output fits within the limit.
 MAX_FILENAME_LEN = 255
@@ -360,6 +366,33 @@ def is_on_windows():
         A boolean representing whether the OS is Windows.
     """
     return os.name == "nt"
+
+
+def stop_current_process(terminate_timeout):
+    """Sends KeyboardInterrupt to main thread and then terminates process.
+
+    The daemon thread calls this function when timeout or user interrupt.
+
+    Args:
+        terminate_timeout: A float, the interval in seconds between interrupt
+                           and termination.
+    """
+    logging.error("Interrupt main thread.")
+    if not is_on_windows():
+        # Default SIGINT handler sends KeyboardInterrupt to main thread
+        # and unblocks it.
+        os.kill(os.getpid(), signal.SIGINT)
+    else:
+        # On Windows, raising CTRL_C_EVENT, which is received as
+        # SIGINT, has no effect on non-console process.
+        # interrupt_main() behaves like SIGINT but does not unblock
+        # main thread immediately.
+        thread.interrupt_main()
+
+    time.sleep(terminate_timeout)
+    logging.error("Terminate current process.")
+    # Send SIGTERM on Linux. Call terminateProcess() on Windows.
+    os.kill(os.getpid(), signal.SIGTERM)
 
 
 def kill_process_group(proc, signal_no=signal.SIGTERM):

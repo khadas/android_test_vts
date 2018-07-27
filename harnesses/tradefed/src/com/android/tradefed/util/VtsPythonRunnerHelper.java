@@ -40,7 +40,7 @@ public class VtsPythonRunnerHelper {
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String VTS = "vts";
     static final String ANDROID_BUILD_TOP = "ANDROID_BUILD_TOP";
-    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 15;
+    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 40;
 
     private IBuildInfo mBuildInfo = null;
     private String mPythonVersion = "";
