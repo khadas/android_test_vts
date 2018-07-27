@@ -97,6 +97,8 @@ enum ComponentType {
   TESTS_MSGQ = 25;
   // For memory test HAL.
   TESTS_MEMORY = 26;
+  // For dumpstate HAL (a lazy HAL, for debugging).
+  DUMPSTATE = 27;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
