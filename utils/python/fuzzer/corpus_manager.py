@@ -65,6 +65,10 @@ class CorpusManager(feature_utils.Feature):
         _TOGGLE_PARAM: String, the name of the parameter used to toggle the feature.
         _REQUIRED_PARAMS: list, the list of parameter names that are required.
         _OPTIONAL_PARAMS: list, the list of parameter names that are optional.
+        _key_path: string, path to the json path.
+        _bucket_name: string, name of the Google Cloud Storage bucket used.
+        _gcs_api_utils: GcsApiUtils object, used to communicate with GCS.
+        _gcs_path: string, path to the upper most level corpus directory in GCS.
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_LOG_UPLOADING
@@ -74,11 +78,12 @@ class CorpusManager(feature_utils.Feature):
     ]
     _OPTIONAL_PARAMS = []
 
-    def __init__(self, user_params):
+    def __init__(self, user_params, dut=None):
         """Initializes the gcs util provider.
 
         Args:
             user_params: A dictionary from parameter name (String) to parameter value.
+            dut: The Android device being tested.
         """
         self.ParseParameters(
             toggle_param_name=self._TOGGLE_PARAM,
@@ -92,10 +97,17 @@ class CorpusManager(feature_utils.Feature):
             self._gcs_api_utils = gcs_api_utils.GcsApiUtils(
                 self._key_path, self._bucket_name)
 
+        self._gcs_path = 'corpus'
+        if dut is not None:
+            branch = dut.build_alias.split('.')[0]
+            model = dut.product_type
+            self._gcs_path = os.path.join(self._gcs_path, branch, model)
+
     def FetchCorpusSeed(self, test_name, local_temp_dir):
         """Fetches seed corpus of the corresponding test from the GCS directory.
 
         Args:
+
             test_name: string, name of the current fuzzing test.
             local_temp_dir: string, path to temporary directory for this test
                             on the host machine.
@@ -418,20 +430,23 @@ class CorpusManager(feature_utils.Feature):
         """
         dir_path = ''
 
-        # ex: corpus/ILight/ILight_corpus_seed_high
+        # ex: corpus/ILight/ILight_corpus_seed
         if dir_type in CORPUS_PRIORITIES:
-            dir_path = 'corpus/%s/%s_%s' % (test_name, test_name, dir_type)
+            dir_path = os.path.join(self._gcs_path, test_name,
+                                    '%s_%s' % (test_name, dir_type))
         # ex: corpus/ILight/ILight_corpus_measure
         elif dir_type == 'corpus_measure':
-            dir_path = 'corpus/%s/%s_%s' % (test_name, test_name, dir_type)
+            dir_path = os.path.join(self._gcs_path, test_name,
+                                    '%s_%s' % (test_name, dir_type))
         # ex: corpus/ILight/incoming/tmpV1oPTp
         elif dir_type == 'incoming_parent':
-            dir_path = 'corpus/%s/incoming/%s' % (
-                test_name, os.path.basename(local_temp_dir))
+            dir_path = os.path.join(self._gcs_path, test_name, 'incoming',
+                                    os.path.basename(local_temp_dir))
         # ex: corpus/ILight/incoming/tmpV1oPTp/ILight_corpus_out
         elif dir_type == 'incoming_child':
-            dir_path = 'corpus/%s/incoming/%s/%s_corpus_out' % (
-                test_name, os.path.basename(local_temp_dir), test_name)
+            dir_path = os.path.join(self._gcs_path, test_name, 'incoming',
+                                    os.path.basename(local_temp_dir),
+                                    '%s_corpus_out' % test_name)
         # ex: /tmp/tmpV1oPTp/ILight_corpus_out
         elif dir_type == 'local_corpus_out':
             dir_path = os.path.join(local_temp_dir,
@@ -455,10 +470,11 @@ class CorpusManager(feature_utils.Feature):
             file_path, generated file path if file_type supported.
             Empty string if file_type not supported.
         """
-        # ex: corpus/ILight/ILight_corpus_seed/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
+        # ex: corpus/[build tag]/[device]/ILight/ILight_corpus_seed/20f5d9b8cd53881c9ff0205c9fdc5d283dc9fc68
         if file_type in CORPUS_STATES:
-            file_path = 'corpus/%s/%s_%s/%s' % (
-                test_name, test_name, file_type, os.path.basename(seed))
+            file_path = os.path.join(self._gcs_path, test_name,
+                                     '%s_%s' % (test_name, file_type),
+                                     os.path.basename(seed))
             return file_path
         else:
             logging.error('invalid file_type argument entered.')
