@@ -57,8 +57,12 @@ public class VtsDashboardUtil {
 
     public VtsDashboardUtil(VtsVendorConfigFileUtil configReader) {
         mConfigReader = configReader;
-        String apiUrl = mConfigReader.GetVendorConfigVariable("dashboard_api_host_url");
-        vtsDashboardApiTransport = new VtsDashboardApiTransport(new NetHttpTransport(), apiUrl);
+        try {
+            String apiUrl = mConfigReader.GetVendorConfigVariable("dashboard_api_host_url");
+            vtsDashboardApiTransport = new VtsDashboardApiTransport(new NetHttpTransport(), apiUrl);
+        } catch (NoSuchElementException e) {
+            CLog.w("Configure file not available.");
+        }
     }
 
     /**
