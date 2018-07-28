@@ -204,6 +204,18 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
+    case HIDL_MEMORY_OPERATION: {
+      LOG(INFO) << "Process command HIDL_MEMORY_OPERATION";
+      VtsDriverControlResponseMessage response_message;
+      HidlMemoryResponseMessage* hidl_memory_response =
+          response_message.mutable_hidl_memory_response();
+      // call method on resource_manager to process the command
+      resource_manager_->ProcessHidlMemoryCommand(
+          command_message.hidl_memory_request(), hidl_memory_response);
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      if (VtsSocketSendMessage(response_message)) return true;
+      break;
+    }
     default:
       break;
   }
