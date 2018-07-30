@@ -46,7 +46,7 @@ class GcsApiUtils(object):
             self._credentials = self._credentials.with_scopes(
                 [_READ_WRITE_SCOPE_URL])
 
-    def ListFilesWithPrefix(self, dir_path):
+    def ListFilesWithPrefix(self, dir_path, strict=True):
         """Returns a list of files under a given GCS prefix.
 
         GCS uses prefixes to resemble the concept of directories.
@@ -67,12 +67,26 @@ class GcsApiUtils(object):
         'corpus/'
         'corpus/ILight/ILight_corpus_seed/132'
 
+        Given the two prefixes (directories),
+            corpus/ILight/ILight_corpus_seed
+            corpus/ILight/ILight_corpus_seed_01
+
+        ListFilesWithPrefix(corpus/ILight/ILight_corpus_seed, strict=True)
+        will only list files in corpus/ILight/ILight_corpus_seed,
+        not in corpus/ILight/ILight_corpus_seed_01.
+
+        ListFilesWithPrefix(corpus/ILight/ILight_corpus_seed, strict=False)
+        will list files in both corpus/ILight/ILight_corpus_seed,
+        and corpus/ILight/ILight_corpus_seed_01.
+
         Args:
             dir_path: path to the GCS directory of interest.
 
         Returns:
             a list of absolute path filenames of the content of the given GCS directory.
         """
+        if strict and not dir_path.endswith('/'):
+            dir_path += '/'
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         dir_list = list(bucket.list_blobs(prefix=dir_path))
