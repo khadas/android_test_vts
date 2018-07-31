@@ -4,8 +4,8 @@ enum
 future
 futures
 google-api-python-client
-google-cloud
-google.auth
+google-auth>=1.4.2
+google-cloud-storage
 httplib2
 protobuf
 pyserial
