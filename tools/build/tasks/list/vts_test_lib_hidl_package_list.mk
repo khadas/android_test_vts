@@ -86,6 +86,7 @@ vts_hal_driver_libs := \
   android.hardware.sensors@1.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
   android.hardware.soundtrigger@2.1-vts.driver \
+  android.hardware.tests.memory@1.0-vts.driver \
   android.hardware.tests.msgq@1.0-vts.driver \
   android.hardware.tetheroffload.config@1.0-vts.driver \
   android.hardware.tetheroffload.control@1.0-vts.driver \
@@ -108,6 +109,8 @@ vts_hal_driver_libs := \
   android.hardware.wifi.offload@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.1-vts.driver \
+  android.hidl.memory.block@1.0-vts.driver \
+  android.hidl.memory.token@1.0-vts.driver \
   android.system.net.netd@1.0-vts.driver \
   android.system.net.netd@1.1-vts.driver \
 
@@ -184,6 +187,7 @@ vts_hal_profiler_libs := \
   android.hardware.sensors@1.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
   android.hardware.soundtrigger@2.1-vts.profiler \
+  android.hardware.tests.memory@1.0-vts.profiler \
   android.hardware.tests.msgq@1.0-vts.profiler \
   android.hardware.tetheroffload.config@1.0-vts.profiler \
   android.hardware.tetheroffload.control@1.0-vts.profiler \
@@ -206,6 +210,8 @@ vts_hal_profiler_libs := \
   android.hardware.wifi.offload@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.1-vts.profiler \
+  android.hidl.memory.block@1.0-vts.profiler \
+  android.hidl.memory.token@1.0-vts.profiler \
   android.system.net.netd@1.0-vts.profiler \
   android.system.net.netd@1.1-vts.profiler \
 

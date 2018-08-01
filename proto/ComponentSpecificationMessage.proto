@@ -95,6 +95,8 @@ enum ComponentType {
   MEDIA_OMX = 24;
   // For msgq test HAL.
   TESTS_MSGQ = 25;
+  // For memory test HAL.
+  TESTS_MEMORY = 26;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
@@ -339,6 +341,15 @@ message EnumDataValueMessage {
 message MemoryDataValueMessage {
   optional int64 size = 1;
   optional bytes contents = 2;
+  // To identify an existing hidl_memory object stored in resource_manager.
+  optional int32 mem_id = 3 [default = -1];
+  // To record the pointer address of hidl_memory object.
+  // We use uint64 to represent the address of the hidl_memory pointer,
+  // which allows vtsc to reinterpret the address when caller wants to use
+  // an existing hidl_memory object stored in resource_manager.
+  // This field is updated by driver_manager when the hidl_memory address
+  // is found in memory.
+  optional uint64 hidl_mem_address = 4;
 }
 
 // Type of a file descriptor.
