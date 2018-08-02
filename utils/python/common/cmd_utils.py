@@ -23,6 +23,12 @@ STDOUT = 'stdouts'
 STDERR = 'stderrs'
 EXIT_CODE = 'return_codes'
 
+# Exit code returned from the sub-process when timed out on Linux systems.
+EXIT_CODE_TIMEOUT_ON_LINUX = -15
+
+# Same as EXIT_CODE_TIMEOUT_ON_LINUX but on Windows systems.
+EXIT_CODE_TIMEOUT_ON_WINDOWS = -1073741510
+
 
 def _ExecuteOneShellCommandWithTimeout(cmd,
                                        timeout,
@@ -63,7 +69,10 @@ def _ExecuteOneShellCommandWithTimeout(cmd,
         if proc.poll() is None:
             utils.kill_process_group(proc)
         if callback_on_timeout is not None:
-            callback_on_timeout(*args)
+            if ((utils.is_on_windows()
+                 and proc.returncode == EXIT_CODE_TIMEOUT_ON_WINDOWS)
+                    or proc.returncode == EXIT_CODE_TIMEOUT_ON_LINUX):
+                callback_on_timeout(*args)
     wait_thread.join()
 
     if len(result) != 1:
