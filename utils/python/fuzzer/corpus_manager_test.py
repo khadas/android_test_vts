@@ -78,6 +78,7 @@ class CorpusManagerTest(unittest.TestCase):
         _corpus_manager = corpus_manager.CorpusManager({})
         _corpus_manager.enabled = True
         _corpus_manager._gcs_api_utils = mock.MagicMock()
+        _corpus_manager._UploadCorpusMeasure = mock.MagicMock()
         _corpus_manager.UploadCorpusOutDir('ILight', '/tmp/tmpDir1')
         _corpus_manager._gcs_api_utils.UploadDir.assert_called_with(
             '/tmp/tmpDir1/ILight_corpus_out', 'corpus/ILight/incoming/tmpDir1')
