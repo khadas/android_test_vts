@@ -135,9 +135,6 @@ class MirrorTracker(object):
                 command_port=self._host_command_port,
                 callback_port=self._host_callback_port)
 
-        # Create a resource mirror object.
-        mirror = resource_mirror.ResourceFmqMirror(client)
-
         # Create a new queue by default.
         existing_queue_id = -1
         # Check if caller wants to create a queue object based on
@@ -147,24 +144,27 @@ class MirrorTracker(object):
             if type(existing_queue) == str:
                 if existing_queue in self._registered_mirrors:
                     data_type = self._registered_mirrors[
-                        existing_queue]._data_type
-                    sync = self._registered_mirrors[existing_queue]._sync
+                        existing_queue].dataType
+                    sync = self._registered_mirrors[
+                        existing_queue].sync
                     existing_queue_id = self._registered_mirrors[
-                        existing_queue]._queue_id
+                        existing_queue].queueId
                 else:
-                    raise errors.USERError(
-                        "Nonexisting queue name in mirror_tracker.")
+                    logging.error("Nonexisting queue name in mirror_tracker.")
+                    return None
             # Check if caller provides a resource mirror object.
             elif isinstance(existing_queue, resource_mirror.ResourceFmqMirror):
-                data_type = existing_queue._data_type
-                sync = existing_queue._sync
-                existing_queue_id = existing_queue._queue_id
+                data_type = existing_queue.dataType
+                sync = existing_queue.sync
+                existing_queue_id = existing_queue.queueId
             else:
-                raise errors.USERError(
+                logging.error(
                     "Unsupported way of finding an existing queue object.")
+                return None
 
-        mirror._create(data_type, sync, existing_queue_id, queue_size,
-                       blocking, reset_pointers)
+        # Create a resource mirror object.
+        mirror = resource_mirror.ResourceFmqMirror(data_type, sync, client)
+        mirror._create(existing_queue_id, queue_size, blocking, reset_pointers)
         if mirror.queueId == -1:
             # Failed to create queue object, error logged in resource_mirror.
             return None

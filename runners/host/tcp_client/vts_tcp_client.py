@@ -290,7 +290,7 @@ class VtsTcpClient(object):
                 index += 1
             return result
         elif var_spec_msg.type == CompSpecMsg_pb2.TYPE_UNION:
-            result = VtsReturnValueObject()
+            result = {}
             index = 1
             for union_value in var_spec_msg.union_value:
                 if len(union_value.name) > 0:
