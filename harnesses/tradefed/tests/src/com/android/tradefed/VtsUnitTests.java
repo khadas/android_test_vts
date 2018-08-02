@@ -20,6 +20,7 @@ import com.android.tradefed.device.metric.VtsHalTraceCollectorTest;
 import com.android.tradefed.module.VtsHalAdapterModuleControllerTest;
 import com.android.tradefed.presubmit.VtsConfigLoadingTest;
 import com.android.tradefed.targetprep.VtsCoveragePreparerTest;
+import com.android.tradefed.targetprep.VtsDevicePreparerTest;
 import com.android.tradefed.targetprep.VtsHalAdapterPreparerTest;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparerTest;
 import com.android.tradefed.targetprep.VtsTraceCollectPreparerTest;
@@ -45,6 +46,7 @@ import org.junit.runners.Suite.SuiteClasses;
         // NOTE: please keep classes sorted lexicographically in each group
         // device
         VtsCoverageCollectorTest.class,
+        VtsDevicePreparerTest.class,
         VtsHalTraceCollectorTest.class,
 
         // module
