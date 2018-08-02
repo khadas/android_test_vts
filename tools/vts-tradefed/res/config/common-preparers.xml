@@ -20,8 +20,8 @@
         <option name="dep-module" value="future" />
         <option name="dep-module" value="futures" />
         <option name="dep-module" value="google-api-python-client" />
-        <option name="dep-module" value="google-cloud" />
-        <option name="dep-module" value="google.auth" />
+        <option name="dep-module" value="google-auth>=1.4.2" />
+        <option name="dep-module" value="google-cloud-storage" />
         <option name="dep-module" value="httplib2" />
         <option name="dep-module" value="oauth2client" />
         <option name="dep-module" value="protobuf" />
