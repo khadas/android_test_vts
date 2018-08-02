@@ -54,6 +54,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
         BUILD_KEYS.put("cts:build_abis", "ro.product.cpu.abilist");
         BUILD_KEYS.put("cts:build_abis_32", "ro.product.cpu.abilist32");
         BUILD_KEYS.put("cts:build_abis_64", "ro.product.cpu.abilist64");
+        BUILD_KEYS.put("cts:build_first_api_level", "ro.product.first_api_level");
         BUILD_KEYS.put("cts:build_serial", "ro.serialno");
         BUILD_KEYS.put("cts:build_version_release", "ro.build.version.release");
         BUILD_KEYS.put("cts:build_version_sdk", "ro.build.version.sdk");
