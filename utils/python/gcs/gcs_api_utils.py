@@ -35,16 +35,37 @@ class GcsApiUtils(object):
         _bucket_name: string, Google Cloud Storage bucket name.
         _credentials: credentials object for the service account.
         _project: string, Google Cloud project name of the service account.
+        _enabled: boolean, whether this GcsApiUtils object is enabled.
     """
 
     def __init__(self, key_path, bucket_name):
         self._key_path = key_path
         self._bucket_name = bucket_name
         os.environ[_GOOGLE_CRED_ENV_VAR] = key_path
-        self._credentials, self._project = google.auth.default()
+        self._enabled = True
+        try:
+            self._credentials, self._project = google.auth.default()
+        except DefaultCredentialsError as e:
+            logging.exception(e)
+            self._enabled = False
+
         if self._credentials.requires_scopes:
             self._credentials = self._credentials.with_scopes(
                 [_READ_WRITE_SCOPE_URL])
+
+    @property
+    def Enabled(self):
+        """Gets private variable _enabled.
+
+        Returns:
+            self._enabled: boolean, whether this GcsApiUtils object is enabled.
+        """
+        return self._enabled
+
+    @Enabled.setter
+    def Enabled(self, enabled):
+        """Sets private variable _enabled."""
+        self._enabled = enabled
 
     def ListFilesWithPrefix(self, dir_path, strict=True):
         """Returns a list of files under a given GCS prefix.
@@ -85,6 +106,10 @@ class GcsApiUtils(object):
         Returns:
             a list of absolute path filenames of the content of the given GCS directory.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return []
+
         if strict and not dir_path.endswith('/'):
             dir_path += '/'
         client = storage.Client(credentials=self._credentials)
@@ -102,6 +127,10 @@ class GcsApiUtils(object):
             number of files, if files exist under the prefix.
             0, if prefix doesnt exist.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return 0
+
         return len(self.ListFilesWithPrefix(dir_path))
 
     def PrefixExists(self, dir_path):
@@ -116,6 +145,10 @@ class GcsApiUtils(object):
             True, if such prefix exists in the GCS bucket.
             False, otherwise.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         return self.CountFiles(dir_path) is not 0
 
     def FileExists(self, file_path):
@@ -125,6 +158,10 @@ class GcsApiUtils(object):
             True, if the specific file exists in the GCS bucket.
             False, otherwise.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         blob = bucket.blob(file_path)
@@ -140,6 +177,10 @@ class GcsApiUtils(object):
         Raises:
             exception when the source file does not exist in GCS.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return
+
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         blob = bucket.blob(src_file_path)
@@ -157,6 +198,10 @@ class GcsApiUtils(object):
         Returns:
             local_dest_folder, path to the local folder created (or had already existed).
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return
+
         local_dest_folder = os.path.join(dest_dir, os.path.basename(src_dir))
         if not os.path.exists(local_dest_folder):
             os.makedirs(local_dest_folder)
@@ -176,6 +221,10 @@ class GcsApiUtils(object):
             True, if the source directory exists and files successfully downloaded.
             False, if the source directory does not exist.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         if self.PrefixExists(src_dir):
             logging.info('successfully found the GCS directory.')
             self.PrepareDownloadDestination(src_dir, dest_dir)
@@ -203,6 +252,10 @@ class GcsApiUtils(object):
             src_file_path: source file path, directory/filename in local.
             dest_file_path: destination file path, directory/filename in GCS.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return
+
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         blob = bucket.blob(dest_file_path)
@@ -220,6 +273,10 @@ class GcsApiUtils(object):
             True, if the source directory exists and files successfully uploaded.
             False, if the source directory does not exist.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         if os.path.exists(src_dir):
             logging.info('successfully found the local directory.')
             src_basedir = os.path.basename(src_dir)
@@ -244,6 +301,10 @@ class GcsApiUtils(object):
         Returns:
             True if susccessful, False otherwise.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         blob = bucket.blob(src_file_path)
@@ -265,6 +326,10 @@ class GcsApiUtils(object):
         Returns:
             True if successful, False otherwise.
         """
+        if not self._enabled:
+            logging.error('This GcsApiUtils object is not enabled.')
+            return False
+
         client = storage.Client(credentials=self._credentials)
         bucket = client.get_bucket(self._bucket_name)
         blob = bucket.blob(file_path)
