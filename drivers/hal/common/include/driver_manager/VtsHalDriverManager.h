@@ -148,6 +148,25 @@ class VtsHalDriverManager {
                               const int component_type, const string& version,
                               const string& package_name,
                               const string& component_name);
+
+  // Recursively preprocess HAL function call arguments that have special types
+  // such as TYPE_HIDL_INTERFACE, TYPE_FMQ_SYNC, TYPE_FMQ_UNSYNC,
+  // TYPE_HIDL_MEMORY, TYPE_HANDLE.
+  //
+  // @param arg argument for a HAL function call.
+  //
+  // @return true if preprocessing succeeds, false otherwise.
+  bool PreprocessHidlHalFunctionCallArgs(VariableSpecificationMessage* arg);
+
+  // Recursively set HAL function call return values that have special types
+  // such as TYPE_HIDL_INTERFACE, TYPE_FMQ_SYNC, TYPE_FMQ_UNSYNC,
+  // TYPE_HIDL_MEMORY, TYPE_HANDLE.
+  //
+  // @param return_val return value for a HAL function call.
+  //
+  // @return true if setting results succeeds, false otherwise.
+  bool SetHidlHalFunctionCallResults(VariableSpecificationMessage* return_val);
+
   // ============== attributes ===================
 
   // The server socket port # of the agent.
