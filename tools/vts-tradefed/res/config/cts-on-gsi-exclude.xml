@@ -290,4 +290,8 @@
     <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetSubscriberId" />
     <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testSetDataEnabled" />
     <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testVoiceMailNumber" />
+
+    <!-- b/111967702: CtsSecurityTestCases irrelevant test cases -->
+    <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.BannedFilesTest#testNoSu" />
+    <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.BannedFilesTest#testNoSuInPath" />
 </configuration>
