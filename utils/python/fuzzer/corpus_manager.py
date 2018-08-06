@@ -43,7 +43,7 @@ FETCH_ONE_AND_FEED = 1
 FETCH_CRASH_AND_FEED = 2
 FETCH_ALL_AND_REPEAT = 3
 
-SCHEDULING_ALGORITHM = FETCH_ONE_AND_FEED
+SCHEDULING_ALGORITHM = FETCH_CRASH_AND_FEED
 MEASURE_CORPUS = True
 CORPUS_STATES = [
     'corpus_seed_high', 'corpus_seed', 'corpus_seed_low', 'corpus_inuse',
@@ -96,6 +96,7 @@ class CorpusManager(feature_utils.Feature):
             self._bucket_name = self.fuzzing_gcs_bucket_name
             self._gcs_api_utils = gcs_api_utils.GcsApiUtils(
                 self._key_path, self._bucket_name)
+            self.enabled = self._gcs_api_utils.Enabled
 
         self._gcs_path = 'corpus'
         if dut is not None:
