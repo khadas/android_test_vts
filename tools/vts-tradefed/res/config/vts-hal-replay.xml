@@ -15,7 +15,6 @@
 -->
 <configuration description="VTS HAL Replay Test Plan">
   <include name="vts-base" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsSancovPreparer" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-hal-replay" />

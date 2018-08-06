@@ -15,8 +15,8 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.testrunner.ITestRunListener;
-import com.android.ddmlib.testrunner.TestIdentifier;
+import com.android.tradefed.result.ITestLifeCycleReceiver;
+import com.android.tradefed.result.TestDescription;
 import com.android.tradefed.util.StreamUtil;
 
 import org.easymock.EasyMock;
@@ -67,14 +67,14 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testFailed(test1, "TIMEOUT");
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
@@ -96,13 +96,13 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
@@ -124,7 +124,7 @@ public class VtsMultiDeviceTestResultParserTest {
         long totalTime = getTotalTime(contents);
 
         // prepare the mock object
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(null, 0);
         mockRunListener.testRunEnded(totalTime, Collections.<String, String>emptyMap());
 
@@ -216,13 +216,13 @@ public class VtsMultiDeviceTestResultParserTest {
     public void testNormalSummary() throws IOException, JSONException {
         JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_NORMAL));
 
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(RUN_NAME, 2);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test1);
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test2);
         mockRunListener.testFailed(test2, FAILURE_MESSAGE);
         mockRunListener.testEnded(test2, Collections.emptyMap());
@@ -241,9 +241,9 @@ public class VtsMultiDeviceTestResultParserTest {
     public void testClassErrorSummary() throws IOException, JSONException {
         JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_CLASS_ERRORS));
 
-        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(RUN_NAME, 1);
-        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test1);
         mockRunListener.testFailed(test1, FAILURE_MESSAGE);
         mockRunListener.testEnded(test1, Collections.emptyMap());

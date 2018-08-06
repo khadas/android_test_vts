@@ -29,7 +29,6 @@ import com.android.tradefed.targetprep.ITargetPreparer;
 import com.android.tradefed.targetprep.TargetSetupError;
 import com.android.tradefed.testtype.IAbi;
 import com.android.tradefed.testtype.IAbiReceiver;
-import com.android.tradefed.testtype.IInvocationContextReceiver;
 import com.android.tradefed.testtype.IMultiDeviceTest;
 import com.android.tradefed.testtype.IRemoteTest;
 
@@ -41,10 +40,8 @@ import java.util.Map;
 /**
  * Container for Compatibility test module info.
  */
-public class ModuleDefMultiDevice
-        extends ModuleDef implements IMultiDeviceTest, IInvocationContextReceiver {
+public class ModuleDefMultiDevice extends ModuleDef implements IMultiDeviceTest {
     private Map<ITestDevice, IBuildInfo> mDeviceInfos = null;
-    private IInvocationContext mInvocationContext = null;
     private List<IMultiTargetPreparer> mMultiPreparers = new ArrayList<>();
 
     public ModuleDefMultiDevice(String name, IAbi abi, IRemoteTest test,
@@ -91,31 +88,12 @@ public class ModuleDefMultiDevice
      * {@inheritDoc}
      */
     @Override
-    public void setInvocationContext(IInvocationContext invocationContext) {
-        mInvocationContext = invocationContext;
-    }
-
-    /**
-     * Getter method for mInvocationContext.
-     */
-    public IInvocationContext getInvocationContext() {
-        return mInvocationContext;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected void prepareTestClass() {
         super.prepareTestClass();
 
         IRemoteTest test = getTest();
         if (test instanceof IMultiDeviceTest) {
             ((IMultiDeviceTest) test).setDeviceInfos(mDeviceInfos);
-        }
-
-        if (test instanceof IInvocationContextReceiver) {
-            ((IInvocationContextReceiver) test).setInvocationContext(mInvocationContext);
         }
     }
 
@@ -142,7 +120,7 @@ public class ModuleDefMultiDevice
             }
 
             try {
-                preparer.setUp(mInvocationContext);
+                preparer.setUp(getInvocationContext());
             } catch (BuildError e) {
                 // This should only happen for flashing new build
                 CLog.e("Unexpected BuildError from multi-device preparer: %s",
@@ -168,7 +146,7 @@ public class ModuleDefMultiDevice
         for (int i = mMultiPreparers.size() - 1; i >= 0; i--) {
             IMultiTargetPreparer cleaner = mMultiPreparers.get(i);
             CLog.d("MultiDeviceCleaner: %s", cleaner.getClass().getSimpleName());
-            cleaner.tearDown(mInvocationContext, null);
+            cleaner.tearDown(getInvocationContext(), null);
         }
     }
 }

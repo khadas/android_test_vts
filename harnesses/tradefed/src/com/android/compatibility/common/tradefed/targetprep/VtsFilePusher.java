@@ -42,7 +42,7 @@ import java.io.FileNotFoundException;
 /**
  * Pushes specified testing artifacts from Compatibility repository.
  */
-@OptionClass(alias = "file-pusher")
+@OptionClass(alias = "vts-file-pusher")
 public class VtsFilePusher extends PushFilePreparer implements IAbiReceiver {
     @Option(name="push-group", description=
             "A push group name. Must be a .push file under tools/vts-tradefed/res/push_groups/. "
@@ -223,6 +223,14 @@ public class VtsFilePusher extends PushFilePreparer implements IAbiReceiver {
     @Override
     public void setAbi(IAbi abi) {
         mAbi = abi;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IAbi getAbi() {
+        return mAbi;
     }
 
     /**

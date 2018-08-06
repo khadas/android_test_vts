@@ -113,6 +113,8 @@ public class VtsDashboardUtil {
                     Base64.getEncoder().encodeToString(message.toByteArray()).getBytes());
         } catch (IOException e) {
             CLog.e("Couldn't write a proto message to a temp file.");
+        } catch (NullPointerException e) {
+            CLog.e("Couldn't serialize proto message.");
         }
 
         if (Strings.isNullOrEmpty(messageFilePath)) {

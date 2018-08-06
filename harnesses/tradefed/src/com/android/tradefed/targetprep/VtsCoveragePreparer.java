@@ -285,7 +285,7 @@ public class VtsCoveragePreparer implements ITargetPreparer, ITargetCleaner {
         if (mDeviceInfoPath != null) {
             FileUtil.recursiveDelete(mDeviceInfoPath);
         }
-        device.executeShellCommand("rm -r " + COVERAGE_CONFIGURE_DST);
+        device.executeShellCommand("rm -rf " + COVERAGE_CONFIGURE_DST);
         device.executeShellCommand(String.format("rm -rf %s/*", COVERAGE_DATA_PATH));
     }
 

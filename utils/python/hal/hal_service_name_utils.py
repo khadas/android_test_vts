@@ -40,16 +40,21 @@ def GetHalServiceName(shell, hal, bitness="64", run_as_compliance_test=False):
         a set containing all service names for the given HAL.
     """
 
-    cmd = VTS_TESTABILITY_CHECKER_64
+    binary = VTS_TESTABILITY_CHECKER_64
     if bitness == "32":
-        cmd = VTS_TESTABILITY_CHECKER_32
+        binary = VTS_TESTABILITY_CHECKER_32
+    # Give permission to execute the binary.
+    shell.Execute("chmod 755 %s" % binary)
+    cmd = binary
     if run_as_compliance_test:
         cmd += " -c "
     cmd += " -b " + bitness + " " + hal
     cmd_results = shell.Execute(str(cmd))
     asserts.assertFalse(
         any(cmd_results[const.EXIT_CODE]),
-        "Failed to run vts_testability_checker. Error: %s" % cmd_results[const.STDERR][0])
+        "Failed to run vts_testability_checker. ErrorCode: %s\n STDOUT: %s\n STDERR: %s\n"
+        % (cmd_results[const.EXIT_CODE][0], cmd_results[const.STDOUT][0],
+           cmd_results[const.STDERR][0]))
     result = json.loads(cmd_results[const.STDOUT][0])
     if str(result['Testable']).lower() == "true":
         return True, set(result['instances'])
@@ -82,8 +87,8 @@ def GetServiceInstancesCombinations(services,
     if mode == CombMode.FULL_PERMUTATION:
         return GetServiceInstancesFullCombinations(services, service_instances)
     elif mode == CombMode.NAME_MATCH:
-        return GetServiceInstancesNameMatchCombinations(services,
-                                                        service_instances)
+        return GetServiceInstancesNameMatchCombinations(
+            services, service_instances)
     else:
         logging.warning("Unknown comb mode, use default comb mode instead.")
         return GetServiceInstancesFullCombinations(services, service_instances)
@@ -111,8 +116,8 @@ def GetServiceInstancesFullCombinations(services, service_instances):
     if not services or (service_instances and type(service_instances) != dict):
         return service_instance_combinations
     service = services.pop()
-    pre_instance_combs = GetServiceInstancesCombinations(services,
-                                                         service_instances)
+    pre_instance_combs = GetServiceInstancesCombinations(
+        services, service_instances)
     if service not in service_instances or not service_instances[service]:
         return pre_instance_combs
     for name in service_instances[service]:

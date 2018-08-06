@@ -13,22 +13,30 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Main Test Plan">
-  <include name="common-preparers" />
+<configuration description="Runs a retry of a previous VTS session.">
+  <!-- vts-base-common -->
   <device_recovery class="com.android.tradefed.device.WaitDeviceRecovery" />
 
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:rerun-from-file:true" />
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.AndroidJUnitTest:fallback-to-serial-rerun:false" />
   <logger class="com.android.tradefed.log.FileLogger">
-    <option name="log-level-display" value="INFO" />
+    <option name="log-level-display" value="WARN" />
   </logger>
-  <option name="compatibility:skip-all-system-status-check" value="true" />
-  <option name="enable-root" value="true" />
   <option name="max-log-size" value="200" />
   <object type="vts-vendor-config" class="com.android.tradefed.util.VtsVendorConfigFileUtil" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
   <multi_target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
-  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
+
+  <!-- vts-base -->
+  <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
+
+  <!-- specific to retry -->
+  <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest">
+    <option name="primary-abi-only" value="true" />
+  </test>
+  <option name="plan" value="cts-on-gsi-retry" />
+  <option name="test-tag" value="cts" />
 </configuration>

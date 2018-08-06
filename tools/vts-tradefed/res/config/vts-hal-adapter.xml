@@ -13,12 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS-* Main Test Plan Excluding VTS">
+<configuration description="VTS HAL Adapter Test Plan">
   <include name="vts-base" />
+  <include name="cts-preconditions" />
+  <option name="dynamic-config-pusher:dynamic-resource-name" value="vts-tradefed" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
-  <option name="vts-plan-result:plan-name" value="vts-star" />
+  <option name="vts-plan-result:plan-name" value="vts-hal-adapter" />
 
+  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-adapter" />
   <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
     <option name="abort-on-push-failure" value="true"/>
     <option name="push" value="script/target/vts_adapter.sh->/data/local/tmp/vts_adapter.sh"/>
@@ -28,15 +31,4 @@
     <option name="test-file-name" value="DeviceHealthTests.apk" />
     <option name="cleanup-apks" value="true" />
   </target_preparer>
-
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-app" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-codelab" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-device-health" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-fuzz" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-hal-profiling" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-host" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-library" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-performance" />
-  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-selftest" />
-
 </configuration>

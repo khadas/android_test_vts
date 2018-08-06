@@ -122,7 +122,7 @@ public final class VtsCoveragePreparerTest {
         doReturn("None").when(mDevice).getProperty(GCOV_PROPERTY);
 
         mPreparer.setUp(mDevice, mBuildInfo);
-        verify(mBuildInfo, never()).setFile(any(), any(), any());
+        verify(mBuildInfo, never()).setFile((String) any(), any(), any());
     }
 
     @Test
@@ -178,7 +178,7 @@ public final class VtsCoveragePreparerTest {
             assertEquals(String.format("Could not find %s under %s.", GCOV_FILE_NAME,
                                  mTestDir.getAbsolutePath()),
                     e.getMessage());
-            verify(mBuildInfo, never()).setFile(any(), any(), any());
+            verify(mBuildInfo, never()).setFile((String) any(), any(), any());
             return;
         }
         fail();

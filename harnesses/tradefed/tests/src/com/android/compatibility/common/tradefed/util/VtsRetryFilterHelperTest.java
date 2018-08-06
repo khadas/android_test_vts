@@ -19,7 +19,7 @@ package com.android.compatibility.common.tradefed.util;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
-import com.android.tradefed.util.VtsFileUtil;
+import com.android.tradefed.util.FileUtil;
 
 import org.easymock.EasyMock;
 import org.junit.After;
@@ -49,10 +49,10 @@ public class VtsRetryFilterHelperTest {
 
     @Before
     public void setUp() throws Exception {
-        mTmpDir = VtsFileUtil.createTempDir("vts-unit-tests");
+        mTmpDir = FileUtil.createTempDir("vts-unit-tests");
         File invDir = new File(mTmpDir, "2017.09.01_17.30.00");
         invDir.mkdirs();
-        VtsFileUtil.saveResourceFile(
+        FileUtil.saveResourceFile(
                 getClass().getResourceAsStream(RESULTS_FILE), invDir, "test_result.xml");
         mBuildHelper = new CompatibilityBuildHelper(null) {
             @Override
@@ -66,7 +66,7 @@ public class VtsRetryFilterHelperTest {
 
     @After
     public void tearDown() throws Exception {
-        VtsFileUtil.recursiveDelete(mTmpDir);
+        FileUtil.recursiveDelete(mTmpDir);
     }
 
     /**
