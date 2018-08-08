@@ -23,6 +23,7 @@ import types
 
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg_pb2
+from vts.proto import VtsResourceControllerMessage_pb2 as ResControlMsg_pb2
 from vts.runners.host import const
 from vts.runners.host import errors
 from vts.utils.python.mirror import mirror_object
@@ -43,7 +44,8 @@ COMMAND_TYPE_NAME = {
     201: "LIST_APIS",
     202: "CALL_API",
     203: "VTS_AGENT_COMMAND_GET_ATTRIBUTE",
-    301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND"
+    301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND",
+    401: "VTS_FMQ_COMMAND"
 }
 
 
@@ -175,7 +177,8 @@ class VtsTcpClient(object):
                             target_version_minor=None,
                             target_package=None,
                             target_component_name=None,
-                            hw_binder_service_name=None):
+                            hw_binder_service_name=None,
+                            is_test_hal=None):
         """RPC to LAUNCH_DRIVER_SERVICE.
 
            Args:
@@ -190,6 +193,8 @@ class VtsTcpClient(object):
                target_package: string, package name of a HIDL HAL.
                target_component_name: string, name of a target component.
                hw_binder_service_name: name of a HW Binder service to use.
+               is_test_hal: bool, whether the HAL service is a test HAL
+                            (e.g. msgq).
 
            Returns:
                response code, -1 or 0 on failure, other values on success.
@@ -210,7 +215,8 @@ class VtsTcpClient(object):
             target_version_minor=target_version_minor,
             target_package=target_package,
             target_component_name=target_component_name,
-            hw_binder_service_name=hw_binder_service_name)
+            hw_binder_service_name=hw_binder_service_name,
+            is_test_hal=is_test_hal)
         resp = self.RecvResponse()
         logging.debug("resp for LAUNCH_DRIVER_SERVICE: %s", resp)
         if driver_type == SysMsg_pb2.VTS_DRIVER_TYPE_HAL_HIDL \
@@ -295,7 +301,9 @@ class VtsTcpClient(object):
                 result.append(
                     self.GetPythonDataOfVariableSpecMsg(vector_value))
             return result
-        elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_INTERFACE):
+        elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_INTERFACE
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_SYNC
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_UNSYNC):
             logging.debug("var_spec_msg: %s", var_spec_msg)
             return var_spec_msg
 
@@ -437,6 +445,29 @@ class VtsTcpClient(object):
             const.EXIT_CODE: exit_code
         }
 
+    def SendFmqRequest(self, message):
+        """Sends a command to the FMQ driver and receives the response.
+
+        Args:
+            message: FmqRequestMessage, message that contains the arguments
+                     in the FMQ request.
+
+        Returns:
+            FmqResponseMessage, which includes all possible return value types,
+            including int, bool, and data read from the queue.
+        """
+        self.SendCommand(SysMsg_pb2.VTS_FMQ_COMMAND, fmq_request=message)
+        resp = self.RecvResponse()
+        logging.debug("resp for VTS_FMQ_COMMAND: %s", resp)
+
+        if not resp:
+            logging.error("TCP client did not receive a response from agent.")
+        elif resp.response_code != SysMsg_pb2.SUCCESS:
+            logging.error(
+                "TCP client received unsuccessful response code from agent.")
+        else:
+            return resp.fmq_response
+
     def Ping(self):
         """RPC to send a PING request.
 
@@ -524,13 +555,15 @@ class VtsTcpClient(object):
                     target_package=None,
                     target_component_name=None,
                     hw_binder_service_name=None,
+                    is_test_hal=None,
                     module_name=None,
                     service_name=None,
                     callback_port=None,
                     driver_type=None,
                     shell_command=None,
                     caller_uid=None,
-                    arg=None):
+                    arg=None,
+                    fmq_request=None):
         """Sends a command.
 
         Args:
@@ -570,6 +603,9 @@ class VtsTcpClient(object):
         if hw_binder_service_name is not None:
             command_msg.hw_binder_service_name = hw_binder_service_name
 
+        if is_test_hal is not None:
+            command_msg.is_test_hal = is_test_hal
+
         if module_name is not None:
             command_msg.module_name = module_name
 
@@ -602,6 +638,9 @@ class VtsTcpClient(object):
                 command_msg.shell_command.extend(shell_command)
             else:
                 command_msg.shell_command.append(shell_command)
+
+        if fmq_request is not None:
+            command_msg.fmq_request.CopyFrom(fmq_request)
 
         logging.debug("command %s" % command_msg)
         message = command_msg.SerializeToString()

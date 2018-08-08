@@ -30,6 +30,7 @@
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
+#include "test/vts/proto/VtsResourceControllerMessage.pb.h"
 
 using namespace std;
 
@@ -191,6 +192,18 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
+    case FMQ_OPERATION: {
+      LOG(INFO) << "Process command FMQ_OPERATION";
+      VtsDriverControlResponseMessage response_message;
+      FmqResponseMessage* fmq_response =
+          response_message.mutable_fmq_response();
+      // call method on resource_manager to process the command
+      resource_manager_->ProcessFmqCommand(command_message.fmq_request(),
+                                           fmq_response);
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      if (VtsSocketSendMessage(response_message)) return true;
+      break;
+    }
     default:
       break;
   }
@@ -201,6 +214,7 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
 // Starts to run a UNIX socket server (foreground).
 int StartSocketServer(const string& socket_port_file,
                       VtsHalDriverManager* driver_manager,
+                      VtsResourceManager* resource_manager,
                       const char* lib_path) {
   int sockfd;
   socklen_t clilen;
@@ -243,8 +257,8 @@ int StartSocketServer(const string& socket_port_file,
     if (pid == 0) {  // child
       close(sockfd);
       LOG(DEBUG) << "Process for an agent - pid = " << getpid();
-      VtsDriverHalSocketServer* server =
-          new VtsDriverHalSocketServer(driver_manager, lib_path);
+      VtsDriverHalSocketServer* server = new VtsDriverHalSocketServer(
+          driver_manager, resource_manager, lib_path);
       server->SetSockfd(newsockfd);
       while (server->ProcessOneCommand())
         ;
