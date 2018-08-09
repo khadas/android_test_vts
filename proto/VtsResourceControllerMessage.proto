@@ -36,6 +36,19 @@ enum FmqOp {
     FMQ_PROTO_IS_VALID = 12;
 }
 
+enum HidlMemoryOp {
+    MEM_PROTO_UNKNOWN = 0;
+    MEM_PROTO_ALLOCATE = 1;
+    MEM_PROTO_START_READ = 2;
+    MEM_PROTO_START_READ_RANGE = 3;
+    MEM_PROTO_READ_BYTES = 4;
+    MEM_PROTO_START_UPDATE = 5;
+    MEM_PROTO_START_UPDATE_RANGE = 6;
+    MEM_PROTO_UPDATE_BYTES = 7;
+    MEM_PROTO_COMMIT = 8;
+    MEM_PROTO_GET_SIZE = 9;
+}
+
 // The arguments for a FMQ operation.
 message FmqRequestMessage {
     // operation to be performed
@@ -78,4 +91,31 @@ message FmqResponseMessage {
     optional int32 queue_id = 3;
     // signal if the operation succeeds on target side
     optional bool success = 4;
+}
+
+// The arguments for a hidl_memory operation.
+message HidlMemoryRequestMessage {
+    // operation to be performed
+    optional HidlMemoryOp operation = 1;
+    // id to identify memory region
+    optional int32 mem_id = 2 [default = -1];
+    // requested memory size
+    optional uint64 mem_size = 3;
+    // offset from the start of memory region
+    optional uint64 start = 4;
+    // length of memory to be modified
+    optional uint64 length = 5;
+    // data to be written into memory
+    optional bytes write_data = 6;
+}
+
+message HidlMemoryResponseMessage {
+    // indicate if the memory region is found
+    optional bool success = 1;
+    // new id assigned to the new memory region
+    optional int32 new_mem_id = 2;
+    // result returned by GetSize() method on the memory region
+    optional uint64 mem_size = 3;
+    // data read from memory
+    optional bytes read_data = 4;
 }
