@@ -102,3 +102,14 @@ cc_test {
         "hidl_memory_driver/VtsHidlMemoryDriverTest.cpp",
     ]
 }
+
+cc_test {
+    name: "vts_resource_hidl_handle_test",
+
+    defaults: ["libvts_resource-defaults"],
+
+    srcs: [
+        "hidl_handle_driver/VtsHidlHandleDriver.cpp",
+        "hidl_handle_driver/VtsHidlHandleDriverTest.cpp",
+    ]
+}
