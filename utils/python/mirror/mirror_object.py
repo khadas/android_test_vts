@@ -53,6 +53,7 @@ COMPONENT_TYPE_DICT = {
     "graphics_composer": 23,
     "media_omx": 24,
     "tests_msgq": 25,
+    "tests_memory": 26,
     "bionic_libm": 1001,
     "bionic_libc": 1002,
     "vndk_libcutils": 1101
