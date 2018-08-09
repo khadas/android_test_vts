@@ -509,6 +509,41 @@ bool AgentRequestHandler::ProcessHidlMemoryCommand(
   return VtsSocketSendMessage(response_msg);
 }
 
+bool AgentRequestHandler::ProcessHidlHandleCommand(
+    const AndroidSystemControlCommandMessage& command_msg) {
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
+  android::sp<android::vts::IVtsFuzzer> client =
+      android::vts::GetBinderClient(service_name_);
+  if (!client.get()) {
+#endif
+    LOG(ERROR) << "Driver socket client is uninitialized.";
+    return false;
+  }
+
+  AndroidSystemControlResponseMessage response_msg;
+  HidlHandleResponseMessage* hidl_handle_response =
+      response_msg.mutable_hidl_handle_response();
+  HidlHandleRequestMessage hidl_handle_request =
+      command_msg.hidl_handle_request();
+  // send the request message
+  bool success = client->ProcessHidlHandleCommand(hidl_handle_request,
+                                                  hidl_handle_response);
+
+  // prepare for response back to host
+  if (success) {
+    response_msg.set_response_code(SUCCESS);
+  } else {
+    response_msg.set_response_code(FAIL);
+    response_msg.set_reason(
+        "Failed to call api to process hidl_handle command.");
+  }
+
+  return VtsSocketSendMessage(response_msg);
+}
+
 bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
@@ -539,6 +574,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
       return ProcessFmqCommand(command_msg);
     case VTS_HIDL_MEMORY_COMMAND:
       return ProcessHidlMemoryCommand(command_msg);
+    case VTS_HIDL_HANDLE_COMMAND:
+      return ProcessHidlHandleCommand(command_msg);
     default:
       LOG(ERROR) << " ERROR unknown command " << command_msg.command_type();
       return DefaultResponse();

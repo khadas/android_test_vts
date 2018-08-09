@@ -216,6 +216,18 @@ bool VtsDriverHalSocketServer::ProcessOneCommand() {
       if (VtsSocketSendMessage(response_message)) return true;
       break;
     }
+    case HIDL_HANDLE_OPERATION: {
+      LOG(INFO) << "Process command HIDL_HANDLE_OPERATION";
+      VtsDriverControlResponseMessage response_message;
+      HidlHandleResponseMessage* hidl_handle_response =
+          response_message.mutable_hidl_handle_response();
+      // call method on resource manager to process the command
+      resource_manager_->ProcessHidlHandleCommand(
+          command_message.hidl_handle_request(), hidl_handle_response);
+      response_message.set_response_code(VTS_DRIVER_RESPONSE_SUCCESS);
+      if (VtsSocketSendMessage(response_message)) return true;
+      break;
+    }
     default:
       break;
   }
