@@ -30,9 +30,12 @@ cc_defaults {
         "libcutils",
         "libfmq",
         "libhidlbase",
+        "libhidlmemory",
         "liblog",
         "libprotobuf-cpp-full",
         "libutils",
+        "android.hidl.allocator@1.0",
+        "android.hidl.memory@1.0",
     ],
 
     export_include_dirs: ["include"],
@@ -54,6 +57,7 @@ cc_library_shared {
 
     srcs: [
         "fmq_driver/VtsFmqDriver.cpp",
+        "hidl_memory_driver/VtsHidlMemoryDriver.cpp",
     ],
 }
 
@@ -83,4 +87,15 @@ cc_test {
         "fmq_driver/VtsFmqDriver.cpp",
         "fmq_driver/VtsFmqDriverTest.cpp"
     ],
+}
+
+cc_test {
+    name: "vts_resource_hidl_memory_test",
+
+    defaults: ["libvts_resource-defaults"],
+
+    srcs: [
+        "hidl_memory_driver/VtsHidlMemoryDriver.cpp",
+        "hidl_memory_driver/VtsHidlMemoryDriverTest.cpp",
+    ]
 }
