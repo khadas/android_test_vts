@@ -149,12 +149,29 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
           size_t descriptor_addr;
           bool success =
               resource_manager_->GetQueueDescAddress(*arg, &descriptor_addr);
-          arg->mutable_fmq_value(0)->set_fmq_desc_address(descriptor_addr);
           if (!success) {
             LOG(ERROR) << "Unable to find queue descriptor for queue with id "
                        << arg->fmq_value(0).fmq_id();
             return kErrorString;
           }
+          arg->mutable_fmq_value(0)->set_fmq_desc_address(descriptor_addr);
+        }
+      } else if (arg->type() == TYPE_HIDL_MEMORY) {
+        if (arg->hidl_memory_value().mem_id() != -1) {
+          // Preprocess an argument that wants to use an existing hidl_memory.
+          // resource_manager returns the address of the hidl_memory pointer,
+          // and driver_manager fills the address in the proto field,
+          // which can be read by vtsc.
+          size_t hidl_mem_address;
+          bool success =
+              resource_manager_->GetHidlMemoryAddress(*arg, &hidl_mem_address);
+          if (!success) {
+            LOG(ERROR) << "Unable to find hidl_memory with id "
+                       << arg->hidl_memory_value().mem_id();
+            return kErrorString;
+          }
+          arg->mutable_hidl_memory_value()->set_hidl_mem_address(
+              hidl_mem_address);
         }
       }
     }
@@ -215,6 +232,10 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
         // Tell resource_manager to register a new FMQ.
         int new_queue_id = resource_manager_->RegisterFmq(*return_val);
         return_val->mutable_fmq_value(0)->set_fmq_id(new_queue_id);
+      } else if (return_val->type() == TYPE_HIDL_MEMORY) {
+        // Tell resource_manager to register the new memory object.
+        int new_mem_id = resource_manager_->RegisterHidlMemory(*return_val);
+        return_val->mutable_hidl_memory_value()->set_mem_id(new_mem_id);
       }
     }
     google::protobuf::TextFormat::PrintToString(result_msg, &output);
