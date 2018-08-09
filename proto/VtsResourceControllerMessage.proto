@@ -20,33 +20,72 @@ option java_outer_classname = "VtsResourceControllerMessage";
 
 import "test/vts/proto/ComponentSpecificationMessage.proto";
 
+// Possible operations on Fast Message Queue.
 enum FmqOp {
+    // Unknown operation.
     FMQ_PROTO_UNKNOWN = 0;
+    // Create a new FMQ object.
     FMQ_PROTO_CREATE = 1;
+    // Read from a FMQ (no blocking).
     FMQ_PROTO_READ = 2;
+    // Read from a FMQ (with short-form blocking).
     FMQ_PROTO_READ_BLOCKING = 3;
+    // Read from a FMQ (with long-form blocking).
     FMQ_PROTO_READ_BLOCKING_LONG = 4; // TODO: support this from host side in the future
+    // Write to a FMQ (no blocking).
     FMQ_PROTO_WRITE = 5;
+    // Write to a FMQ (with short-form blocking).
     FMQ_PROTO_WRITE_BLOCKING = 6;
+    // Write to a FMQ (with long-form blocking).
     FMQ_PROTO_WRITE_BLOCKING_LONG = 7; // TODO: support this from host side in the future
+    // Get space available to write in FMQ.
     FMQ_PROTO_AVAILABLE_WRITE = 8;
+    // Get number of items available to read.
     FMQ_PROTO_AVAILABLE_READ = 9;
+    // Get size of item in FMQ.
     FMQ_PROTO_GET_QUANTUM_SIZE = 10;
+    // Get number of items that fit in FMQ.
     FMQ_PROTO_GET_QUANTUM_COUNT = 11;
+    // Check if FMQ is valid.
     FMQ_PROTO_IS_VALID = 12;
 }
 
+// Possible operations on hidl_memory.
 enum HidlMemoryOp {
+    // Unknown operation.
     MEM_PROTO_UNKNOWN = 0;
+    // Allcate a new memory region.
     MEM_PROTO_ALLOCATE = 1;
+    // Signal starting to read memory.
     MEM_PROTO_START_READ = 2;
+    // Signal starting to read a particular region of memory.
     MEM_PROTO_START_READ_RANGE = 3;
+    // Perform actual read operation.
     MEM_PROTO_READ_BYTES = 4;
+    // Signal starting to write to memory.
     MEM_PROTO_START_UPDATE = 5;
+    // Signal starting to write to a particular region of memory.
     MEM_PROTO_START_UPDATE_RANGE = 6;
+    // Perform actual write operation.
     MEM_PROTO_UPDATE_BYTES = 7;
+    // Commit to a read/write operation.
     MEM_PROTO_COMMIT = 8;
+    // Get the size of memory region.
     MEM_PROTO_GET_SIZE = 9;
+}
+
+// Possible operations on hidl_handle.
+enum HidlHandleOp {
+    // Unknown operation.
+    HANDLE_PROTO_UNKNOWN = 0;
+    // Create a handle object for a single file.
+    HANDLE_PROTO_CREATE_FILE = 1;
+    // Read from a handle object with one file.
+    HANDLE_PROTO_READ_FILE = 2;
+    // Write to a handle object with one file.
+    HANDLE_PROTO_WRITE_FILE = 3;
+    // Delete a handle object.
+    HANDLE_PROTO_DELETE = 4;
 }
 
 // The arguments for a FMQ operation.
@@ -109,6 +148,7 @@ message HidlMemoryRequestMessage {
     optional bytes write_data = 6;
 }
 
+// The response for a hidl_memory operation.
 message HidlMemoryResponseMessage {
     // indicate if the memory region is found
     optional bool success = 1;
@@ -118,4 +158,35 @@ message HidlMemoryResponseMessage {
     optional uint64 mem_size = 3;
     // data read from memory
     optional bytes read_data = 4;
+}
+
+// The arguments for a hidl_handle operation.
+message HidlHandleRequestMessage {
+    // operation to be performed
+    optional HidlHandleOp operation = 1;
+    // identifies the handle object
+    optional int32 handle_id = 2 [default = -1];
+    // to specify what files to open, and additional integers
+    // in a handle object
+    optional HandleDataValueMessage handle_info = 3;
+    // number of bytes to read from the file
+    // read() function in C I/O takes in a size_t,
+    // so use unsigned integer here.
+    optional uint64 read_data_size = 4;
+    // data to be written into file
+    optional bytes write_data = 5;
+}
+
+// The response for a hidl_handle operation.
+message HidlHandleResponseMessage {
+    // indicate if the operation succeeds
+    optional bool success = 1;
+    // new id assigned to the new handle object
+    optional int32 new_handle_id = 2;
+    // data read from the file
+    optional bytes read_data = 3;
+    // number of bytes written into the file if the request is a write operation
+    // write() function in C I/O returns a ssize_t,
+    // so use signed integer here.
+    optional int64 write_data_size = 4;
 }
