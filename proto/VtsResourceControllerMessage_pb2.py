@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsResourceControllerMessage.proto',
   package='android.vts',
   syntax='proto2',
-  serialized_pb=_b('\n\"VtsResourceControllerMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\x9e\x02\n\x11\x46mqRequestMessage\x12%\n\toperation\x18\x01 \x01(\x0e\x32\x12.android.vts.FmqOp\x12\x11\n\tdata_type\x18\x02 \x01(\x0c\x12\x0c\n\x04sync\x18\x03 \x01(\x08\x12\x14\n\x08queue_id\x18\x04 \x01(\x05:\x02-1\x12\x12\n\nqueue_size\x18\x05 \x01(\x04\x12\x10\n\x08\x62locking\x18\x06 \x01(\x08\x12\x16\n\x0ereset_pointers\x18\x07 \x01(\x08\x12=\n\nwrite_data\x18\x08 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x16\n\x0eread_data_size\x18\t \x01(\x04\x12\x16\n\x0etime_out_nanos\x18\n \x01(\x03\"\x8f\x01\n\x12\x46mqResponseMessage\x12<\n\tread_data\x18\x01 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x18\n\x10sizet_return_val\x18\x02 \x01(\x04\x12\x10\n\x08queue_id\x18\x03 \x01(\x05\x12\x0f\n\x07success\x18\x04 \x01(\x08\"\xa1\x01\n\x18HidlMemoryRequestMessage\x12,\n\toperation\x18\x01 \x01(\x0e\x32\x19.android.vts.HidlMemoryOp\x12\x12\n\x06mem_id\x18\x02 \x01(\x05:\x02-1\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\r\n\x05start\x18\x04 \x01(\x04\x12\x0e\n\x06length\x18\x05 \x01(\x04\x12\x12\n\nwrite_data\x18\x06 \x01(\x0c\"e\n\x19HidlMemoryResponseMessage\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nnew_mem_id\x18\x02 \x01(\x05\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\x11\n\tread_data\x18\x04 \x01(\x0c\"\xc5\x01\n\x18HidlHandleRequestMessage\x12,\n\toperation\x18\x01 \x01(\x0e\x32\x19.android.vts.HidlHandleOp\x12\x15\n\thandle_id\x18\x02 \x01(\x05:\x02-1\x12\x38\n\x0bhandle_info\x18\x03 \x01(\x0b\x32#.android.vts.HandleDataValueMessage\x12\x16\n\x0eread_data_size\x18\x04 \x01(\x04\x12\x12\n\nwrite_data\x18\x05 \x01(\x0c\"o\n\x19HidlHandleResponseMessage\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x15\n\rnew_handle_id\x18\x02 \x01(\x05\x12\x11\n\tread_data\x18\x03 \x01(\x0c\x12\x17\n\x0fwrite_data_size\x18\x04 \x01(\x03*\xf3\x02\n\x05\x46mqOp\x12\x15\n\x11\x46MQ_PROTO_UNKNOWN\x10\x00\x12\x14\n\x10\x46MQ_PROTO_CREATE\x10\x01\x12\x12\n\x0e\x46MQ_PROTO_READ\x10\x02\x12\x1b\n\x17\x46MQ_PROTO_READ_BLOCKING\x10\x03\x12 \n\x1c\x46MQ_PROTO_READ_BLOCKING_LONG\x10\x04\x12\x13\n\x0f\x46MQ_PROTO_WRITE\x10\x05\x12\x1c\n\x18\x46MQ_PROTO_WRITE_BLOCKING\x10\x06\x12!\n\x1d\x46MQ_PROTO_WRITE_BLOCKING_LONG\x10\x07\x12\x1d\n\x19\x46MQ_PROTO_AVAILABLE_WRITE\x10\x08\x12\x1c\n\x18\x46MQ_PROTO_AVAILABLE_READ\x10\t\x12\x1e\n\x1a\x46MQ_PROTO_GET_QUANTUM_SIZE\x10\n\x12\x1f\n\x1b\x46MQ_PROTO_GET_QUANTUM_COUNT\x10\x0b\x12\x16\n\x12\x46MQ_PROTO_IS_VALID\x10\x0c*\x99\x02\n\x0cHidlMemoryOp\x12\x15\n\x11MEM_PROTO_UNKNOWN\x10\x00\x12\x16\n\x12MEM_PROTO_ALLOCATE\x10\x01\x12\x18\n\x14MEM_PROTO_START_READ\x10\x02\x12\x1e\n\x1aMEM_PROTO_START_READ_RANGE\x10\x03\x12\x18\n\x14MEM_PROTO_READ_BYTES\x10\x04\x12\x1a\n\x16MEM_PROTO_START_UPDATE\x10\x05\x12 \n\x1cMEM_PROTO_START_UPDATE_RANGE\x10\x06\x12\x1a\n\x16MEM_PROTO_UPDATE_BYTES\x10\x07\x12\x14\n\x10MEM_PROTO_COMMIT\x10\x08\x12\x16\n\x12MEM_PROTO_GET_SIZE\x10\t*\x98\x01\n\x0cHidlHandleOp\x12\x18\n\x14HANDLE_PROTO_UNKNOWN\x10\x00\x12\x1c\n\x18HANDLE_PROTO_CREATE_FILE\x10\x01\x12\x1a\n\x16HANDLE_PROTO_READ_FILE\x10\x02\x12\x1b\n\x17HANDLE_PROTO_WRITE_FILE\x10\x03\x12\x17\n\x13HANDLE_PROTO_DELETE\x10\x04\x42\x35\n\x15\x63om.android.vts.protoB\x1cVtsResourceControllerMessage')
+  serialized_pb=_b('\n\"VtsResourceControllerMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\xb7\x02\n\x11\x46mqRequestMessage\x12%\n\toperation\x18\x01 \x01(\x0e\x32\x12.android.vts.FmqOp\x12\x11\n\tdata_type\x18\x02 \x01(\x0c\x12\x0c\n\x04sync\x18\x03 \x01(\x08\x12\x14\n\x08queue_id\x18\x04 \x01(\x05:\x02-1\x12\x12\n\nqueue_size\x18\x05 \x01(\x04\x12\x10\n\x08\x62locking\x18\x06 \x01(\x08\x12\x16\n\x0ereset_pointers\x18\x07 \x01(\x08\x12=\n\nwrite_data\x18\x08 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x16\n\x0eread_data_size\x18\t \x01(\x04\x12\x16\n\x0etime_out_nanos\x18\n \x01(\x03\x12\x17\n\x0fqueue_desc_addr\x18\x0b \x01(\x04\"\x8f\x01\n\x12\x46mqResponseMessage\x12<\n\tread_data\x18\x01 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x18\n\x10sizet_return_val\x18\x02 \x01(\x04\x12\x10\n\x08queue_id\x18\x03 \x01(\x05\x12\x0f\n\x07success\x18\x04 \x01(\x08\"\xa1\x01\n\x18HidlMemoryRequestMessage\x12,\n\toperation\x18\x01 \x01(\x0e\x32\x19.android.vts.HidlMemoryOp\x12\x12\n\x06mem_id\x18\x02 \x01(\x05:\x02-1\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\r\n\x05start\x18\x04 \x01(\x04\x12\x0e\n\x06length\x18\x05 \x01(\x04\x12\x12\n\nwrite_data\x18\x06 \x01(\x0c\"e\n\x19HidlMemoryResponseMessage\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nnew_mem_id\x18\x02 \x01(\x05\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\x11\n\tread_data\x18\x04 \x01(\x0c\"\xc5\x01\n\x18HidlHandleRequestMessage\x12,\n\toperation\x18\x01 \x01(\x0e\x32\x19.android.vts.HidlHandleOp\x12\x15\n\thandle_id\x18\x02 \x01(\x05:\x02-1\x12\x38\n\x0bhandle_info\x18\x03 \x01(\x0b\x32#.android.vts.HandleDataValueMessage\x12\x16\n\x0eread_data_size\x18\x04 \x01(\x04\x12\x12\n\nwrite_data\x18\x05 \x01(\x0c\"o\n\x19HidlHandleResponseMessage\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x15\n\rnew_handle_id\x18\x02 \x01(\x05\x12\x11\n\tread_data\x18\x03 \x01(\x0c\x12\x17\n\x0fwrite_data_size\x18\x04 \x01(\x03*\xbc\x02\n\x05\x46mqOp\x12\x0f\n\x0b\x46MQ_UNKNOWN\x10\x00\x12\x0e\n\nFMQ_CREATE\x10\x01\x12\x0c\n\x08\x46MQ_READ\x10\x02\x12\x15\n\x11\x46MQ_READ_BLOCKING\x10\x03\x12\x1a\n\x16\x46MQ_READ_BLOCKING_LONG\x10\x04\x12\r\n\tFMQ_WRITE\x10\x05\x12\x16\n\x12\x46MQ_WRITE_BLOCKING\x10\x06\x12\x1b\n\x17\x46MQ_WRITE_BLOCKING_LONG\x10\x07\x12\x17\n\x13\x46MQ_AVAILABLE_WRITE\x10\x08\x12\x16\n\x12\x46MQ_AVAILABLE_READ\x10\t\x12\x18\n\x14\x46MQ_GET_QUANTUM_SIZE\x10\n\x12\x19\n\x15\x46MQ_GET_QUANTUM_COUNT\x10\x0b\x12\x10\n\x0c\x46MQ_IS_VALID\x10\x0c\x12\x15\n\x11\x46MQ_GET_DESC_ADDR\x10\r*\x99\x02\n\x0cHidlMemoryOp\x12\x15\n\x11MEM_PROTO_UNKNOWN\x10\x00\x12\x16\n\x12MEM_PROTO_ALLOCATE\x10\x01\x12\x18\n\x14MEM_PROTO_START_READ\x10\x02\x12\x1e\n\x1aMEM_PROTO_START_READ_RANGE\x10\x03\x12\x18\n\x14MEM_PROTO_READ_BYTES\x10\x04\x12\x1a\n\x16MEM_PROTO_START_UPDATE\x10\x05\x12 \n\x1cMEM_PROTO_START_UPDATE_RANGE\x10\x06\x12\x1a\n\x16MEM_PROTO_UPDATE_BYTES\x10\x07\x12\x14\n\x10MEM_PROTO_COMMIT\x10\x08\x12\x16\n\x12MEM_PROTO_GET_SIZE\x10\t*\x98\x01\n\x0cHidlHandleOp\x12\x18\n\x14HANDLE_PROTO_UNKNOWN\x10\x00\x12\x1c\n\x18HANDLE_PROTO_CREATE_FILE\x10\x01\x12\x1a\n\x16HANDLE_PROTO_READ_FILE\x10\x02\x12\x1b\n\x17HANDLE_PROTO_WRITE_FILE\x10\x03\x12\x17\n\x13HANDLE_PROTO_DELETE\x10\x04\x42\x35\n\x15\x63om.android.vts.protoB\x1cVtsResourceControllerMessage')
   ,
   dependencies=[ComponentSpecificationMessage__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -33,62 +33,66 @@ _FMQOP = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_UNKNOWN', index=0, number=0,
+      name='FMQ_UNKNOWN', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_CREATE', index=1, number=1,
+      name='FMQ_CREATE', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_READ', index=2, number=2,
+      name='FMQ_READ', index=2, number=2,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_READ_BLOCKING', index=3, number=3,
+      name='FMQ_READ_BLOCKING', index=3, number=3,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_READ_BLOCKING_LONG', index=4, number=4,
+      name='FMQ_READ_BLOCKING_LONG', index=4, number=4,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_WRITE', index=5, number=5,
+      name='FMQ_WRITE', index=5, number=5,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_WRITE_BLOCKING', index=6, number=6,
+      name='FMQ_WRITE_BLOCKING', index=6, number=6,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_WRITE_BLOCKING_LONG', index=7, number=7,
+      name='FMQ_WRITE_BLOCKING_LONG', index=7, number=7,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_AVAILABLE_WRITE', index=8, number=8,
+      name='FMQ_AVAILABLE_WRITE', index=8, number=8,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_AVAILABLE_READ', index=9, number=9,
+      name='FMQ_AVAILABLE_READ', index=9, number=9,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_GET_QUANTUM_SIZE', index=10, number=10,
+      name='FMQ_GET_QUANTUM_SIZE', index=10, number=10,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_GET_QUANTUM_COUNT', index=11, number=11,
+      name='FMQ_GET_QUANTUM_COUNT', index=11, number=11,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FMQ_PROTO_IS_VALID', index=12, number=12,
+      name='FMQ_IS_VALID', index=12, number=12,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FMQ_GET_DESC_ADDR', index=13, number=13,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1104,
-  serialized_end=1475,
+  serialized_start=1129,
+  serialized_end=1445,
 )
 _sym_db.RegisterEnumDescriptor(_FMQOP)
 
@@ -142,8 +146,8 @@ _HIDLMEMORYOP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1478,
-  serialized_end=1759,
+  serialized_start=1448,
+  serialized_end=1729,
 )
 _sym_db.RegisterEnumDescriptor(_HIDLMEMORYOP)
 
@@ -177,25 +181,26 @@ _HIDLHANDLEOP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1762,
-  serialized_end=1914,
+  serialized_start=1732,
+  serialized_end=1884,
 )
 _sym_db.RegisterEnumDescriptor(_HIDLHANDLEOP)
 
 HidlHandleOp = enum_type_wrapper.EnumTypeWrapper(_HIDLHANDLEOP)
-FMQ_PROTO_UNKNOWN = 0
-FMQ_PROTO_CREATE = 1
-FMQ_PROTO_READ = 2
-FMQ_PROTO_READ_BLOCKING = 3
-FMQ_PROTO_READ_BLOCKING_LONG = 4
-FMQ_PROTO_WRITE = 5
-FMQ_PROTO_WRITE_BLOCKING = 6
-FMQ_PROTO_WRITE_BLOCKING_LONG = 7
-FMQ_PROTO_AVAILABLE_WRITE = 8
-FMQ_PROTO_AVAILABLE_READ = 9
-FMQ_PROTO_GET_QUANTUM_SIZE = 10
-FMQ_PROTO_GET_QUANTUM_COUNT = 11
-FMQ_PROTO_IS_VALID = 12
+FMQ_UNKNOWN = 0
+FMQ_CREATE = 1
+FMQ_READ = 2
+FMQ_READ_BLOCKING = 3
+FMQ_READ_BLOCKING_LONG = 4
+FMQ_WRITE = 5
+FMQ_WRITE_BLOCKING = 6
+FMQ_WRITE_BLOCKING_LONG = 7
+FMQ_AVAILABLE_WRITE = 8
+FMQ_AVAILABLE_READ = 9
+FMQ_GET_QUANTUM_SIZE = 10
+FMQ_GET_QUANTUM_COUNT = 11
+FMQ_IS_VALID = 12
+FMQ_GET_DESC_ADDR = 13
 MEM_PROTO_UNKNOWN = 0
 MEM_PROTO_ALLOCATE = 1
 MEM_PROTO_START_READ = 2
@@ -291,6 +296,13 @@ _FMQREQUESTMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='queue_desc_addr', full_name='android.vts.FmqRequestMessage.queue_desc_addr', index=10,
+      number=11, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -304,7 +316,7 @@ _FMQREQUESTMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=89,
-  serialized_end=375,
+  serialized_end=400,
 )
 
 
@@ -355,8 +367,8 @@ _FMQRESPONSEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=378,
-  serialized_end=521,
+  serialized_start=403,
+  serialized_end=546,
 )
 
 
@@ -421,8 +433,8 @@ _HIDLMEMORYREQUESTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=524,
-  serialized_end=685,
+  serialized_start=549,
+  serialized_end=710,
 )
 
 
@@ -473,8 +485,8 @@ _HIDLMEMORYRESPONSEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=687,
-  serialized_end=788,
+  serialized_start=712,
+  serialized_end=813,
 )
 
 
@@ -532,8 +544,8 @@ _HIDLHANDLEREQUESTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=791,
-  serialized_end=988,
+  serialized_start=816,
+  serialized_end=1013,
 )
 
 
@@ -584,8 +596,8 @@ _HIDLHANDLERESPONSEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=990,
-  serialized_end=1101,
+  serialized_start=1015,
+  serialized_end=1126,
 )
 
 _FMQREQUESTMESSAGE.fields_by_name['operation'].enum_type = _FMQOP
