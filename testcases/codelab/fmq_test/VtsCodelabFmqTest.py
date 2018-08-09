@@ -48,7 +48,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
             queue_size=2048,
             blocking=False,
             client=self.dut.hal.GetTcpClient("light"))
-        queue1_writer_id = self._queue1_writer.getQueueId()
+        queue1_writer_id = self._queue1_writer.queueId
         asserts.assertNotEqual(queue1_writer_id, -1)
 
         # Initialize a non-blocking, synchronized reader.
@@ -56,7 +56,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
         self._queue1_reader = self.dut.resource.InitFmq(
             existing_queue=self._queue1_writer,
             client=self.dut.hal.GetTcpClient("light"))
-        queue1_reader_id = self._queue1_reader.getQueueId()
+        queue1_reader_id = self._queue1_reader.queueId
         asserts.assertNotEqual(queue1_reader_id, -1)
 
         # Initialize a blocking, synchronized writer.
@@ -66,7 +66,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
             queue_size=2048,
             blocking=True,
             client=self.dut.hal.GetTcpClient("light"))
-        queue2_writer_id = self._queue2_writer.getQueueId()
+        queue2_writer_id = self._queue2_writer.queueId
         asserts.assertNotEqual(queue2_writer_id, -1)
 
         # Initialize a blocking, synchronized reader.
@@ -74,7 +74,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
         self._queue2_reader = self.dut.resource.InitFmq(
             existing_queue=self._queue2_writer,
             client=self.dut.hal.GetTcpClient("light"))
-        queue2_reader_id = self._queue2_reader.getQueueId()
+        queue2_reader_id = self._queue2_reader.queueId
         asserts.assertNotEqual(queue2_reader_id, -1)
 
         # Initialize a non-blocking, unsynchronized writer.
@@ -84,7 +84,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
             queue_size=2048,
             blocking=False,
             client=self.dut.hal.GetTcpClient("light"))
-        queue3_writer_id = self._queue3_writer.getQueueId()
+        queue3_writer_id = self._queue3_writer.queueId
         asserts.assertNotEqual(queue3_writer_id, -1)
 
         # Initialize a non-blocking, unsynchronized reader 1.
@@ -92,7 +92,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
         self._queue3_reader1 = self.dut.resource.InitFmq(
             existing_queue=self._queue3_writer,
             client=self.dut.hal.GetTcpClient("light"))
-        queue3_reader1_id = self._queue3_reader1.getQueueId()
+        queue3_reader1_id = self._queue3_reader1.queueId
         asserts.assertNotEqual(queue3_reader1_id, -1)
 
         # Initialize a non-blocking, unsynchronized reader 2.
@@ -100,7 +100,7 @@ class VtsCodelabFmqTest(base_test.BaseTestClass):
         self._queue3_reader2 = self.dut.resource.InitFmq(
             existing_queue=self._queue3_writer,
             client=self.dut.hal.GetTcpClient("light"))
-        queue3_reader2_id = self._queue3_reader2.getQueueId()
+        queue3_reader2_id = self._queue3_reader2.queueId
         asserts.assertNotEqual(queue3_reader2_id, -1)
 
     def testBasic(self):
