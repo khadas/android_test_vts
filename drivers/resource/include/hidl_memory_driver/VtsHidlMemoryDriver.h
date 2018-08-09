@@ -156,6 +156,15 @@ class VtsHidlMemoryDriver {
   bool GetSize(MemoryId mem_id, size_t* result);
 
  private:
+  // Finds the memory object with ID mem_id.
+  // Logs error if mem_id is not found.
+  //
+  // @param mem_id identifies the memory object.
+  //
+  // @return MemoryInfo pointer, which contains both hidl_memory pointer and
+  //         IMemory pointer.
+  MemoryInfo* FindMemory(MemoryId mem_id);
+
   // A map to keep track of each hidl_memory information.
   // Store MemoryInfo smart pointer, which contains both hidl_memory,
   // and actual memory pointer.
