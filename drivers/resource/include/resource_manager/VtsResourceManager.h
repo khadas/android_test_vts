@@ -68,6 +68,30 @@ class VtsResourceManager {
       const HidlHandleRequestMessage& hidl_handle_request,
       HidlHandleResponseMessage* hidl_handle_response);
 
+  // Registers the handle object in hidl_handle_driver_ given the hidl_handle
+  // address provided in hidl_handle_msg.
+  //
+  // @param hidl_handle_msg stores hidl_handle address, used to find actual
+  //                        handle object.
+  //
+  // @return handle_id assigned to the new handle object.
+  int RegisterHidlHandle(const VariableSpecificationMessage& hidl_handle_msg);
+
+  // Gets hidl_handle address in hidl_handle_driver_.
+  // If caller wants to use a handle object in the driver, it specifies
+  // handle_id in HandleDataValueMessage. This method calls hidl_handle_driver_
+  // to locate the handle object with handle_id, and stores the address
+  // in result pointer.
+  //
+  // @param hidl_handle_msg contains handle_id of the handle object.
+  // @param result          stores hidl_handle address.
+  //
+  // @return true if the handle object with handle_id is found, and stores
+  //              address in result,
+  //         false otherwise.
+  bool GetHidlHandleAddress(const VariableSpecificationMessage& hidl_handle_msg,
+                            size_t* result);
+
   // Processes command for operations on hidl_memory.
   //
   // @param hidl_memory_request  contains arguments for the operation.
