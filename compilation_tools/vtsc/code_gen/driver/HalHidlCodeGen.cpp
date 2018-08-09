@@ -1090,6 +1090,15 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_MEMORY:
     {
+      out << "if (" << arg_value_name
+          << ".hidl_memory_value().has_hidl_mem_address()) {\n";
+      out.indent();  // if case starts: existing hidl_memory is used.
+      out << arg_name
+          << " = *(reinterpret_cast<android::hardware::hidl_memory*>("
+          << arg_value_name << ".hidl_memory_value().hidl_mem_address()));\n";
+      out.unindent();  // if case ends.
+      out << "} else {\n";
+      out.indent();  // else case starts: allocates new memory region.
       out << "sp<::android::hidl::allocator::V1_0::IAllocator> ashmemAllocator"
           << " = ::android::hidl::allocator::V1_0::IAllocator::getService(\""
           << "ashmem\");\n";
@@ -1114,6 +1123,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << arg_name << " = memory;\n";
       out.unindent();
       out << "});\n";
+      out.unindent();  // else case ends.
+      out << "}\n";
       break;
     }
     case TYPE_POINTER:
@@ -1596,7 +1607,9 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HIDL_MEMORY:
     {
       out << result_msg << "->set_type(TYPE_HIDL_MEMORY);\n";
-      out << "/* ERROR: TYPE_HIDL_MEMORY is not supported yet. */\n";
+      out << result_msg << "->mutable_hidl_memory_value()->set_hidl_mem_address"
+          << "(reinterpret_cast<size_t>(new android::hardware::hidl_memory("
+          << result_value << ")));\n";
       break;
     }
     case TYPE_POINTER:
