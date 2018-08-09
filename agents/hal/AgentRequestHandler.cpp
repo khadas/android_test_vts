@@ -29,6 +29,7 @@
 #include "SocketServerForDriver.h"
 #include "test/vts/proto/AndroidSystemControlMessage.pb.h"
 #include "test/vts/proto/VtsDriverControlMessage.pb.h"
+#include "test/vts/proto/VtsResourceControllerMessage.pb.h"
 
 using namespace std;
 using namespace google::protobuf;
@@ -112,6 +113,8 @@ bool AgentRequestHandler::LaunchDriverService(
   const string& module_name = command_msg.module_name();
   const string& hw_binder_service_name = command_msg.hw_binder_service_name();
   int bits = command_msg.bits();
+  const string& test_hal_flag =
+      command_msg.is_test_hal() ? "TREBLE_TESTING_OVERRIDE=true " : "";
 
   LOG(DEBUG) << "file_path=" << file_path;
   ResponseCode result = FAIL;
@@ -155,11 +158,12 @@ bool AgentRequestHandler::LaunchDriverService(
         if (driver_hal_spec_dir_path_.length() < 1) {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
           asprintf(&cmd,
-                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
+                   "%sLD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
                    "--server_socket_path=%s "
                    "--callback_socket_name=%s",
-                   ld_dir_path.c_str(), driver_binary_path.c_str(),
-                   socket_port_flie_path.c_str(), callback_socket_name.c_str());
+                   test_hal_flag.c_str(), ld_dir_path.c_str(),
+                   driver_binary_path.c_str(), socket_port_flie_path.c_str(),
+                   callback_socket_name.c_str());
 #else  // binder
           asprintf(&cmd,
                    "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
@@ -171,11 +175,11 @@ bool AgentRequestHandler::LaunchDriverService(
         } else {
 #ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
           asprintf(&cmd,
-                   "LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
+                   "%sLD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH %s "
                    "--server_socket_path=%s "
                    "--spec_dir_path=%s --callback_socket_name=%s",
-                   ld_dir_path.c_str(), driver_binary_path.c_str(),
-                   socket_port_flie_path.c_str(),
+                   test_hal_flag.c_str(), ld_dir_path.c_str(),
+                   driver_binary_path.c_str(), socket_port_flie_path.c_str(),
                    driver_hal_spec_dir_path_.c_str(),
                    callback_socket_name.c_str());
 #else  // binder
@@ -439,6 +443,37 @@ void AgentRequestHandler::CreateSystemControlResponseFromDriverControlResponse(
   }
 }
 
+bool AgentRequestHandler::ProcessFmqCommand(
+    const AndroidSystemControlCommandMessage& command_msg) {
+#ifndef VTS_AGENT_DRIVER_COMM_BINDER  // socket
+  VtsDriverSocketClient* client = driver_client_;
+  if (!client) {
+#else  // binder
+  android::sp<android::vts::IVtsFuzzer> client =
+      android::vts::GetBinderClient(service_name_);
+  if (!client.get()) {
+#endif
+    LOG(ERROR) << "Driver socket client is uninitialized.";
+    return false;
+  }
+
+  AndroidSystemControlResponseMessage response_msg;
+  FmqResponseMessage* fmq_response = response_msg.mutable_fmq_response();
+  FmqRequestMessage fmq_request = command_msg.fmq_request();
+  // send the request message
+  bool success = client->ProcessFmqCommand(fmq_request, fmq_response);
+
+  // prepare for response back to host
+  if (success) {
+    response_msg.set_response_code(SUCCESS);
+  } else {
+    response_msg.set_response_code(FAIL);
+    response_msg.set_reason("Failed to call api to process FMQ command.");
+  }
+
+  return VtsSocketSendMessage(response_msg);
+}
+
 bool AgentRequestHandler::ProcessOneCommand() {
   AndroidSystemControlCommandMessage command_msg;
   if (!VtsSocketRecvMessage(&command_msg)) return false;
@@ -465,6 +500,8 @@ bool AgentRequestHandler::ProcessOneCommand() {
     case VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND:
       ExecuteShellCommand(command_msg);
       return true;
+    case VTS_FMQ_COMMAND:
+      return ProcessFmqCommand(command_msg);
     default:
       LOG(ERROR) << " ERROR unknown command " << command_msg.command_type();
       return DefaultResponse();
