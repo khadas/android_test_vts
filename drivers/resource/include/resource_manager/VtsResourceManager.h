@@ -67,6 +67,29 @@ class VtsResourceManager {
       const HidlMemoryRequestMessage& hidl_memory_request,
       HidlMemoryResponseMessage* hidl_memory_response);
 
+  // Registers the memory object in hidl_memory_driver_ given the hidl_memory
+  // pointer address provided in hidl_memory_msg.
+  //
+  // @param hidl_memory_msg stores hidl_memory pointer, used to find actual
+  //                        memory pointer.
+  //
+  // @return mem_id assigned to the new memory object.
+  int RegisterHidlMemory(const VariableSpecificationMessage& hidl_memory_msg);
+
+  // Gets hidl_memory pointer address in hidl_memory_driver_.
+  // If caller wants to use a memory object in the driver, it specifies mem_id
+  // in MemoryDataValueMessage. This method calls hidl_memory_driver to locate
+  // the memory object with mem_id, and stores the address in result pointer.
+  //
+  // @param hidl_memory_msg contains memory object mem_id.
+  // @param result          stores hidl_memory pointer.
+  //
+  // @return true if the memory object with mem_id is found, and stores pointer
+  //              address in result,
+  //         false otherwise.
+  bool GetHidlMemoryAddress(const VariableSpecificationMessage& hidl_memory_msg,
+                            size_t* result);
+
   // Processes command for operations on Fast Message Queue.
   //
   // @param fmq_request  contains arguments for the operation.
