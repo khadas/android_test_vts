@@ -32,6 +32,67 @@ VtsResourceManager::VtsResourceManager() {}
 
 VtsResourceManager::~VtsResourceManager() {}
 
+void VtsResourceManager::ProcessHidlMemoryCommand(
+    const HidlMemoryRequestMessage& hidl_memory_request,
+    HidlMemoryResponseMessage* hidl_memory_response) {
+  size_t mem_size = hidl_memory_request.mem_size();
+  int mem_id = hidl_memory_request.mem_id();
+  uint64_t start = hidl_memory_request.start();
+  uint64_t length = hidl_memory_request.length();
+  const string& write_data = hidl_memory_request.write_data();
+  bool success = false;
+
+  switch (hidl_memory_request.operation()) {
+    case MEM_PROTO_ALLOCATE: {
+      int new_mem_id = hidl_memory_driver_.Allocate(mem_size);
+      hidl_memory_response->set_new_mem_id(new_mem_id);
+      success = new_mem_id != -1;
+      break;
+    }
+    case MEM_PROTO_START_READ: {
+      success = hidl_memory_driver_.Read(mem_id);
+      break;
+    }
+    case MEM_PROTO_START_READ_RANGE: {
+      success = hidl_memory_driver_.ReadRange(mem_id, start, length);
+      break;
+    }
+    case MEM_PROTO_START_UPDATE: {
+      success = hidl_memory_driver_.Update(mem_id);
+      break;
+    }
+    case MEM_PROTO_START_UPDATE_RANGE: {
+      success = hidl_memory_driver_.UpdateRange(mem_id, start, length);
+      break;
+    }
+    case MEM_PROTO_UPDATE_BYTES: {
+      success = hidl_memory_driver_.UpdateBytes(mem_id, write_data.c_str(),
+                                                length, start);
+      break;
+    }
+    case MEM_PROTO_READ_BYTES: {
+      char read_data[length];
+      success = hidl_memory_driver_.ReadBytes(mem_id, read_data, length, start);
+      hidl_memory_response->set_read_data(string(read_data, length));
+      break;
+    }
+    case MEM_PROTO_COMMIT: {
+      success = hidl_memory_driver_.Commit(mem_id);
+      break;
+    }
+    case MEM_PROTO_GET_SIZE: {
+      size_t result_mem_size;
+      success = hidl_memory_driver_.GetSize(mem_id, &result_mem_size);
+      hidl_memory_response->set_mem_size(result_mem_size);
+      break;
+    }
+    default:
+      LOG(ERROR) << "unknown operation in hidl_memory_driver.";
+      break;
+  }
+  hidl_memory_response->set_success(success);
+}
+
 void VtsResourceManager::ProcessFmqCommand(const FmqRequestMessage& fmq_request,
                                            FmqResponseMessage* fmq_response) {
   size_t sizet_result;
