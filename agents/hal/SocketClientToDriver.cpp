@@ -190,6 +190,28 @@ bool VtsDriverSocketClient::ProcessHidlMemoryCommand(
   return true;
 }
 
+bool VtsDriverSocketClient::ProcessHidlHandleCommand(
+    const HidlHandleRequestMessage& hidl_handle_request,
+    HidlHandleResponseMessage* hidl_handle_response) {
+  VtsDriverControlCommandMessage command_message;
+  VtsDriverControlResponseMessage response_message;
+  command_message.set_command_type(HIDL_HANDLE_OPERATION);
+  (command_message.mutable_hidl_handle_request())
+      ->CopyFrom(hidl_handle_request);
+
+  if (!VtsSocketSendMessage(command_message)) {
+    LOG(ERROR) << "Unable to send hidl_handle command from agent to driver.";
+    return false;
+  }
+  if (!VtsSocketRecvMessage(&response_message)) {
+    LOG(ERROR) << "Unable to receive hidl_handle message from driver to agent";
+    return false;
+  }
+
+  hidl_handle_response->CopyFrom(response_message.hidl_handle_response());
+  return true;
+}
+
 int32_t VtsDriverSocketClient::Status(int32_t type) {
   VtsDriverControlCommandMessage command_message;
   command_message.set_command_type(CALL_FUNCTION);

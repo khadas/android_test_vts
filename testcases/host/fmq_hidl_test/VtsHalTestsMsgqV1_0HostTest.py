@@ -89,14 +89,14 @@ class VtsHalTestsMsgqV1_0HostTest(base_test.BaseTestClass):
             queue_size=self.MAX_NUM_MSG,
             blocking=True,
             client=self.dut.hal.GetTcpClient("tests_msgq"))
-        asserts.assertNotEqual(self._sync_client.getQueueId(), -1)
+        asserts.assertNotEqual(self._sync_client.queueId, -1)
 
         # Prepare a VariableSpecificationMessage to specify the FMQ that will be
         # passed into the HAL service.
         var_msg = CompSpecMsg.VariableSpecificationMessage()
         var_msg.type = CompSpecMsg.TYPE_FMQ_SYNC
         fmq_val = var_msg.fmq_value.add()
-        fmq_val.fmq_id = self._sync_client.getQueueId()
+        fmq_val.fmq_id = self._sync_client.queueId
         fmq_val.scalar_type = "uint16_t"
         fmq_val.type = CompSpecMsg.TYPE_SCALAR
 
@@ -114,12 +114,12 @@ class VtsHalTestsMsgqV1_0HostTest(base_test.BaseTestClass):
             "Hal should configure an unsynchronized queue without error.")
         # An unsynchronized queue is registered successfully on the target driver.
         asserts.assertNotEqual(self._unsync_client1, None)
-        asserts.assertNotEqual(self._unsync_client1.getQueueId(), -1)
+        asserts.assertNotEqual(self._unsync_client1.queueId, -1)
         # Register another reader.
         self._unsync_client2 = self.dut.resource.InitFmq(
             existing_queue=self._unsync_client1,
             client=self.dut.hal.GetTcpClient("tests_msgq"))
-        asserts.assertNotEqual(self._unsync_client2.getQueueId(), -1)
+        asserts.assertNotEqual(self._unsync_client2.queueId, -1)
 
     def testSyncQueueBlockingReadWriteSuccess(self):
         """This test operates on the synchronized queue.
