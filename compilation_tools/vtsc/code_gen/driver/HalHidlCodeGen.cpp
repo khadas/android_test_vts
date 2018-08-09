@@ -230,7 +230,13 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
       out << var_type << " " << cur_arg_name << " = nullptr;\n";
     } else if (arg.type() == TYPE_SCALAR) {
       out << var_type << " " << cur_arg_name << " = 0;\n";
-    } else if (arg.type() != TYPE_FMQ_SYNC && arg.type() != TYPE_FMQ_UNSYNC) {
+    } else if (arg.type() == TYPE_FMQ_SYNC || arg.type() == TYPE_FMQ_UNSYNC) {
+      // FMQ type, use pointer to store arguments because copy assignment
+      // is not allowed for fmq descriptor.
+      // Use const because getDesc() function in FMQ implementation
+      // returns const type.
+      out << "const " << var_type << "* " << cur_arg_name << ";\n";
+    } else {
       out << var_type << " " << cur_arg_name << ";\n";
     }
 
@@ -245,14 +251,14 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   // Define the return results and call the HAL function.
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     const auto& return_val = func_msg.return_type_hidl(index);
-    if (return_val.type() != TYPE_FMQ_SYNC &&
-        return_val.type() != TYPE_FMQ_UNSYNC) {
-      out << GetCppVariableType(return_val) << " result" << index << ";\n";
-    } else {
+    if (return_val.type() == TYPE_FMQ_SYNC ||
+        return_val.type() == TYPE_FMQ_UNSYNC) {
       // Use pointer to store return results with fmq type as copy assignment
       // is not allowed for fmq descriptor.
-      out << "std::unique_ptr<" << GetCppVariableType(return_val) << "> result"
+      out << "unique_ptr<" << GetCppVariableType(return_val) << "> result"
           << index << ";\n";
+    } else {
+      out << GetCppVariableType(return_val) << " result" << index << ";\n";
     }
   }
   if (CanElideCallback(func_msg)) {
@@ -267,11 +273,24 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     out << "VariableSpecificationMessage* result_val_" << index << " = "
         << "result_msg->add_return_type_hidl();\n";
-    GenerateSetResultCodeForTypedVariable(out, func_msg.return_type_hidl(index),
-                                          "result_val_" + std::to_string(index),
-                                          "result" + std::to_string(index));
+    const auto& return_val = func_msg.return_type_hidl(index);
+    if (return_val.type() == TYPE_FMQ_SYNC ||
+        return_val.type() == TYPE_FMQ_UNSYNC) {
+      // Get the raw pointer for FMQ descriptor, because inside SetResult
+      // we need to allocate a new FMQ descriptor in the heap (without smart
+      // pointer), to make the memory persistent. The memory will not get freed
+      // when we register the queue in resource_manager.
+      GenerateSetResultCodeForTypedVariable(
+          out, func_msg.return_type_hidl(index),
+          "result_val_" + std::to_string(index),
+          "*result" + std::to_string(index) + ".get()");
+    } else {
+      GenerateSetResultCodeForTypedVariable(
+          out, func_msg.return_type_hidl(index),
+          "result_val_" + std::to_string(index),
+          "result" + std::to_string(index));
+    }
   }
-
   out << "return true;\n";
   out.unindent();
   out << "}\n";
@@ -281,7 +300,13 @@ void HalHidlCodeGen::GenerateHalFunctionCall(Formatter& out,
     const FunctionSpecificationMessage& func_msg) {
   out << kInstanceVariableName << "->" << func_msg.name() << "(";
   for (int index = 0; index < func_msg.arg_size(); index++) {
-    out << "arg" << index;
+    if (func_msg.arg(index).type() == TYPE_FMQ_SYNC ||
+        func_msg.arg(index).type() == TYPE_FMQ_UNSYNC) {
+      // only FMQ types store arguments as pointers, dereference it now.
+      out << "*arg" << index;
+    } else {
+      out << "arg" << index;
+    }
     if (index != (func_msg.arg_size() - 1)) out << ", ";
   }
   if (func_msg.return_type_hidl_size()== 0 || CanElideCallback(func_msg)) {
@@ -309,12 +334,14 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
 
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     const auto& return_val = func_msg.return_type_hidl(index);
-    if (return_val.type() != TYPE_FMQ_SYNC &&
-        return_val.type() != TYPE_FMQ_UNSYNC) {
-      out << "result" << index << " = arg" << index << ";\n";
-    } else {
+    if (return_val.type() == TYPE_FMQ_SYNC ||
+        return_val.type() == TYPE_FMQ_UNSYNC) {
+      // Need a smart pointer to store FMQ descriptor in hidl callback,
+      // since FMQ descriptor doesn't have copy constructor.
       out << "result" << index << ".reset(new (std::nothrow) "
           << GetCppVariableType(return_val) << "(arg" << index << "));\n";
+    } else {
+      out << "result" << index << " = arg" << index << ";\n";
     }
   }
   out.unindent();
@@ -1095,54 +1122,46 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       break;
     }
     case TYPE_FMQ_SYNC:
-    {
+    case TYPE_FMQ_UNSYNC: {
       if (arg_name.find("->") != std::string::npos) {
         cout << "Nested structure with fmq is not supported yet." << endl;
       } else {
-        std::string element_type = GetCppVariableType(val.fmq_value(0));
-        std::string queue_name = arg_name + "_sync_q";
         // TODO(zhuoyao): consider record and use the queue capacity.
+        std::string element_type = GetCppVariableType(val.fmq_value(0));
+        std::string queue_name =
+            arg_name + (val.type() == TYPE_FMQ_SYNC ? "_sync_q" : "_unsync_q");
+        std::string queue_descriptor_type = GetCppVariableType(val);
+
+        // When caller wants to reuse an existing queue.
+        out << "if (" << arg_value_name << ".fmq_value_size() > 0 && "
+            << arg_value_name << ".fmq_value(0).has_fmq_desc_address()) {\n";
+        out.indent();  // if case starts
+        out << arg_name << " = "
+            << "reinterpret_cast<" << queue_descriptor_type << "*>("
+            << arg_value_name << ".fmq_value(0).fmq_desc_address());\n";
+        out.unindent();  // if case ends
+
+        // When caller wants to create a brand new queue and write to it.
+        out << "} else {\n";
+        out.indent();  // else case starts
         out << "::android::hardware::MessageQueue<" << element_type
-            << ", ::android::hardware::kSynchronizedReadWrite> " << queue_name
-            << "(1024);\n";
+            << ", ::android::hardware::"
+            << (val.type() == TYPE_FMQ_SYNC ? "kSynchronizedReadWrite"
+                                            : "kUnsynchronizedWrite")
+            << "> " << queue_name << "(1024);\n";
         out << "for (int i = 0; i < (int)" << arg_value_name
             << ".fmq_value_size(); i++) {\n";
-        out.indent();
+        out.indent();  // for loop starts
         std::string fmq_item_name = queue_name + "_item";
         out << element_type << " " << fmq_item_name << ";\n";
         GenerateDriverImplForTypedVariable(out, val.fmq_value(0), fmq_item_name,
                                            arg_value_name + ".fmq_value(i)");
         out << queue_name << ".write(&" << fmq_item_name << ");\n";
-        out.unindent();
+        out.unindent();  // for loop ends
         out << "}\n";
-        out << GetCppVariableType(val) << " " << arg_name << "(*" << queue_name
-            << ".getDesc());\n";
-      }
-      break;
-    }
-    case TYPE_FMQ_UNSYNC:
-    {
-      if (arg_name.find("->") != std::string::npos) {
-        cout << "Nested structure with fmq is not supported yet." << endl;
-      } else {
-        std::string element_type = GetCppVariableType(val.fmq_value(0));
-        std::string queue_name = arg_name + "_unsync_q";
-        // TODO(zhuoyao): consider record and use the queue capacity.
-        out << "::android::hardware::MessageQueue<" << element_type << ", "
-            << "::android::hardware::kUnsynchronizedWrite> " << queue_name
-            << "(1024);\n";
-        out << "for (int i = 0; i < (int)" << arg_value_name
-            << ".fmq_value_size(); i++) {\n";
-        out.indent();
-        std::string fmq_item_name = queue_name + "_item";
-        out << element_type << " " << fmq_item_name << ";\n";
-        GenerateDriverImplForTypedVariable(out, val.fmq_value(0), fmq_item_name,
-                                           arg_value_name + ".fmq_value(i)");
-        out << queue_name << ".write(&" << fmq_item_name << ");\n";
-        out.unindent();
+        out << arg_name << " = " << queue_name << ".getDesc();\n";
+        out.unindent();  // else case ends
         out << "}\n";
-        out << GetCppVariableType(val) << " " << arg_name << "(*" << queue_name
-            << ".getDesc());\n";
       }
       break;
     }
@@ -1586,16 +1605,25 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
       out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
       break;
     }
+    // TODO: support more types in FMQ in the future.
+    // TODO: When user-defined types are supported, need to have a copy
+    //       method to copy the types into fmq_item from val.
     case TYPE_FMQ_SYNC:
-    {
-      out << result_msg << "->set_type(TYPE_FMQ_SYNC);\n";
-      out << "/* ERROR: TYPE_FMQ_SYNC is not supported yet. */\n";
-      break;
-    }
     case TYPE_FMQ_UNSYNC:
     {
-      out << result_msg << "->set_type(TYPE_FMQ_UNSYNC);\n";
-      out << "/* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */\n";
+      out << result_msg << "->set_type("
+          << (val.type() == TYPE_FMQ_SYNC ? "TYPE_FMQ_SYNC" : "TYPE_FMQ_UNSYNC")
+          << ");\n";
+      string item_name = result_msg + "_item";
+      out << "VariableSpecificationMessage* " << item_name << " = "
+          << result_msg << "->add_fmq_value();\n";
+      out << item_name << "->set_type(TYPE_SCALAR);\n";
+      out << item_name << "->set_scalar_type(\""
+          << val.fmq_value(0).scalar_type() << "\");\n";
+      out << item_name
+          << "->set_fmq_desc_address(reinterpret_cast<size_t>(new "
+             "(std::nothrow) "
+          << GetCppVariableType(val) << "(" << result_value << ")));\n";
       break;
     }
     case TYPE_REF:
