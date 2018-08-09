@@ -43,11 +43,13 @@ class SyncReadWrites : public ::testing::Test {
     static constexpr size_t NUM_ELEMS = 2048;
 
     // initialize a writer
-    writer_id_ = manager_.CreateFmq("uint16_t", true, NUM_ELEMS, false);
+    writer_id_ = manager_.CreateFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", NUM_ELEMS, false);
     ASSERT_NE(writer_id_, -1);
 
     // initialize a reader
-    reader_id_ = manager_.CreateFmq("uint16_t", true, writer_id_);
+    reader_id_ = manager_.CreateFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", writer_id_);
     ASSERT_NE(reader_id_, -1);
   }
 
@@ -67,11 +69,13 @@ class BlockingReadWrites : public ::testing::Test {
     static constexpr size_t NUM_ELEMS = 2048;
 
     // initialize a writer
-    writer_id_ = manager_.CreateFmq("uint16_t", true, NUM_ELEMS, true);
+    writer_id_ = manager_.CreateFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", NUM_ELEMS, true);
     ASSERT_NE(writer_id_, -1);
 
     // initialize a reader
-    reader_id_ = manager_.CreateFmq("uint16_t", true, writer_id_);
+    reader_id_ = manager_.CreateFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", writer_id_);
     ASSERT_NE(reader_id_, -1);
   }
 
@@ -89,12 +93,15 @@ class UnsynchronizedWrites : public ::testing::Test {
     static constexpr size_t NUM_ELEMS = 2048;
 
     // initialize a writer
-    writer_id_ = manager_.CreateFmq("uint16_t", false, NUM_ELEMS, false);
+    writer_id_ = manager_.CreateFmq<uint16_t, kUnsynchronizedWrite>(
+        "uint16_t", NUM_ELEMS, false);
     ASSERT_NE(writer_id_, -1);
 
     // initialize two readers
-    reader_id1_ = manager_.CreateFmq("uint16_t", false, writer_id_);
-    reader_id2_ = manager_.CreateFmq("uint16_t", false, writer_id_);
+    reader_id1_ = manager_.CreateFmq<uint16_t, kUnsynchronizedWrite>(
+        "uint16_t", writer_id_);
+    reader_id2_ = manager_.CreateFmq<uint16_t, kUnsynchronizedWrite>(
+        "uint16_t", writer_id_);
     ASSERT_NE(reader_id1_, -1);
     ASSERT_NE(reader_id2_, -1);
   }
@@ -112,45 +119,47 @@ TEST_F(SyncReadWrites, SetupBasicTest) {
   static constexpr size_t NUM_ELEMS = 2048;
 
   // check if the writer has a valid queue
-  ASSERT_TRUE(manager_.IsValid("uint16_t", true, writer_id_));
+  ASSERT_TRUE((manager_.IsValid<uint16_t, kSynchronizedReadWrite>("uint16_t",
+                                                                  writer_id_)));
 
   // check queue size on writer side
   size_t writer_queue_size;
-  ASSERT_TRUE(manager_.GetQuantumCount("uint16_t", true, writer_id_,
-                                       &writer_queue_size));
+  ASSERT_TRUE((manager_.GetQuantumCount<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, &writer_queue_size)));
   ASSERT_EQ(NUM_ELEMS, writer_queue_size);
 
   // check queue element size on writer side
   size_t writer_elem_size;
-  ASSERT_TRUE(
-      manager_.GetQuantumSize("uint16_t", true, writer_id_, &writer_elem_size));
+  ASSERT_TRUE((manager_.GetQuantumSize<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, &writer_elem_size)));
   ASSERT_EQ(sizeof(uint16_t), writer_elem_size);
 
   // check space available for writer
   size_t writer_available_writes;
-  ASSERT_TRUE(manager_.AvailableToWrite("uint16_t", true, writer_id_,
-                                        &writer_available_writes));
+  ASSERT_TRUE((manager_.AvailableToWrite<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, &writer_available_writes)));
   ASSERT_EQ(NUM_ELEMS, writer_available_writes);
 
   // check if the reader has a valid queue
-  ASSERT_TRUE(manager_.IsValid("uint16_t", true, reader_id_));
+  ASSERT_TRUE((manager_.IsValid<uint16_t, kSynchronizedReadWrite>("uint16_t",
+                                                                  reader_id_)));
 
   // check queue size on reader side
   size_t reader_queue_size;
-  ASSERT_TRUE(manager_.GetQuantumCount("uint16_t", true, reader_id_,
-                                       &reader_queue_size));
+  ASSERT_TRUE((manager_.GetQuantumCount<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, &reader_queue_size)));
   ASSERT_EQ(NUM_ELEMS, reader_queue_size);
 
   // check queue element size on reader side
   size_t reader_elem_size;
-  ASSERT_TRUE(
-      manager_.GetQuantumSize("uint16_t", true, reader_id_, &reader_elem_size));
+  ASSERT_TRUE((manager_.GetQuantumSize<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, &reader_elem_size)));
   ASSERT_EQ(sizeof(uint16_t), reader_elem_size);
 
   // check items available for reader
   size_t reader_available_reads;
-  ASSERT_TRUE(manager_.AvailableToRead("uint16_t", true, reader_id_,
-                                       &reader_available_reads));
+  ASSERT_TRUE((manager_.AvailableToRead<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, &reader_available_reads)));
   ASSERT_EQ(0, reader_available_reads);
 }
 
@@ -172,12 +181,12 @@ TEST_F(SyncReadWrites, ReadWriteSuccessTest) {
   InitData(write_data, DATA_SIZE);
 
   // writer should succeed
-  ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
-                                static_cast<void*>(write_data), DATA_SIZE));
+  ASSERT_TRUE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, write_data, DATA_SIZE)));
 
   // reader should succeed
-  ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
-                               static_cast<void*>(read_data), DATA_SIZE));
+  ASSERT_TRUE((manager_.ReadFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, read_data, DATA_SIZE)));
 
   // check if the data is read back correctly
   ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
@@ -189,8 +198,8 @@ TEST_F(SyncReadWrites, ReadEmpty) {
   uint16_t read_data[DATA_SIZE];
 
   // attempt to read from an empty queue
-  ASSERT_FALSE(manager_.ReadFmq("uint16_t", true, reader_id_,
-                                static_cast<void*>(read_data), DATA_SIZE));
+  ASSERT_FALSE((manager_.ReadFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, read_data, DATA_SIZE)));
 }
 
 // Tests writing to a full queue.
@@ -203,22 +212,22 @@ TEST_F(SyncReadWrites, WriteFull) {
   InitData(write_data, DATA_SIZE);
 
   // This write succeeds, filling up the queue
-  ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
-                                static_cast<void*>(write_data), DATA_SIZE));
+  ASSERT_TRUE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, write_data, DATA_SIZE)));
 
   // This write fails, queue is full
-  ASSERT_FALSE(manager_.WriteFmq("uint16_t", true, writer_id_,
-                                 static_cast<void*>(write_data), DATA_SIZE));
+  ASSERT_FALSE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, write_data, DATA_SIZE)));
 
   // checks space available is 0
   size_t writer_available_writes;
-  ASSERT_TRUE(manager_.AvailableToWrite("uint16_t", true, writer_id_,
-                                        &writer_available_writes));
+  ASSERT_TRUE((manager_.AvailableToWrite<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, &writer_available_writes)));
   ASSERT_EQ(0, writer_available_writes);
 
   // reader succeeds, reads the entire queue back correctly
-  ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
-                               static_cast<void*>(read_data), DATA_SIZE));
+  ASSERT_TRUE((manager_.ReadFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, read_data, DATA_SIZE)));
 
   ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
 }
@@ -232,9 +241,8 @@ TEST_F(SyncReadWrites, WriteTooLarge) {
   InitData(write_data, LARGE_DATA_SIZE);
 
   // write more than the queue size
-  ASSERT_FALSE(manager_.WriteFmq("uint16_t", true, writer_id_,
-                                 static_cast<void*>(write_data),
-                                 LARGE_DATA_SIZE));
+  ASSERT_FALSE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", writer_id_, write_data, LARGE_DATA_SIZE)));
 }
 
 // Pass the wrong type.
@@ -246,12 +254,8 @@ TEST_F(SyncReadWrites, WrongType) {
   InitData(write_data, DATA_SIZE);
 
   // attempt to write uint32_t type
-  ASSERT_FALSE(manager_.WriteFmq("uint32_t", true, writer_id_,
-                                 static_cast<void*>(write_data), DATA_SIZE));
-
-  // attempt to specify wrong queue flavor
-  ASSERT_FALSE(manager_.WriteFmq("uint16_t", false, writer_id_,
-                                 static_cast<void*>(write_data), DATA_SIZE));
+  ASSERT_FALSE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+      "uint32_t", writer_id_, write_data, DATA_SIZE)));
 }
 
 // Tests consecutive interaction between writer and reader.
@@ -265,18 +269,18 @@ TEST_F(SyncReadWrites, ConsecutiveReadWrite) {
   // 10 consecutive writes and reads
   for (size_t i = 0; i < BATCH_SIZE; i++) {
     InitData(write_data, DATA_SIZE);
-    ASSERT_TRUE(manager_.WriteFmq("uint16_t", true, writer_id_,
-                                  static_cast<void*>(write_data), DATA_SIZE));
+    ASSERT_TRUE((manager_.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", writer_id_, write_data, DATA_SIZE)));
 
-    ASSERT_TRUE(manager_.ReadFmq("uint16_t", true, reader_id_,
-                                 static_cast<void*>(read_data), DATA_SIZE));
+    ASSERT_TRUE((manager_.ReadFmq<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", reader_id_, read_data, DATA_SIZE)));
     ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
   }
 
   // no more available to read
   size_t reader_available_reads;
-  ASSERT_TRUE(manager_.AvailableToRead("uint16_t", true, reader_id_,
-                                       &reader_available_reads));
+  ASSERT_TRUE((manager_.AvailableToRead<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, &reader_available_reads)));
   ASSERT_EQ(0, reader_available_reads);
 }
 
@@ -294,18 +298,16 @@ TEST_F(BlockingReadWrites, ReadWriteSuccess) {
 
   pid_t pid = fork();
   if (pid == 0) {  // child process is a reader, blocking for at most 0.1s.
-    ASSERT_TRUE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
-                                         static_cast<void*>(read_data),
-                                         DATA_SIZE, 100 * 1000000));
+    ASSERT_TRUE((manager_.ReadFmqBlocking<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", reader_id_, read_data, DATA_SIZE, 100 * 1000000)));
     ASSERT_EQ(0, memcmp(write_data, read_data, DATA_SIZE * sizeof(uint16_t)));
     exit(0);
   } else if (pid > 0) {
     // parent process is a writer, waits for 0.05s and writes.
     struct timespec writer_wait_time = {0, 50 * 1000000};
     nanosleep(&writer_wait_time, NULL);
-    ASSERT_TRUE(manager_.WriteFmqBlocking("uint16_t", true, writer_id_,
-                                          static_cast<void*>(write_data),
-                                          DATA_SIZE, 1000000));
+    ASSERT_TRUE((manager_.WriteFmqBlocking<uint16_t, kSynchronizedReadWrite>(
+        "uint16_t", writer_id_, write_data, DATA_SIZE, 1000000)));
   }
 }
 
@@ -315,9 +317,8 @@ TEST_F(BlockingReadWrites, BlockingTimeOut) {
   uint16_t read_data[DATA_SIZE];
 
   // block for 0.05s, timeout
-  ASSERT_FALSE(manager_.ReadFmqBlocking("uint16_t", true, reader_id_,
-                                        static_cast<void*>(read_data),
-                                        DATA_SIZE, 50 * 1000000));
+  ASSERT_FALSE((manager_.ReadFmqBlocking<uint16_t, kSynchronizedReadWrite>(
+      "uint16_t", reader_id_, read_data, DATA_SIZE, 50 * 1000000)));
 }
 
 // Tests two readers can both read back what writer writes correctly.
@@ -331,17 +332,17 @@ TEST_F(UnsynchronizedWrites, ReadWriteSuccess) {
   InitData(write_data, DATA_SIZE);
 
   // writer writes 64 items
-  ASSERT_TRUE(manager_.WriteFmq("uint16_t", false, writer_id_,
-                                static_cast<void*>(write_data), DATA_SIZE));
+  ASSERT_TRUE((manager_.WriteFmq<uint16_t, kUnsynchronizedWrite>(
+      "uint16_t", writer_id_, write_data, DATA_SIZE)));
 
   // reader 1 reads back data correctly
-  ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id1_,
-                               static_cast<void*>(read_data1), DATA_SIZE));
+  ASSERT_TRUE((manager_.ReadFmq<uint16_t, kUnsynchronizedWrite>(
+      "uint16_t", reader_id1_, read_data1, DATA_SIZE)));
   ASSERT_EQ(0, memcmp(write_data, read_data1, DATA_SIZE * sizeof(uint16_t)));
 
   // reader 2 reads back data correctly
-  ASSERT_TRUE(manager_.ReadFmq("uint16_t", false, reader_id2_,
-                               static_cast<void*>(read_data2), DATA_SIZE));
+  ASSERT_TRUE((manager_.ReadFmq<uint16_t, kUnsynchronizedWrite>(
+      "uint16_t", reader_id2_, read_data2, DATA_SIZE)));
   ASSERT_EQ(0, memcmp(write_data, read_data2, DATA_SIZE * sizeof(uint16_t)));
 }
 
@@ -354,9 +355,8 @@ TEST_F(UnsynchronizedWrites, IllegalBlocking) {
   InitData(write_data, DATA_SIZE);
 
   // should fail immediately, instead of blocking
-  ASSERT_FALSE(manager_.WriteFmqBlocking("uint16_t", false, writer_id_,
-                                         static_cast<void*>(write_data),
-                                         DATA_SIZE, 1000000));
+  ASSERT_FALSE((manager_.WriteFmqBlocking<uint16_t, kUnsynchronizedWrite>(
+      "uint16_t", writer_id_, write_data, DATA_SIZE, 1000000)));
 }
 
 }  // namespace vts

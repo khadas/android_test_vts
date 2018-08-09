@@ -84,7 +84,6 @@ cc_test {
     rtti: true,
 
     srcs: [
-        "fmq_driver/VtsFmqDriver.cpp",
         "fmq_driver/VtsFmqDriverTest.cpp"
     ],
 }
