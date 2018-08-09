@@ -1117,6 +1117,7 @@ class AndroidDevice(object):
             self.lib = mirror_tracker.MirrorTracker(self.host_command_port)
             self.shell = mirror_tracker.MirrorTracker(
                 host_command_port=self.host_command_port, adb=self.adb)
+            self.resource = mirror_tracker.MirrorTracker(self.host_command_port)
         if self.enable_sl4a:
             try:
                 self.startSl4aClient(self.enable_sl4a_ed)

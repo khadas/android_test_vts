@@ -35,10 +35,12 @@ namespace vts {
 
 VtsHalDriverManager::VtsHalDriverManager(const string& spec_dir,
                                          const int epoch_count,
-                                         const string& callback_socket_name)
+                                         const string& callback_socket_name,
+                                         VtsResourceManager* resource_manager)
     : callback_socket_name_(callback_socket_name),
       hal_driver_loader_(
-          HalDriverLoader(spec_dir, epoch_count, callback_socket_name)) {}
+          HalDriverLoader(spec_dir, epoch_count, callback_socket_name)),
+      resource_manager_(resource_manager) {}
 
 DriverId VtsHalDriverManager::LoadTargetComponent(
     const string& dll_file_name, const string& spec_lib_file_path,
@@ -137,6 +139,23 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
           uint64_t interface_pt = GetDriverPointerById(driver_id);
           arg->set_hidl_interface_pointer(interface_pt);
         }
+      } else if (arg->type() == TYPE_FMQ_SYNC ||
+                 arg->type() == TYPE_FMQ_UNSYNC) {
+        if (arg->fmq_value(0).fmq_id() != -1) {
+          // Preprocess an argument that wants to use an existing FMQ.
+          // resource_manager returns address of hidl_memory pointer and
+          // driver_manager fills the address in the proto field,
+          // which can be read by vtsc.
+          size_t descriptor_addr;
+          bool success =
+              resource_manager_->GetQueueDescAddress(*arg, &descriptor_addr);
+          arg->mutable_fmq_value(0)->set_fmq_desc_address(descriptor_addr);
+          if (!success) {
+            LOG(ERROR) << "Unable to find queue descriptor for queue with id "
+                       << arg->fmq_value(0).fmq_id();
+            return kErrorString;
+          }
+        }
       }
     }
     // For Hidl HAL, use CallFunction method.
@@ -191,6 +210,11 @@ string VtsHalDriverManager::CallFunction(FunctionCallMessage* call_msg) {
           // in case of generated nullptr, set the driver_id to -1.
           return_val->set_hidl_interface_id(-1);
         }
+      } else if (return_val->type() == TYPE_FMQ_SYNC ||
+                 return_val->type() == TYPE_FMQ_UNSYNC) {
+        // Tell resource_manager to register a new FMQ.
+        int new_queue_id = resource_manager_->RegisterFmq(*return_val);
+        return_val->mutable_fmq_value(0)->set_fmq_id(new_queue_id);
       }
     }
     google::protobuf::TextFormat::PrintToString(result_msg, &output);

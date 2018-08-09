@@ -17,6 +17,7 @@ syntax = "proto2";
 package android.vts;
 
 import "test/vts/proto/ComponentSpecificationMessage.proto";
+import "test/vts/proto/VtsResourceControllerMessage.proto";
 
 
 // Type of a command.
@@ -45,6 +46,9 @@ enum CommandType {
 
   // To execute a shell command;
   VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND = 301;
+
+  // To request FMQ resource.
+  VTS_FMQ_COMMAND = 401;
 }
 
 
@@ -122,6 +126,9 @@ message AndroidSystemControlCommandMessage {
   optional int32 target_version_major = 3010 [default = -1];
   // HAL minor version of the target component (e.g. 1.0 -> 0).
   optional int32 target_version_minor = 3011 [default = -1];
+  // Specify if a HAL service is test HAL.
+  // Need to add flag TREBLE_TESTING_OVERRIDE=true in environment if it is.
+  optional bool is_test_hal = 3012;
 
   // the name of a HW Binder service to use (only needed for HIDL HAL).
   optional bytes hw_binder_service_name = 3021;
@@ -137,6 +144,9 @@ message AndroidSystemControlCommandMessage {
 
   // for VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND
   repeated bytes shell_command = 5001;
+
+  // for specifying requests to FMQ driver
+  optional FmqRequestMessage fmq_request = 6001;
 }
 
 
@@ -161,6 +171,9 @@ message AndroidSystemControlResponseMessage {
   repeated bytes stdout = 2001;
   repeated bytes stderr = 2002;
   repeated int32 exit_code = 2003;
+
+  // read data and return value from FMQ driver
+  optional FmqResponseMessage fmq_response = 3001;
 }
 
 
