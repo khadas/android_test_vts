@@ -50,6 +50,8 @@ enum VtsDriverCommandType {
   FMQ_OPERATION = 301;
   // To request hidl_memory resource.
   HIDL_MEMORY_OPERATION = 302;
+  // To request hidl_handle resource.
+  HIDL_HANDLE_OPERATION = 303;
 }
 
 
@@ -117,6 +119,8 @@ message VtsDriverControlCommandMessage {
   optional FmqRequestMessage fmq_request = 3001;
   // Arguments for operation on hidl_memory
   optional HidlMemoryRequestMessage hidl_memory_request = 3002;
+  // Arguments for operation on hidl_handle
+  optional HidlHandleRequestMessage hidl_handle_request = 3003;
 }
 
 
@@ -144,4 +148,6 @@ message VtsDriverControlResponseMessage {
   optional FmqResponseMessage fmq_response = 3001;
   // response from hidl_memory driver
   optional HidlMemoryResponseMessage hidl_memory_response = 3002;
+  // response from hidl_handle driver
+  optional HidlHandleResponseMessage hidl_handle_response = 3003;
 }
