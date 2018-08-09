@@ -18,6 +18,7 @@
 #define __VTS_RESOURCE_VTSRESOURCEMANAGER_H
 
 #include <android-base/logging.h>
+#include <android/hardware/audio/4.0/IStreamIn.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/text_format.h>
 
@@ -31,6 +32,9 @@ using namespace std;
 
 namespace android {
 namespace vts {
+
+typedef ::android::hardware::audio::V4_0::IStreamIn::ReadParameters
+    ReadParameters;
 
 // A class that manages all resources allocated on the target side.
 // Resources include fast message queue, hidl_memory, hidl_handle.
@@ -167,6 +171,10 @@ class VtsResourceManager {
   // This method infers the queue flavor from the sync field in fmq_request
   // proto message, and calls ProcessFmqCommandInternal() with template T
   // and queue flavor.
+  // Notice we create another method called
+  // ProcessFmqCommandWithPredefinedType() with the same interface.
+  // This prevents compiler error during conversion between protobuf message
+  // and C++.
   //
   // @param fmq_request  contains arguments for FMQ operation.
   // @param fmq_response FMQ response to be filled by this function.
@@ -184,16 +192,24 @@ class VtsResourceManager {
                                  FmqResponseMessage* fmq_response);
 
   // Converts write_data field in fmq_request to a C++ buffer.
+  // For user-defined type, dynamically load the HAL shared library
+  // to parse protobuf message to C++ type.
   //
   // @param fmq_request    contains the write_data, represented as a repeated
   //                       proto field.
   // @param write_data     converted data that will be written into FMQ.
   // @param write_data_size number of items in write_data.
+  //
+  // @return true if parsing is successful, false otherwise.
+  //         This function can fail if loading shared library or locating
+  //         function symbols fails in user-defined type.
   template <typename T>
-  void FmqProto2Cpp(const FmqRequestMessage& fmq_request, T* write_data,
+  bool FmqProto2Cpp(const FmqRequestMessage& fmq_request, T* write_data,
                     size_t write_data_size);
 
   // Converts a C++ buffer into read_data field in fmq_response.
+  // For user-defined type, dynamically load the HAL shared library
+  // to parse C++ type to protobuf message.
   //
   // @param fmq_response   to be filled by the function. The function fills the
   //                       read_data field, which is represented as a repeated
@@ -202,9 +218,53 @@ class VtsResourceManager {
   //                       written into protobuf message.
   // @param read_data      contains data read from FMQ read operation.
   // @param read_data_size number of items in read_data.
+  //
+  // @return true if parsing is successful, false otherwise.
+  //         This function can fail if loading shared library or locating
+  //         function symbols fails in user-defined type.
   template <typename T>
-  void FmqCpp2Proto(FmqResponseMessage* fmq_response, const string& data_type,
+  bool FmqCpp2Proto(FmqResponseMessage* fmq_response, const string& data_type,
                     T* read_data, size_t read_data_size);
+
+  // Loads the corresponding HAL driver shared library from the type name.
+  // This function parses the shared library path from a type name, and
+  // loads the shared library object from the path.
+  //
+  // Example:
+  // For type ::android::hardware::audio::V4_0::IStreamIn::ReadParameters,
+  // the path that is parsed from the type name is
+  // /data/local/tmp/android.hardware.audio@4.0-vts.driver.so.
+  // Then the function loads the shared library object from this path.
+  //
+  // TODO: Consider determining the path and bitness by passing a field
+  // in the protobuf message.
+  //
+  // @param data_type type name.
+  //
+  // @return shared library object.
+  void* LoadSharedLibFromTypeName(const string& data_type);
+
+  // Load the translation function between C++ and protobuf.
+  // This method parses the function name that can translate C++ to protobuf
+  // or translate protobuf to C++ from data_type.
+  // Then it loads the function symbol from shared_lib_obj, which is an opened
+  // HAL shared library.
+  //
+  // Example: type name is
+  // ::android::hardware::audio::V4_0::IStreamIn::ReadParameters,
+  // and we have the shared library pointer shared_lib_obj.
+  // To translate from protobuf to C++, we need to call
+  // GetTranslationFuncPtr(shared_lib_obj, data_type, true);
+  // To translate from C++ to protobuf, we need to call
+  // GetTranslationFuncPtr(shared_lib_obj, data_type, false);
+  //
+  // @param shared_lib_obj  opened HAL shared library object.
+  // @param data_type       type name.
+  // @param is_proto_to_cpp whether the function is to convert proto to C++.
+  //
+  // @return name of the translation function.
+  void* GetTranslationFuncPtr(void* shared_lib_obj, const string& data_type,
+                              bool is_proto_to_cpp);
 
   // Manages Fast Message Queue (FMQ) driver.
   VtsFmqDriver fmq_driver_;
@@ -223,9 +283,11 @@ class VtsResourceManager {
       {"uint32_t", &VtsResourceManager::ProcessFmqCommandWithType<uint32_t>},
       {"int64_t", &VtsResourceManager::ProcessFmqCommandWithType<int64_t>},
       {"uint64_t", &VtsResourceManager::ProcessFmqCommandWithType<uint64_t>},
-      {"float", &VtsResourceManager::ProcessFmqCommandWithType<float>},
-      {"double", &VtsResourceManager::ProcessFmqCommandWithType<double>},
-      {"bool", &VtsResourceManager::ProcessFmqCommandWithType<bool>}};
+      {"float_t", &VtsResourceManager::ProcessFmqCommandWithType<float>},
+      {"double_t", &VtsResourceManager::ProcessFmqCommandWithType<double>},
+      {"bool_t", &VtsResourceManager::ProcessFmqCommandWithType<bool>},
+      {"::android::hardware::audio::V4_0::IStreamIn::ReadParameters",
+       &VtsResourceManager::ProcessFmqCommandWithType<ReadParameters>}};
 };
 
 }  // namespace vts
