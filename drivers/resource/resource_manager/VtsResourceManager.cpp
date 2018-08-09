@@ -93,6 +93,25 @@ void VtsResourceManager::ProcessHidlMemoryCommand(
   hidl_memory_response->set_success(success);
 }
 
+int VtsResourceManager::RegisterHidlMemory(
+    const VariableSpecificationMessage& hidl_memory_msg) {
+  size_t hidl_mem_address =
+      hidl_memory_msg.hidl_memory_value().hidl_mem_address();
+  if (hidl_mem_address == 0) {
+    LOG(ERROR) << "Invalid queue descriptor address."
+               << "vtsc either didn't set the address or set a null pointer.";
+    return -1;  // check for null pointer
+  }
+  return hidl_memory_driver_.RegisterHidlMemory(hidl_mem_address);
+}
+
+bool VtsResourceManager::GetHidlMemoryAddress(
+    const VariableSpecificationMessage& hidl_memory_msg, size_t* result) {
+  int mem_id = hidl_memory_msg.hidl_memory_value().mem_id();
+  bool success = hidl_memory_driver_.GetHidlMemoryAddress(mem_id, result);
+  return success;
+}
+
 void VtsResourceManager::ProcessFmqCommand(const FmqRequestMessage& fmq_request,
                                            FmqResponseMessage* fmq_response) {
   size_t sizet_result;
