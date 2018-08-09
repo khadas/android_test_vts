@@ -123,8 +123,13 @@ class MirrorTracker(object):
             ResourcFmqMirror object,
             it allows users to directly call methods on the mirror object.
         """
+        # Check if queue name already exists in tracker.
+        if new_queue_name is not None and new_queue_name in self._registered_mirrors:
+            logging.error("Queue name already exists in tracker.")
+            return None
+
         # Need to initialize a client if caller doesn't provide one.
-        if not client:
+        if client is None:
             client = vts_tcp_client.VtsTcpClient()
             client.Connect(
                 command_port=self._host_command_port,
@@ -137,9 +142,9 @@ class MirrorTracker(object):
         existing_queue_id = -1
         # Check if caller wants to create a queue object based on
         # an existing queue object.
-        if (existing_queue != None):
+        if existing_queue is not None:
             # Check if caller provides a string.
-            if (type(existing_queue) == str):
+            if type(existing_queue) == str:
                 if existing_queue in self._registered_mirrors:
                     data_type = self._registered_mirrors[
                         existing_queue]._data_type
@@ -150,7 +155,7 @@ class MirrorTracker(object):
                     raise errors.USERError(
                         "Nonexisting queue name in mirror_tracker.")
             # Check if caller provides a resource mirror object.
-            elif (isinstance(existing_queue, resource_mirror.ResourceFmqMirror)):
+            elif isinstance(existing_queue, resource_mirror.ResourceFmqMirror):
                 data_type = existing_queue._data_type
                 sync = existing_queue._sync
                 existing_queue_id = existing_queue._queue_id
@@ -160,14 +165,56 @@ class MirrorTracker(object):
 
         mirror._create(data_type, sync, existing_queue_id, queue_size,
                        blocking, reset_pointers)
-        if (mirror._queue_id == -1):
+        if mirror._queue_id == -1:
             # Failed to create queue object, error logged in resource_mirror.
             return None
 
         # Needs to dynamically generate queue name if caller doesn't provide one
-        if (new_queue_name == None):
+        if new_queue_name is None:
             new_queue_name = "queue_id_" + str(mirror._queue_id)
         self._registered_mirrors[new_queue_name] = mirror
+        return mirror
+
+    def InitHidlMemory(self, mem_size=0, client=None, mem_name=None):
+        """Initialize a hidl_memory object.
+
+        This method will initialize a hidl_memory object on the target side,
+        create a mirror object, and register it in the tracker.
+
+        Args:
+            mem_size: int, size of the memory region.
+            client: VtsTcpClient, if an existing session should be used.
+                If not specified, creates a new one.
+            mem_name: string, name of the memory region.
+                If not specified, dynamically assign the memory region a name.
+
+        Returns:
+            ResourceHidlMemoryMirror object,
+            it allows users to directly call methods on the mirror object.
+        """
+        # Check if mem_name already exists in tracker.
+        if mem_name is not None and mem_name in self._registered_mirrors:
+            logging.error("Memory name already exists in tracker.")
+            return None
+
+        # Need to initialize a client if caller doesn't provide one.
+        if client is None:
+            client = vts_tcp_client.VtsTcpClient()
+            client.Connect(
+                command_port=self._host_command_port,
+                callback_port=self._host_callback_port)
+
+        # Create a resource_mirror object.
+        mirror = resource_mirror.ResourceHidlMemoryMirror(client)
+        mirror._allocate(mem_size)
+        if mirror._mem_id == -1:
+            # Failed to create memory object, error logged in resource_mirror.
+            return None
+
+        # Need to dynamically assign a memory name if caller doesn't provide one.
+        if mem_name is None:
+            mem_name = "mem_id_" + str(mirror._mem_id)
+        self._registered_mirrors[mem_name] = mirror
         return mirror
 
     def InitHidlHal(self,

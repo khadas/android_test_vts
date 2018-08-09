@@ -45,7 +45,8 @@ COMMAND_TYPE_NAME = {
     202: "CALL_API",
     203: "VTS_AGENT_COMMAND_GET_ATTRIBUTE",
     301: "VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND",
-    401: "VTS_FMQ_COMMAND"
+    401: "VTS_FMQ_COMMAND",
+    402: "VTS_HIDL_MEMORY_COMMAND"
 }
 
 
@@ -467,6 +468,31 @@ class VtsTcpClient(object):
                 "TCP client received unsuccessful response code from agent.")
         else:
             return resp.fmq_response
+        return None
+
+    def SendHidlMemoryRequest(self, message):
+        """Sends a command to the hidl_memory driver and receives the response.
+
+        Args:
+            message: HidlMemoryRequestMessage, message that contains the arguments
+                     in the hidl_memory request.
+
+        Returns:
+            HidlMemoryResponseMessage, return values needed by the host-side caller.
+        """
+        self.SendCommand(SysMsg_pb2.VTS_HIDL_MEMORY_COMMAND, hidl_memory_request=message)
+        resp = self.RecvResponse()
+        logging.debug("resp for VTS_HIDL_MEMORY_COMMAND: %s", resp)
+
+        if not resp:
+            logging.error("TCP client did not receive a response from agent.")
+        elif resp.response_code != SysMsg_pb2.SUCCESS:
+            logging.error("TCP client received unsuccessful response code from agent.")
+        elif resp.hidl_memory_response is None:
+            logging.error("TCP client did not receive a hidl_memory response.")
+        else:
+            return resp.hidl_memory_response
+        return None
 
     def Ping(self):
         """RPC to send a PING request.
@@ -563,7 +589,8 @@ class VtsTcpClient(object):
                     shell_command=None,
                     caller_uid=None,
                     arg=None,
-                    fmq_request=None):
+                    fmq_request=None,
+                    hidl_memory_request=None):
         """Sends a command.
 
         Args:
@@ -641,6 +668,9 @@ class VtsTcpClient(object):
 
         if fmq_request is not None:
             command_msg.fmq_request.CopyFrom(fmq_request)
+
+        if hidl_memory_request is not None:
+            command_msg.hidl_memory_request.CopyFrom(hidl_memory_request)
 
         logging.debug("command %s" % command_msg)
         message = command_msg.SerializeToString()
