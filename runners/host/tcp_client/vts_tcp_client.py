@@ -304,7 +304,8 @@ class VtsTcpClient(object):
             return result
         elif (var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_INTERFACE
               or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_SYNC
-              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_UNSYNC):
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_FMQ_UNSYNC
+              or var_spec_msg.type == CompSpecMsg_pb2.TYPE_HIDL_MEMORY):
             logging.debug("var_spec_msg: %s", var_spec_msg)
             return var_spec_msg
 
