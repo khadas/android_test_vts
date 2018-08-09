@@ -59,6 +59,23 @@ MemoryId VtsHidlMemoryDriver::Allocate(size_t mem_size) {
   return new_mem_id;
 }
 
+MemoryId VtsHidlMemoryDriver::RegisterHidlMemory(size_t hidl_mem_address) {
+  unique_ptr<hidl_memory> hidl_mem_ptr(
+      reinterpret_cast<hidl_memory*>(hidl_mem_address));
+  sp<IMemory> mem_ptr = mapMemory(*hidl_mem_ptr.get());
+  if (mem_ptr == nullptr) {
+    LOG(ERROR) << "Register memory failure. "
+               << "Unable to map hidl_memory to IMemory object.";
+    return -1;
+  }
+  unique_ptr<MemoryInfo> mem_info(new MemoryInfo{move(hidl_mem_ptr), mem_ptr});
+  map_mutex_.lock();
+  size_t new_mem_id = hidl_memory_map_.size();
+  hidl_memory_map_.emplace(new_mem_id, move(mem_info));
+  map_mutex_.unlock();
+  return new_mem_id;
+}
+
 bool VtsHidlMemoryDriver::Update(MemoryId mem_id) {
   MemoryInfo* mem_info = FindMemory(mem_id);
   if (mem_info == nullptr) return false;
@@ -120,6 +137,15 @@ bool VtsHidlMemoryDriver::GetSize(MemoryId mem_id, size_t* result) {
   MemoryInfo* mem_info = FindMemory(mem_id);
   if (mem_info == nullptr) return false;
   *result = (mem_info->memory)->getSize();
+  return true;
+}
+
+bool VtsHidlMemoryDriver::GetHidlMemoryAddress(MemoryId mem_id,
+                                               size_t* result) {
+  MemoryInfo* mem_info = FindMemory(mem_id);
+  if (mem_info == nullptr) return false;  // unable to find memory object.
+  hidl_memory* hidl_mem_ptr = (mem_info->hidl_mem_ptr).get();
+  *result = reinterpret_cast<size_t>(hidl_mem_ptr);
   return true;
 }
 
