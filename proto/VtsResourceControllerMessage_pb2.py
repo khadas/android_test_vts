@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='VtsResourceControllerMessage.proto',
   package='android.vts',
   syntax='proto2',
-  serialized_pb=_b('\n\"VtsResourceControllerMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\x9e\x02\n\x11\x46mqRequestMessage\x12%\n\toperation\x18\x01 \x01(\x0e\x32\x12.android.vts.FmqOp\x12\x11\n\tdata_type\x18\x02 \x01(\x0c\x12\x0c\n\x04sync\x18\x03 \x01(\x08\x12\x14\n\x08queue_id\x18\x04 \x01(\x05:\x02-1\x12\x12\n\nqueue_size\x18\x05 \x01(\x04\x12\x10\n\x08\x62locking\x18\x06 \x01(\x08\x12\x16\n\x0ereset_pointers\x18\x07 \x01(\x08\x12=\n\nwrite_data\x18\x08 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x16\n\x0eread_data_size\x18\t \x01(\x04\x12\x16\n\x0etime_out_nanos\x18\n \x01(\x03\"\x8f\x01\n\x12\x46mqResponseMessage\x12<\n\tread_data\x18\x01 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x18\n\x10sizet_return_val\x18\x02 \x01(\x04\x12\x10\n\x08queue_id\x18\x03 \x01(\x05\x12\x0f\n\x07success\x18\x04 \x01(\x08*\xf3\x02\n\x05\x46mqOp\x12\x15\n\x11\x46MQ_PROTO_UNKNOWN\x10\x00\x12\x14\n\x10\x46MQ_PROTO_CREATE\x10\x01\x12\x12\n\x0e\x46MQ_PROTO_READ\x10\x02\x12\x1b\n\x17\x46MQ_PROTO_READ_BLOCKING\x10\x03\x12 \n\x1c\x46MQ_PROTO_READ_BLOCKING_LONG\x10\x04\x12\x13\n\x0f\x46MQ_PROTO_WRITE\x10\x05\x12\x1c\n\x18\x46MQ_PROTO_WRITE_BLOCKING\x10\x06\x12!\n\x1d\x46MQ_PROTO_WRITE_BLOCKING_LONG\x10\x07\x12\x1d\n\x19\x46MQ_PROTO_AVAILABLE_WRITE\x10\x08\x12\x1c\n\x18\x46MQ_PROTO_AVAILABLE_READ\x10\t\x12\x1e\n\x1a\x46MQ_PROTO_GET_QUANTUM_SIZE\x10\n\x12\x1f\n\x1b\x46MQ_PROTO_GET_QUANTUM_COUNT\x10\x0b\x12\x16\n\x12\x46MQ_PROTO_IS_VALID\x10\x0c\x42\x35\n\x15\x63om.android.vts.protoB\x1cVtsResourceControllerMessage')
+  serialized_pb=_b('\n\"VtsResourceControllerMessage.proto\x12\x0b\x61ndroid.vts\x1a#ComponentSpecificationMessage.proto\"\x9e\x02\n\x11\x46mqRequestMessage\x12%\n\toperation\x18\x01 \x01(\x0e\x32\x12.android.vts.FmqOp\x12\x11\n\tdata_type\x18\x02 \x01(\x0c\x12\x0c\n\x04sync\x18\x03 \x01(\x08\x12\x14\n\x08queue_id\x18\x04 \x01(\x05:\x02-1\x12\x12\n\nqueue_size\x18\x05 \x01(\x04\x12\x10\n\x08\x62locking\x18\x06 \x01(\x08\x12\x16\n\x0ereset_pointers\x18\x07 \x01(\x08\x12=\n\nwrite_data\x18\x08 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x16\n\x0eread_data_size\x18\t \x01(\x04\x12\x16\n\x0etime_out_nanos\x18\n \x01(\x03\"\x8f\x01\n\x12\x46mqResponseMessage\x12<\n\tread_data\x18\x01 \x03(\x0b\x32).android.vts.VariableSpecificationMessage\x12\x18\n\x10sizet_return_val\x18\x02 \x01(\x04\x12\x10\n\x08queue_id\x18\x03 \x01(\x05\x12\x0f\n\x07success\x18\x04 \x01(\x08\"\xa1\x01\n\x18HidlMemoryRequestMessage\x12,\n\toperation\x18\x01 \x01(\x0e\x32\x19.android.vts.HidlMemoryOp\x12\x12\n\x06mem_id\x18\x02 \x01(\x05:\x02-1\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\r\n\x05start\x18\x04 \x01(\x04\x12\x0e\n\x06length\x18\x05 \x01(\x04\x12\x12\n\nwrite_data\x18\x06 \x01(\x0c\"e\n\x19HidlMemoryResponseMessage\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nnew_mem_id\x18\x02 \x01(\x05\x12\x10\n\x08mem_size\x18\x03 \x01(\x04\x12\x11\n\tread_data\x18\x04 \x01(\x0c*\xf3\x02\n\x05\x46mqOp\x12\x15\n\x11\x46MQ_PROTO_UNKNOWN\x10\x00\x12\x14\n\x10\x46MQ_PROTO_CREATE\x10\x01\x12\x12\n\x0e\x46MQ_PROTO_READ\x10\x02\x12\x1b\n\x17\x46MQ_PROTO_READ_BLOCKING\x10\x03\x12 \n\x1c\x46MQ_PROTO_READ_BLOCKING_LONG\x10\x04\x12\x13\n\x0f\x46MQ_PROTO_WRITE\x10\x05\x12\x1c\n\x18\x46MQ_PROTO_WRITE_BLOCKING\x10\x06\x12!\n\x1d\x46MQ_PROTO_WRITE_BLOCKING_LONG\x10\x07\x12\x1d\n\x19\x46MQ_PROTO_AVAILABLE_WRITE\x10\x08\x12\x1c\n\x18\x46MQ_PROTO_AVAILABLE_READ\x10\t\x12\x1e\n\x1a\x46MQ_PROTO_GET_QUANTUM_SIZE\x10\n\x12\x1f\n\x1b\x46MQ_PROTO_GET_QUANTUM_COUNT\x10\x0b\x12\x16\n\x12\x46MQ_PROTO_IS_VALID\x10\x0c*\x99\x02\n\x0cHidlMemoryOp\x12\x15\n\x11MEM_PROTO_UNKNOWN\x10\x00\x12\x16\n\x12MEM_PROTO_ALLOCATE\x10\x01\x12\x18\n\x14MEM_PROTO_START_READ\x10\x02\x12\x1e\n\x1aMEM_PROTO_START_READ_RANGE\x10\x03\x12\x18\n\x14MEM_PROTO_READ_BYTES\x10\x04\x12\x1a\n\x16MEM_PROTO_START_UPDATE\x10\x05\x12 \n\x1cMEM_PROTO_START_UPDATE_RANGE\x10\x06\x12\x1a\n\x16MEM_PROTO_UPDATE_BYTES\x10\x07\x12\x14\n\x10MEM_PROTO_COMMIT\x10\x08\x12\x16\n\x12MEM_PROTO_GET_SIZE\x10\tB5\n\x15\x63om.android.vts.protoB\x1cVtsResourceControllerMessage')
   ,
   dependencies=[ComponentSpecificationMessage__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -87,12 +87,67 @@ _FMQOP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=524,
-  serialized_end=895,
+  serialized_start=791,
+  serialized_end=1162,
 )
 _sym_db.RegisterEnumDescriptor(_FMQOP)
 
 FmqOp = enum_type_wrapper.EnumTypeWrapper(_FMQOP)
+_HIDLMEMORYOP = _descriptor.EnumDescriptor(
+  name='HidlMemoryOp',
+  full_name='android.vts.HidlMemoryOp',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_UNKNOWN', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_ALLOCATE', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_START_READ', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_START_READ_RANGE', index=3, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_READ_BYTES', index=4, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_START_UPDATE', index=5, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_START_UPDATE_RANGE', index=6, number=6,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_UPDATE_BYTES', index=7, number=7,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_COMMIT', index=8, number=8,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEM_PROTO_GET_SIZE', index=9, number=9,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=1165,
+  serialized_end=1446,
+)
+_sym_db.RegisterEnumDescriptor(_HIDLMEMORYOP)
+
+HidlMemoryOp = enum_type_wrapper.EnumTypeWrapper(_HIDLMEMORYOP)
 FMQ_PROTO_UNKNOWN = 0
 FMQ_PROTO_CREATE = 1
 FMQ_PROTO_READ = 2
@@ -106,6 +161,16 @@ FMQ_PROTO_AVAILABLE_READ = 9
 FMQ_PROTO_GET_QUANTUM_SIZE = 10
 FMQ_PROTO_GET_QUANTUM_COUNT = 11
 FMQ_PROTO_IS_VALID = 12
+MEM_PROTO_UNKNOWN = 0
+MEM_PROTO_ALLOCATE = 1
+MEM_PROTO_START_READ = 2
+MEM_PROTO_START_READ_RANGE = 3
+MEM_PROTO_READ_BYTES = 4
+MEM_PROTO_START_UPDATE = 5
+MEM_PROTO_START_UPDATE_RANGE = 6
+MEM_PROTO_UPDATE_BYTES = 7
+MEM_PROTO_COMMIT = 8
+MEM_PROTO_GET_SIZE = 9
 
 
 
@@ -254,12 +319,134 @@ _FMQRESPONSEMESSAGE = _descriptor.Descriptor(
   serialized_end=521,
 )
 
+
+_HIDLMEMORYREQUESTMESSAGE = _descriptor.Descriptor(
+  name='HidlMemoryRequestMessage',
+  full_name='android.vts.HidlMemoryRequestMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='operation', full_name='android.vts.HidlMemoryRequestMessage.operation', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='mem_id', full_name='android.vts.HidlMemoryRequestMessage.mem_id', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=True, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='mem_size', full_name='android.vts.HidlMemoryRequestMessage.mem_size', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='start', full_name='android.vts.HidlMemoryRequestMessage.start', index=3,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='length', full_name='android.vts.HidlMemoryRequestMessage.length', index=4,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='write_data', full_name='android.vts.HidlMemoryRequestMessage.write_data', index=5,
+      number=6, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=524,
+  serialized_end=685,
+)
+
+
+_HIDLMEMORYRESPONSEMESSAGE = _descriptor.Descriptor(
+  name='HidlMemoryResponseMessage',
+  full_name='android.vts.HidlMemoryResponseMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='success', full_name='android.vts.HidlMemoryResponseMessage.success', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='new_mem_id', full_name='android.vts.HidlMemoryResponseMessage.new_mem_id', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='mem_size', full_name='android.vts.HidlMemoryResponseMessage.mem_size', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='read_data', full_name='android.vts.HidlMemoryResponseMessage.read_data', index=3,
+      number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=687,
+  serialized_end=788,
+)
+
 _FMQREQUESTMESSAGE.fields_by_name['operation'].enum_type = _FMQOP
 _FMQREQUESTMESSAGE.fields_by_name['write_data'].message_type = ComponentSpecificationMessage__pb2._VARIABLESPECIFICATIONMESSAGE
 _FMQRESPONSEMESSAGE.fields_by_name['read_data'].message_type = ComponentSpecificationMessage__pb2._VARIABLESPECIFICATIONMESSAGE
+_HIDLMEMORYREQUESTMESSAGE.fields_by_name['operation'].enum_type = _HIDLMEMORYOP
 DESCRIPTOR.message_types_by_name['FmqRequestMessage'] = _FMQREQUESTMESSAGE
 DESCRIPTOR.message_types_by_name['FmqResponseMessage'] = _FMQRESPONSEMESSAGE
+DESCRIPTOR.message_types_by_name['HidlMemoryRequestMessage'] = _HIDLMEMORYREQUESTMESSAGE
+DESCRIPTOR.message_types_by_name['HidlMemoryResponseMessage'] = _HIDLMEMORYRESPONSEMESSAGE
 DESCRIPTOR.enum_types_by_name['FmqOp'] = _FMQOP
+DESCRIPTOR.enum_types_by_name['HidlMemoryOp'] = _HIDLMEMORYOP
 
 FmqRequestMessage = _reflection.GeneratedProtocolMessageType('FmqRequestMessage', (_message.Message,), dict(
   DESCRIPTOR = _FMQREQUESTMESSAGE,
@@ -274,6 +461,20 @@ FmqResponseMessage = _reflection.GeneratedProtocolMessageType('FmqResponseMessag
   # @@protoc_insertion_point(class_scope:android.vts.FmqResponseMessage)
   ))
 _sym_db.RegisterMessage(FmqResponseMessage)
+
+HidlMemoryRequestMessage = _reflection.GeneratedProtocolMessageType('HidlMemoryRequestMessage', (_message.Message,), dict(
+  DESCRIPTOR = _HIDLMEMORYREQUESTMESSAGE,
+  __module__ = 'VtsResourceControllerMessage_pb2'
+  # @@protoc_insertion_point(class_scope:android.vts.HidlMemoryRequestMessage)
+  ))
+_sym_db.RegisterMessage(HidlMemoryRequestMessage)
+
+HidlMemoryResponseMessage = _reflection.GeneratedProtocolMessageType('HidlMemoryResponseMessage', (_message.Message,), dict(
+  DESCRIPTOR = _HIDLMEMORYRESPONSEMESSAGE,
+  __module__ = 'VtsResourceControllerMessage_pb2'
+  # @@protoc_insertion_point(class_scope:android.vts.HidlMemoryResponseMessage)
+  ))
+_sym_db.RegisterMessage(HidlMemoryResponseMessage)
 
 
 DESCRIPTOR.has_options = True
