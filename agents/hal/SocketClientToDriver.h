@@ -86,6 +86,20 @@ class VtsDriverSocketClient : public VtsDriverCommUtil {
   //         false otherwise.
   bool ProcessFmqCommand(const FmqRequestMessage& fmq_request,
                          FmqResponseMessage* fmq_response);
+
+  // Processes the command for a hidl_memory request, stores the result in
+  // hidl_memory_response.
+  //
+  // @param hidl_memory_request  contains arguments in a request message for
+  //                             hidl_memory driver.
+  // @param hidl_memory_response pointer to message sent back to host.
+  //
+  // @return true if api is called successfully and data have been transferred
+  //              without error,
+  //         false otherwise.
+  bool ProcessHidlMemoryCommand(
+      const HidlMemoryRequestMessage& hidl_memory_request,
+      HidlMemoryResponseMessage* hidl_memory_response);
 };
 
 // returns the socket port file's path for the given service_name.
