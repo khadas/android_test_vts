@@ -66,7 +66,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None and fmq_response.queue_id != -1):
+        if fmq_response is not None and fmq_response.queue_id != -1:
             self._queue_id = fmq_response.queue_id
         else:
             self._queue_id = -1
@@ -150,7 +150,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None):
+        if fmq_response is not None:
             return fmq_response.success
         return False
 
@@ -178,7 +178,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None):
+        if fmq_response is not None:
             return fmq_response.success
         return False
 
@@ -246,7 +246,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None):
+        if fmq_response is not None:
             return fmq_response.success
         return False
 
@@ -319,6 +319,263 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
                  None if the operation is unsuccessful.
         """
         fmq_response = self._client.SendFmqRequest(request_msg)
-        if (fmq_response != None and fmq_response.success):
+        if fmq_response is not None and fmq_response.success:
             return fmq_response.sizet_return_val
         return None
+
+
+class ResourceHidlMemoryMirror(mirror_object.MirrorObject):
+    """This class mirrors hidl_memory resource allocated on the target side.
+
+    Attributes:
+        _client: the TCP client instance.
+        _mem_id: int, used to identify the memory region on the target side.
+    """
+
+    def __init__(self, client):
+        super(ResourceHidlMemoryMirror, self).__init__(client)
+        self._mem_id = -1
+
+    def _allocate(self, mem_size):
+        """Initiate a hidl_memory region on the target side.
+
+        This method stores the mem_id in the class attribute.
+        Users should not directly call this method to get a new memory region,
+        because it will overwrite the original memory object with mem_id,
+        making that memory object out of reference.
+        Users should always call InitHidlMemory() in mirror_tracker.py to get
+        a new memory region.
+
+        Args:
+            mem_size: int, size of the requested memory region.
+        """
+        # Prepare arguments.
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_ALLOCATE)
+        request_msg.mem_size = mem_size
+
+        # Send and receive data.
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None and response_msg.new_mem_id != -1:
+            self._mem_id = response_msg.new_mem_id
+        else:
+            logging.error("Failed to allocate memory region.")
+
+    def read(self):
+        """Notify that caller will read the entire memory region.
+
+        Before every actual read operation, caller must call this method
+        or readRange() first.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_START_READ)
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def readRange(self, start, length):
+        """Notify that caller will read only part of memory region.
+
+        Notify that caller will read starting at start and
+        ending at start + length.
+        Before every actual read operation, caller must call this method
+        or read() first.
+
+        Args:
+            start: int, offset from the start of memory region to be modified.
+            length: int, number of bytes to be modified.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_START_READ_RANGE)
+        request_msg.start = start
+        request_msg.length = length
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def update(self):
+        """Notify that caller will possibly write to all memory region.
+
+        Before every actual write operation, caller must call this method
+        or updateRange() first.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_START_UPDATE)
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def updateRange(self, start, length):
+        """Notify that caller will only write to part of memory region.
+
+        Notify that caller will only write starting at start and
+        ending at start + length.
+        Before every actual write operation, caller must call this method
+        or update() first.
+
+        Args:
+            start: int, offset from the start of memory region to be modified.
+            length: int, number of bytes to be modified.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_START_UPDATE_RANGE)
+        request_msg.start = start
+        request_msg.length = length
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def readBytes(self, length, start=0):
+        """This method performs actual read operation.
+
+        This method helps caller perform actual read operation on the
+        memory region, because host side won't be able to cast c++ pointers.
+
+        Args:
+            length: int, number of bytes to read.
+            start: int, offset from the start of memory region to read.
+
+        Returns:
+            string, data read from memory.
+                    Caller can perform conversion on the result to obtain the
+                    corresponding data structure in python.
+            None, indicate if the read fails.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_READ_BYTES)
+        request_msg.start = start
+        request_msg.length = length
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if response_msg.success:
+                return response_msg.read_data
+            logging.error("Failed to find memory region with id %d",
+                          self._mem_id)
+        return None
+
+    def updateBytes(self, data, length, start=0):
+        """This method performs actual write operation.
+
+        This method helps caller perform actual write operation on the
+        memory region, because host side won't be able to cast c++ pointers.
+
+        Args:
+            data: string, bytes to be written into memory.
+                  Caller can use bytearray() function to convert python
+                  data structures into python, and call str() on the resulting
+                  bytearray object.
+            length: int, number of bytes to write.
+            start: int, offset from the start of memory region to be modified.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_UPDATE_BYTES)
+        request_msg.write_data = data
+        request_msg.start = start
+        request_msg.length = length
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def commit(self):
+        """Caller signals done with operating on the memory region.
+
+        Caller needs to call this method after reading/writing.
+
+        Returns:
+            bool, true if the operation succeeds, false otherwise.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_COMMIT)
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if not response_msg.success:
+                logging.error("Failed to find memory region with id %d",
+                              self._mem_id)
+            return response_msg.success
+        return False
+
+    def getSize(self):
+        """Gets the size of the memory region.
+
+        Returns:
+            int, size of memory region, -1 to signal operation failure.
+        """
+        request_msg = self._createTemplateRequestMessage(
+            ResControlMsg.MEM_PROTO_GET_SIZE)
+
+        response_msg = self._client.SendHidlMemoryRequest(request_msg)
+        if response_msg is not None:
+            if response_msg.success:
+                return response_msg.mem_size
+            logging.error("Failed to find memory region with id %d",
+                          self._mem_id)
+        return -1
+
+    def getMemId(self):
+        """Gets the id assigned from the target side.
+
+        Returns:
+            int, id of the memory object.
+        """
+        return self._mem_id
+
+    def _createTemplateRequestMessage(self, operation):
+        """Creates a template HidlMemoryRequestMessage.
+
+        This method creates a message that contains common arguments among
+        all hidl_memory operations.
+
+        Args:
+            operation: HidlMemoryOp, hidl_memory operations.
+                       (see test/vts/proto/VtsResourceControllerMessage.proto).
+
+        Returns:
+            HidlMemoryRequestMessage, hidl_memory request message.
+                (See test/vts/proto/VtsResourceControllerMessage.proto).
+        """
+        request_msg = ResControlMsg.HidlMemoryRequestMessage()
+        request_msg.operation = operation
+        request_msg.mem_id = self._mem_id
+        return request_msg
