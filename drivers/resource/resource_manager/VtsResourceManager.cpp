@@ -17,10 +17,14 @@
 
 #include "resource_manager/VtsResourceManager.h"
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #include <android-base/logging.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/text_format.h>
 
+#include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsResourceControllerMessage.pb.h"
 
 using namespace std;
@@ -31,6 +35,123 @@ namespace vts {
 VtsResourceManager::VtsResourceManager() {}
 
 VtsResourceManager::~VtsResourceManager() {}
+
+void VtsResourceManager::ProcessHidlHandleCommand(
+    const HidlHandleRequestMessage& hidl_handle_request,
+    HidlHandleResponseMessage* hidl_handle_response) {
+  HidlHandleOp operation = hidl_handle_request.operation();
+  HandleId handle_id = hidl_handle_request.handle_id();
+  HandleDataValueMessage handle_info = hidl_handle_request.handle_info();
+  size_t read_data_size = hidl_handle_request.read_data_size();
+  const void* write_data =
+      static_cast<const void*>(hidl_handle_request.write_data().c_str());
+  size_t write_data_size = hidl_handle_request.write_data().length();
+  bool success = false;
+
+  switch (operation) {
+    case HANDLE_PROTO_CREATE_FILE: {
+      if (handle_info.fd_val().size() == 0) {
+        LOG(ERROR) << "No files to open.";
+        break;
+      }
+
+      // TODO: currently only support opening a single file.
+      // Support any file descriptor type in the future.
+      FdMessage file_desc_info = handle_info.fd_val(0);
+      if (file_desc_info.type() != FILE_TYPE) {
+        LOG(ERROR) << "Currently only support file type.";
+        break;
+      }
+
+      string filepath = file_desc_info.file_name();
+      int flag;
+      int mode = 0;
+      // Translate the mode into C++ flags and modes.
+      if (file_desc_info.file_mode_str() == "r" ||
+          file_desc_info.file_mode_str() == "rb") {
+        flag = O_RDONLY;
+      } else if (file_desc_info.file_mode_str() == "w" ||
+                 file_desc_info.file_mode_str() == "wb") {
+        flag = O_WRONLY | O_CREAT | O_TRUNC;
+        mode = S_IRWXU;  // User has the right to read/write/execute.
+      } else if (file_desc_info.file_mode_str() == "a" ||
+                 file_desc_info.file_mode_str() == "ab") {
+        flag = O_WRONLY | O_CREAT | O_APPEND;
+        mode = S_IRWXU;
+      } else if (file_desc_info.file_mode_str() == "r+" ||
+                 file_desc_info.file_mode_str() == "rb+" ||
+                 file_desc_info.file_mode_str() == "r+b") {
+        flag = O_RDWR;
+      } else if (file_desc_info.file_mode_str() == "w+" ||
+                 file_desc_info.file_mode_str() == "wb+" ||
+                 file_desc_info.file_mode_str() == "w+b") {
+        flag = O_RDWR | O_CREAT | O_TRUNC;
+        mode = S_IRWXU;
+      } else if (file_desc_info.file_mode_str() == "a+" ||
+                 file_desc_info.file_mode_str() == "ab+" ||
+                 file_desc_info.file_mode_str() == "a+b") {
+        flag = O_RDWR | O_CREAT | O_APPEND;
+        mode = S_IRWXU;
+      } else if (file_desc_info.file_mode_str() == "x" ||
+                 file_desc_info.file_mode_str() == "x+") {
+        struct stat buffer;
+        if (stat(filepath.c_str(), &buffer) == 0) {
+          LOG(ERROR) << "Host side creates a file with mode x, "
+                     << "but file already exists";
+          break;
+        }
+        flag = O_CREAT;
+        mode = S_IRWXU;
+        if (file_desc_info.file_mode_str() == "x+") {
+          flag |= O_RDWR;
+        } else {
+          flag |= O_WRONLY;
+        }
+      } else {
+        LOG(ERROR) << "Unknown file mode.";
+        break;
+      }
+
+      // Convert repeated int field into vector.
+      vector<int> int_data(write_data_size);
+      transform(handle_info.int_val().cbegin(), handle_info.int_val().cend(),
+                int_data.begin(), [](const int& item) { return item; });
+      // Call API on hidl_handle driver to create a file handle.
+      int new_handle_id =
+          hidl_handle_driver_.CreateFileHandle(filepath, flag, mode, int_data);
+      hidl_handle_response->set_new_handle_id(new_handle_id);
+      success = new_handle_id != -1;
+      break;
+    }
+    case HANDLE_PROTO_READ_FILE: {
+      char read_data[read_data_size];
+      // Call API on hidl_handle driver to read the file.
+      ssize_t read_success_bytes = hidl_handle_driver_.ReadFile(
+          handle_id, static_cast<void*>(read_data), read_data_size);
+      success = read_success_bytes != -1;
+      hidl_handle_response->set_read_data(
+          string(read_data, read_success_bytes));
+      break;
+    }
+    case HANDLE_PROTO_WRITE_FILE: {
+      // Call API on hidl_handle driver to write to the file.
+      ssize_t write_success_bytes =
+          hidl_handle_driver_.WriteFile(handle_id, write_data, write_data_size);
+      success = write_success_bytes != -1;
+      hidl_handle_response->set_write_data_size(write_success_bytes);
+      break;
+    }
+    case HANDLE_PROTO_DELETE: {
+      // Call API on hidl_handle driver to unregister the handle object.
+      success = hidl_handle_driver_.UnregisterHidlHandle(handle_id);
+      break;
+    }
+    default:
+      LOG(ERROR) << "Unknown operation.";
+      break;
+  }
+  hidl_handle_response->set_success(success);
+}
 
 void VtsResourceManager::ProcessHidlMemoryCommand(
     const HidlMemoryRequestMessage& hidl_memory_request,
