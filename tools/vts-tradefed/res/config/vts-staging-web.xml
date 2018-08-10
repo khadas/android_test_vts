@@ -15,6 +15,7 @@
 -->
 <configuration description="VTS Staging Plan for VTS Dashboard">
   <include name="vts-base" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsCoveragePreparer" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-staging-web" />
