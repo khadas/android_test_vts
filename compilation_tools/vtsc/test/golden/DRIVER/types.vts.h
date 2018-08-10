@@ -22,14 +22,14 @@
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const ScalarDataValueMessage& arg);
+extern "C" ::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const ScalarDataValueMessage& arg);
 uint32_t Random__android__hardware__nfc__V1_0__NfcEvent();
 bool Verify__android__hardware__nfc__V1_0__NfcEvent(const VariableSpecificationMessage& expected_result, const VariableSpecificationMessage& actual_result);
-void SetResult__android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcEvent result_value);
-::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const ScalarDataValueMessage& arg);
+extern "C" void SetResult__android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcEvent result_value);
+extern "C" ::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const ScalarDataValueMessage& arg);
 uint32_t Random__android__hardware__nfc__V1_0__NfcStatus();
 bool Verify__android__hardware__nfc__V1_0__NfcStatus(const VariableSpecificationMessage& expected_result, const VariableSpecificationMessage& actual_result);
-void SetResult__android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcStatus result_value);
+extern "C" void SetResult__android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcStatus result_value);
 
 
 }  // namespace vts
