@@ -10,7 +10,7 @@
 using namespace android::hardware::nfc::V1_0;
 namespace android {
 namespace vts {
-::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const ScalarDataValueMessage& arg) {
+extern "C" ::android::hardware::nfc::V1_0::NfcEvent EnumValue__android__hardware__nfc__V1_0__NfcEvent(const ScalarDataValueMessage& arg) {
     return (::android::hardware::nfc::V1_0::NfcEvent) arg.uint32_t();
 }
 uint32_t Random__android__hardware__nfc__V1_0__NfcEvent() {
@@ -29,13 +29,13 @@ bool Verify__android__hardware__nfc__V1_0__NfcEvent(const VariableSpecificationM
     return true;
 }
 
-void SetResult__android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcEvent result_value __attribute__((__unused__))){
+extern "C" void SetResult__android__hardware__nfc__V1_0__NfcEvent(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcEvent result_value __attribute__((__unused__))){
     result_msg->set_type(TYPE_ENUM);
     result_msg->set_scalar_type("uint32_t");
     result_msg->mutable_scalar_value()->set_uint32_t(static_cast<uint32_t>(result_value));
 }
 
-::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const ScalarDataValueMessage& arg) {
+extern "C" ::android::hardware::nfc::V1_0::NfcStatus EnumValue__android__hardware__nfc__V1_0__NfcStatus(const ScalarDataValueMessage& arg) {
     return (::android::hardware::nfc::V1_0::NfcStatus) arg.uint32_t();
 }
 uint32_t Random__android__hardware__nfc__V1_0__NfcStatus() {
@@ -52,7 +52,7 @@ bool Verify__android__hardware__nfc__V1_0__NfcStatus(const VariableSpecification
     return true;
 }
 
-void SetResult__android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcStatus result_value __attribute__((__unused__))){
+extern "C" void SetResult__android__hardware__nfc__V1_0__NfcStatus(VariableSpecificationMessage* result_msg, ::android::hardware::nfc::V1_0::NfcStatus result_value __attribute__((__unused__))){
     result_msg->set_type(TYPE_ENUM);
     result_msg->set_scalar_type("uint32_t");
     result_msg->mutable_scalar_value()->set_uint32_t(static_cast<uint32_t>(result_value));

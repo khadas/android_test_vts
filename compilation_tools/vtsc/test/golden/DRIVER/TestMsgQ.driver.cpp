@@ -10,7 +10,7 @@
 using namespace android::hardware::tests::msgq::V1_0;
 namespace android {
 namespace vts {
-::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits EnumValue__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const ScalarDataValueMessage& arg) {
+extern "C" ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits EnumValue__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const ScalarDataValueMessage& arg) {
     return (::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits) arg.uint32_t();
 }
 uint32_t Random__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits() {
@@ -24,7 +24,7 @@ bool Verify__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(cons
     return true;
 }
 
-void SetResult__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(VariableSpecificationMessage* result_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits result_value __attribute__((__unused__))){
+extern "C" void SetResult__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(VariableSpecificationMessage* result_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits result_value __attribute__((__unused__))){
     result_msg->set_type(TYPE_ENUM);
     result_msg->set_scalar_type("uint32_t");
     result_msg->mutable_scalar_value()->set_uint32_t(static_cast<uint32_t>(result_value));

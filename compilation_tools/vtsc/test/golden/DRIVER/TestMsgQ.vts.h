@@ -23,10 +23,10 @@
 using namespace android::hardware::tests::msgq::V1_0;
 namespace android {
 namespace vts {
-::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits EnumValue__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const ScalarDataValueMessage& arg);
+extern "C" ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits EnumValue__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const ScalarDataValueMessage& arg);
 uint32_t Random__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits();
 bool Verify__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const VariableSpecificationMessage& expected_result, const VariableSpecificationMessage& actual_result);
-void SetResult__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(VariableSpecificationMessage* result_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits result_value);
+extern "C" void SetResult__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(VariableSpecificationMessage* result_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits result_value);
 
 class Vts_android_hardware_tests_msgq_V1_0_ITestMsgQ : public ::android::hardware::tests::msgq::V1_0::ITestMsgQ, public DriverCallbackBase {
  public:
