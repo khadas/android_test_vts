@@ -10,7 +10,7 @@
 using namespace android::hardware::tests::bar::V1_0;
 namespace android {
 namespace vts {
-void MessageTo__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& var_msg __attribute__((__unused__)), ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated* arg __attribute__((__unused__)), const string& callback_socket_name __attribute__((__unused__))) {
+extern "C" void MessageTo__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& var_msg __attribute__((__unused__)), ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated* arg __attribute__((__unused__)), const string& callback_socket_name __attribute__((__unused__))) {
     MessageTo__android__hardware__tests__foo__V1_0__Unrelated(var_msg.struct_value(0), &(arg->myRelated), callback_socket_name);
 }
 bool Verify__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const VariableSpecificationMessage& expected_result __attribute__((__unused__)), const VariableSpecificationMessage& actual_result __attribute__((__unused__))){
@@ -18,7 +18,7 @@ bool Verify__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(const V
     return true;
 }
 
-void SetResult__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(VariableSpecificationMessage* result_msg, ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated result_value __attribute__((__unused__))){
+extern "C" void SetResult__android__hardware__tests__bar__V1_0__IBar__SomethingRelated(VariableSpecificationMessage* result_msg, ::android::hardware::tests::bar::V1_0::IBar::SomethingRelated result_value __attribute__((__unused__))){
     result_msg->set_type(TYPE_STRUCT);
     auto *result_msg_myRelated = result_msg->add_struct_value();
     result_msg_myRelated->set_type(TYPE_STRUCT);

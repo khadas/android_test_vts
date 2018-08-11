@@ -515,11 +515,16 @@ bool VtsHalDriverManager::PreprocessHidlHalFunctionCallArgs(
     }
     case TYPE_FMQ_SYNC:
     case TYPE_FMQ_UNSYNC: {
+      if (arg->fmq_value_size() == 0) {
+        LOG(ERROR) << "Driver manager: host side didn't specify queue "
+                   << "information in fmq_value field.";
+        return false;
+      }
       if (arg->fmq_value(0).fmq_id() != -1) {
         // Preprocess an argument that wants to use an existing FMQ.
         // resource_manager returns address of hidl_memory pointer and
         // driver_manager fills the address in the proto field,
-        // which can be read by vtsc.
+        // which can be read by HAL driver.
         size_t descriptor_addr;
         bool success =
             resource_manager_->GetQueueDescAddress(*arg, &descriptor_addr);
