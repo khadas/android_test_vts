@@ -97,6 +97,8 @@ enum ComponentType {
   TESTS_MSGQ = 25;
   // For memory test HAL.
   TESTS_MEMORY = 26;
+  // For dumpstate HAL (a lazy HAL, for debugging).
+  DUMPSTATE = 27;
 
   // for bionic's libm
   BIONIC_LIBM = 1001;
@@ -387,6 +389,17 @@ message HandleDataValueMessage {
   repeated FdMessage fd_val = 4;
   // ints values
   repeated int32 int_val = 5;
+  // To specify an existing handle object registered in target-side driver.
+  // If host side specifies this field, HIDL function calls will retrieve
+  // the handle object from target-side driver, instead of creating a new one.
+  optional int32 handle_id = 6 [default = -1];
+  // To record the pointer address of hidl_handle object.
+  // We use uint64 to represent the address of the hidl_handle pointer,
+  // which allows vtsc to reinterpret the address when caller wants to use
+  // an existing hidl_handle object stored in target-side driver.
+  // This field is updated by driver_manager when the hidl_handle address
+  // is found in memory.
+  optional uint64 hidl_handle_address = 7;
 }
 
 // To specify a function argument or an attribute in general.
