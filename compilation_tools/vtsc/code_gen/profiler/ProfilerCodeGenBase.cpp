@@ -276,5 +276,69 @@ void ProfilerCodeGenBase::GenerateCloseNameSpaces(Formatter& out,
   out << "}  // namespace android\n";
 }
 
+bool ProfilerCodeGenBase::IncludeHidlNativeType(
+    const ComponentSpecificationMessage& message, const VariableType& type) {
+  if (message.has_interface()) {
+    InterfaceSpecificationMessage interface = message.interface();
+    for (const VariableSpecificationMessage& attribute :
+         interface.attribute()) {
+      if (IncludeHidlNativeType(attribute, type)) {
+        return true;
+      }
+    }
+    for (const FunctionSpecificationMessage& api : interface.api()) {
+      for (const VariableSpecificationMessage& arg : api.arg()) {
+        if (IncludeHidlNativeType(arg, type)) {
+          return true;
+        }
+      }
+      for (const VariableSpecificationMessage& result :
+           api.return_type_hidl()) {
+        if (IncludeHidlNativeType(result, type)) {
+          return true;
+        }
+      }
+    }
+  } else {
+    for (const VariableSpecificationMessage& attribute : message.attribute()) {
+      if (IncludeHidlNativeType(attribute, type)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool ProfilerCodeGenBase::IncludeHidlNativeType(
+    const VariableSpecificationMessage& val, const VariableType& type) {
+  if (val.type() == type) {
+    return true;
+  }
+  if (val.type() == TYPE_VECTOR || val.type() == TYPE_ARRAY) {
+    if (IncludeHidlNativeType(val.vector_value(0), type)) return true;
+  }
+  if (val.type() == TYPE_STRUCT) {
+    if (!val.has_predefined_type()) {
+      for (const auto sub_struct : val.sub_struct()) {
+        if (IncludeHidlNativeType(sub_struct, type)) return true;
+      }
+      for (const auto struct_field : val.struct_value()) {
+        if (IncludeHidlNativeType(struct_field, type)) return true;
+      }
+    }
+  }
+  if (val.type() == TYPE_UNION) {
+    if (!val.has_predefined_type()) {
+      for (const auto sub_union : val.sub_union()) {
+        if (IncludeHidlNativeType(sub_union, type)) return true;
+      }
+      for (const auto union_field : val.union_value()) {
+        if (IncludeHidlNativeType(union_field, type)) return true;
+      }
+    }
+  }
+  return false;
+}
+
 }  // namespace vts
 }  // namespace android

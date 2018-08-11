@@ -177,6 +177,13 @@ class ProfilerCodeGenBase {
   virtual void GenerateCloseNameSpaces(Formatter& out,
       const ComponentSpecificationMessage& message);
 
+  // Utility functions that check whether the given message uses any hidl native
+  // types (e.g. fmq, hidl_memory, hidl_handle).
+  bool IncludeHidlNativeType(const ComponentSpecificationMessage& message,
+                             const VariableType& type);
+  bool IncludeHidlNativeType(const VariableSpecificationMessage& val,
+                             const VariableType& type);
+
   std::string input_vts_file_path_;
   DISALLOW_COPY_AND_ASSIGN (ProfilerCodeGenBase);
 };
