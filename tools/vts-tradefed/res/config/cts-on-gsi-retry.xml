@@ -33,6 +33,9 @@
   <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
   <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
 
+  <!-- Exclude tests applicable only to instant mode -->
+  <include name="cts-exclude-instant" />
+
   <!-- specific to retry -->
   <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest">
     <option name="primary-abi-only" value="true" />

@@ -30,6 +30,9 @@
     <option name="compatibility:test-arg" value="com.android.tradefed.testtype.HostTest:exclude-annotation:android.platform.test.annotations.RestrictedBuildTest" />
     <option name="compatibility:test-arg" value="com.android.compatibility.common.tradefed.testtype.JarHostTest:exclude-annotation:android.platform.test.annotations.RestrictedBuildTest" />
 
+    <!-- Exclude tests applicable only to instant mode -->
+    <include name="cts-exclude-instant" />
+
     <!-- Radio system of a general system image is not checked -->
     <option name="compatibility:exclude-filter" value="CtsTelephonyTestCases" />
     <option name="compatibility:exclude-filter" value="CtsTelephony2TestCases" />
