@@ -956,6 +956,15 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     {
       out << "if (" << arg_value_name << ".has_handle_value()) {\n";
       out.indent();
+      out << "if (" << arg_value_name
+          << ".handle_value().has_hidl_handle_address()) {\n";
+      out.indent();  // if case starts: existing hidl_handle is specified.
+      out << arg_name
+          << " = *(reinterpret_cast<android::hardware::hidl_handle*>("
+          << arg_value_name << ".handle_value().hidl_handle_address()));\n";
+      out.unindent();  // if case ends.
+      out << "} else {\n";
+      out.indent();  // else case starts: create a new handle object.
       out << "native_handle_t* handle = native_handle_create(" << arg_value_name
           << ".handle_value().num_fds(), " << arg_value_name
           << ".handle_value().num_ints());\n";
@@ -1059,6 +1068,8 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out.unindent();
       out << "}\n";
       out << arg_name << " = handle;\n";
+      out.unindent();  // else case (create a new handle object) ends.
+      out << "}\n";
       out.unindent();
       out << "} else {\n";
       out.indent();
@@ -1577,7 +1588,9 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HANDLE:
     {
       out << result_msg << "->set_type(TYPE_HANDLE);\n";
-      out << "/* ERROR: TYPE_HANDLE is not supported yet. */\n";
+      out << result_msg << "->mutable_handle_value()->set_hidl_handle_address"
+          << "(reinterpret_cast<size_t>(new android::hardware::hidl_handle("
+          << result_value << ")));\n";
       break;
     }
     case TYPE_HIDL_INTERFACE:
