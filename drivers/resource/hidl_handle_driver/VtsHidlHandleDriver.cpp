@@ -132,6 +132,25 @@ ssize_t VtsHidlHandleDriver::WriteFile(HandleId handle_id,
   return write_result;
 }
 
+HandleId VtsHidlHandleDriver::RegisterHidlHandle(size_t hidl_handle_address) {
+  unique_ptr<hidl_handle> hidl_handle_ptr(
+      reinterpret_cast<hidl_handle*>(hidl_handle_address));
+
+  map_mutex_.lock();
+  size_t new_handle_id = hidl_handle_map_.size();
+  hidl_handle_map_.emplace(new_handle_id, move(hidl_handle_ptr));
+  map_mutex_.unlock();
+  return new_handle_id;
+}
+
+bool VtsHidlHandleDriver::GetHidlHandleAddress(HandleId handle_id,
+                                               size_t* result) {
+  hidl_handle* handle = FindHandle(handle_id);
+  if (handle == nullptr) return false;  // unable to find handle object.
+  *result = reinterpret_cast<size_t>(handle);
+  return true;
+}
+
 hidl_handle* VtsHidlHandleDriver::FindHandle(HandleId handle_id, bool release) {
   hidl_handle* handle;
   map_mutex_.lock();

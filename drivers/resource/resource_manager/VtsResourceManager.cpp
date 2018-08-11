@@ -153,6 +153,25 @@ void VtsResourceManager::ProcessHidlHandleCommand(
   hidl_handle_response->set_success(success);
 }
 
+int VtsResourceManager::RegisterHidlHandle(
+    const VariableSpecificationMessage& hidl_handle_msg) {
+  size_t hidl_handle_address =
+      hidl_handle_msg.handle_value().hidl_handle_address();
+  if (hidl_handle_address == 0) {
+    LOG(ERROR) << "Invalid hidl_handle address."
+               << "vtsc either didn't set the address or set a null pointer.";
+    return -1;  // check for null pointer
+  }
+  return hidl_handle_driver_.RegisterHidlHandle(hidl_handle_address);
+}
+
+bool VtsResourceManager::GetHidlHandleAddress(
+    const VariableSpecificationMessage& hidl_handle_msg, size_t* result) {
+  int handle_id = hidl_handle_msg.handle_value().handle_id();
+  bool success = hidl_handle_driver_.GetHidlHandleAddress(handle_id, result);
+  return success;
+}
+
 void VtsResourceManager::ProcessHidlMemoryCommand(
     const HidlMemoryRequestMessage& hidl_memory_request,
     HidlMemoryResponseMessage* hidl_memory_response) {
