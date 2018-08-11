@@ -564,7 +564,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::GetService(bool get_st
     callback_message.set_name("Vts_android_hardware_tests_bar_V1_0_IBar::expectNullHandle");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HANDLE);
-    /* ERROR: TYPE_HANDLE is not supported yet. */
+    var_msg0->mutable_handle_value()->set_hidl_handle_address(reinterpret_cast<size_t>(new android::hardware::hidl_handle(arg0)));
     VariableSpecificationMessage* var_msg1 = callback_message.add_arg();
     var_msg1->set_type(TYPE_STRUCT);
     SetResult__android__hardware__tests__foo__V1_0__Abc(var_msg1, arg1);
@@ -1139,7 +1139,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
         for (int i = 0; i < (int)result0.size(); i++) {
             auto *result_val_0_vector_i = result_val_0->add_vector_value();
             result_val_0_vector_i->set_type(TYPE_HANDLE);
-            /* ERROR: TYPE_HANDLE is not supported yet. */
+            result_val_0_vector_i->mutable_handle_value()->set_hidl_handle_address(reinterpret_cast<size_t>(new android::hardware::hidl_handle(result0[i])));
         }
         return true;
     }
@@ -1158,67 +1158,71 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     if (!strcmp(func_name, "expectNullHandle")) {
         ::android::hardware::hidl_handle arg0;
         if (func_msg.arg(0).has_handle_value()) {
-            native_handle_t* handle = native_handle_create(func_msg.arg(0).handle_value().num_fds(), func_msg.arg(0).handle_value().num_ints());
-            if (!handle) {
-                LOG(ERROR) << "Failed to create handle. ";
-                exit(-1);
-            }
-            for (int fd_index = 0; fd_index < func_msg.arg(0).handle_value().num_fds() + func_msg.arg(0).handle_value().num_ints(); fd_index++) {
-                if (fd_index < func_msg.arg(0).handle_value().num_fds()) {
-                    FdMessage fd_val = func_msg.arg(0).handle_value().fd_val(fd_index);
-                    string file_name = fd_val.file_name();
-                    switch (fd_val.type()) {
-                        case FdType::FILE_TYPE:
-                        {
-                            size_t pre = 0; size_t pos = 0;
-                            string dir;
-                            struct stat st;
-                            while((pos=file_name.find_first_of('/', pre)) != string::npos){
-                                dir = file_name.substr(0, pos++);
-                                pre = pos;
-                                if(dir.size() == 0) continue; // ignore leading /
-                                if (stat(dir.c_str(), &st) == -1) {
-                                LOG(INFO) << " Creating dir: " << dir;
-                                    mkdir(dir.c_str(), 0700);
-                                }
-                            }
-                            int fd = open(file_name.c_str(), fd_val.flags() | O_CREAT, fd_val.mode());
-                            if (fd == -1) {
-                                LOG(ERROR) << "Failed to open file: " << file_name << " error: " << errno;
-                                exit (-1);
-                            }
-                            handle->data[fd_index] = fd;
-                            break;
-                        }
-                        case FdType::DIR_TYPE:
-                        {
-                            struct stat st;
-                            if (!stat(file_name.c_str(), &st)) {
-                                mkdir(file_name.c_str(), fd_val.mode());
-                            }
-                            handle->data[fd_index] = open(file_name.c_str(), O_DIRECTORY, fd_val.mode());
-                            break;
-                        }
-                        case FdType::DEV_TYPE:
-                        {
-                            if(file_name == "/dev/ashmem") {
-                                handle->data[fd_index] = ashmem_create_region("SharedMemory", fd_val.memory().size());
-                            }
-                            break;
-                        }
-                        case FdType::PIPE_TYPE:
-                        case FdType::SOCKET_TYPE:
-                        case FdType::LINK_TYPE:
-                        {
-                            LOG(ERROR) << "Not supported yet. ";
-                            break;
-                        }
-                    }
-                } else {
-                    handle->data[fd_index] = func_msg.arg(0).handle_value().int_val(fd_index -func_msg.arg(0).handle_value().num_fds());
+            if (func_msg.arg(0).handle_value().has_hidl_handle_address()) {
+                arg0 = *(reinterpret_cast<android::hardware::hidl_handle*>(func_msg.arg(0).handle_value().hidl_handle_address()));
+            } else {
+                native_handle_t* handle = native_handle_create(func_msg.arg(0).handle_value().num_fds(), func_msg.arg(0).handle_value().num_ints());
+                if (!handle) {
+                    LOG(ERROR) << "Failed to create handle. ";
+                    exit(-1);
                 }
+                for (int fd_index = 0; fd_index < func_msg.arg(0).handle_value().num_fds() + func_msg.arg(0).handle_value().num_ints(); fd_index++) {
+                    if (fd_index < func_msg.arg(0).handle_value().num_fds()) {
+                        FdMessage fd_val = func_msg.arg(0).handle_value().fd_val(fd_index);
+                        string file_name = fd_val.file_name();
+                        switch (fd_val.type()) {
+                            case FdType::FILE_TYPE:
+                            {
+                                size_t pre = 0; size_t pos = 0;
+                                string dir;
+                                struct stat st;
+                                while((pos=file_name.find_first_of('/', pre)) != string::npos){
+                                    dir = file_name.substr(0, pos++);
+                                    pre = pos;
+                                    if(dir.size() == 0) continue; // ignore leading /
+                                    if (stat(dir.c_str(), &st) == -1) {
+                                    LOG(INFO) << " Creating dir: " << dir;
+                                        mkdir(dir.c_str(), 0700);
+                                    }
+                                }
+                                int fd = open(file_name.c_str(), fd_val.flags() | O_CREAT, fd_val.mode());
+                                if (fd == -1) {
+                                    LOG(ERROR) << "Failed to open file: " << file_name << " error: " << errno;
+                                    exit (-1);
+                                }
+                                handle->data[fd_index] = fd;
+                                break;
+                            }
+                            case FdType::DIR_TYPE:
+                            {
+                                struct stat st;
+                                if (!stat(file_name.c_str(), &st)) {
+                                    mkdir(file_name.c_str(), fd_val.mode());
+                                }
+                                handle->data[fd_index] = open(file_name.c_str(), O_DIRECTORY, fd_val.mode());
+                                break;
+                            }
+                            case FdType::DEV_TYPE:
+                            {
+                                if(file_name == "/dev/ashmem") {
+                                    handle->data[fd_index] = ashmem_create_region("SharedMemory", fd_val.memory().size());
+                                }
+                                break;
+                            }
+                            case FdType::PIPE_TYPE:
+                            case FdType::SOCKET_TYPE:
+                            case FdType::LINK_TYPE:
+                            {
+                                LOG(ERROR) << "Not supported yet. ";
+                                break;
+                            }
+                        }
+                    } else {
+                        handle->data[fd_index] = func_msg.arg(0).handle_value().int_val(fd_index -func_msg.arg(0).handle_value().num_fds());
+                    }
+                }
+                arg0 = handle;
             }
-            arg0 = handle;
         } else {
             arg0 = nullptr;
         }

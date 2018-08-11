@@ -106,6 +106,23 @@ class VtsHidlHandleDriver {
   ssize_t WriteFile(HandleId handle_id, const void* write_data,
                     size_t num_bytes);
 
+  // Registers a handle object in the driver using an existing
+  // hidl_handle address created by vtsc.
+  //
+  // @param handle_address address of hidl_handle pointer.
+  //
+  // @return id to be used to hidl_handle later.
+  //         -1 if registration fails.
+  HandleId RegisterHidlHandle(size_t hidl_handle_address);
+
+  // Get hidl_handle address of handle object with handle_id.
+  //
+  // @param handle_id identifies the handle object.
+  // @param result    stores the hidl_handle address.
+  //
+  // @return true if handle object is found, false otherwise.
+  bool GetHidlHandleAddress(HandleId handle_id, size_t* result);
+
  private:
   // Finds the handle object with ID handle_id.
   // Logs error if handle_id is not found.

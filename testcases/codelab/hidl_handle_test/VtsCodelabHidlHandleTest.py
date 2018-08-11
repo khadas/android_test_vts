@@ -16,7 +16,9 @@
 #
 
 import logging
+import time
 
+from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg
 from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import const
@@ -30,31 +32,81 @@ class VtsCodelabHidlHandleTest(base_test.BaseTestClass):
     Attributes:
         TEST_DIR_PATH: string, directory where the test file will be created.
         TEST_FILE_PATH: string, path to the file that host side uses.
+        SERVICE_NAME: string, dumpstate HAL full service name.
+        START_COMMAND: string, command to start dumpstate HAL service
+                       since it is a lazy HAL.
+        CHECK_COMMAND: string, command to check if dumpstate HAL service
+                       is started.
+        MAX_RETRY: int, number of times to check if dumpstate HAL service
+                   is started.
         _created: bool, whether we created TEST_DIR_PATH.
         _writer: ResourceHidlHandleMirror, writer who writes to TEST_FILE_PATH.
         _reader: ResourceHidlHandleMirror, reader who reads from TEST_FILE_PATH.
+        _dumpstate: dumpstate HAL server instance.
+        _permission: SELinux permission, either enforcing or permissive.
+                     This needs to set to permissive on the target side
+                     when HAL server writes to user-defined destination.
+                     This class will restore the permission level after
+                     the test finishes.
     """
 
     TEST_DIR_PATH = "/data/local/tmp/vts_codelab_tmp/"
     TEST_FILE_PATH = TEST_DIR_PATH + "test.txt"
+    SERVICE_NAME = "android.hardware.dumpstate@1.0::IDumpstateDevice/default"
+    START_COMMAND = "setprop ctl.interface_start " + SERVICE_NAME
+    CHECK_COMMAND = "lshal --types=b | grep \"" + SERVICE_NAME + "\""
+    MAX_RETRY = 3
 
     def setUpClass(self):
         """Necessary setup for the test environment.
 
-        Load a light HAL driver, and create a /tmp directory to create
-        test files in it.
+        We need to start dumpstate HAL service manually because it is a lazy
+        HAL service, then load it in our target-side driver.
+        Create a tmp directory in /data to create test files in it if the tmp
+        directory doesn't exist.
+        We also need to set SELinux permission to permissive because
+        HAL server and host side are communicating via a file.
+        We will recover SELinux permission during tearDown of this class.
         """
         self.dut = self.android_devices[0]
+        # Execute shell command to start dumpstate HAL service because
+        # it is a lazy HAL service.
+        self.dut.shell.Execute(self.START_COMMAND)
+
+        start_hal_success = False
+        # Wait until service is started.
+        # Retry at most three times.
+        for _ in range(self.MAX_RETRY):
+            result = self.dut.shell.Execute(self.CHECK_COMMAND)
+            if result[const.STDOUT][0] != "":
+                start_hal_success = True  # setup successful
+                break
+            time.sleep(1)  # wait one second.
+        # Dumpstate HAL service is still not started after waiting for
+        # self.MAX_RETRY times, stop the testcase.
+        if not start_hal_success:
+            logging.error("Failed to start dumpstate HAL service.")
+            return False
+
         # Initialize a hal driver to start all managers on the target side,
         # not used for other purposes.
         self.dut.hal.InitHidlHal(
-            target_type="light",
+            target_type="dumpstate",
             target_basepaths=self.dut.libPaths,
-            target_version_major=2,
+            target_version_major=1,
             target_version_minor=0,
-            target_package="android.hardware.light",
-            target_component_name="ILight",
+            target_package="android.hardware.dumpstate",
+            target_component_name="IDumpstateDevice",
             bits=int(self.abi_bitness))
+        # Make a shortcut name for the dumpstate HAL server.
+        self._dumpstate = self.dut.hal.dumpstate
+
+        # In order for dumpstate service to write to file, need to set
+        # SELinux to permissive.
+        permission_result = self.dut.shell.Execute("getenforce")
+        self._permission = permission_result[const.STDOUT][0].strip()
+        if self._permission == "Enforcing":
+            self.dut.shell.Execute("setenforce permissive")
 
         # Check if a tmp directory under /data exists.
         self._created = False
@@ -83,11 +135,11 @@ class VtsCodelabHidlHandleTest(base_test.BaseTestClass):
         self._writer = self.dut.resource.InitHidlHandleForSingleFile(
             self.TEST_FILE_PATH,
             "w+",
-            client=self.dut.hal.GetTcpClient("light"))
+            client=self.dut.hal.GetTcpClient("dumpstate"))
         self._reader = self.dut.resource.InitHidlHandleForSingleFile(
             self.TEST_FILE_PATH,
             "r",
-            client=self.dut.hal.GetTcpClient("light"))
+            client=self.dut.hal.GetTcpClient("dumpstate"))
         asserts.assertTrue(self._writer is not None,
                            "Writer should be initialized successfully.")
         asserts.assertTrue(self._reader is not None,
@@ -107,12 +159,17 @@ class VtsCodelabHidlHandleTest(base_test.BaseTestClass):
         """Cleanup after all tests.
 
         Remove self.TEST_FILE_DIR directory if we created it at the beginning.
+        If SELinux permission level is changed, restore it here.
         """
         # Delete self.TEST_DIR_PATH if we created it.
         if self._created:
             logging.info("Deleting " + self.TEST_DIR_PATH +
                          " directory created for this test.")
             self.dut.shell.Execute("rm -rf " + self.TEST_DIR_PATH)
+
+        # Restore SELinux permission level.
+        if self._permission == "Enforcing":
+            self.dut.shell.Execute("setenforce enforcing")
 
     def testInvalidWrite(self):
         """Test writing to a file with no write permission should fail. """
@@ -135,7 +192,7 @@ class VtsCodelabHidlHandleTest(base_test.BaseTestClass):
             failed_reader = self.dut.resource.InitHidlHandleForSingleFile(
                 self.TEST_DIR_PATH + "abc.txt",
                 "r",
-                client=self.dut.hal.GetTcpClient("light"))
+                client=self.dut.hal.GetTcpClient("dumpstate"))
             asserts.assertTrue(
                 failed_reader is None,
                 "Open a non-existing file with 'r' flag should fail.")
@@ -159,6 +216,26 @@ class VtsCodelabHidlHandleTest(base_test.BaseTestClass):
                 self._writer.writeFile(write_data, len(write_data)))
             curr_read_data = self._reader.readFile(len(write_data))
             asserts.assertEqual(curr_read_data, write_data)
+
+    def testHidlHandleArgument(self):
+        """Test calling APIs in dumpstate HAL server.
+
+        Host side specifies a handle object in resource_manager, ans pass
+        it to dumpstate HAL server to write debug message into it.
+        Host side then reads part of the debug message.
+        """
+        # Prepare a VariableSpecificationMessage to specify the handle object
+        # that will be passed into the HAL service.
+        var_msg = CompSpecMsg.VariableSpecificationMessage()
+        var_msg.type = CompSpecMsg.TYPE_HANDLE
+        var_msg.handle_value.handle_id = self._writer.handleId
+
+        self._dumpstate.dumpstateBoard(var_msg)
+        # Read 1000 bytes to retrieve part of debug message.
+        debug_msg = self._reader.readFile(1000)
+        logging.info("Below are part of result from dumpstate: ")
+        logging.info(debug_msg)
+        asserts.assertNotEqual(debug_msg, "")
 
 
 if __name__ == "__main__":
