@@ -20,12 +20,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include <android-base/logging.h>
-#include <google/protobuf/repeated_field.h>
-#include <google/protobuf/text_format.h>
-
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsResourceControllerMessage.pb.h"
+
+using android::hardware::kSynchronizedReadWrite;
+using android::hardware::kUnsynchronizedWrite;
 
 using namespace std;
 
@@ -238,8 +237,9 @@ int VtsResourceManager::RegisterHidlMemory(
   size_t hidl_mem_address =
       hidl_memory_msg.hidl_memory_value().hidl_mem_address();
   if (hidl_mem_address == 0) {
-    LOG(ERROR) << "Invalid queue descriptor address."
-               << "vtsc either didn't set the address or set a null pointer.";
+    LOG(ERROR) << "Resource manager: invalid hidl_memory address."
+               << "HAL driver either didn't set the address or "
+               << "set a null pointer.";
     return -1;  // check for null pointer
   }
   return hidl_memory_driver_.RegisterHidlMemory(hidl_mem_address);
@@ -254,414 +254,352 @@ bool VtsResourceManager::GetHidlMemoryAddress(
 
 void VtsResourceManager::ProcessFmqCommand(const FmqRequestMessage& fmq_request,
                                            FmqResponseMessage* fmq_response) {
-  size_t sizet_result;
-  int new_queue_id;
-  bool success;
-
-  LOG(DEBUG) << "Processing FMQ command in resource manager.";
   const string& data_type = fmq_request.data_type();
-  bool sync = fmq_request.sync();
-  size_t queue_size = fmq_request.queue_size();
-  int queue_id = fmq_request.queue_id();
-  bool blocking = fmq_request.blocking();
-  bool reset_pointers = fmq_request.reset_pointers();
-
-  switch (fmq_request.operation()) {
-    case FMQ_PROTO_CREATE: {
-      if (fmq_request.queue_id() == -1) {
-        new_queue_id =
-            fmq_driver_.CreateFmq(data_type, sync, queue_size, blocking);
-      } else {
-        new_queue_id =
-            fmq_driver_.CreateFmq(data_type, sync, queue_id, reset_pointers);
-      }
-      fmq_response->set_queue_id(new_queue_id);
-      break;
-    }
-    case FMQ_PROTO_READ:
-    case FMQ_PROTO_READ_BLOCKING:
-      ProcessFmqRead(fmq_request, fmq_response);
-      break;
-    case FMQ_PROTO_WRITE:
-    case FMQ_PROTO_WRITE_BLOCKING: {
-      ProcessFmqWrite(fmq_request, fmq_response);
-      break;
-    }
-    case FMQ_PROTO_AVAILABLE_WRITE: {
-      success = fmq_driver_.AvailableToWrite(data_type, sync, queue_id,
-                                             &sizet_result);
-      fmq_response->set_success(success);
-      fmq_response->set_sizet_return_val(sizet_result);
-      break;
-    }
-    case FMQ_PROTO_AVAILABLE_READ: {
-      success =
-          fmq_driver_.AvailableToRead(data_type, sync, queue_id, &sizet_result);
-      fmq_response->set_success(success);
-      fmq_response->set_sizet_return_val(sizet_result);
-      break;
-    }
-    case FMQ_PROTO_GET_QUANTUM_SIZE: {
-      success =
-          fmq_driver_.GetQuantumSize(data_type, sync, queue_id, &sizet_result);
-      fmq_response->set_success(success);
-      fmq_response->set_sizet_return_val(sizet_result);
-      break;
-    }
-    case FMQ_PROTO_GET_QUANTUM_COUNT: {
-      success =
-          fmq_driver_.GetQuantumCount(data_type, sync, queue_id, &sizet_result);
-      fmq_response->set_success(success);
-      fmq_response->set_sizet_return_val(sizet_result);
-      break;
-    }
-    case FMQ_PROTO_IS_VALID: {
-      success = fmq_driver_.IsValid(data_type, sync, queue_id);
-      fmq_response->set_success(success);
-      break;
-    }
-    default: {
-      LOG(ERROR) << "unsupported operation.";
-      break;
-    }
+  // Find the correct function with template to process FMQ operation.
+  auto iterator = func_map_.find(data_type);
+  if (iterator == func_map_.end()) {  // queue not found
+    LOG(ERROR) << "Resource manager: current FMQ driver doesn't support type "
+               << data_type;
+    fmq_response->set_success(false);
+  } else {
+    (this->*(iterator->second))(fmq_request, fmq_response);
   }
 }
 
 int VtsResourceManager::RegisterFmq(
     const VariableSpecificationMessage& queue_msg) {
-  bool sync = queue_msg.type() == TYPE_FMQ_SYNC;
-  // TODO: support user-defined types in the future, only support scalar types
-  // for now.
-  string data_type = queue_msg.fmq_value(0).scalar_type();
-
   size_t queue_desc_addr = queue_msg.fmq_value(0).fmq_desc_address();
   if (queue_desc_addr == 0) {
-    LOG(ERROR) << "Invalid queue descriptor address."
-               << "vtsc either didn't set the address or set a null pointer.";
+    LOG(ERROR)
+        << "Resource manager: invalid queue descriptor address."
+        << "HAL driver either didn't set the address or set a null pointer.";
     return -1;  // check for null pointer
   }
-  return fmq_driver_.CreateFmq(data_type, sync, queue_desc_addr);
+
+  FmqRequestMessage fmq_request;
+  FmqResponseMessage fmq_response;
+  fmq_request.set_operation(FMQ_CREATE);
+  fmq_request.set_sync(queue_msg.type() == TYPE_FMQ_SYNC);
+  // TODO: support user-defined types in the future, only support scalar types
+  // for now.
+  fmq_request.set_data_type(queue_msg.fmq_value(0).scalar_type());
+  fmq_request.set_queue_desc_addr(queue_desc_addr);
+  ProcessFmqCommand(fmq_request, &fmq_response);
+  return fmq_response.queue_id();
 }
 
 bool VtsResourceManager::GetQueueDescAddress(
     const VariableSpecificationMessage& queue_msg, size_t* result) {
-  bool sync = queue_msg.type() == TYPE_FMQ_SYNC;
+  FmqRequestMessage fmq_request;
+  FmqResponseMessage fmq_response;
+  fmq_request.set_operation(FMQ_GET_DESC_ADDR);
+  fmq_request.set_sync(queue_msg.type() == TYPE_FMQ_SYNC);
   // TODO: support user-defined types in the future, only support scalar types
   // for now.
-  const string& data_type = queue_msg.fmq_value(0).scalar_type();
-  int queue_id = queue_msg.fmq_value(0).fmq_id();
-  bool success =
-      fmq_driver_.GetQueueDescAddress(data_type, sync, queue_id, result);
+  fmq_request.set_data_type(queue_msg.fmq_value(0).scalar_type());
+  fmq_request.set_queue_id(queue_msg.fmq_value(0).fmq_id());
+  ProcessFmqCommand(fmq_request, &fmq_response);
+  bool success = fmq_response.success();
+  *result = fmq_response.sizet_return_val();
   return success;
 }
 
-bool VtsResourceManager::ProcessFmqReadWriteInternal(
-    FmqOp op, const string& data_type, bool sync, int queue_id, void* data,
-    size_t data_size, int64_t time_out_nanos) {
-  switch (op) {
-    case FMQ_PROTO_WRITE: {
-      return fmq_driver_.WriteFmq(data_type, sync, queue_id, data, data_size);
-    }
-    case FMQ_PROTO_WRITE_BLOCKING: {
-      return fmq_driver_.WriteFmqBlocking(data_type, sync, queue_id, data,
-                                          data_size, time_out_nanos);
-    }
-    case FMQ_PROTO_READ: {
-      return fmq_driver_.ReadFmq(data_type, sync, queue_id, data, data_size);
-    }
-    case FMQ_PROTO_READ_BLOCKING: {
-      return fmq_driver_.ReadFmqBlocking(data_type, sync, queue_id, data,
-                                         data_size, time_out_nanos);
-    }
-    default: {
-      LOG(ERROR) << "unsupported operation.";
-      break;
-    }
+template <typename T>
+void VtsResourceManager::ProcessFmqCommandWithType(
+    const FmqRequestMessage& fmq_request, FmqResponseMessage* fmq_response) {
+  // Infers queue flavor and calls the internal method.
+  if (fmq_request.sync()) {
+    ProcessFmqCommandInternal<T, kSynchronizedReadWrite>(fmq_request,
+                                                         fmq_response);
+  } else {
+    ProcessFmqCommandInternal<T, kUnsynchronizedWrite>(fmq_request,
+                                                       fmq_response);
   }
-  return false;
 }
 
-void VtsResourceManager::ProcessFmqWrite(const FmqRequestMessage& fmq_request,
-                                         FmqResponseMessage* fmq_response) {
-  void* data_buffer;
-  bool success = false;
-  FmqOp op = fmq_request.operation();
+template <typename T, hardware::MQFlavor flavor>
+void VtsResourceManager::ProcessFmqCommandInternal(
+    const FmqRequestMessage& fmq_request, FmqResponseMessage* fmq_response) {
   const string& data_type = fmq_request.data_type();
-  bool sync = fmq_request.sync();
   int queue_id = fmq_request.queue_id();
+  size_t queue_size = fmq_request.queue_size();
+  bool blocking = fmq_request.blocking();
+  bool reset_pointers = fmq_request.reset_pointers();
   size_t write_data_size = fmq_request.write_data_size();
+  T write_data[write_data_size];
+  size_t read_data_size = fmq_request.read_data_size();
+  T read_data[read_data_size];
+  size_t queue_desc_addr = fmq_request.queue_desc_addr();
   int64_t time_out_nanos = fmq_request.time_out_nanos();
+  // TODO: The three variables below are manually created.
+  // In the future, get these from host side when we support long-form
+  // blocking from host side.
+  uint32_t read_notification = 0;
+  uint32_t write_notification = 0;
+  atomic<uint32_t> event_flag_word;
+  bool success = false;
+  size_t sizet_result;
 
-  if (!data_type.compare("int8_t")) {
-    vector<int8_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().int8_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("uint8_t")) {
-    vector<uint8_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().uint8_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("int16_t")) {
-    vector<int16_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().int16_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("uint16_t")) {
-    vector<uint16_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().uint16_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("int32_t")) {
-    vector<int32_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().int32_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("uint32_t")) {
-    vector<uint32_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().uint32_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("int64_t")) {
-    vector<int64_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().int64_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("uint64_t")) {
-    vector<uint64_t> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().uint64_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("float_t")) {
-    vector<float> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().float_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("double_t")) {
-    vector<double> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().double_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
-  } else if (!data_type.compare("bool_t")) {
-    vector<char> write_data(write_data_size);
-    transform(fmq_request.write_data().cbegin(),
-              fmq_request.write_data().cend(), write_data.begin(),
-              [](const VariableSpecificationMessage& item) {
-                return item.scalar_value().bool_t();
-              });
-    data_buffer = static_cast<void*>(&write_data[0]);
-    success =
-        ProcessFmqReadWriteInternal(op, data_type, sync, queue_id, data_buffer,
-                                    write_data_size, time_out_nanos);
+  switch (fmq_request.operation()) {
+    case FMQ_CREATE: {
+      int new_queue_id = -1;
+      if (queue_id == -1) {
+        if (queue_desc_addr == 0) {
+          new_queue_id =
+              fmq_driver_.CreateFmq<T, flavor>(data_type, queue_size, blocking);
+        } else {
+          new_queue_id =
+              fmq_driver_.CreateFmq<T, flavor>(data_type, queue_desc_addr);
+        }
+      } else {
+        new_queue_id = fmq_driver_.CreateFmq<T, flavor>(data_type, queue_id,
+                                                        reset_pointers);
+      }
+      fmq_response->set_queue_id(new_queue_id);
+      success = new_queue_id != -1;
+      break;
+    }
+    case FMQ_READ: {
+      success = fmq_driver_.ReadFmq<T, flavor>(data_type, queue_id, read_data,
+                                               read_data_size);
+      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      break;
+    }
+    case FMQ_READ_BLOCKING: {
+      success = fmq_driver_.ReadFmqBlocking<T, flavor>(
+          data_type, queue_id, read_data, read_data_size, time_out_nanos);
+      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      break;
+    }
+    case FMQ_READ_BLOCKING_LONG: {
+      // TODO: implement a meaningful long-form blocking mechanism
+      // Currently passing a dummy event flag word.
+      success = fmq_driver_.ReadFmqBlocking<T, flavor>(
+          data_type, queue_id, read_data, read_data_size, read_notification,
+          write_notification, time_out_nanos, &event_flag_word);
+      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      break;
+    }
+    case FMQ_WRITE: {
+      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      success = fmq_driver_.WriteFmq<T, flavor>(data_type, queue_id, write_data,
+                                                write_data_size);
+      break;
+    }
+    case FMQ_WRITE_BLOCKING: {
+      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      success = fmq_driver_.WriteFmqBlocking<T, flavor>(
+          data_type, queue_id, write_data, write_data_size, time_out_nanos);
+      break;
+    }
+    case FMQ_WRITE_BLOCKING_LONG: {
+      // TODO: implement a meaningful long-form blocking mechanism
+      // Currently passing a dummy event flag word.
+      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      success = fmq_driver_.WriteFmqBlocking<T, flavor>(
+          data_type, queue_id, write_data, write_data_size, read_notification,
+          write_notification, time_out_nanos, &event_flag_word);
+      break;
+    }
+    case FMQ_AVAILABLE_WRITE: {
+      success = fmq_driver_.AvailableToWrite<T, flavor>(data_type, queue_id,
+                                                        &sizet_result);
+      fmq_response->set_sizet_return_val(sizet_result);
+      break;
+    }
+    case FMQ_AVAILABLE_READ: {
+      success = fmq_driver_.AvailableToRead<T, flavor>(data_type, queue_id,
+                                                       &sizet_result);
+      fmq_response->set_sizet_return_val(sizet_result);
+      break;
+    }
+    case FMQ_GET_QUANTUM_SIZE: {
+      success = fmq_driver_.GetQuantumSize<T, flavor>(data_type, queue_id,
+                                                      &sizet_result);
+      fmq_response->set_sizet_return_val(sizet_result);
+      break;
+    }
+    case FMQ_GET_QUANTUM_COUNT: {
+      success = fmq_driver_.GetQuantumCount<T, flavor>(data_type, queue_id,
+                                                       &sizet_result);
+      fmq_response->set_sizet_return_val(sizet_result);
+      break;
+    }
+    case FMQ_IS_VALID: {
+      success = fmq_driver_.IsValid<T, flavor>(data_type, queue_id);
+      break;
+    }
+    case FMQ_GET_DESC_ADDR: {
+      success = fmq_driver_.GetQueueDescAddress<T, flavor>(data_type, queue_id,
+                                                           &sizet_result);
+      fmq_response->set_sizet_return_val(sizet_result);
+      break;
+    }
+    default:
+      LOG(ERROR) << "Resource manager: Unsupported FMQ operation.";
   }
   fmq_response->set_success(success);
+}
+
+template <typename T>
+void VtsResourceManager::FmqProto2Cpp(const FmqRequestMessage& fmq_request,
+                                      T* write_data, size_t write_data_size) {
+  const string& data_type = fmq_request.data_type();
+  // Read from different proto fields based on type.
+  if (data_type == "int8_t") {
+    int8_t* convert_data = reinterpret_cast<int8_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = (fmq_request.write_data(i).scalar_value().int8_t());
+    }
+  } else if (data_type == "uint8_t") {
+    uint8_t* convert_data = reinterpret_cast<uint8_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().uint8_t();
+    }
+  } else if (data_type == "int16_t") {
+    int16_t* convert_data = reinterpret_cast<int16_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().int16_t();
+    }
+  } else if (data_type == "uint16_t") {
+    uint16_t* convert_data = reinterpret_cast<uint16_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().uint16_t();
+    }
+  } else if (data_type == "int32_t") {
+    int32_t* convert_data = reinterpret_cast<int32_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().int32_t();
+    }
+  } else if (data_type == "uint32_t") {
+    uint32_t* convert_data = reinterpret_cast<uint32_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().uint32_t();
+    }
+  } else if (data_type == "int64_t") {
+    int64_t* convert_data = reinterpret_cast<int64_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().int64_t();
+    }
+  } else if (data_type == "uint64_t") {
+    uint64_t* convert_data = reinterpret_cast<uint64_t*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().uint64_t();
+    }
+  } else if (data_type == "float_t") {
+    float* convert_data = reinterpret_cast<float*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().float_t();
+    }
+  } else if (data_type == "double_t") {
+    double* convert_data = reinterpret_cast<double*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().double_t();
+    }
+  } else if (data_type == "bool_t") {
+    bool* convert_data = reinterpret_cast<bool*>(write_data);
+    for (int i = 0; i < write_data_size; i++) {
+      convert_data[i] = fmq_request.write_data(i).scalar_value().bool_t();
+    }
+  }
 }
 
 // TODO: support user-defined types, only support primitive types now.
-void VtsResourceManager::ProcessFmqRead(const FmqRequestMessage& fmq_request,
-                                        FmqResponseMessage* fmq_response) {
-  bool success = false;
-  FmqOp op = fmq_request.operation();
-  const string& data_type = fmq_request.data_type();
-  bool sync = fmq_request.sync();
-  int queue_id = fmq_request.queue_id();
-  size_t read_data_size = fmq_request.read_data_size();
-  int64_t time_out_nanos = fmq_request.time_out_nanos();
-
-  if (!data_type.compare("int8_t")) {
-    int8_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+template <typename T>
+void VtsResourceManager::FmqCpp2Proto(FmqResponseMessage* fmq_response,
+                                      const string& data_type, T* read_data,
+                                      size_t read_data_size) {
+  fmq_response->clear_read_data();
+  // Write to different proto fields based on type.
+  if (data_type == "int8_t") {
+    int8_t* convert_data = reinterpret_cast<int8_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_int8_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_int8_t(convert_data[i]);
     }
-  } else if (!data_type.compare("uint8_t")) {
-    uint8_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "uint8_t") {
+    uint8_t* convert_data = reinterpret_cast<uint8_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_uint8_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_uint8_t(convert_data[i]);
     }
-  } else if (!data_type.compare("int16_t")) {
-    int16_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "int16_t") {
+    int16_t* convert_data = reinterpret_cast<int16_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_int16_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_int16_t(convert_data[i]);
     }
-  } else if (!data_type.compare("uint16_t")) {
-    uint16_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "uint16_t") {
+    uint16_t* convert_data = reinterpret_cast<uint16_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_uint16_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_uint16_t(convert_data[i]);
     }
-  } else if (!data_type.compare("int32_t")) {
-    int32_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "int32_t") {
+    int32_t* convert_data = reinterpret_cast<int32_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_int32_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_int32_t(convert_data[i]);
     }
-  } else if (!data_type.compare("uint32_t")) {
-    uint32_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "uint32_t") {
+    uint32_t* convert_data = reinterpret_cast<uint32_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_uint32_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_uint32_t(convert_data[i]);
     }
-  } else if (!data_type.compare("int64_t")) {
-    int64_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "int64_t") {
+    int64_t* convert_data = reinterpret_cast<int64_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_int64_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_int64_t(convert_data[i]);
     }
-  } else if (!data_type.compare("uint64_t")) {
-    uint64_t data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "uint64_t") {
+    uint64_t* convert_data = reinterpret_cast<uint64_t*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_uint64_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_uint64_t(convert_data[i]);
     }
-  } else if (!data_type.compare("float_t")) {
-    float data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "float_t") {
+    float* convert_data = reinterpret_cast<float*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_float_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_float_t(convert_data[i]);
     }
-  } else if (!data_type.compare("double_t")) {
-    double data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "double_t") {
+    double* convert_data = reinterpret_cast<double*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_double_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_double_t(convert_data[i]);
     }
-  } else if (!data_type.compare("bool_t")) {
-    bool data_buffer[read_data_size];
-    success = ProcessFmqReadWriteInternal(op, data_type, sync, queue_id,
-                                          static_cast<void*>(data_buffer),
-                                          read_data_size, time_out_nanos);
-    fmq_response->clear_read_data();
+  } else if (data_type == "bool_t") {
+    bool* convert_data = reinterpret_cast<bool*>(read_data);
     for (size_t i = 0; i < read_data_size; i++) {
       VariableSpecificationMessage* item = fmq_response->add_read_data();
       item->set_type(TYPE_SCALAR);
       item->set_scalar_type(data_type);
-      (item->mutable_scalar_value())->set_bool_t(data_buffer[i]);
+      (item->mutable_scalar_value())->set_bool_t(convert_data[i]);
     }
   }
-  fmq_response->set_success(success);
 }
 
 }  // namespace vts

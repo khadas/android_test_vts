@@ -34,15 +34,14 @@ namespace vts {
 
 // A class that manages all resources allocated on the target side.
 // Resources include fast message queue, hidl_memory, hidl_handle.
-// This class only manages fast message queue now.
-// TODO: Add hidl_memory and hidl_handle managers when they are implemented.
-// Example:
+//
+// Example (Process FMQ Command):
 //   // Initialize a manager.
 //   VtsResourceManager manager;
 //
 //   // Generate some FMQ request (e.g. creating a queue.).
 //   FmqRequestMessage fmq_request;
-//   fmq_request.set_operation(FMQ_PROTO_CREATE);
+//   fmq_request.set_operation(FMQ_CREATE);
 //   fmq_request.set_data_type("uint16_t");
 //   fmq_request.set_sync(true);
 //   fmq_request.set_queue_size(2048);
@@ -124,6 +123,8 @@ class VtsResourceManager {
                             size_t* result);
 
   // Processes command for operations on Fast Message Queue.
+  // The arguments are specified in fmq_request, and this function stores result
+  // in fmq_response.
   //
   // @param fmq_request  contains arguments for the operation.
   // @param fmq_response to be filled by the function.
@@ -158,41 +159,52 @@ class VtsResourceManager {
                            size_t* result);
 
  private:
-  // Calls internal methods in fmq_driver to execute FMQ read/write operations.
-  //
-  // @param op             read/write operation.
-  // @param data_type      type of data in the queue.
-  // @param sync           whether the queue is synchronized (only has one
-  //                       reader).
-  // @param queue_id       identifies the message queue object.
-  // @param data           write/read data.
-  // @param data_size      length of data.
-  // @param time_out_nanos wait time (in nanoseconds) when blocking.
-  //
-  // @return true if the operation succeeds, false otherwise.
-  bool ProcessFmqReadWriteInternal(FmqOp op, const string& data_type, bool sync,
-                                   int queue_id, void* data, size_t data_size,
-                                   int64_t time_out_nanos);
+  // Function template used in our map that maps type name to function
+  // with template.
+  typedef void (VtsResourceManager::*ProcessFmqCommandFn)(
+      const FmqRequestMessage&, FmqResponseMessage*);
 
-  // Processes write operation on the FMQ.
-  // The function determines the data type of the write operation,
-  // and calls the corresponding methods to perform write.
-  // The results are stored in fmq_response.
+  // This method infers the queue flavor from the sync field in fmq_request
+  // proto message, and calls ProcessFmqCommandInternal() with template T
+  // and queue flavor.
   //
-  // @param fmq_request  arguments for the FMQ operation.
-  // @param fmq_response to be filled by the function.
-  void ProcessFmqWrite(const FmqRequestMessage& fmq_request,
-                       FmqResponseMessage* fmq_response);
+  // @param fmq_request  contains arguments for FMQ operation.
+  // @param fmq_response FMQ response to be filled by this function.
+  template <typename T>
+  void ProcessFmqCommandWithType(const FmqRequestMessage& fmq_request,
+                                 FmqResponseMessage* fmq_response);
 
-  // Processes read operation on the FMQ.
-  // The function determines the data type of the read operation,
-  // and calls the corresponding methods to perform read.
-  // The results are stored in fmq_response.
+  // A helper method to call methods on fmq_driver.
+  // This method already has the template type and flavor of FMQ.
   //
-  // @param fmq_request  arguments for the FMQ operation.
-  // @param fmq_response to be filled by the function.
-  void ProcessFmqRead(const FmqRequestMessage& fmq_request,
-                      FmqResponseMessage* fmq_response);
+  // @param fmq_request  contains arguments for FMQ operation.
+  // @param fmq_response FMQ response to be filled by this function.
+  template <typename T, hardware::MQFlavor flavor>
+  void ProcessFmqCommandInternal(const FmqRequestMessage& fmq_request,
+                                 FmqResponseMessage* fmq_response);
+
+  // Converts write_data field in fmq_request to a C++ buffer.
+  //
+  // @param fmq_request    contains the write_data, represented as a repeated
+  //                       proto field.
+  // @param write_data     converted data that will be written into FMQ.
+  // @param write_data_size number of items in write_data.
+  template <typename T>
+  void FmqProto2Cpp(const FmqRequestMessage& fmq_request, T* write_data,
+                    size_t write_data_size);
+
+  // Converts a C++ buffer into read_data field in fmq_response.
+  //
+  // @param fmq_response   to be filled by the function. The function fills the
+  //                       read_data field, which is represented as a repeated
+  //                       proto field.
+  // @param data_type      type of data in FMQ, this information will be
+  //                       written into protobuf message.
+  // @param read_data      contains data read from FMQ read operation.
+  // @param read_data_size number of items in read_data.
+  template <typename T>
+  void FmqCpp2Proto(FmqResponseMessage* fmq_response, const string& data_type,
+                    T* read_data, size_t read_data_size);
 
   // Manages Fast Message Queue (FMQ) driver.
   VtsFmqDriver fmq_driver_;
@@ -200,6 +212,20 @@ class VtsResourceManager {
   VtsHidlMemoryDriver hidl_memory_driver_;
   // Manages hidl_handle driver.
   VtsHidlHandleDriver hidl_handle_driver_;
+  // A map that maps each FMQ user-defined type into a process
+  // function with template.
+  const unordered_map<string, ProcessFmqCommandFn> func_map_ = {
+      {"int8_t", &VtsResourceManager::ProcessFmqCommandWithType<int8_t>},
+      {"uint8_t", &VtsResourceManager::ProcessFmqCommandWithType<uint8_t>},
+      {"int16_t", &VtsResourceManager::ProcessFmqCommandWithType<int16_t>},
+      {"uint16_t", &VtsResourceManager::ProcessFmqCommandWithType<uint16_t>},
+      {"int32_t", &VtsResourceManager::ProcessFmqCommandWithType<int32_t>},
+      {"uint32_t", &VtsResourceManager::ProcessFmqCommandWithType<uint32_t>},
+      {"int64_t", &VtsResourceManager::ProcessFmqCommandWithType<int64_t>},
+      {"uint64_t", &VtsResourceManager::ProcessFmqCommandWithType<uint64_t>},
+      {"float", &VtsResourceManager::ProcessFmqCommandWithType<float>},
+      {"double", &VtsResourceManager::ProcessFmqCommandWithType<double>},
+      {"bool", &VtsResourceManager::ProcessFmqCommandWithType<bool>}};
 };
 
 }  // namespace vts
