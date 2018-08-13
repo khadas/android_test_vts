@@ -60,7 +60,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
 
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_CREATE, queue_id)
+            ResControlMsg.FMQ_CREATE, queue_id)
         request_msg.queue_size = queue_size
         request_msg.blocking = blocking
         request_msg.reset_pointers = reset_pointers
@@ -90,7 +90,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         # Prepare arguments.
         del data[:]
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_READ, self._queue_id)
+            ResControlMsg.FMQ_READ, self._queue_id)
         request_msg.read_data_size = data_size
 
         # Send and receive data.
@@ -120,7 +120,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         # Prepare arguments.
         del data[:]
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_READ_BLOCKING, self._queue_id)
+            ResControlMsg.FMQ_READ_BLOCKING, self._queue_id)
         request_msg.read_data_size = data_size
         request_msg.time_out_nanos = time_out_nanos
 
@@ -146,7 +146,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_WRITE, self._queue_id)
+            ResControlMsg.FMQ_WRITE, self._queue_id)
         self._prepareWriteData(request_msg, data[:data_size])
 
         # Send and receive data.
@@ -173,7 +173,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_WRITE_BLOCKING, self._queue_id)
+            ResControlMsg.FMQ_WRITE_BLOCKING, self._queue_id)
         self._prepareWriteData(request_msg, data[:data_size])
         request_msg.time_out_nanos = time_out_nanos
 
@@ -191,7 +191,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_AVAILABLE_WRITE, self._queue_id)
+            ResControlMsg.FMQ_AVAILABLE_WRITE, self._queue_id)
 
         # Send and receive data.
         return self._processUtilMethod(request_msg)
@@ -204,7 +204,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_AVAILABLE_READ, self._queue_id)
+            ResControlMsg.FMQ_AVAILABLE_READ, self._queue_id)
 
         # Send and receive data.
         return self._processUtilMethod(request_msg)
@@ -217,7 +217,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_GET_QUANTUM_SIZE, self._queue_id)
+            ResControlMsg.FMQ_GET_QUANTUM_SIZE, self._queue_id)
 
         # send and receive data
         return self._processUtilMethod(request_msg)
@@ -230,7 +230,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_GET_QUANTUM_COUNT, self._queue_id)
+            ResControlMsg.FMQ_GET_QUANTUM_COUNT, self._queue_id)
 
         # Send and receive data.
         return self._processUtilMethod(request_msg)
@@ -243,7 +243,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
-            ResControlMsg.FMQ_PROTO_IS_VALID, self._queue_id)
+            ResControlMsg.FMQ_IS_VALID, self._queue_id)
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
