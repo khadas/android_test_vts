@@ -19,7 +19,6 @@
 
 #include <mutex>
 #include <string>
-#include <typeinfo>
 #include <unordered_map>
 
 #include <android-base/logging.h>
@@ -34,92 +33,19 @@ using android::hardware::MQDescriptorUnsync;
 using namespace std;
 using QueueId = int;
 
+static constexpr const int kInvalidQueueId = -1;
+
 namespace android {
 namespace vts {
 
 // struct to store queue information.
 struct QueueInfo {
   // type of data in the queue.
-  const type_info& queue_data_type;
+  string queue_data_type;
   // flavor of the queue (sync or unsync).
   hardware::MQFlavor queue_flavor;
   // pointer to the actual queue object.
   shared_ptr<void> queue_object;
-};
-
-// possible operation on the queue.
-enum FmqOperation {
-  // unknown operation.
-  FMQ_OP_UNKNOWN,
-  // create a new queue, or new object based on an existing queue.
-  FMQ_OP_CREATE,
-  // read without blocking.
-  FMQ_OP_READ,
-  // read with blocking (short form, no multiple queue blocking).
-  FMQ_OP_READ_BLOCKING,
-  // read with blocking (long form, possible multiple queue blocking).
-  // target side only for now.
-  FMQ_OP_READ_BLOCKING_LONG,
-  // write without blocking.
-  FMQ_OP_WRITE,
-  // write with blocking (short form, no multiple queue blocking).
-  FMQ_OP_WRITE_BLOCKING,
-  // write with blocking (long form, possible multiple queue blocking).
-  // target side only for now.
-  FMQ_OP_WRITE_BLOCKING_LONG,
-  // gets space available to write.
-  FMQ_OP_AVAILABLE_WRITE,
-  // gets number of items available to read.
-  FMQ_OP_AVAILABLE_READ,
-  // gets size of item.
-  FMQ_OP_GET_QUANTUM_SIZE,
-  // gets number of items that fit into the queue.
-  FMQ_OP_GET_QUANTUM_COUNT,
-  // checks if the queue is valid.
-  FMQ_OP_IS_VALID,
-  // gets event flag word, which allows multiple queue blocking.
-  FMQ_OP_GET_EVENT_FLAG_WORD,
-  // gets address of the queue.
-  FMQ_OP_GET_QUEUE_DESC_ADDR
-};
-
-// struct to store parameters in an operation.
-struct OperationParam {
-  OperationParam()
-      : op(FMQ_OP_UNKNOWN),
-        queue_id(-1),
-        queue_descriptor(0),
-        queue_size(0),
-        blocking(false),
-        reset_pointers(true),
-        data_size(0),
-        read_notification(0),
-        write_notification(0),
-        time_out_nanos(0),
-        event_flag_word(nullptr){};
-  FmqOperation op;      // operation to perform on FMQ.
-  QueueId queue_id;     // identifies the message queue object.
-  size_t queue_descriptor;  // pointer to descriptor of an existing queue.
-  size_t queue_size;    // size of the queue.
-  bool blocking;        // whether to enable blocking in the queue.
-  bool reset_pointers;  // whether to reset read/write pointers when creating a
-                        // message queue object based on an existing message
-                        // queue.
-  size_t data_size;     // length of the data.
-  uint32_t read_notification;         // bits to set when finish reading.
-  uint32_t write_notification;        // bits to set when finish writing.
-  int64_t time_out_nanos;             // wait time while blocking.
-  atomic<uint32_t>* event_flag_word;  // allows for multiple queue blocking.
-};
-
-// different operations on the queue have different return value types.
-union RequestResult {
-  // stores results from functions that return int (create).
-  int int_val;
-  // stores results from functions that return size_t (e.g. GetQuantumSize).
-  size_t sizet_val;
-  // stores results from functions that return pointer (e.g. GetEventFlagWord).
-  atomic<uint32_t>* pointer_val;
 };
 
 // A fast message queue class that manages all fast message queues created
@@ -128,83 +54,80 @@ union RequestResult {
 // Example:
 //   VtsFmqDriver manager;
 //   // creates one reader and one writer.
-//   QueueId writer_id = manager.CreateFmq("uint16_t", true, NUM_ELEMS, false);
-//   QueueId reader_id = manager.CreateFmq("uint16_t", true, writer_id);
+//   QueueId writer_id =
+//       manager.CreateFmq<uint16_t, kSynchronizedReadWrite>(2048, false);
+//   QueueId reader_id =
+//       manager.CreateFmq<uint16_t, kSynchronizedReadWrite>(writer_id);
 //   // write some data
 //   uint16_t write_data[5] {1, 2, 3, 4, 5};
-//   manager.WriteFmq("uint16_t", true, writer_id,
-//                    static_cast<void*>(write_data), 5);
+//   manager.WriteFmq<uint16_t, kSynchronizedReadWrite>(
+//       writer_id, write_data, 5);
 //   // read the same data back
 //   uint16_t read_data[5];
-//   manager.ReadFmq("uint16_t", true, reader_id,
-//                   static_cast<void*>(read_data), 5);
+//   manager.ReadFmq<uint16_t, kSynchronizedReadWrite>(
+//       reader_id, read_data, 5);
 class VtsFmqDriver {
  public:
   // Constructor to initialize a Fast Message Queue (FMQ) manager.
-  VtsFmqDriver();
+  VtsFmqDriver() {}
 
-  // Virtual destructor to clean up the class.
-  ~VtsFmqDriver();
+  // Destructor to clean up the class.
+  ~VtsFmqDriver() {
+    // Clears objects in the map.
+    fmq_map_.clear();
+  }
 
   // Creates a brand new FMQ, i.e. the "first message queue object".
   //
-  // @param type       type of data in the queue.
-  // @param sync       whether queue is synchronized (only has one reader).
+  // @param data_type  type of data in the queue. This information is stored
+  //                   in the driver to verify type later.
   // @param queue_size number of elements in the queue.
   // @param blocking   whether to enable blocking within the queue.
   //
   // @return message queue object id associated with the caller on success,
-  //         -1 on failure.
-  QueueId CreateFmq(string type, bool sync, size_t queue_size, bool blocking);
+  //         kInvalidQueueId on failure.
+  template <typename T, hardware::MQFlavor flavor>
+  QueueId CreateFmq(const string& data_type, size_t queue_size, bool blocking);
 
   // Creates a new FMQ object based on an existing message queue
   // (Using queue_id assigned by fmq_driver.).
   //
-  // @param type           string, queue data type.
-  // @param sync           whether queue is synchronized (only has one reader).
+  // @param data_type      type of data in the queue. This information is stored
+  //                       in the driver to verify type later.
   // @param queue_id       identifies the message queue object.
   // @param reset_pointers whether to reset read and write pointers.
   //
   // @return message queue object id associated with the caller on success,
-  //         -1 on failure.
-  QueueId CreateFmq(string type, bool sync, QueueId queue_id,
+  //         kInvalidQueueId on failure.
+  template <typename T, hardware::MQFlavor flavor>
+  QueueId CreateFmq(const string& data_type, QueueId queue_id,
                     bool reset_pointers = true);
 
   // Creates a new FMQ object based on an existing message queue
   // (Using queue descriptor.).
   // This method will reset read/write pointers in the new queue object.
   //
-  // @param type             string, queue data type.
-  // @param sync             whether queue is synchronized
-  //                         (only has one reader).
+  // @param data_type        type of data in the queue. This information is
+  //                         stored in the driver to verify type later.
   // @param queue_descriptor pointer to descriptor of an existing queue.
   //
   // @return message queue object id associated with the caller on success,
-  //         -1 on failure.
-  QueueId CreateFmq(string type, bool sync, size_t queue_descriptor);
-
-  // Reads one item from FMQ (no blocking at all).
-  //
-  // @param type     type of data in the queue data type.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param data     pointer to the start of data to be filled.
-  //
-  // @return true if no error happens when reading from FMQ,
-  //         false otherwise.
-  bool ReadFmq(string type, bool sync, QueueId queue_id, void* data);
+  //         kInvalidQueueId on failure.
+  template <typename T, hardware::MQFlavor flavor>
+  QueueId CreateFmq(const string& data_type, size_t queue_descriptor);
 
   // Reads data_size items from FMQ (no blocking at all).
   //
-  // @param type      type of data in the queue.
-  // @param sync      whether queue is synchronized (only has one reader).
+  // @param data_type type of data in the queue. This information is verified
+  //                  by the driver before calling the API on FMQ.
   // @param queue_id  identifies the message queue object.
   // @param data      pointer to the start of data to be filled.
   // @param data_size number of items to read.
   //
   // @return true if no error happens when reading from FMQ,
   //         false otherwise.
-  bool ReadFmq(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool ReadFmq(const string& data_type, QueueId queue_id, T* data,
                size_t data_size);
 
   // Reads data_size items from FMQ, block if there is not enough data to
@@ -212,8 +135,8 @@ class VtsFmqDriver {
   // This method can only be called if blocking=true on creation of the "first
   // message queue object" of the FMQ.
   //
-  // @param type           type of data in the queue.
-  // @param sync           whether queue is synchronized (only has one reader).
+  // @param data_type      type of data in the queue. This information is
+  //                       verified by the driver before calling the API on FMQ.
   // @param queue_id       identifies the message queue object.
   // @param data           pointer to the start of data to be filled.
   // @param data_size      number of items to read.
@@ -221,13 +144,15 @@ class VtsFmqDriver {
   //
   // Returns: true if no error happens when reading from FMQ,
   //          false otherwise.
-  bool ReadFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool ReadFmqBlocking(const string& data_type, QueueId queue_id, T* data,
                        size_t data_size, int64_t time_out_nanos);
 
   // Reads data_size items from FMQ, possibly block on other queues.
   //
-  // @param type               type of data in the queue.
-  // @param sync               whether queue is synchronized.
+  // @param data_type          type of data in the queue. This information is
+  //                           verified by the driver before calling the API
+  //                           on FMQ.
   // @param queue_id           identifies the message queue object.
   // @param data               pointer to the start of data to be filled.
   // @param data_size          number of items to read.
@@ -239,33 +164,24 @@ class VtsFmqDriver {
   //
   // @return true if no error happens when reading from FMQ,
   //         false otherwise.
-  bool ReadFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool ReadFmqBlocking(const string& data_type, QueueId queue_id, T* data,
                        size_t data_size, uint32_t read_notification,
                        uint32_t write_notification, int64_t time_out_nanos,
                        atomic<uint32_t>* event_flag_word);
 
-  // Writes one item to FMQ (no blocking at all).
-  //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param data     pointer to the start of data to be written.
-  //
-  // @return true if no error happens when writing to FMQ,
-  //         false otherwise.
-  bool WriteFmq(string type, bool sync, QueueId queue_id, void* data);
-
   // Writes data_size items to FMQ (no blocking at all).
   //
-  // @param type      type of data in the queue.
-  // @param sync      whether queue is synchronized (only has one reader).
+  // @param data_type type of data in the queue. This information is verified
+  //                  by the driver before calling the API on FMQ.
   // @param queue_id  identifies the message queue object.
   // @param data      pointer to the start of data to be written.
   // @param data_size number of items to write.
   //
   // @return true if no error happens when writing to FMQ,
   //         false otherwise.
-  bool WriteFmq(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool WriteFmq(const string& data_type, QueueId queue_id, T* data,
                 size_t data_size);
 
   // Writes data_size items to FMQ, block if there is not enough space in
@@ -273,8 +189,9 @@ class VtsFmqDriver {
   // This method can only be called if blocking=true on creation of the "first
   // message queue object" of the FMQ.
   //
-  // @param type           type of data in the queue.
-  // @param sync           whether queue is synchronized (only has one reader).
+  // @param data_type      type of data in the queue. This information is
+  // verified
+  //                       by the driver before calling the API on FMQ.
   // @param queue_id       identifies the message queue object.
   // @param data           pointer to the start of data to be written.
   // @param data_size      number of items to write.
@@ -282,13 +199,15 @@ class VtsFmqDriver {
   //
   // @returns true if no error happens when writing to FMQ,
   //          false otherwise
-  bool WriteFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool WriteFmqBlocking(const string& data_type, QueueId queue_id, T* data,
                         size_t data_size, int64_t time_out_nanos);
 
   // Writes data_size items to FMQ, possibly block on other queues.
   //
-  // @param type               type of data in the queue.
-  // @param sync               whether queue is synchronized.
+  // @param data_type          type of data in the queue. This information is
+  //                           verified by the driver before calling the API
+  //                           on FMQ.
   // @param queue_id           identifies the message queue object.
   // @param data               pointer to the start of data to be written.
   // @param data_size          number of items to write.
@@ -300,201 +219,139 @@ class VtsFmqDriver {
   //
   // @return true if no error happens when writing to FMQ,
   //         false otherwise.
-  bool WriteFmqBlocking(string type, bool sync, QueueId queue_id, void* data,
+  template <typename T, hardware::MQFlavor flavor>
+  bool WriteFmqBlocking(const string& data_type, QueueId queue_id, T* data,
                         size_t data_size, uint32_t read_notification,
                         uint32_t write_notification, int64_t time_out_nanos,
                         atomic<uint32_t>* event_flag_word);
 
   // Gets space available to write in the queue.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer to the result. Use pointer to store result because
-  //                 the return value signals if the queue is found correctly.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to the result. Use pointer to store result because
+  //                  the return value signals if the queue is found correctly.
   //
   // @return true if queue is found and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool AvailableToWrite(string type, bool sync, QueueId queue_id,
+  template <typename T, hardware::MQFlavor flavor>
+  bool AvailableToWrite(const string& data_type, QueueId queue_id,
                         size_t* result);
 
   // Gets number of items available to read in the queue.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer to the result. Use pointer to store result because
-  //                 the return value signals if the queue is found correctly.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to the result. Use pointer to store result because
+  //                  the return value signals if the queue is found correctly.
   //
   // @return true if queue is found and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool AvailableToRead(string type, bool sync, QueueId queue_id,
+  template <typename T, hardware::MQFlavor flavor>
+  bool AvailableToRead(const string& data_type, QueueId queue_id,
                        size_t* result);
 
   // Gets size of item in the queue.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer to the result. Use pointer to store result because
-  //                 the return value signals if the queue is found correctly.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to the result. Use pointer to store result because
+  //                  the return value signals if the queue is found correctly.
   //
   // @return true if queue is found and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool GetQuantumSize(string type, bool sync, QueueId queue_id, size_t* result);
+  template <typename T, hardware::MQFlavor flavor>
+  bool GetQuantumSize(const string& data_type, QueueId queue_id,
+                      size_t* result);
 
   // Gets number of items that fit in the queue.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer to the result. Use pointer to store result because
-  //                 the return value signals if the queue is found correctly.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to the result. Use pointer to store result because
+  //                  the return value signals if the queue is found correctly.
   //
   // @return true if queue is found and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool GetQuantumCount(string type, bool sync, QueueId queue_id,
+  template <typename T, hardware::MQFlavor flavor>
+  bool GetQuantumCount(const string& data_type, QueueId queue_id,
                        size_t* result);
 
   // Checks if the queue associated with queue_id is valid.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
   //
   // @return true if the queue object is valid, false otherwise.
-  bool IsValid(string type, bool sync, QueueId queue_id);
+  template <typename T, hardware::MQFlavor flavor>
+  bool IsValid(const string& data_type, QueueId queue_id);
 
   // Gets event flag word of the queue, which allows multiple queues
   // to communicate (i.e. blocking).
   // The returned event flag word can be passed into readBlocking() and
   // writeBlocking() to achieve blocking among multiple queues.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer to the result. Use pointer to store result because
-  //                 the return value signals if the queue is found correctly.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to the result. Use pointer to store result because
+  //                  the return value signals if the queue is found correctly.
   //
   // @return true if queue is found and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool GetEventFlagWord(string type, bool sync, QueueId queue_id,
+  template <typename T, hardware::MQFlavor flavor>
+  bool GetEventFlagWord(const string& data_type, QueueId queue_id,
                         atomic<uint32_t>** result);
 
   // Gets the address of queue descriptor in memory. This function is called by
   // driver_manager to preprocess arguments that are FMQs.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether queue is synchronized (only has one reader).
-  // @param queue_id identifies the queue object.
-  // @param result   pointer to store result.
+  // @param data_type type of data in the queue. This information is
+  //                  verified by the driver before calling the API on FMQ.
+  // @param queue_id  identifies the message queue object.
+  // @param result    pointer to store result.
   //
   // @return true if queue is found, and type matches, and puts actual result in
   //              result pointer,
   //         false otherwise.
-  bool GetQueueDescAddress(string type, bool sync, QueueId queue_id,
+  template <typename T, hardware::MQFlavor flavor>
+  bool GetQueueDescAddress(const string& data_type, QueueId queue_id,
                            size_t* result);
 
  private:
   // Finds the queue in the map based on the input queue ID.
   //
-  // @param queue_id identifies the queue object.
+  // @param data_type type of data in the queue. This function verifies this
+  //                  information.
+  // @param queue_id  identifies the message queue object.
   //
   // @return the pointer to message queue object,
   //         nullptr if queue ID is invalid or queue type is misspecified.
   template <typename T, hardware::MQFlavor flavor>
-  MessageQueue<T, flavor>* FindQueue(QueueId queue_id);
+  MessageQueue<T, flavor>* FindQueue(const string& data_type, QueueId queue_id);
 
-  // Processes the request from the host.
+  // Inserts a FMQ object into the map, along with its type of data and queue
+  // flavor. This function ensures only one thread is inserting queue into the
+  // map at once.
   //
-  // @param type     type of data in the queue.
-  // @param sync     whether the queue is synchronized (only has one reader).
-  // @param op_param reference to a struct that stores parameters in the
-  //                 operation request.
-  // @param result   pointer to the result, since various functions have
-  //                 different types of return values.
-  // @param data     pointer to the start of data buffer.
-  //
-  // @return true if queue is found and type checking passes, and the
-  //              actual result is stored in result pointer,
-  //         false otherwise.
-  bool ProcessRequest(string type, bool sync, const OperationParam& op_param,
-                      RequestResult* result, void* data = nullptr);
-
-  // Helper method to determine the appropriate function to call and
-  // template to provide when performing operation on the queue, depending on
-  // whether the queue is synchronized, and whether the operation involves
-  // blocking read/write.
-  //
-  // @param sync        whether the queue is synchronized.
-  // @param op_param    reference to a struct that stores parameters in the
-  //                    operation request.
-  // @param result      pointer to the result, since various functions have
-  //                    different types of return values.
-  // @param data        pointer to the start of data buffer.
-  // @param is_blocking whether blocking is enabled in the queue.
-  //
-  // @return true if queue is found and type checking passes, and the
-  //              actual result is stored in result struct,
-  //         false otherwise.
-  template <typename T>
-  bool ExecuteOperationHelper(bool sync, const OperationParam& op_param,
-                              RequestResult* result, T* data, bool is_blocking);
-
-  // Executes the operation specified by the caller (non-blocking operation
-  // only).
-  //
-  // @param op_param reference to a struct that stores parameters in the
-  //                 operation request.
-  // @param result   pointer to the result, since various functions have
-  //                 different types of return values.
-  // @param data     pointer to the start of data buffer.
-  //
-  // @return true if queue is found and type checking passes, and the
-  //              actual result is stored in result struct,
-  //         false otherwise.
-  template <typename T, hardware::MQFlavor>
-  bool ExecuteNonBlockingOperation(const OperationParam& op_param,
-                                   RequestResult* result, T* data);
-
-  // Executes the operation specified by the caller (blocking operation).
-  //
-  // @param op_param reference to a struct that stores parameters in the
-  //                 operation request.
-  // @param data     pointer to the start of data buffer.
-  //
-  // @return true if the operation succeeds,
-  //         false otherwise.
-  template <typename T>
-  bool ExecuteBlockingOperation(const OperationParam& op_param, T* data);
-
-  // Inserts QueueInfo object into fmq_map_, while ensuring thread safety on
-  // fmq_map_.
-  //
-  // @param queue_info QueueInfo object.
+  // @param data_type    type of data in the queue. This information is stored
+  //                     in the driver.
+  // @param queue_object a shared pointer to MessageQueue.
   //
   // @return id associated with the queue.
-  QueueId InsertQueue(unique_ptr<QueueInfo> queue_info);
-
-  // Processes util methods that return size_t (AvailableToWrite,
-  // AvailableToRead, GetQuantumCount, GetQuantumSize).
-  //
-  // @param type     type of data in the queue.
-  // @param sync     whether the queue is synchronized (only has one reader).
-  // @param op       operation on the queue.
-  // @param queue_id identifies the message queue object.
-  // @param result   pointer that stores result.
-  //
-  // @return true if queue is found and type checking passes, and stores the
-  //              result in result pointer,
-  //         false otherwise.
-  bool ProcessUtilMethod(string type, bool sync, FmqOperation op,
-                         QueueId queue_id, size_t* result);
+  template <typename T, hardware::MQFlavor flavor>
+  QueueId InsertQueue(const string& data_type,
+                      shared_ptr<MessageQueue<T, flavor>> queue_object);
 
   // a hashtable to keep track of all ongoing FMQ's.
   // The key of the hashtable is the queue ID.
@@ -505,6 +362,279 @@ class VtsFmqDriver {
   // a mutex to ensure mutual exclusion of operations on fmq_map_
   mutex map_mutex_;
 };
+
+// Implementations follow, because all the methods are template methods.
+template <typename T, hardware::MQFlavor flavor>
+QueueId VtsFmqDriver::CreateFmq(const string& data_type, size_t queue_size,
+                                bool blocking) {
+  shared_ptr<MessageQueue<T, flavor>> new_queue(
+      new (std::nothrow) MessageQueue<T, flavor>(queue_size, blocking));
+  return InsertQueue<T, flavor>(data_type, new_queue);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+QueueId VtsFmqDriver::CreateFmq(const string& data_type, QueueId queue_id,
+                                bool reset_pointers) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  const hardware::MQDescriptor<T, flavor>* descriptor = queue_object->getDesc();
+  if (descriptor == nullptr) {
+    LOG(ERROR) << "FMQ Driver: cannot find descriptor for the specified "
+               << "Fast Message Queue with ID " << queue_id << ".";
+    return kInvalidQueueId;
+  }
+
+  shared_ptr<MessageQueue<T, flavor>> new_queue(
+      new (std::nothrow) MessageQueue<T, flavor>(*descriptor, reset_pointers));
+  return InsertQueue<T, flavor>(data_type, new_queue);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+QueueId VtsFmqDriver::CreateFmq(const string& data_type,
+                                size_t queue_desc_addr) {
+  // Cast the address back to a descriptor object.
+  hardware::MQDescriptor<T, flavor>* descriptor_addr =
+      reinterpret_cast<hardware::MQDescriptor<T, flavor>*>(queue_desc_addr);
+  shared_ptr<MessageQueue<T, flavor>> new_queue(
+      new (std::nothrow) MessageQueue<T, flavor>(*descriptor_addr));
+  // Need to manually delete this pointer because HAL driver allocates it.
+  delete descriptor_addr;
+
+  return InsertQueue<T, flavor>(data_type, new_queue);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::ReadFmq(const string& data_type, QueueId queue_id, T* data,
+                           size_t data_size) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->read(data, data_size);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::ReadFmqBlocking(const string& data_type, QueueId queue_id,
+                                   T* data, size_t data_size,
+                                   int64_t time_out_nanos) {
+  if (flavor == kUnsynchronizedWrite) {
+    LOG(ERROR) << "FMQ Driver: blocking read is not allowed in "
+               << "unsynchronized queue.";
+    return false;
+  }
+
+  MessageQueue<T, kSynchronizedReadWrite>* queue_object =
+      FindQueue<T, kSynchronizedReadWrite>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->readBlocking(data, data_size, time_out_nanos);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::ReadFmqBlocking(const string& data_type, QueueId queue_id,
+                                   T* data, size_t data_size,
+                                   uint32_t read_notification,
+                                   uint32_t write_notification,
+                                   int64_t time_out_nanos,
+                                   atomic<uint32_t>* event_flag_word) {
+  if (flavor == kUnsynchronizedWrite) {
+    LOG(ERROR) << "FMQ Driver: blocking read is not allowed in "
+               << "unsynchronized queue.";
+    return false;
+  }
+
+  hardware::EventFlag* ef_group = nullptr;
+  status_t status;
+  // create an event flag out of the event flag word
+  status = hardware::EventFlag::createEventFlag(event_flag_word, &ef_group);
+  if (status != NO_ERROR) {  // check status
+    LOG(ERROR) << "FMQ Driver: cannot create event flag with the specified "
+               << "event flag word.";
+    return false;
+  }
+
+  MessageQueue<T, kSynchronizedReadWrite>* queue_object =
+      FindQueue<T, kSynchronizedReadWrite>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->readBlocking(data, data_size, read_notification,
+                                    write_notification, time_out_nanos,
+                                    ef_group);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::WriteFmq(const string& data_type, QueueId queue_id, T* data,
+                            size_t data_size) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->write(data, data_size);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::WriteFmqBlocking(const string& data_type, QueueId queue_id,
+                                    T* data, size_t data_size,
+                                    int64_t time_out_nanos) {
+  if (flavor == kUnsynchronizedWrite) {
+    LOG(ERROR) << "FMQ Driver: blocking write is not allowed in "
+               << "unsynchronized queue.";
+    return false;
+  }
+
+  MessageQueue<T, kSynchronizedReadWrite>* queue_object =
+      FindQueue<T, kSynchronizedReadWrite>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->writeBlocking(data, data_size, time_out_nanos);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::WriteFmqBlocking(const string& data_type, QueueId queue_id,
+                                    T* data, size_t data_size,
+                                    uint32_t read_notification,
+                                    uint32_t write_notification,
+                                    int64_t time_out_nanos,
+                                    atomic<uint32_t>* event_flag_word) {
+  if (flavor == kUnsynchronizedWrite) {
+    LOG(ERROR) << "FMQ Driver: blocking write is not allowed in "
+               << "unsynchronized queue.";
+    return false;
+  }
+
+  hardware::EventFlag* ef_group = nullptr;
+  status_t status;
+  // create an event flag out of the event flag word
+  status = hardware::EventFlag::createEventFlag(event_flag_word, &ef_group);
+  if (status != NO_ERROR) {  // check status
+    LOG(ERROR) << "FMQ Driver: cannot create event flag with the specified "
+               << "event flag word.";
+    return false;
+  }
+
+  MessageQueue<T, kSynchronizedReadWrite>* queue_object =
+      FindQueue<T, kSynchronizedReadWrite>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->writeBlocking(data, data_size, read_notification,
+                                     write_notification, time_out_nanos,
+                                     ef_group);
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::AvailableToWrite(const string& data_type, QueueId queue_id,
+                                    size_t* result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = queue_object->availableToWrite();
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::AvailableToRead(const string& data_type, QueueId queue_id,
+                                   size_t* result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = queue_object->availableToRead();
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::GetQuantumSize(const string& data_type, QueueId queue_id,
+                                  size_t* result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = queue_object->getQuantumSize();
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::GetQuantumCount(const string& data_type, QueueId queue_id,
+                                   size_t* result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = queue_object->getQuantumCount();
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::IsValid(const string& data_type, QueueId queue_id) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  return queue_object->isValid();
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::GetEventFlagWord(const string& data_type, QueueId queue_id,
+                                    atomic<uint32_t>** result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = queue_object->getEventFlagWord();
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+bool VtsFmqDriver::GetQueueDescAddress(const string& data_type,
+                                       QueueId queue_id, size_t* result) {
+  MessageQueue<T, flavor>* queue_object =
+      FindQueue<T, flavor>(data_type, queue_id);
+  if (queue_object == nullptr) return false;
+  *result = reinterpret_cast<size_t>(queue_object->getDesc());
+  return true;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+MessageQueue<T, flavor>* VtsFmqDriver::FindQueue(const string& data_type,
+                                                 QueueId queue_id) {
+  map_mutex_.lock();  // Ensure mutual exclusion.
+  auto iterator = fmq_map_.find(queue_id);
+  if (iterator == fmq_map_.end()) {  // queue not found
+    LOG(ERROR) << "FMQ Driver: cannot find Fast Message Queue with ID "
+               << queue_id;
+    return nullptr;
+  }
+
+  QueueInfo* queue_info = (iterator->second).get();
+  if (queue_info->queue_data_type != data_type) {  // queue data type incorrect
+    LOG(ERROR) << "FMQ Driver: caller specified data type " << data_type
+               << " doesn't match with the data type "
+               << queue_info->queue_data_type << " stored in driver.";
+    return nullptr;
+  }
+
+  if (queue_info->queue_flavor != flavor) {  // queue flavor incorrect
+    LOG(ERROR) << "FMQ Driver: caller specified flavor " << flavor
+               << "doesn't match with the stored queue flavor "
+               << queue_info->queue_flavor << ".";
+    return nullptr;
+  }
+
+  // type check passes, extract queue from the struct
+  shared_ptr<MessageQueue<T, flavor>> queue_object =
+      static_pointer_cast<MessageQueue<T, flavor>>(queue_info->queue_object);
+  MessageQueue<T, flavor>* result = queue_object.get();
+  map_mutex_.unlock();
+  return result;
+}
+
+template <typename T, hardware::MQFlavor flavor>
+QueueId VtsFmqDriver::InsertQueue(
+    const string& data_type, shared_ptr<MessageQueue<T, flavor>> queue_object) {
+  if (queue_object == nullptr) {
+    LOG(ERROR) << "FMQ Driver Error: Failed to create a FMQ "
+               << "using FMQ constructor.";
+    return kInvalidQueueId;
+  }
+  // Create a struct to store queue object, type of data, and
+  // queue flavor.
+  unique_ptr<QueueInfo> new_queue_info(new QueueInfo{
+      string(data_type), flavor, static_pointer_cast<void>(queue_object)});
+  map_mutex_.lock();
+  size_t new_queue_id = fmq_map_.size();
+  fmq_map_.emplace(new_queue_id, move(new_queue_info));
+  map_mutex_.unlock();
+  return new_queue_id;
+}
 
 }  // namespace vts
 }  // namespace android
