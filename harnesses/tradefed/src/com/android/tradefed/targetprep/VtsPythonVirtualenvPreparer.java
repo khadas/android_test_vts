@@ -372,7 +372,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 String virtualEnvPath = mVenvDir.getAbsolutePath();
                 String[] cmd = new String[] {
                         "virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, cmd);
+                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 3, cmd);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
                     CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
