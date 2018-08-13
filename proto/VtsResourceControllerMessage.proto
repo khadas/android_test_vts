@@ -23,31 +23,39 @@ import "test/vts/proto/ComponentSpecificationMessage.proto";
 // Possible operations on Fast Message Queue.
 enum FmqOp {
     // Unknown operation.
-    FMQ_PROTO_UNKNOWN = 0;
+    FMQ_UNKNOWN = 0;
     // Create a new FMQ object.
-    FMQ_PROTO_CREATE = 1;
+    FMQ_CREATE = 1;
     // Read from a FMQ (no blocking).
-    FMQ_PROTO_READ = 2;
+    FMQ_READ = 2;
     // Read from a FMQ (with short-form blocking).
-    FMQ_PROTO_READ_BLOCKING = 3;
+    FMQ_READ_BLOCKING = 3;
     // Read from a FMQ (with long-form blocking).
-    FMQ_PROTO_READ_BLOCKING_LONG = 4; // TODO: support this from host side in the future
+    // TODO: support this from host side in the future
+    FMQ_READ_BLOCKING_LONG = 4;
     // Write to a FMQ (no blocking).
-    FMQ_PROTO_WRITE = 5;
+    FMQ_WRITE = 5;
     // Write to a FMQ (with short-form blocking).
-    FMQ_PROTO_WRITE_BLOCKING = 6;
+    FMQ_WRITE_BLOCKING = 6;
     // Write to a FMQ (with long-form blocking).
-    FMQ_PROTO_WRITE_BLOCKING_LONG = 7; // TODO: support this from host side in the future
+    // TODO: support this from host side in the future
+    FMQ_WRITE_BLOCKING_LONG = 7;
     // Get space available to write in FMQ.
-    FMQ_PROTO_AVAILABLE_WRITE = 8;
+    FMQ_AVAILABLE_WRITE = 8;
     // Get number of items available to read.
-    FMQ_PROTO_AVAILABLE_READ = 9;
+    FMQ_AVAILABLE_READ = 9;
     // Get size of item in FMQ.
-    FMQ_PROTO_GET_QUANTUM_SIZE = 10;
+    FMQ_GET_QUANTUM_SIZE = 10;
     // Get number of items that fit in FMQ.
-    FMQ_PROTO_GET_QUANTUM_COUNT = 11;
+    FMQ_GET_QUANTUM_COUNT = 11;
     // Check if FMQ is valid.
-    FMQ_PROTO_IS_VALID = 12;
+    FMQ_IS_VALID = 12;
+    // Get address of queue descriptor.
+    // This is an operation that is used in the target-side
+    // drivers to pass queue descriptor address to identify
+    // the FMQ. It is not for communication between host and
+    // target.
+    FMQ_GET_DESC_ADDR = 13;
 }
 
 // Possible operations on hidl_memory.
@@ -115,6 +123,12 @@ message FmqRequestMessage {
     optional uint64 read_data_size = 9;
     // wait time when blocking
     optional int64 time_out_nanos = 10;
+
+    // store address of queue descriptor
+    // This is a field that is used by internal drivers
+    // to identify a FMQ.
+    // It is not used for communication between host and target.
+    optional uint64 queue_desc_addr = 11;
 }
 
 // The response for a FMQ operation,
