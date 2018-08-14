@@ -701,12 +701,16 @@ void HalHidlCodeGen::GenerateDriverDeclForAttribute(Formatter& out,
     }
     string func_name = "MessageTo"
         + ClearStringWithNameSpaceAccess(attribute.name());
+    // Add extern C to allow resource_manager to dynamically load this function.
+    out << "extern \"C\" ";
     out << "void " << func_name
         << "(const VariableSpecificationMessage& var_msg, " << attribute.name()
         << "* arg, const string& callback_socket_name);\n";
   } else if (attribute.type() == TYPE_ENUM) {
     string func_name = "EnumValue"
             + ClearStringWithNameSpaceAccess(attribute.name());
+    // Add extern C to allow resource_manager to dynamically load this function.
+    out << "extern \"C\" ";
     // Message to value converter
     out << attribute.name() << " " << func_name
         << "(const ScalarDataValueMessage& arg);\n";
@@ -724,6 +728,9 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
     {
       string func_name = "EnumValue"
           + ClearStringWithNameSpaceAccess(attribute.name());
+      // Add extern C to allow resource_manager to dynamically load this
+      // function.
+      out << "extern \"C\" ";
       // Message to value converter
       out << attribute.name() << " " << func_name
           << "(const ScalarDataValueMessage& arg) {\n";
@@ -742,6 +749,9 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
       }
       string func_name = "MessageTo"
           + ClearStringWithNameSpaceAccess(attribute.name());
+      // Add extern C to allow resource_manager to dynamically load this
+      // function.
+      out << "extern \"C\" ";
       out << "void " << func_name
           << "(const VariableSpecificationMessage& "
              "var_msg __attribute__((__unused__)), "
@@ -768,6 +778,9 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
       }
       string func_name = "MessageTo"
           + ClearStringWithNameSpaceAccess(attribute.name());
+      // Add extern C to allow resource_manager to dynamically load this
+      // function.
+      out << "extern \"C\" ";
       out << "void " << func_name
           << "(const VariableSpecificationMessage& var_msg, "
           << attribute.name() << "* arg, "
@@ -1575,6 +1588,10 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
           GenerateSetResultCodeForTypedVariable(
               out, union_field, union_field_name,
               result_value + "." + union_field.name());
+          if (union_field.has_name()) {
+            out << union_field_name << "->set_name(\"" << union_field.name()
+                << "\");\n";
+          }
         }
       }
       break;
@@ -1631,9 +1648,6 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
       out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
       break;
     }
-    // TODO: support more types in FMQ in the future.
-    // TODO: When user-defined types are supported, need to have a copy
-    //       method to copy the types into fmq_item from val.
     case TYPE_FMQ_SYNC:
     case TYPE_FMQ_UNSYNC:
     {
@@ -1643,12 +1657,37 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
       string item_name = result_msg + "_item";
       out << "VariableSpecificationMessage* " << item_name << " = "
           << result_msg << "->add_fmq_value();\n";
-      out << item_name << "->set_type(TYPE_SCALAR);\n";
-      out << item_name << "->set_scalar_type(\""
-          << val.fmq_value(0).scalar_type() << "\");\n";
-      out << item_name
-          << "->set_fmq_desc_address(reinterpret_cast<size_t>(new "
-             "(std::nothrow) "
+      if (val.fmq_value(0).type() == TYPE_SCALAR) {
+        // This FMQ uses scalar type, stores type name in
+        // scalar_type field.
+        out << item_name << "->set_type(TYPE_SCALAR);\n";
+        out << item_name << "->set_scalar_type(\""
+            << val.fmq_value(0).scalar_type() << "\");\n";
+      } else if (val.fmq_value(0).type() == TYPE_ENUM) {
+        // This FMQ uses enum type, stores type name in
+        // predefined_type field.
+        out << item_name << "->set_type(TYPE_ENUM);\n";
+        out << item_name << "->set_predefined_type(\""
+            << val.fmq_value(0).predefined_type() << "\");\n";
+      } else if (val.fmq_value(0).type() == TYPE_STRUCT) {
+        // This FMQ uses struct type, stores type name in
+        // predefined_type field.
+        out << item_name << "->set_type(TYPE_STRUCT);\n";
+        out << item_name << "->set_predefined_type(\""
+            << val.fmq_value(0).predefined_type() << "\");\n";
+      } else if (val.fmq_value(0).type() == TYPE_UNION) {
+        // This FMQ uses union type, stores type name in
+        // predefined_type field.
+        out << item_name << "->set_type(TYPE_UNION);\n";
+        out << item_name << "->set_predefined_type(\""
+            << val.fmq_value(0).predefined_type() << "\");\n";
+      } else {
+        // FMQ doesn't support string, vector, or array type.
+        out << "LOG(ERROR) << \"Unsupport type of data in FMQ\";\n";
+      }
+      // Cast result into address, and save it in proto.
+      out << item_name << "->set_fmq_desc_address("
+          << "reinterpret_cast<size_t>(new (std::nothrow) "
           << GetCppVariableType(val) << "(" << result_value << ")));\n";
       break;
     }
@@ -1677,6 +1716,8 @@ void HalHidlCodeGen::GenerateSetResultDeclForAttribute(Formatter& out,
       GenerateSetResultDeclForAttribute(out, sub_union);
     }
   }
+  // Add extern C to allow resource_manager to dynamically load this function.
+  out << "extern \"C\" ";
   string func_name = "void SetResult"
       + ClearStringWithNameSpaceAccess(attribute.name());
   out << func_name << "(VariableSpecificationMessage* result_msg, "
@@ -1694,6 +1735,8 @@ void HalHidlCodeGen::GenerateSetResultImplForAttribute(Formatter& out,
       GenerateSetResultImplForAttribute(out, sub_union);
     }
   }
+  // Add extern C to allow resource_manager to dynamically load this function.
+  out << "extern \"C\" ";
   string func_name = "void SetResult"
       + ClearStringWithNameSpaceAccess(attribute.name());
   out << func_name << "(VariableSpecificationMessage* result_msg, "

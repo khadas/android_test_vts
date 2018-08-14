@@ -26,6 +26,9 @@ cc_defaults {
     local_include_dirs: ["include"],
 
     shared_libs: [
+        "android.hardware.audio@4.0",
+        "android.hidl.allocator@1.0",
+        "android.hidl.memory@1.0",
         "libbase",
         "libcutils",
         "libfmq",
@@ -34,13 +37,12 @@ cc_defaults {
         "liblog",
         "libprotobuf-cpp-full",
         "libutils",
-        "android.hidl.allocator@1.0",
-        "android.hidl.memory@1.0",
     ],
 
     export_include_dirs: ["include"],
 
     export_shared_lib_headers: [
+        "android.hardware.audio@4.0",
         "android.hidl.allocator@1.0",
         "android.hidl.memory@1.0",
         "libcutils",

@@ -17,8 +17,10 @@
 
 #include "resource_manager/VtsResourceManager.h"
 
+#include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <regex>
 
 #include "test/vts/proto/ComponentSpecificationMessage.pb.h"
 #include "test/vts/proto/VtsResourceControllerMessage.pb.h"
@@ -158,7 +160,8 @@ int VtsResourceManager::RegisterHidlHandle(
       hidl_handle_msg.handle_value().hidl_handle_address();
   if (hidl_handle_address == 0) {
     LOG(ERROR) << "Invalid hidl_handle address."
-               << "vtsc either didn't set the address or set a null pointer.";
+               << "HAL driver either didn't set the address or "
+               << "set a null pointer.";
     return -1;  // check for null pointer
   }
   return hidl_handle_driver_.RegisterHidlHandle(hidl_handle_address);
@@ -362,13 +365,23 @@ void VtsResourceManager::ProcessFmqCommandInternal(
     case FMQ_READ: {
       success = fmq_driver_.ReadFmq<T, flavor>(data_type, queue_id, read_data,
                                                read_data_size);
-      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      if (!FmqCpp2Proto<T>(fmq_response, data_type, read_data,
+                           read_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert C++ type into "
+                   << "protobuf message for type " << data_type;
+        break;
+      }
       break;
     }
     case FMQ_READ_BLOCKING: {
       success = fmq_driver_.ReadFmqBlocking<T, flavor>(
           data_type, queue_id, read_data, read_data_size, time_out_nanos);
-      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      if (!FmqCpp2Proto<T>(fmq_response, data_type, read_data,
+                           read_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert C++ type into "
+                   << "protobuf message for type " << data_type;
+        break;
+      }
       break;
     }
     case FMQ_READ_BLOCKING_LONG: {
@@ -377,17 +390,30 @@ void VtsResourceManager::ProcessFmqCommandInternal(
       success = fmq_driver_.ReadFmqBlocking<T, flavor>(
           data_type, queue_id, read_data, read_data_size, read_notification,
           write_notification, time_out_nanos, &event_flag_word);
-      FmqCpp2Proto<T>(fmq_response, data_type, read_data, read_data_size);
+      if (!FmqCpp2Proto<T>(fmq_response, data_type, read_data,
+                           read_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert C++ type into "
+                   << "protobuf message for type " << data_type;
+        break;
+      }
       break;
     }
     case FMQ_WRITE: {
-      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      if (!FmqProto2Cpp<T>(fmq_request, write_data, write_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert protobuf message "
+                   << "into C++ types for type " << data_type;
+        break;
+      }
       success = fmq_driver_.WriteFmq<T, flavor>(data_type, queue_id, write_data,
                                                 write_data_size);
       break;
     }
     case FMQ_WRITE_BLOCKING: {
-      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      if (!FmqProto2Cpp<T>(fmq_request, write_data, write_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert protobuf message "
+                   << "into C++ types for type " << data_type;
+        break;
+      }
       success = fmq_driver_.WriteFmqBlocking<T, flavor>(
           data_type, queue_id, write_data, write_data_size, time_out_nanos);
       break;
@@ -395,7 +421,11 @@ void VtsResourceManager::ProcessFmqCommandInternal(
     case FMQ_WRITE_BLOCKING_LONG: {
       // TODO: implement a meaningful long-form blocking mechanism
       // Currently passing a dummy event flag word.
-      FmqProto2Cpp<T>(fmq_request, write_data, write_data_size);
+      if (!FmqProto2Cpp<T>(fmq_request, write_data, write_data_size)) {
+        LOG(ERROR) << "Resource manager: failed to convert protobuf message "
+                   << "into C++ types for type " << data_type;
+        break;
+      }
       success = fmq_driver_.WriteFmqBlocking<T, flavor>(
           data_type, queue_id, write_data, write_data_size, read_notification,
           write_notification, time_out_nanos, &event_flag_word);
@@ -442,7 +472,7 @@ void VtsResourceManager::ProcessFmqCommandInternal(
 }
 
 template <typename T>
-void VtsResourceManager::FmqProto2Cpp(const FmqRequestMessage& fmq_request,
+bool VtsResourceManager::FmqProto2Cpp(const FmqRequestMessage& fmq_request,
                                       T* write_data, size_t write_data_size) {
   const string& data_type = fmq_request.data_type();
   // Read from different proto fields based on type.
@@ -501,12 +531,31 @@ void VtsResourceManager::FmqProto2Cpp(const FmqRequestMessage& fmq_request,
     for (int i = 0; i < write_data_size; i++) {
       convert_data[i] = fmq_request.write_data(i).scalar_value().bool_t();
     }
+  } else {
+    // Encounter a predefined type in HAL service.
+    LOG(INFO) << "Resource manager: detected host side specifies a "
+              << "predefined type.";
+    void* shared_lib_obj = LoadSharedLibFromTypeName(data_type);
+
+    // Locate the symbol for the translation function.
+    typedef void (*parse_fn)(const VariableSpecificationMessage&, T*,
+                             const string&);
+    parse_fn parser =
+        (parse_fn)(GetTranslationFuncPtr(shared_lib_obj, data_type, true));
+    if (!parser) return false;  // Error logged in helper function.
+
+    // Parse the data from protobuf to C++.
+    for (int i = 0; i < write_data_size; i++) {
+      (*parser)(fmq_request.write_data(i), &write_data[i], "");
+    }
+    dlclose(shared_lib_obj);
   }
+  return true;
 }
 
 // TODO: support user-defined types, only support primitive types now.
 template <typename T>
-void VtsResourceManager::FmqCpp2Proto(FmqResponseMessage* fmq_response,
+bool VtsResourceManager::FmqCpp2Proto(FmqResponseMessage* fmq_response,
                                       const string& data_type, T* read_data,
                                       size_t read_data_size) {
   fmq_response->clear_read_data();
@@ -599,7 +648,125 @@ void VtsResourceManager::FmqCpp2Proto(FmqResponseMessage* fmq_response,
       item->set_scalar_type(data_type);
       (item->mutable_scalar_value())->set_bool_t(convert_data[i]);
     }
+  } else {
+    // Encounter a predefined type in HAL service.
+    LOG(INFO) << "Resource manager: detected host side specifies a "
+              << "predefined type.";
+    void* shared_lib_obj = LoadSharedLibFromTypeName(data_type);
+    if (!shared_lib_obj) return false;
+
+    // Locate the symbol for the translation function.
+    typedef void (*set_result_fn)(VariableSpecificationMessage*, T);
+    set_result_fn parser =
+        (set_result_fn)(GetTranslationFuncPtr(shared_lib_obj, data_type, 0));
+    if (!parser) return false;  // Error logged in helper function.
+
+    // Parse the data from C++ to protobuf.
+    for (int i = 0; i < read_data_size; i++) {
+      VariableSpecificationMessage* item = fmq_response->add_read_data();
+      (*parser)(item, read_data[i]);
+    }
+    dlclose(shared_lib_obj);
   }
+  return true;
+}
+
+void* VtsResourceManager::LoadSharedLibFromTypeName(const string& data_type) {
+  // Base path.
+  // TODO: Consider determining the path and bitness by passing a field
+  // in the protobuf message.
+  string shared_lib_path = "/data/local/tmp/64/";
+  // Start searching after the first ::
+  size_t curr_index = 0;
+  size_t next_index;
+  bool success = false;
+  regex version_regex("V[0-9]+_[0-9]+");
+  const string split_str = "::";
+
+  while ((next_index = data_type.find(split_str, curr_index)) != string::npos) {
+    if (curr_index == next_index) {
+      // No character between the current :: and the next ::
+      // Likely it is the first :: in the type name.
+      curr_index = next_index + split_str.length();
+      continue;
+    }
+    string curr_string = data_type.substr(curr_index, next_index - curr_index);
+    // Check if it is a version, e.g. V4_0.
+    if (regex_match(curr_string, version_regex)) {
+      size_t length = shared_lib_path.length();
+      // Change _ into ., e.g. V4_0 to V4.0.
+      size_t separator = curr_string.find("_");
+      curr_string.replace(separator, 1, ".");
+      // Use @ before version.
+      shared_lib_path.replace(length - 1, 1, "@");
+      // Exclude V in the front.
+      shared_lib_path += curr_string.substr(1);
+      success = true;
+      break;
+    } else {
+      shared_lib_path += curr_string + ".";
+    }
+    // Start searching from the next ::
+    curr_index = next_index + split_str.length();
+  }
+  // Failed to parse the shared library name from type name.
+  if (!success) return nullptr;
+
+  shared_lib_path += "-vts.driver.so";
+  // Load the shared library that contains translation functions.
+  void* shared_lib_obj = dlopen(shared_lib_path.c_str(), RTLD_LAZY);
+  if (!shared_lib_obj) {
+    LOG(ERROR) << "Resource manager: failed to load shared lib "
+               << shared_lib_path << " for type " << data_type;
+    return nullptr;
+  }
+  LOG(INFO) << "Resource manager: successfully loaded shared library "
+            << shared_lib_path;
+  return shared_lib_obj;
+}
+
+void* VtsResourceManager::GetTranslationFuncPtr(void* shared_lib_obj,
+                                                const string& data_type,
+                                                bool is_proto_to_cpp) {
+  string translation_func_name = data_type;
+  // Replace all :: with __.
+  // TODO: there might be a special case where part of the type name involves
+  // a single :. Consider fixing this in the future.
+  replace(translation_func_name.begin(), translation_func_name.end(), ':', '_');
+
+  void* func_ptr = nullptr;
+  if (is_proto_to_cpp) {
+    // TODO: Currently HAL driver uses different function names to parse
+    // enum vs e.g. struct.
+    // For enum, the prefix of the parsing function is EnumValue.
+    // For other types, the prefix is MessageTo.
+    // Here we try both methods to load the function symbols.
+    // When vtsc is modified in the future, we don't need to do this anymore.
+    // First try using MessageTo prefix for the parsing function name.
+    func_ptr =
+        dlsym(shared_lib_obj, ("MessageTo" + translation_func_name).c_str());
+    if (func_ptr) {
+      return func_ptr;
+    }
+    // Then try using EnumValue prefix.
+    func_ptr =
+        dlsym(shared_lib_obj, ("EnumValue" + translation_func_name).c_str());
+    if (!func_ptr) {
+      LOG(ERROR) << "Resource manager: failed to load function name "
+                 << "MessageTo" << translation_func_name << " or "
+                 << "EnumValue" << translation_func_name
+                 << " to parse protobuf message into C++ type.";
+    }
+  } else {
+    func_ptr =
+        dlsym(shared_lib_obj, ("SetResult" + translation_func_name).c_str());
+    if (!func_ptr) {
+      LOG(ERROR) << "Resource manager: failed to load the function name "
+                 << "SetResult" << translation_func_name
+                 << " to parse C++ type into protobuf message.";
+    }
+  }
+  return func_ptr;
 }
 
 }  // namespace vts
