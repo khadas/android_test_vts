@@ -30,17 +30,20 @@ class LogUploadingFeature(feature_utils.Feature):
         enabled: boolean, True if log uploading is enabled, False otherwise
         web: (optional) WebFeature, object storing web feature util for test run
         _report_file_util: report file util object for uploading logs
+        _report_file_util_gcs: report file util object for uploading logs to gcs
     """
 
     _TOGGLE_PARAM = keys.ConfigKeys.IKEY_ENABLE_LOG_UPLOADING
     _REQUIRED_PARAMS = [
         keys.ConfigKeys.IKEY_ANDROID_DEVICE,
         keys.ConfigKeys.IKEY_LOG_UPLOADING_PATH,
+        keys.ConfigKeys.IKEY_LOG_UPLOADING_GCS_BUCKET_NAME,
+        keys.ConfigKeys.IKEY_SERVICE_JSON_PATH
     ]
     _OPTIONAL_PARAMS = [
         keys.ConfigKeys.KEY_TESTBED_NAME,
         keys.ConfigKeys.IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY,
-        keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX,
+        keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX
     ]
 
     def __init__(self, user_params, web=None):
@@ -73,6 +76,18 @@ class LogUploadingFeature(feature_utils.Feature):
             url_prefix=getattr(
                 self, keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX, None))
 
+        gcs_bucket_name = getattr(
+            self, keys.ConfigKeys.IKEY_LOG_UPLOADING_GCS_BUCKET_NAME)
+        gcs_url_prefix = "https://storage.cloud.google.com/" + gcs_bucket_name + "/"
+        self._report_file_util_gcs = report_file_utils.ReportFileUtil(
+            flatten_source_dir=True,
+            use_destination_date_dir=getattr(
+                self, keys.ConfigKeys.IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY,
+                True),
+            destination_dir=gcs_bucket_name,
+            url_prefix=gcs_url_prefix,
+            gcs_key_path=getattr(self, keys.ConfigKeys.IKEY_SERVICE_JSON_PATH))
+
     def UploadLogs(self, prefix=None):
         """Save test logs and add log urls to report message"""
         if not self.enabled:
@@ -91,8 +106,14 @@ class LogUploadingFeature(feature_utils.Feature):
             file_name_prefix=file_name_prefix,
             file_path_filters=path_filter)
 
+        gcs_urls = self._report_file_util_gcs.SaveReportsFromDirectory(
+            source_dir=logging.log_path,
+            file_name_prefix=file_name_prefix,
+            file_path_filters=path_filter)
+
         if urls is None:
             logging.error('Error happened when saving logs.')
 
         if urls and self.web and self.web.enabled:
             self.web.AddLogUrls(urls)
+            self.web.AddLogGcsUrls(gcs_urls)

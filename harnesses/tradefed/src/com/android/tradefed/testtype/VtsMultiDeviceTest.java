@@ -158,6 +158,8 @@ public class VtsMultiDeviceTest
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH =
             "vts/tools/vts-tradefed/res/default/DefaultTestCase.runner_conf";
+    // TODO(hsinyichen): Read max-test-timeout from configuration
+    static final long MAX_TEST_TIMEOUT_MSECS = 1000 * 60 * 60 * 10;
 
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;

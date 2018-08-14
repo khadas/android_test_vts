@@ -25,6 +25,7 @@ from vts.testcases.template.binary_test import binary_test
 from vts.utils.python.hal import hal_service_name_utils
 from vts.utils.python.os import path_utils
 
+_HAL_TEST_NAME_PATTERN = ".*\(.*\).*"
 
 class HalHidlReplayTest(binary_test.BinaryTest):
     """Base class to run a HAL HIDL replay test on a target device.
@@ -87,6 +88,7 @@ class HalHidlReplayTest(binary_test.BinaryTest):
             service_instance_combinations = self._GetServiceInstanceCombinations(
                 target_trace_path)
 
+            appendix_list = []
             if service_instance_combinations:
                 for instance_combination in service_instance_combinations:
                     test_case = self.CreateReplayTestCase(
@@ -99,6 +101,8 @@ class HalHidlReplayTest(binary_test.BinaryTest):
                     name_appendix = "({0})".format(",".join(service_name_list))
                     test_case.name_appendix = name_appendix
                     self.testcases.append(test_case)
+                    appendix_list.append(name_appendix)
+                self.test_filter.ExpandAppendix(appendix_list, _HAL_TEST_NAME_PATTERN)
             else:
                 test_case = self.CreateReplayTestCase(trace_file_name,
                                                       target_trace_path)
