@@ -36,7 +36,14 @@ def PyValue2PbEnum(message, pb_spec, py_value):
     if pb_spec.name:
         message.name = pb_spec.name
     message.type = CompSpecMsg.TYPE_ENUM
-    # TODO(yim): derive the type by looking up its predefined_type.
+    # Look for the enum definition and retrieve the scalar type.
+    scalar_type = pb_spec.enum_value.scalar_type
+    if scalar_type != "":
+        # If the scalar type definition is found, set it and return.
+        setattr(message.scalar_value, scalar_type, py_value)
+        return
+    # Use default scalar_type int32_t for enum definition if the definition
+    # is not found.
     setattr(message.scalar_value, "int32_t", py_value)
 
 
@@ -124,13 +131,30 @@ def FindSubStructType(pb_spec, sub_struct_name):
     return None
 
 
+def FindSubUnionType(pb_spec, sub_union_name):
+    """Finds a specific sub_union type.
+
+    Args:
+        pb_spec: VariableSpecificationMessage which captures the
+                 specification of a target attribute.
+        sub_union_name: string, the name of a sub union to look up.
+
+    Returns:
+        VariableSpecificationMessage if found or None otherwise.
+    """
+    for sub_union in pb_spec.sub_union:
+        if sub_union.name == sub_union_name:
+            return sub_union
+    return None
+
+
 def PyDict2PbStruct(message, pb_spec, py_value):
     """Converts Python dict to VTS VariableSecificationMessage (struct).
 
     Args:
         pb_spec: VariableSpecificationMessage which captures the
                  specification of a target attribute.
-        py_value: Python value provided by a test case.
+        py_value: A dictionary that represents a struct.
 
     Returns:
         Converted VariableSpecificationMessage if found, None otherwise
@@ -159,6 +183,13 @@ def PyDict2PbStruct(message, pb_spec, py_value):
                 else:
                     logging.error("PyDict2PbStruct: substruct not found.")
                     sys.exit(-1)
+            elif attr.type == CompSpecMsg.TYPE_UNION:
+                sub_attr = FindSubStructType(pb_spec, attr.predefined_type)
+                if sub_attr:
+                    PyDict2PbUnion(attr_msg, sub_attr, curr_value)
+                else:
+                    logging.error("PyDict2PbStruct: subunion not found.")
+                    sys.exit(-1)
             else:
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
@@ -172,6 +203,74 @@ def PyDict2PbStruct(message, pb_spec, py_value):
         logging.error("PyDict2PbStruct: provided dictionary included elements" +
                       " not part of the type being converted to: %s",
                       provided_attrs)
+        sys.exit(-1)
+    return message
+
+
+def PyDict2PbUnion(message, pb_spec, py_value):
+    """Converts Python dict to VTS VariableSecificationMessage (union).
+
+    Args:
+        pb_spec: VariableSpecificationMessage which captures the
+                 specification of a target attribute.
+        py_value: A dictionary that represents a struct.
+
+    Returns:
+        Converted VariableSpecificationMessage if found, None otherwise
+    """
+    if len(py_value) > 1:
+        logging.error("PyDict2PbUnion: Union only allows specifying " +
+                      "at most one field. Current Python dictionary " +
+                      "has size %d", len(py_value))
+        sys.exit(-1)
+
+    if pb_spec.name:
+        message.name = pb_spec.name
+    message.type = CompSpecMsg.TYPE_UNION
+    provided_attrs = set(py_value.keys())
+    for attr in pb_spec.union_value:
+        # Since it is a union type, we stop after finding one field name
+        # that matches, and shouldn't throw an error when name is not found.
+        if attr.name in py_value:
+            provided_attrs.remove(attr.name)
+            curr_value = py_value[attr.name]
+            attr_msg = message.union_value.add()
+            if attr.type == CompSpecMsg.TYPE_ENUM:
+                PyValue2PbEnum(attr_msg, attr, curr_value)
+            elif attr.type == CompSpecMsg.TYPE_SCALAR:
+                PyValue2PbScalar(attr_msg, attr, curr_value)
+            elif attr.type == CompSpecMsg.TYPE_STRING:
+                PyString2PbString(attr_msg, attr, curr_value)
+            elif attr.type == CompSpecMsg.TYPE_VECTOR:
+                PyList2PbVector(attr_msg, attr, curr_value)
+            elif attr.type == CompSpecMsg.TYPE_STRUCT:
+                # TODO: is a nested struct in union stored in sub_union field.
+                sub_attr = FindSubUnionType(pb_spec, attr.predefined_type)
+                if sub_attr:
+                    PyDict2PbStruct(attr_msg, sub_attr, curr_value)
+                else:
+                    logging.error("PyDict2PbStruct: substruct not found.")
+                    sys.exit(-1)
+            elif attr.type == CompSpecMsg.TYPE_UNION:
+                sub_attr = FindSubUnionType(pb_spec, attr.predefined_type)
+                if sub_attr:
+                    PyDict2PbUnion(attr_msg, sub_attr, curr_value)
+                else:
+                    logging.error("PyDict2PbUnion: subunion not found.")
+                    sys.exit(-1)
+            else:
+                logging.error("PyDict2PbStruct: unsupported type %s",
+                              attr.type)
+                sys.exit(-1)
+        else:
+            # Add a field, where name field is initialized as an empty string.
+            # In generated driver implementation, driver knows this field is
+            # not used, and skip reading it.
+            message.union_value.add()
+
+    if len(provided_attrs) > 0:
+        logging.error("PyDict2PbUnion: specified field is not in the union " +
+                      "definition for union type %s", provided_attrs)
         sys.exit(-1)
     return message
 
@@ -198,6 +297,8 @@ def Convert(pb_spec, py_value):
         message.CopyFrom(py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_STRUCT:
         PyDict2PbStruct(message, pb_spec, py_value)
+    elif pb_spec.type == CompSpecMsg.TYPE_UNION:
+        PyDict2PbUnion(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_ENUM:
         PyValue2PbEnum(message, pb_spec, py_value)
     elif pb_spec.type == CompSpecMsg.TYPE_SCALAR:
