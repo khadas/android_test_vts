@@ -25,39 +25,55 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
     """This is a class that mirrors FMQ resource allocated on the target side.
 
     Attributes:
-        _client: the TCP client instance.
+        SUPPORTED_SCALAR_TYPES: set, contains all scalar types supported by FMQ.
+                                If the type of FMQ is one of those, this class
+                                prepares the write data from caller provided
+                                Python data.
+        _client: VtsTcpClient, the TCP client instance.
         _queue_id: int, used to identify the queue object on the target side.
         _data_type: type of data in the queue.
         _sync: bool, whether the queue is synchronized.
     """
 
-    def __init__(self, client, queue_id=-1):
-        super(ResourceFmqMirror, self).__init__(client)
-        self._queue_id = queue_id
+    SUPPORTED_SCALAR_TYPES = {
+        "uint8_t", "int8_t", "uint16_t", "int16_t", "uint32_t", "int32_t",
+        "uint64_t", "int64_t", "bool_t", "double_t"
+    }
 
-    def _create(self, data_type, sync, queue_id, queue_size, blocking,
-                reset_pointers):
-        """Initiate a fast message queue object on the target side,
-           and stores the queue_id in the class attribute.
-           User should not directly call this method because it will overwrite
-           the original queue_id stored in the mirror object, leaving that
-           queue object out of reference.
-           User should always call InitFmq() in mirror_tracker.py to obtain a
-           new queue object.
+    def __init__(self, data_type, sync, client, queue_id=-1):
+        """Initialize a FMQ mirror.
 
         Args:
-            data_type: string, type of data in the queue (e.g. "uint32_t", "int16_t").
+            data_type: string, type of data in the queue
+                       (e.g. "uint32_t", "int16_t").
             sync: bool, whether queue is synchronized (only has one reader).
+            client: VtsTcpClient, specifies the session that this mirror use.
+            queue_id: int, identifies the queue on the target side.
+                      Optional if caller initializes a new FMQ mirror.
+        """
+        super(ResourceFmqMirror, self).__init__(client)
+        self._data_type = data_type
+        self._sync = sync
+        self._queue_id = queue_id
+
+    def _create(self, queue_id, queue_size, blocking, reset_pointers):
+        """Initiate a fast message queue object on the target side.
+
+        This method registers a FMQ object on the target side, and stores
+        the queue_id in the class attribute.
+        Users should not directly call this method because it will overwrite
+        the original queue_id stored in the mirror object, leaving that
+        queue object out of reference.
+        Users should always call InitFmq() in mirror_tracker.py to obtain a
+        new queue object.
+
+        Args:
             queue_id: int, identifies the message queue object on the target side.
             queue_size: int, size of the queue.
             blocking: bool, whether blocking is enabled in the queue.
             reset_pointers: bool, whether to reset read/write pointers when
               creating a message queue object based on an existing message queue.
         """
-        # Sets some configuration for the current resource mirror.
-        self._data_type = data_type
-        self._sync = sync
-
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
             ResControlMsg.FMQ_CREATE, queue_id)
@@ -147,7 +163,10 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
             ResControlMsg.FMQ_WRITE, self._queue_id)
-        self._prepareWriteData(request_msg, data[:data_size])
+        prepare_result = self._prepareWriteData(request_msg, data[:data_size])
+        if not prepare_result:
+            # Prepare write data failure, error logged in _prepareWriteData().
+            return False
 
         # Send and receive data.
         fmq_response = self._client.SendFmqRequest(request_msg)
@@ -174,7 +193,10 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         # Prepare arguments.
         request_msg = self._createTemplateRequestMessage(
             ResControlMsg.FMQ_WRITE_BLOCKING, self._queue_id)
-        self._prepareWriteData(request_msg, data[:data_size])
+        prepare_result = self._prepareWriteData(request_msg, data[:data_size])
+        if not prepare_result:
+            # Prepare write data failure, error logged in _prepareWriteData().
+            return False
         request_msg.time_out_nanos = time_out_nanos
 
         # Send and receive data.
@@ -184,7 +206,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         return False
 
     def availableToWrite(self):
-        """Gets space available to write in the queue.
+        """Get space available to write in the queue.
 
         Returns:
             int, number of slots available.
@@ -197,7 +219,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         return self._processUtilMethod(request_msg)
 
     def availableToRead(self):
-        """Gets number of items available to read.
+        """Get number of items available to read.
 
         Returns:
             int, number of items.
@@ -210,7 +232,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         return self._processUtilMethod(request_msg)
 
     def getQuantumSize(self):
-        """Gets size of item in the queue.
+        """Get size of item in the queue.
 
         Returns:
             int, size of item.
@@ -223,7 +245,7 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         return self._processUtilMethod(request_msg)
 
     def getQuantumCount(self):
-        """Gets number of items that fit in the queue.
+        """Get number of items that fit in the queue.
 
         Returns:
             int, number of items.
@@ -260,6 +282,24 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         """
         return self._queue_id
 
+    @property
+    def dataType(self):
+        """Get the type of data of this FMQ mirror.
+
+        Returns:
+            string, type of data in the queue
+        """
+        return self._data_type
+
+    @property
+    def sync(self):
+        """Get the synchronization option of this FMQ mirror.
+
+        Returns:
+            bool, true if the queue is synchronized (only has one reader).
+        """
+        return self._sync
+
     def _createTemplateRequestMessage(self, operation, queue_id):
         """Creates a template FmqRequestMessage with common arguments among
            all FMQ operations.
@@ -280,22 +320,42 @@ class ResourceFmqMirror(mirror_object.MirrorObject):
         request_msg.queue_id = queue_id
         return request_msg
 
-    # Converts a python list into protobuf message.
-    # TODO: Consider use py2pb once we know how to support user-defined types.
-    #       This method only supports primitive types like int32_t, bool_t.
     def _prepareWriteData(self, request_msg, data):
-        """Prepares write data by converting python list into
-           repeated protobuf field.
+        """Converts python list to repeated protobuf field.
+
+        If the type of data in the queue is a supported scalar, caller can
+        directly supply the python native value. Otherwise, caller needs to
+        supply a list of VariableSpecificationMessage.
 
         Args:
-            request_msg: FmqRequestMessage, arguments for a FMQ operation request.
-            data: list, list of data items.
+            request_msg: FmqRequestMessage, arguments for a FMQ operation
+                         request.
+            data: VariableSpecificationMessage list or a list of scalar values.
+                  If the type of FMQ is scalar type, caller can directly
+                  specify the Python scalar data. Otherwise, caller has to
+                  provide each item as VariableSpecificationMessage.
+
+        Returns:
+            bool, true if preparation succeeds, false otherwise.
+            This function can fail if caller doesn't provide a list of
+            VariableSpecificationMessage when type of data in the queue
+            is not a supported scalar type.
         """
         for curr_value in data:
             new_message = request_msg.write_data.add()
-            new_message.type = CompSpecMsg.TYPE_SCALAR
-            new_message.scalar_type = self._data_type
-            setattr(new_message.scalar_value, self._data_type, curr_value)
+            if isinstance(curr_value,
+                          CompSpecMsg.VariableSpecificationMessage):
+                new_message.CopyFrom(curr_value)
+            elif self._data_type in self.SUPPORTED_SCALAR_TYPES:
+                new_message.type = CompSpecMsg.TYPE_SCALAR
+                new_message.scalar_type = self._data_type
+                setattr(new_message.scalar_value, self._data_type, curr_value)
+            else:
+                logging.error("Need to provide VariableSpecificationMessage " +
+                              "if type of data in the queue is not a " +
+                              "supported scalar type.")
+                return False
+        return True
 
     def _extractReadData(self, response_msg, data):
         """Extracts read data from the response message returned by client.

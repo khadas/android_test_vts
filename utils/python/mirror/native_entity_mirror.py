@@ -229,7 +229,7 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                         # no need to process the return values.
                         continue
 
-                    if (result.type == CompSpecMsg.TYPE_HIDL_INTERFACE):
+                    if result.type == CompSpecMsg.TYPE_HIDL_INTERFACE:
                         if result.hidl_interface_id <= -1:
                             results[i] = None
                         driver_id = result.hidl_interface_id
@@ -246,22 +246,44 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                             logging.error("Invalid new queue_id.")
                             results[i] = None
                         else:
+                            # Retrieve type of data in this FMQ.
+                            data_type = None
+                            # For scalar, read scalar_type field.
+                            if result.fmq_value[0].type == \
+                                    CompSpecMsg.TYPE_SCALAR:
+                                data_type = result.fmq_value[0].scalar_type
+                            # For enum, struct, and union, read predefined_type
+                            # field.
+                            elif (result.fmq_value[0].type ==
+                                     CompSpecMsg.TYPE_ENUM or
+                                  result.fmq_value[0].type ==
+                                     CompSpecMsg.TYPE_STRUCT or
+                                  result.fmq_value[0].type ==
+                                     CompSpecMsg.TYPE_UNION):
+                                data_type = result.fmq_value[0].predefined_type
+
+                            # Encounter an unknown type in FMQ.
+                            if data_type == None:
+                                logging.error(
+                                    "Unknown type %d in the new FMQ.",
+                                    result.fmq_value[0].type)
+                                results[i] = None
+                                continue
+                            sync = result.type == CompSpecMsg.TYPE_FMQ_SYNC
                             fmq_mirror = resource_mirror.ResourceFmqMirror(
-                                self._client, result.fmq_value[0].fmq_id)
-                            # TODO: support user-defined types in the future.
-                            fmq_mirror._data_type = result.fmq_value[0].scalar_type
-                            fmq_mirror._sync = result.type == CompSpecMsg.TYPE_FMQ_SYNC
+                                data_type, sync, self._client,
+                                result.fmq_value[0].fmq_id)
                             results[i] = fmq_mirror
-                    elif (result.type == CompSpecMsg.TYPE_HIDL_MEMORY):
-                        if (result.hidl_memory_value.mem_id == -1):
+                    elif result.type == CompSpecMsg.TYPE_HIDL_MEMORY:
+                        if result.hidl_memory_value.mem_id == -1:
                             logging.error("Invalid new mem_id.")
                             results[i] = None
                         else:
                             mem_mirror = resource_mirror.ResourceHidlMemoryMirror(
                                 self._client, result.hidl_memory_value.mem_id)
                             results[i] = mem_mirror
-                    elif (result.type == CompSpecMsg.TYPE_HANDLE):
-                        if (result.handle_value.handle_id == -1):
+                    elif result.type == CompSpecMsg.TYPE_HANDLE:
+                        if result.handle_value.handle_id == -1:
                             logging.error("Invalid new handle_id.")
                             results[i] = None
                         else:
