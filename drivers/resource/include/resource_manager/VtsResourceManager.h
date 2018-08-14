@@ -19,6 +19,9 @@
 
 #include <android-base/logging.h>
 #include <android/hardware/audio/4.0/IStreamIn.h>
+#include <android/hardware/audio/4.0/IStreamOut.h>
+#include <android/hardware/audio/effect/2.0/types.h>
+#include <android/hardware/audio/effect/4.0/types.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/text_format.h>
 
@@ -35,6 +38,11 @@ namespace vts {
 
 typedef ::android::hardware::audio::V4_0::IStreamIn::ReadParameters
     ReadParameters;
+typedef ::android::hardware::audio::V4_0::IStreamIn::ReadStatus ReadStatus;
+typedef ::android::hardware::audio::V4_0::IStreamOut::WriteCommand WriteCommand;
+typedef ::android::hardware::audio::V4_0::IStreamOut::WriteStatus WriteStatus;
+typedef ::android::hardware::audio::effect::V4_0::Result ResultV4_0;
+typedef ::android::hardware::audio::effect::V2_0::Result ResultV2_0;
 
 // A class that manages all resources allocated on the target side.
 // Resources include fast message queue, hidl_memory, hidl_handle.
@@ -287,7 +295,15 @@ class VtsResourceManager {
       {"double_t", &VtsResourceManager::ProcessFmqCommandWithType<double>},
       {"bool_t", &VtsResourceManager::ProcessFmqCommandWithType<bool>},
       {"::android::hardware::audio::V4_0::IStreamIn::ReadParameters",
-       &VtsResourceManager::ProcessFmqCommandWithType<ReadParameters>}};
+       &VtsResourceManager::ProcessFmqCommandWithType<ReadParameters>},
+      {"::android::hardware::audio::V4_0::IStreamIn::ReadStatus",
+       &VtsResourceManager::ProcessFmqCommandWithType<ReadStatus>},
+      {"::android::hardware::audio::V4_0::IStreamOut::WriteCommand",
+       &VtsResourceManager::ProcessFmqCommandWithType<WriteCommand>},
+      {"::android::hardware::audio::effect::V4_0::Result",
+       &VtsResourceManager::ProcessFmqCommandWithType<ResultV4_0>},
+      {"::android::hardware::audio::effect::V2_0::Result",
+       &VtsResourceManager::ProcessFmqCommandWithType<ResultV2_0>}};
 };
 
 }  // namespace vts
