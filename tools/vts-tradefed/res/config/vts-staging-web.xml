@@ -22,7 +22,7 @@
   <option name="vts-plan-result:default-type" value="staging" />
 
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:gtest-batch-mode:true" />
-  <option name="compatibility:include-filter" value="BionicUnitTests" />
+  <option name="compatibility:include-filter" value="LibcTest" />
   <option name="compatibility:include-filter" value="SampleShellTest" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0TargetProfiling" />
