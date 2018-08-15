@@ -1,8 +1,5 @@
 #include "android/hardware/tests/msgq/1.0/TestMsgQ.vts.h"
-#include <cutils/ashmem.h>
-#include <fcntl.h>
 #include <fmq/MessageQueue.h>
-#include <sys/stat.h>
 
 using namespace android::hardware::tests::msgq::V1_0;
 using namespace android::hardware;
