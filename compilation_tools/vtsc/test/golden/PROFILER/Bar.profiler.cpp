@@ -1,7 +1,6 @@
 #include "android/hardware/tests/bar/1.0/Bar.vts.h"
 #include <cutils/ashmem.h>
 #include <fcntl.h>
-#include <fmq/MessageQueue.h>
 #include <sys/stat.h>
 
 using namespace android::hardware::tests::bar::V1_0;
