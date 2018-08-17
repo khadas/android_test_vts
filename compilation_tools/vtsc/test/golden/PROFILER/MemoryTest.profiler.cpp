@@ -1,8 +1,7 @@
 #include "android/hardware/tests/memory/1.0/MemoryTest.vts.h"
-#include <cutils/ashmem.h>
-#include <fcntl.h>
-#include <fmq/MessageQueue.h>
-#include <sys/stat.h>
+#include <cutils/properties.h>
+#include <android/hidl/memory/1.0/IMemory.h>
+#include <hidlmemory/mapping.h>
 
 using namespace android::hardware::tests::memory::V1_0;
 using namespace android::hardware;
@@ -57,6 +56,17 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_HIDL_MEMORY);
                         arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                        if (property_get_bool("hal.instrumentation.dump.memory", false)){
+                            sp<android::hidl::memory::V1_0::IMemory> arg_0_mem = mapMemory((*arg_val_0));
+                            if (arg_0_mem == nullptr) {
+                                LOG(WARNING) << "Unable to map hidl_memory to IMemory object.";
+                            } else {
+                                arg_0_mem->read();
+                                char* arg_0_mem_char = static_cast<char*>(static_cast<void*>(arg_0_mem->getPointer()));
+                                arg_0->mutable_hidl_memory_value()->set_contents(string(arg_0_mem_char, (*arg_val_0).size()));
+                                arg_0_mem->commit();
+                            }
+                        }
                     } else {
                         LOG(WARNING) << "argument 0 is null.";
                     }
@@ -75,6 +85,17 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     if (result_val_0 != nullptr) {
                         result_0->set_type(TYPE_HIDL_MEMORY);
                         result_0->mutable_hidl_memory_value()->set_size((*result_val_0).size());
+                        if (property_get_bool("hal.instrumentation.dump.memory", false)){
+                            sp<android::hidl::memory::V1_0::IMemory> result_0_mem = mapMemory((*result_val_0));
+                            if (result_0_mem == nullptr) {
+                                LOG(WARNING) << "Unable to map hidl_memory to IMemory object.";
+                            } else {
+                                result_0_mem->read();
+                                char* result_0_mem_char = static_cast<char*>(static_cast<void*>(result_0_mem->getPointer()));
+                                result_0->mutable_hidl_memory_value()->set_contents(string(result_0_mem_char, (*result_val_0).size()));
+                                result_0_mem->commit();
+                            }
+                        }
                     } else {
                         LOG(WARNING) << "return value 0 is null.";
                     }
@@ -109,6 +130,17 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_HIDL_MEMORY);
                         arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                        if (property_get_bool("hal.instrumentation.dump.memory", false)){
+                            sp<android::hidl::memory::V1_0::IMemory> arg_0_mem = mapMemory((*arg_val_0));
+                            if (arg_0_mem == nullptr) {
+                                LOG(WARNING) << "Unable to map hidl_memory to IMemory object.";
+                            } else {
+                                arg_0_mem->read();
+                                char* arg_0_mem_char = static_cast<char*>(static_cast<void*>(arg_0_mem->getPointer()));
+                                arg_0->mutable_hidl_memory_value()->set_contents(string(arg_0_mem_char, (*arg_val_0).size()));
+                                arg_0_mem->commit();
+                            }
+                        }
                     } else {
                         LOG(WARNING) << "argument 0 is null.";
                     }
@@ -213,6 +245,17 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_memory_V1_0_IMemoryTes
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_HIDL_MEMORY);
                         arg_0->mutable_hidl_memory_value()->set_size((*arg_val_0).size());
+                        if (property_get_bool("hal.instrumentation.dump.memory", false)){
+                            sp<android::hidl::memory::V1_0::IMemory> arg_0_mem = mapMemory((*arg_val_0));
+                            if (arg_0_mem == nullptr) {
+                                LOG(WARNING) << "Unable to map hidl_memory to IMemory object.";
+                            } else {
+                                arg_0_mem->read();
+                                char* arg_0_mem_char = static_cast<char*>(static_cast<void*>(arg_0_mem->getPointer()));
+                                arg_0->mutable_hidl_memory_value()->set_contents(string(arg_0_mem_char, (*arg_val_0).size()));
+                                arg_0_mem->commit();
+                            }
+                        }
                     } else {
                         LOG(WARNING) << "argument 0 is null.";
                     }
