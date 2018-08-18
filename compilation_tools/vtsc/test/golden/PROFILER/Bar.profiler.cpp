@@ -1525,52 +1525,53 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                             auto *result_0_vector_result_0_index __attribute__((__unused__)) = result_0->add_vector_value();
                             result_0_vector_result_0_index->set_type(TYPE_HANDLE);
                             auto result_0_vector_result_0_index_h = (*result_val_0)[result_0_index].getNativeHandle();
-                            if (!result_0_vector_result_0_index_h) {
-                                LOG(WARNING) << "null handle";
-                                return;
-                            }
-                            result_0_vector_result_0_index->mutable_handle_value()->set_version(result_0_vector_result_0_index_h->version);
-                            result_0_vector_result_0_index->mutable_handle_value()->set_num_ints(result_0_vector_result_0_index_h->numInts);
-                            result_0_vector_result_0_index->mutable_handle_value()->set_num_fds(result_0_vector_result_0_index_h->numFds);
-                            for (int i = 0; i < result_0_vector_result_0_index_h->numInts + result_0_vector_result_0_index_h->numFds; i++) {
-                                if(i < result_0_vector_result_0_index_h->numFds) {
-                                    auto* fd_val_i = result_0_vector_result_0_index->mutable_handle_value()->add_fd_val();
-                                    char filePath[PATH_MAX];
-                                    string procPath = "/proc/self/fd/" + to_string(result_0_vector_result_0_index_h->data[i]);
-                                    ssize_t r = readlink(procPath.c_str(), filePath, sizeof(filePath));
-                                    if (r == -1) {
-                                        LOG(ERROR) << "Unable to get file path";
-                                        continue;
-                                    }
-                                    filePath[r] = '\0';
-                                    fd_val_i->set_file_name(filePath);
-                                    struct stat statbuf;
-                                    fstat(result_0_vector_result_0_index_h->data[i], &statbuf);
-                                    fd_val_i->set_mode(statbuf.st_mode);
-                                    if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
-                                        fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
-                                        int flags = fcntl(result_0_vector_result_0_index_h->data[i], F_GETFL);
-                                        fd_val_i->set_flags(flags);
-                                    }
-                                    else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
-                                        fd_val_i->set_type(DEV_TYPE);
-                                        if (strcmp(filePath, "/dev/ashmem") == 0) {
-                                            int size = ashmem_get_size_region(result_0_vector_result_0_index_h->data[i]);
-                                            fd_val_i->mutable_memory()->set_size(size);
+                            if (result_0_vector_result_0_index_h) {
+                                result_0_vector_result_0_index->mutable_handle_value()->set_version(result_0_vector_result_0_index_h->version);
+                                result_0_vector_result_0_index->mutable_handle_value()->set_num_ints(result_0_vector_result_0_index_h->numInts);
+                                result_0_vector_result_0_index->mutable_handle_value()->set_num_fds(result_0_vector_result_0_index_h->numFds);
+                                for (int i = 0; i < result_0_vector_result_0_index_h->numInts + result_0_vector_result_0_index_h->numFds; i++) {
+                                    if(i < result_0_vector_result_0_index_h->numFds) {
+                                        auto* fd_val_i = result_0_vector_result_0_index->mutable_handle_value()->add_fd_val();
+                                        char filePath[PATH_MAX];
+                                        string procPath = "/proc/self/fd/" + to_string(result_0_vector_result_0_index_h->data[i]);
+                                        ssize_t r = readlink(procPath.c_str(), filePath, sizeof(filePath));
+                                        if (r == -1) {
+                                            LOG(ERROR) << "Unable to get file path";
+                                            continue;
                                         }
+                                        filePath[r] = '\0';
+                                        fd_val_i->set_file_name(filePath);
+                                        struct stat statbuf;
+                                        fstat(result_0_vector_result_0_index_h->data[i], &statbuf);
+                                        fd_val_i->set_mode(statbuf.st_mode);
+                                        if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
+                                            fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
+                                            int flags = fcntl(result_0_vector_result_0_index_h->data[i], F_GETFL);
+                                            fd_val_i->set_flags(flags);
+                                        }
+                                        else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
+                                            fd_val_i->set_type(DEV_TYPE);
+                                            if (strcmp(filePath, "/dev/ashmem") == 0) {
+                                                int size = ashmem_get_size_region(result_0_vector_result_0_index_h->data[i]);
+                                                fd_val_i->mutable_memory()->set_size(size);
+                                            }
+                                        }
+                                        else if (S_ISFIFO(statbuf.st_mode)){
+                                            fd_val_i->set_type(PIPE_TYPE);
+                                        }
+                                        else if (S_ISSOCK(statbuf.st_mode)) {
+                                            fd_val_i->set_type(SOCKET_TYPE);
+                                        }
+                                        else {
+                                            fd_val_i->set_type(LINK_TYPE);
+                                        }
+                                    } else {
+                                        result_0_vector_result_0_index->mutable_handle_value()->add_int_val(result_0_vector_result_0_index_h->data[i]);
                                     }
-                                    else if (S_ISFIFO(statbuf.st_mode)){
-                                        fd_val_i->set_type(PIPE_TYPE);
-                                    }
-                                    else if (S_ISSOCK(statbuf.st_mode)) {
-                                        fd_val_i->set_type(SOCKET_TYPE);
-                                    }
-                                    else {
-                                        fd_val_i->set_type(LINK_TYPE);
-                                    }
-                                } else {
-                                    result_0_vector_result_0_index->mutable_handle_value()->add_int_val(result_0_vector_result_0_index_h->data[i]);
                                 }
+                            } else {
+                                LOG(WARNING) << "null handle";
+                                result_0_vector_result_0_index->mutable_handle_value()->set_hidl_handle_address(0);
                             }
                         }
                     } else {
@@ -1679,52 +1680,53 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
                     if (arg_val_0 != nullptr) {
                         arg_0->set_type(TYPE_HANDLE);
                         auto arg_0_h = (*arg_val_0).getNativeHandle();
-                        if (!arg_0_h) {
-                            LOG(WARNING) << "null handle";
-                            return;
-                        }
-                        arg_0->mutable_handle_value()->set_version(arg_0_h->version);
-                        arg_0->mutable_handle_value()->set_num_ints(arg_0_h->numInts);
-                        arg_0->mutable_handle_value()->set_num_fds(arg_0_h->numFds);
-                        for (int i = 0; i < arg_0_h->numInts + arg_0_h->numFds; i++) {
-                            if(i < arg_0_h->numFds) {
-                                auto* fd_val_i = arg_0->mutable_handle_value()->add_fd_val();
-                                char filePath[PATH_MAX];
-                                string procPath = "/proc/self/fd/" + to_string(arg_0_h->data[i]);
-                                ssize_t r = readlink(procPath.c_str(), filePath, sizeof(filePath));
-                                if (r == -1) {
-                                    LOG(ERROR) << "Unable to get file path";
-                                    continue;
-                                }
-                                filePath[r] = '\0';
-                                fd_val_i->set_file_name(filePath);
-                                struct stat statbuf;
-                                fstat(arg_0_h->data[i], &statbuf);
-                                fd_val_i->set_mode(statbuf.st_mode);
-                                if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
-                                    fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
-                                    int flags = fcntl(arg_0_h->data[i], F_GETFL);
-                                    fd_val_i->set_flags(flags);
-                                }
-                                else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
-                                    fd_val_i->set_type(DEV_TYPE);
-                                    if (strcmp(filePath, "/dev/ashmem") == 0) {
-                                        int size = ashmem_get_size_region(arg_0_h->data[i]);
-                                        fd_val_i->mutable_memory()->set_size(size);
+                        if (arg_0_h) {
+                            arg_0->mutable_handle_value()->set_version(arg_0_h->version);
+                            arg_0->mutable_handle_value()->set_num_ints(arg_0_h->numInts);
+                            arg_0->mutable_handle_value()->set_num_fds(arg_0_h->numFds);
+                            for (int i = 0; i < arg_0_h->numInts + arg_0_h->numFds; i++) {
+                                if(i < arg_0_h->numFds) {
+                                    auto* fd_val_i = arg_0->mutable_handle_value()->add_fd_val();
+                                    char filePath[PATH_MAX];
+                                    string procPath = "/proc/self/fd/" + to_string(arg_0_h->data[i]);
+                                    ssize_t r = readlink(procPath.c_str(), filePath, sizeof(filePath));
+                                    if (r == -1) {
+                                        LOG(ERROR) << "Unable to get file path";
+                                        continue;
                                     }
+                                    filePath[r] = '\0';
+                                    fd_val_i->set_file_name(filePath);
+                                    struct stat statbuf;
+                                    fstat(arg_0_h->data[i], &statbuf);
+                                    fd_val_i->set_mode(statbuf.st_mode);
+                                    if (S_ISREG(statbuf.st_mode) || S_ISDIR(statbuf.st_mode)) {
+                                        fd_val_i->set_type(S_ISREG(statbuf.st_mode)? FILE_TYPE: DIR_TYPE);
+                                        int flags = fcntl(arg_0_h->data[i], F_GETFL);
+                                        fd_val_i->set_flags(flags);
+                                    }
+                                    else if (S_ISCHR(statbuf.st_mode) || S_ISBLK(statbuf.st_mode)) {
+                                        fd_val_i->set_type(DEV_TYPE);
+                                        if (strcmp(filePath, "/dev/ashmem") == 0) {
+                                            int size = ashmem_get_size_region(arg_0_h->data[i]);
+                                            fd_val_i->mutable_memory()->set_size(size);
+                                        }
+                                    }
+                                    else if (S_ISFIFO(statbuf.st_mode)){
+                                        fd_val_i->set_type(PIPE_TYPE);
+                                    }
+                                    else if (S_ISSOCK(statbuf.st_mode)) {
+                                        fd_val_i->set_type(SOCKET_TYPE);
+                                    }
+                                    else {
+                                        fd_val_i->set_type(LINK_TYPE);
+                                    }
+                                } else {
+                                    arg_0->mutable_handle_value()->add_int_val(arg_0_h->data[i]);
                                 }
-                                else if (S_ISFIFO(statbuf.st_mode)){
-                                    fd_val_i->set_type(PIPE_TYPE);
-                                }
-                                else if (S_ISSOCK(statbuf.st_mode)) {
-                                    fd_val_i->set_type(SOCKET_TYPE);
-                                }
-                                else {
-                                    fd_val_i->set_type(LINK_TYPE);
-                                }
-                            } else {
-                                arg_0->mutable_handle_value()->add_int_val(arg_0_h->data[i]);
                             }
+                        } else {
+                            LOG(WARNING) << "null handle";
+                            arg_0->mutable_handle_value()->set_hidl_handle_address(0);
                         }
                     } else {
                         LOG(WARNING) << "argument 0 is null.";
