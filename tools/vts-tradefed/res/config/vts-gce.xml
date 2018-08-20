@@ -25,10 +25,6 @@
   <option name="compatibility:include-filter" value="VtsCodelabTargetBinary" />
   <option name="compatibility:include-filter" value="VtsFirmwareBootHeaderVerification" />
   <option name="compatibility:include-filter" value="VtsFirmwareDtboVerification" />
-  <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalAudioEffectV4_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalAudioV2_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalAuthSecretV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBaseV1_0TargetTest" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1Target" />
@@ -95,6 +91,10 @@
 
   <!-- Temporailly excluded due to their incompatibility with cuttlefish
 
+  <option name="compatibility:include-filter" value="VtsHalAudioEffectV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalAudioEffectV4_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalAudioV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_0Target" />
