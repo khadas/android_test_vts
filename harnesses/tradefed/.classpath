@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="tests/res"/>
 	<classpathentry kind="src" path="vtsproto"/>
 	<classpathentry kind="src" path="objenesis"/>
 	<classpathentry kind="src" path="mockito"/>
