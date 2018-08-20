@@ -871,8 +871,8 @@ class AndroidDevice(object):
         else:
             product_sku = self.getProp(PROPERTY_PRODUCT_SKU)
             if product_sku:
-                odm_prod_sku_manifest = "/odm/etc/vintf/manifest_{sku}.xml".format(sku=product_sku)
-                manifest_paths.insert(0, odm_prod_sku_manifest)
+                manifest_paths.insert(0, "/odm/etc/manifest_{sku}.xml".format(sku=product_sku))
+                manifest_paths.insert(0, "/odm/etc/vintf/manifest_{sku}.xml".format(sku=product_sku))
             for manifest in manifest_paths:
                 try:
                     stdout = self.adb.shell('cat %s' % manifest)
