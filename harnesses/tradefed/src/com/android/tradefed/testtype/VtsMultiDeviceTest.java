@@ -562,6 +562,20 @@ public class VtsMultiDeviceTest
      * {@inheritDoc}
      */
     @Override
+    public void clearIncludeFilters() {
+        mIncludeFilters.clear();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<String> getIncludeFilters() {
+        return mIncludeFilters;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void addExcludeFilter(String filter) {
         mExcludeFilters.add(cleanFilter(filter));
     }
@@ -574,6 +588,18 @@ public class VtsMultiDeviceTest
         for (String filter : filters) {
             mExcludeFilters.add(cleanFilter(filter));
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clearExcludeFilters() {
+        mExcludeFilters.clear();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<String> getExcludeFilters() {
+        return mExcludeFilters;
     }
 
     /**
