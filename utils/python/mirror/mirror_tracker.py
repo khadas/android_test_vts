@@ -17,6 +17,7 @@
 import logging
 
 from vts.proto import AndroidSystemControlMessage_pb2 as ASysCtrlMsg
+from vts.runners.host import const
 from vts.runners.host import errors
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.runners.host.tcp_server import callback_server
@@ -42,6 +43,7 @@ class MirrorTracker(object):
                              mirror object.
         _callback_server: VtsTcpServer, the server that receives and handles
                           callback messages from target side.
+        shell_default_nohup: bool, whether to use nohup by default in shell commands.
     """
 
     def __init__(self,
@@ -54,6 +56,7 @@ class MirrorTracker(object):
         self._adb = adb
         self._registered_mirrors = {}
         self._callback_server = None
+        self.shell_default_nohup = False
         if start_callback_server:
             self._StartCallbackServer()
 
@@ -416,11 +419,90 @@ class MirrorTracker(object):
                 continue
             mirror.enabled = False
 
-    def Execute(self, command, no_except=False):
-        """Execute a shell command with default shell terminal."""
+    def Execute(self, commands, no_except=False, nohup=None):
+        """Execute shell command(s).
+
+        This method automatically decide whether to use adb shell or vts shell
+        driver on the device based on performance benchmark results.
+
+        The difference in the decision logic will only have impact on the performance, but
+        will be transparent to the user of this method.
+
+        The current logic is:
+            1. If shell_default_nohup is disabled and command
+               list size is smaller or equal than 3, use adb shell. Otherwise, use
+              shell driver (with nohup).
+
+            2. If adb shell is used, no_except will always be true.
+
+            This is subject to further optimization.
+
+        Args:
+            commands: string or list or tuple, commands to execute on device.
+            no_except: bool, whether to throw exceptions. If set to True,
+                       when exception happens, return code will be -1 and
+                       str(err) will be in stderr. Result will maintain the
+                       same length as with input commands.
+            nohup: bool or None, True for using nohup for shell commands; False for
+                   not using nohup; None for using default setting.
+
+        Returns:
+            dictionary of list, command results that contains stdout,
+            stderr, and exit_code.
+        """
+        if not isinstance(commands, (list, tuple)):
+            commands = [commands]
+
+        if nohup is None:
+            nohup = self.shell_default_nohup
+
+        # TODO(yuexima): further optimize the threshold and nohup adb command
+        non_nohup_adb_threshold = 3
+        if not nohup and len(commands) <= non_nohup_adb_threshold:
+            return self._ExecuteShellCmdViaAdbShell(commands)
+        else:
+            return self._ExecuteShellCmdViaVtsDriver(commands, no_except)
+
+    def _ExecuteShellCmdViaVtsDriver(self, commands, no_except):
+        """Execute shell command(s) using default shell terminal.
+
+        Args:
+            commands: string or list or tuple, commands to execute on device
+            no_except: bool, whether to throw exceptions. If set to True,
+                       when exception happens, return code will be -1 and
+                       str(err) will be in stderr. Result will maintain the
+                       same length as with input command.
+
+        Returns:
+            dictionary of list, command results that contains stdout,
+            stderr, and exit_code.
+        """
         if _DEFAULT_SHELL_NAME not in self._registered_mirrors:
             self.InvokeTerminal(_DEFAULT_SHELL_NAME)
-        return getattr(self, _DEFAULT_SHELL_NAME).Execute(command, no_except)
+
+        return getattr(self, _DEFAULT_SHELL_NAME).Execute(commands, no_except)
+
+    def _ExecuteShellCmdViaAdbShell(self, commands):
+        """Execute shell command(s) using adb shell command.
+
+        Args:
+            commands: string or list or tuple, command to execute on device
+
+        Returns:
+            dictionary of list, command results that contains stdout,
+            stderr, and exit_code.
+        """
+        all = {const.STDOUT: [],
+               const.STDERR: [],
+               const.EXIT_CODE: []}
+
+        for cmd in commands:
+            res = self._adb.shell(cmd, no_except=True)
+            all[const.STDOUT].append(res[const.STDOUT])
+            all[const.STDERR].append(res[const.STDERR])
+            all[const.EXIT_CODE].append(res[const.EXIT_CODE])
+
+        return all
 
     def SetConnTimeout(self, timeout):
         """Set remove shell connection timeout for default shell terminal.
