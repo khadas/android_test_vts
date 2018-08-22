@@ -22,6 +22,8 @@ import com.android.tradefed.result.FileInputStreamSource;
 import com.android.tradefed.result.LogDataType;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Utility class to add output file to TradeFed log directory.
@@ -36,7 +38,7 @@ public class OutputUtil {
     static private String[] PYTHON_OUTPUT_PATTERNS = new String[] {"test_run_details.*\\.txt",
             "vts_agent_.*\\.log", "systrace_.*\\.html", "logcat.*\\.txt", "bugreport.*\\.zip"};
     // Python folder pattern in which any files will be included in results
-    static private String PYTHON_OUTPUT_ADDITIONAL = ".*additional_output_files";
+    static private String PYTHON_CUSTOM_OUTPUT = ".*custom_output_files";
 
     public OutputUtil(ITestLogger listener) {
         mListener = listener;
@@ -51,6 +53,31 @@ public class OutputUtil {
     public void addOutputFromTextFile(String outputFileName, File source) {
         FileInputStreamSource inputSource = new FileInputStreamSource(source);
         mListener.testLog(outputFileName, LogDataType.TEXT, inputSource);
+    }
+
+    /**
+     * Collect all VTS python runner log output files as a single zip file
+     * @param logDirectory
+     */
+    public void collectVtsRunnerOutputZip(File logDirectory) {
+        try {
+            Set<String> latest = FileUtil.findFiles(logDirectory, "latest");
+            if (latest.isEmpty()) {
+                CLog.e("Empty python log directory: %s", logDirectory);
+                return;
+            }
+
+            File tmpZip = ZipUtil.createZip(
+                    Arrays.asList(new File(latest.iterator().next()).listFiles()));
+            String outputFileName = "module_" + mTestModuleName + "_output_files_" + mAbiName;
+            FileInputStreamSource inputSource = new FileInputStreamSource(tmpZip);
+            mListener.testLog(outputFileName, LogDataType.ZIP, inputSource);
+            tmpZip.delete();
+
+        } catch (IOException e) {
+            CLog.e("Error processing python module output directory: %s", logDirectory);
+            CLog.e(e);
+        }
     }
 
     /**
@@ -71,7 +98,7 @@ public class OutputUtil {
 
         // Next, collect any additional files produced by tests.
         try {
-            for (String path : FileUtil.findFiles(logDirectory, PYTHON_OUTPUT_ADDITIONAL)) {
+            for (String path : FileUtil.findFiles(logDirectory, PYTHON_CUSTOM_OUTPUT)) {
                 for (File f : new File(path).listFiles()) {
                     addVtsRunnerOutputFile(f);
                 }
