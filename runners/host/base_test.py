@@ -227,6 +227,10 @@ class BaseTestClass(object):
                     self.registerController(android_device,
                                             start_services=self.start_vts_agents))
             event.End()
+
+            for device in getattr(self, _ANDROID_DEVICES):
+                device.shell_default_nohup = self.getUserParam(
+                    keys.ConfigKeys.SHELL_DEFAULT_NOHUP, default_value=False)
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter

@@ -160,3 +160,6 @@ class ConfigKeys(object):
 
     # Mobly test related keys
     MOBLY_TEST_MODULE = "MOBLY_TEST_MODULE"
+
+    # Controller option keys
+    SHELL_DEFAULT_NOHUP = "shell_default_nohup"
