@@ -1285,7 +1285,7 @@ public class VtsMultiDeviceTest
                 CLog.e("Command stderr: " + commandResult.getStderr());
                 CLog.e("Command status: " + commandStatus);
                 CLog.e("Python log: ");
-                mOutputUtil.collectVtsRunnerOutputZip(vtsRunnerLogDir);
+                mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
                 throw new RuntimeException("Failed to run VTS test");
             }
@@ -1334,7 +1334,7 @@ public class VtsMultiDeviceTest
                 }
             }
         }
-        mOutputUtil.collectVtsRunnerOutputZip(vtsRunnerLogDir);
+        mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
 
         File reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME);
         CLog.d("Report message path: %s", reportMsg);
