@@ -17,6 +17,7 @@ import datetime
 import logging
 import os
 import shutil
+import tempfile
 
 from vts.utils.python.common import cmd_utils
 from vts.utils.python.gcs import gcs_api_utils
@@ -167,10 +168,22 @@ class ReportFileUtil(object):
         src_path = NotNoneStr(src_path)
         dest_path = NotNoneStr(dest_path)
 
+        # Copy snapshot to temp as GCS will not handle dynamic files.
+        temp_dir = tempfile.mkdtemp()
+        shutil.copy(src_path, temp_dir)
+        src_path = os.path.join(temp_dir, os.path.basename(src_path))
+        logging.debug('Snapshot of logs: %s', src_path)
+
         try:
             self._gcs_api_utils.UploadFile(src_path, dest_path)
         except IOError as e:
             logging.exception(e)
+        finally:
+            logging.debug('removing temporary directory')
+            try:
+                shutil.rmtree(temp_dir)
+            except OSError as e:
+                logging.exception(e)
 
     def SaveReport(self, src_path, new_file_name=None, file_name_prefix=None):
         '''Save report file to destination.
