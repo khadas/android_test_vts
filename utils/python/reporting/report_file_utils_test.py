@@ -60,7 +60,6 @@ class ReportFileUtilsTest(unittest.TestCase):
             use_destination_date_dir=True,
             destination_dir="vts-log",
             url_prefix="https://storage.cloud.google.com/vts-log/")
-        _report_file_util._use_gcs = True
 
         self.assertEqual(_report_file_util._flatten_source_dir, True)
         self.assertEqual(_report_file_util._use_destination_date_dir, True)
@@ -153,8 +152,8 @@ class ReportFileUtilsTest(unittest.TestCase):
     def testPushReportFileGcs(self):
         """Tests the _PushReportFileGcs function with mocking"""
         _report_file_util = report_file_utils.ReportFileUtil()
-        _report_file_util.use_gcs = True
         _report_file_util._gcs_api_utils = mock.MagicMock()
+        _report_file_util._gcs_available = True
         _report_file_util._PushReportFileGcs("src_path", "dest_path")
         _report_file_util._gcs_api_utils.UploadFile.assert_called_with(
             "src_path", "dest_path")
