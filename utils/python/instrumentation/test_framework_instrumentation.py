@@ -13,19 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import datetime
 import logging
+import operator
+import os
 import time
 
+from vts.runners.host import logger
 from vts.utils.python.instrumentation import test_framework_instrumentation_categories as tfic
 from vts.utils.python.instrumentation import test_framework_instrumentation_event as tfie
 
 
 # global category listing
 categories = tfic.TestFrameworkInstrumentationCategories()
+# TODO(yuexima): use data class
 counts = {}
 
 DEFAULT_CATEGORY = 'Misc'
+DEFAULT_FILE_NAME_TEXT_RESULT = 'instrumentation_data.txt'
 
 
 def Begin(name, category=DEFAULT_CATEGORY, enable_logging=None, disable_subevent_logging=False):
@@ -112,6 +117,87 @@ def Count(name, category=DEFAULT_CATEGORY):
     name, category = tfie.NormalizeNameCategory(name, category)
     # TODO(yuexima): give warning when there's illegal char, but only once for each combination.'
     if (name, category) not in counts:
-        counts[(name, category)] = [time.clock()]
+        counts[(name, category)] = [time.time()]
     else:
-        counts[name, category].append(time.clock())
+        counts[name, category].append(time.time())
+
+
+def GenerateTextReport():
+    """Compile instrumentation results into a simple text output format for visualization.
+
+    Returns:
+        a string containing result text.
+    """
+    class EventItem:
+        """Temporary data storage class for instrumentation text result generation.
+
+        Attributes:
+            name: string, event name
+            category: string, event category
+            time_cpu: float, CPU time of the event (can be begin or end)
+            time_wall: float, wall time of the event (can be begin or end)
+            type: string, begin or end
+        """
+        name = ''
+        category = ''
+        time_cpu = -1
+        time_wall = -1
+        type = ''
+        duration = -1
+
+    results = []
+
+    for event in tfie.event_data:
+        ei = EventItem()
+        ei.name = event.name
+        ei.category = event.category
+        ei.type = 'begin'
+        ei.time_cpu = event.timestamp_begin_cpu
+        ei.time_wall = event.timestamp_begin_wall
+        results.append(ei)
+
+    for event in tfie.event_data:
+        ei = EventItem()
+        ei.name = event.name
+        ei.category = event.category
+        ei.type = 'end'
+        ei.time_cpu = event.timestamp_end_cpu
+        ei.time_wall = event.timestamp_end_wall
+        ei.duration = event.timestamp_end_wall - event.timestamp_begin_wall
+        results.append(ei)
+
+    results.sort(key=operator.attrgetter('time_cpu'))
+
+    result_text = []
+
+    level = 0
+    for e in results:
+        if e.type == 'begin':
+            s = ('Begin [%s @ %s] ' % (e.name, e.category) +
+                 datetime.datetime.fromtimestamp(e.time_wall).strftime('%Y-%m-%d %H:%M:%S_%f'))
+            result_text.append('    '*level + s)
+            level += 1
+        else:
+            s = ('End   [%s @ %s] ' % (e.name, e.category) +
+                 datetime.datetime.fromtimestamp(e.time_wall).strftime('%Y-%m-%d %H:%M:%S_%f'))
+            level -= 1
+            result_text.append('    '*level + s)
+            result_text.append('\n')
+            result_text.append('    '*level + "%.4f" % e.duration)
+        result_text.append('\n')
+
+    return ''.join(result_text)
+
+
+def CompileResults(directory=None, filename=DEFAULT_FILE_NAME_TEXT_RESULT):
+    """Writes instrumentation results into a simple text output format for visualization.
+
+    Args:
+        directory: string, parent path of result
+        filename: string, result file name
+    """
+    if not directory:
+        directory = logger.GetOutputDir()
+
+    with open(os.path.join(directory, filename), 'w') as f:
+        f.write(GenerateTextReport())

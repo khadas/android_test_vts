@@ -29,6 +29,9 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         """Setup tasks"""
         self.category = 'category_default'
         self.name = 'name_default'
+        tfie.event_data = []
+        tfie.event_stack = []
+        tfi.counts = {}
 
     def testEventName(self):
         """Tests whether illegal characters are being recognized and replaced."""
@@ -205,6 +208,25 @@ class TestFrameworkInstrumentationTest(unittest.TestCase):
         self.assertEqual(len(tfi.counts[self.name, self.category]), 2)
         tfi.Count(self.name)
         self.assertEqual(len(tfi.counts), 2)
+
+    def testGenerateTextReport(self):
+        """Tests the GenerateTextReport method."""
+        event = tfi.Begin('name1', 'cat1', disable_subevent_logging=True)
+        event_sub = tfi.Begin('name2', 'cat2', disable_subevent_logging=False)
+        event_sub.End()
+        event.End()
+        res = tfi.GenerateTextReport()
+
+        # Checks result is not empty
+        self.assertGreater(len(res), 0)
+
+        # Since the format of the result is subject to change, here we only
+        # checks whether the names and categories are mentioned in the result.
+        self.assertIn('name1', res)
+        self.assertIn('name2', res)
+        self.assertIn('cat1', res)
+        self.assertIn('cat2', res)
+
 
 if __name__ == "__main__":
     unittest.main()
