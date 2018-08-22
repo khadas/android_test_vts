@@ -558,10 +558,9 @@ class BaseTestClass(object):
                 return
 
         if self._timer:
-            logging.info("Cancel timer.")
             self._timer.cancel()
 
-        logging.info("Start timer with timeout=%ssec.", timeout)
+        logging.debug("Start timer with timeout=%ssec.", timeout)
         self._timer = threading.Timer(timeout, self.interrupt)
         self._timer.daemon = True
         self._timer.start()
