@@ -39,6 +39,8 @@ log_severity_map = {
     "DEBUG": logging.DEBUG,
 }
 
+# Directory name in the log path in which files will be included in TradeFed output
+PYTHON_OUTPUT_ADDITIONAL = 'additional_output_files'
 
 def _parse_logline_timestamp(t):
     """Parses a logline timestamp into a tuple.
@@ -276,6 +278,31 @@ def normalizeLogLineTimestamp(log_line_timestamp):
     norm_tp = norm_tp.replace(':', '-')
     return norm_tp
 
+
+def GetOutputDir():
+    '''Returns a directory to store additional output files.
+
+    Files under this directory will be included in log output folder.
+    All files will be uploaded to VTS dashboard if enabled;
+    Only files with recognized file types will be included in TradeFed output.
+
+    Returns:
+        A path if successfully created.
+        None if failed.
+    '''
+    res = os.path.join(logging.log_path, PYTHON_OUTPUT_ADDITIONAL)
+    if not os.path.exists(res):
+        try:
+            # Currently, PYTHON_OUTPUT_ADDITIONAL is a path only one level below
+            # logging.log_path, so os.mkdir checks whether logging.log_path exists.
+            # If PYTHON_OUTPUT_ADDITIONAL's directory level increases, use os.makedirs
+            # instead.
+            os.mkdir(res)
+        except OSError as exc: # Guard against race condition
+            logging.error('Failed to create test output directory %s', res)
+            return None
+
+    return res
 
 class LoggerProxy(object):
     """This class is for situations where a logger may or may not exist.
