@@ -43,12 +43,12 @@ class ReportFileUtil(object):
         _use_destination_date_dir: bool, whether to create date directory
                                    in destination directory
         _source_dir: string, source directory that contains report files
-        _destination_dir: string, destination directory for report saving
-                          or the GCS bucket name if _use_gcs is True.
+        _destination_dir: string, the GCS destination bucket name.
         _url_prefix: string, a prefix added to relative destination file paths.
                      If set to None, will use parent directory path.
         _use_gcs: bool, whether or not this ReportFileUtil is using GCS.
         _gcs_api_utils: GcsApiUtils object used by the ReportFileUtil object.
+        _gcs_available: bool, whether or not the GCS agent is available.
     '''
 
     def __init__(self,
@@ -58,6 +58,16 @@ class ReportFileUtil(object):
                  destination_dir=None,
                  url_prefix=None,
                  gcs_key_path=None):
+        """Initializes the ReportFileUtils object.
+
+        Args:
+            flatten_source_dir: bool, whether or not flatten the directory structure.
+            use_destination_date_dir: bool, whether or not use date as part of name,
+            source_dir: string, path to the source directory.
+            destination_dir: string, path to the destination directory.
+            url_prefix: string, prefix of the url used to upload the link to dashboard.
+            gcs_key_path: string, path to the GCS key file.
+        """
         source_dir = NotNoneStr(source_dir)
         destination_dir = NotNoneStr(destination_dir)
         url_prefix = NotNoneStr(url_prefix)
@@ -68,10 +78,12 @@ class ReportFileUtil(object):
         self._destination_dir = destination_dir
         self._url_prefix = url_prefix
         self._use_gcs = False
+
         if gcs_key_path is not None:
             self._use_gcs = True
             self._gcs_api_utils = gcs_api_utils.GcsApiUtils(
                 gcs_key_path, destination_dir)
+            self._gcs_available = self._gcs_api_utils.Enabled
 
     def _ConvertReportPath(self,
                            src_path,
@@ -126,6 +138,8 @@ class ReportFileUtil(object):
             src_path: string, source path of report file
             dest_path: string, destination path of report file
         '''
+        logging.info('Uploading log %s to %s.', src_path, dest_path)
+
         src_path = NotNoneStr(src_path)
         dest_path = NotNoneStr(dest_path)
 
@@ -144,6 +158,12 @@ class ReportFileUtil(object):
             src_path: string, source path of report file
             dest_path: string, destination path of report file
         """
+        if not self._gcs_available:
+            logging.error('Logs not being uploaded.')
+            return
+
+        logging.info('Uploading log %s to %s.', src_path, dest_path)
+
         src_path = NotNoneStr(src_path)
         dest_path = NotNoneStr(dest_path)
 
@@ -177,7 +197,10 @@ class ReportFileUtil(object):
                 src_path,
                 new_file_name=new_file_name,
                 file_name_prefix=file_name_prefix)
-            self._PushReportFile(src_path, dest_path)
+            if self._use_gcs:
+                self._PushReportFileGcs(src_path, dest_path)
+            else:
+                self._PushReportFile(src_path, dest_path)
 
             return url
         except IOError as e:
