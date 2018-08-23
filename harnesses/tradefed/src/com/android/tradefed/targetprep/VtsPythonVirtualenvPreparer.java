@@ -62,7 +62,8 @@ import java.util.TreeSet;
 public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String LOCAL_PYPI_PATH_ENV_VAR_NAME = "VTS_PYPI_PATH";
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
-    private static final int BASE_TIMEOUT = 1000 * 60;
+    private static final int MINUTE_IN_MSECS = 1000 * 60;
+    private static final int SECOND_IN_MSECS = 1000;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -205,7 +206,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (!EnvUtil.isOnWindows()) {
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "ls", path);
+            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS, "ls", path);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.d(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
                         path, c.getStatus(), c.getStdout(), c.getStderr()));
@@ -233,7 +234,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         if (!mScriptFiles.isEmpty()) {
             for (String scriptFile : mScriptFiles) {
                 CLog.d("Attempting to execute a script, %s", scriptFile);
-                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, scriptFile);
+                CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, scriptFile);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Executing script %s failed", scriptFile);
                     throw new TargetSetupError("Failed to source a script", mDescriptor);
@@ -241,7 +242,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             }
         }
         if (mRequirementsFile != null) {
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
+            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install",
                     "-r", mRequirementsFile.getAbsolutePath());
             if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
                 CLog.e("Installing dependencies from %s failed with error: %s",
@@ -258,7 +259,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 CommandResult result = null;
                 if (mLocalPypiPath != null) {
                     CLog.d("Attempting installation of %s from local directory", dep);
-                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
+                    result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install",
                             dep, "--no-index", "--find-links=" + mLocalPypiPath);
                     CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                             result.getStdout(), result.getStderr()));
@@ -269,14 +270,14 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 if (mLocalPypiPath == null || result.getStatus() != CommandStatus.SUCCESS) {
                     CLog.d("Attempting installation of %s from PyPI", dep);
                     result = getRunUtil().runTimedCmd(
-                            BASE_TIMEOUT * 5, getPipPath(), "install", dep);
+                            MINUTE_IN_MSECS * 5, getPipPath(), "install", dep);
                     CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                             result.getStdout(), result.getStderr());
                     if (result.getStatus() != CommandStatus.SUCCESS) {
                         CLog.e("Installing %s from PyPI failed.", dep);
                         CLog.d("Attempting to upgrade %s", dep);
                         result = getRunUtil().runTimedCmd(
-                                BASE_TIMEOUT * 5, getPipPath(), "install", "--upgrade", dep);
+                                MINUTE_IN_MSECS * 5, getPipPath(), "install", "--upgrade", dep);
                         if (result.getStatus() != CommandStatus.SUCCESS) {
                             throw new TargetSetupError(
                                     String.format("Failed to install dependencies with pip. "
@@ -405,7 +406,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             String virtualEnvPath = mVenvDir.getAbsolutePath();
             String[] cmd =
                     new String[] {"virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 3, cmd);
+            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 3, cmd);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
                 CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
@@ -544,7 +545,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @return installed pip packages
      */
     private Map<String, String> getInstalledPipModules() {
-        CommandResult res = getRunUtil().runTimedCmd(BASE_TIMEOUT, getPipPath(), "list");
+        CommandResult res = getRunUtil().runTimedCmd(SECOND_IN_MSECS * 30, getPipPath(), "list");
         if (res.getStatus() != CommandStatus.SUCCESS) {
             CLog.e(String.format("Failed to read pip installed list: "
                             + "Result %s. stdout: %s, stderr: %s",
