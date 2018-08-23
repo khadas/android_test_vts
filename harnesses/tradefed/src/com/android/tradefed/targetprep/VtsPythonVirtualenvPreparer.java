@@ -62,8 +62,8 @@ import java.util.TreeSet;
 public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String LOCAL_PYPI_PATH_ENV_VAR_NAME = "VTS_PYPI_PATH";
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
-    private static final int MINUTE_IN_MSECS = 1000 * 60;
     private static final int SECOND_IN_MSECS = 1000;
+    private static final int MINUTE_IN_MSECS = SECOND_IN_MSECS * 60;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -229,6 +229,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
     }
 
+    /**
+     * Installs all python pip module dependencies specified in options.
+     * @throws TargetSetupError
+     */
     protected void installDeps() throws TargetSetupError {
         boolean hasDependencies = false;
         if (!mScriptFiles.isEmpty()) {
@@ -242,60 +246,87 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             }
         }
         if (mRequirementsFile != null) {
-            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install",
-                    "-r", mRequirementsFile.getAbsolutePath());
-            if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
-                CLog.e("Installing dependencies from %s failed with error: %s",
-                        mRequirementsFile.getAbsolutePath(), c.getStderr());
-                throw new TargetSetupError("Failed to install dependencies with pip", mDescriptor);
-            }
             hasDependencies = true;
+            installPipRequirementFile(mRequirementsFile);
         }
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
                 if (mNoDepModules.contains(dep) || isPipModuleInstalled(dep)) {
                     continue;
                 }
-                CommandResult result = null;
-                if (mLocalPypiPath != null) {
-                    CLog.d("Attempting installation of %s from local directory", dep);
-                    result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install",
-                            dep, "--no-index", "--find-links=" + mLocalPypiPath);
-                    CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                            result.getStdout(), result.getStderr()));
-                    if (result.getStatus() != CommandStatus.SUCCESS) {
-                        CLog.e(String.format("Installing %s from %s failed", dep, mLocalPypiPath));
-                    }
-                }
-                if (mLocalPypiPath == null || result.getStatus() != CommandStatus.SUCCESS) {
-                    CLog.d("Attempting installation of %s from PyPI", dep);
-                    result = getRunUtil().runTimedCmd(
-                            MINUTE_IN_MSECS * 5, getPipPath(), "install", dep);
-                    CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                            result.getStdout(), result.getStderr());
-                    if (result.getStatus() != CommandStatus.SUCCESS) {
-                        CLog.e("Installing %s from PyPI failed.", dep);
-                        CLog.d("Attempting to upgrade %s", dep);
-                        result = getRunUtil().runTimedCmd(
-                                MINUTE_IN_MSECS * 5, getPipPath(), "install", "--upgrade", dep);
-                        if (result.getStatus() != CommandStatus.SUCCESS) {
-                            throw new TargetSetupError(
-                                    String.format("Failed to install dependencies with pip. "
-                                                    + "Result %s. stdout: %s, stderr: %s",
-                                            result.getStatus(), result.getStdout(),
-                                            result.getStderr()),
-                                    mDescriptor);
-                        } else {
-                            CLog.d(String.format("Result %s. stdout: %s, stderr: %s",
-                                    result.getStatus(), result.getStdout(), result.getStderr()));
-                        }
-                    }
+                if (!installPipModuleLocally(dep)) {
+                    installPipModule(dep);
                 }
                 hasDependencies = true;
             }
         }
         if (!hasDependencies) {
             CLog.d("No dependencies to install");
+        }
+    }
+
+    /**
+     * Installs a pip requirement file from Internet.
+     * @param req pip module requirement file object
+     * @throws TargetSetupError
+     */
+    private void installPipRequirementFile(File req) throws TargetSetupError {
+        CommandResult c = getRunUtil().runTimedCmd(
+                MINUTE_IN_MSECS * 5, getPipPath(), "install", "-r", req.getAbsolutePath());
+        if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
+            CLog.e("Installing dependencies from %s failed with error: %s", req.getAbsolutePath(),
+                    c.getStderr());
+            throw new TargetSetupError("Failed to install dependencies with pip", mDescriptor);
+        }
+    }
+
+    /**
+     * Installs a pip module from local directory.
+     * @param name of the module
+     * @return true if the module is successfully installed; false otherwise.
+     */
+    private boolean installPipModuleLocally(String name) {
+        if (mLocalPypiPath == null) {
+            return false;
+        }
+        CLog.d("Attempting installation of %s from local directory", name);
+        CommandResult result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(),
+                "install", name, "--no-index", "--find-links=" + mLocalPypiPath);
+        CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                result.getStdout(), result.getStderr()));
+        if (result.getStatus() != CommandStatus.SUCCESS) {
+            CLog.e(String.format("Installing %s from %s failed", name, mLocalPypiPath));
+        }
+
+        return result.getStatus() == CommandStatus.SUCCESS;
+    }
+
+    /**
+     * Install a pip module from Internet
+     * @param name of the module
+     * @throws TargetSetupError if install failed
+     */
+    private void installPipModule(String name) throws TargetSetupError {
+        CLog.d("Attempting installation of %s from PyPI", name);
+        CommandResult result =
+                getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install", name);
+        CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(), result.getStdout(),
+                result.getStderr());
+        if (result.getStatus() != CommandStatus.SUCCESS) {
+            CLog.e("Installing %s from PyPI failed.", name);
+            CLog.d("Attempting to upgrade %s", name);
+            result = getRunUtil().runTimedCmd(
+                    MINUTE_IN_MSECS * 5, getPipPath(), "install", "--upgrade", name);
+            if (result.getStatus() != CommandStatus.SUCCESS) {
+                throw new TargetSetupError(
+                        String.format("Failed to install dependencies with pip. "
+                                        + "Result %s. stdout: %s, stderr: %s",
+                                result.getStatus(), result.getStdout(), result.getStderr()),
+                        mDescriptor);
+            } else {
+                CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                        result.getStdout(), result.getStderr()));
+            }
         }
     }
 
