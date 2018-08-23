@@ -22,11 +22,6 @@ import unittest
 from vts.utils.python.reporting import report_file_utils
 
 
-def simple_PushReportFileGcs(src_path, dest_path):
-    """mock function created for _PushReportFileGcs"""
-    return
-
-
 def simple_os_walk(source_dir, followlinks):
     """mock function created for os.walk"""
     root = "/root"
@@ -34,6 +29,16 @@ def simple_os_walk(source_dir, followlinks):
     files = ("dir1/file1_1.txt", "dir1/file1_2.txt", "dir1/file1_3.txt",
              "dir2/file2_1")
     return [(root, dirs, files)]
+
+
+def simple_PushReportFileGcs(src_path, dest_path):
+    """mock function created for _PushReportFileGcs"""
+    return
+
+
+def simple_tempfile_mkdtemp():
+    """mock function for tempfile.mkdtemp"""
+    return 'temp_dir'
 
 
 class ReportFileUtilsTest(unittest.TestCase):
@@ -60,7 +65,6 @@ class ReportFileUtilsTest(unittest.TestCase):
             use_destination_date_dir=True,
             destination_dir="vts-log",
             url_prefix="https://storage.cloud.google.com/vts-log/")
-        _report_file_util._use_gcs = True
 
         self.assertEqual(_report_file_util._flatten_source_dir, True)
         self.assertEqual(_report_file_util._use_destination_date_dir, True)
@@ -150,14 +154,19 @@ class ReportFileUtilsTest(unittest.TestCase):
                 os.path.join(datetime.datetime.now().strftime('%Y-%m-%d'),
                              os.path.basename(src_path))))
 
-    def testPushReportFileGcs(self):
+    @mock.patch('tempfile.mkdtemp', side_effect=simple_tempfile_mkdtemp)
+    def testPushReportFileGcs(self, simple_tempfile_mkdtemp):
         """Tests the _PushReportFileGcs function with mocking"""
         _report_file_util = report_file_utils.ReportFileUtil()
-        _report_file_util.use_gcs = True
         _report_file_util._gcs_api_utils = mock.MagicMock()
+        _report_file_util._gcs_available = True
+        report_file_utils.shutil = mock.MagicMock()
         _report_file_util._PushReportFileGcs("src_path", "dest_path")
         _report_file_util._gcs_api_utils.UploadFile.assert_called_with(
-            "src_path", "dest_path")
+            "temp_dir/src_path", "dest_path")
+        report_file_utils.shutil.copy.assert_called_with(
+            'src_path', 'temp_dir')
+        report_file_utils.shutil.rmtree.assert_called_with('temp_dir')
 
     @mock.patch(
         'vts.utils.python.reporting.report_file_utils.ReportFileUtil._PushReportFileGcs',
