@@ -64,6 +64,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
     private static final int SECOND_IN_MSECS = 1000;
     private static final int MINUTE_IN_MSECS = SECOND_IN_MSECS * 60;
+    protected static int PIP_RETRY = 3;
+    private static final int PIP_RETRY_WAIT = SECOND_IN_MSECS * 3;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -231,7 +233,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
 
     /**
      * Installs all python pip module dependencies specified in options.
-     * @throws TargetSetupError
+     * @throws TargetSetupError if failed
      */
     protected void installDeps() throws TargetSetupError {
         boolean hasDependencies = false;
@@ -245,19 +247,56 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 }
             }
         }
+
         if (mRequirementsFile != null) {
             hasDependencies = true;
-            installPipRequirementFile(mRequirementsFile);
+            boolean success = false;
+
+            long retry_interval = PIP_RETRY_WAIT;
+            for (int retry_count = 0; retry_count < PIP_RETRY + 1; retry_count++) {
+                if (retry_count > 0) {
+                    getRunUtil().sleep(retry_interval);
+                    retry_interval *= 3;
+                }
+
+                if (installPipRequirementFile(mRequirementsFile)) {
+                    success = true;
+                    break;
+                }
+            }
+
+            if (!success) {
+                throw new TargetSetupError(
+                        "Failed to install pip requirement file " + mRequirementsFile, mDescriptor);
+            }
         }
+
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
+                hasDependencies = true;
+
                 if (mNoDepModules.contains(dep) || isPipModuleInstalled(dep)) {
                     continue;
                 }
-                if (!installPipModuleLocally(dep)) {
-                    installPipModule(dep);
+
+                boolean success = installPipModuleLocally(dep);
+
+                long retry_interval = PIP_RETRY_WAIT;
+                for (int retry_count = 0; retry_count < PIP_RETRY + 1; retry_count++) {
+                    if (retry_count > 0) {
+                        getRunUtil().sleep(retry_interval);
+                        retry_interval *= 3;
+                    }
+
+                    if (success || (!success && installPipModule(dep))) {
+                        success = true;
+                        break;
+                    }
                 }
-                hasDependencies = true;
+
+                if (!success) {
+                    throw new TargetSetupError("Failed to install pip module " + dep, mDescriptor);
+                }
             }
         }
         if (!hasDependencies) {
@@ -268,16 +307,15 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     /**
      * Installs a pip requirement file from Internet.
      * @param req pip module requirement file object
-     * @throws TargetSetupError
+     * @return true if success. False otherwise
      */
-    private void installPipRequirementFile(File req) throws TargetSetupError {
-        CommandResult c = getRunUtil().runTimedCmd(
-                MINUTE_IN_MSECS * 5, getPipPath(), "install", "-r", req.getAbsolutePath());
-        if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
-            CLog.e("Installing dependencies from %s failed with error: %s", req.getAbsolutePath(),
-                    c.getStderr());
-            throw new TargetSetupError("Failed to install dependencies with pip", mDescriptor);
-        }
+    private boolean installPipRequirementFile(File req) {
+        CommandResult result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 10, getPipPath(),
+                "install", "-r", mRequirementsFile.getAbsolutePath());
+        CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                result.getStdout(), result.getStderr()));
+
+        return result.getStatus() == CommandStatus.SUCCESS;
     }
 
     /**
@@ -294,9 +332,6 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 "install", name, "--no-index", "--find-links=" + mLocalPypiPath);
         CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                 result.getStdout(), result.getStderr()));
-        if (result.getStatus() != CommandStatus.SUCCESS) {
-            CLog.e(String.format("Installing %s from %s failed", name, mLocalPypiPath));
-        }
 
         return result.getStatus() == CommandStatus.SUCCESS;
     }
@@ -304,9 +339,9 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     /**
      * Install a pip module from Internet
      * @param name of the module
-     * @throws TargetSetupError if install failed
+     * @return true if success. False otherwise
      */
-    private void installPipModule(String name) throws TargetSetupError {
+    private boolean installPipModule(String name) {
         CLog.d("Attempting installation of %s from PyPI", name);
         CommandResult result =
                 getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install", name);
@@ -317,17 +352,12 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             CLog.d("Attempting to upgrade %s", name);
             result = getRunUtil().runTimedCmd(
                     MINUTE_IN_MSECS * 5, getPipPath(), "install", "--upgrade", name);
-            if (result.getStatus() != CommandStatus.SUCCESS) {
-                throw new TargetSetupError(
-                        String.format("Failed to install dependencies with pip. "
-                                        + "Result %s. stdout: %s, stderr: %s",
-                                result.getStatus(), result.getStdout(), result.getStderr()),
-                        mDescriptor);
-            } else {
-                CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                        result.getStdout(), result.getStderr()));
-            }
+
+            CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                    result.getStdout(), result.getStderr()));
         }
+
+        return result.getStatus() == CommandStatus.SUCCESS;
     }
 
     /**

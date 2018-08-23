@@ -53,6 +53,7 @@ public class VtsPythonVirtualenvPreparerTest {
                 return mMockRunUtil;
             }
         };
+        VtsPythonVirtualenvPreparer.PIP_RETRY = 0;
         mPreparer.mVenvDir = new File("");
         mPreparer.mDepModules.add("enum");
     }
