@@ -88,7 +88,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             description = "Reuse an exising virtualenv path if exists in "
                     + "temp directory. When this option is enabled, virtualenv directory used or "
                     + "created by this preparer will not be deleted after tests complete.")
-    protected boolean mReuse = false;
+    protected boolean mReuse = true;
 
     @Option(name = "python-version",
             description = "The version of a Python interpreter to use."
