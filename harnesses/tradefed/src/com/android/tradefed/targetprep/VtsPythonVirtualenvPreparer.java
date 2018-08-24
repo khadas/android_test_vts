@@ -63,9 +63,9 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String LOCAL_PYPI_PATH_ENV_VAR_NAME = "VTS_PYPI_PATH";
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
     private static final int SECOND_IN_MSECS = 1000;
-    private static final int MINUTE_IN_MSECS = SECOND_IN_MSECS * 60;
+    private static final int MINUTE_IN_MSECS = 60 * SECOND_IN_MSECS;
     protected static int PIP_RETRY = 3;
-    private static final int PIP_RETRY_WAIT = SECOND_IN_MSECS * 3;
+    private static final int PIP_RETRY_WAIT = 3 * SECOND_IN_MSECS;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -240,7 +240,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         if (!mScriptFiles.isEmpty()) {
             for (String scriptFile : mScriptFiles) {
                 CLog.d("Attempting to execute a script, %s", scriptFile);
-                CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, scriptFile);
+                CommandResult c = getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, scriptFile);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Executing script %s failed", scriptFile);
                     throw new TargetSetupError("Failed to source a script", mDescriptor);
@@ -253,8 +253,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             boolean success = false;
 
             long retry_interval = PIP_RETRY_WAIT;
-            for (int retry_count = 0; retry_count < PIP_RETRY + 1; retry_count++) {
-                if (retry_count > 0) {
+            for (int try_count = 0; try_count < PIP_RETRY + 1; try_count++) {
+                if (try_count > 0) {
                     getRunUtil().sleep(retry_interval);
                     retry_interval *= 3;
                 }
@@ -310,7 +310,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @return true if success. False otherwise
      */
     private boolean installPipRequirementFile(File req) {
-        CommandResult result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 10, getPipPath(),
+        CommandResult result = getRunUtil().runTimedCmd(10 * MINUTE_IN_MSECS, getPipPath(),
                 "install", "-r", mRequirementsFile.getAbsolutePath());
         CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                 result.getStdout(), result.getStderr()));
@@ -328,7 +328,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             return false;
         }
         CLog.d("Attempting installation of %s from local directory", name);
-        CommandResult result = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(),
+        CommandResult result = getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, getPipPath(),
                 "install", name, "--no-index", "--find-links=" + mLocalPypiPath);
         CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                 result.getStdout(), result.getStderr()));
@@ -344,14 +344,14 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private boolean installPipModule(String name) {
         CLog.d("Attempting installation of %s from PyPI", name);
         CommandResult result =
-                getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 5, getPipPath(), "install", name);
+                getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, getPipPath(), "install", name);
         CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(), result.getStdout(),
                 result.getStderr());
         if (result.getStatus() != CommandStatus.SUCCESS) {
             CLog.e("Installing %s from PyPI failed.", name);
             CLog.d("Attempting to upgrade %s", name);
             result = getRunUtil().runTimedCmd(
-                    MINUTE_IN_MSECS * 5, getPipPath(), "install", "--upgrade", name);
+                    5 * MINUTE_IN_MSECS, getPipPath(), "install", "--upgrade", name);
 
             CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
                     result.getStdout(), result.getStderr()));
@@ -450,34 +450,91 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         try {
+            File createComplete;
             if (mReuse) {
                 String tempDir = System.getProperty("java.io.tmpdir");
                 mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
+                createComplete = new File(mVenvDir, "complete");
                 if (mVenvDir.exists()) {
-                    CLog.d("Using existing virtualenv for version " + mPythonVersion);
-                    // TODO(yuexima): handle multiple TF instance case race condition
-                    return;
+                    if (waitForOtherProcessToCreateVirtualEnv(createComplete)) {
+                        CLog.d("Using existing virtualenv for version " + mPythonVersion);
+                        return;
+                    }
                 }
             } else {
                 mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
                         + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+                createComplete = new File(mVenvDir, "complete");
             }
-            CLog.d("Creating virtualenv for version " + mPythonVersion);
+
+            CLog.d("Creating virtualenv at " + mVenvDir);
             mIsDirCreator = true;
+
             String virtualEnvPath = mVenvDir.getAbsolutePath();
             String[] cmd =
                     new String[] {"virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS * 3, cmd);
-            if (c.getStatus() != CommandStatus.SUCCESS) {
-                CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
-                CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
-                        c.getStdout(), c.getStderr()));
-                throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
+
+            int nRetryCreate = 3;
+            long waitRetryCreate = 5 * SECOND_IN_MSECS;
+
+            for (int try_count = 0; try_count < nRetryCreate; try_count++) {
+                CommandResult c = getRunUtil().runTimedCmd(3 * MINUTE_IN_MSECS, cmd);
+
+                if (c.getStatus() != CommandStatus.SUCCESS) {
+                    String message_lower = (c.getStdout() + c.getStderr()).toLowerCase();
+                    if (message_lower.contains("errno 26")
+                            || message_lower.contains("text file busy")) {
+                        // Race condition, retry.
+                        CLog.d("detected the virtualenv path is being created by other process.");
+
+                        if (waitForOtherProcessToCreateVirtualEnv(createComplete)) {
+                            CLog.d("detected the other process has finished creating virtualenv.");
+                            return;
+                        }
+                    } else {
+                        // Other error, abort.
+                        CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
+                                c.getStdout(), c.getStderr()));
+                        break;
+                    }
+
+                } else {
+                    createComplete.createNewFile();
+                    CLog.d("Succesfully created virtualenv at " + mVenvDir);
+                    return;
+                }
+
+                getRunUtil().sleep(waitRetryCreate);
             }
+
         } catch (IOException | RuntimeException e) {
-            CLog.e("Failed to create temp directory for virtualenv");
-            throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
+            CLog.e(e);
         }
+
+        CLog.e(String.format("Failed to create virtualenv at %s.", mVenvDir));
+        throw new TargetSetupError("Error creating virtualenv", mDescriptor);
+    }
+
+    /**
+     * Wait for another process to finish creating virtualenv path.
+     * @param createComplete file object that marks the complete of virtualenv creation
+     *        with its existence.
+     * @return true if creation is detected a success; false otherwise.
+     */
+    private boolean waitForOtherProcessToCreateVirtualEnv(File createComplete) {
+        long start = System.currentTimeMillis();
+        long totalWaitCheckComplete = 3 * MINUTE_IN_MSECS;
+        long waitRetryCheckComplete = SECOND_IN_MSECS / 2;
+
+        while (System.currentTimeMillis() - start < totalWaitCheckComplete) {
+            if (createComplete.exists()) {
+                return true;
+            }
+
+            getRunUtil().sleep(waitRetryCheckComplete);
+        }
+
+        return false;
     }
 
     protected void addDepModule(String module) {
@@ -606,7 +663,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @return installed pip packages
      */
     private Map<String, String> getInstalledPipModules() {
-        CommandResult res = getRunUtil().runTimedCmd(SECOND_IN_MSECS * 30, getPipPath(), "list");
+        CommandResult res = getRunUtil().runTimedCmd(30 * SECOND_IN_MSECS, getPipPath(), "list");
         if (res.getStatus() != CommandStatus.SUCCESS) {
             CLog.e(String.format("Failed to read pip installed list: "
                             + "Result %s. stdout: %s, stderr: %s",
