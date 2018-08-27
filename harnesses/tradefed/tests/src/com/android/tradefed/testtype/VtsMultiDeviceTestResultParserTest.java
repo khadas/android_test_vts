@@ -17,14 +17,19 @@ package com.android.tradefed.testtype;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.android.tradefed.util.StreamUtil;
 
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -40,6 +45,9 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
     private static final String OUTPUT_FILE_1 = "vts_multi_device_test_parser_output.txt";
     private static final String OUTPUT_FILE_2 = "vts_multi_device_test_parser_output_timeout.txt";
     private static final String OUTPUT_FILE_3 = "vts_multi_device_test_parser_output_error.txt";
+    private static final String SUMMARY_FILE_NORMAL = "/testtype/test_run_summary_normal.json";
+    private static final String SUMMARY_FILE_CLASS_ERRORS =
+            "/testtype/test_run_summary_class_errors.json";
     private static final String USER_DIR = "user.dir";
     private static final String RES = "res";
     private static final String TEST_TYPE = "testtype";
@@ -53,6 +61,10 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
     private static final String RUN_NAME = "SampleLightFuzzTest";
     private static final String TEST_NAME_1 = "testTurnOnLightBlackBoxFuzzing";
     private static final String TEST_NAME_2 = "testTurnOnLightWhiteBoxFuzzing";
+
+    // error messages in the summary files.
+    private static final String FAILURE_MESSAGE = "unit test";
+    private static final String CLASS_ERROR_MESSAGE = "class error";
 
     // enumeration to indicate the input file used for each run.
     private TestCase mTestCase = TestCase.NORMAL;
@@ -150,6 +162,23 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
      }
 
     /**
+     * Read a resource file as a string.
+     *
+     * @param resource the name of the resource.
+     * @return {String} the contents of the resource.
+     * @throws IOException if fails to read.
+     */
+    private String getResourceAsString(String resource) throws IOException {
+        InputStream input = getClass().getResourceAsStream(resource);
+        Assert.assertNotNull("Cannot load " + resource, input);
+        try {
+            return StreamUtil.getStringFromStream(input);
+        } finally {
+            input.close();
+        }
+    }
+
+    /**
       * Returns the sample shell output for a test command.
       * @return {String} shell output
       * @throws IOException
@@ -173,6 +202,16 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
          }
          return output.split("\n");
      }
+
+    /**
+     * Returns the sample shell output for a test command.
+     *
+     * @return {String} shell output
+     * @throws IOException
+     */
+    private String[] getOutput(String filePath) throws IOException {
+        return getResourceAsString(filePath).split("\n");
+    }
 
      /** Return the file path that contains sample shell output logs.
       *
@@ -232,4 +271,49 @@ public class VtsMultiDeviceTestResultParserTest extends TestCase {
          }
          return date;
      }
+
+    /*
+     * Test parsing a summary containing passing and failing records.
+     */
+    public void testNormalSummary() throws IOException, JSONException {
+        JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_NORMAL));
+
+        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        mockRunListener.testRunStarted(RUN_NAME, 2);
+        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        mockRunListener.testStarted(test1);
+        mockRunListener.testEnded(test1, Collections.emptyMap());
+
+        TestIdentifier test2 = new TestIdentifier(RUN_NAME, TEST_NAME_2);
+        mockRunListener.testStarted(test2);
+        mockRunListener.testFailed(test2, FAILURE_MESSAGE);
+        mockRunListener.testEnded(test2, Collections.emptyMap());
+        mockRunListener.testRunEnded(EasyMock.anyLong(), EasyMock.eq(Collections.emptyMap()));
+
+        EasyMock.replay(mockRunListener);
+        VtsMultiDeviceTestResultParser resultParser =
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
+        resultParser.processJsonFile(object);
+    }
+
+    /*
+     * Test parsing a summary containing class error message.
+     */
+    public void testClassErrorSummary() throws IOException, JSONException {
+        JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_CLASS_ERRORS));
+
+        ITestRunListener mockRunListener = EasyMock.createMock(ITestRunListener.class);
+        mockRunListener.testRunStarted(RUN_NAME, 1);
+        TestIdentifier test1 = new TestIdentifier(RUN_NAME, TEST_NAME_1);
+        mockRunListener.testStarted(test1);
+        mockRunListener.testFailed(test1, FAILURE_MESSAGE);
+        mockRunListener.testEnded(test1, Collections.emptyMap());
+        mockRunListener.testRunFailed(CLASS_ERROR_MESSAGE);
+        mockRunListener.testRunEnded(EasyMock.anyLong(), EasyMock.eq(Collections.emptyMap()));
+
+        EasyMock.replay(mockRunListener);
+        VtsMultiDeviceTestResultParser resultParser =
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
+        resultParser.processJsonFile(object);
+    }
 }
