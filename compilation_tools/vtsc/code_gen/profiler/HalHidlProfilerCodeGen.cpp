@@ -175,12 +175,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHandleVariable(
   std::string handle_name = arg_name + "_h";
   out << "auto " << handle_name << " = " << arg_value
       << ".getNativeHandle();\n";
-  out << "if (!" << handle_name << ") {\n";
+  out << "if (" << handle_name << ") {\n";
   out.indent();
-  out << "LOG(WARNING) << \"null handle\";\n";
-  out << "return;\n";
-  out.unindent();
-  out << "}\n";
   out << arg_name << "->mutable_handle_value()->set_version(" << handle_name
       << "->version);\n";
   out << arg_name << "->mutable_handle_value()->set_num_ints(" << handle_name
@@ -250,6 +246,13 @@ void HalHidlProfilerCodeGen::GenerateProfilerForHandleVariable(
       << "->data[i]);\n";
   out.unindent();
   out << "}\n";
+  out.unindent();
+  out << "}\n";
+  out.unindent();
+  out << "} else {\n";
+  out.indent();
+  out << "LOG(WARNING) << \"null handle\";\n";
+  out << arg_name << "->mutable_handle_value()->set_hidl_handle_address(0);\n";
   out.unindent();
   out << "}\n";
 }
