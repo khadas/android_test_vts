@@ -312,4 +312,7 @@
     <!-- b/80388295: CtsAccessibilityServiceTestCases failure flaky -->
     <option name="compatibility:exclude-filter" value="CtsAccessibilityServiceTestCases android.accessibilityservice.cts.AccessibilityGestureDispatchTest#testClickWhenMagnified_matchesActualTouch" />
 
+    <!-- b/80466264: CtsAppSecurityHostTestCases#testDirectBoot* incompatible with devices without FBE -->
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootEmulated" />
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootNone" />
 </configuration>
