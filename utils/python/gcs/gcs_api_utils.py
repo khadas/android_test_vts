@@ -45,13 +45,12 @@ class GcsApiUtils(object):
         self._enabled = True
         try:
             self._credentials, self._project = google.auth.default()
-        except DefaultCredentialsError as e:
+            if self._credentials.requires_scopes:
+                self._credentials = self._credentials.with_scopes(
+                    [_READ_WRITE_SCOPE_URL])
+        except google.auth.exceptions.DefaultCredentialsError as e:
             logging.exception(e)
             self._enabled = False
-
-        if self._credentials.requires_scopes:
-            self._credentials = self._credentials.with_scopes(
-                [_READ_WRITE_SCOPE_URL])
 
     @property
     def Enabled(self):
