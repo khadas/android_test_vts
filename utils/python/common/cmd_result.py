@@ -74,3 +74,24 @@ class CmdResult(object):
         self.stdouts.append(stdout)
         self.stderrs.append(stderr)
         self.returncodes.append(returncode)
+
+    def __getitem__(self, key):
+        """Legacy code support for getting results as a dictionary.
+
+        Args:
+            key: string, commend result type.
+
+        Returns:
+            list of string or int, command results corresponding to provided key.
+
+        Raises:
+            KeyError if key is not specified in const.
+        """
+        if key == cmd_utils.STDOUT:
+            return self.stdouts
+        elif key == cmd_utils.STDERR:
+            return self.stderrs
+        elif key == cmd_utils.EXIT_CODE:
+            return self.returncodes
+        else:
+            raise KeyError(key)

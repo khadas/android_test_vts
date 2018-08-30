@@ -37,7 +37,7 @@ class CmdResultTest(unittest.TestCase):
         """TearDown tasks"""
 
     def test_single_result_data(self):
-        """Test the functionally of getting data from single command result."""
+        """Tests the functionally of getting data from single command result."""
         self.assertEqual(self.res_single_no_error.stdout, 'stdout')
         self.assertEqual(self.res_single_no_error.stderr, '')
         self.assertEqual(self.res_single_no_error.returncode, 0)
@@ -46,13 +46,49 @@ class CmdResultTest(unittest.TestCase):
         self.assertEqual(self.res_single_no_error.returncodes[-1], 0)
 
     def test_multiple_result_data(self):
-        """Test the functionally of getting data from multiple command result."""
+        """Tests the functionally of getting data from multiple command result."""
         self.assertEqual(self.res_multiple_no_error.stdout, 'stdout2')
         self.assertEqual(self.res_multiple_no_error.stderr, '')
         self.assertEqual(self.res_multiple_no_error.returncode, 0)
         self.assertEqual(self.res_multiple_no_error.stdouts, ['stdout1', 'stdout2'])
         self.assertEqual(self.res_multiple_no_error.stderrs, ['', ''])
         self.assertEqual(self.res_multiple_no_error.returncodes, [0, 0])
+
+    def test_legacy_single_result_dictionary_support_no_error(self):
+        """Tests legacy dictionary getting method for single command result."""
+        self.assertEqual(self.res_single_no_error[cmd_utils.STDOUT][0], 'stdout')
+        self.assertFalse(self.res_single_no_error[cmd_utils.STDERR][0])
+        self.assertFalse(any(self.res_single_no_error[cmd_utils.STDERR]))
+        self.assertFalse(self.res_single_no_error[cmd_utils.EXIT_CODE][0])
+        self.assertFalse(any(self.res_single_no_error[cmd_utils.EXIT_CODE]))
+
+    def test_legacy_single_result_dictionary_support_no_error_wrong_key(self):
+        """Tests legacy dictionary getting method for single command result."""
+        try:
+            self.res_single_no_error["wrong key"]
+        except KeyError as e:
+            return  # test pass, end test case
+        except:
+            pass  # wrong exception, proceed to end of test function
+
+        self.assertFalse(True, "wrong key should raise KeyError exception")
+
+    def test_legacy_multiple_result_dictionary_support_no_error(self):
+        """Tests legacy dictionary getting method for multiple command results."""
+        self.assertEqual(self.res_multiple_no_error[cmd_utils.STDOUT][0], 'stdout1')
+        self.assertEqual(self.res_multiple_no_error[cmd_utils.STDOUT][1], 'stdout2')
+        self.assertFalse(any(self.res_multiple_no_error[cmd_utils.STDERR]))
+        self.assertFalse(any(self.res_multiple_no_error[cmd_utils.EXIT_CODE]))
+
+    def test_legacy_multiple_result_dictionary_support_one_error(self):
+        """Tests legacy dictionary getting method for multiple command results."""
+        self.assertTrue(any(self.res_multiple_one_error[cmd_utils.STDERR]))
+        self.assertTrue(any(self.res_multiple_one_error[cmd_utils.EXIT_CODE]))
+
+    def test_legacy_multiple_result_dictionary_support_one_stderr_only(self):
+        """Tests legacy dictionary getting method for multiple command results."""
+        self.assertTrue(any(self.res_multiple_one_stderr_only[cmd_utils.STDERR]))
+        self.assertFalse(any(self.res_multiple_one_stderr_only[cmd_utils.EXIT_CODE]))
 
 if __name__ == "__main__":
     unittest.main()
