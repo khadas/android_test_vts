@@ -15,9 +15,16 @@
 # limitations under the License.
 #
 
-import mock
 import os
 import unittest
+
+try:
+    from unittest import mock
+except ImportError:
+    # TODO: Remove when we stop supporting Python 2
+    import mock
+
+from google.auth import exceptions as auth_exceptions
 
 from vts.utils.python.gcs import gcs_api_utils
 
@@ -146,6 +153,15 @@ class GcsApiUtilsTest(unittest.TestCase):
         _gcs_api_utils.UploadDir('valid_source_dir', 'GCS_destination/dest')
         num_UploadFile_called = simple_UploadFile.call_count
         self.assertEqual(num_UploadFile_called, 4)
+
+    @mock.patch(
+        'vts.utils.python.gcs.gcs_api_utils.google.auth.default',
+        side_effect=auth_exceptions.DefaultCredentialsError('unit test'))
+    def testCredentialsError(self, mock_default):
+        """Tests authentication failure in __init__."""
+        _gcs_api_utils = gcs_api_utils.GcsApiUtils('key/path', 'vts-fuzz')
+        self.assertFalse(_gcs_api_utils.Enabled)
+        mock_default.assert_called()
 
 
 if __name__ == "__main__":
