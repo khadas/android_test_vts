@@ -31,13 +31,26 @@ class CmdResult(object):
                     If multiple command results are included in the object,
                     only the last one is returned.
         returncodes: list of int, a list of command returncode outputs.
+        cmd: string, original command that generates the result.
+             If multiple commands are included in the object,
+             only the last one is returned.
+             original command may not always be included (is None).
+        cmds: a list of string, original commands that generate the results.
+        exception: Exception or string, the exception that prevented the command
+                   from generating result.
+                   If multiple commands are included in the object,
+                   only the last one is returned.
+        execptions: a list of Exception or string, the exceptions that
+                    prevented the command from generating result.
     """
 
-    def __init__(self, stdout, stderr, returncode):
+    def __init__(self, stdout, stderr, returncode, cmd=None, exception=None):
         self.stdouts = []
         self.stderrs = []
         self.returncodes = []
-        self.AddResult(stdout, stderr, returncode)
+        self.cmds = []
+        self.exceptions = []
+        self.AddResult(stdout, stderr, returncode, cmd=cmd, exception=exception)
 
     @property
     def stdout(self):
@@ -63,17 +76,39 @@ class CmdResult(object):
         """
         return self.returncodes[-1]
 
-    def AddResult(self, stdout, stderr, returncode):
+    @property
+    def cmd(self):
+        """Returns original command that generates the result.
+
+        If multiple commands are included in the object, only the last one is returned.
+        """
+        return self.cmds[-1]
+
+    @property
+    def exception(self):
+        """Returns the exception that prevented the command from generating result.
+
+        If multiple commands are included in the object, only the last one is returned.
+        """
+        return self.exceptions[-1]
+
+    def AddResult(self, stdout, stderr, returncode, cmd=None, exception=None):
         """Adds additional command result data to the object.
 
         Args:
-            stdout: string, command stdout output
-            stderr: string, command stderr output
-            returncode: int, command returncode output
+            stdout: string, command stdout output.
+            stderr: string, command stderr output.
+            returncode: int, command returncode output.
+            cmd: string, original command that generates the result.
+                 Defaults to None.
+            exception: Exception or string, the exception that prevented the command
+                       from generating result.
         """
         self.stdouts.append(stdout)
         self.stderrs.append(stderr)
         self.returncodes.append(returncode)
+        self.cmds.append(cmd)
+        self.exceptions.append(exception)
 
     def __getitem__(self, key):
         """Legacy code support for getting results as a dictionary.

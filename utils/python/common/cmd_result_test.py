@@ -26,12 +26,20 @@ class CmdResultTest(unittest.TestCase):
     def setUp(self):
         """SetUp tasks"""
         self.res_single_no_error = cmd_result.CmdResult('stdout', '', 0)
+
         self.res_multiple_no_error = cmd_result.CmdResult('stdout1', '', 0)
         self.res_multiple_no_error.AddResult('stdout2', '', 0)
+
         self.res_multiple_one_error = cmd_result.CmdResult('stdout1', '', 0)
         self.res_multiple_one_error.AddResult('stdout2', 'stderr2', 1)
+
         self.res_multiple_one_stderr_only = cmd_result.CmdResult('stdout1', '', 0)
         self.res_multiple_one_stderr_only.AddResult('stdout2', 'stderr2', 0)
+
+        self.res_multiple_with_cmd_and_exception = cmd_result.CmdResult(
+            'stdout1', '', 0, cmd='cmd1')
+        self.res_multiple_with_cmd_and_exception.AddResult(
+            None, None, None, cmd='cmd2', exception='TCP connection lost')
 
     def tearDown(self):
         """TearDown tasks"""
@@ -89,6 +97,15 @@ class CmdResultTest(unittest.TestCase):
         """Tests legacy dictionary getting method for multiple command results."""
         self.assertTrue(any(self.res_multiple_one_stderr_only[cmd_utils.STDERR]))
         self.assertFalse(any(self.res_multiple_one_stderr_only[cmd_utils.EXIT_CODE]))
+
+    def test_multiple_result_with_cmd_and_exception(self):
+        """Tests getting original command strings and exceptions"""
+        self.assertEqual(self.res_multiple_with_cmd_and_exception.cmd, 'cmd2')
+        self.assertEqual(self.res_multiple_with_cmd_and_exception.cmds, ['cmd1', 'cmd2'])
+        self.assertEqual(self.res_multiple_with_cmd_and_exception.exception, 'TCP connection lost')
+        self.assertEqual(self.res_multiple_with_cmd_and_exception.exceptions,
+                         [None, 'TCP connection lost'])
+
 
 if __name__ == "__main__":
     unittest.main()
