@@ -177,35 +177,22 @@ public class VtsMultiDeviceTestTest {
      * Test the run method with a normal input.
      */
     @Test
-    public void testRunNormalInput() {
+    public void testRunNormalInput() throws Exception {
         mTest.setDevice(createMockDevice());
-        try {
-            mTest.run(mMockInvocationListener);
-        } catch (IllegalArgumentException e) {
-            // not expected
-            fail();
-            e.printStackTrace();
-        } catch (DeviceNotAvailableException e) {
-            // not expected
-            fail();
-            e.printStackTrace();
-        }
+        mTest.run(mMockInvocationListener);
     }
 
     /**
      * Test the run method when the device is set null.
      */
     @Test
-    public void testRunDeviceNotAvailable() {
+    public void testRunDeviceNotAvailable() throws Exception {
         mTest.setDevice(null);
         try {
             mTest.run(mMockInvocationListener);
-            fail();
-       } catch (IllegalArgumentException e) {
-            // not expected
-            fail();
-       } catch (DeviceNotAvailableException e) {
+            fail("Should have thrown an exception.");
+        } catch (DeviceNotAvailableException e) {
             // expected
-       }
+        }
     }
 }

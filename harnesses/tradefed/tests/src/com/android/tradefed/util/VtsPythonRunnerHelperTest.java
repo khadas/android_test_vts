@@ -17,22 +17,19 @@ package com.android.tradefed.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.build.IFolderBuildInfo;
-import com.android.tradefed.util.CommandResult;
-import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.EnvUtil;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.ProcessHelper;
-import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.VtsPythonRunnerHelper;
-import java.io.File;
-import java.io.IOException;
+import com.android.tradefed.log.LogUtil.CLog;
+
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Unit tests for {@link VtsPythonRunnerHelper}.
@@ -184,17 +181,17 @@ public class VtsPythonRunnerHelperTest {
         File envDir = new File(mVirtualenvPath);
         File binDir = new File(mVirtualenvPath, binDirName);
         try {
-            System.out.println(envDir.mkdir());
-            System.out.println(binDir.mkdir());
-            System.out.println(binDir.exists());
+            CLog.d("%s", envDir.mkdir());
+            CLog.d("%s", binDir.mkdir());
+            assertTrue(binDir.exists());
             assertEquals(binDir.getAbsolutePath(),
                     VtsPythonRunnerHelper.getPythonBinDir(mVirtualenvPath));
             VtsPythonRunnerHelper.activateVirtualenv(runUtil, mVirtualenvPath);
             String pythonBinary = runUtil.runTimedCmd(1000, "which", "python").getStdout();
             assertEquals(pythonBinary, new File(binDir, "python").getAbsolutePath());
         } finally {
-            binDir.delete();
-            envDir.delete();
+            FileUtil.recursiveDelete(envDir);
+            FileUtil.recursiveDelete(binDir);
         }
     }
 
