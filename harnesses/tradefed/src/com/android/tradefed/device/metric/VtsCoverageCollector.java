@@ -66,10 +66,6 @@ public class VtsCoverageCollector extends BaseDeviceMetricCollector {
         }
         for (ITestDevice device : getDevices()) {
             String serial = device.getSerialNumber();
-            if (serial == null) {
-                CLog.e("Could not get device serial number.");
-                return;
-            }
             String gcovDirPath = getGcoveResrouceDir(buildInfo, device);
             if (gcovDirPath == null) {
                 CLog.e("Could not get gcov resource dir path.");
