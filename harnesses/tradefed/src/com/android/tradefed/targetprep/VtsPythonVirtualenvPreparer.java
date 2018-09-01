@@ -127,7 +127,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             CLog.i("Preparing python dependencies...");
             ITestDevice device = context.getDevices().get(0);
             mDescriptor = device.getDeviceDescriptor();
-            createVirtualenv(mBuildInfo);
+            initVirtualenv(mBuildInfo);
             CLog.d("Python virtualenv path is: " + mVenvDir);
             VtsPythonRunnerHelper.activateVirtualenv(getRunUtil(), mVenvDir.getAbsolutePath());
             setLocalPypiPath();
@@ -426,7 +426,111 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @param buildInfo
      * @throws TargetSetupError
      */
-    protected void createVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
+    protected void initVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
+        if (checkTestPlanLevelVirtualenv(buildInfo)) {
+            return;
+        }
+
+        try {
+            if (checkHostReuseVirtualenv(buildInfo)) {
+                return;
+            }
+
+            if (createVirtualenv()) {
+                return;
+            }
+
+        } catch (IOException | RuntimeException e) {
+            CLog.e(e);
+        }
+
+        CLog.e(String.format("Failed to create virtualenv at %s.", mVenvDir));
+        throw new TargetSetupError("Error creating virtualenv", mDescriptor);
+    }
+
+    protected File getVirtualenvCreationMarkFile() {
+        return new File(mVenvDir, "complete");
+    }
+
+    /**
+     * Completes the creation of virtualenv.
+     * @return true if the directory is successfully prepared as virutalenv; false otherwise
+     * @throws IOException if completion mark file creation failed.
+     */
+    protected boolean createVirtualenv() throws IOException {
+        CLog.d("Creating virtualenv at " + mVenvDir);
+
+        String[] cmd = new String[] {
+                "virtualenv", "-p", "python" + mPythonVersion, mVenvDir.getAbsolutePath()};
+
+        long waitRetryCreate = 5 * SECOND_IN_MSECS;
+
+        for (int try_count = 0; try_count < PIP_RETRY + 1; try_count++) {
+            if (try_count > 0) {
+                getRunUtil().sleep(waitRetryCreate);
+            }
+            CommandResult c = getRunUtil().runTimedCmd(3 * MINUTE_IN_MSECS, cmd);
+
+            if (c.getStatus() != CommandStatus.SUCCESS) {
+                String message_lower = (c.getStdout() + c.getStderr()).toLowerCase();
+                if (message_lower.contains("errno 26")
+                        || message_lower.contains("text file busy")) {
+                    // Race condition, retry.
+                    CLog.d("detected the virtualenv path is being created by other process.");
+
+                    if (createVirtualenv_waitForOtherProcessToCreateVirtualEnv()) {
+                        CLog.d("detected the other process has created virtualenv.");
+                        return true;
+                    }
+                } else {
+                    // Other error, abort.
+                    CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
+                            c.getStdout(), c.getStderr()));
+                    break;
+                }
+
+            } else {
+                mIsDirCreator = true;
+                getVirtualenvCreationMarkFile().createNewFile();
+                CLog.d("Succesfully created virtualenv at " + mVenvDir);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether a host-wise virutanenv directory can be used. If not, creates a empty one.
+     * @param buildInfo
+     * @return true if a host-wise virutanenv directory can be used; false otherwise.
+     * @throws IOException if failed to create empty directory for the virtualenv path.
+     */
+    protected boolean checkHostReuseVirtualenv(IBuildInfo buildInfo) throws IOException {
+        if (mReuse) {
+            String tempDir = System.getProperty("java.io.tmpdir");
+            mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
+            if (mVenvDir.exists()) {
+                if (createVirtualenv_waitForOtherProcessToCreateVirtualEnv()) {
+                    CLog.d("Using existing virtualenv for version " + mPythonVersion);
+                    return true;
+                }
+            }
+        } else {
+            mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
+                    + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether a test plan-wise common virtualenv directory can be used.
+     * @param buildInfo
+     * @return true if a test plan-wise virtuanenv directory exists; false otherwise
+     * @throws TargetSetupError
+     */
+    protected boolean checkTestPlanLevelVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
         if (mVenvDir == null) {
             String venvDir = null;
             switch (getConfiguredPythonVersionMajor()) {
@@ -446,92 +550,31 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (mVenvDir != null) {
-            return;
+            return true;
         }
 
-        try {
-            File createComplete;
-            if (mReuse) {
-                String tempDir = System.getProperty("java.io.tmpdir");
-                mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
-                createComplete = new File(mVenvDir, "complete");
-                if (mVenvDir.exists()) {
-                    if (waitForOtherProcessToCreateVirtualEnv(createComplete)) {
-                        CLog.d("Using existing virtualenv for version " + mPythonVersion);
-                        return;
-                    }
-                }
-            } else {
-                mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
-                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
-                createComplete = new File(mVenvDir, "complete");
-            }
-
-            CLog.d("Creating virtualenv at " + mVenvDir);
-            mIsDirCreator = true;
-
-            String virtualEnvPath = mVenvDir.getAbsolutePath();
-            String[] cmd =
-                    new String[] {"virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-
-            int nRetryCreate = 3;
-            long waitRetryCreate = 5 * SECOND_IN_MSECS;
-
-            for (int try_count = 0; try_count < nRetryCreate; try_count++) {
-                CommandResult c = getRunUtil().runTimedCmd(3 * MINUTE_IN_MSECS, cmd);
-
-                if (c.getStatus() != CommandStatus.SUCCESS) {
-                    String message_lower = (c.getStdout() + c.getStderr()).toLowerCase();
-                    if (message_lower.contains("errno 26")
-                            || message_lower.contains("text file busy")) {
-                        // Race condition, retry.
-                        CLog.d("detected the virtualenv path is being created by other process.");
-
-                        if (waitForOtherProcessToCreateVirtualEnv(createComplete)) {
-                            CLog.d("detected the other process has finished creating virtualenv.");
-                            return;
-                        }
-                    } else {
-                        // Other error, abort.
-                        CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
-                                c.getStdout(), c.getStderr()));
-                        break;
-                    }
-
-                } else {
-                    createComplete.createNewFile();
-                    CLog.d("Succesfully created virtualenv at " + mVenvDir);
-                    return;
-                }
-
-                getRunUtil().sleep(waitRetryCreate);
-            }
-
-        } catch (IOException | RuntimeException e) {
-            CLog.e(e);
-        }
-
-        CLog.e(String.format("Failed to create virtualenv at %s.", mVenvDir));
-        throw new TargetSetupError("Error creating virtualenv", mDescriptor);
+        return false;
     }
 
     /**
      * Wait for another process to finish creating virtualenv path.
-     * @param createComplete file object that marks the complete of virtualenv creation
-     *        with its existence.
      * @return true if creation is detected a success; false otherwise.
      */
-    private boolean waitForOtherProcessToCreateVirtualEnv(File createComplete) {
+    protected boolean createVirtualenv_waitForOtherProcessToCreateVirtualEnv() {
         long start = System.currentTimeMillis();
         long totalWaitCheckComplete = 3 * MINUTE_IN_MSECS;
         long waitRetryCheckComplete = SECOND_IN_MSECS / 2;
 
-        while (System.currentTimeMillis() - start < totalWaitCheckComplete) {
-            if (createComplete.exists()) {
+        while (true) {
+            if (getVirtualenvCreationMarkFile().exists()) {
                 return true;
             }
 
-            getRunUtil().sleep(waitRetryCheckComplete);
+            if (System.currentTimeMillis() - start < totalWaitCheckComplete) {
+                getRunUtil().sleep(waitRetryCheckComplete);
+            } else {
+                break;
+            }
         }
 
         return false;
@@ -549,7 +592,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * Get an instance of {@link IRunUtil}.
      */
     @VisibleForTesting
-    IRunUtil getRunUtil() {
+    protected IRunUtil getRunUtil() {
         if (mRunUtil == null) {
             mRunUtil = new RunUtil();
         }
