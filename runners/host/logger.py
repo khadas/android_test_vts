@@ -40,7 +40,7 @@ log_severity_map = {
 }
 
 # Directory name in the log path in which files will be included in TradeFed output
-PYTHON_OUTPUT_ADDITIONAL = 'additional_output_files'
+PYTHON_CUSTOM_OUTPUT = 'custom_output_files'
 
 def _parse_logline_timestamp(t):
     """Parses a logline timestamp into a tuple.
@@ -290,12 +290,12 @@ def GetOutputDir():
         A path if successfully created.
         None if failed.
     '''
-    res = os.path.join(logging.log_path, PYTHON_OUTPUT_ADDITIONAL)
+    res = os.path.join(logging.log_path, PYTHON_CUSTOM_OUTPUT)
     if not os.path.exists(res):
         try:
-            # Currently, PYTHON_OUTPUT_ADDITIONAL is a path only one level below
+            # Currently, PYTHON_CUSTOM_OUTPUT is a path only one level below
             # logging.log_path, so os.mkdir checks whether logging.log_path exists.
-            # If PYTHON_OUTPUT_ADDITIONAL's directory level increases, use os.makedirs
+            # If PYTHON_CUSTOM_OUTPUT's directory level increases, use os.makedirs
             # instead.
             os.mkdir(res)
         except OSError as exc: # Guard against race condition
