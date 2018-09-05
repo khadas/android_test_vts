@@ -68,6 +68,8 @@ PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 # the slot for vbmeta.img
 _FASTBOOT_VAR_HAS_VBMETA = "has-slot:vbmeta"
 
+SYSPROP_DEV_BOOTCOMPLETE = "dev.bootcomplete"
+SYSPROP_SYS_BOOT_COMPLETED = "sys.boot_completed"
 # the name of a system property which tells whether to stop properly configured
 # native servers where properly configured means a server's init.rc is
 # configured to stop when that property's value is 1.
@@ -835,8 +837,8 @@ class AndroidDevice(object):
             True if booted, False otherwise.
         """
         try:
-            completed = self.getProp("sys.boot_completed")
-            if completed == '1':
+            if (self.getProp(SYSPROP_SYS_BOOT_COMPLETED) == '1' and
+                self.getProp(SYSPROP_DEV_BOOTCOMPLETE) == '1'):
                 return True
         except adb.AdbError:
             # adb shell calls may fail during certain period of booting
@@ -927,7 +929,8 @@ class AndroidDevice(object):
         """
         logging.debug("stopping Android framework")
         self.adb.shell("stop")
-        self.setProp("sys.boot_completed", 0)
+        self.setProp(SYSPROP_SYS_BOOT_COMPLETED, 0)
+        self.setProp(SYSPROP_DEV_BOOTCOMPLETE, 0)
         logging.info("Android framework stopped")
 
     def stop(self, stop_native_server=False):
