@@ -47,7 +47,11 @@ public class VtsPythonRunnerHelper {
     protected IRunUtil mRunUtil;
 
     public VtsPythonRunnerHelper(IBuildInfo buildInfo) {
-        this(buildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV));
+        this(buildInfo.getBuildAttributes().get(VtsPythonVirtualenvPreparer.VIRTUAL_ENV));
+    }
+
+    public VtsPythonRunnerHelper(String virtualEnvPath) {
+        this(virtualEnvPath == null ? null : new File(virtualEnvPath));
     }
 
     public VtsPythonRunnerHelper(File virtualEnvPath) {
