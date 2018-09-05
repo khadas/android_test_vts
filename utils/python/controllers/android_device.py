@@ -1183,7 +1183,7 @@ class AndroidDevice(object):
         kill_command = "pgrep 'vts_*' | xargs kill"
         cleanup_commands.append(kill_command)
         try:
-            self.adb.shell("\"" + " && ".join(cleanup_commands) + "\"")
+            self.adb.shell("\"" + " ; ".join(cleanup_commands) + "\"")
         except adb.AdbError as e:
             self.log.warning(
                 "A command to setup the env to start the VTS Agent failed %s",
@@ -1197,13 +1197,12 @@ class AndroidDevice(object):
             vts_agent_log_path = os.path.join(
                 self.log_path, 'vts_agent_%s_%s.log' % (bitness, self.serial))
 
-            chmod_file_names = ' '.join(
-                map(lambda file_name: '{path}/{bit}/{file_name}{bit}'.format(
+            chmod_cmd = ' '.join(
+                map(lambda file_name: 'chmod 755 {path}/{bit}/{file_name}{bit};'.format(
                         path=DEFAULT_AGENT_BASE_DIR,
                         bit=bitness,
                         file_name=file_name),
                     file_names))
-            chmod_cmd = 'chmod 755 %s && ' % chmod_file_names
 
             cmd = ('adb -s {s} shell "{chmod} LD_LIBRARY_PATH={path}/{bitness} '
                    '{path}/{bitness}/vts_hal_agent{bitness} '
