@@ -16,6 +16,7 @@
 <configuration description="Runs a subset of CTS tests using a general system image (GSI)">
     <include name="common-preparers" />
     <include name="cts-base" />
+
     <include name="cts-on-gsi-exclude" />
 
     <option name="plan" value="cts-on-gsi" />

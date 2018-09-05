@@ -16,7 +16,6 @@
 <configuration description="Base test plan for running CTS test modules with VTS">
 
     <option name="dynamic-sharding" value="true" />
-    <option name="disable-strict-sharding" value="true" />
     <device_recovery class="com.android.tradefed.device.WaitDeviceRecovery" />
     <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider">
         <option name="url-suite-name-override" value="CTS" />
