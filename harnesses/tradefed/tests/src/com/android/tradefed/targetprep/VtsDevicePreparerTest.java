@@ -284,6 +284,57 @@ public class VtsDevicePreparerTest {
     }
 
     /**
+     * Tests the functionality of radio log restore option.
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_tearDown_enableAdbRoot_turnOff() throws DeviceNotAvailableException {
+        doReturn(true).when(mockDevice).isAdbRoot();
+        doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        mPreparer.mEnableRadioLog = true;
+        mPreparer.mRestoreRadioLog = true;
+        mPreparer.mInitialRadioLog = false;
+        mPreparer.tearDown(mockDevice, mockBuildInfo, null);
+        verify(mockDevice, times(1))
+                .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
+        verify(mockDevice, times(1)).reboot();
+    }
+
+    /**
+     * Tests the functionality of radio log restore option.
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_tearDown_enableAdbRoot_noNeedTurnOff() throws DeviceNotAvailableException {
+        doReturn(true).when(mockDevice).isAdbRoot();
+        doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        mPreparer.mEnableRadioLog = true;
+        mPreparer.mRestoreRadioLog = true;
+        mPreparer.mInitialRadioLog = true;
+        mPreparer.tearDown(mockDevice, mockBuildInfo, null);
+        verify(mockDevice, times(0))
+                .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
+        verify(mockDevice, times(0)).reboot();
+    }
+
+    /**
+     * Tests the functionality of radio log restore option.
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_tearDown_enableAdbRoot_noNeedTurnOff2() throws DeviceNotAvailableException {
+        doReturn(true).when(mockDevice).isAdbRoot();
+        doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        mPreparer.mEnableRadioLog = false;
+        mPreparer.mRestoreRadioLog = true;
+        mPreparer.mInitialRadioLog = true;
+        mPreparer.tearDown(mockDevice, mockBuildInfo, null);
+        verify(mockDevice, times(0))
+                .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
+        verify(mockDevice, times(0)).reboot();
+    }
+
+    /**
      * Tests the functionality of enable-adb-root option
      *
      * @throws DeviceNotAvailableException
