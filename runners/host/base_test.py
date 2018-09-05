@@ -35,6 +35,7 @@ from vts.utils.python.common import filter_utils
 from vts.utils.python.common import list_utils
 from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.coverage import sancov_utils
+from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
 from vts.utils.python.precondition import precondition_utils
 from vts.utils.python.profiling import profiling_utils
 from vts.utils.python.reporting import log_uploading_utils
@@ -116,6 +117,7 @@ class BaseTestClass(object):
                                 of failed test cases. Default is True
         test_filter: Filter object to filter test names.
     """
+    _current_record = None
     start_vts_agents = True
 
     def __init__(self, configs):
@@ -125,7 +127,6 @@ class BaseTestClass(object):
             setattr(self, name, value)
         self.results = records.TestResult()
         self.log = logger.LoggerProxy()
-        self._current_record = None
 
         # Timeout
         self._interrupted = False
@@ -218,9 +219,13 @@ class BaseTestClass(object):
     def android_devices(self):
         """Returns a list of AndroidDevice objects"""
         if not hasattr(self, _ANDROID_DEVICES):
+            event = tfi.Begin('base_test registering android_device. '
+                              'Start agents: %s' % self.start_vts_agents,
+                              tfi.categories.FRAMEWORK_SETUP)
             setattr(self, _ANDROID_DEVICES,
                     self.registerController(android_device,
                                             start_services=self.start_vts_agents))
+            event.End()
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter
@@ -419,8 +424,9 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
+        event = tfi.Begin('_setUpClass method for test class',
+                          tfi.categories.TEST_CLASS_SETUP)
         self.resetTimeout(self.timeout)
-
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
@@ -457,7 +463,14 @@ class BaseTestClass(object):
         for device in self.android_devices:
             device.waitForProcessStop(native_server_process_names)
 
-        return self.setUpClass()
+
+        event_sub = tfi.Begin('setUpClass method from test script',
+                              tfi.categories.TEST_CLASS_SETUP,
+                              enable_logging=False)
+        result = self.setUpClass()
+        event_sub.End()
+        event.End()
+        return result
 
     def setUpClass(self):
         """Setup function that will be called before executing any test case in
@@ -475,11 +488,20 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of tearDownClass
         is called.
         """
+        event = tfi.Begin('_tearDownClass method for test class',
+                          tfi.categories.TEST_CLASS_TEARDOWN)
+        event_sub = tfi.Begin('tearDownClass method from test script',
+                              tfi.categories.TEST_CLASS_TEARDOWN,
+                              enable_logging=False)
         ret = self.tearDownClass()
 
         self.resetTimeout(TEARDOWN_CLASS_TIMEOUT_SECS)
+        event_sub.End()
         if self.log_uploading.enabled:
+            event_upload = tfi.Begin('Log upload',
+                                     tfi.categories.RESULT_PROCESSING)
             self.log_uploading.UploadLogs()
+            event_upload.End()
         if self.web.enabled:
             if self.results.class_errors:
                 # Create a result to make the module shown as failure.
@@ -499,6 +521,7 @@ class BaseTestClass(object):
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
 
+        event.End()
         return ret
 
     def tearDownClass(self):
@@ -558,9 +581,17 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of setUp is
         called.
         """
+        event = tfi.Begin('_setUp method for test case',
+                          tfi.categories.TEST_CASE_SETUP,)
         if self.systrace.enabled:
             self.systrace.StartSystrace()
-        return self.setUp()
+
+        event_sub = tfi.Begin('_setUp method from test script',
+                              tfi.categories.TEST_CASE_SETUP,
+                              enable_logging=False)
+        result = self.setUp()
+        event_sub.End()
+        event.End()
 
     def setUp(self):
         """Setup function that will be called every time before executing each
@@ -581,9 +612,16 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of tearDown
         is called.
         """
+        event = tfi.Begin('_tearDown method for test case',
+                          tfi.categories.TEST_CASE_TEARDOWN)
         if self.systrace.enabled:
             self.systrace.ProcessAndUploadSystrace(test_name)
+        event_sub = tfi.Begin('_setUp method from test script',
+                              tfi.categories.TEST_CASE_TEARDOWN,
+                              enable_logging=False)
         self.tearDown()
+        event_sub.End()
+        event.End()
 
     def tearDown(self):
         """Teardown function that will be called every time a test case has
@@ -603,11 +641,16 @@ class BaseTestClass(object):
                       record.test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
+
+        event = tfi.Begin('_onFail method from BaseTest',
+                          tfi.categories.FAILED_TEST_CASE_PROCESSING,
+                          enable_logging=False)
         self.onFail(record.test_name, begin_time)
         if self._bug_report_on_failure:
             self.DumpBugReport(ecord.test_name)
         if self._logcat_on_failure:
             self.DumpLogcat(record.test_name)
+        event.End()
 
     def onFail(self, test_name, begin_time):
         """A function that is executed upon a test case failure.
@@ -700,11 +743,16 @@ class BaseTestClass(object):
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_EXCEPTION)
+
+        event = tfi.Begin('_onFail method from BaseTest',
+                          tfi.categories.FAILED_TEST_CASE_PROCESSING,
+                          enable_logging=False)
         self.onException(test_name, begin_time)
         if self._bug_report_on_failure:
             self.DumpBugReport(ecord.test_name)
         if self._logcat_on_failure:
             self.DumpLogcat(record.test_name)
+        event.End()
 
     def onException(self, test_name, begin_time):
         """A function that is executed upon an unhandled exception from a test
@@ -857,10 +905,13 @@ class BaseTestClass(object):
                 asserts.assertTrue(ret is not False,
                                    "Setup for %s failed." % test_name)
 
+                event_test = tfi.Begin("test function",
+                                       tfi.categories.TEST_CASE_EXECUTION)
                 if args or kwargs:
                     verdict = test_func(*args, **kwargs)
                 else:
                     verdict = test_func()
+                event_test.End()
                 finished = True
             finally:
                 self._tearDown(test_name)
@@ -991,7 +1042,10 @@ class BaseTestClass(object):
             test_name = GenerateTestName(setting)
             previous_success_cnt = len(self.results.passed)
 
+            event_exec = tfi.Begin('BaseTest execOneTest method for generated tests',
+                                   enable_logging=False)
             self.execOneTest(test_name, test_func, (setting, ) + args, **kwargs)
+            event_exec.End()
             if len(self.results.passed) - previous_success_cnt != 1:
                 failed_settings.append(setting)
 
@@ -1141,7 +1195,10 @@ class BaseTestClass(object):
                     test_func()
                     logging.debug("Finished '%s'", test_name)
                 else:
+                    event_exec = tfi.Begin('BaseTest execOneTest method for individual tests',
+                                           enable_logging=False)
                     self.execOneTest(test_name, test_func, None)
+                    event_exec.End()
             if self.isSkipAllTests() and not self.results.executed:
                 self.results.skipClass(
                     self.test_module_name,
@@ -1219,6 +1276,8 @@ class BaseTestClass(object):
             prefix: string, file name prefix. Usually in format of
                     <test_module>-<test_case>
         """
+        event = tfi.Begin('dump Bugreport',
+                          tfi.categories.FAILED_TEST_CASE_PROCESSING)
         if prefix:
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
@@ -1233,6 +1292,7 @@ class BaseTestClass(object):
 
             logging.info('Dumping bugreport %s...' % file_path)
             device.adb.bugreport(file_path)
+        event.End()
 
     def skipAllTests(self, msg):
         """Skip all test cases.
@@ -1281,6 +1341,8 @@ class BaseTestClass(object):
             prefix: string, file name prefix. Usually in format of
                     <test_module>-<test_case>
         """
+        event = tfi.Begin('dump logcat',
+                          tfi.categories.FAILED_TEST_CASE_PROCESSING)
         if prefix:
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
@@ -1297,3 +1359,4 @@ class BaseTestClass(object):
 
                 logging.info('Dumping logcat %s...' % file_path)
                 device.adb.logcat('-b', buffer, '-d', '>', file_path)
+        event.End()
