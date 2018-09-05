@@ -36,6 +36,7 @@ from vts.utils.python.common import list_utils
 from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.coverage import sancov_utils
 from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
+from vts.utils.python.io import file_util
 from vts.utils.python.precondition import precondition_utils
 from vts.utils.python.profiling import profiling_utils
 from vts.utils.python.reporting import log_uploading_utils
@@ -1280,14 +1281,19 @@ class BaseTestClass(object):
         if prefix:
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
+        parent_dir = os.path.join(logging.log_path, 'bugreport')
+
+        if not file_util.Mkdir(parent_dir):
+            logging.error('Failed to create bugreport output directory %s', parent_dir)
+            return
+
         for device in self.android_devices:
             file_name = (_BUG_REPORT_FILE_PREFIX
                          + prefix
                          + '_%s' % device.serial
                          + _BUG_REPORT_FILE_EXTENSION)
 
-            file_path = os.path.join(logging.log_path,
-                                     file_name)
+            file_path = os.path.join(parent_dir, file_name)
 
             logging.info('Dumping bugreport %s...' % file_path)
             device.adb.bugreport(file_path)
@@ -1345,6 +1351,12 @@ class BaseTestClass(object):
         if prefix:
             prefix = re.sub('[^\w\-_\. ]', '_', prefix) + '_'
 
+        parent_dir = os.path.join(logging.log_path, 'logcat')
+
+        if not file_util.Mkdir(parent_dir):
+            logging.error('Failed to create bugreport output directory %s', parent_dir)
+            return
+
         for device in self.android_devices:
             for buffer in LOGCAT_BUFFERS:
                 file_name = (_LOGCAT_FILE_PREFIX
@@ -1353,8 +1365,7 @@ class BaseTestClass(object):
                              + device.serial
                              + _LOGCAT_FILE_EXTENSION)
 
-                file_path = os.path.join(logging.log_path,
-                                         file_name)
+                file_path = os.path.join(parent_dir, file_name)
 
                 logging.info('Dumping logcat %s...' % file_path)
                 device.adb.logcat('-b', buffer, '-d', '>', file_path)
