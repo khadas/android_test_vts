@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import time
 import re
 
 
@@ -27,8 +28,11 @@ LOGGING_TEMPLATE = LOGGING_PREFIX + ' {category}: {name} {status}'
 # the replacing logic be required if escape character is needed.
 ILLEGAL_CHARS = ':\t\r\n'
 
-# A list of Event objects: events that has began and not ended.
+# A list of events that have began but not ended.
 event_stack = []
+# A list of events that have finished
+# TODO(yuexima): use a new class to store data
+event_data = []
 
 
 def NormalizeNameCategory(name, category):
@@ -62,6 +66,13 @@ class TestFrameworkInstrumentationEvent(object):
               reading. Final performance analysis will mostly focus on category
               granularity instead of name granularity.
         status: int, 0 for not started, 1 for started, 2 for ended, 3 for removed.
+        timestamp_begin_cpu: float, cpu time of event begin
+        timestamp_begin_wall: float, wall time of event begin
+        timestamp_end_cpu: float, cpu time of event end
+                           Note: on some operating system (such as windows), the difference
+                           between start and end cpu time may be measured using
+                           wall time.
+        timestamp_end_wall: float, wall time of event end
         _enable_logging: bool or None. Whether to put the event in logging.
                          Should be set to False when timing small pieces of code that could take
                          very short time to run.
@@ -78,6 +89,11 @@ class TestFrameworkInstrumentationEvent(object):
     _enable_logging = False
     _disable_subevent_logging = False
     # TODO(yuexima): add on/off toggle param for logging.
+
+    timestamp_begin_cpu = -1
+    timestamp_begin_wall = -1
+    timestamp_end_cpu = -1
+    timestamp_end_wall = -1
 
     def __init__(self, name, category):
         self.name, self.category = NormalizeNameCategory(name, category)
@@ -104,6 +120,8 @@ class TestFrameworkInstrumentationEvent(object):
                                       event begins and before this event ends. This will overwrite
                                       subevent's logging setting if set to True.
         """
+        timestamp_begin_cpu = time.clock()
+        timestamp_begin_wall = time.time()
         global event_stack
         if event_stack and event_stack[-1]._disable_subevent_logging:
             self._enable_logging = False
@@ -134,10 +152,14 @@ class TestFrameworkInstrumentationEvent(object):
                                           status='BEGIN'))
 
         self.status = 1
+        self.timestamp_begin_cpu = timestamp_begin_cpu
+        self.timestamp_begin_wall = timestamp_begin_wall
         event_stack.append(self)
 
     def End(self):
         """Performs logging action for the end of this event."""
+        timestamp_end_cpu = time.clock()
+        timestamp_end_wall = time.time()
         if self.status == 0:
             self.LogE('TestFrameworkInstrumentation: event %s has not yet began. '
                       'Skipping End.', self)
@@ -159,6 +181,10 @@ class TestFrameworkInstrumentationEvent(object):
                                           status='END'))
 
         self.status = 2
+        self.timestamp_end_cpu = timestamp_end_cpu
+        self.timestamp_end_wall = timestamp_end_wall
+        global event_data
+        event_data.append(self)
         global event_stack
         event_stack.remove(self)
 
@@ -227,4 +253,11 @@ class TestFrameworkInstrumentationEvent(object):
             log_func(*args)
 
     def __str__(self):
-        return 'Event object: @%s #%s' % (self.category, self.name)
+        return 'Event object: @%s #%s' % (self.category, self.name) + \
+            '\n  Begin timestamp(CPU): %s' % self.timestamp_begin_cpu + \
+            '\n  End timestamp(CPU): %s' % self.timestamp_end_cpu + \
+            '\n  Begin timestamp(wall): %s' % self.timestamp_begin_wall + \
+            '\n  End timestamp(wall): %s' % self.timestamp_end_wall + \
+            '\n  Status: %s' % self.status + \
+            '\n  Duration(CPU): %s' % (self.timestamp_end_cpu - self.timestamp_begin_cpu) + \
+            '\n  Duration(wall): %s' % (self.timestamp_end_wall - self.timestamp_begin_wall)
