@@ -21,6 +21,6 @@ LOCAL_COMPATIBILITY_SUITE := vts
 include $(BUILD_SYSTEM)/base_rules.mk
 
 $(LOCAL_BUILT_MODULE):
-	@echo "VTS host-driven test target: $(LOCAL_MODULE)"
+	@echo "VTS host-driven test target: $(PRIVATE_MODULE)"
 	$(hide) touch $@
 
