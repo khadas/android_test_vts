@@ -686,14 +686,22 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @return True if the value of version1 >= version2
      */
     private static boolean isVersionGreaterEqual(String version1, String version2) {
+        version1 = version1.replaceAll("[^0-9.]+", "");
+        version2 = version2.replaceAll("[^0-9.]+", "");
+
         String[] tokens1 = version1.split("\\.");
         String[] tokens2 = version2.split("\\.");
 
         int length = Math.max(tokens1.length, tokens2.length);
         for (int i = 0; i < length; i++) {
-            int token1 = i < tokens1.length ? Integer.parseInt(tokens1[i]) : 0;
-            int token2 = i < tokens2.length ? Integer.parseInt(tokens2[i]) : 0;
-            if (token1 < token2) {
+            try {
+                int token1 = i < tokens1.length ? Integer.parseInt(tokens1[i]) : 0;
+                int token2 = i < tokens2.length ? Integer.parseInt(tokens2[i]) : 0;
+                if (token1 < token2) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                CLog.e("failed to compare pip module version: %s and %s", version1, version2);
                 return false;
             }
         }
