@@ -91,21 +91,29 @@ public class OutputUtil {
      */
     private void addVtsRunnerOutputFile(File logFile) {
         String fileName = logFile.getName();
+        String fileNameLower = fileName.toLowerCase();
 
         LogDataType type;
-        if (fileName.endsWith(".html")) {
+        if (fileNameLower.endsWith(".html")) {
             type = LogDataType.HTML;
-        } else if (fileName.startsWith("logcat")) {
+        } else if (fileNameLower.startsWith("logcat")) {
             type = LogDataType.LOGCAT;
-        } else if (fileName.startsWith("bugreport") && fileName.endsWith(".zip")) {
+        } else if (fileNameLower.startsWith("bugreport") && fileNameLower.endsWith(".zip")) {
             type = LogDataType.BUGREPORTZ;
-        } else if (fileName.endsWith(".txt") || fileName.endsWith(".log")) {
+        } else if (fileNameLower.startsWith("bugreport") && fileNameLower.endsWith(".txt")) {
+            type = LogDataType.BUGREPORT;
+        } else if (fileNameLower.endsWith(".txt") || fileNameLower.endsWith(".log")) {
             type = LogDataType.TEXT;
-        } else if (fileName.endsWith(".zip")) {
+        } else if (fileNameLower.endsWith(".zip")) {
             type = LogDataType.ZIP;
+        } else if (fileNameLower.endsWith(".jpg")) {
+            type = LogDataType.JPEG;
+        } else if (fileNameLower.endsWith(".tar.gz")) {
+            type = LogDataType.TAR_GZ;
+        } else if (fileNameLower.endsWith(".png")) {
+            type = LogDataType.PNG;
         } else {
-            CLog.w("Unknown output file type. Skipping %s", logFile);
-            return;
+            type = LogDataType.UNKNOWN;
         }
 
         String outputFileName = mTestModuleName + "_" + fileName + "_" + mAbiName;
@@ -121,7 +129,7 @@ public class OutputUtil {
     }
 
     /**
-     * @param bitness
+     * @param abiName
      */
     public void setAbiName(String abiName) {
         mAbiName = abiName;
