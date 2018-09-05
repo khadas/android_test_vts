@@ -29,6 +29,7 @@ import com.android.tradefed.testtype.VtsFuzzTestTest;
 import com.android.tradefed.testtype.VtsMultiDeviceTestResultParserTest;
 import com.android.tradefed.testtype.VtsMultiDeviceTestTest;
 import com.android.tradefed.util.CmdUtilTest;
+import com.android.tradefed.util.OutputUtilTest;
 import com.android.tradefed.util.ProcessHelperTest;
 import com.android.tradefed.util.VtsPythonRunnerHelperTest;
 
@@ -71,6 +72,7 @@ import org.junit.runners.Suite.SuiteClasses;
         CmdUtilTest.class,
         ProcessHelperTest.class,
         VtsPythonRunnerHelperTest.class,
+        OutputUtilTest.class,
 })
 public class VtsUnitTests {
     // empty on purpose
