@@ -306,9 +306,9 @@ class TestRunner(object):
         create = module.create
         module_config_name = module.VTS_CONTROLLER_CONFIG_NAME
         if module_config_name not in self.testbed_configs:
-            event.End()
-            raise signals.ControllerError(("No corresponding config found for"
-                                           " %s") % module_config_name)
+            msg = "No corresponding config found for %s" % module_config_name
+            event.Remove(msg)
+            raise signals.ControllerError(msg)
         try:
             # Make a deep copy of the config to pass to the controller module,
             # in case the controller module modifies the config internally.
@@ -326,14 +326,15 @@ class TestRunner(object):
                 objects = create(controller_config,
                                  self.testbed_configs["use_vts_agent"])
         except:
-            logging.exception(("Failed to initialize objects for controller "
-                               "%s, abort!"), module_config_name)
-            event.End()
+            msg = "Failed to initialize objects for controller %s, abort!" % module_config_name
+            event.Remove(msg)
+            logging.error(msg)
             raise
         if not isinstance(objects, list):
-            event.End()
-            raise signals.ControllerError(("Controller module %s did not"
-                        " return a list of objects, abort.") % module_ref_name)
+            msg = "Controller module %s did not return a list of objects, abort." % module_ref_name
+            event.Remove(msg)
+            raise signals.ControllerError(msg)
+
         self.controller_registry[module_ref_name] = objects
         logging.debug("Found %d objects for controller %s",
                       len(objects), module_config_name)
