@@ -45,7 +45,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -105,6 +107,10 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     // If the same object is used in multiple threads (in sharding mode), the class
     // needs to know when it is safe to call the teardown method.
     private int mNumOfInstances = 0;
+
+    // A map of initially installed pip modules and versions. Newly installed modules are not
+    // currently added automatically.
+    private Map<String, String> mPipInstallList = null;
 
     /**
      * {@inheritDoc}
@@ -199,7 +205,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (!EnvUtil.isOnWindows()) {
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, "ls", path);
+            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "ls", path);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.d(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
                         path, c.getStatus(), c.getStdout(), c.getStderr()));
@@ -246,7 +252,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
-                if (mNoDepModules.contains(dep)) {
+                if (mNoDepModules.contains(dep) || isPipModuleInstalled(dep)) {
                     continue;
                 }
                 CommandResult result = null;
@@ -454,5 +460,115 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    /**
+     * Locally checks whether a pip module is installed.
+     *
+     * This read the installed module list from command "pip list" and check whether the
+     * module in requirement string is installed and its version satisfied.
+     *
+     * Note: This method is only a help method for speed optimization purpose.
+     *       It does not check dependencies of the module.
+     *       It replace dots "." in module name with dash "-".
+     *       If the "pip list" command failed, it will return false and will not throw exception
+     *       It can also only accept one ">=" version requirement string.
+     *       If this method returns false, the requirement should still be checked using pip itself.
+     *
+     * @param requirement such as "numpy", "pip>=9"
+     * @return True if module is installed locally with correct version. False otherwise
+     */
+    private boolean isPipModuleInstalled(String requirement) {
+        if (mPipInstallList == null) {
+            mPipInstallList = getInstalledPipModules();
+            if (mPipInstallList == null) {
+                CLog.e("Failed to read local pip install list.");
+                return false;
+            }
+        }
+
+        String name;
+        String version = null;
+        if (requirement.contains(">=")) {
+            String[] tokens = requirement.split(">=");
+            if (tokens.length != 2) {
+                return false;
+            }
+            name = tokens[0];
+            version = tokens[1];
+        } else if (requirement.contains("=") || requirement.contains("<")
+                || requirement.contains(">")) {
+            return false;
+        } else {
+            name = requirement;
+        }
+
+        name = name.replaceAll("\\.", "-");
+
+        if (!mPipInstallList.containsKey(name)) {
+            return false;
+        }
+
+        // TODO: support other comparison and multiple condition if there's a use case.
+        if (version != null && !isVersionGreaterEqual(mPipInstallList.get(name), version)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Compares whether version string 1 is greater or equal to version string 2
+     * @param version1
+     * @param version2
+     * @return True if the value of version1 >= version2
+     */
+    private static boolean isVersionGreaterEqual(String version1, String version2) {
+        String[] tokens1 = version1.split("\\.");
+        String[] tokens2 = version2.split("\\.");
+
+        int length = Math.max(tokens1.length, tokens2.length);
+        for (int i = 0; i < length; i++) {
+            int token1 = i < tokens1.length ? Integer.parseInt(tokens1[i]) : 0;
+            int token2 = i < tokens2.length ? Integer.parseInt(tokens2[i]) : 0;
+            if (token1 < token2) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets map of installed pip packages and their versions.
+     * @return installed pip packages
+     */
+    private Map<String, String> getInstalledPipModules() {
+        CommandResult res = getRunUtil().runTimedCmd(BASE_TIMEOUT, getPipPath(), "list");
+        if (res.getStatus() != CommandStatus.SUCCESS) {
+            CLog.e(String.format("Failed to read pip installed list: "
+                            + "Result %s. stdout: %s, stderr: %s",
+                    res.getStatus(), res.getStdout(), res.getStderr()));
+            return null;
+        }
+        String raw = res.getStdout();
+        String[] lines = raw.split("\\r?\\n");
+
+        TreeMap<String, String> pipInstallList = new TreeMap<>();
+
+        for (String line : lines) {
+            line = line.trim();
+            if (line.length() == 0 || line.startsWith("Package ") || line.startsWith("-")) {
+                continue;
+            }
+            String[] tokens = line.split("\\s+");
+            if (tokens.length != 2) {
+                CLog.e("Error parsing pip installed package list. Line text: " + line);
+                continue;
+            }
+            pipInstallList.put(tokens[0], tokens[1]);
+        }
+
+        return pipInstallList;
     }
 }
