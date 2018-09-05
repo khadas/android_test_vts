@@ -62,7 +62,10 @@ import java.util.TreeSet;
 public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final String LOCAL_PYPI_PATH_ENV_VAR_NAME = "VTS_PYPI_PATH";
     private static final String LOCAL_PYPI_PATH_KEY = "pypi_packages_path";
-    private static final int BASE_TIMEOUT = 1000 * 60;
+    private static final int SECOND_IN_MSECS = 1000;
+    private static final int MINUTE_IN_MSECS = 60 * SECOND_IN_MSECS;
+    protected static int PIP_RETRY = 3;
+    private static final int PIP_RETRY_WAIT = 3 * SECOND_IN_MSECS;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -85,7 +88,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             description = "Reuse an exising virtualenv path if exists in "
                     + "temp directory. When this option is enabled, virtualenv directory used or "
                     + "created by this preparer will not be deleted after tests complete.")
-    protected boolean mReuse = false;
+    protected boolean mReuse = true;
 
     @Option(name = "python-version",
             description = "The version of a Python interpreter to use."
@@ -124,7 +127,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             CLog.i("Preparing python dependencies...");
             ITestDevice device = context.getDevices().get(0);
             mDescriptor = device.getDeviceDescriptor();
-            createVirtualenv(mBuildInfo);
+            initVirtualenv(mBuildInfo);
             CLog.d("Python virtualenv path is: " + mVenvDir);
             VtsPythonRunnerHelper.activateVirtualenv(getRunUtil(), mVenvDir.getAbsolutePath());
             setLocalPypiPath();
@@ -205,7 +208,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (!EnvUtil.isOnWindows()) {
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT, "ls", path);
+            CommandResult c = getRunUtil().runTimedCmd(MINUTE_IN_MSECS, "ls", path);
             if (c.getStatus() != CommandStatus.SUCCESS) {
                 CLog.d(String.format("Failed to read dir: %s. Result %s. stdout: %s, stderr: %s",
                         path, c.getStatus(), c.getStdout(), c.getStderr()));
@@ -228,74 +231,133 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
     }
 
+    /**
+     * Installs all python pip module dependencies specified in options.
+     * @throws TargetSetupError if failed
+     */
     protected void installDeps() throws TargetSetupError {
         boolean hasDependencies = false;
         if (!mScriptFiles.isEmpty()) {
             for (String scriptFile : mScriptFiles) {
                 CLog.d("Attempting to execute a script, %s", scriptFile);
-                CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, scriptFile);
+                CommandResult c = getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, scriptFile);
                 if (c.getStatus() != CommandStatus.SUCCESS) {
                     CLog.e("Executing script %s failed", scriptFile);
                     throw new TargetSetupError("Failed to source a script", mDescriptor);
                 }
             }
         }
+
         if (mRequirementsFile != null) {
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
-                    "-r", mRequirementsFile.getAbsolutePath());
-            if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
-                CLog.e("Installing dependencies from %s failed with error: %s",
-                        mRequirementsFile.getAbsolutePath(), c.getStderr());
-                throw new TargetSetupError("Failed to install dependencies with pip", mDescriptor);
-            }
             hasDependencies = true;
+            boolean success = false;
+
+            long retry_interval = PIP_RETRY_WAIT;
+            for (int try_count = 0; try_count < PIP_RETRY + 1; try_count++) {
+                if (try_count > 0) {
+                    getRunUtil().sleep(retry_interval);
+                    retry_interval *= 3;
+                }
+
+                if (installPipRequirementFile(mRequirementsFile)) {
+                    success = true;
+                    break;
+                }
+            }
+
+            if (!success) {
+                throw new TargetSetupError(
+                        "Failed to install pip requirement file " + mRequirementsFile, mDescriptor);
+            }
         }
+
         if (!mDepModules.isEmpty()) {
             for (String dep : mDepModules) {
+                hasDependencies = true;
+
                 if (mNoDepModules.contains(dep) || isPipModuleInstalled(dep)) {
                     continue;
                 }
-                CommandResult result = null;
-                if (mLocalPypiPath != null) {
-                    CLog.d("Attempting installation of %s from local directory", dep);
-                    result = getRunUtil().runTimedCmd(BASE_TIMEOUT * 5, getPipPath(), "install",
-                            dep, "--no-index", "--find-links=" + mLocalPypiPath);
-                    CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                            result.getStdout(), result.getStderr()));
-                    if (result.getStatus() != CommandStatus.SUCCESS) {
-                        CLog.e(String.format("Installing %s from %s failed", dep, mLocalPypiPath));
+
+                boolean success = installPipModuleLocally(dep);
+
+                long retry_interval = PIP_RETRY_WAIT;
+                for (int retry_count = 0; retry_count < PIP_RETRY + 1; retry_count++) {
+                    if (retry_count > 0) {
+                        getRunUtil().sleep(retry_interval);
+                        retry_interval *= 3;
+                    }
+
+                    if (success || (!success && installPipModule(dep))) {
+                        success = true;
+                        break;
                     }
                 }
-                if (mLocalPypiPath == null || result.getStatus() != CommandStatus.SUCCESS) {
-                    CLog.d("Attempting installation of %s from PyPI", dep);
-                    result = getRunUtil().runTimedCmd(
-                            BASE_TIMEOUT * 5, getPipPath(), "install", dep);
-                    CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(),
-                            result.getStdout(), result.getStderr());
-                    if (result.getStatus() != CommandStatus.SUCCESS) {
-                        CLog.e("Installing %s from PyPI failed.", dep);
-                        CLog.d("Attempting to upgrade %s", dep);
-                        result = getRunUtil().runTimedCmd(
-                                BASE_TIMEOUT * 5, getPipPath(), "install", "--upgrade", dep);
-                        if (result.getStatus() != CommandStatus.SUCCESS) {
-                            throw new TargetSetupError(
-                                    String.format("Failed to install dependencies with pip. "
-                                                    + "Result %s. stdout: %s, stderr: %s",
-                                            result.getStatus(), result.getStdout(),
-                                            result.getStderr()),
-                                    mDescriptor);
-                        } else {
-                            CLog.d(String.format("Result %s. stdout: %s, stderr: %s",
-                                    result.getStatus(), result.getStdout(), result.getStderr()));
-                        }
-                    }
+
+                if (!success) {
+                    throw new TargetSetupError("Failed to install pip module " + dep, mDescriptor);
                 }
-                hasDependencies = true;
             }
         }
         if (!hasDependencies) {
             CLog.d("No dependencies to install");
         }
+    }
+
+    /**
+     * Installs a pip requirement file from Internet.
+     * @param req pip module requirement file object
+     * @return true if success. False otherwise
+     */
+    private boolean installPipRequirementFile(File req) {
+        CommandResult result = getRunUtil().runTimedCmd(10 * MINUTE_IN_MSECS, getPipPath(),
+                "install", "-r", mRequirementsFile.getAbsolutePath());
+        CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                result.getStdout(), result.getStderr()));
+
+        return result.getStatus() == CommandStatus.SUCCESS;
+    }
+
+    /**
+     * Installs a pip module from local directory.
+     * @param name of the module
+     * @return true if the module is successfully installed; false otherwise.
+     */
+    private boolean installPipModuleLocally(String name) {
+        if (mLocalPypiPath == null) {
+            return false;
+        }
+        CLog.d("Attempting installation of %s from local directory", name);
+        CommandResult result = getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, getPipPath(),
+                "install", name, "--no-index", "--find-links=" + mLocalPypiPath);
+        CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                result.getStdout(), result.getStderr()));
+
+        return result.getStatus() == CommandStatus.SUCCESS;
+    }
+
+    /**
+     * Install a pip module from Internet
+     * @param name of the module
+     * @return true if success. False otherwise
+     */
+    private boolean installPipModule(String name) {
+        CLog.d("Attempting installation of %s from PyPI", name);
+        CommandResult result =
+                getRunUtil().runTimedCmd(5 * MINUTE_IN_MSECS, getPipPath(), "install", name);
+        CLog.d("Result %s. stdout: %s, stderr: %s", result.getStatus(), result.getStdout(),
+                result.getStderr());
+        if (result.getStatus() != CommandStatus.SUCCESS) {
+            CLog.e("Installing %s from PyPI failed.", name);
+            CLog.d("Attempting to upgrade %s", name);
+            result = getRunUtil().runTimedCmd(
+                    5 * MINUTE_IN_MSECS, getPipPath(), "install", "--upgrade", name);
+
+            CLog.d(String.format("Result %s. stdout: %s, stderr: %s", result.getStatus(),
+                    result.getStdout(), result.getStderr()));
+        }
+
+        return result.getStatus() == CommandStatus.SUCCESS;
     }
 
     /**
@@ -364,7 +426,111 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @param buildInfo
      * @throws TargetSetupError
      */
-    protected void createVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
+    protected void initVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
+        if (checkTestPlanLevelVirtualenv(buildInfo)) {
+            return;
+        }
+
+        try {
+            if (checkHostReuseVirtualenv(buildInfo)) {
+                return;
+            }
+
+            if (createVirtualenv()) {
+                return;
+            }
+
+        } catch (IOException | RuntimeException e) {
+            CLog.e(e);
+        }
+
+        CLog.e(String.format("Failed to create virtualenv at %s.", mVenvDir));
+        throw new TargetSetupError("Error creating virtualenv", mDescriptor);
+    }
+
+    protected File getVirtualenvCreationMarkFile() {
+        return new File(mVenvDir, "complete");
+    }
+
+    /**
+     * Completes the creation of virtualenv.
+     * @return true if the directory is successfully prepared as virutalenv; false otherwise
+     * @throws IOException if completion mark file creation failed.
+     */
+    protected boolean createVirtualenv() throws IOException {
+        CLog.d("Creating virtualenv at " + mVenvDir);
+
+        String[] cmd = new String[] {
+                "virtualenv", "-p", "python" + mPythonVersion, mVenvDir.getAbsolutePath()};
+
+        long waitRetryCreate = 5 * SECOND_IN_MSECS;
+
+        for (int try_count = 0; try_count < PIP_RETRY + 1; try_count++) {
+            if (try_count > 0) {
+                getRunUtil().sleep(waitRetryCreate);
+            }
+            CommandResult c = getRunUtil().runTimedCmd(3 * MINUTE_IN_MSECS, cmd);
+
+            if (c.getStatus() != CommandStatus.SUCCESS) {
+                String message_lower = (c.getStdout() + c.getStderr()).toLowerCase();
+                if (message_lower.contains("errno 26")
+                        || message_lower.contains("text file busy")) {
+                    // Race condition, retry.
+                    CLog.d("detected the virtualenv path is being created by other process.");
+
+                    if (createVirtualenv_waitForOtherProcessToCreateVirtualEnv()) {
+                        CLog.d("detected the other process has created virtualenv.");
+                        return true;
+                    }
+                } else {
+                    // Other error, abort.
+                    CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
+                            c.getStdout(), c.getStderr()));
+                    break;
+                }
+
+            } else {
+                mIsDirCreator = true;
+                getVirtualenvCreationMarkFile().createNewFile();
+                CLog.d("Succesfully created virtualenv at " + mVenvDir);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether a host-wise virutanenv directory can be used. If not, creates a empty one.
+     * @param buildInfo
+     * @return true if a host-wise virutanenv directory can be used; false otherwise.
+     * @throws IOException if failed to create empty directory for the virtualenv path.
+     */
+    protected boolean checkHostReuseVirtualenv(IBuildInfo buildInfo) throws IOException {
+        if (mReuse) {
+            String tempDir = System.getProperty("java.io.tmpdir");
+            mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
+            if (mVenvDir.exists()) {
+                if (createVirtualenv_waitForOtherProcessToCreateVirtualEnv()) {
+                    CLog.d("Using existing virtualenv for version " + mPythonVersion);
+                    return true;
+                }
+            }
+        } else {
+            mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
+                    + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether a test plan-wise common virtualenv directory can be used.
+     * @param buildInfo
+     * @return true if a test plan-wise virtuanenv directory exists; false otherwise
+     * @throws TargetSetupError
+     */
+    protected boolean checkTestPlanLevelVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
         if (mVenvDir == null) {
             String venvDir = null;
             switch (getConfiguredPythonVersionMajor()) {
@@ -384,38 +550,34 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         if (mVenvDir != null) {
-            return;
+            return true;
         }
 
-        try {
-            if (mReuse) {
-                String tempDir = System.getProperty("java.io.tmpdir");
-                mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
-                if (mVenvDir.exists()) {
-                    CLog.d("Using existing virtualenv for version " + mPythonVersion);
-                    // TODO(yuexima): handle multiple TF instance case race condition
-                    return;
-                }
+        return false;
+    }
+
+    /**
+     * Wait for another process to finish creating virtualenv path.
+     * @return true if creation is detected a success; false otherwise.
+     */
+    protected boolean createVirtualenv_waitForOtherProcessToCreateVirtualEnv() {
+        long start = System.currentTimeMillis();
+        long totalWaitCheckComplete = 3 * MINUTE_IN_MSECS;
+        long waitRetryCheckComplete = SECOND_IN_MSECS / 2;
+
+        while (true) {
+            if (getVirtualenvCreationMarkFile().exists()) {
+                return true;
+            }
+
+            if (System.currentTimeMillis() - start < totalWaitCheckComplete) {
+                getRunUtil().sleep(waitRetryCheckComplete);
             } else {
-                mVenvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
-                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+                break;
             }
-            CLog.d("Creating virtualenv for version " + mPythonVersion);
-            mIsDirCreator = true;
-            String virtualEnvPath = mVenvDir.getAbsolutePath();
-            String[] cmd =
-                    new String[] {"virtualenv", "-p", "python" + mPythonVersion, virtualEnvPath};
-            CommandResult c = getRunUtil().runTimedCmd(BASE_TIMEOUT * 3, cmd);
-            if (c.getStatus() != CommandStatus.SUCCESS) {
-                CLog.e(String.format("Failed to create virtualenv with : %s.", virtualEnvPath));
-                CLog.e(String.format("Exit code: %s, stdout: %s, stderr: %s", c.getStatus(),
-                        c.getStdout(), c.getStderr()));
-                throw new TargetSetupError("Failed to create virtualenv", mDescriptor);
-            }
-        } catch (IOException | RuntimeException e) {
-            CLog.e("Failed to create temp directory for virtualenv");
-            throw new TargetSetupError("Error creating virtualenv", e, mDescriptor);
         }
+
+        return false;
     }
 
     protected void addDepModule(String module) {
@@ -430,7 +592,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * Get an instance of {@link IRunUtil}.
      */
     @VisibleForTesting
-    IRunUtil getRunUtil() {
+    protected IRunUtil getRunUtil() {
         if (mRunUtil == null) {
             mRunUtil = new RunUtil();
         }
@@ -544,7 +706,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      * @return installed pip packages
      */
     private Map<String, String> getInstalledPipModules() {
-        CommandResult res = getRunUtil().runTimedCmd(BASE_TIMEOUT, getPipPath(), "list");
+        CommandResult res = getRunUtil().runTimedCmd(30 * SECOND_IN_MSECS, getPipPath(), "list");
         if (res.getStatus() != CommandStatus.SUCCESS) {
             CLog.e(String.format("Failed to read pip installed list: "
                             + "Result %s. stdout: %s, stderr: %s",

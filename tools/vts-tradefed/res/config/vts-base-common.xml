@@ -24,6 +24,10 @@
   </logger>
   <option name="compatibility:skip-all-system-status-check" value="true" />
   <option name="enable-root" value="true" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsDevicePreparer">
+    <option name="enable-adb-root" value="true"/>
+    <option name="restore-framework" value="true"/>
+  </target_preparer>
   <option name="max-log-size" value="200" />
   <object type="vts-vendor-config" class="com.android.tradefed.util.VtsVendorConfigFileUtil" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
