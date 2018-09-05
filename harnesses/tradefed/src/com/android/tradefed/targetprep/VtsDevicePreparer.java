@@ -262,10 +262,10 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
 
         boolean current = mDevice.getProperty(SYSPROP_RADIO_LOG).equals("1");
 
-        if (mInitialRadioLog && !current) {
+        if (!mInitialRadioLog && current) {
             CLog.d("Turing off radio modem log.");
             this.setProperty(SYSPROP_RADIO_LOG, "0");
-        } else if (!mInitialRadioLog && current) {
+        } else if (mInitialRadioLog && !current) {
             CLog.d("Turing on radio modem log.");
             this.setProperty(SYSPROP_RADIO_LOG, "1");
         } else {
