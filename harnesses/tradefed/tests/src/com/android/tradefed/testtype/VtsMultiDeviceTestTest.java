@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.build.IFolderBuildInfo;
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -26,15 +27,18 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
+import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.StreamUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 import org.easymock.EasyMock;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,11 +61,14 @@ public class VtsMultiDeviceTestTest {
 
     private ITestInvocationListener mMockInvocationListener = null;
     private VtsMultiDeviceTest mTest = null;
+
+    private File mWorkingDir = null;
     /**
      * Helper to initialize the various EasyMocks we'll need.
      */
     @Before
     public void setUp() throws Exception {
+        mWorkingDir = FileUtil.createTempDir("vts-multi-device-working-dir");
         mMockInvocationListener = EasyMock.createMock(ITestInvocationListener.class);
         mTest = new VtsMultiDeviceTest() {
             // TODO: Test this method.
@@ -70,13 +77,27 @@ public class VtsMultiDeviceTestTest {
                 return;
             }
             @Override
-            protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
-                return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS);
+            protected VtsCompatibilityInvocationHelper createInvocationHelper() {
+                return new VtsCompatibilityInvocationHelper() {
+                    @Override
+                    public File getTestsDir() throws FileNotFoundException {
+                        return mWorkingDir;
+                    }
+                };
+            }
+            @Override
+            protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
+                return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS, workingDir);
             }
         };
         mTest.setBuild(createMockBuildInfo());
         mTest.setTestCasePath(TEST_CASE_PATH);
         mTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+    }
+
+    @After
+    public void tearDown() {
+        FileUtil.recursiveDelete(mWorkingDir);
     }
 
     /**
@@ -106,7 +127,6 @@ public class VtsMultiDeviceTestTest {
         }
         new File(logPath, VtsMultiDeviceTest.REPORT_MESSAGE_FILE_NAME).createNewFile();
     }
-
 
     /**
      * Create a mock IBuildInfo with necessary getter methods.
@@ -156,8 +176,9 @@ public class VtsMultiDeviceTestTest {
     /**
      * Create a process helper which mocks status of a running process.
      */
-    private VtsPythonRunnerHelper createMockVtsPythonRunnerHelper(CommandStatus status) {
-        return new VtsPythonRunnerHelper(new File(PYTHON_DIR)) {
+    private VtsPythonRunnerHelper createMockVtsPythonRunnerHelper(
+            CommandStatus status, File workingDir) {
+        return new VtsPythonRunnerHelper(new File(PYTHON_DIR), workingDir) {
             @Override
             public String runPythonRunner(
                     String[] cmd, CommandResult commandResult, long testTimeout) {
@@ -180,19 +201,5 @@ public class VtsMultiDeviceTestTest {
     public void testRunNormalInput() throws Exception {
         mTest.setDevice(createMockDevice());
         mTest.run(mMockInvocationListener);
-    }
-
-    /**
-     * Test the run method when the device is set null.
-     */
-    @Test
-    public void testRunDeviceNotAvailable() throws Exception {
-        mTest.setDevice(null);
-        try {
-            mTest.run(mMockInvocationListener);
-            fail("Should have thrown an exception.");
-        } catch (DeviceNotAvailableException e) {
-            // expected
-        }
     }
 }

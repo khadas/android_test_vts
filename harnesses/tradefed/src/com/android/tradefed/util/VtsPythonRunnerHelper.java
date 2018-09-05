@@ -16,19 +16,11 @@
 
 package com.android.tradefed.util;
 
-import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.targetprep.VtsPythonVirtualenvPreparer;
-import com.android.tradefed.util.CommandResult;
-import com.android.tradefed.util.CommandStatus;
-import com.android.tradefed.util.EnvUtil;
-import com.android.tradefed.util.IRunUtil;
-import com.android.tradefed.util.ProcessHelper;
-import com.android.tradefed.util.RunInterruptedException;
-import com.android.tradefed.util.RunUtil;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -46,25 +38,20 @@ public class VtsPythonRunnerHelper {
     private File mVirtualenvPath;
     protected IRunUtil mRunUtil;
 
-    public VtsPythonRunnerHelper(IBuildInfo buildInfo) {
-        this(buildInfo.getBuildAttributes().get(VtsPythonVirtualenvPreparer.VIRTUAL_ENV));
+    public VtsPythonRunnerHelper(IBuildInfo buildInfo, File workingDir) {
+        this(buildInfo.getBuildAttributes().get(VtsPythonVirtualenvPreparer.VIRTUAL_ENV),
+                workingDir);
     }
 
-    public VtsPythonRunnerHelper(String virtualEnvPath) {
-        this(virtualEnvPath == null ? null : new File(virtualEnvPath));
+    public VtsPythonRunnerHelper(String virtualEnvPath, File workingDir) {
+        this(virtualEnvPath == null ? null : new File(virtualEnvPath), workingDir);
     }
 
-    public VtsPythonRunnerHelper(File virtualEnvPath) {
+    public VtsPythonRunnerHelper(File virtualEnvPath, File workingDir) {
         mVirtualenvPath = virtualEnvPath;
         mRunUtil = new RunUtil();
         activateVirtualenv(mRunUtil, getPythonVirtualEnv());
-        VtsCompatibilityInvocationHelper invocationHelper = new VtsCompatibilityInvocationHelper();
-        try {
-            mRunUtil.setWorkingDir(invocationHelper.getTestsDir());
-        } catch (FileNotFoundException e) {
-            CLog.e("VtsCompatibilityInvocationHelper cannot find test case directory. "
-                    + "Command working directory not set.");
-        }
+        mRunUtil.setWorkingDir(workingDir);
     }
 
     /**
