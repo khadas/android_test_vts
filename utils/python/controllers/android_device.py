@@ -1177,7 +1177,7 @@ class AndroidDevice(object):
             "rm -f /data/local/tmp/vts_agent_callback*"
         ]
 
-        kill_command = "pgrep -f 'vts_*' | xargs kill"
+        kill_command = "pgrep 'vts_*' | xargs kill"
         cleanup_commands.append(kill_command)
         try:
             self.adb.shell("\"" + " && ".join(cleanup_commands) + "\"")
