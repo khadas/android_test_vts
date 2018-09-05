@@ -433,8 +433,14 @@ public class VtsMultiDeviceTest
     @Option(name = "gtest-batch-mode", description = "Run Gtest binaries in batch mode.")
     private boolean mGtestBatchMode = false;
 
-    @Option(name = "log-severity", description = "Set the log severity level.")
-    private String mLogSeverity = "INFO";
+    @Option(name = "log-severity",
+            description = "Set the log severity level."
+                    + "Note, this is a legacy option and does not affect how log files are saved."
+                    + "By setting it to INFO, it will only make python DEBUG log not showing on "
+                    + "console even if TradeFed log display level is set to DEBUG."
+                    + "Therefore, it is not recommemded to set or modify this value in the current"
+                    + "implementation.")
+    private String mLogSeverity = "DEBUG";
 
     @Option(name = "run-as-vts-self-test",
             description = "Run the module as vts-selftest. "

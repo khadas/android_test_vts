@@ -150,7 +150,7 @@ def _initiateTestLogger(log_path, prefix=None, filename=None, log_severity="INFO
 
     log.setLevel(logging.DEBUG)
 
-    # Log info to stream
+    # Log into stream
     terminal_format = log_line_format
     if prefix:
         terminal_format = "[{}] {}".format(prefix, log_line_format)
