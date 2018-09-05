@@ -38,6 +38,7 @@ from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
 from vts.utils.python.controllers import customflasher
 from vts.utils.python.controllers import sl4a_client
+from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
 from vts.utils.python.mirror import mirror_tracker
 
 VTS_CONTROLLER_CONFIG_NAME = "AndroidDevice"
@@ -740,6 +741,9 @@ class AndroidDevice(object):
             raise AndroidDeviceError(("Android device %s already has an adb "
                                       "logcat thread going on. Cannot start "
                                       "another one.") % self.serial)
+        event = tfi.Begin("start adb logcat from android_device",
+                          tfi.categories.FRAMEWORK_SETUP)
+
         f_name = "adblog_%s_%s.txt" % (self.model, self.serial)
         utils.create_dir(self.log_path)
         logcat_file_path = os.path.join(self.log_path, f_name)
@@ -752,6 +756,7 @@ class AndroidDevice(object):
                                                            logcat_file_path)
         self.adb_logcat_process = utils.start_standing_subprocess(cmd)
         self.adb_logcat_file_path = logcat_file_path
+        event.End()
 
     def stopAdbLogcat(self):
         """Stops the adb logcat collection subprocess.
@@ -761,11 +766,15 @@ class AndroidDevice(object):
                 "Android device %s does not have an ongoing adb logcat collection."
                 % self.serial)
 
+        event = tfi.Begin("stop adb logcat from android_device",
+                          tfi.categories.FRAMEWORK_TEARDOWN)
         try:
             utils.stop_standing_subprocess(self.adb_logcat_process)
         except utils.VTSUtilsError as e:
+            event.Remove("Cannot stop adb logcat. %s" % e)
             logging.error("Cannot stop adb logcat. %s", e)
         self.adb_logcat_process = None
+        event.End()
 
     def takeBugReport(self, test_name, begin_time):
         """Takes a bug report on the device and stores it in a file.
@@ -1096,13 +1105,19 @@ class AndroidDevice(object):
         2. Start VtsAgent and create HalMirror unless disabled in config.
         3. If enabled in config, start sl4a service and create sl4a clients.
         """
+        event = tfi.Begin("start vts services",
+                          tfi.categories.FRAMEWORK_SETUP)
+
         self.enable_vts_agent = getattr(self, "enable_vts_agent", True)
         self.enable_sl4a = getattr(self, "enable_sl4a", False)
         self.enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
         try:
             self.startAdbLogcat()
-        except:
-            self.log.exception("Failed to start adb logcat!")
+        except Exception as e:
+            msg = "Failed to start adb logcat!"
+            event.Remove(msg)
+            self.log.error(msg)
+            self.log.exception(e)
             raise
         if self.enable_vts_agent:
             self.startVtsAgent()
@@ -1123,9 +1138,12 @@ class AndroidDevice(object):
             try:
                 self.startSl4aClient(self.enable_sl4a_ed)
             except Exception as e:
-                self.log.exception("Failed to start SL4A!")
+                msg = "Failed to start SL4A!"
+                event.Remove(msg)
+                self.log.error(msg)
                 self.log.exception(e)
                 raise
+        event.End()
 
     def stopServices(self):
         """Stops long running services on the android device.
@@ -1151,6 +1169,9 @@ class AndroidDevice(object):
             raise AndroidDeviceError(
                 "HAL agent is already running on %s." % self.serial)
 
+        event = tfi.Begin("start vts agent", tfi.categories.FRAMEWORK_SETUP)
+
+        event_cleanup = tfi.Begin("start vts agent -- cleanup", tfi.categories.FRAMEWORK_SETUP)
         cleanup_commands = [
             "rm -f /data/local/tmp/vts_driver_*",
             "rm -f /data/local/tmp/vts_agent_callback*"
@@ -1164,6 +1185,7 @@ class AndroidDevice(object):
             self.log.warning(
                 "A command to setup the env to start the VTS Agent failed %s",
                 e)
+        event_cleanup.End()
 
         log_severity = getattr(self, keys.ConfigKeys.KEY_LOG_SEVERITY, "INFO")
         bits = ['64', '32'] if self.is64Bit else ['32']
@@ -1206,9 +1228,13 @@ class AndroidDevice(object):
                 # one common cause is that 64-bit executable is not supported
                 # in low API level devices.
                 if bitness == '32':
+                    msg = "unrecognized bitness"
+                    event.Remove(msg)
+                    logging.error(msg)
                     raise
                 else:
                     logging.error('retrying using a 32-bit binary.')
+        event.End()
 
     def stopVtsAgent(self):
         """Stop the HAL agent running on the AndroidDevice.
