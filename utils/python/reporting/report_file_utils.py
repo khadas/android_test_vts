@@ -22,8 +22,6 @@ import tempfile
 from vts.utils.python.common import cmd_utils
 from vts.utils.python.gcs import gcs_api_utils
 
-PYTHON_OUTPUT_ADDITIONAL = 'additional_output_files'
-
 
 def NotNoneStr(item):
     '''Convert a variable to string only if it is not None'''
@@ -269,12 +267,3 @@ class ReportFileUtil(object):
             return urls
         except IOError as e:
             logging.exception(e)
-
-    def GetAdditioanlOutputDirectory(self):
-        '''Returns a directory to store additional output files.
-
-        Files under this directory will be included in log output folder.
-        All files will be uploaded to VTS dashboard if enabled;
-        Only files with recognized file types will be included in TradeFed output.
-        '''
-        return os.path.join(logging.log_path, PYTHON_OUTPUT_ADDITIONAL)
