@@ -140,6 +140,9 @@ public class VtsPythonVirtualenvPreparerTest {
         CommandResult result = new CommandResult(CommandStatus.TIMED_OUT);
         result.setStdout("output");
         result.setStderr("std err");
+        expect(mMockRunUtil.runTimedCmd(
+                       anyLong(), EasyMock.eq(mPreparer.getPipPath()), EasyMock.eq("list")))
+                .andReturn(result);
         expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
                        EasyMock.eq("install"), EasyMock.eq("enum")))
                 .andReturn(result);
@@ -160,6 +163,9 @@ public class VtsPythonVirtualenvPreparerTest {
     }
 
     private void addDefaultModuleExpectations(IRunUtil mockRunUtil, CommandResult result) {
+        expect(mockRunUtil.runTimedCmd(
+                       anyLong(), EasyMock.eq(mPreparer.getPipPath()), EasyMock.eq("list")))
+                .andReturn(result);
         expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
                        EasyMock.eq("install"), EasyMock.eq("enum")))
                 .andReturn(result);
