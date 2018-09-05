@@ -197,7 +197,6 @@ def CompileResults(directory=None, filename=DEFAULT_FILE_NAME_TEXT_RESULT):
         filename: string, result file name
     """
     if not directory:
-        directory = logger.GetOutputDir()
-
+        directory = logging.log_path
     with open(os.path.join(directory, filename), 'w') as f:
         f.write(GenerateTextReport())

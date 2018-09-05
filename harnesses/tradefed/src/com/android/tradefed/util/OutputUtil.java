@@ -34,12 +34,6 @@ public class OutputUtil {
     private String mTestModuleName = null;
     private String mAbiName = null;
 
-    // Python output file patterns to be included in results
-    static private String[] PYTHON_OUTPUT_PATTERNS = new String[] {"test_run_details.*\\.txt",
-            "vts_agent_.*\\.log", "systrace_.*\\.html", "logcat.*\\.txt", "bugreport.*\\.zip"};
-    // Python folder pattern in which any files will be included in results
-    static private String PYTHON_CUSTOM_OUTPUT = ".*custom_output_files";
-
     public OutputUtil(ITestLogger listener) {
         mListener = listener;
     }
@@ -59,7 +53,7 @@ public class OutputUtil {
      * Collect all VTS python runner log output files as a single zip file
      * @param logDirectory
      */
-    public void collectVtsRunnerOutputZip(File logDirectory) {
+    public void ZipVtsRunnerOutputDir(File logDirectory) {
         try {
             Set<String> latest = FileUtil.findFiles(logDirectory, "latest");
             if (latest.isEmpty()) {
@@ -81,42 +75,10 @@ public class OutputUtil {
     }
 
     /**
-     * Collect all VTS python runner log output files
-     * @param logDirectory
-     */
-    public void collectVtsRunnerOutputs(File logDirectory) {
-        // First, collect known patterns.
-        for (String pattern : PYTHON_OUTPUT_PATTERNS) {
-            try {
-                FileUtil.findFiles(logDirectory, pattern)
-                        .forEach(path -> addVtsRunnerOutputFile(new File(path)));
-            } catch (IOException e) {
-                CLog.e("Error reading log directory: %s", logDirectory);
-                CLog.e(e);
-            }
-        }
-
-        // Next, collect any additional files produced by tests.
-        try {
-            for (String path : FileUtil.findFiles(logDirectory, PYTHON_CUSTOM_OUTPUT)) {
-                for (File f : new File(path).listFiles()) {
-                    addVtsRunnerOutputFile(f);
-                }
-
-                // Only use the first result, if many were found.
-                break;
-            }
-        } catch (IOException e) {
-            CLog.e("Error reading log directory: %s", logDirectory);
-            CLog.e(e);
-        }
-    }
-
-    /**
      *
      * @param logFile
      */
-    private void addVtsRunnerOutputFile(File logFile) {
+    public void addVtsRunnerOutputFile(File logFile) {
         String fileName = logFile.getName();
         String fileNameLower = fileName.toLowerCase();
 
