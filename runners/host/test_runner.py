@@ -157,6 +157,8 @@ class TestRunner(object):
         test_cls_instances: list of test class instances that were executed
                             or scheduled to be executed.
         log_severity: string, log severity level for the test logger.
+                      Currently, this parameter only affects how logs are displayed
+                      to the console, and is not recommended to be used.
     """
 
     def __init__(self, test_configs, run_list):
