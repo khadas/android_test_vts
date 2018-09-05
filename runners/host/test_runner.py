@@ -68,6 +68,7 @@ def main():
         sys.exit(1)
     test_result = runTestClass(test_classes[0])
     event.End()
+    tfi.CompileResults()
     return test_result
 
 
