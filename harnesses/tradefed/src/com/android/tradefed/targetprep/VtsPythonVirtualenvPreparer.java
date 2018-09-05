@@ -348,8 +348,8 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                 break;
         }
 
-        if (buildInfo.getFile(target) == null) {
-            buildInfo.setFile(target, new File(mVenvDir.getAbsolutePath()), buildInfo.getBuildId());
+        if (!buildInfo.getBuildAttributes().containsKey(target)) {
+            buildInfo.addBuildAttribute(target, mVenvDir.getAbsolutePath());
         }
     }
 
@@ -360,13 +360,20 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      */
     protected void createVirtualenv(IBuildInfo buildInfo) throws TargetSetupError {
         if (mVenvDir == null) {
+            String venvDir = null;
             switch (getConfiguredPythonVersionMajor()) {
                 case 2:
-                    mVenvDir = buildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV);
+                    venvDir = buildInfo.getBuildAttributes().get(
+                            VtsPythonVirtualenvPreparer.VIRTUAL_ENV);
                     break;
                 case 3:
-                    mVenvDir = buildInfo.getFile(VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3);
+                    venvDir = buildInfo.getBuildAttributes().get(
+                            VtsPythonVirtualenvPreparer.VIRTUAL_ENV_V3);
                     break;
+            }
+
+            if (venvDir != null) {
+                mVenvDir = new File(venvDir);
             }
         }
 
