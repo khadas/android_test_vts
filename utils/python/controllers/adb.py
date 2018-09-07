@@ -183,7 +183,22 @@ class AdbProxy():
         def adb_call(*args, **kwargs):
             clean_name = name.replace('_', '-')
             arg_str = ' '.join(str(elem) for elem in args)
+            if clean_name == 'shell':
+                arg_str = self._quote_wrap_shell_command(arg_str)
             return self._exec_cmd(' '.join((self.adb_str, clean_name, arg_str)),
                                   **kwargs)
 
         return adb_call
+
+    def _quote_wrap_shell_command(self, cmd):
+        """Wraps adb shell command with double quotes.
+
+        Double quotes inside the command will be replaced with \".
+
+        Args:
+            cmd: string, command string.
+
+        Returns:
+            string, quote wrapped command.
+        """
+        return '"%s"' % cmd.replace('"', '\\"')
