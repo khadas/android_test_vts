@@ -372,6 +372,7 @@ class AndroidDevice(object):
         lib: LibMirror, in charge of all communications with static and shared
              native libs.
         shell: ShellMirror, in charge of all communications with shell.
+        shell_default_nohup: bool, whether to use nohup by default in shell commands.
         _product_type: A string, the device product type (e.g., bullhead) if
                        known, ANDROID_PRODUCT_TYPE_UNKNOWN otherwise.
     """
@@ -379,7 +380,8 @@ class AndroidDevice(object):
     def __init__(self,
                  serial="",
                  product_type=ANDROID_PRODUCT_TYPE_UNKNOWN,
-                 device_callback_port=5010):
+                 device_callback_port=5010,
+                 shell_default_nohup=False):
         self.serial = serial
         self._product_type = product_type
         self.device_command_port = None
@@ -404,6 +406,7 @@ class AndroidDevice(object):
         self.hal = None
         self.lib = None
         self.shell = None
+        self.shell_default_nohup = shell_default_nohup
         self.sl4a_host_port = None
         # TODO: figure out a good way to detect which port is available
         # on the target side, instead of hard coding a port number.
