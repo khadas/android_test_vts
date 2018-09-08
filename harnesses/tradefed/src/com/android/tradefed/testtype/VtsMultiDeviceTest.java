@@ -88,6 +88,7 @@ public class VtsMultiDeviceTest
     static final String ABI_BITNESS = "abi_bitness";
     static final String SKIP_ON_32BIT_ABI = "skip_on_32bit_abi";
     static final String SKIP_ON_64BIT_ABI = "skip_on_64bit_abi";
+    static final String SHELL_DEFAULT_NOHUP = "shell_default_nohup";
     static final String SKIP_IF_THERMAL_THROTTLING = "skip_if_thermal_throttling";
     static final String DISABLE_CPU_FREQUENCY_SCALING = "disable_cpu_frequency_scaling";
     static final String DISABLE_FRAMEWORK = "DISABLE_FRAMEWORK";
@@ -289,12 +290,14 @@ public class VtsMultiDeviceTest
                     + "0 means using number of avaiable CPU threads.")
     private int mLtpNumberOfThreads = -1;
 
-    @Option(name = "skip-on-32bit-abi",
-        description = "Whether to skip tests on 32bit ABI.")
+    @Option(name = "shell-default-nohup",
+            description = "Whether to by default use nohup for shell commands.")
+    private boolean mShellDefaultNohup = false;
+
+    @Option(name = "skip-on-32bit-abi", description = "Whether to skip tests on 32bit ABI.")
     private boolean mSkipOn32BitAbi = false;
 
-    @Option(name = "skip-on-64bit-abi",
-        description = "Whether to skip tests on 64bit ABI.")
+    @Option(name = "skip-on-64bit-abi", description = "Whether to skip tests on 64bit ABI.")
     private boolean mSkipOn64BitAbi = false;
 
     @Option(name = "skip-if-thermal-throttling",
@@ -906,6 +909,11 @@ public class VtsMultiDeviceTest
             }
             jsonObject.put(LOG_SEVERITY, logSeverity);
             CLog.d("Added %s to the Json object: %s", LOG_SEVERITY, logSeverity);
+        }
+
+        if (mShellDefaultNohup) {
+            jsonObject.put(SHELL_DEFAULT_NOHUP, mShellDefaultNohup);
+            CLog.d("Added %s to the Json object", SHELL_DEFAULT_NOHUP);
         }
 
         if (mAbi != null) {

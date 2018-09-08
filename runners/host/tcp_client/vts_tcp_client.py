@@ -19,7 +19,6 @@ import logging
 import os
 import socket
 import time
-import types
 
 from vts.proto import AndroidSystemControlMessage_pb2 as SysMsg_pb2
 from vts.proto import ComponentSpecificationMessage_pb2 as CompSpecMsg_pb2
@@ -393,7 +392,7 @@ class VtsTcpClient(object):
         """RPC to VTS_AGENT_COMMAND_EXECUTE_SHELL_COMMAND.
 
         Args:
-            command: string or list of string, command to execute on device
+            command: string or list or tuple, command to execute on device
             no_except: bool, whether to throw exceptions. If set to True,
                        when exception happens, return code will be -1 and
                        str(err) will be in stderr. Result will maintain the
@@ -700,7 +699,7 @@ class VtsTcpClient(object):
             command_msg.arg = arg
 
         if shell_command is not None:
-            if isinstance(shell_command, types.ListType):
+            if isinstance(shell_command, (list, tuple)):
                 command_msg.shell_command.extend(shell_command)
             else:
                 command_msg.shell_command.append(shell_command)
