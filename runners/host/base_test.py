@@ -227,6 +227,10 @@ class BaseTestClass(object):
                     self.registerController(android_device,
                                             start_services=self.start_vts_agents))
             event.End()
+
+            for device in getattr(self, _ANDROID_DEVICES):
+                device.shell_default_nohup = self.getUserParam(
+                    keys.ConfigKeys.SHELL_DEFAULT_NOHUP, default_value=False)
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter
@@ -1298,6 +1302,21 @@ class BaseTestClass(object):
             logging.info('Dumping bugreport %s...' % file_path)
             device.adb.bugreport(file_path)
         event.End()
+
+    def skipAllTestsIf(self, condition, msg):
+        """Skip all test cases if the given condition is true.
+
+        This method is usually called in setup functions when a precondition
+        to the test module is not met.
+
+        Args:
+            condition: object that can be evaluated by bool(), a condition that
+                       will trigger skipAllTests if evaluated to be True.
+            msg: string, reason why tests are skipped. If set to None or empty
+            string, a default message will be used (not recommended)
+        """
+        if condition:
+            self.skipAllTests(msg)
 
     def skipAllTests(self, msg):
         """Skip all test cases.
