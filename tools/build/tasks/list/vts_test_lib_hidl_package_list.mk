@@ -301,6 +301,8 @@ vts_hal_test_bins := \
 vts_hal_test_bins += \
   VtsVndkHidlBufferpoolV1_0TargetSingleTest \
   VtsVndkHidlBufferpoolV1_0TargetMultiTest \
+  VtsVndkHidlBufferpoolV2_0TargetSingleTest \
+  VtsVndkHidlBufferpoolV2_0TargetMultiTest \
 
 vts_test_lib_hidl_packages := \
   $(vts_hal_driver_libs) \
