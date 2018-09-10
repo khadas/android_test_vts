@@ -47,7 +47,7 @@ public class VtsPythonRunnerHelperTest {
     public void setUp() throws Exception {
         IFolderBuildInfo buildInfo = EasyMock.createNiceMock(IFolderBuildInfo.class);
         EasyMock.replay(buildInfo);
-        mVtsPythonRunnerHelper = new VtsPythonRunnerHelper(new File(mVirtualenvPath)) {
+        mVtsPythonRunnerHelper = new VtsPythonRunnerHelper(new File(mVirtualenvPath), null) {
             @Override
             protected ProcessHelper createProcessHelper(String[] cmd) {
                 return mProcessHelper;
