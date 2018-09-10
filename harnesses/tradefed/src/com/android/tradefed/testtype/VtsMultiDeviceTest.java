@@ -16,7 +16,9 @@
 
 package com.android.tradefed.testtype;
 
+import com.android.annotations.VisibleForTesting;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -59,10 +61,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * A Test that runs a vts multi device test package (part of Vendor Test Suite,
- * VTS) on given device.
+ * A Test that runs a vts multi device test package (part of Vendor Test Suite, VTS) on given
+ * device.<p>
+ * TODO: Complete unit tests
  */
-
 @OptionClass(alias = "vtsmultidevicetest")
 public class VtsMultiDeviceTest
         implements IDeviceTest, IRemoteTest, ITestFilterReceiver, IRuntimeHintProvider,
@@ -661,14 +663,6 @@ public class VtsMultiDeviceTest
     @Override
     public void run(ITestInvocationListener listener)
             throws IllegalArgumentException, DeviceNotAvailableException {
-        if (mDevice == null) {
-            throw new DeviceNotAvailableException("Device has not been set.");
-        }
-
-        if (mBuildInfo == null) {
-            throw new RuntimeException("BuildInfo has not been set.");
-        }
-
         mOutputUtil = new OutputUtil(listener);
         mOutputUtil.setTestModuleName(mTestModuleName);
         if (mAbi != null) {
@@ -1262,7 +1256,16 @@ public class VtsMultiDeviceTest
             CLog.w("max-test-timeout is less than test-timeout. Set max timeout to %dms.", timeout);
         }
 
-        VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper();
+        // TODO: Stop relying on VtsCompatibilityInvocationHelper
+        File workingDir = null;
+        VtsCompatibilityInvocationHelper invocationHelper = createInvocationHelper();
+        try {
+            workingDir = invocationHelper.getTestsDir();
+        } catch (FileNotFoundException e) {
+            CLog.e("VtsCompatibilityInvocationHelper cannot find test case directory. "
+                    + "Command working directory not set.");
+        }
+        VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper(workingDir);
 
         List<String> cmd = new ArrayList<>();
         cmd.add("python");
@@ -1424,9 +1427,18 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * Creates VtsPythonRunnerHelper.
+     * Creates a {@link VtsPythonRunnerHelper}.
      */
-    protected VtsPythonRunnerHelper createVtsPythonRunnerHelper() {
-        return new VtsPythonRunnerHelper(mBuildInfo);
+    @VisibleForTesting
+    protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
+        return new VtsPythonRunnerHelper(mBuildInfo, workingDir);
+    }
+
+    /**
+     * Creates a {@link VtsCompatibilityInvocationHelper} to get the working directory.
+     */
+    @VisibleForTesting
+    protected VtsCompatibilityInvocationHelper createInvocationHelper() {
+        return new VtsCompatibilityInvocationHelper();
     }
 }
