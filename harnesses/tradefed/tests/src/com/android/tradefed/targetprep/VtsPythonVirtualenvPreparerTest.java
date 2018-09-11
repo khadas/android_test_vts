@@ -193,10 +193,18 @@ public class VtsPythonVirtualenvPreparerTest {
         expect(mMockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
                        EasyMock.eq("install"), EasyMock.eq("blahblah")))
                 .andReturn(result);
-
+        mMockRunUtil.sleep(VtsPythonVirtualenvPreparer.PIP_INSTALL_DELAY);
         EasyMock.replay(mMockRunUtil);
         mPreparer.installDeps();
         EasyMock.verify(mMockRunUtil);
+    }
+
+    /**
+     * Tests the value of PIP_INSTALL_DELAY is at least 1 second.
+     */
+    @Test
+    public void test_PIP_INSTALL_DELAY_minimum_value() {
+        assertTrue(VtsPythonVirtualenvPreparer.PIP_INSTALL_DELAY >= 1000);
     }
 
     /**
@@ -265,6 +273,7 @@ public class VtsPythonVirtualenvPreparerTest {
         expect(mockRunUtil.runTimedCmd(anyLong(), EasyMock.eq(mPreparer.getPipPath()),
                        EasyMock.eq("install"), EasyMock.eq("enum")))
                 .andReturn(result);
+        mMockRunUtil.sleep(VtsPythonVirtualenvPreparer.PIP_INSTALL_DELAY);
     }
 
     /**
