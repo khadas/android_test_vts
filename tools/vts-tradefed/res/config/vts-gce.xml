@@ -81,12 +81,12 @@
   <option name="compatibility:include-filter" value="VtsHalWifiV1_2Target" />
   <option name="compatibility:include-filter" value="VtsHidlAllocatorV1_0Target" />
   <option name="compatibility:include-filter" value="VtsKernelBinderTest" />
-  <option name="compatibility:include-filter" value="VtsKernelConfig" />
   <option name="compatibility:include-filter" value="VtsKernelDeviceTreeEarlyMount" />
   <option name="compatibility:include-filter" value="VtsKernelHwBinder" />
   <option name="compatibility:include-filter" value="VtsKernelLibcutilsTest" />
   <option name="compatibility:include-filter" value="VtsKernelLinuxKselftestPresubmit" />
   <option name="compatibility:include-filter" value="VtsKernelNetBpfTest" />
+  <option name="compatibility:include-filter" value="CtsOnGsiTrebleFrameworkVintfTest SystemVendorTest.KernelCompatibility"/>
 
   <!-- Temporailly excluded due to their incompatibility with cuttlefish
 
