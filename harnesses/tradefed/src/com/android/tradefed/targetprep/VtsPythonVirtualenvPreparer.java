@@ -66,6 +66,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     private static final int MINUTE_IN_MSECS = 60 * SECOND_IN_MSECS;
     protected static int PIP_RETRY = 3;
     private static final int PIP_RETRY_WAIT = 3 * SECOND_IN_MSECS;
+    protected static final int PIP_INSTALL_DELAY = SECOND_IN_MSECS;
     public static final String VIRTUAL_ENV_V3 = "VIRTUAL_ENV_V3";
     public static final String VIRTUAL_ENV = "VIRTUAL_ENV";
 
@@ -290,6 +291,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
 
                     if (success || (!success && installPipModule(dep))) {
                         success = true;
+                        getRunUtil().sleep(PIP_INSTALL_DELAY);
                         break;
                     }
                 }
