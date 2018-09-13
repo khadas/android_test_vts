@@ -42,7 +42,6 @@
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
-  <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalKeymasterV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0TargetReplay" />
@@ -103,6 +102,7 @@
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_2Target" />
   <option name="compatibility:include-filter" value="VtsHalHealthV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalHealthV2_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalKeymasterV3_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalRadioV1_2Target" />
