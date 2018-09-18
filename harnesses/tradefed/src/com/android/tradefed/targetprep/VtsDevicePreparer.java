@@ -101,6 +101,8 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
     static final String SYSPROP_DEV_BOOTCOMPLETE = "dev.bootcomplete";
     static final String SYSPROP_SYS_BOOT_COMPLETED = "sys.boot_completed";
     public static String SYSPROP_RADIO_LOG = "persist.vendor.radio.adb_log_on";
+    public static String SYSPROP_RADIO_LOG_OLD = "persist.radio.adb_log_on";
+    public String mSyspropRadioLog = SYSPROP_RADIO_LOG;
 
     // The name of a system property which tells whether to stop properly configured
     // native servers where properly configured means a server's init.rc is
@@ -109,13 +111,20 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
 
     boolean mInitialFrameworkStarted = true;
     boolean mInitialAdbRoot = false;
-    boolean mInitialRadioLog = false;
+    DeviceOptionState mInitialRadioLog = DeviceOptionState.UNKNOWN;
     ITestDevice mDevice = null;
 
     // Whether to reboot device during setUp
     boolean mRebootSetup = false;
     // Whether to reboot device during tearDown
     boolean mRebootTearDown = false;
+
+    public enum DeviceOptionState {
+        UNKNOWN,
+        ENABLED,
+        DISABLED,
+        NOT_AVAILABLE;
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -241,10 +250,16 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
      */
     private void radioLogPreRebootSetup() throws DeviceNotAvailableException {
         if (mEnableRadioLog || mRestoreAll || mRestoreRadioLog) {
-            mInitialRadioLog = mDevice.getProperty(SYSPROP_RADIO_LOG).equals("1");
+            mInitialRadioLog = radioLogGetState();
+
+            if (mInitialRadioLog == DeviceOptionState.NOT_AVAILABLE) {
+                CLog.d("Radio modem log configured but the setting is not available "
+                        + " on device. Skipping.");
+                return;
+            }
         }
 
-        if (mEnableRadioLog && !mInitialRadioLog) {
+        if (mEnableRadioLog && mInitialRadioLog == DeviceOptionState.DISABLED) {
             this.setProperty(SYSPROP_RADIO_LOG, "1");
             CLog.d("Turing on radio modem log.");
             mRebootSetup = true;
@@ -256,16 +271,22 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
      *
      */
     private void radioLogPreTearDown() throws DeviceNotAvailableException {
+        if (mInitialRadioLog == DeviceOptionState.NOT_AVAILABLE) {
+            return;
+        }
+
         if (!mRestoreAll && !mRestoreRadioLog) {
             return;
         }
 
-        boolean current = mDevice.getProperty(SYSPROP_RADIO_LOG).equals("1");
+        DeviceOptionState current = radioLogGetState();
 
-        if (!mInitialRadioLog && current) {
+        if (mInitialRadioLog == DeviceOptionState.DISABLED
+                && current == DeviceOptionState.ENABLED) {
             CLog.d("Turing off radio modem log.");
             this.setProperty(SYSPROP_RADIO_LOG, "0");
-        } else if (mInitialRadioLog && !current) {
+        } else if (mInitialRadioLog == DeviceOptionState.ENABLED
+                && current == DeviceOptionState.DISABLED) {
             CLog.d("Turing on radio modem log.");
             this.setProperty(SYSPROP_RADIO_LOG, "1");
         } else {
@@ -273,6 +294,33 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
         }
 
         mRebootTearDown = true;
+    }
+
+    /**
+     * Returns the state of radio modem log on/off state.
+     * @return DeviceOptionState specifying the state.
+     * @throws DeviceNotAvailableException
+     */
+    private DeviceOptionState radioLogGetState() throws DeviceNotAvailableException {
+        String radioProp = mDevice.getProperty(mSyspropRadioLog);
+
+        if (radioProp == null && mSyspropRadioLog != SYSPROP_RADIO_LOG_OLD) {
+            mSyspropRadioLog = SYSPROP_RADIO_LOG_OLD;
+            radioProp = mDevice.getProperty(mSyspropRadioLog);
+        }
+
+        if (radioProp == null) {
+            return DeviceOptionState.NOT_AVAILABLE;
+        }
+
+        switch (radioProp) {
+            case "1":
+                return DeviceOptionState.ENABLED;
+            case "0":
+                return DeviceOptionState.DISABLED;
+            default:
+                return DeviceOptionState.NOT_AVAILABLE;
+        }
     }
 
     // ----------------------- Below are device util methods -----------------------
