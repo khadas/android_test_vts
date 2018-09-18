@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.targetprep.VtsDevicePreparer.DeviceOptionState;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -257,7 +258,7 @@ public class VtsDevicePreparerTest {
     @Test
     public void test_setUp_enableRadioLog()
             throws DeviceNotAvailableException, TargetSetupError, BuildError {
-        doReturn("").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        doReturn("0").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
         mPreparer.mEnableRadioLog = true;
         mPreparer.setUp(mockDevice, mockBuildInfo);
         verify(mockDevice, times(1))
@@ -273,9 +274,45 @@ public class VtsDevicePreparerTest {
      * @throws TargetSetupError
      */
     @Test
-    public void test_setUp_enableRadioLogAlreadyEnabled()
+    public void test_setUp_enableRadioLog_alreadyEnabled()
             throws DeviceNotAvailableException, TargetSetupError, BuildError {
         doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        mPreparer.mEnableRadioLog = true;
+        mPreparer.setUp(mockDevice, mockBuildInfo);
+        verify(mockDevice, times(0))
+                .executeShellCommand(eq("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 1"));
+        verify(mockDevice, times(0)).reboot();
+    }
+
+    /**
+     * Tests the functionality of enable-radio-log option
+     *
+     * @throws DeviceNotAvailableException
+     * @throws BuildError
+     * @throws TargetSetupError
+     */
+    @Test
+    public void test_setUp_enableRadioLog_notAvailable1()
+            throws DeviceNotAvailableException, TargetSetupError, BuildError {
+        doReturn(null).when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
+        mPreparer.mEnableRadioLog = true;
+        mPreparer.setUp(mockDevice, mockBuildInfo);
+        verify(mockDevice, times(0))
+                .executeShellCommand(eq("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 1"));
+        verify(mockDevice, times(0)).reboot();
+    }
+
+    /**
+     * Tests the functionality of enable-radio-log option
+     *
+     * @throws DeviceNotAvailableException
+     * @throws BuildError
+     * @throws TargetSetupError
+     */
+    @Test
+    public void test_setUp_enableRadioLog_notAvailable2()
+            throws DeviceNotAvailableException, TargetSetupError, BuildError {
+        doReturn("").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
         mPreparer.mEnableRadioLog = true;
         mPreparer.setUp(mockDevice, mockBuildInfo);
         verify(mockDevice, times(0))
@@ -293,7 +330,7 @@ public class VtsDevicePreparerTest {
         doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
         mPreparer.mEnableRadioLog = true;
         mPreparer.mRestoreRadioLog = true;
-        mPreparer.mInitialRadioLog = false;
+        mPreparer.mInitialRadioLog = DeviceOptionState.DISABLED;
         mPreparer.tearDown(mockDevice, mockBuildInfo, null);
         verify(mockDevice, times(1))
                 .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
@@ -310,7 +347,7 @@ public class VtsDevicePreparerTest {
         doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
         mPreparer.mEnableRadioLog = true;
         mPreparer.mRestoreRadioLog = true;
-        mPreparer.mInitialRadioLog = true;
+        mPreparer.mInitialRadioLog = DeviceOptionState.ENABLED;
         mPreparer.tearDown(mockDevice, mockBuildInfo, null);
         verify(mockDevice, times(0))
                 .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
@@ -327,7 +364,7 @@ public class VtsDevicePreparerTest {
         doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_RADIO_LOG);
         mPreparer.mEnableRadioLog = false;
         mPreparer.mRestoreRadioLog = true;
-        mPreparer.mInitialRadioLog = true;
+        mPreparer.mInitialRadioLog = DeviceOptionState.ENABLED;
         mPreparer.tearDown(mockDevice, mockBuildInfo, null);
         verify(mockDevice, times(0))
                 .executeShellCommand("setprop " + VtsDevicePreparer.SYSPROP_RADIO_LOG + " 0");
