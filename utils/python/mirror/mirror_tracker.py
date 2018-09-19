@@ -29,6 +29,7 @@ from vts.utils.python.mirror import resource_mirror
 _DEFAULT_TARGET_BASE_PATHS = ["/system/lib64/hw"]
 _DEFAULT_HWBINDER_SERVICE = "default"
 _DEFAULT_SHELL_NAME = "_default"
+_MAX_ADB_SHELL_LENGTH = 950
 
 
 class MirrorTracker(object):
@@ -458,7 +459,8 @@ class MirrorTracker(object):
 
         # TODO(yuexima): further optimize the threshold and nohup adb command
         non_nohup_adb_threshold = 3
-        if not nohup and len(commands) <= non_nohup_adb_threshold:
+        if (not nohup and len(commands) <= non_nohup_adb_threshold
+            and not filter(lambda cmd: len(cmd) > _MAX_ADB_SHELL_LENGTH, commands)):
             return self._ExecuteShellCmdViaAdbShell(commands)
         else:
             return self._ExecuteShellCmdViaVtsDriver(commands, no_except)
