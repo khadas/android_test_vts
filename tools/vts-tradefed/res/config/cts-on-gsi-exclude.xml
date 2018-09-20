@@ -292,4 +292,9 @@
     <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerRunDuringPauseStop" />
     <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerStepRamp" />
     <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerTwoShapers" />
+
+    <!-- b/112450846: CtsAppSecurityHostTestCases multi-user, fixing on Q -->
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.StorageHostTest#testCache" />
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.StorageHostTest#testVerifyAppStats" />
+    <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.StorageHostTest#testVerifyStats" />
 </configuration>
