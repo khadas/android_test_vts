@@ -21,5 +21,6 @@
   <option name="vts-plan-result:plan-name" value="vts-presubmit" />
 
   <option name="compatibility:include-filter" value="SampleShellTest" />
+  <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
 
 </configuration>
