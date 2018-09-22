@@ -257,6 +257,8 @@ class GtestBinaryTest(binary_test.BinaryTest):
         '''Runs all binary tests.'''
         if self.batch_mode:
             for test_case in self.testcases:
+                logging.info('Running %s test cases in batch.',
+                             len(test_case.full_name.split(':')))
                 self.RunTestCase(test_case)
 
                 self.runGeneratedTests(
