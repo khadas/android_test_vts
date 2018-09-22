@@ -27,6 +27,8 @@ from vts.testcases.template.binary_test import binary_test
 from vts.testcases.template.binary_test import binary_test_case
 from vts.testcases.template.gtest_binary_test import gtest_test_case
 
+_GTEST_RESULT_ATTRIBUTE_WHITE_LIST = ('properties',)
+
 
 class GtestBinaryTest(binary_test.BinaryTest):
     '''Base class to run gtests binary on target.
@@ -220,9 +222,11 @@ class GtestBinaryTest(binary_test.BinaryTest):
                     if sub.tag == 'failure':
                         failure_message = sub.get('message')
 
-                if len(test_case) and not failure_message:
+                test_case_filtered = filter(
+                    lambda sub: sub.tag not in _GTEST_RESULT_ATTRIBUTE_WHITE_LIST, test_case)
+                if len(test_case_filtered) and not failure_message:
                     failure_message = 'Error: %s\n' % test_case.attrib
-                    for sub in test_case:
+                    for sub in test_case_filtered:
                         failure_message += '%s: %s\n' % (sub.tag, sub.attrib)
 
                 result.failure_message = failure_message
