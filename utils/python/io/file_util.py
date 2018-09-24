@@ -76,14 +76,15 @@ def Mkdir(path, skip_if_exists=True):
               (with skip_if_exists being True).
               False if errors occur or directory already exists (with skip_if_exists being False).
     """
-    if not skip_if_exists or not os.path.exists(path):
-        try:
-            os.mkdir(path)
-            return True
-        except OSError as e:
-            logging.exception(e)
+    if skip_if_exists and os.path.exists(path):
+        return True
 
-    return False
+    try:
+        os.mkdir(path)
+        return True
+    except OSError as e:
+        logging.exception(e)
+        return False
 
 
 def Makedirs(path, skip_if_exists=True):
@@ -101,14 +102,15 @@ def Makedirs(path, skip_if_exists=True):
               (with skip_if_exists being True).
               False if errors occur or directory already exists (with skip_if_exists being False).
     '''
-    if not skip_if_exists or not os.path.exists(path):
-        try:
-            os.makedirs(path)
-            return True
-        except OSError as e:
-            logging.exception(e)
+    if skip_if_exists and os.path.exists(path):
+        return True
 
-    return False
+    try:
+        os.makedirs(path)
+        return True
+    except OSError as e:
+        logging.exception(e)
+        return False
 
 
 def MakeTempDir(base_dir):
