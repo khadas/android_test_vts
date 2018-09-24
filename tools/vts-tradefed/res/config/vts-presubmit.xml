@@ -20,6 +20,8 @@
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-presubmit" />
 
+  <include name="vts-presubmit-exclude" />
+
   <option name="compatibility:include-filter" value="SampleShellTest" />
   <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
 
