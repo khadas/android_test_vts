@@ -178,7 +178,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 for line in stderr.split('\n'):
                     logging.error(line)
 
-        xml_str = command_results[const.STDOUT][1].strip()
+        xml_str = command_results[const.STDOUT][1]
 
         if self.batch_mode:
             self._ParseBatchResults(test_case, xml_str)
@@ -188,7 +188,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
             command_results[const.EXIT_CODE][1],
             'Failed to show Gtest XML output: %s' % command_results)
 
-        root = xml.etree.ElementTree.fromstring(xml_str)
+        root = self._ParseResultXmlString(xml_str)
         asserts.assertEqual(root.get('tests'), '1', 'No tests available')
         success = True
         if root.get('errors') != '0' or root.get('failures') != '0':
@@ -208,6 +208,27 @@ class GtestBinaryTest(binary_test.BinaryTest):
 
         asserts.skipIf(root.get('disabled') == '1', 'Gtest test case disabled')
 
+    def _ParseResultXmlString(self, xml_str):
+        """Parses the xml result string into elements.
+
+        Args:
+            xml_str: string, result xml text content.
+
+        Returns:
+            xml.etree.ElementTree, parsed xml content.
+
+        Raises:
+            assertion failure if xml format is not expected.
+        """
+        asserts.assertTrue(xml_str is not None, 'Test command result not received.')
+        xml_str = xml_str.strip()
+        asserts.assertTrue(xml_str, 'Test command result is empty.')
+
+        try:
+            return xml.etree.ElementTree.fromstring(xml_str)
+        except:
+            asserts.fail('Result xml content is corrupted.')
+
     def _ParseBatchResults(self, test_case_original, xml_str):
         '''Parse batch mode gtest results
 
@@ -215,7 +236,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
             test_case_original: GtestTestCase object, original batch test case object
             xml_str: string, result xml output content
         '''
-        root = xml.etree.ElementTree.fromstring(xml_str)
+        root = self._ParseResultXmlString(xml_str)
 
         for test_suite in root:
             logging.debug('Test tag: %s, attribute: %s',
