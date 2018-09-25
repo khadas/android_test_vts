@@ -105,12 +105,9 @@ class GtestBinaryTest(binary_test.BinaryTest):
         cmd = ['chmod 755 %s' % path, list_test_case.GetRunCommand()]
         cmd_results = self.shell.Execute(cmd)
         test_cases = []
-        if any(cmd_results[const.EXIT_CODE]
-               ):  # gtest binary doesn't exist or is corrupted
-            logging.error(
+        asserts.assertFalse(any(cmd_results[const.EXIT_CODE]),
                 'Failed to list test cases from %s. Command: %s, Result: %s.' %
                 (path, cmd, cmd_results))
-            return test_cases
 
         test_suite = ''
         for line in cmd_results[const.STDOUT][1].split('\n'):
