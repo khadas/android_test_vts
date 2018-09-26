@@ -306,3 +306,27 @@ class Elf64_Rela(_64_Rel):
     _fields_ = [('r_offset', Elf64_Addr),
                 ('r_info', Elf64_Xword),
                 ('r_addend', Elf64_Sxword)]
+
+
+class Elf32_Phdr(CStructure):
+    """ELF 32-bit program header."""
+    _fields_ = [('p_type', Elf32_Word),
+                ('p_offset', Elf32_Off),
+                ('p_vaddr', Elf32_Addr),
+                ('p_paddr', Elf32_Addr),
+                ('p_filesz', Elf32_Word),
+                ('p_memsz', Elf32_Word),
+                ('p_flags', Elf32_Word),
+                ('p_align', Elf32_Word)]
+
+
+class Elf64_Phdr(CStructure):
+    """ELF 64-bit program header."""
+    _fields_ = [('p_type', Elf64_Word),
+                ('p_flags', Elf64_Word),
+                ('p_offset', Elf64_Off),
+                ('p_vaddr', Elf64_Addr),
+                ('p_paddr', Elf64_Addr),
+                ('p_filesz', Elf64_Xword),
+                ('p_memsz', Elf64_Xword),
+                ('p_align', Elf64_Xword)]
