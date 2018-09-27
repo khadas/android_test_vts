@@ -55,6 +55,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -1214,9 +1215,12 @@ public class VtsMultiDeviceTest
      */
     private void doRunTest(ITestLifeCycleReceiver listener)
             throws RuntimeException, IllegalArgumentException {
+        long methodStartTime = System.currentTimeMillis();
         CLog.d("Device serial number: " + mDevice.getSerialNumber());
 
         setTestCaseDataDir();
+
+        VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener);
 
         JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;
@@ -1297,17 +1301,22 @@ public class VtsMultiDeviceTest
                 CLog.e("Python log: ");
                 mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
                 printToDeviceLogcatAboutTestModuleStatus("ERROR");
-                throw new RuntimeException("Failed to run VTS test");
+                listener.testRunFailed("Failed to run VTS test. Python process failed.");
+                listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                        Collections.<String, String>emptyMap());
+                return;
             }
             printToDeviceLogcatAboutTestModuleStatus("END");
         }
 
-        VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener);
-
         if (mUseStdoutLogs) {
             if (commandResult.getStdout() == null) {
-                CLog.e("The std:out is null for CommandResult.");
-                throw new RuntimeException("The std:out is null for CommandResult.");
+                String msg = "The std:out is null for CommandResult.";
+                CLog.e(msg);
+                listener.testRunFailed(msg);
+                listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                        Collections.<String, String>emptyMap());
+                return;
             }
             parser.processNewLines(commandResult.getStdout().split("\n"));
         } else {
@@ -1328,8 +1337,12 @@ public class VtsMultiDeviceTest
                     CLog.e("Error occurred in parsing Json String : %s", jsonData);
                 }
                 if (object == null) {
-                    CLog.e("Json object is null.");
-                    throw new RuntimeException("Json object is null.");
+                    String msg = "Json object is null.";
+                    CLog.e(msg);
+                    listener.testRunFailed(msg);
+                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                            Collections.<String, String>emptyMap());
+                    return;
                 }
                 parser.processJsonFile(object);
 
