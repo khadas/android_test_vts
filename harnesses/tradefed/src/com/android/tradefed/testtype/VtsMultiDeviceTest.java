@@ -498,7 +498,6 @@ public class VtsMultiDeviceTest
     private TreeMap<String, Boolean> mConfigBool = new TreeMap<>();
 
     private IBuildInfo mBuildInfo = null;
-    private String mRunName = "VtsHostDrivenTest";
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
@@ -1303,8 +1302,7 @@ public class VtsMultiDeviceTest
             printToDeviceLogcatAboutTestModuleStatus("END");
         }
 
-        VtsMultiDeviceTestResultParser parser =
-                new VtsMultiDeviceTestResultParser(listener, mRunName);
+        VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener);
 
         if (mUseStdoutLogs) {
             if (commandResult.getStdout() == null) {
