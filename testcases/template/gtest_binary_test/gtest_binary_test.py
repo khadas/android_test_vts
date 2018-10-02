@@ -27,6 +27,8 @@ from vts.testcases.template.binary_test import binary_test
 from vts.testcases.template.binary_test import binary_test_case
 from vts.testcases.template.gtest_binary_test import gtest_test_case
 
+_GTEST_RESULT_ATTRIBUTE_WHITE_LIST = ('properties',)
+
 
 class GtestBinaryTest(binary_test.BinaryTest):
     '''Base class to run gtests binary on target.
@@ -103,12 +105,9 @@ class GtestBinaryTest(binary_test.BinaryTest):
         cmd = ['chmod 755 %s' % path, list_test_case.GetRunCommand()]
         cmd_results = self.shell.Execute(cmd)
         test_cases = []
-        if any(cmd_results[const.EXIT_CODE]
-               ):  # gtest binary doesn't exist or is corrupted
-            logging.error(
+        asserts.assertFalse(any(cmd_results[const.EXIT_CODE]),
                 'Failed to list test cases from %s. Command: %s, Result: %s.' %
                 (path, cmd, cmd_results))
-            return test_cases
 
         test_suite = ''
         for line in cmd_results[const.STDOUT][1].split('\n'):
@@ -176,7 +175,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 for line in stderr.split('\n'):
                     logging.error(line)
 
-        xml_str = command_results[const.STDOUT][1].strip()
+        xml_str = command_results[const.STDOUT][1]
 
         if self.batch_mode:
             self._ParseBatchResults(test_case, xml_str)
@@ -191,12 +190,33 @@ class GtestBinaryTest(binary_test.BinaryTest):
             command_results[const.EXIT_CODE][1],
             'Failed to show Gtest XML output: %s' % command_results)
 
-        root = xml.etree.ElementTree.fromstring(xml_str)
+        root = self._ParseResultXmlString(xml_str)
         asserts.assertEqual(root.get('tests'), '1', 'No tests available')
         if root.get('errors') != '0' or root.get('failures') != '0':
             messages = [x.get('message') for x in root.findall('.//failure')]
             asserts.fail('\n'.join([x for x in messages if x]))
         asserts.skipIf(root.get('disabled') == '1', 'Gtest test case disabled')
+
+    def _ParseResultXmlString(self, xml_str):
+        """Parses the xml result string into elements.
+
+        Args:
+            xml_str: string, result xml text content.
+
+        Returns:
+            xml.etree.ElementTree, parsed xml content.
+
+        Raises:
+            assertion failure if xml format is not expected.
+        """
+        asserts.assertTrue(xml_str is not None, 'Test command result not received.')
+        xml_str = xml_str.strip()
+        asserts.assertTrue(xml_str, 'Test command result is empty.')
+
+        try:
+            return xml.etree.ElementTree.fromstring(xml_str)
+        except:
+            asserts.fail('Result xml content is corrupted.')
 
     def _ParseBatchResults(self, test_case_original, xml_str):
         '''Parse batch mode gtest results
@@ -205,7 +225,7 @@ class GtestBinaryTest(binary_test.BinaryTest):
             test_case_original: GtestTestCase object, original batch test case object
             xml_str: string, result xml output content
         '''
-        root = xml.etree.ElementTree.fromstring(xml_str)
+        root = self._ParseResultXmlString(xml_str)
 
         for test_suite in root:
             print test_suite.tag, test_suite.attrib
@@ -220,9 +240,11 @@ class GtestBinaryTest(binary_test.BinaryTest):
                     if sub.tag == 'failure':
                         failure_message = sub.get('message')
 
-                if len(test_case) and not failure_message:
+                test_case_filtered = filter(
+                    lambda sub: sub.tag not in _GTEST_RESULT_ATTRIBUTE_WHITE_LIST, test_case)
+                if len(test_case_filtered) and not failure_message:
                     failure_message = 'Error: %s\n' % test_case.attrib
-                    for sub in test_case:
+                    for sub in test_case_filtered:
                         failure_message += '%s: %s\n' % (sub.tag, sub.attrib)
 
                 result.failure_message = failure_message
