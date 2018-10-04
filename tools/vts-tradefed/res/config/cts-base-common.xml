@@ -66,9 +66,7 @@
 
     <!-- Include additional test metadata output. -->
     <template-include name="metadata-reporters" default="empty" />
-    <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector">
-         <option name="disable-framework" value="false"/>
-    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
 
     <option name="compatibility:primary-abi-only" value="true" />
 

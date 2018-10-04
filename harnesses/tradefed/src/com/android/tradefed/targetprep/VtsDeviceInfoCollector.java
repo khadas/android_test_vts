@@ -29,7 +29,7 @@ import java.util.Map.Entry;
  * Collects device info. This's a fork of DeviceInfoCollector and is forked in order to simplify the
  * change deployment process and reduce the deployment time, which are critical for VTS services.
  */
-public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
+public class VtsDeviceInfoCollector implements ITargetPreparer {
     // TODO(trong): remove "cts:" prefix, will need a custom ResultReporter.
     private static final Map<String, String> BUILD_KEYS = new HashMap<>();
     private static final Map<String, String> BUILD_LEGACY_PROPERTIES = new HashMap<>();
@@ -40,6 +40,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
     // configured to stop when that property's value is 1.
     static final String SYSPROP_VTS_NATIVE_SERVER = "vts.native_server.on";
 
+    @Deprecated
     @Option(name = "disable-framework", description = "Initialize device by stopping framework.")
     private boolean mDisableFramework = false;
 
@@ -87,26 +88,6 @@ public class VtsDeviceInfoCollector implements ITargetPreparer, ITargetCleaner {
                 propertyValue = device.getProperty(BUILD_LEGACY_PROPERTIES.get(entry.getValue()));
             }
             buildInfo.addBuildAttribute(entry.getKey(), ArrayUtil.join(",", propertyValue));
-        }
-
-        if (mDisableFramework) {
-            // Set the default device runtime state to stopped.
-            device.executeShellCommand("stop");
-            device.executeShellCommand("setprop sys.boot_completed 0");
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
-            throws DeviceNotAvailableException {
-        // Restore the framework at test run completion.
-        long startTime = System.currentTimeMillis();
-        device.waitForDeviceOnline(REBOOT_TIMEOUT);
-        device.executeShellCommand(String.format("setprop %s %s", SYSPROP_VTS_NATIVE_SERVER, "0"));
-        device.executeShellCommand("start");
-        if (!device.waitForBootComplete(REBOOT_TIMEOUT + startTime - System.currentTimeMillis())) {
-            throw new DeviceNotAvailableException("Framework irrecoverable after testing.");
         }
     }
 }
