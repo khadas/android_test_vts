@@ -1377,6 +1377,8 @@ class BaseTestClass(object):
             return
 
         for device in self.android_devices:
+            if not device.isAdbLogcatOn:
+                continue
             for buffer in LOGCAT_BUFFERS:
                 file_name = (_LOGCAT_FILE_PREFIX
                              + prefix
