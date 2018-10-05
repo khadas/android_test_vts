@@ -31,6 +31,7 @@ include $(LOCAL_PATH)/list/vts_func_fuzzer_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_lib_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_host_bin_package_list.mk
 include $(LOCAL_PATH)/list/vts_test_hidl_hal_hash_list.mk
+include $(LOCAL_PATH)/list/vts_vndk_abi_dump_package_list.mk
 include $(build_utils_dir)/vts_package_utils.mk
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
@@ -137,6 +138,10 @@ host_testcase_files := \
 host_testcase_copy_pairs := \
   $(foreach f,$(host_testcase_files),\
     test/vts-testcase/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/$(f))
+
+host_vndk_abi_dumps := \
+  $(foreach target,$(vts_vndk_abi_dump_target_tuple_list),\
+    $(call create-vndk-abi-dump-from-target,$(target),$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden))
 
 host_kernel_config_files :=\
   $(call find-files-in-subdirs,kernel/configs,"android-base*.config" -and -type f,.)
@@ -265,6 +270,6 @@ vts_copy_pairs := \
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs)
 
-$(compatibility_zip): $(vts_copy_pairs)
+$(compatibility_zip): $(vts_copy_pairs) $(host_vndk_abi_dumps)
 
 -include vendor/google_vts/tools/build/vts_package_vendor.mk
