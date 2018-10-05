@@ -542,7 +542,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
   out.indent();
   out << "LOG(WARNING) << \"incorrect package. Expect: "
       << GetPackageName(message) << " actual: \" << package;\n";
-  out << "return;\n";
   out.unindent();
   out << "}\n";
   out << "std::string version_str = std::string(version);\n";
@@ -555,7 +554,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
   out.indent();
   out << "LOG(WARNING) << \"incorrect version. Expect: " << GetVersion(message)
       << " or lower (if version != x.0), actual: \" << version;\n";
-  out << "return;\n";
   out.unindent();
   out << "}\n";
 
@@ -564,7 +562,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerSanityCheck(
   out.indent();
   out << "LOG(WARNING) << \"incorrect interface. Expect: "
       << GetComponentName(message) << " actual: \" << interface;\n";
-  out << "return;\n";
   out.unindent();
   out << "}\n";
   out << "\n";
