@@ -14,6 +14,7 @@
 # limitations under the License.
 
 vts_hal_driver_libs := \
+  android.hardware.atrace@1.0-vts.driver \
   android.hardware.audio@2.0-vts.driver \
   android.hardware.audio.common@2.0-vts.driver \
   android.hardware.audio.effect@2.0-vts.driver \
@@ -116,6 +117,7 @@ vts_hal_driver_libs := \
   android.system.net.netd@1.1-vts.driver \
 
 vts_hal_profiler_libs := \
+  android.hardware.atrace@1.0-vts.profiler \
   android.hardware.audio@2.0-vts.profiler \
   android.hardware.audio.common@2.0-vts.profiler \
   android.hardware.audio.effect@2.0-vts.profiler \
@@ -218,6 +220,7 @@ vts_hal_profiler_libs := \
   android.system.net.netd@1.1-vts.profiler \
 
 vts_hal_test_bins := \
+  VtsHalAtraceV1_0TargetTest \
   VtsHalAudioV2_0TargetTest \
   VtsHalAudioV4_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
