@@ -48,3 +48,39 @@ $(foreach m,$(1),\
                                $(patsubst $(HOST_CROSS_OUT)/%,%,$(ins))))\
       $(bui):$(2)/host/$(my_copy_dest))))
 endef
+
+# $(1): The path to the lsdump.
+# $(2): The path to the output dump.
+define lsdump-to-dump
+$(2) : $(1) $(HOST_OUT_EXECUTABLES)/extract_lsdump
+	@echo "Generate:" $(notdir $(2))
+	@mkdir -p $(dir $(2))
+	@rm -f $(2)
+	$(HOST_OUT_EXECUTABLES)/extract_lsdump $(1) $(2)
+endef
+
+# $(1): The target tuple. e.g., arm:arm:armv7-a-neon:32
+# $(2): The output directory. e.g., $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden.
+# Evaluates to a list of destination files. (i.e. suitable for dependency list)
+define create-vndk-abi-dump-from-target
+$(strip \
+  $(eval target_tuple := $(subst :, ,$(1))) \
+  $(eval primary_arch := $(word 1, $(target_tuple))) \
+  $(eval arch := $(word 2, $(target_tuple))) \
+  $(eval arch_variant := $(word 3, $(target_tuple))) \
+  $(eval binder_bitness := $(word 4, $(target_tuple))) \
+  $(eval target_arch_variant := \
+    $(arch)$(if $(filter $(arch_variant),$(arch)),,_$(arch_variant))) \
+  $(eval lsdump_dir := \
+    prebuilts/abi-dumps/vndk/$(PLATFORM_VNDK_VERSION)/$(binder_bitness)/$(target_arch_variant)/source-based) \
+  $(if $(wildcard $(lsdump_dir)),\
+    $(eval lsdump_names := \
+      $(call find-files-in-subdirs,$(lsdump_dir),"*.lsdump.gz" -and -type f,.)) \
+    $(eval abi_dump_dir := \
+      $(2)/$(PLATFORM_VNDK_VERSION)/binder$(binder_bitness)/$(primary_arch)/$(if $(findstring 64,$(arch)),lib64,lib)) \
+    $(foreach f,$(lsdump_names),\
+      $(eval copy_src := $(lsdump_dir)/$(f)) \
+      $(eval copy_dst := $(abi_dump_dir)/$(f:%.lsdump.gz=%.dump)) \
+      $(eval $(call lsdump-to-dump,$(copy_src),$(copy_dst))) \
+      $(copy_dst))))
+endef
