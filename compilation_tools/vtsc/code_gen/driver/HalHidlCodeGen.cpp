@@ -691,13 +691,17 @@ void HalHidlCodeGen::GenerateRandomFunctionImplForAttribute(Formatter& out,
 
 void HalHidlCodeGen::GenerateDriverDeclForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
+      attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate SetResult method implementation for all sub_types.
     for (const auto sub_struct : attribute.sub_struct()) {
       GenerateDriverDeclForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
       GenerateDriverDeclForAttribute(out, sub_union);
+    }
+    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+      GenerateDriverDeclForAttribute(out, sub_safe_union);
     }
     string func_name = "MessageTo"
         + ClearStringWithNameSpaceAccess(attribute.name());
@@ -799,6 +803,26 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
         out.unindent();
         out << "}" << "\n";
       }
+      out.unindent();
+      out << "}\n";
+      break;
+    }
+    case TYPE_SAFE_UNION: {
+      // Recursively generate driver implementation method for all sub_types.
+      for (const auto sub_safe_union : attribute.sub_safe_union()) {
+        GenerateDriverImplForAttribute(out, sub_safe_union);
+      }
+      string func_name =
+          "MessageTo" + ClearStringWithNameSpaceAccess(attribute.name());
+      // Add extern C to allow resource_manager to dynamically load this
+      // function.
+      out << "extern \"C\" ";
+      out << "void " << func_name << "(const VariableSpecificationMessage&, "
+          << attribute.name() << "*, "
+          << "const string&) {"
+          << "\n";
+      out.indent();
+      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
       out.unindent();
       out << "}\n";
       break;
@@ -1205,6 +1229,10 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << "/* ERROR: TYPE_REF is not supported yet. */\n";
       break;
     }
+    case TYPE_SAFE_UNION: {
+      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      break;
+    }
     default:
     {
       cerr << __func__ << " ERROR: unsupported type " << val.type() << ".\n";
@@ -1415,6 +1443,10 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     case TYPE_REF:
     {
       out << "/* ERROR: TYPE_REF is not supported yet. */\n";
+      break;
+    }
+    case TYPE_SAFE_UNION: {
+      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
       break;
     }
     default:
@@ -1697,6 +1729,11 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
       out << "/* ERROR: TYPE_REF is not supported yet. */\n";
       break;
     }
+    case TYPE_SAFE_UNION: {
+      out << result_msg << "->set_type(TYPE_SAFE_UNION);\n";
+      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      break;
+    }
     default:
     {
       cerr << __func__ << " ERROR: unsupported type " << val.type() << ".\n";
@@ -1707,13 +1744,17 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
 
 void HalHidlCodeGen::GenerateSetResultDeclForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
+      attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate SetResult method implementation for all sub_types.
     for (const auto sub_struct : attribute.sub_struct()) {
       GenerateSetResultDeclForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
       GenerateSetResultDeclForAttribute(out, sub_union);
+    }
+    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+      GenerateSetResultDeclForAttribute(out, sub_safe_union);
     }
   }
   // Add extern C to allow resource_manager to dynamically load this function.
@@ -1726,13 +1767,17 @@ void HalHidlCodeGen::GenerateSetResultDeclForAttribute(Formatter& out,
 
 void HalHidlCodeGen::GenerateSetResultImplForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
+      attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate SetResult method implementation for all sub_types.
     for (const auto sub_struct : attribute.sub_struct()) {
       GenerateSetResultImplForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
       GenerateSetResultImplForAttribute(out, sub_union);
+    }
+    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+      GenerateSetResultImplForAttribute(out, sub_safe_union);
     }
   }
   // Add extern C to allow resource_manager to dynamically load this function.
@@ -1773,6 +1818,7 @@ void HalHidlCodeGen::GenerateDefaultReturnValForTypedVariable(
     case TYPE_ARRAY:
     case TYPE_STRUCT:
     case TYPE_UNION:
+    case TYPE_SAFE_UNION:
     case TYPE_HANDLE:
     case TYPE_HIDL_MEMORY:
     case TYPE_FMQ_SYNC:
