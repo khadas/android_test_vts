@@ -499,7 +499,7 @@ public class VtsMultiDeviceTest
     private TreeMap<String, Boolean> mConfigBool = new TreeMap<>();
 
     private IBuildInfo mBuildInfo = null;
-    private String mRunName = "VtsHostDrivenTest";
+    private String mRunName = null;
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
@@ -738,6 +738,33 @@ public class VtsMultiDeviceTest
     }
 
     /**
+     * Derive mRunName from module name or test paths.
+     *
+     * @return the derived mRunName.
+     * @throws RuntimeException if mTestModuleName, mTestConfigPath, and mTestCasePath are null.
+     */
+    private String deriveRunName() {
+        if (mRunName != null) {
+            return mRunName;
+        }
+
+        if (mTestModuleName != null) {
+            mRunName = mTestModuleName;
+        } else {
+            CLog.w("--test-module-name not set (not recommended); deriving automatically");
+            if (mTestConfigPath != null) {
+                mRunName = new File(mTestConfigPath).getName().replace(CONFIG_FILE_EXTENSION, "");
+            } else if (mTestCasePath != null) {
+                mRunName = new File(mTestCasePath).getName();
+            } else {
+                throw new RuntimeException(
+                        "Failed to derive test module name; use --test-module-name option");
+            }
+        }
+        return mRunName;
+    }
+
+    /**
      * This method reads the provided VTS runner test json config, adds or updates some of its
      * fields (e.g., to add build info and device serial IDs), and returns the updated json object.
      * This method calls populateDefaultJsonFields to populate the config JSONObject if the config file is missing
@@ -817,21 +844,7 @@ public class VtsMultiDeviceTest
         JSONArray testBedArray = (JSONArray) jsonObject.get(TEST_BED);
         if (testBedArray.length() == 0) {
             JSONObject testBedItemObject = new JSONObject();
-            String testName;
-            if (mTestModuleName != null) {
-                testName = mTestModuleName;
-            } else {
-                CLog.w("--test-module-name not set (not recommended); deriving automatically");
-                if (mTestConfigPath != null) {
-                    testName = new File(mTestConfigPath).getName();
-                    testName = testName.replace(CONFIG_FILE_EXTENSION, "");
-                } else if (mTestCasePath != null) {
-                    testName = new File(mTestCasePath).getName();
-                } else {
-                    throw new RuntimeException(
-                        "Failed to derive test module name; use --test-module-name option");
-                }
-            }
+            String testName = deriveRunName();
             CLog.d("Setting test module name as %s", testName);
             testBedItemObject.put(NAME, testName);
             testBedItemObject.put(ANDROIDDEVICE, deviceArray);
@@ -1222,7 +1235,7 @@ public class VtsMultiDeviceTest
         setTestCaseDataDir();
 
         VtsMultiDeviceTestResultParser parser =
-                new VtsMultiDeviceTestResultParser(listener, mRunName);
+                new VtsMultiDeviceTestResultParser(listener, deriveRunName());
 
         JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;
