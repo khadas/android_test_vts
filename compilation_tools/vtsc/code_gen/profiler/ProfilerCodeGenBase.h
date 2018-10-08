@@ -89,6 +89,11 @@ class ProfilerCodeGenBase {
     const VariableSpecificationMessage& val, const std::string& arg_name,
     const std::string& arg_value) = 0;
 
+  // Generates the profiler code for safe union type.
+  virtual void GenerateProfilerForSafeUnionVariable(
+      Formatter& out, const VariableSpecificationMessage& val,
+      const std::string& arg_name, const std::string& arg_value) = 0;
+
   // Generates the profiler code for hidl callback type.
   virtual void GenerateProfilerForHidlCallbackVariable(Formatter& out,
       const VariableSpecificationMessage& val, const std::string& arg_name,
