@@ -352,6 +352,13 @@ void HalHidlProfilerCodeGen::GenerateProfilerForFMQUnsyncVariable(
   out << "}\n";
 }
 
+void HalHidlProfilerCodeGen::GenerateProfilerForSafeUnionVariable(
+    Formatter& out, const VariableSpecificationMessage&,
+    const std::string& arg_name, const std::string&) {
+  out << arg_name << "->set_type(TYPE_SAFE_UNION);\n";
+  out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+}
+
 void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     Formatter& out, const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";

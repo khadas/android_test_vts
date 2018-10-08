@@ -144,6 +144,8 @@ enum VariableType {
   TYPE_FMQ_UNSYNC = 19;
   // for HIDL ref<>, a restricted native pointer type.
   TYPE_REF = 20;
+  // similar to TYPE_UNION, but support runtime type check.
+  TYPE_SAFE_UNION = 21;
 }
 
 
@@ -447,6 +449,15 @@ message VariableSpecificationMessage {
 
   // for nested union type declarations (without actual definitions).
   repeated VariableSpecificationMessage sub_union = 153;
+
+  // for sub variables when this's a safe_union type.
+  repeated VariableSpecificationMessage safe_union_value = 154;
+
+  // the runtime type used in the safe union.
+  optional VariableType safe_union_type = 155;
+
+  // for nested safe_union type declarations.
+  repeated VariableSpecificationMessage sub_safe_union = 156;
 
   // for the definition/value of TYPE_FMQ_SYNC and TYPE_FMQ_UNSYNC.
   repeated VariableSpecificationMessage fmq_value = 161;

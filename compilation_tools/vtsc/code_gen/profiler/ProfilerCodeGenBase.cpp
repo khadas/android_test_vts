@@ -217,22 +217,27 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
       GenerateProfilerForFMQUnsyncVariable(out, val, arg_name, arg_value);
       break;
     }
-    default:
-    {
-      cout << "not supported.\n";
+    case TYPE_SAFE_UNION: {
+      GenerateProfilerForSafeUnionVariable(out, val, arg_name, arg_value);
+      break;
     }
+    default: { cout << "Type " << val.type() << " not supported yet.\n"; }
   }
 }
 
 void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(Formatter& out,
   const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
+      attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate profiler method declaration for all sub_types.
     for (const auto sub_struct : attribute.sub_struct()) {
       GenerateProfilerMethodDeclForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
       GenerateProfilerMethodDeclForAttribute(out, sub_union);
+    }
+    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+      GenerateProfilerMethodDeclForAttribute(out, sub_safe_union);
     }
   }
   std::string attribute_name = attribute.name();
@@ -244,13 +249,17 @@ void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(Formatter& out,
 
 void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
     Formatter& out, const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
+  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
+      attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate profiler method implementation for all sub_types.
     for (const auto sub_struct : attribute.sub_struct()) {
       GenerateProfilerMethodImplForAttribute(out, sub_struct);
     }
     for (const auto sub_union : attribute.sub_union()) {
       GenerateProfilerMethodImplForAttribute(out, sub_union);
+    }
+    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+      GenerateProfilerMethodImplForAttribute(out, sub_safe_union);
     }
   }
   std::string attribute_name = attribute.name();
