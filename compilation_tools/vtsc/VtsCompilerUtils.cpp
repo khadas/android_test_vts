@@ -244,6 +244,17 @@ string GetCppVariableType(const VariableSpecificationMessage& arg,
       }
       break;
     }
+    case TYPE_SAFE_UNION: {
+      if (arg.safe_union_value_size() == 0 && arg.has_predefined_type()) {
+        result = arg.predefined_type();
+      } else {
+        cerr << __func__ << ":" << __LINE__
+             << " ERROR no predefined_type set for safe union"
+             << " variable" << endl;
+        exit(-1);
+      }
+      break;
+    }
     case TYPE_HIDL_CALLBACK:
     {
       if (arg.has_predefined_type()) {
