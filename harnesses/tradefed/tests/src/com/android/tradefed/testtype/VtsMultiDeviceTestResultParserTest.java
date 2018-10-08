@@ -50,7 +50,7 @@ public class VtsMultiDeviceTestResultParserTest {
             "/testtype/test_run_summary_class_errors.json";
 
     // test name
-    private static final String TEST_CLASS = "SampleLightFuzzTest";
+    private static final String RUN_NAME = "SampleLightFuzzTest";
     private static final String TEST_NAME_1 = "testTurnOnLightBlackBoxFuzzing";
     private static final String TEST_NAME_2 = "testTurnOnLightWhiteBoxFuzzing";
 
@@ -69,19 +69,19 @@ public class VtsMultiDeviceTestResultParserTest {
         // prepare the mock object
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestDescription test1 = new TestDescription(TEST_CLASS, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testFailed(test1, "TIMEOUT");
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestDescription test2 = new TestDescription(TEST_CLASS, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
 
         EasyMock.replay(mockRunListener);
         VtsMultiDeviceTestResultParser resultParser =
-                new VtsMultiDeviceTestResultParser(mockRunListener);
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
         resultParser.processNewLines(contents);
         resultParser.done();
         EasyMock.verify(mockRunListener);
@@ -98,18 +98,18 @@ public class VtsMultiDeviceTestResultParserTest {
         // prepare the mock object
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(TEST_NAME_2, 2);
-        TestDescription test1 = new TestDescription(TEST_CLASS, TEST_NAME_2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test1);
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestDescription test2 = new TestDescription(TEST_CLASS, TEST_NAME_1);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test2);
         mockRunListener.testEnded(test2, Collections.emptyMap());
         mockRunListener.testRunEnded(totalTime, Collections.emptyMap());
 
         EasyMock.replay(mockRunListener);
         VtsMultiDeviceTestResultParser resultParser =
-                new VtsMultiDeviceTestResultParser(mockRunListener);
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
         resultParser.processNewLines(contents);
         resultParser.done();
         EasyMock.verify(mockRunListener);
@@ -130,7 +130,7 @@ public class VtsMultiDeviceTestResultParserTest {
 
         EasyMock.replay(mockRunListener);
         VtsMultiDeviceTestResultParser resultParser =
-                new VtsMultiDeviceTestResultParser(mockRunListener);
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
         resultParser.processNewLines(contents);
         resultParser.done();
         EasyMock.verify(mockRunListener);
@@ -217,12 +217,12 @@ public class VtsMultiDeviceTestResultParserTest {
         JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_NORMAL));
 
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
-        mockRunListener.testRunStarted(TEST_CLASS, 2);
-        TestDescription test1 = new TestDescription(TEST_CLASS, TEST_NAME_1);
+        mockRunListener.testRunStarted(RUN_NAME, 2);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test1);
         mockRunListener.testEnded(test1, Collections.emptyMap());
 
-        TestDescription test2 = new TestDescription(TEST_CLASS, TEST_NAME_2);
+        TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_2);
         mockRunListener.testStarted(test2);
         mockRunListener.testFailed(test2, FAILURE_MESSAGE);
         mockRunListener.testEnded(test2, Collections.emptyMap());
@@ -230,7 +230,7 @@ public class VtsMultiDeviceTestResultParserTest {
 
         EasyMock.replay(mockRunListener);
         VtsMultiDeviceTestResultParser resultParser =
-                new VtsMultiDeviceTestResultParser(mockRunListener);
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
         resultParser.processJsonFile(object);
     }
 
@@ -242,8 +242,8 @@ public class VtsMultiDeviceTestResultParserTest {
         JSONObject object = new JSONObject(getResourceAsString(SUMMARY_FILE_CLASS_ERRORS));
 
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
-        mockRunListener.testRunStarted(TEST_CLASS, 1);
-        TestDescription test1 = new TestDescription(TEST_CLASS, TEST_NAME_1);
+        mockRunListener.testRunStarted(RUN_NAME, 1);
+        TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
         mockRunListener.testStarted(test1);
         mockRunListener.testFailed(test1, FAILURE_MESSAGE);
         mockRunListener.testEnded(test1, Collections.emptyMap());
@@ -252,7 +252,7 @@ public class VtsMultiDeviceTestResultParserTest {
 
         EasyMock.replay(mockRunListener);
         VtsMultiDeviceTestResultParser resultParser =
-                new VtsMultiDeviceTestResultParser(mockRunListener);
+                new VtsMultiDeviceTestResultParser(mockRunListener, RUN_NAME);
         resultParser.processJsonFile(object);
     }
 }
