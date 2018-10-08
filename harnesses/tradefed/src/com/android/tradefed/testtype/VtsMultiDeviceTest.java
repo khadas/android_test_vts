@@ -499,6 +499,7 @@ public class VtsMultiDeviceTest
     private TreeMap<String, Boolean> mConfigBool = new TreeMap<>();
 
     private IBuildInfo mBuildInfo = null;
+    private String mRunName = "VtsHostDrivenTest";
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
@@ -1220,7 +1221,8 @@ public class VtsMultiDeviceTest
 
         setTestCaseDataDir();
 
-        VtsMultiDeviceTestResultParser parser = new VtsMultiDeviceTestResultParser(listener);
+        VtsMultiDeviceTestResultParser parser =
+                new VtsMultiDeviceTestResultParser(listener, mRunName);
 
         JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;

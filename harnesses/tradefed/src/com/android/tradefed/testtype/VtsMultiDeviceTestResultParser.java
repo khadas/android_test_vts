@@ -58,6 +58,7 @@ public class VtsMultiDeviceTestResultParser {
     // General state
     private Map<TestDescription, String> mTestResultCache;
     private final Collection<ITestLifeCycleReceiver> mListeners;
+    private String mRunName = null;
     private String mCurrentTestName = null;
     private int mTotalTestCount = 0;
 
@@ -107,9 +108,10 @@ public class VtsMultiDeviceTestResultParser {
         }
     }
 
-    public VtsMultiDeviceTestResultParser(ITestLifeCycleReceiver listener) {
+    public VtsMultiDeviceTestResultParser(ITestLifeCycleReceiver listener, String runName) {
         mListeners = new ArrayList<>(1);
         mListeners.add(listener);
+        mRunName = runName;
         mTestResultCache = new HashMap<>();
     }
 
