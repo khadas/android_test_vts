@@ -144,15 +144,13 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
             });
         }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
-        ::android::hardware::hidl_memory result0;
-        hw_binder_proxy_->haveSomeMemory(arg0, [&](const ::android::hardware::hidl_memory& arg0){
+        hw_binder_proxy_->haveSomeMemory(arg0, [&](const ::android::hardware::hidl_memory& arg0 __attribute__((__unused__))){
             LOG(INFO) << "callback haveSomeMemory called";
-            result0 = arg0;
+            result_msg->set_name("haveSomeMemory");
+            VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
+            result_val_0->set_type(TYPE_HIDL_MEMORY);
+            result_val_0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(arg0)));
         });
-        result_msg->set_name("haveSomeMemory");
-        VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
-        result_val_0->set_type(TYPE_HIDL_MEMORY);
-        result_val_0->mutable_hidl_memory_value()->set_hidl_mem_address(reinterpret_cast<size_t>(new android::hardware::hidl_memory(result0)));
         return true;
     }
     if (!strcmp(func_name, "fillMemory")) {
@@ -185,15 +183,13 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
         ::android::hidl::memory::block::V1_0::MemoryBlock arg0;
         MessageTo__android__hidl__memory__block__V1_0__MemoryBlock(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
-        ::android::hidl::memory::block::V1_0::MemoryBlock result0;
-        hw_binder_proxy_->haveSomeMemoryBlock(arg0, [&](const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0){
+        hw_binder_proxy_->haveSomeMemoryBlock(arg0, [&](const ::android::hidl::memory::block::V1_0::MemoryBlock& arg0 __attribute__((__unused__))){
             LOG(INFO) << "callback haveSomeMemoryBlock called";
-            result0 = arg0;
+            result_msg->set_name("haveSomeMemoryBlock");
+            VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
+            result_val_0->set_type(TYPE_STRUCT);
+            SetResult__android__hidl__memory__block__V1_0__MemoryBlock(result_val_0, arg0);
         });
-        result_msg->set_name("haveSomeMemoryBlock");
-        VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
-        result_val_0->set_type(TYPE_STRUCT);
-        SetResult__android__hidl__memory__block__V1_0__MemoryBlock(result_val_0, result0);
         return true;
     }
     if (!strcmp(func_name, "set")) {
@@ -222,8 +218,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::CallFunction
     }
     if (!strcmp(func_name, "get")) {
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
-        sp<::android::hidl::memory::token::V1_0::IMemoryToken> result0;
-        result0 = hw_binder_proxy_->get();
+        sp<::android::hidl::memory::token::V1_0::IMemoryToken> result0 = hw_binder_proxy_->get();
         result_msg->set_name("get");
         VariableSpecificationMessage* result_val_0 = result_msg->add_return_type_hidl();
         result_val_0->set_type(TYPE_HIDL_INTERFACE);

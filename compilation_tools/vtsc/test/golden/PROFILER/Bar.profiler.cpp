@@ -1621,6 +1621,58 @@ void HIDL_INSTRUMENTATION_FUNCTION_android_hardware_tests_bar_V1_0_IBar(
         }
         profiler.AddTraceEvent(event, package, version, interface, msg);
     }
+    if (strcmp(method, "repeatWithFmq") == 0) {
+        FunctionSpecificationMessage msg;
+        msg.set_name("repeatWithFmq");
+        if (!args) {
+            LOG(WARNING) << "no argument passed";
+        } else {
+            switch (event) {
+                case details::HidlInstrumentor::CLIENT_API_ENTRY:
+                case details::HidlInstrumentor::SERVER_API_ENTRY:
+                case details::HidlInstrumentor::PASSTHROUGH_ENTRY:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of arguments does not match. expect: 1, actual: " << (*args).size() << ", method name: repeatWithFmq, event type: " << event;
+                        break;
+                    }
+                    auto *arg_0 __attribute__((__unused__)) = msg.add_arg();
+                    ::android::hardware::tests::foo::V1_0::IFoo::WithFmq *arg_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::tests::foo::V1_0::IFoo::WithFmq*> ((*args)[0]);
+                    if (arg_val_0 != nullptr) {
+                        arg_0->set_type(TYPE_STRUCT);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__WithFmq(arg_0, (*arg_val_0));
+                    } else {
+                        LOG(WARNING) << "argument 0 is null.";
+                    }
+                    break;
+                }
+                case details::HidlInstrumentor::CLIENT_API_EXIT:
+                case details::HidlInstrumentor::SERVER_API_EXIT:
+                case details::HidlInstrumentor::PASSTHROUGH_EXIT:
+                {
+                    if ((*args).size() != 1) {
+                        LOG(ERROR) << "Number of return values does not match. expect: 1, actual: " << (*args).size() << ", method name: repeatWithFmq, event type: " << event;
+                        break;
+                    }
+                    auto *result_0 __attribute__((__unused__)) = msg.add_return_type_hidl();
+                    ::android::hardware::tests::foo::V1_0::IFoo::WithFmq *result_val_0 __attribute__((__unused__)) = reinterpret_cast<::android::hardware::tests::foo::V1_0::IFoo::WithFmq*> ((*args)[0]);
+                    if (result_val_0 != nullptr) {
+                        result_0->set_type(TYPE_STRUCT);
+                        profile____android__hardware__tests__foo__V1_0__IFoo__WithFmq(result_0, (*result_val_0));
+                    } else {
+                        LOG(WARNING) << "return value 0 is null.";
+                    }
+                    break;
+                }
+                default:
+                {
+                    LOG(WARNING) << "not supported. ";
+                    break;
+                }
+            }
+        }
+        profiler.AddTraceEvent(event, package, version, interface, msg);
+    }
     if (strcmp(method, "thisIsNew") == 0) {
         FunctionSpecificationMessage msg;
         msg.set_name("thisIsNew");
