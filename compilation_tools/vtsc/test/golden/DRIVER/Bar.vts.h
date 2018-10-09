@@ -131,6 +131,9 @@ class Vts_android_hardware_tests_bar_V1_0_IBar : public ::android::hardware::tes
     ::android::hardware::Return<void> closeHandles(
         ) override;
 
+    ::android::hardware::Return<void> repeatWithFmq(
+        const ::android::hardware::tests::foo::V1_0::IFoo::WithFmq& arg0, std::function<void(const ::android::hardware::tests::foo::V1_0::IFoo::WithFmq& arg0)> cb) override;
+
     ::android::hardware::Return<void> thisIsNew(
         ) override;
 

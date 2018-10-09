@@ -248,49 +248,23 @@ void HalHidlCodeGen::GenerateDriverImplForMethod(Formatter& out,
   out << "LOG(DEBUG) << \"local_device = \" << " << kInstanceVariableName
       << ".get();\n";
 
-  // Define the return results and call the HAL function.
-  for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
-    const auto& return_val = func_msg.return_type_hidl(index);
-    if (return_val.type() == TYPE_FMQ_SYNC ||
-        return_val.type() == TYPE_FMQ_UNSYNC) {
-      // Use pointer to store return results with fmq type as copy assignment
-      // is not allowed for fmq descriptor.
-      out << "unique_ptr<" << GetCppVariableType(return_val) << "> result"
-          << index << ";\n";
-    } else {
-      out << GetCppVariableType(return_val) << " result" << index << ";\n";
-    }
-  }
+  // Call the HAL function.
   if (CanElideCallback(func_msg)) {
-    out << "result0 = ";
+    out << GetCppVariableType(func_msg.return_type_hidl(0)) << " result0 = ";
     GenerateHalFunctionCall(out, func_msg);
-  } else {
-    GenerateHalFunctionCall(out, func_msg);
-  }
-
-  // Set the return results value to the proto message.
-  out << "result_msg->set_name(\"" << func_msg.name() << "\");\n";
-  for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
-    out << "VariableSpecificationMessage* result_val_" << index << " = "
-        << "result_msg->add_return_type_hidl();\n";
-    const auto& return_val = func_msg.return_type_hidl(index);
-    if (return_val.type() == TYPE_FMQ_SYNC ||
-        return_val.type() == TYPE_FMQ_UNSYNC) {
-      // Get the raw pointer for FMQ descriptor, because inside SetResult
-      // we need to allocate a new FMQ descriptor in the heap (without smart
-      // pointer), to make the memory persistent. The memory will not get freed
-      // when we register the queue in resource_manager.
-      GenerateSetResultCodeForTypedVariable(
-          out, func_msg.return_type_hidl(index),
-          "result_val_" + std::to_string(index),
-          "*result" + std::to_string(index) + ".get()");
-    } else {
+    // Set the return results value to the proto message.
+    for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
+      out << "VariableSpecificationMessage* result_val_" << index << " = "
+          << "result_msg->add_return_type_hidl();\n";
       GenerateSetResultCodeForTypedVariable(
           out, func_msg.return_type_hidl(index),
           "result_val_" + std::to_string(index),
           "result" + std::to_string(index));
     }
+  } else {
+    GenerateHalFunctionCall(out, func_msg);
   }
+
   out << "return true;\n";
   out.unindent();
   out << "}\n";
@@ -311,6 +285,7 @@ void HalHidlCodeGen::GenerateHalFunctionCall(Formatter& out,
   }
   if (func_msg.return_type_hidl_size()== 0 || CanElideCallback(func_msg)) {
     out << ");\n";
+    out << "result_msg->set_name(\"" << func_msg.name() << "\");\n";
   } else {
     out << (func_msg.arg_size() != 0 ? ", " : "");
     GenerateSyncCallbackFunctionImpl(out, func_msg);
@@ -324,7 +299,7 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
     const auto& return_val = func_msg.return_type_hidl(index);
     out << GetCppVariableType(return_val, IsConstType(return_val.type()))
-        << " arg" << index;
+        << " arg" << index << " __attribute__((__unused__))";
     if (index != (func_msg.return_type_hidl_size() - 1)) out << ",";
   }
   out << "){\n";
@@ -332,17 +307,14 @@ void HalHidlCodeGen::GenerateSyncCallbackFunctionImpl(Formatter& out,
   out << "LOG(INFO) << \"callback " << func_msg.name() << " called\""
       << ";\n";
 
+  // Set the return results value to the proto message.
+  out << "result_msg->set_name(\"" << func_msg.name() << "\");\n";
   for (int index = 0; index < func_msg.return_type_hidl_size(); index++) {
-    const auto& return_val = func_msg.return_type_hidl(index);
-    if (return_val.type() == TYPE_FMQ_SYNC ||
-        return_val.type() == TYPE_FMQ_UNSYNC) {
-      // Need a smart pointer to store FMQ descriptor in hidl callback,
-      // since FMQ descriptor doesn't have copy constructor.
-      out << "result" << index << ".reset(new (std::nothrow) "
-          << GetCppVariableType(return_val) << "(arg" << index << "));\n";
-    } else {
-      out << "result" << index << " = arg" << index << ";\n";
-    }
+    out << "VariableSpecificationMessage* result_val_" << index << " = "
+        << "result_msg->add_return_type_hidl();\n";
+    GenerateSetResultCodeForTypedVariable(out, func_msg.return_type_hidl(index),
+                                          "result_val_" + std::to_string(index),
+                                          "arg" + std::to_string(index));
   }
   out.unindent();
   out << "}";
