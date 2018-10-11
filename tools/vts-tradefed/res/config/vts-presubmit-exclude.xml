@@ -82,4 +82,6 @@
     <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_VISIBLE_REGION" />
     <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_Z_ORDER" />
 
+    <option name="compatibility:exclude-filter" value="VtsHalWifiV1_0Host WifiChipHidlTest.CreateRttController" />
+    <option name="compatibility:exclude-filter" value="VtsHalWifiV1_0Host WifiStaIfaceHidlTest.LinkLayerStatsCollection" />
 </configuration>
