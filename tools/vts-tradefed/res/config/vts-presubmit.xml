@@ -24,5 +24,6 @@
 
   <option name="compatibility:include-filter" value="SampleShellTest" />
   <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
+  <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1Target" />
 
 </configuration>
