@@ -15,7 +15,7 @@
 -->
 <configuration description="Excluded tests from vts-presubmit plan runs">
 
-    <!-- b/116450442: VtsHalAudioV4_0Target known incompatibility with cuttlefish -->
+    <!-- b/116450442: known incompatibility with cuttlefish -->
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target AudioPrimaryHidlTest.GetMicrophonesTest" />
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target FloatAccessorPrimaryHidlTest.MasterVolumeTest" />
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target r(RequiredOutputStreamConfigSupport/OutputStreamTest.SupportedFormat/.*)" />
@@ -28,5 +28,58 @@
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target r(RecommendedInputStreamConfigSupport/InputStreamTest.SupportedFormat/.*)" />
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target r(RecommendedInputStreamConfigSupport/InputStreamTest.getNonExistingParameter/.*)" />
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target r(RecommendedInputStreamConfigSupport/InputStreamTest.GetAudioSource/.*)" />
+
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.DumpDebugInfo" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.CreateClientSingleton" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.CreateVirtualDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.DestroyVirtualDisplayBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.CreateLayer" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.CreateLayerBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.DestroyLayerBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.DestroyLayerBadLayerError" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetActiveConfigBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDisplayConfig" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDisplayConfigBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDisplayName" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDisplayType" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetClientTargetSupport" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetClientTargetSupportBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDisplayAttribute" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetHdrCapabilities" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetClientTargetSlotCount" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetActiveConfig" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetActiveConfigPowerCycle" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetColorModes" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetColorMode" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetColorModeBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetColorModeBadParameter" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.GetDozeSupportBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetPowerMode" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetPowerModeVariations" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetPowerModeBadDisplay" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetPowerModeUnsupported" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetPowerModeBadParameter" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlTest.SetVsyncEnabled" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_COLOR_TRANSFORM" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_CLIENT_TARGET" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_OUTPUT_BUFFER" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.VALIDATE_DISPLAY" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.ACCEPT_DISPLAY_CHANGES" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.PRESENT_DISPLAY" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.PRESENT_DISPLAY_NO_LAYER_STATE_CHANGES" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_CURSOR_POSITION" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_BUFFER" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_SURFACE_DAMAGE" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_BLEND_MODE" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_COLOR" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_COMPOSITION_TYPE" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_DATASPACE" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_DISPLAY_FRAME" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_PLANE_ALPHA" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_SIDEBAND_STREAM" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_SOURCE_CROP" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_TRANSFORM" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_VISIBLE_REGION" />
+    <option name="compatibility:exclude-filter" value="VtsHalGraphicsComposerV2_1Target GraphicsComposerHidlCommandTest.SET_LAYER_Z_ORDER" />
 
 </configuration>
