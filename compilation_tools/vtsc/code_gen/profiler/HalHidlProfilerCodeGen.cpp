@@ -363,6 +363,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
     Formatter& out, const FunctionSpecificationMessage& method) {
   out << "FunctionSpecificationMessage msg;\n";
   out << "msg.set_name(\"" << method.name() << "\");\n";
+  out << "if (profiling_for_args) {\n";
+  out.indent();
   out << "if (!args) {\n";
   out.indent();
   out << "LOG(WARNING) << \"no argument passed\";\n";
@@ -371,7 +373,6 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
   out.indent();
   out << "switch (event) {\n";
   out.indent();
-  // TODO(b/32141398): Support profiling in passthrough mode.
   out << "case details::HidlInstrumentor::CLIENT_API_ENTRY:\n";
   out << "case details::HidlInstrumentor::SERVER_API_ENTRY:\n";
   out << "case details::HidlInstrumentor::PASSTHROUGH_ENTRY:\n";
@@ -460,6 +461,8 @@ void HalHidlProfilerCodeGen::GenerateProfilerForMethod(
   out << "}\n";
   out.unindent();
   out << "}\n";
+  out.unindent();
+  out << "}\n";
   out << "profiler.AddTraceEvent(event, package, version, interface, msg);\n";
 }
 
@@ -511,6 +514,7 @@ void HalHidlProfilerCodeGen::GenerateSourceIncludeFiles(
   // Include the corresponding profiler header file.
   out << "#include \"" << GetPackagePath(message) << "/" << GetVersion(message)
       << "/" << GetComponentBaseName(message) << ".vts.h\"\n";
+  out << "#include <cutils/properties.h>\n";
   if (IncludeHidlNativeType(message, TYPE_HANDLE)) {
     out << "#include <cutils/ashmem.h>\n";
     out << "#include <fcntl.h>\n";
@@ -579,6 +583,8 @@ void HalHidlProfilerCodeGen::GenerateLocalVariableDefinition(
   // create and initialize the VTS profiler interface.
   out << "VtsProfilingInterface& profiler = "
       << "VtsProfilingInterface::getInstance(TRACEFILEPREFIX);\n\n";
+  out << "bool profiling_for_args = "
+         "property_get_bool(\"hal.instrumentation.profile.args\", true);\n";
 }
 
 }  // namespace vts

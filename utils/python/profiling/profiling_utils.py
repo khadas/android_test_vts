@@ -105,6 +105,7 @@ class ProfilingFeature(feature_utils.Feature):
         keys.ConfigKeys.IKEY_TRACE_FILE_TOOL_NAME,
         keys.ConfigKeys.IKEY_SAVE_TRACE_FILE_REMOTE,
         keys.ConfigKeys.IKEY_ABI_BITNESS,
+        keys.ConfigKeys.IKEY_PROFILING_ARG_VALUE,
     ]
 
     def __init__(self, user_params, web=None):
@@ -213,6 +214,10 @@ class ProfilingFeature(feature_utils.Feature):
         shell.Execute("setprop hal.instrumentation.lib.path.64 " +
                       hal_instrumentation_lib_path_64)
 
+        if getattr(self, keys.ConfigKeys.IKEY_PROFILING_ARG_VALUE, False):
+            shell.Execute("setprop hal.instrumentation.profile.args true")
+        else:
+            shell.Execute("setprop hal.instrumentation.profile.args false")
         shell.Execute("setprop hal.instrumentation.enable true")
 
     def DisableVTSProfiling(self, shell):
@@ -222,6 +227,7 @@ class ProfilingFeature(feature_utils.Feature):
             shell: shell to control the testing device.
         """
         shell.Execute("setprop hal.instrumentation.lib.path \"\"")
+        shell.Execute("setprop hal.instrumentation.profile.args \"\"")
         shell.Execute("setprop hal.instrumentation.enable false")
 
     def _ParseTraceData(self, trace_file, measure_api_coverage):
