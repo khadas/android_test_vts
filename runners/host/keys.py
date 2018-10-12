@@ -91,6 +91,7 @@ class ConfigKeys(object):
     IKEY_PROFILING_TRACING_PATH = "profiling_trace_path"
     IKEY_TRACE_FILE_TOOL_NAME = "trace_file_tool_name"
     IKEY_SAVE_TRACE_FILE_REMOTE = "save_trace_file_remote"
+    IKEY_PROFILING_ARG_VALUE = "profiling_arg_value"
 
     # Keys for systrace (for hal tests)
     IKEY_ENABLE_SYSTRACE = "enable_systrace"
