@@ -75,12 +75,12 @@ $(strip \
     prebuilts/abi-dumps/vndk/$(PLATFORM_VNDK_VERSION)/$(binder_bitness)/$(target_arch_variant)/source-based) \
   $(if $(wildcard $(lsdump_dir)),\
     $(eval lsdump_names := \
-      $(call find-files-in-subdirs,$(lsdump_dir),"*.lsdump.gz" -and -type f,.)) \
+      $(call find-files-in-subdirs,$(lsdump_dir),"*.lsdump" -and -type f,.)) \
     $(eval abi_dump_dir := \
       $(2)/$(PLATFORM_VNDK_VERSION)/binder$(binder_bitness)/$(primary_arch)/$(if $(findstring 64,$(arch)),lib64,lib)) \
     $(foreach f,$(lsdump_names),\
       $(eval copy_src := $(lsdump_dir)/$(f)) \
-      $(eval copy_dst := $(abi_dump_dir)/$(f:%.lsdump.gz=%.dump)) \
+      $(eval copy_dst := $(abi_dump_dir)/$(f:%.lsdump=%.dump)) \
       $(eval $(call lsdump-to-dump,$(copy_src),$(copy_dst))) \
       $(copy_dst))))
 endef
