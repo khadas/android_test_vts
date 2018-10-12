@@ -1,4 +1,5 @@
 #include "android/hardware/nfc/1.0/types.vts.h"
+#include <cutils/properties.h>
 
 using namespace android::hardware::nfc::V1_0;
 using namespace android::hardware;
