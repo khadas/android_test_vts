@@ -380,7 +380,7 @@ public class VtsMultiDeviceTestResultParser {
      * @param object
      * @throws RuntimeException
      */
-    public void processJsonFile(JSONObject object) throws RuntimeException{
+    public void processJsonFile(JSONObject object) throws RuntimeException {
         try {
             JSONArray results = object.getJSONArray(RESULTS);
             if (results == null) {

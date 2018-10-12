@@ -674,7 +674,7 @@ public class VtsMultiDeviceTest
      * @return the derived mRunName.
      * @throws RuntimeException if mTestModuleName, mTestConfigPath, and mTestCasePath are null.
      */
-    private String deriveRunName() {
+    private String deriveRunName() throws RuntimeException {
         if (mRunName != null) {
             return mRunName;
         }
@@ -684,7 +684,8 @@ public class VtsMultiDeviceTest
         } else {
             CLog.w("--test-module-name not set (not recommended); deriving automatically");
             if (mTestConfigPath != null) {
-                mRunName = new File(mTestConfigPath).getName().replace(CONFIG_FILE_EXTENSION, "");
+                mRunName = new File(mTestConfigPath).getName();
+                mRunName = mRunName.replace(CONFIG_FILE_EXTENSION, "");
             } else if (mTestCasePath != null) {
                 mRunName = new File(mTestCasePath).getName();
             } else {
