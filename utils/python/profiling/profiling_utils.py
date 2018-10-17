@@ -153,10 +153,9 @@ class ProfilingFeature(feature_utils.Feature):
         if not host_profiling_trace_path:
             host_profiling_trace_path = LOCAL_PROFILING_TRACE_PATH
 
-        dut.shell.InvokeTerminal("profiling_shell")
         target_trace_file = path_utils.JoinTargetPath(
             TARGET_PROFILING_TRACE_PATH, "*.vts.trace")
-        results = dut.shell.profiling_shell.Execute("ls " + target_trace_file)
+        results = dut.shell.Execute("ls " + target_trace_file)
         asserts.assertTrue(results, "failed to find trace file")
         stdout_lines = results[const.STDOUT][0].split("\n")
         logging.debug("stdout: %s", stdout_lines)

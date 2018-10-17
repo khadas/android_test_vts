@@ -396,6 +396,10 @@ class MirrorTracker(object):
             raise error.ComponentLoadingError(
                 "Invalid value for bits: %s" % bits)
 
+        if instance_name in self._registered_mirrors:
+            logging.warning("shell driver %s already exists", instance_name)
+            return
+
         client = vts_tcp_client.VtsTcpClient()
         client.Connect(command_port=self._host_command_port)
 
