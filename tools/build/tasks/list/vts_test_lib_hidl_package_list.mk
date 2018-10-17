@@ -78,6 +78,7 @@ vts_hal_driver_libs := \
   android.hardware.power@1.1-vts.driver \
   android.hardware.power@1.2-vts.driver \
   android.hardware.power@1.3-vts.driver \
+  android.hardware.power.stats@1.0-vts.driver \
   android.hardware.radio@1.0-vts.driver \
   android.hardware.radio@1.1-vts.driver \
   android.hardware.radio@1.2-vts.driver \
@@ -181,6 +182,7 @@ vts_hal_profiler_libs := \
   android.hardware.power@1.1-vts.profiler \
   android.hardware.power@1.2-vts.profiler \
   android.hardware.power@1.3-vts.profiler \
+  android.hardware.power.stats@1.0-vts.profiler \
   android.hardware.radio@1.0-vts.profiler \
   android.hardware.radio@1.1-vts.profiler \
   android.hardware.radio@1.2-vts.profiler \
@@ -271,6 +273,7 @@ vts_hal_test_bins := \
   VtsHalPowerV1_1TargetTest \
   VtsHalPowerV1_2TargetTest \
   VtsHalPowerV1_3TargetTest \
+  VtsHalPowerStatsV1_0TargetTest \
   VtsHalRadioV1_0TargetTest \
   VtsHalRadioV1_1TargetTest \
   VtsHalRadioV1_2TargetTest \
