@@ -240,9 +240,6 @@
     <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedProfileOwnerTest#testKeyManagement" />
     <option name="compatibility:exclude-filter" value="CtsDevicePolicyManagerTestCases com.android.cts.devicepolicy.MixedManagedProfileOwnerTest#testKeyManagement" />
 
-    <!-- b/110235498: Instant App is irrelevant and thus excluded -->
-    <option name="compatibility:exclude-filter" value="CtsExternalSourcesTestCases android.packageinstaller.externalsources.cts.ExternalSourcesInstantAppsTest#allowedSourceTest" />
-
     <!-- b/110405497: Flaky tests (waiver) -->
     <option name="compatibility:exclude-filter" value="CtsKeystoreTestCases android.keystore.cts.KeyAttestationTest#testDeviceIdAttestation" />
 
@@ -261,9 +258,6 @@
      <!-- b/110417203: Flaky tests -->
     <option name="compatibility:exclude-filter" value="CtsUsageStatsTestCases android.app.usage.cts.NetworkUsageStatsTest#testUidTagStateDetails" />
 
-    <!-- b/110375762: A regression in a security PoC test which is irrelevant -->
-    <option name="compatibility:exclude-filter" value="CtsSecurityHostTestCases android.security.cts.Poc17_05#testPocCVE_2017_0630" />
-
     <!-- b/80077786: MyVerizonServices fail -->
     <option name="compatibility:exclude-filter" value="CtsPermission2TestCases android.permission2.cts.PrivappPermissionsTest#testPrivappPermissionsEnforcement" />
 
@@ -273,14 +267,6 @@
 
     <!-- b/111147583: CtsSecurityTestCases irrelevant test cases -->
     <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.VerifiedBootTest#testVerifiedBootSupport" />
-
-    <!-- b/111451322: CtsLocationTestCases regression (9.0 R3 waiver) -->
-    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRates" />
-    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRatesOnOff" />
-    <option name="compatibility:exclude-filter" value="CtsLocationTestCases android.location.cts.GnssLocationRateChangeTest#testVariedRatesRepetitive" />
-
-    <!-- b/111510520: CtsMediaTestCases regression (9.0 R3 waiver) -->
-    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VpxEncoderTest#testBasicVP9" />
 
     <!-- b/110405126: CtsPermissionTestCases flaky (due to SIM card setting) -->
     <option name="compatibility:exclude-filter" value="CtsPermissionTestCases android.permission.cts.TelephonyManagerPermissionTest#testGetDeviceId" />
@@ -294,4 +280,16 @@
     <!-- b/111967702: CtsSecurityTestCases irrelevant test cases -->
     <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.BannedFilesTest#testNoSu" />
     <option name="compatibility:exclude-filter" value="CtsSecurityTestCases android.security.cts.BannedFilesTest#testNoSuInPath" />
+
+    <!-- b/116170534: CtsMediaTestCases regression (9.0 R4 waiver) -->
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.DecoderTest#testH265HDR10StaticMetadata" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerCornerCase" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerCornerCase2" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerCubicMonotonic" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerDuck" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerJoin" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerRamp" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerRunDuringPauseStop" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerStepRamp" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.VolumeShaperTest#testPlayerTwoShapers" />
 </configuration>
