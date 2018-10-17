@@ -25,14 +25,15 @@
 #include <unordered_map>
 #include <utility>
 
+
+namespace testing {
+
 using namespace ::std;
 using namespace ::std::chrono;
 
 constexpr char kVtsHalHidlTargetCallbackDefaultName[] =
     "VtsHalHidlTargetCallbackDefaultName";
-constexpr milliseconds DEFAULT_CALLBACK_WAIT_TIMEOUT_INITIAL = minutes(1);
-
-namespace testing {
+constexpr ::std::chrono::milliseconds DEFAULT_CALLBACK_WAIT_TIMEOUT_INITIAL = minutes(1);
 
 /*
  * VTS target side test template for callback.
