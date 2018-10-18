@@ -87,6 +87,8 @@
 
     <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host AudioDecHidlTest.FlushTest_OMX.google.vorbis.decoder_audio_decoder.vorbis" />
 
+    <option name="compatibility:exclude-filter" value="VtsHalRadioV1_0Target RadioHidlTest.getDataRegistrationState" />
+
     <option name="compatibility:exclude-filter" value="VtsHalWifiV1_0Host WifiChipHidlTest.CreateRttController" />
     <option name="compatibility:exclude-filter" value="VtsHalWifiV1_0Host WifiStaIfaceHidlTest.LinkLayerStatsCollection" />
 </configuration>
