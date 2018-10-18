@@ -37,5 +37,6 @@
   <option name="compatibility:include-filter" value="VtsKernelLtp" />
   <option name="compatibility:include-filter" value="VtsKernelSyscallExistence" />
   <option name="compatibility:include-filter" value="VtsKernelVersion" />
+  <option name="compatibility:include-filter" value="CtsOnGsiTrebleFrameworkVintfTest SystemVendorTest.KernelCompatibility"/>
 
 </configuration>
