@@ -19,6 +19,7 @@ from builtins import open
 import gzip
 import logging
 import os
+import re
 import socket
 import subprocess
 import tempfile
@@ -550,6 +551,33 @@ class AndroidDevice(object):
                 asserts.fail(error_msg)
             logging.error(error_msg)
             return 0
+
+    @property
+    def kernel_version(self):
+        """Gets the kernel verison from the device.
+
+        This method reads the output of command "uname -r" from the device.
+
+        Returns:
+            A tuple of kernel version information
+            in the format of (version, patchlevel, sublevel).
+
+            It will fail if failed to get the output or correct format
+            from the output of "uname -r" command
+        """
+        cmd = 'uname -r'
+        out = self.adb.shell(cmd)
+        out = out.strip()
+
+        match = re.match(r"(\d+)\.(\d+)\.(\d+)", out)
+        if match is None:
+            asserts.fail("Failed to detect kernel version of device. out:%s", out)
+
+        version = int(match.group(1))
+        patchlevel = int(match.group(2))
+        sublevel = int(match.group(3))
+        logging.info("Detected kernel version: %s", match.group(0))
+        return (version, patchlevel, sublevel)
 
     @property
     def vndk_version(self):
