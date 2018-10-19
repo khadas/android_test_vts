@@ -66,7 +66,7 @@ public class ModuleRepoMultiDevice
 
         List<ITargetPreparer> preparers = new ArrayList<ITargetPreparer>();
 
-        if (mDeviceInfos.size() <= 1) {
+        if (mDeviceInfos == null || mDeviceInfos.size() <= 1) {
             preparers = config.getTargetPreparers();
         }
 
