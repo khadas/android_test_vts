@@ -95,6 +95,7 @@
     <!-- b/117936821: known incompatibility with Pixel 1 -->
     <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.mm.mmapstress07" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.syscalls.ptrace05" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.syscalls.sighold02" />
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcSysrqTrigger" />
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcUidProcstatSet" />
 
