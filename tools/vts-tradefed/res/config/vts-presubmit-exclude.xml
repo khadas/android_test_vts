@@ -15,6 +15,9 @@
 -->
 <configuration description="Excluded tests from vts-presubmit plan runs">
 
+    <!-- Excludes known flaky test cases. -->
+    <include name="vts-flaky" />
+
     <!-- b/116450442: known incompatibility with cuttlefish -->
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target AudioPrimaryHidlTest.GetMicrophonesTest" />
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target FloatAccessorPrimaryHidlTest.MasterVolumeTest" />
