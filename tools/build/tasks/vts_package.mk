@@ -143,13 +143,6 @@ host_vndk_abi_dumps := \
   $(foreach target,$(vts_vndk_abi_dump_target_tuple_list),\
     $(call create-vndk-abi-dump-from-target,$(target),$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden))
 
-host_kernel_config_files :=\
-  $(call find-files-in-subdirs,kernel/configs,"android-base*.config" -and -type f,.)
-
-host_kernel_config_copy_pairs := \
-  $(foreach f,$(host_kernel_config_files),\
-    kernel/configs/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/config/data/$(f))
-
 ifneq ($(TARGET_BUILD_PDK),true)
 
 host_camera_its_files := \
@@ -260,7 +253,6 @@ vts_copy_pairs := \
   $(call copy-many-files,$(target_native_copy_pairs)) \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
-  $(call copy-many-files,$(host_kernel_config_copy_pairs)) \
   $(call copy-many-files,$(host_camera_its_copy_pairs)) \
   $(call copy-many-files,$(host_systrace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
