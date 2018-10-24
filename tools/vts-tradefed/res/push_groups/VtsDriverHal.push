@@ -11,6 +11,3 @@ DATA/lib64/libvts_interfacespecification.so->/data/local/tmp/64/libvts_interface
 
 DATA/bin/vts_hal_driver32->/data/local/tmp/32/vts_hal_driver32
 DATA/bin/vts_hal_driver64->/data/local/tmp/64/vts_hal_driver64
-
-DATA/bin/vts_hal_replayer32->/data/local/tmp/32/vts_hal_replayer32
-DATA/bin/vts_hal_replayer64->/data/local/tmp/64/vts_hal_replayer64
