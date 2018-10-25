@@ -90,3 +90,7 @@ vts_test_bin_packages += \
 # System suspend unit tests.
 vts_test_bin_packages += \
     SystemSuspendV1_0UnitTest
+
+# libpower tests
+vts_test_bin_packages += \
+    libpower_test
