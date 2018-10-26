@@ -282,6 +282,7 @@ class CoverageFeature(feature_utils.Feature):
         Args:
             dut: the device under test.
         """
+        self._ExecuteOneAdbShellCommand(dut, serial, "setenforce 0")
         self._ExecuteOneAdbShellCommand(dut, serial, _FLUSH_COMMAND)
         logging.debug("Removing existing gcda files.")
         self._ClearTargetGcov(dut, serial)
