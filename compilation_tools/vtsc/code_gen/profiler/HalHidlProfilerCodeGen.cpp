@@ -477,6 +477,12 @@ void HalHidlProfilerCodeGen::GenerateHeaderIncludeFiles(
   out << "#include \"VtsProfilingInterface.h\"\n";
   out << "\n";
 
+  out << "// HACK: NAN is #defined by math.h which gets included by\n";
+  out << "// ComponentSpecificationMessage.pb.h, but some HALs use\n";
+  out << "// enums called NAN.  Undefine NAN to work around it.\n";
+  out << "#undef NAN\n";
+  out << "\n";
+
   // Include generated hal classes.
   out << "#include <" << GetPackagePath(message) << "/" << GetVersion(message)
       << "/" << GetComponentName(message) << ".h>\n";
