@@ -59,7 +59,7 @@ void VtsHidlHalReplayer::ListTestServices(const string& trace_file) {
     // for backward compatibility, some previous testcases don't
     // specify major and minor versions separately, manually parse it
     if (version_major == -1 && version_minor == -1) {
-      string version_str = std::to_string(msg.version());
+      string version_str = GetVersionString(msg.version());
       version_major = GetVersionMajor(version_str);
       version_minor = GetVersionMinor(version_str);
     }
