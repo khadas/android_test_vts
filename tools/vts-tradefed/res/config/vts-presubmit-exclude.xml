@@ -112,6 +112,27 @@
     <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target RequiredOutputStreamConfigSupport/OutputStreamTest.GetRenderPosition/11__44100_MONO" />
     <option name="compatibility:exclude-filter" value="VtsHalRadioV1_0Target RadioHidlTest.deactivateDataCall" />
     <option name="compatibility:exclude-filter" value="VtsHalRadioV1_0Target RadioHidlTest.setRadioCapability" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.mtest06_2" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.mtest06_3" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.mem01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.mem03" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.page01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp mm.page02" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.umount02" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp fs.fs_fill" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.linkat02" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.mount01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.ioctl05" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.umount2_02" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.umount2_03" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.mknod07" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.utime06" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.umount2_01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.fallocate04" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.mknodat02" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp fs.fs_inod01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.ftruncate04_64" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.poll02" />
 
     <!-- b/118340949: temporally disable kernel test cases that takes 3+ minutes to finish -->
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio16" />
