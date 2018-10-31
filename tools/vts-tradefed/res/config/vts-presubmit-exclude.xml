@@ -106,4 +106,17 @@
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcSysrqTrigger" />
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcUidProcstatSet" />
 
+    <!-- b/118683028: tests recently become flaky -->
+    <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host VideoDecHidlTest.AdaptivePlaybackTest_OMX.google.hevc.decoder_video_decoder.hevc" />
+    <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host ComponentHidlTest.PortEnableDisable_Idle_OMX.google.opus.decoder_audio_decoder.opus" />
+    <option name="compatibility:exclude-filter" value="VtsHalAudioV4_0Target RequiredOutputStreamConfigSupport/OutputStreamTest.GetRenderPosition/11__44100_MONO" />
+    <option name="compatibility:exclude-filter" value="VtsHalRadioV1_0Target RadioHidlTest.deactivateDataCall" />
+    <option name="compatibility:exclude-filter" value="VtsHalRadioV1_0Target RadioHidlTest.setRadioCapability" />
+
+    <!-- b/118340949: temporally disable kernel test cases that takes 3+ minutes to finish -->
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio16" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio17" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio24" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio27" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio28" />
 </configuration>
