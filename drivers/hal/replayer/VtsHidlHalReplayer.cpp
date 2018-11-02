@@ -67,6 +67,7 @@ void VtsHidlHalReplayer::ListTestServices(const string& trace_file) {
     string service_fq_name = GetInterfaceFQName(package_name, version_major,
                                                 version_minor, interface_name);
     registeredHalServices.insert(service_fq_name);
+    msg.Clear();
   }
   for (string service : registeredHalServices) {
     cout << "hal_service: " << service << endl;
