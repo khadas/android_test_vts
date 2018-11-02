@@ -196,6 +196,9 @@ class BaseTestClass(object):
             keys.ConfigKeys.IKEY_SKIP_ON_64BIT_ABI, default_value=False)
         self.run_32bit_on_64bit_abi = self.getUserParam(
             keys.ConfigKeys.IKEY_RUN_32BIT_ON_64BIT_ABI, default_value=False)
+        self.max_retry_count = self.getUserParam(
+            keys.ConfigKeys.IKEY_MAX_RETRY_COUNT, default_value=0)
+
         self.web = web_utils.WebFeature(self.user_params)
         self.coverage = coverage_utils.CoverageFeature(
             self.user_params, web=self.web)
