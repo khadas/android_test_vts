@@ -123,6 +123,7 @@ public class VtsMultiDeviceTest
     static final String LOGCAT_ON_FAILURE = "LOGCAT_ON_FAILURE";
     static final String ENABLE_COVERAGE = "enable_coverage";
     static final String EXCLUDE_COVERAGE_PATH = "exclude_coverage_path";
+    static final String ENABLE_LOG_UPLOADING = "enable_log_uploading";
     static final String ENABLE_PROFILING = "enable_profiling";
     static final String PROFILING_ARG_VALUE = "profiling_arg_value";
     static final String ENABLE_SANCOV = "enable_sancov";
@@ -234,6 +235,10 @@ public class VtsMultiDeviceTest
     @Option(name = "use-stdout-logs",
             description = "Flag that determines whether to use std:out to parse output.")
     private boolean mUseStdoutLogs = false;
+
+    @Option(name = "enable-log-uploading",
+            description = "Enables the runner's log uploading feature.")
+    private Boolean mEnableLogUploading = null;
 
     @Option(name = "include-filter",
             description = "The positive filter of the test names to run.")
@@ -1185,6 +1190,12 @@ public class VtsMultiDeviceTest
         if (!mConfigBool.isEmpty()) {
             jsonObject.put(CONFIG_BOOL, new JSONObject(mConfigBool));
             CLog.d("Added %s to the Json object", CONFIG_BOOL);
+        }
+
+        if (mEnableLogUploading != null) {
+            jsonObject.put(ENABLE_LOG_UPLOADING, mEnableLogUploading);
+            CLog.d("Added %s to the Json object (value: %s)", ENABLE_LOG_UPLOADING,
+                    mEnableLogUploading);
         }
     }
 
