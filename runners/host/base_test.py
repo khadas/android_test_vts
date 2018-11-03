@@ -33,6 +33,7 @@ from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
 from vts.utils.python.common import filter_utils
 from vts.utils.python.common import list_utils
+from vts.utils.python.common import timeout_utils
 from vts.utils.python.coverage import coverage_utils
 from vts.utils.python.coverage import sancov_utils
 from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
@@ -51,7 +52,8 @@ TEST_CASE_TEMPLATE = "[Test Case] %s %s"
 RESULT_LINE_TEMPLATE = TEST_CASE_TEMPLATE + " %s"
 STR_TEST = "test"
 STR_GENERATE = "generate"
-TEARDOWN_CLASS_TIMEOUT_SECS = 30
+TIMEOUT_SECS_LOG_UPLOADING = 60
+TIMEOUT_SECS_TEARDOWN_CLASS = 30
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 _BUG_REPORT_FILE_PREFIX = "bugreport_"
 _BUG_REPORT_FILE_EXTENSION = ".zip"
@@ -135,9 +137,9 @@ class BaseTestClass(object):
         self._timer = None
         self.timeout = self.getUserParam(
             keys.ConfigKeys.KEY_TEST_TIMEOUT,
-            default_value=_DEFAULT_TEST_TIMEOUT_SECS * 1000.0)
+            default_value=_DEFAULT_TEST_TIMEOUT_SECS * 1.0)
         try:
-            self.timeout = float(self.timeout) / 1000.0
+            self.timeout = float(self.timeout)
         except (TypeError, ValueError):
             logging.error("Cannot parse timeout: %s", self.timeout)
             self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
@@ -495,18 +497,15 @@ class BaseTestClass(object):
         """
         event = tfi.Begin('_tearDownClass method for test class',
                           tfi.categories.TEST_CLASS_TEARDOWN)
+        self.resetTimeout(TIMEOUT_SECS_TEARDOWN_CLASS)
+
         event_sub = tfi.Begin('tearDownClass method from test script',
                               tfi.categories.TEST_CLASS_TEARDOWN,
                               enable_logging=False)
         ret = self.tearDownClass()
 
-        self.resetTimeout(TEARDOWN_CLASS_TIMEOUT_SECS)
         event_sub.End()
-        if self.log_uploading.enabled:
-            event_upload = tfi.Begin('Log upload',
-                                     tfi.categories.RESULT_PROCESSING)
-            self.log_uploading.UploadLogs()
-            event_upload.End()
+
         if self.web.enabled:
             if self.results.class_errors:
                 # Create a result to make the module shown as failure.
@@ -525,6 +524,20 @@ class BaseTestClass(object):
 
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
+
+        self.cancelTimeout()
+
+        if self.log_uploading.enabled:
+            @timeout_utils.timeout(TIMEOUT_SECS_LOG_UPLOADING,
+                                   message='_tearDownClass method in base_test timed out.',
+                                   no_exception=True)
+            def _executeLogUpload(log_uploading):
+                log_uploading.UploadLogs()
+
+            event_upload = tfi.Begin('Log upload',
+                                     tfi.categories.RESULT_PROCESSING)
+            _executeLogUpload(self.log_uploading)
+            event_upload.End()
 
         event.End()
         return ret
@@ -547,6 +560,17 @@ class BaseTestClass(object):
 
         utils.stop_current_process(TEARDOWN_CLASS_TIMEOUT_SECS)
 
+    def cancelTimeout(self):
+        """Cancels main thread timer."""
+        with self._interrupt_lock:
+            if self._interrupted:
+                logging.warning("Test execution has been interrupted. "
+                                "Cannot cancel or reset timeout.")
+                return
+
+        if self._timer:
+            self._timer.cancel()
+
     def resetTimeout(self, timeout):
         """Restarts the timer that will interrupt the main thread.
 
@@ -556,14 +580,7 @@ class BaseTestClass(object):
         Args:
             timeout: A float, wait time in seconds before interrupt.
         """
-        with self._interrupt_lock:
-            if self._interrupted:
-                logging.warning("Test execution has been interrupted. "
-                                "Cannot reset timeout.")
-                return
-
-        if self._timer:
-            self._timer.cancel()
+        self.cancelTimeout()
 
         logging.debug("Start timer with timeout=%ssec.", timeout)
         self._timer = threading.Timer(timeout, self.interrupt)
