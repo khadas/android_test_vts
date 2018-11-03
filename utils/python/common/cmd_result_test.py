@@ -21,7 +21,7 @@ import vts.utils.python.common.cmd_result as cmd_result
 
 
 class CmdResultTest(unittest.TestCase):
-    '''Test methods inside android_device module.'''
+    '''Test methods for cmd_result module.'''
 
     def setUp(self):
         """SetUp tasks"""
