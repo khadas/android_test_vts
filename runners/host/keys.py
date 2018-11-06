@@ -37,6 +37,9 @@ class ConfigKeys(object):
     KEY_EXCLUDE_FILTER = "exclude_filter"
     KEY_EXCLUDE_OVER_INCLUDE = "exclude_over_include"
 
+    # Keys for base test.
+    IKEY_MAX_RETRY_COUNT = "max_retry_count"
+
     # Keys for binary tests
     IKEY_BINARY_TEST_SOURCE = "binary_test_source"
     IKEY_BINARY_TEST_WORKING_DIRECTORY = "binary_test_working_directory"

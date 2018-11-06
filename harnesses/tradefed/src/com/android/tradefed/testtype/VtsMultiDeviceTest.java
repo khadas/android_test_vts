@@ -133,6 +133,7 @@ public class VtsMultiDeviceTest
     static final String COVERAGE_REPORT_PATH = "coverage_report_path";
     static final String GLOBAL_COVERAGE = "global_coverage";
     static final String LTP_NUMBER_OF_THREADS = "ltp_number_of_threads";
+    static final String MAX_RETRY_COUNT = "max_retry_count";
     static final String MOBLY_TEST_MODULE = "MOBLY_TEST_MODULE";
     static final String NATIVE_SERVER_PROCESS_NAME = "native_server_process_name";
     static final String PASSTHROUGH_MODE = "passthrough_mode";
@@ -506,6 +507,11 @@ public class VtsMultiDeviceTest
                     + "If the value for the same key is set multiple times, only the last value is "
                     + "used.")
     private TreeMap<String, Boolean> mConfigBool = new TreeMap<>();
+
+    @Option(name = "max-retry-count",
+            description = "The max number of retries. Currerntly done by VTS Python runner in "
+                    + "a test case granularity.")
+    private int mMaxRetryCount = 0;
 
     private IBuildInfo mBuildInfo = null;
     private String mRunName = null;
@@ -1197,6 +1203,11 @@ public class VtsMultiDeviceTest
             CLog.d("Added %s to the Json object (value: %s)", ENABLE_LOG_UPLOADING,
                     mEnableLogUploading);
         }
+
+        if (mMaxRetryCount > 0) {
+            jsonObject.put(MAX_RETRY_COUNT, mMaxRetryCount);
+            CLog.d("Added %s to the Json object", MAX_RETRY_COUNT);
+        }
     }
 
     /**
@@ -1410,8 +1421,8 @@ public class VtsMultiDeviceTest
         FileUtil.recursiveDelete(vtsRunnerLogDir);
         CLog.d("Deleted the runner log dir, %s.", vtsRunnerLogDir);
         if (jsonFilePath != null) {
-          FileUtil.deleteFile(new File(jsonFilePath));
-          CLog.d("Deleted the runner json config file, %s.", jsonFilePath);
+            FileUtil.deleteFile(new File(jsonFilePath));
+            CLog.d("Deleted the runner json config file, %s.", jsonFilePath);
         }
 
         if (interruptMessage != null) {
