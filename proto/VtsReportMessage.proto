@@ -227,6 +227,8 @@ message HalInterfaceMessage {
   optional int32 hal_version_minor = 3;
   // HAL interface name. e.g. IFoo.
   optional bytes hal_interface_name = 4;
+  // HAL release level (e.g. "current", "27", "28")
+  optional bytes hal_release_level = 5;
 }
 
 // To specify a API coverage report. Currently only for HAL API coverage.
@@ -333,6 +335,10 @@ message TestPlanReportMessage {
 
   // Report resource flies.
   repeated UrlResourceMessage partner_report = 31;
+
+  // Available HAL APIs for coverage measurement.
+  // Only used for profiling test plan.
+  repeated ApiCoverageReportMessage hal_api_report = 41;
 
   // Detailed information about the execution environment (e.g., branch,
   // build ID, and device) can be found in the associated TestReportMessage(s)
