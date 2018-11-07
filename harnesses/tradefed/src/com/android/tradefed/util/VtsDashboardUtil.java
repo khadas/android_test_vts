@@ -101,7 +101,7 @@ public class VtsDashboardUtil {
      *
      * @param message, DashboardPostMessage that keeps the result to upload.
      */
-    public void Upload(DashboardPostMessage message) {
+    public void Upload(DashboardPostMessage.Builder message) {
         String dashboardCurlCommand =
                 mConfigReader.GetVendorConfigVariable("dashboard_use_curl_command");
         Optional<String> dashboardCurlCommandOpt = Optional.of(dashboardCurlCommand);
@@ -110,7 +110,7 @@ public class VtsDashboardUtil {
         String messageFilePath = "";
         try {
             messageFilePath = WriteToTempFile(
-                    Base64.getEncoder().encodeToString(message.toByteArray()).getBytes());
+                    Base64.getEncoder().encodeToString(message.build().toByteArray()).getBytes());
         } catch (IOException e) {
             CLog.e("Couldn't write a proto message to a temp file.");
         }
