@@ -21,6 +21,7 @@
   <option name="vts-plan-result:plan-name" value="vts-presubmit-kernel" />
 
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:enable-log-uploading:false" />
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:max-retry-count:2" />
 
   <include name="vts-presubmit-exclude" />
 
