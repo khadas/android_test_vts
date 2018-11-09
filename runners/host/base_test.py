@@ -118,7 +118,10 @@ class BaseTestClass(object):
                                 of failed test cases. Default is False
         _logcat_on_failure: bool, whether to dump logcat at the end
                                 of failed test cases. Default is True
+        _is_final_run: bool, whether the current test run is the final run during retry.
         test_filter: Filter object to filter test names.
+        _test_filter_retry: Filter object for retry filtering.
+        max_retry_count: int, max number of retries.
     """
     _current_record = None
     start_vts_agents = True
@@ -148,6 +151,8 @@ class BaseTestClass(object):
             self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
 
         # Setup test filters
+        # TODO(yuexima): remove include_filter and exclude_filter from class attributes
+        # after confirming all modules no longer have reference to them
         self.include_filter = self.getUserParam(
             [
                 keys.ConfigKeys.KEY_TEST_SUITE,
@@ -161,27 +166,13 @@ class BaseTestClass(object):
             ],
             default_value=[])
 
-        # TODO(yuexima): remove include_filter and exclude_filter from class attributes
-        # after confirming all modules no longer have reference to them
-        self.include_filter = list_utils.ExpandItemDelimiters(
-            list_utils.ItemsToStr(self.include_filter), ',')
-        self.exclude_filter = list_utils.ExpandItemDelimiters(
-            list_utils.ItemsToStr(self.exclude_filter), ',')
-        exclude_over_include = self.getUserParam(
-            keys.ConfigKeys.KEY_EXCLUDE_OVER_INCLUDE, default_value=None)
         self.test_module_name = self.getUserParam(
             keys.ConfigKeys.KEY_TESTBED_NAME,
             warn_if_not_found=True,
             default_value=self.__class__.__name__)
-        self.test_filter = filter_utils.Filter(
-            self.include_filter,
-            self.exclude_filter,
-            enable_regex=True,
-            exclude_over_include=exclude_over_include,
-            enable_negative_pattern=True,
-            enable_module_name_prefix_matching=True,
-            module_name=self.test_module_name,
-            expand_bitness=True)
+
+        self.updateTestFilter()
+
         logging.debug('Test filter: %s' % self.test_filter)
 
         # TODO: get abi information differently for multi-device support.
@@ -220,6 +211,7 @@ class BaseTestClass(object):
             keys.ConfigKeys.IKEY_BUG_REPORT_ON_FAILURE, default_value=False)
         self._logcat_on_failure = self.getUserParam(
             keys.ConfigKeys.IKEY_LOGCAT_ON_FAILURE, default_value=True)
+        self._test_filter_retry = None
 
     @property
     def android_devices(self):
@@ -248,6 +240,26 @@ class BaseTestClass(object):
 
     def __exit__(self, *args):
         self._exec_func(self.cleanUp)
+
+    def updateTestFilter(self):
+        """Updates test filter using include and exclude filters."""
+        self.include_filter = list_utils.ExpandItemDelimiters(
+            list_utils.ItemsToStr(self.include_filter), ',')
+        self.exclude_filter = list_utils.ExpandItemDelimiters(
+            list_utils.ItemsToStr(self.exclude_filter), ',')
+
+        exclude_over_include = self.getUserParam(
+            keys.ConfigKeys.KEY_EXCLUDE_OVER_INCLUDE, default_value=None)
+
+        self.test_filter = filter_utils.Filter(
+            self.include_filter,
+            self.exclude_filter,
+            enable_regex=True,
+            exclude_over_include=exclude_over_include,
+            enable_negative_pattern=True,
+            enable_module_name_prefix_matching=True,
+            module_name=self.test_module_name,
+            expand_bitness=True)
 
     def unpack_userparams(self, req_param_names=[], opt_param_names=[], **kwargs):
         """Wrapper for test cases using ACTS runner API."""
@@ -671,7 +683,7 @@ class BaseTestClass(object):
                           enable_logging=False)
         self.onFail(record.test_name, begin_time)
         if self._bug_report_on_failure:
-            self.DumpBugReport(ecord.test_name)
+            self.DumpBugReport(record.test_name)
         if self._logcat_on_failure:
             self.DumpLogcat(record.test_name)
         event.End()
@@ -691,16 +703,15 @@ class BaseTestClass(object):
         called.
         """
         record = self._current_record
-        test_name = record.test_name
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         msg = record.details
         if msg:
             logging.debug(msg)
         logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
-                     test_name, record.result)
+                     record.test_name, record.result)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_PASS)
-        self.onPass(test_name, begin_time)
+        self.onPass(record.test_name, begin_time)
 
     def onPass(self, test_name, begin_time):
         """A function that is executed upon a test case passing.
@@ -717,14 +728,13 @@ class BaseTestClass(object):
         called.
         """
         record = self._current_record
-        test_name = record.test_name
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
-                     test_name, record.result)
+                     record.test_name, record.result)
         logging.debug("Reason to skip: %s", record.details)
         if self.web.enabled:
             self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_SKIP)
-        self.onSkip(test_name, begin_time)
+        self.onSkip(record.test_name, begin_time)
 
     def onSkip(self, test_name, begin_time):
         """A function that is executed upon a test case being skipped.
@@ -741,11 +751,10 @@ class BaseTestClass(object):
         called.
         """
         record = self._current_record
-        test_name = record.test_name
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         if self.web.enabled:
             self.web.SetTestResult(None)
-        self.onSilent(test_name, begin_time)
+        self.onSilent(record.test_name, begin_time)
 
     def onSilent(self, test_name, begin_time):
         """A function that is executed upon a test case being marked as silent.
@@ -762,7 +771,6 @@ class BaseTestClass(object):
         is called.
         """
         record = self._current_record
-        test_name = record.test_name
         logging.exception(record.details)
         begin_time = logger.epochToLogLineTimestamp(record.begin_time)
         if self.web.enabled:
@@ -771,7 +779,7 @@ class BaseTestClass(object):
         event = tfi.Begin('_onFail method from BaseTest',
                           tfi.categories.FAILED_TEST_CASE_PROCESSING,
                           enable_logging=False)
-        self.onException(test_name, begin_time)
+        self.onException(record.test_name, begin_time)
         if self._bug_report_on_failure:
             self.DumpBugReport(ecord.test_name)
         if self._logcat_on_failure:
@@ -802,6 +810,14 @@ class BaseTestClass(object):
             func: The procedure function to be executed.
         """
         record = self._current_record
+
+        if (func not in (self._onPass, self._onSilent, self._onSkip)
+            and not self._is_final_run):
+            logging.debug('Skipping test failure procedure function during retry')
+            logging.info(RESULT_LINE_TEMPLATE, self.results.progressStr,
+                         record.test_name, 'RETRY')
+            return
+
         if record is None:
             logging.error("Cannot execute %s. No record for current test.",
                           func.__name__)
@@ -855,6 +871,15 @@ class BaseTestClass(object):
             signals.TestSilent if a test should not be executed
             signals.TestSkip if a test should be logged but not be executed
         """
+        if self._test_filter_retry and not self._test_filter_retry.Filter(test_name):
+            # TODO: TestSilent will remove test case from record,
+            #       TestSkip will record test skip with a reason.
+            #       skip during retry is neither of these, as the test should be skipped,
+            #       not being recorded and not being deleted.
+            #       Create a new signal type if callers outside this class wants to distinguish
+            #       between these skip types.
+            raise signals.TestSkip('Skipping completed tests in retry run attempt.')
+
         self._filterOneTestThroughTestFilter(test_name, test_filter)
         self._filterOneTestThroughAbiBitness(test_name)
 
@@ -910,6 +935,9 @@ class BaseTestClass(object):
             args: A tuple of params.
             kwargs: Extra kwargs.
         """
+        if self._test_filter_retry and not self._test_filter_retry.Filter(test_name):
+            return
+
         is_silenced = False
         tr_record = records.TestResultRecord(test_name, self.test_module_name)
         tr_record.testBegin()
@@ -951,11 +979,13 @@ class BaseTestClass(object):
         except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             # Abort signals, pass along.
             tr_record.testFail(e)
+            self._is_final_run = True
             finished = True
             raise signals.TestAbortClass, e, sys.exc_info()[2]
         except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
             # Abort signals, pass along.
             tr_record.testFail(e)
+            self._is_final_run = True
             finished = True
             raise signals.TestAbortAll, e, sys.exc_info()[2]
         except (signals.TestPass, acts_signals.TestPass) as e:
@@ -1165,14 +1195,39 @@ class BaseTestClass(object):
         tests = self._get_test_funcs(test_names)
         return tests
 
+    def runTestsWithRetry(self, tests):
+        """Run tests with retry and collect test results.
+
+        Args:
+            tests: A list of tests to be run.
+        """
+        for count in range(self.max_retry_count + 1):
+            if count:
+                include_filter = map(lambda item: item.test_name,
+                                     self.results.getNonPassingRecords(skipped=False))
+                self._test_filter_retry = filter_utils.Filter(include_filter=include_filter)
+                logging.info('Automatically retrying %s test cases. Run attempt %s of %s',
+                             len(include_filter),
+                             count + 1,
+                             self.max_retry_count + 1)
+                logging.debug('Retrying the following test cases: %s', include_filter)
+
+            self._is_final_run = count == self.max_retry_count
+
+            try:
+                self.runTests(tests)
+            except Exception as e:
+                if self._is_final_run:
+                    raise e
+
+            if self._is_final_run:
+                break
+
     def runTests(self, tests):
         """Run tests and collect test results.
 
         Args:
             tests: A list of tests to be run.
-
-        Returns:
-            The test results object of this class.
         """
         # Setup for the class with retry.
         for i in xrange(_SETUP_RETRY_NUMBER):
@@ -1194,7 +1249,8 @@ class BaseTestClass(object):
                     self.results.failClass(self.test_module_name,
                                            caught_exception)
                     self._exec_func(self._tearDownClass)
-                    return self.results
+                    self._is_final_run = True
+                    return
                 else:
                     # restart services before retry setup.
                     for device in self.android_devices:
@@ -1209,7 +1265,7 @@ class BaseTestClass(object):
             if self.run_as_vts_self_test:
                 logging.debug('setUpClass function was executed successfully.')
                 self.results.passClass(self.test_module_name)
-                return self.results
+                return
 
             for test_name, test_func in tests:
                 if test_name.startswith(STR_GENERATE):
@@ -1227,14 +1283,14 @@ class BaseTestClass(object):
                 self.results.skipClass(
                     self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
-            return self.results
         except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             logging.error("Received TestAbortClass signal")
             class_error = e
-            return self.results
+            self._is_final_run = True
         except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
             logging.error("Received TestAbortAll signal")
             class_error = e
+            self._is_final_run = True
             # Piggy-back test results on this exception object so we don't lose
             # results from this test class.
             setattr(e, "results", self.results)
@@ -1245,14 +1301,21 @@ class BaseTestClass(object):
             class_error = e
             raise e
         finally:
-            if class_error:
+            if not self.results.getNonPassingRecords(skipped=False):
+                self._is_final_run = True
+
+            if class_error and self._is_final_run:
                 self.results.failClass(self.test_module_name, class_error)
+
             self._exec_func(self._tearDownClass)
-            if self.web.enabled:
-                name, timestamp = self.web.GetTestModuleKeys()
-                self.results.setTestModuleKeys(name, timestamp)
-            logging.info("Summary for test class %s: %s",
-                         self.test_module_name, self.results.summary())
+
+            if self._is_final_run:
+                if self.web.enabled:
+                    name, timestamp = self.web.GetTestModuleKeys()
+                    self.results.setTestModuleKeys(name, timestamp)
+
+                logging.info("Summary for test class %s: %s",
+                             self.test_module_name, self.results.summary())
 
     def run(self, test_names=None):
         """Runs test cases within a test class by the order they appear in the
@@ -1283,7 +1346,10 @@ class BaseTestClass(object):
                 records.TestResultRecord(test_name, self.test_module_name)
                 for test_name,_ in tests if test_name.startswith(STR_TEST)
             ]
-        return self.runTests(tests)
+
+        self.runTestsWithRetry(tests)
+
+        return self.results
 
     def cleanUp(self):
         """A function that is executed upon completion of all tests cases
