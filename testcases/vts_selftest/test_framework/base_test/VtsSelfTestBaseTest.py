@@ -54,7 +54,12 @@ def AssertShellCommandSuccess(command_results, num_of_commands):
 
 
 class VtsSelfTestBaseTest(base_test.BaseTestClass):
-    '''Two hello world test cases which use the shell driver.'''
+    '''Two hello world test cases which use the shell driver.
+
+    Attributes:
+        is_first_run: bool, whether this test run is the first run with retry attempts.
+    '''
+    run_count = 0
 
     def setUpClass(self):
         # Since we are running the actual test cases, run_as_vts_self_test
@@ -63,6 +68,9 @@ class VtsSelfTestBaseTest(base_test.BaseTestClass):
 
         self.dut = self.android_devices[0]
         self.shell = self.dut.shell
+
+    def tearDownClass(self):
+        self.run_count += 1
 
     def testShellEcho1(self):
         '''A simple testcase which sends a command.'''
@@ -141,6 +149,14 @@ class VtsSelfTestBaseTest(base_test.BaseTestClass):
     def test_getUserConfigBool5(self):
         '''Test getUserConfigBool.'''
         asserts.assertEqual(self.getUserConfigBool('c', to_str=True), None)
+
+    def test_retry_run_pass_on_2nd(self):
+        """Tests retry feature."""
+        asserts.assertEqual(self.run_count, 1)
+
+    def test_retry_run_pass_on_3rd(self):
+        """Tests retry feature."""
+        asserts.assertEqual(self.run_count, 2)
 
 if __name__ == "__main__":
     test_runner.main()
