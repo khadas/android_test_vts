@@ -138,17 +138,9 @@ class BaseTestClass(object):
         self._interrupted = False
         self._interrupt_lock = threading.Lock()
         self._timer = None
-        self.timeout = self.getUserParam(
-            keys.ConfigKeys.KEY_TEST_TIMEOUT,
-            default_value=_DEFAULT_TEST_TIMEOUT_SECS * 1.0)
-        try:
-            self.timeout = float(self.timeout)
-        except (TypeError, ValueError):
-            logging.error("Cannot parse timeout: %s", self.timeout)
-            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
-        if self.timeout <= 0:
-            logging.error("Invalid timeout: %s", self.timeout)
-            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
+
+        timeout_milli = self.getUserParam(keys.ConfigKeys.KEY_TEST_TIMEOUT, 0)
+        self.timeout = timeout_milli / 1000 if timeout_milli > 0 else _DEFAULT_TEST_TIMEOUT_SECS
 
         # Setup test filters
         # TODO(yuexima): remove include_filter and exclude_filter from class attributes
