@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Pair to Pair Test Plan">
-  <include name="vts-base-common" />
+  <include name="vts-base-multi-device" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-p2p" />
