@@ -13,18 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for local development test runs">
-    <include name="vts-base-presubmit" />
+<configuration description="VTS Base Config for Single-device Test Plans">
+  <include name="vts-base-common" />
 
-    <target_preparer class="com.android.tradefed.targetprep.VtsDevicePreparer">
-      <option name="restore-framework" value="true"/>
-    </target_preparer>
-
-    <logger class="com.android.tradefed.log.FileLogger">
-      <option name="log-level-display" value="INFO" />
-    </logger>
-
-    <option name="vts-plan-result:plan-name" value="vts-local" />
-
-    <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
+  <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
+  <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
 </configuration>
