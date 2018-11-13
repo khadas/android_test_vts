@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Codelab Plan">
-  <include name="vts-base-multi-device" />
+  <include name="vts-base-common" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts" />
   <option name="vts-plan-result:plan-name" value="vts" />
