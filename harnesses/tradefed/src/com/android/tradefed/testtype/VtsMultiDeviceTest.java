@@ -237,10 +237,6 @@ public class VtsMultiDeviceTest
             description = "Flag that determines whether to use std:out to parse output.")
     private boolean mUseStdoutLogs = false;
 
-    @Option(name = "enable-dashboard-uploading",
-            description = "Enables the runner's dashboard result uploading feature.")
-    private Boolean mEnableDashboardUploading = null;
-
     @Option(name = "enable-log-uploading",
             description = "Enables the runner's log uploading feature.")
     private Boolean mEnableLogUploading = null;
@@ -1414,13 +1410,12 @@ public class VtsMultiDeviceTest
 
         if (reportMsg == null) {
             CLog.e("Cannot find report message proto file.");
-        } else if (reportMsg.length() > 0
-                && (mEnableDashboardUploading == null || mEnableDashboardUploading)) {
+        } else if (reportMsg.length() > 0) {
             CLog.i("Uploading report message. File size: %s", reportMsg.length());
             VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
             dashboardUtil.Upload(reportMsg.getAbsolutePath());
         } else {
-            CLog.d("Dashboard result uploading is not enabled.");
+            CLog.d("Result uploading is not enabled.");
         }
 
         FileUtil.recursiveDelete(vtsRunnerLogDir);
