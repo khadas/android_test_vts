@@ -30,4 +30,5 @@
   <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
   <multi_target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
+  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 </configuration>
