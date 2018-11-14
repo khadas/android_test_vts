@@ -565,7 +565,7 @@ class BaseTestClass(object):
                 return
             self._interrupted = True
 
-        utils.stop_current_process(TEARDOWN_CLASS_TIMEOUT_SECS)
+        utils.stop_current_process(TIMEOUT_SECS_TEARDOWN_CLASS)
 
     def cancelTimeout(self):
         """Cancels main thread timer."""
