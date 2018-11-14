@@ -15,6 +15,7 @@
 -->
 <configuration description="VTS Presubmit Test Plan for Connectivity Modules">
   <include name="vts-base-presubmit" />
+  <option name="vts-plan-result:plan-name" value="vts-presubmit-connectivity" />
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:max-retry-count:2" />
 
   <include name="vts-presubmit-exclude" />
