@@ -111,7 +111,7 @@ def runTestClass(test_class):
                 line = sys.stdin.readline()
                 if not line:
                     break
-            utils.stop_current_process(base_test.TEARDOWN_CLASS_TIMEOUT_SECS)
+            utils.stop_current_process(base_test.TIMEOUT_SECS_TEARDOWN_CLASS)
 
         watcher_thread = threading.Thread(target=watchStdin, name="watchStdin")
         watcher_thread.daemon = True
