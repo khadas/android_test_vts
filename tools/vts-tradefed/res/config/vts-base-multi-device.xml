@@ -13,14 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Serving Plan for local development test runs">
-    <include name="vts-base-presubmit" />
-
-    <logger class="com.android.tradefed.log.FileLogger">
-      <option name="log-level-display" value="INFO" />
-    </logger>
-
-    <option name="vts-plan-result:plan-name" value="vts-local" />
-
-    <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
+<configuration description="VTS Base Config for Multi-device Test Plans">
+  <include name="vts-base-common" />
+  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 </configuration>
