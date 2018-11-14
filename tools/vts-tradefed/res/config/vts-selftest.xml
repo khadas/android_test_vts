@@ -14,14 +14,7 @@
      limitations under the License.
 -->
 <configuration description="VTS Self Test Plan">
-  <include name="vts-base-common" />
-
-  <build_provider class="com.android.compatibility.common.tradefed.build.CompatibilityBuildProvider" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
-  <target_preparer class="com.android.tradefed.targetprep.VtsDevicePreparer">
-    <option name="enable-adb-root" value="true"/>
-  </target_preparer>
-
+  <include name="vts-base-presubmit" />
   <option name="plan" value="vts" />
   <option name="test-tag" value="vts-star" />
   <option name="vts-plan-result:plan-name" value="vts-selftest" />

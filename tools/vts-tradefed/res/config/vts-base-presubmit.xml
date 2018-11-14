@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright (C) 2018 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="VTS Main Test Plan">
+<configuration description="VTS Main Test Plan Simplified Base Config for Presubmit Tests">
   <include name="vts-base-single-device" />
 
   <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
@@ -24,12 +24,10 @@
     <option name="restore-framework" value="true"/>
   </target_preparer>
 
-  <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInfoCollector">
-    <option name="apk" value="CtsDeviceInfo.apk"/>
-    <option name="package" value="com.android.compatibility.common.deviceinfo"/>
-    <option name="src-dir" value="/sdcard/device-info-files/"/>
-    <option name="dest-dir" value="device-info-files/"/>
-    <option name="temp-dir" value="temp-device-info-files/"/>
-    <option name="throw-error" value="false"/>
-  </target_preparer>
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:enable-dashboard-uploading:false" />
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:enable-log-uploading:false" />
+
+  <option name="compatibility:primary-abi-only" value="true" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-star" />
 </configuration>
