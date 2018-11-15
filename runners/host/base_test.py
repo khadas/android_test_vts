@@ -518,6 +518,12 @@ class BaseTestClass(object):
                 # Create a result to make the module shown as failure.
                 self.web.AddTestReport("setup_class")
                 self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
+
+            # Attach log destination urls to proto message so the urls will be
+            # recorded and uploaded to dashboard. The actual log uploading is postponed
+            # after generating report message to prevent failure due to timeout of log uploading.
+            self.log_uploading.UploadLogs(dryrun=True)
+
             message_b = self.web.GenerateReportMessage(self.results.requested,
                                                        self.results.executed)
         else:
@@ -538,8 +544,8 @@ class BaseTestClass(object):
             @timeout_utils.timeout(TIMEOUT_SECS_LOG_UPLOADING,
                                    message='_tearDownClass method in base_test timed out.',
                                    no_exception=True)
-            def _executeLogUpload(log_uploading):
-                log_uploading.UploadLogs()
+            def _executeLogUpload(_log_uploading):
+                _log_uploading.UploadLogs()
 
             event_upload = tfi.Begin('Log upload',
                                      tfi.categories.RESULT_PROCESSING)
