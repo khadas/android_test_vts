@@ -397,7 +397,16 @@ public class VtsMultiDeviceTestResultParser {
                     CLog.e("JSONArray is null.");
                 }
 
-                listener.testRunStarted(mRunName, results.length());
+                int nNonSkippedTests = 0;
+                for (int index = 0; index < results.length(); index++) {
+                    JSONObject resultObject = results.getJSONObject(index);
+                    String result = (String) resultObject.get(RESULT);
+                    if (!result.equals(SKIP)) {
+                        nNonSkippedTests++;
+                    }
+                }
+
+                listener.testRunStarted(mRunName, nNonSkippedTests);
 
                 for (int index = 0; index < results.length(); index++) {
                     JSONObject resultObject = results.getJSONObject(index);
@@ -409,44 +418,38 @@ public class VtsMultiDeviceTestResultParser {
 
                     // mark test started
                     TestDescription TestDescription = new TestDescription(testClass, testName);
-                    listener.testStarted(TestDescription);
 
-                    switch (result) {
-                        case ERROR:
-                            /* Error is reported by the VTS runner when an unexpected exception
-                               happened during test execution. It could be due to: a framework bug,
-                               an unhandled I/O, a TCP error, or a bug in test module or template
-                               execution code. Error thus does not necessarily indicate a test
-                               failure or a bug in device implementation. Since error is not yet
-                               recognized in TF, it is converted to FAIL. */
-                            listener.testFailed(
-                                    TestDescription, details.isEmpty() ? UNKNOWN_ERROR : details);
-                            // Always call testEnded at the end of the test case
-                            listener.testEnded(TestDescription, Collections.emptyMap());
-                            break;
-                        case PASS :
-                            listener.testEnded(
-                                    TestDescription, Collections.<String, String>emptyMap());
-                            break;
-                        case TIMEOUT :
-                            /* Timeout is not recognized in TF. Use FAIL instead. */
-                            listener.testFailed(
-                                    TestDescription, details.isEmpty() ? UNKNOWN_TIMEOUT : details);
-                            // Always call testEnded at the end of the test case
-                            listener.testEnded(TestDescription, Collections.emptyMap());
-                            break;
-                        case SKIP :
-                            /* Skip is not recognized in TF */
-                            break;
-                        case FAIL:
-                            /* Indicates a test failure. */
-                            listener.testFailed(
-                                    TestDescription, details.isEmpty() ? UNKNOWN_FAILURE : details);
-                            // Always call testEnded at the end of the test case
-                            listener.testEnded(TestDescription, Collections.emptyMap());
-                        default:
-                            break;
+                    /* SKIP is not recognized in TF. Does not report result instead. */
+                    if (!result.equals(SKIP)) {
+                        listener.testStarted(TestDescription);
+
+                        switch (result) {
+                            case PASS:
+                                break;
+                            case ERROR:
+                                /* Error is reported by the VTS runner when an unexpected exception
+                                   happened during test execution. It could be due to: a framework
+                                   bug, an unhandled I/O, a TCP error, or a bug in test module or
+                                   template execution code. Error thus does not necessarily indicate
+                                   a test failure or a bug in device implementation. Since error is
+                                   not yet recognized in TF, it is converted to FAIL. */
+                            case TIMEOUT:
+                                /* Timeout is not recognized in TF. Use FAIL instead. */
+                            case FAIL:
+                                /* Indicates a test failure. */
+                                listener.testFailed(TestDescription,
+                                        details.isEmpty() ? UNKNOWN_FAILURE : details);
+                                break;
+                            default:
+                                listener.testFailed(TestDescription,
+                                        "Internal error: Cannot recognize test result type. Details: "
+                                                + details);
+                                break;
+                        }
+
+                        listener.testEnded(TestDescription, Collections.emptyMap());
                     }
+
                     if (!resultObject.isNull(TABLES)) {
                         JSONObject tables = resultObject.getJSONObject(TABLES);
                         Iterator<String> iter = tables.keys();

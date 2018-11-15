@@ -16,10 +16,6 @@
 <configuration description="VTS Serving Plan for local development test runs">
     <include name="vts-base-presubmit" />
 
-    <logger class="com.android.tradefed.log.FileLogger">
-      <option name="log-level-display" value="INFO" />
-    </logger>
-
     <option name="vts-plan-result:plan-name" value="vts-local" />
 
     <option name="compatibility:include-filter" value="VtsCodelabHelloWorldTest" />
