@@ -219,13 +219,13 @@ public class VtsMultiDeviceTestResultParserTest {
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(RUN_NAME, 2);
         TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
-        mockRunListener.testStarted(test1);
-        mockRunListener.testEnded(test1, Collections.emptyMap());
+        mockRunListener.testStarted(test1, 1525425222367l);
+        mockRunListener.testEnded(test1, 1525425223793l, Collections.emptyMap());
 
         TestDescription test2 = new TestDescription(RUN_NAME, TEST_NAME_2);
-        mockRunListener.testStarted(test2);
+        mockRunListener.testStarted(test2, 1525425749536l);
         mockRunListener.testFailed(test2, FAILURE_MESSAGE);
-        mockRunListener.testEnded(test2, Collections.emptyMap());
+        mockRunListener.testEnded(test2, 1525425749537l, Collections.emptyMap());
         mockRunListener.testRunEnded(EasyMock.anyLong(), EasyMock.eq(Collections.emptyMap()));
 
         EasyMock.replay(mockRunListener);
@@ -244,9 +244,9 @@ public class VtsMultiDeviceTestResultParserTest {
         ITestLifeCycleReceiver mockRunListener = EasyMock.createMock(ITestLifeCycleReceiver.class);
         mockRunListener.testRunStarted(RUN_NAME, 1);
         TestDescription test1 = new TestDescription(RUN_NAME, TEST_NAME_1);
-        mockRunListener.testStarted(test1);
+        mockRunListener.testStarted(test1, 1525424790227l);
         mockRunListener.testFailed(test1, FAILURE_MESSAGE);
-        mockRunListener.testEnded(test1, Collections.emptyMap());
+        mockRunListener.testEnded(test1, 1525424790227l, Collections.emptyMap());
         mockRunListener.testRunFailed(CLASS_ERROR_MESSAGE);
         mockRunListener.testRunEnded(EasyMock.anyLong(), EasyMock.eq(Collections.emptyMap()));
 

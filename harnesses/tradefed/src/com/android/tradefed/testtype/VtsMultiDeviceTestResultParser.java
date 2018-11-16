@@ -389,9 +389,10 @@ public class VtsMultiDeviceTestResultParser {
             for (ITestLifeCycleReceiver listener : mListeners) {
                 long elapsedTime;
                 if (results.length() > 0) {
-                    long beginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
-                    long endTime = (long) results.getJSONObject(results.length() - 1).get(END_TIME);
-                    elapsedTime = endTime - beginTime;
+                    long firstBeginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
+                    long lastEndTime =
+                            (long) results.getJSONObject(results.length() - 1).get(END_TIME);
+                    elapsedTime = lastEndTime - firstBeginTime;
                 } else {
                     elapsedTime = 0;
                     CLog.e("JSONArray is null.");
@@ -413,6 +414,8 @@ public class VtsMultiDeviceTestResultParser {
                     String result = (String) resultObject.get(RESULT);
                     String testClass = (String) resultObject.get(TEST_CLASS);
                     String testName = (String) resultObject.get(TEST_NAME);
+                    long beginTime = (long) results.getJSONObject(index).get(BEGIN_TIME);
+                    long endTime = (long) results.getJSONObject(index).get(END_TIME);
                     String details =
                             resultObject.isNull(DETAILS) ? "" : resultObject.getString(DETAILS);
 
@@ -421,7 +424,7 @@ public class VtsMultiDeviceTestResultParser {
 
                     /* SKIP is not recognized in TF. Does not report result instead. */
                     if (!result.equals(SKIP)) {
-                        listener.testStarted(TestDescription);
+                        listener.testStarted(TestDescription, beginTime);
 
                         switch (result) {
                             case PASS:
@@ -447,7 +450,7 @@ public class VtsMultiDeviceTestResultParser {
                                 break;
                         }
 
-                        listener.testEnded(TestDescription, Collections.emptyMap());
+                        listener.testEnded(TestDescription, endTime, Collections.emptyMap());
                     }
 
                     if (!resultObject.isNull(TABLES)) {
