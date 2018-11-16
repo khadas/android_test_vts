@@ -395,6 +395,10 @@ class WebFeature(feature_utils.Feature):
         if not self.enabled or urls is None:
             return
 
+        for log_msg in self.report_msg.log:
+            if log_msg.url == url:
+                return
+
         for url in urls:
             log_msg = self.report_msg.log.add()
             log_msg.url = url
