@@ -100,9 +100,9 @@ class LogUploadingFeature(feature_utils.Feature):
         if not self.enabled:
             return
 
-        file_name_prefix = '%s_%s_' % (getattr(
-            self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
-                                       self.web.report_msg.start_timestamp)
+        file_name_prefix = '%s_%s_' % (
+            getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
+            self.web.report_msg.start_timestamp)
 
         def path_filter(path):
             '''filter to exclude proto files in log uploading'''
