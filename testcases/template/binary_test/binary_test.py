@@ -224,7 +224,10 @@ class BinaryTest(base_test.BaseTestClass):
         if getattr(self, keys.ConfigKeys.IKEY_BINARY_TEST_DISABLE_FRAMEWORK,
                    False):
             # Disable the framework if requested.
-            self._dut.stop()
+            stop_native_server = getattr(self,
+                                         keys.ConfigKeys.IKEY_BINARY_TEST_STOP_NATIVE_SERVERS,
+                                         False)
+            self._dut.stop(stop_native_server)
         else:
             # Enable the framework if requested.
             self._dut.start()
