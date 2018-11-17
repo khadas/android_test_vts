@@ -23,7 +23,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
 
-PROPERTY_LOGICAL_PARTITIONS = "ro.boot.logical_partitions"
+PROPERTY_LOGICAL_PARTITIONS = "ro.boot.dynamic_partitions"
 
 
 class VtsFastbootVerificationTest(base_test.BaseTestClass):
