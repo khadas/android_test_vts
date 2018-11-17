@@ -95,23 +95,14 @@ class LogUploadingFeature(feature_utils.Feature):
                 url_prefix=getattr(
                     self, keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX, None))
 
-    def UploadLogs(self, file_name_prefix=None, attach_urls_only=False):
-        """Save test logs and add log urls to report message.
-
-        Args:
-            file_name_prefix: string, file name prefix.
-                              Will be auto-generated if not provided.
-            attach_urls_only: bool, whether to perform a dry run to attach
-                              destination urls to result message only. When
-                              enabled, log files will not be actually uploaded.
-        """
+    def UploadLogs(self, prefix=None):
+        """Save test logs and add log urls to report message"""
         if not self.enabled:
             return
 
-        if not file_name_prefix:
-            file_name_prefix = '%s_%s_' % (
-                getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
-                self.web.report_msg.start_timestamp)
+        file_name_prefix = '%s_%s_' % (getattr(
+            self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
+                                       self.web.report_msg.start_timestamp)
 
         def path_filter(path):
             '''filter to exclude proto files in log uploading'''
@@ -123,8 +114,7 @@ class LogUploadingFeature(feature_utils.Feature):
                 urls = file_util.SaveReportsFromDirectory(
                                 source_dir=logging.log_path,
                                 file_name_prefix=file_name_prefix,
-                                file_path_filters=path_filter,
-                                get_urls_only=attach_urls_only)
+                                file_path_filters=path_filter)
                 if urls is None:
                     logging.error('Error happened when saving logs.')
                 elif self.web and self.web.enabled:
