@@ -17,3 +17,8 @@
 
 .section test.dup,"",@note
 nop
+
+# Test path name of program interpreter:
+
+.section .interp,"a",@progbits
+.string "/lib64/ld-linux-x86-64.so.2"

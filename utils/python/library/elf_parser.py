@@ -58,6 +58,7 @@ class ElfParser(object):
         Elf_Sym: ELF symbol entry class.
         Elf_Rel: ELF relocation entry class.
         Elf_Rela: ELF relocation entry class with explicit addend.
+        Elf_Phdr: ELF program header class.
     """
 
     def __init__(self, file_path, begin_offset=0):
@@ -112,6 +113,7 @@ class ElfParser(object):
             self.Elf_Sym = structs.Elf32_Sym
             self.Elf_Rel = structs.Elf32_Rel
             self.Elf_Rela = structs.Elf32_Rela
+            self.Elf_Phdr = structs.Elf32_Phdr
         else:
             self.bitness = 64
             self.Elf_Addr = structs.Elf64_Addr
@@ -125,6 +127,7 @@ class ElfParser(object):
             self.Elf_Sym = structs.Elf64_Sym
             self.Elf_Rel = structs.Elf64_Rel
             self.Elf_Rela = structs.Elf64_Rela
+            self.Elf_Phdr = structs.Elf64_Phdr
 
         try:
             self.Ehdr = self._SeekReadStruct(0, self.Elf_Ehdr)
@@ -515,6 +518,10 @@ class ElfParser(object):
             raise ElfError("Cannot find dynamic string table.")
         return [self.GetString(strtab, off) for off in name_offsets]
 
+    def IsExecutable(self):
+        """Returns whether the ELF is executable."""
+        return self.Ehdr.e_type == consts.ET_EXEC
+
     def MatchCpuAbi(self, abi):
         """Returns whether the ELF matches the ABI.
 
@@ -598,3 +605,17 @@ class ElfParser(object):
         """
         return self.ListGlobalSymbols(include_weak,
                                       consts.DYNSYM, consts.DYNSTR)
+
+    def GetProgramInterpreter(self):
+        """Gets the path to the program interpreter of the ELF.
+
+        Returns:
+            A string, the contents of .interp section.
+            None if the section is not found.
+        """
+        for ph_index in range(self.Ehdr.e_phnum):
+            ph = self._SeekReadStruct(
+                self.Ehdr.e_phoff + ph_index * self.Ehdr.e_phentsize,
+                self.Elf_Phdr)
+            if ph.p_type == consts.PT_INTERP:
+                return self._SeekReadString(ph.p_offset)

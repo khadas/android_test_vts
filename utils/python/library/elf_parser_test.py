@@ -107,6 +107,16 @@ class ElfParserTest(unittest.TestCase):
             relocs.append((rela.r_offset, rela.r_info, rela.r_addend))
         self.assertEqual(relocs, _ANDROID_RELOCATIONS)
 
+    def testIsExecutable(self):
+        """Tests that IsExecutable determines file type correctly."""
+        is_executable = self.elf_file.IsExecutable()
+        self.assertFalse(is_executable)
+
+    def testMatchCpuAbi(self):
+        """Tests that MatchCpuAbi determines machine type correctly."""
+        self.assertTrue(self.elf_file.MatchCpuAbi("x86_64"))
+        self.assertFalse(self.elf_file.MatchCpuAbi("x86"))
+
     def testListDependencies(self):
         """Tests that ListDependencies lists ELF dependencies correctly."""
         deps = self.elf_file.ListDependencies()
@@ -116,6 +126,11 @@ class ElfParserTest(unittest.TestCase):
         """Tests that ListGlobalSymbols lists global symbols correctly."""
         syms = self.elf_file.ListGlobalSymbols(False, '.dynsym', '.dynstr')
         self.assertFalse(_EXPORTED_SYMBOLS.difference(syms))
+
+    def testGetProgramInterpreter(self):
+        """Tests that GetProgramInterpreter parses segment type correctly."""
+        interp = self.elf_file.GetProgramInterpreter()
+        self.assertEqual(interp, "/lib64/ld-linux-x86-64.so.2")
 
 
 if __name__ == '__main__':
