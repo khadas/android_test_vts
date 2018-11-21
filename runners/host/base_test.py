@@ -219,7 +219,7 @@ class BaseTestClass(object):
 
             for device in getattr(self, _ANDROID_DEVICES):
                 device.shell_default_nohup = self.getUserParam(
-                    keys.ConfigKeys.SHELL_DEFAULT_NOHUP, default_value=False)
+                    keys.ConfigKeys.SHELL_DEFAULT_NOHUP, default_value=True)
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter
