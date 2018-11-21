@@ -310,6 +310,7 @@ vts_hal_test_bins := \
   VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
   VtsHalWifiSupplicantV1_1TargetTest \
+  VtsHalWifiSupplicantP2pV1_0TargetTest \
   VtsHidlAllocatorV1_0TargetTest \
 
 # Binaries which are part of VNDK but in the form of HIDL.
