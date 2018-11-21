@@ -221,7 +221,10 @@ void ProfilerCodeGenBase::GenerateProfilerForTypedVariable(Formatter& out,
       GenerateProfilerForSafeUnionVariable(out, val, arg_name, arg_value);
       break;
     }
-    default: { cout << "Type " << val.type() << " not supported yet.\n"; }
+    default: {
+      out << "LOG(ERROR) << \"Type " << val.type()
+          << "is not supported yet. \";\n";
+    }
   }
 }
 

@@ -794,7 +794,7 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
           << "const string&) {"
           << "\n";
       out.indent();
-      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_SAFE_UNION is not supported yet. \";\n";
       out.unindent();
       out << "}\n";
       break;
@@ -1098,7 +1098,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
       out << "} else {\n";
       out.indent();
       if (type_name.find("::android::hidl") == 0) {
-        out << "/* ERROR: general interface is not supported yet. */\n";
+        out << "LOG(ERROR) << \"general interface is not supported yet. \";\n";
       } else {
         ReplaceSubString(type_name, "::", "_");
         out << arg_name << " = VtsFuzzerCreateVts" << type_name
@@ -1149,13 +1149,14 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_POINTER:
     {
-      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_POINTER is not supported yet. \";\n";
       break;
     }
     case TYPE_FMQ_SYNC:
     case TYPE_FMQ_UNSYNC: {
       if (arg_name.find("->") != std::string::npos) {
-        cout << "Nested structure with fmq is not supported yet." << endl;
+        out << "LOG(ERROR) << \"Nested structure with fmq is not supported "
+               "yet. \";\n";
       } else {
         // TODO(zhuoyao): consider record and use the queue capacity.
         std::string element_type = GetCppVariableType(val.fmq_value(0));
@@ -1198,11 +1199,11 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     }
     case TYPE_REF:
     {
-      out << "/* ERROR: TYPE_REF is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_REF is not supported yet. \";\n";
       break;
     }
     case TYPE_SAFE_UNION: {
-      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_SAFE_UNION is not supported yet. \";\n";
       break;
     }
     default:
@@ -1379,46 +1380,46 @@ void HalHidlCodeGen::GenerateVerificationCodeForTypedVariable(Formatter& out,
     }
     case TYPE_HIDL_CALLBACK:
     {
-      out << "/* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_HILD_CALLBACK is not supported yet. \";\n";
       break;
     }
     case TYPE_HANDLE:
     {
-      out << "/* ERROR: TYPE_HANDLE is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_HANDLE is not supported yet. \";\n";
       break;
     }
     case TYPE_HIDL_INTERFACE:
     {
-      out << "/* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_HIDL_INTERFACE is not supported yet. \";\n";
       break;
     }
     case TYPE_HIDL_MEMORY:
     {
-      out << "/* ERROR: TYPE_HIDL_MEMORY is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_HIDL_MEMORY is not supported yet. \";\n";
       break;
     }
     case TYPE_POINTER:
     {
-      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_POINTER is not supported yet. \";\n";
       break;
     }
     case TYPE_FMQ_SYNC:
     {
-      out << "/* ERROR: TYPE_FMQ_SYNC is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_FMQ_SYNC is not supported yet. \";\n";
       break;
     }
     case TYPE_FMQ_UNSYNC:
     {
-      out << "/* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_FMQ_UNSYNC is not supported yet. \";\n";
       break;
     }
     case TYPE_REF:
     {
-      out << "/* ERROR: TYPE_REF is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_REF is not supported yet. \";\n";
       break;
     }
     case TYPE_SAFE_UNION: {
-      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_SAFE_UNION is Not supported yet. \";\n";
       break;
     }
     default:
@@ -1603,7 +1604,7 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_HIDL_CALLBACK:
     {
       out << result_msg << "->set_type(TYPE_HIDL_CALLBACK);\n";
-      out << "/* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE HIDL_CALLBACK is not supported yet. \";\n";
       break;
     }
     case TYPE_HANDLE:
@@ -1649,7 +1650,7 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_POINTER:
     {
       out << result_msg << "->set_type(TYPE_POINTER);\n";
-      out << "/* ERROR: TYPE_POINTER is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_POINTER is not supported yet. \";\n";
       break;
     }
     case TYPE_FMQ_SYNC:
@@ -1698,12 +1699,12 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
     case TYPE_REF:
     {
       out << result_msg << "->set_type(TYPE_REF);\n";
-      out << "/* ERROR: TYPE_REF is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_REF is not supported yet. \";\n";
       break;
     }
     case TYPE_SAFE_UNION: {
       out << result_msg << "->set_type(TYPE_SAFE_UNION);\n";
-      out << "/* ERROR: TYPE_SAFE_UNION is not supported yet. */\n";
+      out << "LOG(ERROR) << \"TYPE_SAFE_UNION is not supported yet. \";\n";
       break;
     }
     default:
