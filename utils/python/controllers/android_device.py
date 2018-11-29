@@ -60,6 +60,8 @@ DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
 THREAD_SLEEP_TIME = 1
 # Max number of attempts that the client can make to connect to the agent
 MAX_AGENT_CONNECT_RETRIES = 10
+# System property for product sku.
+PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 
 
 class AndroidDeviceError(signals.ControllerError):
@@ -1030,7 +1032,7 @@ class AndroidDevice(object):
                 host_command_port=self.host_command_port, adb=self.adb)
         if self.enable_sl4a:
             try:
-                self.startSl4aClient(eself.enable_sl4a_ed)
+                self.startSl4aClient(self.enable_sl4a_ed)
             except Exception as e:
                 self.log.exception("Failed to start SL4A!")
                 self.log.exception(e)

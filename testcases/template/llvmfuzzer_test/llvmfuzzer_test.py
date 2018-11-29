@@ -36,7 +36,10 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
     Attributes:
         _dut: AndroidDevice, the device under test as config
         _testcases: string list, list of testcases to run
+        start_vts_agents: whether to start vts agents when registering new
+                          android devices.
     """
+    start_vts_agents = False
 
     def setUpClass(self):
         """Creates a remote shell instance, and copies data files."""
@@ -54,7 +57,7 @@ class LLVMFuzzerTest(base_test.BaseTestClass):
         logging.info("%s: %s", config.ConfigKeys.FUZZER_CONFIGS,
                      self.fuzzer_configs)
 
-        self._dut = self.registerController(android_device, False)[0]
+        self._dut = self.android_devices[0]
         self._dut.adb.shell("mkdir %s -p" % config.FUZZER_TEST_DIR)
 
     def tearDownClass(self):

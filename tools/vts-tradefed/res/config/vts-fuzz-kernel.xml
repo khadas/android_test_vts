@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs a retry of a previous cts-on-gsi session.">
-    <include name="cts-base-common" />
-    <include name="cts-on-gsi-exclude" />
+<configuration description="VTS Fuzz-Kernel Test Plan">
+  <include name="vts-base" />
+  <option name="plan" value="vts" />
+  <option name="test-tag" value="vts-star" />
+  <option name="vts-plan-result:plan-name" value="vts-fuzz-kernel" />
 
-    <option name="plan" value="cts-on-gsi-retry" />
+  <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-fuzz-kernel" />
 
-    <test class="com.android.compatibility.common.tradefed.testtype.retry.VtsRetryFactoryTest" />
 </configuration>

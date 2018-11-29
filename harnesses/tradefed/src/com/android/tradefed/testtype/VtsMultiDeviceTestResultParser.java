@@ -88,6 +88,7 @@ public class VtsMultiDeviceTestResultParser {
     static final String TEST_CLASS = "Test Class";
     static final String TEST_NAME = "Test Name";
     static final String RESULT = "Result";
+    static final String CLASS_ERRORS = "Class Errors";
 
     // default message for test failure
     static final String UNKNOWN_ERROR = "Unknown error.";
@@ -454,6 +455,10 @@ public class VtsMultiDeviceTestResultParser {
                             printJsonTable(key, tables.getJSONArray(key));
                         }
                     }
+                }
+
+                if (!object.isNull(CLASS_ERRORS)) {
+                    listener.testRunFailed(object.getString(CLASS_ERRORS));
                 }
                 listener.testRunEnded(endTime - beginTime, Collections.<String, String>emptyMap());
             }

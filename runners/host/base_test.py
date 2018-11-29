@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import sys
+import threading
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -47,9 +48,11 @@ TEST_CASE_TOKEN = "[Test Case]"
 RESULT_LINE_TEMPLATE = TEST_CASE_TOKEN + " %s %s"
 STR_TEST = "test"
 STR_GENERATE = "generate"
+TEARDOWN_CLASS_TIMEOUT_SECS = 30
 _REPORT_MESSAGE_FILE_NAME = "report_proto.msg"
 _BUG_REPORT_FILE_PREFIX = "bugreport"
 _BUG_REPORT_FILE_EXTENSION = ".zip"
+_DEFAULT_TEST_TIMEOUT_SECS = 60 * 3
 _LOGCAT_FILE_PREFIX = "logcat"
 _LOGCAT_FILE_EXTENSION = ".txt"
 _ANDROID_DEVICES = '_android_devices'
@@ -85,6 +88,11 @@ class BaseTestClass(object):
         _current_record: A records.TestResultRecord object for the test case
                          currently being executed. If no test is running, this
                          should be None.
+        _interrupted: Whether the test execution has been interrupted.
+        _interrupt_lock: The threading.Lock object that protects _interrupted.
+        _timer: The threading.Timer object that interrupts main thread when
+                timeout.
+        timeout: A float, the timeout, in seconds, configured for this object.
         include_filer: A list of string, each representing a test case name to
                        include.
         exclude_filer: A list of string, each representing a test case name to
@@ -94,6 +102,8 @@ class BaseTestClass(object):
         web: WebFeature, object storing web feature util for test run
         coverage: CoverageFeature, object storing coverage feature util for test run
         sancov: SancovFeature, object storing sancov feature util for test run
+        start_vts_agents: whether to start vts agents when registering new
+                          android devices.
         profiling: ProfilingFeature, object storing profiling feature util for test run
         _bug_report_on_failure: bool, whether to catch bug report at the end
                                 of failed test cases. Default is False
@@ -101,6 +111,7 @@ class BaseTestClass(object):
                                 of failed test cases. Default is True
         test_filter: Filter object to filter test names.
     """
+    start_vts_agents = True
 
     def __init__(self, configs):
         self.tests = []
@@ -110,6 +121,22 @@ class BaseTestClass(object):
         self.results = records.TestResult()
         self.log = logger.LoggerProxy()
         self._current_record = None
+
+        # Timeout
+        self._interrupted = False
+        self._interrupt_lock = threading.Lock()
+        self._timer = None
+        self.timeout = self.getUserParam(
+            keys.ConfigKeys.KEY_TEST_TIMEOUT,
+            default_value=_DEFAULT_TEST_TIMEOUT_SECS * 1000.0)
+        try:
+            self.timeout = float(self.timeout) / 1000.0
+        except (TypeError, ValueError):
+            logging.error("Cannot parse timeout: %s", self.timeout)
+            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
+        if self.timeout <= 0:
+            logging.error("Invalid timeout: %s", self.timeout)
+            self.timeout = _DEFAULT_TEST_TIMEOUT_SECS
 
         # Setup test filters
         self.include_filter = self.getUserParam(
@@ -187,7 +214,8 @@ class BaseTestClass(object):
         """Returns a list of AndroidDevice objects"""
         if not hasattr(self, _ANDROID_DEVICES):
             setattr(self, _ANDROID_DEVICES,
-                    self.registerController(android_device))
+                    self.registerController(android_device,
+                                            start_services=self.start_vts_agents))
         return getattr(self, _ANDROID_DEVICES)
 
     @android_devices.setter
@@ -304,6 +332,8 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of setUpClass
         is called.
         """
+        self.resetTimeout(self.timeout)
+
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
@@ -326,9 +356,15 @@ class BaseTestClass(object):
         is called.
         """
         ret = self.tearDownClass()
+
+        self.resetTimeout(TEARDOWN_CLASS_TIMEOUT_SECS)
         if self.log_uploading.enabled:
             self.log_uploading.UploadLogs()
         if self.web.enabled:
+            if self.results.class_errors:
+                # Create a result to make the module shown as failure.
+                self.web.AddTestReport("setup_class")
+                self.web.SetTestResult(ReportMsg.TEST_CASE_RESULT_FAIL)
             message_b = self.web.GenerateReportMessage(self.results.requested,
                                                        self.results.executed)
         else:
@@ -352,6 +388,40 @@ class BaseTestClass(object):
         Implementation is optional.
         """
         pass
+
+    def interrupt(self):
+        """Interrupts test execution and terminates process."""
+        with self._interrupt_lock:
+            if self._interrupted:
+                logging.warning("Cannot interrupt more than once.")
+                return
+            self._interrupted = True
+
+        utils.stop_current_process(TEARDOWN_CLASS_TIMEOUT_SECS)
+
+    def resetTimeout(self, timeout):
+        """Restarts the timer that will interrupt the main thread.
+
+        This class starts the timer before setUpClass. As the timeout depends
+        on number of generated tests, the subclass can restart the timer.
+
+        Args:
+            timeout: A float, wait time in seconds before interrupt.
+        """
+        with self._interrupt_lock:
+            if self._interrupted:
+                logging.warning("Test execution has been interrupted. "
+                                "Cannot reset timeout.")
+                return
+
+        if self._timer:
+            logging.info("Cancel timer.")
+            self._timer.cancel()
+
+        logging.info("Start timer with timeout=%ssec.", timeout)
+        self._timer = threading.Timer(timeout, self.interrupt)
+        self._timer.daemon = True
+        self._timer.start()
 
     def _testEntry(self, test_record):
         """Internal function to be called upon entry of a test case.
@@ -907,16 +977,23 @@ class BaseTestClass(object):
         """
         # Setup for the class with retry.
         for i in xrange(_SETUP_RETRY_NUMBER):
+            setup_done = False
+            caught_exception = None
             try:
                 if self._setUpClass() is False:
                     raise signals.TestFailure(
                         "Failed to setup %s." % self.test_module_name)
                 else:
-                    break
+                    setup_done = True
             except Exception as e:
+                caught_exception = e
                 logging.exception("Failed to setup %s.", self.test_module_name)
-                if i + 1 == _SETUP_RETRY_NUMBER:
-                    self.results.failClass(self.test_module_name, e)
+            finally:
+                if setup_done:
+                    break
+                elif not caught_exception or i + 1 == _SETUP_RETRY_NUMBER:
+                    self.results.failClass(self.test_module_name,
+                                           caught_exception)
                     self._exec_func(self._tearDownClass)
                     return self.results
                 else:
@@ -926,6 +1003,7 @@ class BaseTestClass(object):
                         device.stopServices()
                         device.startServices()
 
+        class_error = None
         # Run tests in order.
         try:
             # Check if module is running in self test mode.
@@ -948,11 +1026,13 @@ class BaseTestClass(object):
                     self.test_module_name,
                     "All test cases skipped; unable to find any test case.")
             return self.results
-        except (signals.TestAbortClass, acts_signals.TestAbortClass):
+        except (signals.TestAbortClass, acts_signals.TestAbortClass) as e:
             logging.info("Received TestAbortClass signal")
+            class_error = e
             return self.results
         except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
             logging.info("Received TestAbortAll signal")
+            class_error = e
             # Piggy-back test results on this exception object so we don't lose
             # results from this test class.
             setattr(e, "results", self.results)
@@ -960,8 +1040,11 @@ class BaseTestClass(object):
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
+            class_error = e
             raise e
         finally:
+            if class_error:
+                self.results.failClass(self.test_module_name, class_error)
             self._exec_func(self._tearDownClass)
             if self.web.enabled:
                 name, timestamp = self.web.GetTestModuleKeys()

@@ -304,22 +304,15 @@ class VtsTcpClient(object):
                 return mirror_object.MirrorObject(
                     self, result.return_type_submodule_spec, None)
 
-            logging.info("result: %s", result.return_type_hidl)
-            if len(result.return_type_hidl) == 1:
-                result_value = self.GetPythonDataOfVariableSpecMsg(
-                    result.return_type_hidl[0])
-            elif len(result.return_type_hidl) > 1:
+            if result.HasField("return_type"):  # For non-HIDL return value
+                result_value = result
+            else:
                 result_value = []
                 for return_type_hidl in result.return_type_hidl:
                     result_value.append(
                         self.GetPythonDataOfVariableSpecMsg(return_type_hidl))
-            else:  # For non-HIDL return value
-                if hasattr(result, "return_type"):
-                    result_value = result
-                else:
-                    result_value = None
 
-            if hasattr(result, "raw_coverage_data"):
+            if len(result.raw_coverage_data) > 0:
                 return result_value, {"coverage": result.raw_coverage_data}
             else:
                 return result_value
@@ -487,7 +480,10 @@ class VtsTcpClient(object):
                     msg.component_type if target_type is None else target_type,
                     float(imported_interface.split("@")[1].split("::")[0]),
                     imported_interface.split("@")[0])
-                result.MergeFrom(imported_result)
+                # Merge the attributes from imported interface.
+                for attribute in imported_result.attribute:
+                    imported_attribute = result.attribute.add()
+                    imported_attribute.CopyFrom(attribute)
 
         return result
 

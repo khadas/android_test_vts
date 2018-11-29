@@ -30,7 +30,7 @@ class ConfigKeys(object):
     KEY_TESTBED_NAME = "name"
     KEY_TEST_PATHS = "test_paths"
     KEY_TEST_SUITE = "test_suite"
-    KEY_TEST_MAX_TIMEOUT = "test_max_timeout"
+    KEY_TEST_TIMEOUT = "test_timeout"
 
     # Keys in test suite
     KEY_INCLUDE_FILTER = "include_filter"
@@ -107,6 +107,7 @@ class ConfigKeys(object):
     IKEY_GCOV_RESOURCES_PATH = "gcov_resources_path"
     IKEY_COVERAGE_REPORT_PATH = "coverage_report_path"
     IKEY_EXCLUDE_COVERAGE_PATH = "exclude_coverage_path"
+    IKEY_FUZZING_GCS_BUCKET_NAME = "fuzzing_gcs_bucket_name"
 
     # Keys for the HAL HIDL GTest type (see VtsMultiDeviceTest.java).
     IKEY_PRECONDITION_HWBINDER_SERVICE = "precondition_hwbinder_service"
@@ -126,12 +127,15 @@ class ConfigKeys(object):
 
     # Keys for special test cases
     IKEY_FFMPEG_BINARY_PATH = "ffmpeg_binary_path"
+    IKEY_SYZKALLER_PACKAGES_PATH = "syzkaller_packages_path"
+    IKEY_SYZKALLER_TEMPLATE_PATH = "syzkaller_template_path"
 
     # Keys for log uploading
     IKEY_ENABLE_LOG_UPLOADING = "enable_log_uploading"
     IKEY_LOG_UPLOADING_PATH = "log_uploading_path"
     IKEY_LOG_UPLOADING_USE_DATE_DIRECTORY = "log_uploading_use_date_directory"
     IKEY_LOG_UPLOADING_URL_PREFIX = "log_uploading_url_prefix"
+    IKEY_LOG_UPLOADING_GCS_BUCKET_NAME = "log_uploading_gcs_bucket_name"
 
     # A list of keys whose values in configs should not be passed to test
     # classes without unpacking first.
