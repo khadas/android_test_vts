@@ -119,3 +119,29 @@ vtf_copy_pairs := \
 
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs) $(vtf_copy_pairs)
+
+vtf_tradefed_modules := \
+  compatibility-common-util-tests \
+  compatibility-host-util \
+  compatibility-host-util-tests \
+  compatibility-tradefed-tests \
+  hosttestlib \
+  host-libprotobuf-java-full \
+  loganalysis \
+  tradefed \
+  vts-tradefed \
+  vts-tradefed-tests \
+
+vtf_tradefed_copy_pairs := \
+  $(foreach f,$(vtf_tradefed_modules),\
+    $(HOST_OUT)/framework/$(f).jar:$(VTS_TOOLS_OUT)/$(f).jar)
+
+vtf_tradefed_additional_deps_copy_pairs := \
+  test/vts/tools/vts-tradefed/etc/vts-tradefed:$(VTS_TOOLS_OUT)/vts-tradefed
+
+vtf_package_copy_pairs := \
+  $(call copy-many-files,$(vtf_tradefed_copy_pairs)) \
+  $(call copy-many-files,$(vtf_tradefed_additional_deps_copy_pairs)) \
+
+.PHONY: vtf
+vtf: $(vtf_copy_pairs) $(vtf_package_copy_pairs)
