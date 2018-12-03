@@ -344,7 +344,7 @@ bool FuzzerExtended_android_hardware_tests_msgq_V1_0_ITestMsgQ::VerifyResults(co
     if (!strcmp(actual_result.name().c_str(), "getFmqUnsyncWrite")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
         if (actual_result.return_type_hidl(0).scalar_value().bool_t() != expected_result.return_type_hidl(0).scalar_value().bool_t()) { return false; }
-        /* ERROR: TYPE_FMQ_UNSYNC is not supported yet. */
+        LOG(ERROR) << "TYPE_FMQ_UNSYNC is not supported yet. ";
         return true;
     }
     if (!strcmp(actual_result.name().c_str(), "requestWriteFmqSync")) {

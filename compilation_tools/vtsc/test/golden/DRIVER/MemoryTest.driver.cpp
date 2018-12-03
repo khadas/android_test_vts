@@ -244,7 +244,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::VerifyResult
     const FunctionSpecificationMessage& actual_result __attribute__((__unused__))) {
     if (!strcmp(actual_result.name().c_str(), "haveSomeMemory")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
-        /* ERROR: TYPE_HIDL_MEMORY is not supported yet. */
+        LOG(ERROR) << "TYPE_HIDL_MEMORY is not supported yet. ";
         return true;
     }
     if (!strcmp(actual_result.name().c_str(), "fillMemory")) {
@@ -262,7 +262,7 @@ bool FuzzerExtended_android_hardware_tests_memory_V1_0_IMemoryTest::VerifyResult
     }
     if (!strcmp(actual_result.name().c_str(), "get")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
-        /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+        LOG(ERROR) << "TYPE_HIDL_INTERFACE is not supported yet. ";
         return true;
     }
     return false;

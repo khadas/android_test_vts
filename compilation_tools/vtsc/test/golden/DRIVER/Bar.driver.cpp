@@ -184,7 +184,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::GetService(bool get_st
     callback_message.set_name("Vts_android_hardware_tests_bar_V1_0_IBar::callMe");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_CALLBACK);
-    /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
+    LOG(ERROR) << "TYPE HIDL_CALLBACK is not supported yet. ";
     RpcCallToAgent(callback_message, callback_socket_name_);
     return ::android::hardware::Void();
 }
@@ -503,7 +503,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::GetService(bool get_st
     callback_message.set_name("Vts_android_hardware_tests_bar_V1_0_IBar::echoNullInterface");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_CALLBACK);
-    /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
+    LOG(ERROR) << "TYPE HIDL_CALLBACK is not supported yet. ";
     RpcCallToAgent(callback_message, callback_socket_name_);
     cb(static_cast<bool>(0), nullptr);
     return ::android::hardware::Void();
@@ -1047,7 +1047,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
             if (func_msg.arg(0).vector_value(arg0_index).has_hidl_interface_pointer()) {
                 arg0[arg0_index] = reinterpret_cast<::android::hidl::base::V1_0::IBase*>(func_msg.arg(0).vector_value(arg0_index).hidl_interface_pointer());
             } else {
-                /* ERROR: general interface is not supported yet. */
+                LOG(ERROR) << "general interface is not supported yet. ";
             }
         }
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
@@ -1085,7 +1085,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
             result_val_0->mutable_scalar_value()->set_bool_t(arg0);
             VariableSpecificationMessage* result_val_1 = result_msg->add_return_type_hidl();
             result_val_1->set_type(TYPE_HIDL_CALLBACK);
-            /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
+            LOG(ERROR) << "TYPE HIDL_CALLBACK is not supported yet. ";
         });
         return true;
     }
@@ -1472,7 +1472,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::VerifyResults(const Fu
             return false;
         }
         for (int i = 0; i <expected_result.return_type_hidl(0).vector_value_size(); i++) {
-            /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+            LOG(ERROR) << "TYPE_HIDL_INTERFACE is not supported yet. ";
         }
         return true;
     }
@@ -1483,14 +1483,14 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::VerifyResults(const Fu
             return false;
         }
         for (int i = 0; i <expected_result.return_type_hidl(0).vector_value_size(); i++) {
-            /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+            LOG(ERROR) << "TYPE_HIDL_INTERFACE is not supported yet. ";
         }
         return true;
     }
     if (!strcmp(actual_result.name().c_str(), "echoNullInterface")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
         if (actual_result.return_type_hidl(0).scalar_value().bool_t() != expected_result.return_type_hidl(0).scalar_value().bool_t()) { return false; }
-        /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
+        LOG(ERROR) << "TYPE_HILD_CALLBACK is not supported yet. ";
         return true;
     }
     if (!strcmp(actual_result.name().c_str(), "createMyHandle")) {
@@ -1505,7 +1505,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::VerifyResults(const Fu
             return false;
         }
         for (int i = 0; i <expected_result.return_type_hidl(0).vector_value_size(); i++) {
-            /* ERROR: TYPE_HANDLE is not supported yet. */
+            LOG(ERROR) << "TYPE_HANDLE is not supported yet. ";
         }
         return true;
     }
@@ -1538,7 +1538,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::VerifyResults(const Fu
     }
     if (!strcmp(actual_result.name().c_str(), "haveAInterface")) {
         if (actual_result.return_type_hidl_size() != expected_result.return_type_hidl_size() ) { return false; }
-        /* ERROR: TYPE_HIDL_INTERFACE is not supported yet. */
+        LOG(ERROR) << "TYPE_HIDL_INTERFACE is not supported yet. ";
         return true;
     }
     return false;
