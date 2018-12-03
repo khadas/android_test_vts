@@ -1,0 +1,7 @@
+// Common build rules for VTS tests
+
+// VTS target-side test binaries must use the following for proper packaging:
+cc_defaults {
+    name: "vts_target_tests_defaults",
+    test_suites: ["general-tests"],
+}
