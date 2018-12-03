@@ -325,6 +325,9 @@ class BinaryTest(base_test.BaseTestClass):
             if not self.isSkipAllTests():
                 self.coverage.SetCoverageData(dut=self._dut, isGlobal=True)
 
+        if self.profiling.enabled:
+            self.profiling.DisableVTSProfiling(self.shell)
+
         # Clean up the pushed binaries
         logging.debug('Start class cleaning up jobs.')
         # Delete pushed files
