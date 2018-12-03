@@ -132,8 +132,9 @@ class HidlHalGTest(gtest_binary_test.GtestBinaryTest):
             return initial_test_cases
         # first, run one test with --list_registered_services.
         list_service_test_case = copy.copy(initial_test_cases[0])
-        list_service_test_case.args += " --list_registered_services"
-        results = self.shell.Execute(list_service_test_case.GetRunCommand())
+        list_service_test_case.args = " --list_registered_services"
+        results = self.shell.Execute(
+            list_service_test_case.GetRunCommand(raw_command=True))
         if (results[const.EXIT_CODE][0]):
             logging.error("Failed to list test cases from binary %s",
                           list_service_test_case.path)
