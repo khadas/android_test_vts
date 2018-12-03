@@ -16,7 +16,7 @@
 
 LOCAL_MODULE_CLASS := FAKE
 LOCAL_IS_HOST_MODULE := true
-LOCAL_COMPATIBILITY_SUITE := vts
+LOCAL_COMPATIBILITY_SUITE := vts general-tests
 
 include $(BUILD_SYSTEM)/base_rules.mk
 
