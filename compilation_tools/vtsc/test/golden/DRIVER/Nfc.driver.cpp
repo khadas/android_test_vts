@@ -37,7 +37,7 @@ bool FuzzerExtended_android_hardware_nfc_V1_0_INfc::GetService(bool get_stub, co
     callback_message.set_name("Vts_android_hardware_nfc_V1_0_INfc::open");
     VariableSpecificationMessage* var_msg0 = callback_message.add_arg();
     var_msg0->set_type(TYPE_HIDL_CALLBACK);
-    /* ERROR: TYPE_HIDL_CALLBACK is not supported yet. */
+    LOG(ERROR) << "TYPE HIDL_CALLBACK is not supported yet. ";
     RpcCallToAgent(callback_message, callback_socket_name_);
     return ::android::hardware::nfc::V1_0::NfcStatus();
 }
