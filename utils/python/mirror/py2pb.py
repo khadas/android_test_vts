@@ -182,28 +182,28 @@ def PyDict2PbStruct(message, pb_spec, py_value):
                     PyDict2PbStruct(attr_msg, sub_attr, curr_value)
                 else:
                     logging.error("PyDict2PbStruct: substruct not found.")
-                    sys.exit(-1)
+                    return None
             elif attr.type == CompSpecMsg.TYPE_UNION:
                 sub_attr = FindSubStructType(pb_spec, attr.predefined_type)
                 if sub_attr:
                     PyDict2PbUnion(attr_msg, sub_attr, curr_value)
                 else:
                     logging.error("PyDict2PbStruct: subunion not found.")
-                    sys.exit(-1)
+                    return None
             else:
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
-                sys.exit(-1)
+                return None
         else:
             # TODO: instead crash the test, consider to generate default value
             # in case not provided in the py_value.
             logging.error("PyDict2PbStruct: attr %s not provided", attr.name)
-            sys.exit(-1)
+            return None
     if len(provided_attrs) > 0:
         logging.error("PyDict2PbStruct: provided dictionary included elements" +
                       " not part of the type being converted to: %s",
                       provided_attrs)
-        sys.exit(-1)
+        return None
     return message
 
 
@@ -222,7 +222,7 @@ def PyDict2PbUnion(message, pb_spec, py_value):
         logging.error("PyDict2PbUnion: Union only allows specifying " +
                       "at most one field. Current Python dictionary " +
                       "has size %d", len(py_value))
-        sys.exit(-1)
+        return None
 
     if pb_spec.name:
         message.name = pb_spec.name
@@ -250,18 +250,18 @@ def PyDict2PbUnion(message, pb_spec, py_value):
                     PyDict2PbStruct(attr_msg, sub_attr, curr_value)
                 else:
                     logging.error("PyDict2PbStruct: substruct not found.")
-                    sys.exit(-1)
+                    return None
             elif attr.type == CompSpecMsg.TYPE_UNION:
                 sub_attr = FindSubUnionType(pb_spec, attr.predefined_type)
                 if sub_attr:
                     PyDict2PbUnion(attr_msg, sub_attr, curr_value)
                 else:
                     logging.error("PyDict2PbUnion: subunion not found.")
-                    sys.exit(-1)
+                    return None
             else:
                 logging.error("PyDict2PbStruct: unsupported type %s",
                               attr.type)
-                sys.exit(-1)
+                return None
         else:
             # Add a field, where name field is initialized as an empty string.
             # In generated driver implementation, driver knows this field is
@@ -271,7 +271,7 @@ def PyDict2PbUnion(message, pb_spec, py_value):
     if len(provided_attrs) > 0:
         logging.error("PyDict2PbUnion: specified field is not in the union " +
                       "definition for union type %s", provided_attrs)
-        sys.exit(-1)
+        return None
     return message
 
 
@@ -310,6 +310,6 @@ def Convert(pb_spec, py_value):
     else:
         logging.error("py2pb.Convert: unsupported type %s",
                       pb_spec.type)
-        sys.exit(-1)
+        return None
 
     return message
