@@ -23,7 +23,7 @@
 using namespace android::hardware::tests::msgq::V1_0;
 namespace android {
 namespace vts {
-extern "C" ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits EnumValue__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const ScalarDataValueMessage& arg);
+extern "C" void MessageTo__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const VariableSpecificationMessage& var_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits* arg, const string& callback_socket_name);
 uint32_t Random__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits();
 bool Verify__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(const VariableSpecificationMessage& expected_result, const VariableSpecificationMessage& actual_result);
 extern "C" void SetResult__android__hardware__tests__msgq__V1_0__ITestMsgQ__EventFlagBits(VariableSpecificationMessage* result_msg, ::android::hardware::tests::msgq::V1_0::ITestMsgQ::EventFlagBits result_value);
