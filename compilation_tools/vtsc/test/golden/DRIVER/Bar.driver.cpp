@@ -662,7 +662,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "convertToBoolIfSmall")) {
         ::android::hardware::tests::foo::V1_0::IFoo::Discriminator arg0;
-        arg0 = EnumValue__android__hardware__tests__foo__V1_0__IFoo__Discriminator(func_msg.arg(0).scalar_value());
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__Discriminator(func_msg.arg(0), &(arg0), callback_socket_name);
         ::android::hardware::hidl_vec<::android::hardware::tests::foo::V1_0::IFoo::Union> arg1;
         arg1.resize(func_msg.arg(1).vector_value_size());
         for (int arg1_index = 0; arg1_index < func_msg.arg(1).vector_value_size(); arg1_index++) {
@@ -787,7 +787,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "useAnEnum")) {
         ::android::hardware::tests::foo::V1_0::IFoo::SomeEnum arg0;
-        arg0 = EnumValue__android__hardware__tests__foo__V1_0__IFoo__SomeEnum(func_msg.arg(0).scalar_value());
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__SomeEnum(func_msg.arg(0), &(arg0), callback_socket_name);
         LOG(DEBUG) << "local_device = " << hw_binder_proxy_.get();
         ::android::hardware::tests::foo::V1_0::IFoo::SomeEnum result0 = hw_binder_proxy_->useAnEnum(arg0);
         result_msg->set_name("useAnEnum");
@@ -1233,7 +1233,7 @@ bool FuzzerExtended_android_hardware_tests_bar_V1_0_IBar::CallFunction(
     }
     if (!strcmp(func_name, "takeAMask")) {
         ::android::hardware::tests::foo::V1_0::IFoo::BitField arg0;
-        arg0 = EnumValue__android__hardware__tests__foo__V1_0__IFoo__BitField(func_msg.arg(0).scalar_value());
+        MessageTo__android__hardware__tests__foo__V1_0__IFoo__BitField(func_msg.arg(0), &(arg0), callback_socket_name);
         uint8_t arg1;
         arg1 = func_msg.arg(1).scalar_value().uint8_t();
         ::android::hardware::tests::foo::V1_0::IFoo::MyMask arg2;

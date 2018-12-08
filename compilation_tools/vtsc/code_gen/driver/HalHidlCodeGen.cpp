@@ -663,78 +663,64 @@ void HalHidlCodeGen::GenerateRandomFunctionImplForAttribute(Formatter& out,
 
 void HalHidlCodeGen::GenerateDriverDeclForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
-  if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
-      attribute.type() == TYPE_SAFE_UNION) {
-    // Recursively generate SetResult method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
-      GenerateDriverDeclForAttribute(out, sub_struct);
-    }
-    for (const auto sub_union : attribute.sub_union()) {
-      GenerateDriverDeclForAttribute(out, sub_union);
-    }
-    for (const auto sub_safe_union : attribute.sub_safe_union()) {
-      GenerateDriverDeclForAttribute(out, sub_safe_union);
-    }
-    string func_name = "MessageTo"
-        + ClearStringWithNameSpaceAccess(attribute.name());
-    // Add extern C to allow resource_manager to dynamically load this function.
-    out << "extern \"C\" ";
-    out << "void " << func_name
-        << "(const VariableSpecificationMessage& var_msg, " << attribute.name()
-        << "* arg, const string& callback_socket_name);\n";
-  } else if (attribute.type() == TYPE_ENUM) {
-    string func_name = "EnumValue"
-            + ClearStringWithNameSpaceAccess(attribute.name());
-    // Add extern C to allow resource_manager to dynamically load this function.
-    out << "extern \"C\" ";
-    // Message to value converter
-    out << attribute.name() << " " << func_name
-        << "(const ScalarDataValueMessage& arg);\n";
-  } else {
-    cerr << __func__ << " unsupported attribute type " << attribute.type()
-         << "\n";
+  if (!IsUserDefinedType(attribute.type())) {
+    cerr << attribute.type() << " is not a user defined type\n";
     exit(-1);
   }
+  for (const auto sub_struct : attribute.sub_struct()) {
+    GenerateDriverDeclForAttribute(out, sub_struct);
+  }
+  for (const auto sub_union : attribute.sub_union()) {
+    GenerateDriverDeclForAttribute(out, sub_union);
+  }
+  for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    GenerateDriverDeclForAttribute(out, sub_safe_union);
+  }
+  string func_name =
+      "MessageTo" + ClearStringWithNameSpaceAccess(attribute.name());
+  // Add extern C to allow resource_manager to dynamically load this function.
+  out << "extern \"C\" ";
+  out << "void " << func_name
+      << "(const VariableSpecificationMessage& var_msg, " << attribute.name()
+      << "* arg, const string& callback_socket_name);\n";
 }
 
 void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
+  if (!IsUserDefinedType(attribute.type())) {
+    cerr << attribute.type() << " is not a user defined type\n";
+    exit(-1);
+  }
+  // Recursively generate driver implementation method for all sub_types.
+  for (const auto sub_struct : attribute.sub_struct()) {
+    GenerateDriverImplForAttribute(out, sub_struct);
+  }
+  for (const auto sub_union : attribute.sub_union()) {
+    GenerateDriverImplForAttribute(out, sub_union);
+  }
+  for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    GenerateDriverImplForAttribute(out, sub_safe_union);
+  }
+  string func_name =
+      "MessageTo" + ClearStringWithNameSpaceAccess(attribute.name());
+  // Add extern C to allow resource_manager to dynamically load this
+  // function.
+  out << "extern \"C\" ";
+  out << "void " << func_name
+      << "(const VariableSpecificationMessage& "
+         "var_msg __attribute__((__unused__)), "
+      << attribute.name() << "* arg __attribute__((__unused__)), "
+      << "const string& callback_socket_name __attribute__((__unused__))) {"
+      << "\n";
+  out.indent();
+
   switch (attribute.type()) {
-    case TYPE_ENUM:
-    {
-      string func_name = "EnumValue"
-          + ClearStringWithNameSpaceAccess(attribute.name());
-      // Add extern C to allow resource_manager to dynamically load this
-      // function.
-      out << "extern \"C\" ";
-      // Message to value converter
-      out << attribute.name() << " " << func_name
-          << "(const ScalarDataValueMessage& arg) {\n";
-      out.indent();
-      out << "return (" << attribute.name() << ") arg."
+    case TYPE_ENUM: {
+      out << "*arg = (" << attribute.name() << ")var_msg.scalar_value()."
           << attribute.enum_value().scalar_type() << "();\n";
-      out.unindent();
-      out << "}" << "\n";
       break;
     }
-    case TYPE_STRUCT:
-    {
-      // Recursively generate driver implementation method for all sub_types.
-      for (const auto sub_struct : attribute.sub_struct()) {
-        GenerateDriverImplForAttribute(out, sub_struct);
-      }
-      string func_name = "MessageTo"
-          + ClearStringWithNameSpaceAccess(attribute.name());
-      // Add extern C to allow resource_manager to dynamically load this
-      // function.
-      out << "extern \"C\" ";
-      out << "void " << func_name
-          << "(const VariableSpecificationMessage& "
-             "var_msg __attribute__((__unused__)), "
-          << attribute.name() << "* arg __attribute__((__unused__)), "
-          << "const string& callback_socket_name __attribute__((__unused__))) {"
-          << "\n";
-      out.indent();
+    case TYPE_STRUCT: {
       int struct_index = 0;
       for (const auto& struct_value : attribute.struct_value()) {
         GenerateDriverImplForTypedVariable(
@@ -742,70 +728,36 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
             "var_msg.struct_value(" + std::to_string(struct_index) + ")");
         struct_index++;
       }
-      out.unindent();
-      out << "}\n";
       break;
     }
-    case TYPE_UNION:
-    {
-      // Recursively generate driver implementation method for all sub_types.
-      for (const auto sub_union : attribute.sub_union()) {
-        GenerateDriverImplForAttribute(out, sub_union);
-      }
-      string func_name = "MessageTo"
-          + ClearStringWithNameSpaceAccess(attribute.name());
-      // Add extern C to allow resource_manager to dynamically load this
-      // function.
-      out << "extern \"C\" ";
-      out << "void " << func_name
-          << "(const VariableSpecificationMessage& var_msg, "
-          << attribute.name() << "* arg, "
-          << "const string& callback_socket_name __attribute__((__unused__))) {"
-          << "\n";
-      out.indent();
+    case TYPE_UNION: {
       int union_index = 0;
       for (const auto& union_value : attribute.union_value()) {
         out << "if (var_msg.union_value(" << union_index << ").name() == \""
-            << union_value.name() << "\") {" << "\n";
+            << union_value.name() << "\") {"
+            << "\n";
         out.indent();
         GenerateDriverImplForTypedVariable(
             out, union_value, "arg->" + union_value.name(),
             "var_msg.union_value(" + std::to_string(union_index) + ")");
         union_index++;
         out.unindent();
-        out << "}" << "\n";
+        out << "}\n";
       }
-      out.unindent();
-      out << "}\n";
       break;
     }
     case TYPE_SAFE_UNION: {
-      // Recursively generate driver implementation method for all sub_types.
-      for (const auto sub_safe_union : attribute.sub_safe_union()) {
-        GenerateDriverImplForAttribute(out, sub_safe_union);
-      }
-      string func_name =
-          "MessageTo" + ClearStringWithNameSpaceAccess(attribute.name());
-      // Add extern C to allow resource_manager to dynamically load this
-      // function.
-      out << "extern \"C\" ";
-      out << "void " << func_name << "(const VariableSpecificationMessage&, "
-          << attribute.name() << "*, "
-          << "const string&) {"
-          << "\n";
-      out.indent();
       out << "LOG(ERROR) << \"TYPE_SAFE_UNION is not supported yet. \";\n";
-      out.unindent();
-      out << "}\n";
       break;
     }
-    default:
-    {
+    default: {
       cerr << __func__ << " unsupported attribute type " << attribute.type()
            << "\n";
       exit(-1);
     }
   }
+  out.unindent();
+  out << "}\n";
 }
 
 void HalHidlCodeGen::GenerateGetServiceImpl(Formatter& out,
@@ -862,10 +814,10 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
     case TYPE_ENUM:
     {
       if (val.has_predefined_type()) {
-        string func_name = "EnumValue"
-            + ClearStringWithNameSpaceAccess(val.predefined_type());
-        out << arg_name << " = " << func_name << "(" << arg_value_name
-            << ".scalar_value());\n";
+        string func_name =
+            "MessageTo" + ClearStringWithNameSpaceAccess(val.predefined_type());
+        out << func_name << "(" << arg_value_name << ", &(" << arg_name
+            << "), callback_socket_name);\n";
       } else {
         out << arg_name << " = (" << val.name() << ")" << arg_value_name << "."
             << "enum_value().scalar_value(0)." << val.enum_value().scalar_type()

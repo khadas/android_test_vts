@@ -736,21 +736,8 @@ void* VtsResourceManager::GetTranslationFuncPtr(void* shared_lib_obj,
 
   void* func_ptr = nullptr;
   if (is_proto_to_cpp) {
-    // TODO: Currently HAL driver uses different function names to parse
-    // enum vs e.g. struct.
-    // For enum, the prefix of the parsing function is EnumValue.
-    // For other types, the prefix is MessageTo.
-    // Here we try both methods to load the function symbols.
-    // When vtsc is modified in the future, we don't need to do this anymore.
-    // First try using MessageTo prefix for the parsing function name.
     func_ptr =
         dlsym(shared_lib_obj, ("MessageTo" + translation_func_name).c_str());
-    if (func_ptr) {
-      return func_ptr;
-    }
-    // Then try using EnumValue prefix.
-    func_ptr =
-        dlsym(shared_lib_obj, ("EnumValue" + translation_func_name).c_str());
     if (!func_ptr) {
       LOG(ERROR) << "Resource manager: failed to load function name "
                  << "MessageTo" << translation_func_name << " or "
