@@ -169,7 +169,12 @@ class NativeEntityMirror(mirror_object.MirrorObject):
         """
         attribute_spec = self.GetAttribute(attribute_name)
         if attribute_spec:
-            return py2pb.Convert(attribute_spec, py_values)
+            converted_attr = py2pb.Convert(attribute_spec, py_values)
+            if converted_attr is None:
+              raise MirrorObjectError(
+                  "Failed to convert attribute %s", attribute_spec)
+            return coverted_attr
+        logging.error("Can not find attribute: %s", attribute_name)
         return None
 
     # TODO: Guard against calls to this function after self.CleanUp is called.
@@ -195,6 +200,8 @@ class NativeEntityMirror(mirror_object.MirrorObject):
                     logging.debug("value %s", value_msg)
                     if value_msg is not None:
                         converted_msg = py2pb.Convert(arg_msg, value_msg)
+                        if converted_msg is None:
+                          raise MirrorObjectError("Failed to convert arg %s", value_msg)
                         logging.debug("converted_message: %s", converted_msg)
                         arg_msg.CopyFrom(converted_msg)
             else:
