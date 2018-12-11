@@ -15,18 +15,22 @@
 #
 
 # Build rules for VTF (Vendor Test Framework).
-LOCAL_PATH := $(call my-dir)
+#
+# It is designed as a customizable build rule where its callers can provide
+# specifications. Before including it, please set the following variables:
+#
+# - VTF_OUT_ROOT for the base path of a local output directory base.
+# - VTF_TESTCASES_OUT for the testcases sub directory of its output zip file.
+# - VTF_TOOLS_OUT for tools sub directory of its output zip file.
+# - VTF_EXTRA_SCRIPTS for the file name of any extra script to include.
 
-build_utils_dir := $(LOCAL_PATH)/../utils
+build_list_dir := test/vts/tools/build/tasks/list
+build_utils_dir := test/vts/tools/build/utils
 
-include $(LOCAL_PATH)/list/vts_apk_package_list.mk
-include $(LOCAL_PATH)/list/vts_bin_package_list.mk
-include $(LOCAL_PATH)/list/vts_lib_package_list.mk
+include $(build_list_dir)/vts_apk_package_list.mk
+include $(build_list_dir)/vts_bin_package_list.mk
+include $(build_list_dir)/vts_lib_package_list.mk
 include $(build_utils_dir)/vts_package_utils.mk
-
-VTS_OUT_ROOT := $(HOST_OUT)/vts
-VTS_TESTCASES_OUT := $(VTS_OUT_ROOT)/android-vts/testcases
-VTS_TOOLS_OUT := $(VTS_OUT_ROOT)/android-vts/tools
 
 # Packaging rule for android-vts.zip's testcases dir (DATA subdir).
 vtf_target_native_modules := \
@@ -35,7 +39,7 @@ vtf_target_native_modules := \
     $(vts_lib_packages) \
 
 vtf_target_native_copy_pairs := \
-  $(call target-native-copy-pairs,$(vtf_target_native_modules),$(VTS_TESTCASES_OUT))
+  $(call target-native-copy-pairs,$(vtf_target_native_modules),$(VTF_TESTCASES_OUT))
 
 # Packaging rule for host-side test native packages
 
@@ -44,11 +48,11 @@ target_hostdriven_modules := \
   $(vts_test_host_bin_packages) \
 
 target_hostdriven_copy_pairs := \
-  $(call host-native-copy-pairs,$(target_hostdriven_modules),$(VTS_TESTCASES_OUT))
+  $(call host-native-copy-pairs,$(target_hostdriven_modules),$(VTF_TESTCASES_OUT))
 
 host_additional_deps_copy_pairs := \
-  test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTS_TOOLS_OUT)/vts-tradefed_win.bat \
-  test/vts/tools/vts-tradefed/DynamicConfig.xml:$(VTS_TESTCASES_OUT)/cts.dynamic
+  test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTF_TOOLS_OUT)/vts-tradefed_win.bat \
+  test/vts/tools/vts-tradefed/DynamicConfig.xml:$(VTF_TESTCASES_OUT)/cts.dynamic
 
 # Packaging rule for host-side Python logic, configs, and data files
 
@@ -59,7 +63,7 @@ host_framework_files := \
 
 host_framework_copy_pairs := \
   $(foreach f,$(host_framework_files),\
-    test/vts/$(f):$(VTS_TESTCASES_OUT)/vts/$(f))
+    test/vts/$(f):$(VTF_TESTCASES_OUT)/vts/$(f))
 
 host_testcase_files := \
   $(call find-files-in-subdirs,test/vts-testcase,"*.py" -and -type f,.) \
@@ -69,7 +73,7 @@ host_testcase_files := \
 
 host_testcase_copy_pairs := \
   $(foreach f,$(host_testcase_files),\
-    test/vts-testcase/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/$(f))
+    test/vts-testcase/$(f):$(VTF_TESTCASES_OUT)/vts/testcases/$(f))
 
 vts_test_core_copy_pairs := \
   $(call copy-many-files,$(host_testcase_copy_pairs)) \
@@ -83,7 +87,7 @@ host_camera_its_files := \
 
 host_camera_its_copy_pairs := \
   $(foreach f,$(host_camera_its_files),\
-    cts/apps/CameraITS/$(f):$(VTS_TESTCASES_OUT)/CameraITS/$(f))
+    cts/apps/CameraITS/$(f):$(VTF_TESTCASES_OUT)/CameraITS/$(f))
 
 else
 
@@ -97,14 +101,14 @@ host_systrace_files := \
 
 host_systrace_copy_pairs := \
   $(foreach f,$(host_systrace_files),\
-    external/chromium-trace/$(f):$(VTS_OUT_ROOT)/android-vts/tools/external/chromium-trace/$(f))
+    external/chromium-trace/$(f):$(VTF_TOOLS_OUT)/external/chromium-trace/$(f))
 
 target_script_files := \
   $(call find-files-in-subdirs,test/vts/script/target,"*.sh" -and -type f,.)
 
 target_script_copy_pairs := \
   $(foreach f,$(target_script_files),\
-    test/vts/script/target/$(f):$(VTS_TESTCASES_OUT)/script/target/$(f))
+    test/vts/script/target/$(f):$(VTF_TESTCASES_OUT)/script/target/$(f))
 
 vtf_copy_pairs := \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
@@ -119,29 +123,3 @@ vtf_copy_pairs := \
 
 .PHONY: vts-test-core
 vts-test-core: $(vts_test_core_copy_pairs) $(vtf_copy_pairs)
-
-vtf_tradefed_modules := \
-  compatibility-common-util-tests \
-  compatibility-host-util \
-  compatibility-host-util-tests \
-  compatibility-tradefed-tests \
-  hosttestlib \
-  host-libprotobuf-java-full \
-  loganalysis \
-  tradefed \
-  vts-tradefed \
-  vts-tradefed-tests \
-
-vtf_tradefed_copy_pairs := \
-  $(foreach f,$(vtf_tradefed_modules),\
-    $(HOST_OUT)/framework/$(f).jar:$(VTS_TOOLS_OUT)/$(f).jar)
-
-vtf_tradefed_additional_deps_copy_pairs := \
-  test/vts/tools/vts-tradefed/etc/vts-tradefed:$(VTS_TOOLS_OUT)/vts-tradefed
-
-vtf_package_copy_pairs := \
-  $(call copy-many-files,$(vtf_tradefed_copy_pairs)) \
-  $(call copy-many-files,$(vtf_tradefed_additional_deps_copy_pairs)) \
-
-.PHONY: vtf
-vtf: $(vtf_copy_pairs) $(vtf_package_copy_pairs)
