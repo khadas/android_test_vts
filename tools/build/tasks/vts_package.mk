@@ -150,13 +150,6 @@ kernel_rootdir_test_rc_copy_pairs := \
   $(foreach f,$(kernel_rootdir_test_rc_files),\
     system/core/rootdir/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/api/rootdir/init_rc_files/$(f)) \
 
-acts_framework_files := \
-  $(call find-files-in-subdirs,tools/test/connectivity/acts/framework/acts,"*.py" -and -type f,.)
-
-acts_framework_copy_pairs := \
-  $(foreach f,$(acts_framework_files),\
-    tools/test/connectivity/acts/framework/acts/$(f):$(VTS_TESTCASES_OUT)/acts/$(f))
-
 acts_testcases_files := \
   $(call find-files-in-subdirs,tools/test/connectivity/acts/tests/google,"*.py" -and -type f,.)
 
