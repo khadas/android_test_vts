@@ -28,6 +28,8 @@
 
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:enable-dashboard-uploading:false" />
   <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:enable-log-uploading:false" />
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:bug-report-on-failure:false" />
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:logcat-on-failure:false" />
 
   <option name="compatibility:primary-abi-only" value="true" />
   <option name="plan" value="vts" />
