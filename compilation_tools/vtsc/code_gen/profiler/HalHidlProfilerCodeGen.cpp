@@ -111,7 +111,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForStructVariable(
     out << "profile__" << predefined_type << "(" << arg_name << ", "
         << arg_value << ");\n";
   } else {
-    for (const auto struct_field : val.struct_value()) {
+    for (const auto& struct_field : val.struct_value()) {
       std::string struct_field_name = arg_name + "_" + struct_field.name();
       out << "auto *" << struct_field_name
           << " __attribute__((__unused__)) = " << arg_name
@@ -133,7 +133,7 @@ void HalHidlProfilerCodeGen::GenerateProfilerForUnionVariable(
     out << "profile__" << predefined_type << "(" << arg_name << ", "
         << arg_value << ");\n";
   } else {
-    for (const auto union_field : val.union_value()) {
+    for (const auto& union_field : val.union_value()) {
       std::string union_field_name = arg_name + "_" + union_field.name();
       out << "auto *" << union_field_name << " = " << arg_name
           << "->add_union_value();\n";

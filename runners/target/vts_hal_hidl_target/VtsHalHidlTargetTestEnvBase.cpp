@@ -128,7 +128,7 @@ void VtsHalHidlTargetTestEnvBase::registerTestService(const string& FQName) {
 }
 
 void VtsHalHidlTargetTestEnvBase::listRegisteredServices() {
-  for (string service : registeredHalServices_) {
+  for (const string& service : registeredHalServices_) {
     cout << "hal_service: " << service << endl;
   }
   cout << "service_comb_mode: " << mode_ << endl;
