@@ -258,6 +258,8 @@ class ProfilingFeature(feature_utils.Feature):
         results = cmd_utils.ExecuteShellCommand(trace_processor_cmd)
         if any(results[cmd_utils.EXIT_CODE]):
             logging.error("Fail to execute command: %s" % trace_processor_cmd)
+            logging.error("stdout: %s" % results[const.STDOUT])
+            logging.error("stderr: %s" % results[const.STDERR])
             return profiling_data
 
         stdout_lines = results[const.STDOUT][1].split("\n")
