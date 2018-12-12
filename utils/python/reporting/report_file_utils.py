@@ -220,7 +220,8 @@ class ReportFileUtil(object):
     def SaveReportsFromDirectory(self,
                                  source_dir=None,
                                  file_name_prefix=None,
-                                 file_path_filters=None):
+                                 file_path_filters=None,
+                                 dryrun=False):
         '''Save report files from source directory to destination.
 
         Args:
@@ -230,6 +231,7 @@ class ReportFileUtil(object):
             file_name_prefix: string, prefix added to destination file name
             file_path_filter: function, a functions that return True (pass) or
                               False (reject) given original file path.
+            dryrun: bool, whether to perform a dry run to get urls only.
 
         Returns:
             A list of string, containing destination URLs of saved report files.
@@ -258,10 +260,11 @@ class ReportFileUtil(object):
                         continue
 
                     #TODO(yuexima): handle duplicated destination file names
-                    if self._use_gcs:
-                        self._PushReportFileGcs(src_path, dest_path)
-                    else:
-                        self._PushReportFile(src_path, dest_path)
+                    if not dryrun:
+                        if self._use_gcs:
+                            self._PushReportFileGcs(src_path, dest_path)
+                        else:
+                            self._PushReportFile(src_path, dest_path)
                     urls.append(url)
 
             return urls
