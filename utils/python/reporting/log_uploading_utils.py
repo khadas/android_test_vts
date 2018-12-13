@@ -95,14 +95,22 @@ class LogUploadingFeature(feature_utils.Feature):
                 url_prefix=getattr(
                     self, keys.ConfigKeys.IKEY_LOG_UPLOADING_URL_PREFIX, None))
 
-    def UploadLogs(self, prefix=None):
-        """Save test logs and add log urls to report message"""
+    def UploadLogs(self, prefix=None, dryrun=False):
+        """Save test logs and add log urls to report message.
+
+        Args:
+            prefix: string, file name prefix. Will be auto-generated if not provided.
+            dryrun: bool, whether to perform a dry run that attaches
+                    destination URLs to result message only. if True,
+                    log files will not be actually uploaded.
+        """
         if not self.enabled:
             return
 
-        file_name_prefix = '%s_%s_' % (
-            getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
-            self.web.report_msg.start_timestamp)
+        if not prefix:
+            prefix = '%s_%s_' % (
+                getattr(self, keys.ConfigKeys.KEY_TESTBED_NAME, ''),
+                self.web.report_msg.start_timestamp)
 
         def path_filter(path):
             '''filter to exclude proto files in log uploading'''
@@ -110,11 +118,12 @@ class LogUploadingFeature(feature_utils.Feature):
 
         for object_name in ['_report_file_util_gcs', '_report_file_util']:
             if hasattr(self, object_name):
-                file_util = getattr(self, object_name)
-                urls = file_util.SaveReportsFromDirectory(
-                                source_dir=logging.log_path,
-                                file_name_prefix=file_name_prefix,
-                                file_path_filters=path_filter)
+                report_file_util = getattr(self, object_name)
+                urls = report_file_util.SaveReportsFromDirectory(
+                    source_dir=logging.log_path,
+                    file_name_prefix=prefix,
+                    file_path_filters=path_filter,
+                    dryrun=dryrun)
                 if urls is None:
                     logging.error('Error happened when saving logs.')
                 elif self.web and self.web.enabled:

@@ -396,6 +396,10 @@ class WebFeature(feature_utils.Feature):
             return
 
         for url in urls:
+            for log_msg in self.report_msg.log:
+                if log_msg.url == url:
+                    continue
+
             log_msg = self.report_msg.log.add()
             log_msg.url = url
             log_msg.name = os.path.basename(url)
