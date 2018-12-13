@@ -108,7 +108,7 @@ void VtsTraceProcessor::ParseTrace(const string& trace_file) {
     cerr << __func__ << ": Failed to parse trace file: " << trace_file << endl;
     return;
   }
-  for (auto record : profiling_msg.records()) {
+  for (const auto& record : profiling_msg.records()) {
     cout << record.DebugString() << endl;
   }
 }
@@ -270,7 +270,7 @@ void VtsTraceProcessor::ProcessTraceForLatencyProfiling(
   vector<VtsProfilingRecord> seen_records;
   // stack to store temp records that not processed.
   vector<VtsProfilingRecord> pending_records;
-  for (auto record : profiling_msg.records()) {
+  for (const auto& record : profiling_msg.records()) {
     if (isEntryEvent(record.event())) {
       seen_records.emplace_back(record);
     } else {
@@ -433,7 +433,7 @@ void VtsTraceProcessor::SelectTraces(const string& coverage_file_dir,
     for (auto it = original_coverages.begin(); it != original_coverages.end();
          ++it) {
       TestReportMessage cur_coverage_msg = it->second.coverage_msg;
-      for (const auto ref_coverage : selected_coverage_msg.coverage()) {
+      for (const auto& ref_coverage : selected_coverage_msg.coverage()) {
         for (int i = 0; i < cur_coverage_msg.coverage_size(); i++) {
           CoverageReportMessage* coverage_to_be_updated =
               cur_coverage_msg.mutable_coverage(i);
@@ -550,7 +550,7 @@ void VtsTraceProcessor::GetTestListForHal(const string& test_trace_dir,
     test_list[it->first] = set<string>();
     vector<TraceSummary> trace_summaries = it->second;
     vector<string> covered_apis;
-    for (auto summary : trace_summaries) {
+    for (const auto& summary : trace_summaries) {
       for (auto const& api_stat_it : summary.api_stats) {
         if (std::find(covered_apis.begin(), covered_apis.end(),
                       api_stat_it.first) == covered_apis.end()) {
@@ -559,7 +559,7 @@ void VtsTraceProcessor::GetTestListForHal(const string& test_trace_dir,
         }
       }
     }
-    for (auto api : covered_apis) {
+    for (const auto& api : covered_apis) {
       cout << "covered api: " << api << endl;
     }
   }
