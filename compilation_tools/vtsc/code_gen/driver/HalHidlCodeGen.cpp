@@ -429,13 +429,13 @@ void HalHidlCodeGen::GenerateClassHeader(Formatter& out,
     const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   if (message.component_name() != "types") {
-    for (const auto attribute : message.interface().attribute()) {
+    for (const auto& attribute : message.interface().attribute()) {
       GenerateAllFunctionDeclForAttribute(out, attribute);
     }
     DriverCodeGenBase::GenerateClassHeader(out, message,
                                            fuzzer_extended_class_name);
   } else {
-    for (const auto attribute : message.attribute()) {
+    for (const auto& attribute : message.attribute()) {
       GenerateAllFunctionDeclForAttribute(out, attribute);
     };
   }
@@ -502,14 +502,14 @@ void HalHidlCodeGen::GenerateClassImpl(Formatter& out,
     const ComponentSpecificationMessage& message,
     const string& fuzzer_extended_class_name) {
   if (message.component_name() != "types") {
-    for (auto attribute : message.interface().attribute()) {
+    for (const auto& attribute : message.interface().attribute()) {
       GenerateAllFunctionImplForAttribute(out, attribute);
     }
     GenerateGetServiceImpl(out, message, fuzzer_extended_class_name);
     DriverCodeGenBase::GenerateClassImpl(out, message,
                                          fuzzer_extended_class_name);
   } else {
-    for (auto attribute : message.attribute()) {
+    for (const auto& attribute : message.attribute()) {
       GenerateAllFunctionImplForAttribute(out, attribute);
     }
   }
@@ -667,13 +667,13 @@ void HalHidlCodeGen::GenerateDriverDeclForAttribute(Formatter& out,
     cerr << attribute.type() << " is not a user defined type\n";
     exit(-1);
   }
-  for (const auto sub_struct : attribute.sub_struct()) {
+  for (const auto& sub_struct : attribute.sub_struct()) {
     GenerateDriverDeclForAttribute(out, sub_struct);
   }
-  for (const auto sub_union : attribute.sub_union()) {
+  for (const auto& sub_union : attribute.sub_union()) {
     GenerateDriverDeclForAttribute(out, sub_union);
   }
-  for (const auto sub_safe_union : attribute.sub_safe_union()) {
+  for (const auto& sub_safe_union : attribute.sub_safe_union()) {
     GenerateDriverDeclForAttribute(out, sub_safe_union);
   }
   string func_name =
@@ -692,13 +692,13 @@ void HalHidlCodeGen::GenerateDriverImplForAttribute(Formatter& out,
     exit(-1);
   }
   // Recursively generate driver implementation method for all sub_types.
-  for (const auto sub_struct : attribute.sub_struct()) {
+  for (const auto& sub_struct : attribute.sub_struct()) {
     GenerateDriverImplForAttribute(out, sub_struct);
   }
-  for (const auto sub_union : attribute.sub_union()) {
+  for (const auto& sub_union : attribute.sub_union()) {
     GenerateDriverImplForAttribute(out, sub_union);
   }
-  for (const auto sub_safe_union : attribute.sub_safe_union()) {
+  for (const auto& sub_safe_union : attribute.sub_safe_union()) {
     GenerateDriverImplForAttribute(out, sub_safe_union);
   }
   string func_name =
@@ -870,7 +870,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
             << "), callback_socket_name);\n";
       } else {
         int struct_index = 0;
-        for (const auto struct_field : val.struct_value()) {
+        for (const auto& struct_field : val.struct_value()) {
           string struct_field_name = arg_name + "." + struct_field.name();
           string struct_field_value_name = arg_value_name + ".struct_value("
               + std::to_string(struct_index) + ")";
@@ -891,7 +891,7 @@ void HalHidlCodeGen::GenerateDriverImplForTypedVariable(Formatter& out,
             << "), callback_socket_name);\n";
       } else {
         int union_index = 0;
-        for (const auto union_field : val.union_value()) {
+        for (const auto& union_field : val.union_value()) {
           string union_field_name = arg_name + "." + union_field.name();
           string union_field_value_name = arg_value_name + ".union_value("
               + std::to_string(union_index) + ")";
@@ -1180,7 +1180,7 @@ void HalHidlCodeGen::GenerateVerificationFunctionImpl(Formatter& out,
         << "\n";
     out << "const FunctionSpecificationMessage& actual_result "
            "__attribute__((__unused__))) {\n";
-    for (const FunctionSpecificationMessage api : message.interface().api()) {
+    for (const FunctionSpecificationMessage& api : message.interface().api()) {
       out << "if (!strcmp(actual_result.name().c_str(), \"" << api.name()
           << "\")) {\n";
       out.indent();
@@ -1386,10 +1386,10 @@ void HalHidlCodeGen::GenerateVerificationDeclForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
     // Recursively generate verification method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateVerificationDeclForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateVerificationDeclForAttribute(out, sub_union);
     }
   }
@@ -1403,10 +1403,10 @@ void HalHidlCodeGen::GenerateVerificationImplForAttribute(Formatter& out,
     const VariableSpecificationMessage& attribute) {
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION) {
     // Recursively generate verification method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateVerificationImplForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateVerificationImplForAttribute(out, sub_union);
     }
   }
@@ -1515,7 +1515,7 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
             + ClearStringWithNameSpaceAccess(val.predefined_type());
         out << func_name << "(" << result_msg << ", " << result_value << ");\n";
       } else {
-        for (const auto struct_field : val.struct_value()) {
+        for (const auto& struct_field : val.struct_value()) {
           string struct_field_name = result_msg + "_" + struct_field.name();
           out << "auto *" << struct_field_name << " = " << result_msg
               << "->add_struct_value();\n";
@@ -1538,7 +1538,7 @@ void HalHidlCodeGen::GenerateSetResultCodeForTypedVariable(Formatter& out,
             + ClearStringWithNameSpaceAccess(val.predefined_type());
         out << func_name << "(" << result_msg << ", " << result_value << ");\n";
       } else {
-        for (const auto union_field : val.union_value()) {
+        for (const auto& union_field : val.union_value()) {
           string union_field_name = result_msg + "_" + union_field.name();
           out << "auto *" << union_field_name << " = " << result_msg
               << "->add_union_value();\n";
@@ -1672,13 +1672,13 @@ void HalHidlCodeGen::GenerateSetResultDeclForAttribute(Formatter& out,
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
       attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate SetResult method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateSetResultDeclForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateSetResultDeclForAttribute(out, sub_union);
     }
-    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    for (const auto& sub_safe_union : attribute.sub_safe_union()) {
       GenerateSetResultDeclForAttribute(out, sub_safe_union);
     }
   }
@@ -1695,13 +1695,13 @@ void HalHidlCodeGen::GenerateSetResultImplForAttribute(Formatter& out,
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
       attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate SetResult method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateSetResultImplForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateSetResultImplForAttribute(out, sub_union);
     }
-    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    for (const auto& sub_safe_union : attribute.sub_safe_union()) {
       GenerateSetResultImplForAttribute(out, sub_safe_union);
     }
   }

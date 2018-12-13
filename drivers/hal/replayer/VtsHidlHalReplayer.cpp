@@ -69,7 +69,7 @@ void VtsHidlHalReplayer::ListTestServices(const string& trace_file) {
     registeredHalServices.insert(service_fq_name);
     msg.Clear();
   }
-  for (string service : registeredHalServices) {
+  for (const string& service : registeredHalServices) {
     cout << "hal_service: " << service << endl;
   }
 }

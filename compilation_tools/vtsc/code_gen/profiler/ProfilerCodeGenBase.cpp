@@ -45,7 +45,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
     InterfaceSpecificationMessage interface = message.interface();
     // First generate the declaration of profiler functions for all user
     // defined types within the interface.
-    for (const auto attribute : interface.attribute()) {
+    for (const auto& attribute : interface.attribute()) {
       GenerateProfilerMethodDeclForAttribute(out, attribute);
     }
 
@@ -72,7 +72,7 @@ void ProfilerCodeGenBase::GenerateHeaderFile(
   } else {
     // For types.vts, just generate the declaration of profiler functions
     // for all user defined types.
-    for (const auto attribute : message.attribute()) {
+    for (const auto& attribute : message.attribute()) {
       GenerateProfilerMethodDeclForAttribute(out, attribute);
     }
   }
@@ -92,7 +92,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
     InterfaceSpecificationMessage interface = message.interface();
     // First generate profiler functions for all user defined types within
     // the interface.
-    for (const auto attribute : interface.attribute()) {
+    for (const auto& attribute : interface.attribute()) {
       GenerateProfilerMethodImplForAttribute(out, attribute);
     }
     // Generate the main profiler function.
@@ -118,7 +118,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
       GenerateLocalVariableDefinition(out, message);
 
       // Generate the profiler code for each method.
-      for (const FunctionSpecificationMessage api : interface.api()) {
+      for (const FunctionSpecificationMessage& api : interface.api()) {
         out << "if (strcmp(method, \"" << api.name() << "\") == 0) {\n";
         out.indent();
         GenerateProfilerForMethod(out, api);
@@ -132,7 +132,7 @@ void ProfilerCodeGenBase::GenerateSourceFile(
   } else {
     // For types.vts, just generate profiler functions for the user defined
     // types.
-    for (const auto attribute : message.attribute()) {
+    for (const auto& attribute : message.attribute()) {
       GenerateProfilerMethodImplForAttribute(out, attribute);
     }
   }
@@ -233,13 +233,13 @@ void ProfilerCodeGenBase::GenerateProfilerMethodDeclForAttribute(Formatter& out,
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
       attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate profiler method declaration for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateProfilerMethodDeclForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateProfilerMethodDeclForAttribute(out, sub_union);
     }
-    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    for (const auto& sub_safe_union : attribute.sub_safe_union()) {
       GenerateProfilerMethodDeclForAttribute(out, sub_safe_union);
     }
   }
@@ -255,13 +255,13 @@ void ProfilerCodeGenBase::GenerateProfilerMethodImplForAttribute(
   if (attribute.type() == TYPE_STRUCT || attribute.type() == TYPE_UNION ||
       attribute.type() == TYPE_SAFE_UNION) {
     // Recursively generate profiler method implementation for all sub_types.
-    for (const auto sub_struct : attribute.sub_struct()) {
+    for (const auto& sub_struct : attribute.sub_struct()) {
       GenerateProfilerMethodImplForAttribute(out, sub_struct);
     }
-    for (const auto sub_union : attribute.sub_union()) {
+    for (const auto& sub_union : attribute.sub_union()) {
       GenerateProfilerMethodImplForAttribute(out, sub_union);
     }
-    for (const auto sub_safe_union : attribute.sub_safe_union()) {
+    for (const auto& sub_safe_union : attribute.sub_safe_union()) {
       GenerateProfilerMethodImplForAttribute(out, sub_safe_union);
     }
   }
@@ -331,20 +331,20 @@ bool ProfilerCodeGenBase::IncludeHidlNativeType(
   }
   if (val.type() == TYPE_STRUCT) {
     if (!val.has_predefined_type()) {
-      for (const auto sub_struct : val.sub_struct()) {
+      for (const auto& sub_struct : val.sub_struct()) {
         if (IncludeHidlNativeType(sub_struct, type)) return true;
       }
-      for (const auto struct_field : val.struct_value()) {
+      for (const auto& struct_field : val.struct_value()) {
         if (IncludeHidlNativeType(struct_field, type)) return true;
       }
     }
   }
   if (val.type() == TYPE_UNION) {
     if (!val.has_predefined_type()) {
-      for (const auto sub_union : val.sub_union()) {
+      for (const auto& sub_union : val.sub_union()) {
         if (IncludeHidlNativeType(sub_union, type)) return true;
       }
-      for (const auto union_field : val.union_value()) {
+      for (const auto& union_field : val.union_value()) {
         if (IncludeHidlNativeType(union_field, type)) return true;
       }
     }
