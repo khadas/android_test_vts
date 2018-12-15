@@ -144,6 +144,7 @@
     <!-- b/118340949: temporally disable kernel test cases that takes 2+ minutes to finish -->
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio16" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio17" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio20" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio21" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio24" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp dio.dio25" />
