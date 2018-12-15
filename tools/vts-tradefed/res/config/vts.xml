@@ -27,6 +27,8 @@
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-treble" />
   <option name="compatibility:module-metadata-include-filter" key="plan" value="vts-vndk" />
 
+  <option name="compatibility:test-arg" value="com.android.tradefed.testtype.VtsMultiDeviceTest:ltp-number-of-threads:1" />
+
   <!-- Unapproved vts-security Tests -->
   <option name="compatibility:exclude-filter" value="SecurityPoCKernelTest" />
   <option name="compatibility:exclude-filter" value="VtsSecuritySelinuxPolicyHost" />
