@@ -646,14 +646,14 @@ class BaseTestClass(object):
         """Proxy function to guarantee the base implementation of tearDown
         is called.
         """
-        event = tfi.Begin('_tearDown method for test case',
+        event = tfi.Begin('_tearDown method from base_test',
                           tfi.categories.TEST_CASE_TEARDOWN)
         if self.systrace.enabled:
-            self.systrace.ProcessAndUploadSystrace(test_name)
-        event_sub = tfi.Begin('_setUp method from test script',
+            self._exec_func(self.systrace.ProcessAndUploadSystrace, test_name)
+        event_sub = tfi.Begin('_tearDown method from test script',
                               tfi.categories.TEST_CASE_TEARDOWN,
                               enable_logging=False)
-        self.tearDown()
+        self._exec_func(self.tearDown)
         event_sub.End()
         event.End()
 
