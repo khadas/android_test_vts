@@ -1240,6 +1240,9 @@ class BaseTestClass(object):
                 if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
                     logging.error('failed to restore device %s', device.serial)
                     return False
+                device.rootAdb()
+                device.stopServices()
+                device.startServices()
                 self._DiagnoseHost()
             else:
                 self._DiagnoseDevice(device)
