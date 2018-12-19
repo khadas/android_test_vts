@@ -1193,6 +1193,29 @@ class BaseTestClass(object):
         tests = self._get_test_funcs(test_names)
         return tests
 
+    def VtfSelfCheck(self, timeout=900):
+        """Vendor test framework (VTF) checks and restores test framework and devices states.
+
+        Args:
+            timeout: int, timeout in seconds.
+
+        Returns:
+            bool, True if everything is ok. Fales if some error is not recoverable.
+        """
+        start = time.time()
+        available_devices = android_device.list_adb_devices()
+
+        for device in self.android_devices:
+            if device.serial not in available_devices:
+                logging.warn('device %s become unavailable after tests. recovering...',
+                             device.serial)
+                _timeout = timeout - time.time() + start
+                if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
+                    logging.error('failed to restore device %s', device.serial)
+                    return False
+
+        return True
+
     def runTestsWithRetry(self, tests):
         """Run tests with retry and collect test results.
 
@@ -1201,6 +1224,11 @@ class BaseTestClass(object):
         """
         for count in range(self.max_retry_count + 1):
             if count:
+                if not self.VtfSelfCheck():
+                    logging.error('VTF self check failed. '
+                                  'Some error is not recoverable within time constraint.')
+                    return
+
                 include_filter = map(lambda item: item.test_name,
                                      self.results.getNonPassingRecords(skipped=False))
                 self._test_filter_retry = filter_utils.Filter(include_filter=include_filter)
