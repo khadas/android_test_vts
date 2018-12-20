@@ -19,6 +19,7 @@ import os
 import re
 import sys
 import threading
+import time
 
 from vts.proto import VtsReportMessage_pb2 as ReportMsg
 from vts.runners.host import asserts
@@ -111,6 +112,7 @@ class BaseTestClass(object):
         web: WebFeature, object storing web feature util for test run
         coverage: CoverageFeature, object storing coverage feature util for test run
         sancov: SancovFeature, object storing sancov feature util for test run
+        start_time_sec: int, time value in seconds when the module execution starts.
         start_vts_agents: whether to start vts agents when registering new
                           android devices.
         profiling: ProfilingFeature, object storing profiling feature util for test run
@@ -127,6 +129,7 @@ class BaseTestClass(object):
     start_vts_agents = True
 
     def __init__(self, configs):
+        self.start_time_sec = time.time()
         self.tests = []
         # Set all the controller objects and params.
         for name, value in configs.items():
@@ -440,7 +443,10 @@ class BaseTestClass(object):
         """
         event = tfi.Begin('_setUpClass method for test class',
                           tfi.categories.TEST_CLASS_SETUP)
-        self.resetTimeout(self.timeout)
+        timeout = self.timeout - time.time() + self.start_time_sec
+        if timeout < 0:
+            timeout = 1
+        self.resetTimeout(timeout)
         if not precondition_utils.MeetFirstApiLevelPrecondition(self):
             self.skipAllTests("The device's first API level doesn't meet the "
                               "precondition.")
