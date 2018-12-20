@@ -106,7 +106,11 @@ public class VtsDashboardUtil {
                 mConfigReader.GetVendorConfigVariable("dashboard_use_curl_command");
         Optional<String> dashboardCurlCommandOpt = Optional.of(dashboardCurlCommand);
         Boolean curlCommandCheck = Boolean.parseBoolean(dashboardCurlCommandOpt.orElse("false"));
-        message.setAccessToken(GetToken());
+        String token = GetToken();
+        if (token == null) {
+            return;
+        }
+        message.setAccessToken(token);
         String messageFilePath = "";
         try {
             messageFilePath = WriteToTempFile(
