@@ -32,6 +32,7 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
+from vts.utils.python.common import cmd_utils
 from vts.utils.python.common import filter_utils
 from vts.utils.python.common import list_utils
 from vts.utils.python.common import timeout_utils
@@ -1199,6 +1200,25 @@ class BaseTestClass(object):
         tests = self._get_test_funcs(test_names)
         return tests
 
+    def _DiagnoseHost(self):
+        """Runs diagnosis commands on host and logs the results."""
+        commands = ['ps aux | grep adb',
+                    'adb --version',
+                    'adb devices']
+        for cmd in commands:
+            results = cmd_utils.ExecuteShellCommand(cmd)
+            logging.debug('host diagnosis command %s', cmd)
+            logging.debug('               output: %s', results[cmd_utils.STDOUT][0])
+
+    def _DiagnoseDevice(self, device):
+        """Runs diagnosis commands on device and logs the results."""
+        commands = ['ps aux | grep vts',
+                    'cat /proc/meminfo']
+        for cmd in commands:
+            results = device.adb.shell(cmd, no_except=True)
+            logging.debug('device diagnosis command %s', cmd)
+            logging.debug('                 output: %s', results[const.STDOUT])
+
     def VtfSelfCheck(self, timeout=900):
         """Vendor test framework (VTF) checks and restores test framework and devices states.
 
@@ -1210,6 +1230,7 @@ class BaseTestClass(object):
         """
         start = time.time()
         available_devices = android_device.list_adb_devices()
+        self._DiagnoseHost()
 
         for device in self.android_devices:
             if device.serial not in available_devices:
@@ -1219,6 +1240,9 @@ class BaseTestClass(object):
                 if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
                     logging.error('failed to restore device %s', device.serial)
                     return False
+                self._DiagnoseHost()
+            else:
+                self._DiagnoseDevice(device)
 
         return True
 
