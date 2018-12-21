@@ -624,6 +624,12 @@ class BaseTestClass(object):
         """
         event = tfi.Begin('_setUp method for test case',
                           tfi.categories.TEST_CASE_SETUP,)
+        if not self.Heal(passive=True):
+            msg = 'Framework self diagnose didn\'t pass for %s. Marking test as fail.' % test_name
+            logging.error(msg)
+            event.Remove(msg)
+            asserts.fail(msg)
+
         if self.systrace.enabled:
             self.systrace.StartSystrace()
 
@@ -1219,35 +1225,43 @@ class BaseTestClass(object):
             logging.debug('device diagnosis command %s', cmd)
             logging.debug('                 output: %s', results[const.STDOUT])
 
-    def VtfSelfCheck(self, timeout=900):
-        """Vendor test framework (VTF) checks and restores test framework and devices states.
+    def Heal(self, passive=False, timeout=900):
+        """Performs a self healing.
+
+        Includes self diagnosis that looks for any framework or device state errors.
+        Includes self recovery that attempts to correct discovered errors.
 
         Args:
+            passive: bool, whether to perform passive only self-check. A passive check means
+                     only to check known status stored in memory. No command will be issued
+                     to host or device - which makes the check fast.
             timeout: int, timeout in seconds.
 
         Returns:
             bool, True if everything is ok. Fales if some error is not recoverable.
         """
         start = time.time()
-        available_devices = android_device.list_adb_devices()
-        self._DiagnoseHost()
 
-        for device in self.android_devices:
-            if device.serial not in available_devices:
-                logging.warn('device %s become unavailable after tests. recovering...',
-                             device.serial)
-                _timeout = timeout - time.time() + start
-                if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
-                    logging.error('failed to restore device %s', device.serial)
-                    return False
-                device.rootAdb()
-                device.stopServices()
-                device.startServices()
-                self._DiagnoseHost()
-            else:
-                self._DiagnoseDevice(device)
+        if not passive:
+            available_devices = android_device.list_adb_devices()
+            self._DiagnoseHost()
 
-        return True
+            for device in self.android_devices:
+                if device.serial not in available_devices:
+                    logging.warn('device %s become unavailable after tests. recovering...',
+                                 device.serial)
+                    _timeout = timeout - time.time() + start
+                    if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
+                        logging.error('failed to restore device %s', device.serial)
+                        return False
+                    device.rootAdb()
+                    device.stopServices()
+                    device.startServices()
+                    self._DiagnoseHost()
+                else:
+                    self._DiagnoseDevice(device)
+
+        return all(map(lambda device: device.Heal(), self.android_devices))
 
     def runTestsWithRetry(self, tests):
         """Run tests with retry and collect test results.
@@ -1257,8 +1271,8 @@ class BaseTestClass(object):
         """
         for count in range(self.max_retry_count + 1):
             if count:
-                if not self.VtfSelfCheck():
-                    logging.error('VTF self check failed. '
+                if not self.Heal():
+                    logging.error('Self heal failed. '
                                   'Some error is not recoverable within time constraint.')
                     return
 
