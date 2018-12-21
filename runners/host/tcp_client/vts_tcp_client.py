@@ -60,6 +60,7 @@ class VtsTcpClient(object):
                            a failure message.
         connection: a TCP socket instance.
         channel: a file to write and read data.
+        error: string, ongoing tcp connection error. None means no error.
         _mode: the connection mode (adb_forwarding or ssh_tunnel)
         timeout: tcp connection timeout.
     """
@@ -74,6 +75,7 @@ class VtsTcpClient(object):
         self.channel = None
         self._mode = mode
         self.timeout = timeout
+        self.error = None
 
     @property
     def timeout(self):
@@ -95,6 +97,21 @@ class VtsTcpClient(object):
             timeout: int, TCP connection timeout in seconds.
         """
         self._timeout = timeout
+
+    def Heal(self):
+        """Performs a self healing.
+
+        Includes self diagnosis that looks for any framework errors.
+
+        Returns:
+            bool, True if everything is ok; False otherwise.
+        """
+        res = self.error is None
+
+        if not res:
+            logging.error('Self diagnosis found problems TCP client: %s', self.error)
+
+        return res
 
     def Connect(self,
                 ip=TARGET_IP,
@@ -402,12 +419,12 @@ class VtsTcpClient(object):
             dictionary of list, command results that contains stdout,
             stderr, and exit_code.
         """
-        if not no_except:
-            return self.__ExecuteShellCommand(command)
-
         try:
             return self.__ExecuteShellCommand(command)
         except Exception as e:
+            self.error = e
+            if not no_except:
+                raise e
             logging.exception(e)
             return {
                 const.STDOUT: [""] * len(command),
@@ -439,13 +456,16 @@ class VtsTcpClient(object):
         if not resp:
             logging.error(self.NO_RESPONSE_MSG)
             stderr = [self.NO_RESPONSE_MSG]
+            self.error = self.NO_RESPONSE_MSG
         elif resp.response_code != SysMsg_pb2.SUCCESS:
             logging.error(self.FAIL_RESPONSE_MSG)
             stderr = [self.FAIL_RESPONSE_MSG]
+            self.error = self.FAIL_RESPONSE_MSG
         else:
             stdout = resp.stdout
             stderr = resp.stderr
             exit_code = resp.exit_code
+            self.error = None
 
         return {
             const.STDOUT: stdout,
