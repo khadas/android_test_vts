@@ -1194,9 +1194,26 @@ class AndroidDevice(object):
                 raise
         event.End()
 
-    def stopServices(self):
-        """Stops long running services on the android device.
+    def Heal(self):
+        """Performs a self healing.
+
+        Includes self diagnosis that looks for any framework errors.
+
+        Returns:
+            bool, True if everything is ok; False otherwise.
         """
+        res = True
+
+        if self.shell:
+            res &= self.shell.Heal()
+
+        if not res:
+            logging.error('Self diagnosis found problems in Android device %s', self.serial)
+
+        return res
+
+    def stopServices(self):
+        """Stops long running services on the android device."""
         if self.adb_logcat_process:
             self.stopAdbLogcat()
         if getattr(self, "enable_sl4a", False):
