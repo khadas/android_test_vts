@@ -516,7 +516,7 @@ class BaseTestClass(object):
         event_sub = tfi.Begin('tearDownClass method from test script',
                               tfi.categories.TEST_CLASS_TEARDOWN,
                               enable_logging=False)
-        ret = self.tearDownClass()
+        ret = self._exec_func(self.tearDownClass)
 
         event_sub.End()
 
