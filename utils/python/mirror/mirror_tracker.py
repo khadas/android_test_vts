@@ -92,6 +92,21 @@ class MirrorTracker(object):
                 "Failed to start a callback TcpServer at port %s" %
                 self._host_callback_port)
 
+    def Heal(self):
+        """Performs a self healing.
+
+        Includes self diagnosis that looks for any framework errors.
+
+        Returns:
+            bool, True if everything is ok; False otherwise.
+        """
+        res = all(map(lambda shell: shell.Heal(), self._registered_mirrors.values()))
+
+        if not res:
+            logging.error('Self diagnosis found problems mirror_tracker.')
+
+        return res
+
     def InitFmq(self,
                 existing_queue=None,
                 new_queue_name=None,
