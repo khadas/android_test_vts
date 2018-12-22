@@ -422,6 +422,7 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
      */
     void stopFramework() throws DeviceNotAvailableException {
         mDevice.executeShellCommand("stop");
+        this.setProperty(SYSPROP_SYS_BOOT_COMPLETED, "0");
     }
 
     /**
