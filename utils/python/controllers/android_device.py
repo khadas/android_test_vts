@@ -974,8 +974,6 @@ class AndroidDevice(object):
         """
         logging.debug("stopping Android framework")
         self.adb.shell("stop")
-        self.setProp(SYSPROP_SYS_BOOT_COMPLETED, 0)
-        self.setProp(SYSPROP_DEV_BOOTCOMPLETE, 0)
         logging.info("Android framework stopped")
 
     def stop(self, stop_native_server=False):
