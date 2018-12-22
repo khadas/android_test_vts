@@ -28,6 +28,7 @@ import time
 import traceback
 
 from vts.runners.host import asserts
+from vts.runners.host import const
 from vts.runners.host import errors
 from vts.runners.host import keys
 from vts.runners.host import logger as vts_logger
@@ -923,9 +924,9 @@ class AndroidDevice(object):
             return False
 
         cmd = 'ps -g system | grep system_server'
-        res = self.adb.shell(cmd)
+        res = self.adb.shell(cmd, no_except=True)
 
-        return 'system_server' in res
+        return 'system_server' in res[const.STDOUT]
 
     def startFramework(self,
                        wait_for_completion=True,
