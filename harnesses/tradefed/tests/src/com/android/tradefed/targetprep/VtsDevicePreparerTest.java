@@ -127,6 +127,9 @@ public class VtsDevicePreparerTest {
     public void test_stopFramework() throws DeviceNotAvailableException {
         mPreparer.stopFramework();
         verify(mockDevice, times(1)).executeShellCommand(eq("stop"));
+        verify(mockDevice, times(1))
+                .executeShellCommand(
+                        eq("setprop " + VtsDevicePreparer.SYSPROP_SYS_BOOT_COMPLETED + " 0"));
     }
 
     /**
