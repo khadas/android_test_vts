@@ -14,8 +14,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/cts-tradefed"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/cts-common-util"/>
 	<classpathentry kind="var" path="TRADEFED_ROOT/out/host/common/obj/JAVA_LIBRARIES/google-api-java-client-min-repackaged_intermediates/classes.jar"/>
-	<classpathentry kind="var" path="TRADEFED_ROOT/out/soong/.intermediates/external/mockito/mockito-byte-buddy-agent/linux_glibc_common/classes.jar"/>
-	<classpathentry kind="var" path="TRADEFED_ROOT/out/soong/.intermediates/external/mockito/mockito-byte-buddy/linux_glibc_common/classes.jar"/>
-	<classpathentry kind="var" path="TRADEFED_ROOT/out/host/common/obj/JAVA_LIBRARIES/host-libprotobuf-java-micro_intermediates/classes.jar"/>
+	<classpathentry kind="var" path="TRADEFED_ROOT/out/soong/.intermediates/external/mockito/mockito-byte-buddy-agent/linux_glibc_common/combined/mockito-byte-buddy-agent.jar"/>
+	<classpathentry kind="var" path="TRADEFED_ROOT/out/soong/.intermediates/external/mockito/mockito-byte-buddy/linux_glibc_common/combined/mockito-byte-buddy.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
