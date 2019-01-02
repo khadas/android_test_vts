@@ -106,8 +106,10 @@ public class VtsTestPlanResultReporter
         // Use IBuildInfo to pass the uesd vendor config information to the rest of workflow.
         buildInfo.addBuildAttribute(
                 VtsVendorConfigFileUtil.KEY_VENDOR_TEST_CONFIG_DEFAULT_TYPE, mDefaultType);
-        buildInfo.addBuildAttribute(
-                VtsVendorConfigFileUtil.KEY_VENDOR_TEST_CONFIG_FILE_PATH, mVendorConfigFilePath);
+        if (mVendorConfigFilePath != null) {
+            buildInfo.addBuildAttribute(VtsVendorConfigFileUtil.KEY_VENDOR_TEST_CONFIG_FILE_PATH,
+                    mVendorConfigFilePath);
+        }
         configReader = new VtsVendorConfigFileUtil();
         configReader.LoadVendorConfig(buildInfo);
         dashboardUtil = new VtsDashboardUtil(configReader);
