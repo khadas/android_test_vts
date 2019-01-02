@@ -1283,7 +1283,12 @@ class BaseTestClass(object):
                              len(include_filter),
                              count + 1,
                              self.max_retry_count + 1)
-                logging.debug('Retrying the following test cases: %s', include_filter)
+                msg = 'Retrying the following test cases: %s' % include_filter
+                logging.debug(msg)
+
+                path_retry_log = os.path.join(logging.log_path, 'retry_log.txt')
+                with open(path_retry_log) as f:
+                    f.write(msg + '\n')
 
             self._is_final_run = count == self.max_retry_count
 
