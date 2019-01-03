@@ -114,6 +114,7 @@ vts_hal_driver_libs := \
   android.hardware.wifi.offload@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.1-vts.driver \
+  android.hardware.wifi.supplicant@1.2-vts.driver \
   android.hidl.memory.block@1.0-vts.driver \
   android.hidl.memory.token@1.0-vts.driver \
   android.system.net.netd@1.0-vts.driver \
@@ -220,6 +221,7 @@ vts_hal_profiler_libs := \
   android.hardware.wifi.offload@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.1-vts.profiler \
+  android.hardware.wifi.supplicant@1.2-vts.profiler \
   android.hidl.memory.block@1.0-vts.profiler \
   android.hidl.memory.token@1.0-vts.profiler \
   android.system.net.netd@1.0-vts.profiler \
@@ -311,6 +313,7 @@ vts_hal_test_bins := \
   VtsHalWifiOffloadV1_0TargetTest \
   VtsHalWifiSupplicantV1_0TargetTest \
   VtsHalWifiSupplicantV1_1TargetTest \
+  VtsHalWifiSupplicantV1_2TargetTest \
   VtsHalWifiSupplicantP2pV1_0TargetTest \
   VtsHidlAllocatorV1_0TargetTest \
 
