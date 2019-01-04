@@ -103,7 +103,7 @@ class MirrorTracker(object):
         res = all(map(lambda shell: shell.Heal(), self._registered_mirrors.values()))
 
         if not res:
-            logging.error('Self diagnosis found problems mirror_tracker.')
+            logging.error('Self diagnosis found problems in mirror_tracker.')
 
         return res
 
