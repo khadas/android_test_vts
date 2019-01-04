@@ -109,7 +109,7 @@ class VtsTcpClient(object):
         res = self.error is None
 
         if not res:
-            logging.error('Self diagnosis found problems TCP client: %s', self.error)
+            logging.error('Self diagnosis found problems in TCP client: %s', self.error)
 
         return res
 
