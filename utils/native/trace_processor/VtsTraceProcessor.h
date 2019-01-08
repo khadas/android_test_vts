@@ -27,7 +27,7 @@ namespace vts {
 
 class VtsTraceProcessor {
  public:
-  VtsTraceProcessor(VtsCoverageProcessor* coverage_processor)
+  explicit VtsTraceProcessor(VtsCoverageProcessor* coverage_processor)
       : coverage_processor_(coverage_processor){};
   virtual ~VtsTraceProcessor(){};
 
