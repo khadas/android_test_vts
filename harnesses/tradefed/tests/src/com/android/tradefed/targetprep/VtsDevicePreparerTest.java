@@ -220,6 +220,42 @@ public class VtsDevicePreparerTest {
     }
 
     /**
+     * Tests the functionality of isBootCompleted when a dev boot completed sysprop is undefined.
+     *
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_isBootCompleted_null1() throws DeviceNotAvailableException {
+        doReturn(null).when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_DEV_BOOTCOMPLETE);
+        doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_SYS_BOOT_COMPLETED);
+        assertTrue(!mPreparer.isBootCompleted());
+    }
+
+    /**
+     * Tests the functionality of isBootCompleted when a sys boot completed sysprop is undefined.
+     *
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_isBootCompleted_null2() throws DeviceNotAvailableException {
+        doReturn("1").when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_DEV_BOOTCOMPLETE);
+        doReturn(null).when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_SYS_BOOT_COMPLETED);
+        assertTrue(!mPreparer.isBootCompleted());
+    }
+
+    /**
+     * Tests the functionality of isBootCompleted when two boot completed sysprops are undefined.
+     *
+     * @throws DeviceNotAvailableException
+     */
+    @Test
+    public void test_isBootCompleted_null3() throws DeviceNotAvailableException {
+        doReturn(null).when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_DEV_BOOTCOMPLETE);
+        doReturn(null).when(mockDevice).getProperty(VtsDevicePreparer.SYSPROP_SYS_BOOT_COMPLETED);
+        assertTrue(!mPreparer.isBootCompleted());
+    }
+
+    /**
      * Tests the functionality of isFrameworkRunning
      *
      * @throws DeviceNotAvailableException
