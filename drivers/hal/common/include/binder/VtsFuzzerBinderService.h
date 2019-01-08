@@ -73,7 +73,8 @@ class IVtsFuzzer : public IInterface {
 // For client
 class BpVtsFuzzer : public BpInterface<IVtsFuzzer> {
  public:
-  BpVtsFuzzer(const sp<IBinder>& impl) : BpInterface<IVtsFuzzer>(impl) {}
+  explicit BpVtsFuzzer(const sp<IBinder>& impl)
+      : BpInterface<IVtsFuzzer>(impl) {}
 
   void Exit();
 
