@@ -32,7 +32,7 @@ namespace vts {
 
 class DriverBase {
  public:
-  DriverBase(int target_class);
+  explicit DriverBase(int target_class);
   virtual ~DriverBase();
 
   // Loads a target component where the argument is the file path.
