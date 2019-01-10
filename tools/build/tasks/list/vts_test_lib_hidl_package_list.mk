@@ -105,6 +105,7 @@ vts_hal_driver_libs := \
   android.hardware.vibrator@1.0-vts.driver \
   android.hardware.vibrator@1.1-vts.driver \
   android.hardware.vibrator@1.2-vts.driver \
+  android.hardware.vibrator@1.3-vts.driver \
   android.hardware.vr@1.0-vts.driver \
   android.hardware.weaver@1.0-vts.driver \
   android.hardware.wifi@1.0-vts.driver \
@@ -211,6 +212,7 @@ vts_hal_profiler_libs := \
   android.hardware.vibrator@1.0-vts.profiler \
   android.hardware.vibrator@1.1-vts.profiler \
   android.hardware.vibrator@1.2-vts.profiler \
+  android.hardware.vibrator@1.3-vts.profiler \
   android.hardware.vr@1.0-vts.profiler \
   android.hardware.weaver@1.0-vts.profiler \
   android.hardware.wifi@1.0-vts.profiler \
@@ -300,6 +302,7 @@ vts_hal_test_bins := \
   VtsHalVibratorV1_0TargetTest \
   VtsHalVibratorV1_1TargetTest \
   VtsHalVibratorV1_2TargetTest \
+  VtsHalVibratorV1_3TargetTest \
   VtsHalVrV1_0TargetTest \
   VtsHalWeaverV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
