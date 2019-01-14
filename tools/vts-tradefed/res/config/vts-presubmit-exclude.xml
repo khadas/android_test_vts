@@ -113,6 +113,14 @@
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcSysrqTrigger" />
     <option name="compatibility:exclude-filter" value="VtsKernelProcFileApi VtsKernelProcFileApi.testProcUidProcstatSet" />
 
+    <!-- VtsKernelLtp test cases taking longer than 15 seconds -->
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.cve.cve-2011-0999" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.fs.linker01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.nptl.nptl01" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.mm.mmapstress06" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.fs.fs_di" />
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.dio.dio23" />
+
     <!-- b/118683028: tests recently become flaky -->
     <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host VideoDecHidlTest.AdaptivePlaybackTest_OMX.google.hevc.decoder_video_decoder.hevc" />
     <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host ComponentHidlTest.PortEnableDisable_Idle_OMX.google.opus.decoder_audio_decoder.opus" />
