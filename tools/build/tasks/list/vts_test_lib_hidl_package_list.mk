@@ -296,6 +296,7 @@ vts_hal_test_bins := \
   VtsHalThermalV1_1TargetTest \
   VtsHalThermalV2_0TargetTest \
   thermal_hidl_stress_test \
+  VtsHalBufferHubV1_0TargetTest \
   VtsHalTvInputV1_0TargetTest \
   VtsHalUsbV1_0TargetTest \
   VtsHalUsbV1_1TargetTest \
