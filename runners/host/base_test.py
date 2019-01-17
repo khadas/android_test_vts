@@ -1287,7 +1287,7 @@ class BaseTestClass(object):
                 logging.debug(msg)
 
                 path_retry_log = os.path.join(logging.log_path, 'retry_log.txt')
-                with open(path_retry_log) as f:
+                with open(path_retry_log, 'a+') as f:
                     f.write(msg + '\n')
 
             self._is_final_run = count == self.max_retry_count
