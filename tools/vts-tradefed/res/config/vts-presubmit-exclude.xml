@@ -121,6 +121,9 @@
     <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.fs.fs_di" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.dio.dio23" />
 
+    <!-- b/122966836: known regression in reference devices -->
+    <option name="compatibility:exclude-filter" value="VtsKernelLtp VtsKernelLtp.syscalls.mprotect04" />
+
     <!-- b/118683028: tests recently become flaky -->
     <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host VideoDecHidlTest.AdaptivePlaybackTest_OMX.google.hevc.decoder_video_decoder.hevc" />
     <option name="compatibility:exclude-filter" value="VtsHalMediaOmxV1_0Host ComponentHidlTest.PortEnableDisable_Idle_OMX.google.opus.decoder_audio_decoder.opus" />
