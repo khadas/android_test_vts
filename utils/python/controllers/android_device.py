@@ -71,7 +71,8 @@ PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 _FASTBOOT_VAR_HAS_VBMETA = "has-slot:vbmeta"
 
 SYSPROP_DEV_BOOTCOMPLETE = "dev.bootcomplete"
-SYSPROP_LLKD_BLACKLIST = "ro.llkd.blacklist.parent"
+SYSPROP_LLK_BLACKLIST_PARENT = "ro.llk.blacklist.parent"
+SYSPROP_LLK_BLACKLIST_PARENT_VALUE = ",vts_hal_agent64,vts_hal_agent32,vts_shell_driver64,vts_shell_driver32"
 SYSPROP_SYS_BOOT_COMPLETED = "sys.boot_completed"
 # the name of a system property which tells whether to stop properly configured
 # native servers where properly configured means a server's init.rc is
@@ -1238,8 +1239,15 @@ class AndroidDevice(object):
 
         event = tfi.Begin("start vts agent", tfi.categories.FRAMEWORK_SETUP)
 
-        self.setProp(SYSPROP_LLKD_BLACKLIST,
-                     ',vts_hal_agent64,vts_hal_agent32,vts_shell_driver64,vts_shell_driver32')
+        llk_blacklist_parent = self.getProp(SYSPROP_LLK_BLACKLIST_PARENT)
+        if not llk_blacklist_parent:
+            self.setProp(SYSPROP_LLK_BLACKLIST_PARENT,
+                         SYSPROP_LLK_BLACKLIST_PARENT_VALUE)
+        else:
+            if llk_blacklist_parent != SYSPROP_LLK_BLACKLIST_PARENT_VALUE:
+                logging.error('Failed to protect VTF agents from livelock check.'
+                              'Sysprop %s is already set as %s',
+                              SYSPROP_LLK_BLACKLIST_PARENT, llk_blacklist_parent)
 
         event_cleanup = tfi.Begin("start vts agent -- cleanup", tfi.categories.FRAMEWORK_SETUP)
         cleanup_commands = [
