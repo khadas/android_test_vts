@@ -84,7 +84,6 @@ vts_hal_driver_libs := \
   android.hardware.radio@1.1-vts.driver \
   android.hardware.radio@1.2-vts.driver \
   android.hardware.radio.config@1.0-vts.driver \
-  android.hardware.radio.config@1.1-vts.driver \
   android.hardware.radio.deprecated@1.0-vts.driver \
   android.hardware.renderscript@1.0-vts.driver \
   android.hardware.secure_element@1.0-vts.driver \
@@ -287,8 +286,6 @@ vts_hal_test_bins := \
   VtsHalRadioV1_0TargetTest \
   VtsHalRadioV1_1TargetTest \
   VtsHalRadioV1_2TargetTest \
-  VtsHalRadioConfigV1_0TargetTest \
-  VtsHalRadioConfigV1_1TargetTest \
   VtsHalRenderscriptV1_0TargetTest \
   VtsHalSapV1_0TargetTest \
   VtsHalSecureElementV1_0TargetTest \
