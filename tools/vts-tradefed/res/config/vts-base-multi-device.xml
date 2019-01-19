@@ -15,5 +15,4 @@
 -->
 <configuration description="VTS Base Config for Multi-device Test Plans">
   <include name="vts-base-common" />
-  <test class="com.android.compatibility.common.tradefed.testtype.CompatibilityTestMultiDevice" />
 </configuration>
