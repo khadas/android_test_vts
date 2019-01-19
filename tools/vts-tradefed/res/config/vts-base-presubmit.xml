@@ -16,10 +16,6 @@
 <configuration description="VTS Main Test Plan Simplified Base Config for Presubmit Tests">
   <include name="vts-base-single-device" />
 
-  <test class="com.android.compatibility.common.tradefed.testtype.suite.CompatibilityTestSuite">
-    <option name="config-patterns" value="Vts.*\.config" />
-  </test>
-
   <target_preparer class="com.android.tradefed.targetprep.VtsDevicePreparer">
     <option name="enable-adb-root" value="true"/>
     <option name="start-framework" value="true"/>
