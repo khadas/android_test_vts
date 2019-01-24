@@ -18,7 +18,6 @@ package com.android.tradefed.testtype;
 
 import com.android.annotations.VisibleForTesting;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
-import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -519,12 +518,13 @@ public class VtsMultiDeviceTest
 
     private IBuildInfo mBuildInfo = null;
     private String mRunName = null;
-    // the path of a dir which contains the test data files.
-    private String mTestCaseDataDir = "./";
+    // the path to android-vts/testcases
+    private String mTestCaseDir = "./";
 
     private VtsVendorConfigFileUtil configReader = null;
     private IInvocationContext mInvocationContext = null;
     private OutputUtil mOutputUtil = null;
+    protected CompatibilityBuildHelper mBuildHelper = null;
 
     /**
      * {@inheritDoc}
@@ -734,6 +734,7 @@ public class VtsMultiDeviceTest
     @Override
     public void setBuild(IBuildInfo buildInfo) {
         mBuildInfo = buildInfo;
+        mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
     }
 
     /**
@@ -750,7 +751,8 @@ public class VtsMultiDeviceTest
     private void populateDefaultJsonFields(JSONObject jsonObject, String testCaseDataDir)
             throws IOException, JSONException {
         CLog.d("Populating default fields to json object from %s", DEFAULT_TESTCASE_CONFIG_PATH);
-        String content = FileUtil.readStringFromFile(new File(mTestCaseDataDir, DEFAULT_TESTCASE_CONFIG_PATH));
+        String content =
+                FileUtil.readStringFromFile(new File(mTestCaseDir, DEFAULT_TESTCASE_CONFIG_PATH));
         JSONObject defaultJsonObject = new JSONObject(content);
 
         JsonUtil.deepMergeJsonObjects(jsonObject, defaultJsonObject);
@@ -805,19 +807,19 @@ public class VtsMultiDeviceTest
             }
         }
 
-        CLog.d("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
+        CLog.d("Load original test config %s %s", mTestCaseDir, mTestConfigPath);
         String content = null;
 
         if (mTestConfigPath != null) {
             content = FileUtil.readStringFromFile(
-                    new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+                    new File(Paths.get(mTestCaseDir, mTestConfigPath).toString()));
             CLog.d("Loaded original test config %s", content);
             if (content != null) {
                 JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
             }
         }
 
-        populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
+        populateDefaultJsonFields(jsonObject, mTestCaseDir);
         CLog.d("Built a Json object using the loaded original test config");
 
         JSONArray deviceArray = new JSONArray();
@@ -891,8 +893,8 @@ public class VtsMultiDeviceTest
                     testBedArray.length());
             throw new RuntimeException("Failed to produce VTS runner test config");
         }
-        jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
-        CLog.d("Added %s = %s to the Json object", DATA_FILE_PATH, mTestCaseDataDir);
+        jsonObject.put(DATA_FILE_PATH, mTestCaseDir);
+        CLog.d("Added %s = %s to the Json object", DATA_FILE_PATH, mTestCaseDir);
 
         JSONObject build = new JSONObject();
         build.put(BUILD_ID, mBuildInfo.getBuildId());
@@ -1268,7 +1270,7 @@ public class VtsMultiDeviceTest
         long methodStartTime = System.currentTimeMillis();
         CLog.d("Device serial number: " + mDevice.getSerialNumber());
 
-        setTestCaseDataDir();
+        setTestCaseDir();
 
         VtsMultiDeviceTestResultParser parser =
                 new VtsMultiDeviceTestResultParser(listener, deriveRunName());
@@ -1310,16 +1312,8 @@ public class VtsMultiDeviceTest
             CLog.w("max-test-timeout is less than test-timeout. Set max timeout to %dms.", timeout);
         }
 
-        // TODO: Stop relying on VtsCompatibilityInvocationHelper
-        File workingDir = null;
-        VtsCompatibilityInvocationHelper invocationHelper = createInvocationHelper();
-        try {
-            workingDir = invocationHelper.getTestsDir();
-        } catch (FileNotFoundException e) {
-            CLog.e("VtsCompatibilityInvocationHelper cannot find test case directory. "
-                    + "Command working directory not set.");
-        }
-        VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper(workingDir);
+        VtsPythonRunnerHelper vtsPythonRunnerHelper =
+                createVtsPythonRunnerHelper(new File(mTestCaseDir));
 
         List<String> cmd = new ArrayList<>();
         cmd.add("python");
@@ -1468,16 +1462,11 @@ public class VtsMultiDeviceTest
     /**
      * Set the path for android-vts/testcases/ which keeps the VTS python code under vts.
      */
-    private void setTestCaseDataDir() {
-        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(mBuildInfo);
-        File testDir = null;
+    private void setTestCaseDir() {
         try {
-            testDir = buildHelper.getTestsDir();
+            mTestCaseDir = mBuildHelper.getTestsDir().getAbsolutePath();
         } catch (FileNotFoundException e) {
-            /* pass */
-        }
-        if (testDir != null) {
-            mTestCaseDataDir = testDir.getAbsolutePath();
+            CLog.e("Cannot get testcase dir. Tests may not run correctly.");
         }
     }
 
@@ -1495,13 +1484,5 @@ public class VtsMultiDeviceTest
     @VisibleForTesting
     protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
         return new VtsPythonRunnerHelper(mBuildInfo, workingDir);
-    }
-
-    /**
-     * Creates a {@link VtsCompatibilityInvocationHelper} to get the working directory.
-     */
-    @VisibleForTesting
-    protected VtsCompatibilityInvocationHelper createInvocationHelper() {
-        return new VtsCompatibilityInvocationHelper();
     }
 }
