@@ -511,12 +511,18 @@ class BaseTestClass(object):
         """
         event = tfi.Begin('_tearDownClass method for test class',
                           tfi.categories.TEST_CLASS_TEARDOWN)
-        self.resetTimeout(TIMEOUT_SECS_TEARDOWN_CLASS)
+        self.cancelTimeout()
 
         event_sub = tfi.Begin('tearDownClass method from test script',
                               tfi.categories.TEST_CLASS_TEARDOWN,
                               enable_logging=False)
-        ret = self._exec_func(self.tearDownClass)
+
+        @timeout_utils.timeout(TIMEOUT_SECS_TEARDOWN_CLASS,
+                               message='tearDownClass method timed out.',
+                               no_exception=True)
+        def _executeTearDownClass(baseTest):
+            baseTest._exec_func(baseTest.tearDownClass)
+        _executeTearDownClass(self)
 
         event_sub.End()
 
@@ -545,8 +551,6 @@ class BaseTestClass(object):
         with open(report_proto_path, "wb") as f:
             f.write(message_b)
 
-        self.cancelTimeout()
-
         if self.log_uploading.enabled:
             @timeout_utils.timeout(TIMEOUT_SECS_LOG_UPLOADING,
                                    message='_tearDownClass method in base_test timed out.',
@@ -560,7 +564,6 @@ class BaseTestClass(object):
             event_upload.End()
 
         event.End()
-        return ret
 
     def tearDownClass(self):
         """Teardown function that will be called after all the selected test
