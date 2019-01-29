@@ -151,7 +151,6 @@ common_halpower-unit-tests_c_includes := \
 common_halpower-unit-tests_shared_libraries_target := \
     libdl \
     libhardware \
-    libpagemap \
     libdl_preempt_test_1 \
     libdl_preempt_test_2 \
     libdl_test_df_1_global \
