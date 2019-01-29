@@ -256,6 +256,7 @@ vts_hal_test_bins := \
   VtsHalGnssV1_1TargetTest \
   VtsHalGraphicsComposerV2_1TargetTest \
   VtsHalGraphicsComposerV2_2TargetTest \
+  VtsHalGraphicsComposerV2_3TargetTest \
   VtsHalGraphicsMapperV2_0TargetTest \
   VtsHalGraphicsMapperV2_1TargetTest \
   VtsHalHealthStorageV1_0TargetTest \
