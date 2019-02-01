@@ -33,7 +33,7 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
         """Initializes the DUT and places devices into fastboot mode."""
         self.dut = self.android_devices[0]
         self.shell = self.dut.shell
-        if self.dut.getProp(PROPERTY_LOGICAL_PARTITIONS) != "1":
+        if self.dut.getProp(PROPERTY_LOGICAL_PARTITIONS) != "true":
             self.skipAllTests("Device does not support userspace fastboot")
         else:
             self.dut.cleanUp()
