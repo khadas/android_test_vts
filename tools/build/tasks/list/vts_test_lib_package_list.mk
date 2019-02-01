@@ -90,6 +90,7 @@ vts_test_lib_packages += \
     libtest_dt_runpath_c \
     libtest_dt_runpath_d \
     libtest_dt_runpath_x \
+    libtest_dt_runpath_y \
     libtest_empty \
     libtest_ifunc \
     libtest_ifunc_variable \
