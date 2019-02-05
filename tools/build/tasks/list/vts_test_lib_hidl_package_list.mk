@@ -312,6 +312,7 @@ vts_hal_test_bins := \
   VtsHalWeaverV1_0TargetTest \
   VtsHalWifiHostapdV1_0TargetTest \
   VtsHalWifiHostapdV1_1TargetTest \
+  VtsHalWifiKeystoreV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
   VtsHalWifiV1_1TargetTest \
   VtsHalWifiV1_2TargetTest \
