@@ -290,6 +290,7 @@ vts_hal_test_bins := \
   VtsHalVibratorV1_2TargetTest \
   VtsHalVrV1_0TargetTest \
   VtsHalWeaverV1_0TargetTest \
+  VtsHalWifiKeystoreV1_0TargetTest \
   VtsHalWifiV1_0TargetTest \
   VtsHalWifiV1_1TargetTest \
   VtsHalWifiV1_2TargetTest \
