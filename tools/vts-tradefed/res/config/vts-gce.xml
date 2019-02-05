@@ -41,6 +41,7 @@
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalInputClassifierV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalKeymasterV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
