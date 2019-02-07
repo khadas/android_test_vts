@@ -63,6 +63,7 @@ vts_test_bin_packages += \
     dt_early_mount_test \
     kernel_net_tests \
     vts_kernel_tun_test \
+    vts_kernel_toolchain \
 
 # Binder tests.
 vts_test_bin_packages += \
