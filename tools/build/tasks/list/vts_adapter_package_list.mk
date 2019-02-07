@@ -134,6 +134,8 @@ vts_adapter_package_list := \
   android.hardware.neuralnetworks@1.0-adapter-helper \
   android.hardware.neuralnetworks@1.1-adapter \
   android.hardware.neuralnetworks@1.1-adapter-helper \
+  android.hardware.neuralnetworks@1.2-adapter \
+  android.hardware.neuralnetworks@1.2-adapter-helper \
   android.hardware.nfc@1.0-adapter \
   android.hardware.nfc@1.0-adapter-helper \
   android.hardware.nfc@1.1-adapter \
