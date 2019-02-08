@@ -25,10 +25,13 @@ cc_defaults {
 
     local_include_dirs: ["include"],
 
-    shared_libs: [
+    static_libs: [
         "android.hardware.audio@4.0",
         "android.hardware.audio.effect@2.0",
         "android.hardware.audio.effect@4.0",
+    ],
+
+    shared_libs: [
         "android.hidl.allocator@1.0",
         "android.hidl.memory@1.0",
         "libbase",
@@ -43,10 +46,13 @@ cc_defaults {
 
     export_include_dirs: ["include"],
 
-    export_shared_lib_headers: [
+    export_static_lib_headers: [
         "android.hardware.audio@4.0",
         "android.hardware.audio.effect@2.0",
         "android.hardware.audio.effect@4.0",
+    ],
+
+    export_shared_lib_headers: [
         "android.hidl.allocator@1.0",
         "android.hidl.memory@1.0",
         "libcutils",
