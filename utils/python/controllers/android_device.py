@@ -58,6 +58,8 @@ ANDROID_PRODUCT_TYPE_UNKNOWN = "unknown"
 
 # Target-side directory where the VTS binaries are uploaded
 DEFAULT_AGENT_BASE_DIR = "/data/local/tmp"
+# Name of llkd
+LLKD = 'llkd-1'
 # Time for which the current is put on sleep when the client is unable to
 # make a connection.
 THREAD_SLEEP_TIME = 1
@@ -71,8 +73,6 @@ PROPERTY_PRODUCT_SKU = "ro.boot.product.hardware.sku"
 _FASTBOOT_VAR_HAS_VBMETA = "has-slot:vbmeta"
 
 SYSPROP_DEV_BOOTCOMPLETE = "dev.bootcomplete"
-SYSPROP_LLK_BLACKLIST_PARENT = "ro.llk.blacklist.parent"
-SYSPROP_LLK_BLACKLIST_PARENT_VALUE = ",vts_hal_agent64,vts_hal_agent32,vts_shell_driver64,vts_shell_driver32"
 SYSPROP_SYS_BOOT_COMPLETED = "sys.boot_completed"
 # the name of a system property which tells whether to stop properly configured
 # native servers where properly configured means a server's init.rc is
@@ -432,6 +432,7 @@ class AndroidDevice(object):
         claimed.
         """
         self.stopServices()
+        self._StartLLKD()
         if self.host_command_port:
             self.adb.forward("--remove tcp:%s" % self.host_command_port)
             self.host_command_port = None
@@ -1226,6 +1227,20 @@ class AndroidDevice(object):
         if self.hal:
             self.hal.CleanUp()
 
+    def _StartLLKD(self):
+        """Starts LLKD"""
+        try:
+            self.adb.shell('su root start %s' % LLKD)
+        except adb.AdbError as e:
+            logging.error('Failed to start llkd')
+
+    def _StopLLKD(self):
+        """Stops LLKD"""
+        try:
+            self.adb.shell('su root stop %s' % LLKD)
+        except adb.AdbError as e:
+            logging.error('Failed to stop llkd')
+
     def startVtsAgent(self):
         """Start HAL agent on the AndroidDevice.
 
@@ -1239,15 +1254,7 @@ class AndroidDevice(object):
 
         event = tfi.Begin("start vts agent", tfi.categories.FRAMEWORK_SETUP)
 
-        llk_blacklist_parent = self.getProp(SYSPROP_LLK_BLACKLIST_PARENT)
-        if not llk_blacklist_parent:
-            self.setProp(SYSPROP_LLK_BLACKLIST_PARENT,
-                         SYSPROP_LLK_BLACKLIST_PARENT_VALUE)
-        else:
-            if llk_blacklist_parent != SYSPROP_LLK_BLACKLIST_PARENT_VALUE:
-                logging.error('Failed to protect VTF agents from livelock check.'
-                              'Sysprop %s is already set as %s',
-                              SYSPROP_LLK_BLACKLIST_PARENT, llk_blacklist_parent)
+        self._StopLLKD()
 
         event_cleanup = tfi.Begin("start vts agent -- cleanup", tfi.categories.FRAMEWORK_SETUP)
         cleanup_commands = [
