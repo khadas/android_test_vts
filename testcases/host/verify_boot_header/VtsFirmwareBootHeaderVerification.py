@@ -28,7 +28,7 @@ from vts.runners.host import test_runner
 from vts.utils.python.android import api
 from vts.utils.python.file import target_file_utils
 
-BLOCK_DEV_PATH = "/dev/block/platform"  # path to platform block devices
+block_dev_path = "/dev/block/platform"  # path to platform block devices
 PROPERTY_SLOT_SUFFIX = "ro.boot.slot_suffix"  # indicates current slot suffix for A/B devices
 BOOT_HEADER_DTBO_SIZE_OFFSET = 1632  # offset of recovery dtbo size in boot header of version 1.
 
@@ -55,7 +55,14 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
 
     def setUp(self):
         """Checks if the the preconditions to run the test are met."""
-        asserts.skipIf("x86" in self.dut.cpu_abi, "Skipping test for x86 ABI")
+        if "x86" in self.dut.cpu_abi:
+            global block_dev_path
+            block_dev_path = "/dev/block"
+            acpio_idx_string = self.adb.shell(
+                "cat /proc/cmdline | "
+                "grep -o \"androidboot.acpio_idx=[^ ]*\" |"
+                "cut -d \"=\" -f 2 ").replace('\n','')
+            asserts.skipIf((len(acpio_idx_string) == 0), "Skipping test for x86 NON-ACPI ABI")
 
     def CheckImageHeader(self, boot_image, is_recovery=False):
         """Verifies the boot image header version, header size and recovery dtbo size.
@@ -94,7 +101,7 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
         """Validates boot image header."""
         current_boot_partition = "boot" + str(self.slot_suffix)
         boot_path = target_file_utils.FindFiles(
-            self.shell, BLOCK_DEV_PATH, current_boot_partition, "-type l")
+            self.shell, block_dev_path, current_boot_partition, "-type l")
         logging.info("Boot path %s", boot_path)
         if not boot_path:
             asserts.fail("Unable to find path to boot image on device.")
@@ -106,7 +113,7 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
         """Validates recovery image header."""
         asserts.skipIf(self.slot_suffix,
                        "A/B devices do not have a separate recovery partition")
-        recovery_path = target_file_utils.FindFiles(self.shell, BLOCK_DEV_PATH,
+        recovery_path = target_file_utils.FindFiles(self.shell, block_dev_path,
                                                     "recovery", "-type l")
         logging.info("recovery path %s", recovery_path)
         if not recovery_path:
