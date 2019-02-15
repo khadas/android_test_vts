@@ -34,6 +34,7 @@ from vts.runners.host import logger
 from vts.runners.host import records
 from vts.runners.host import signals
 from vts.runners.host import utils
+from vts.utils.python.common import timeout_utils
 from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
 
 
@@ -121,8 +122,8 @@ def runTestClass(test_class):
         tr.parseTestConfig(config)
         try:
             tr.runTestClass(test_class, None)
-        except KeyboardInterrupt as e:
-            logging.exception("Aborted")
+        except (signals.TestAbortAll, KeyboardInterrupt) as e:
+            logging.error("Abort all test")
         except Exception as e:
             logging.error("Unexpected exception")
             logging.exception(e)
@@ -345,6 +346,9 @@ class TestRunner(object):
         event.End()
         return objects
 
+    @timeout_utils.timeout(base_test.TIMEOUT_SECS_TEARDOWN_CLASS,
+                           message='unregisterControllers method timed out.',
+                           no_exception=True)
     def unregisterControllers(self):
         """Destroy controller objects and clear internal registry.
 
@@ -403,8 +407,6 @@ class TestRunner(object):
                 if test_cls_instance not in self.test_cls_instances:
                     self.test_cls_instances.append(test_cls_instance)
                 cls_result = test_cls_instance.run(test_cases)
-            except signals.TestAbortAll as e:
-                raise e
             finally:
                 self.unregisterControllers()
 

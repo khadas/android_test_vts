@@ -17,6 +17,7 @@
 import logging
 import os
 import re
+import signal
 import sys
 import threading
 import time
@@ -32,6 +33,7 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 from vts.utils.python.controllers import adb
 from vts.utils.python.controllers import android_device
+from vts.utils.python.controllers.adb import AdbError
 from vts.utils.python.common import cmd_utils
 from vts.utils.python.common import filter_utils
 from vts.utils.python.common import list_utils
@@ -580,19 +582,22 @@ class BaseTestClass(object):
                 logging.warning("Cannot interrupt more than once.")
                 return
             self._interrupted = True
-
+        logging.info("Test timed out, interrupt")
         utils.stop_current_process(TIMEOUT_SECS_TEARDOWN_CLASS)
 
     def cancelTimeout(self):
         """Cancels main thread timer."""
-        with self._interrupt_lock:
-            if self._interrupted:
-                logging.warning("Test execution has been interrupted. "
-                                "Cannot cancel or reset timeout.")
-                return
+        if hasattr(signal, "SIGALRM"):
+            signal.alarm(0)
+        else:
+            with self._interrupt_lock:
+                if self._interrupted:
+                    logging.warning("Test execution has been interrupted. "
+                                    "Cannot cancel or reset timeout.")
+                    return
 
-        if self._timer:
-            self._timer.cancel()
+            if self._timer:
+                self._timer.cancel()
 
     def resetTimeout(self, timeout):
         """Restarts the timer that will interrupt the main thread.
@@ -603,12 +608,16 @@ class BaseTestClass(object):
         Args:
             timeout: A float, wait time in seconds before interrupt.
         """
-        self.cancelTimeout()
-
         logging.debug("Start timer with timeout=%ssec.", timeout)
-        self._timer = threading.Timer(timeout, self.interrupt)
-        self._timer.daemon = True
-        self._timer.start()
+        if hasattr(signal, "SIGALRM"):
+            signal.signal(signal.SIGALRM, utils._timeout_handler)
+            signal.alarm(int(timeout))
+        else:
+            self.cancelTimeout()
+
+            self._timer = threading.Timer(timeout, self.interrupt)
+            self._timer.daemon = True
+            self._timer.start()
 
     def _testEntry(self, test_record):
         """Internal function to be called upon entry of a test case.
@@ -1002,6 +1011,40 @@ class BaseTestClass(object):
             self._is_final_run = True
             finished = True
             raise signals.TestAbortAll, e, sys.exc_info()[2]
+        except utils.TimeoutError as e:
+            logging.exception(e)
+            # Mark current test case as failure and abort remaing  tests.
+            tr_record.testFail(e)
+            self._is_final_run = True
+            finished = True
+            raise signals.TestAbortAll, e, sys.exc_info()[2]
+        except KeyboardInterrupt as e:
+            logging.error("Received KeyboardInterrupt signal")
+            # Abort signals, pass along.
+            tr_record.testFail(e)
+            self._is_final_run = True
+            finished = True
+            raise
+        except AdbError as e:
+            logging.error(e)
+            for device in self.android_devices:
+                try:
+                    device.getProp("ro.build.version.sdk")
+                except AdbError:
+                    if device.serial in android_device.list_adb_devices():
+                        device.log.error(
+                            "Device is in adb devices, but is not responding, abort test!")
+                    else:
+                        device.log.error("Device is not in adb devices, abort test!")
+                    # Non-recoverable adb failure. Mark test failure and abort
+                    tr_record.testFail(e)
+                    self._is_final_run = True
+                    finished = True
+                    raise signals.TestAbortAll, e, sys.exc_info()[2]
+            # error specific to the test case, mark test failure and continue with remaining test
+            tr_record.testFail(e)
+            self._exec_procedure_func(self._onFail)
+            finished = True
         except (signals.TestPass, acts_signals.TestPass) as e:
             # Explicit test pass.
             tr_record.testPass(e)
@@ -1369,13 +1412,20 @@ class BaseTestClass(object):
             class_error = e
             self._is_final_run = True
         except (signals.TestAbortAll, acts_signals.TestAbortAll) as e:
-            logging.error("Received TestAbortAll signal")
+            logging.info("Received TestAbortAll signal")
             class_error = e
             self._is_final_run = True
             # Piggy-back test results on this exception object so we don't lose
             # results from this test class.
             setattr(e, "results", self.results)
             raise signals.TestAbortAll, e, sys.exc_info()[2]
+        except KeyboardInterrupt as e:
+            class_error = e
+            self._is_final_run = True
+            # Piggy-back test results on this exception object so we don't lose
+            # results from this test class.
+            setattr(e, "results", self.results)
+            raise
         except Exception as e:
             # Exception happened during test.
             logging.exception(e)
@@ -1429,7 +1479,6 @@ class BaseTestClass(object):
             ]
 
         self.runTestsWithRetry(tests)
-
         return self.results
 
     def cleanUp(self):
