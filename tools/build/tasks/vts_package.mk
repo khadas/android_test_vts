@@ -58,7 +58,6 @@ target_native_modules := \
     $(ltp_packages) \
     $(vts_adapter_package_list) \
     $(vts_test_bin_packages) \
-    $(vts_test_lib_packages) \
     $(vts_test_lib_hal_packages) \
     $(vts_test_lib_hidl_packages) \
     $(vts_func_fuzzer_packages) \
