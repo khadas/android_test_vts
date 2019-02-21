@@ -267,6 +267,7 @@ vts_hal_test_bins := \
   VtsHalHealthStorageV1_0TargetTest \
   VtsHalHealthV1_0TargetTest \
   VtsHalHealthV2_0TargetTest \
+  VtsHalInputClassifierV1_0TargetTest \
   VtsHalIrV1_0TargetTest \
   VtsHalKeymasterV3_0TargetTest \
   VtsHalKeymasterV4_0TargetTest \
