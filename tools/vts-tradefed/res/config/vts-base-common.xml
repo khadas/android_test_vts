@@ -27,8 +27,8 @@
   <option name="max-log-size" value="200" />
   <object type="vts-vendor-config" class="com.android.tradefed.util.VtsVendorConfigFileUtil" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.ConsoleReporter" />
-  <result_reporter class="com.android.compatibility.common.tradefed.result.VtsResultReporter" />
   <result_reporter class="com.android.compatibility.common.tradefed.result.suite.CompatibilityProtoResultReporter" />
+  <result_reporter class="com.android.compatibility.common.tradefed.result.suite.CertificationSuiteResultReporter" />
   <template-include name="reporters" default="basic-reporters" />
   <multi_target_preparer class="com.android.tradefed.targetprep.VtsTestPlanResultReporter" />
 
