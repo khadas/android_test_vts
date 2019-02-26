@@ -36,10 +36,7 @@ from vts.runners.host import signals
 from vts.runners.host import utils
 from vts.runners.host.tcp_client import vts_tcp_client
 from vts.utils.python.controllers import adb
-from vts.utils.python.controllers import event_dispatcher
 from vts.utils.python.controllers import fastboot
-from vts.utils.python.controllers import customflasher
-from vts.utils.python.controllers import sl4a_client
 from vts.utils.python.instrumentation import test_framework_instrumentation as tfi
 from vts.utils.python.mirror import mirror_tracker
 
@@ -363,11 +360,9 @@ class AndroidDevice(object):
         adb: An AdbProxy object used for interacting with the device via adb.
         fastboot: A FastbootProxy object used for interacting with the device
                   via fastboot.
-        customflasher: A CustomFlasherProxy object used for interacting with
-                       the device via user defined flashing binary.
         enable_vts_agent: bool, whether VTS agent is used.
-        enable_sl4a: bool, whether SL4A is used.
-        enable_sl4a_ed: bool, whether SL4A Event Dispatcher is used.
+        enable_sl4a: bool, whether SL4A is used. (unsupported)
+        enable_sl4a_ed: bool, whether SL4A Event Dispatcher is used. (unsupported)
         host_command_port: the host-side port for runner to agent sessions
                            (to send commands and receive responses).
         host_callback_port: the host-side port for agent to runner sessions
@@ -399,7 +394,6 @@ class AndroidDevice(object):
         self.vts_agent_process = None
         self.adb = adb.AdbProxy(serial)
         self.fastboot = fastboot.FastbootProxy(serial)
-        self.customflasher = customflasher.CustomFlasherProxy(serial)
         if not self.isBootloaderMode:
             self.rootAdb()
         self.host_command_port = None
@@ -411,21 +405,9 @@ class AndroidDevice(object):
         self.lib = None
         self.shell = None
         self.shell_default_nohup = shell_default_nohup
-        self.sl4a_host_port = None
-        # TODO: figure out a good way to detect which port is available
-        # on the target side, instead of hard coding a port number.
-        self.sl4a_target_port = 8082
 
     def __del__(self):
         self.cleanUp()
-
-    def SetCustomFlasherPath(self, customflasher_path):
-        """Sets customflasher path to use to flash the device.
-
-        Args:
-            customflasher_path: string, path to user-spcified flash binary.
-        """
-        self.customflasher.SetCustomBinaryPath(customflasher_path)
 
     def cleanUp(self):
         """Cleans up the AndroidDevice object and releases any resources it
@@ -436,9 +418,6 @@ class AndroidDevice(object):
         if self.host_command_port:
             self.adb.forward("--remove tcp:%s" % self.host_command_port)
             self.host_command_port = None
-        if self.sl4a_host_port:
-            self.adb.forward("--remove tcp:%s" % self.sl4a_host_port)
-            self.sl4a_host_port = None
 
     @property
     def shell_default_nohup(self):
@@ -1154,14 +1133,11 @@ class AndroidDevice(object):
 
         1. Start adb logcat capture.
         2. Start VtsAgent and create HalMirror unless disabled in config.
-        3. If enabled in config, start sl4a service and create sl4a clients.
         """
         event = tfi.Begin("start vts services",
                           tfi.categories.FRAMEWORK_SETUP)
 
         self.enable_vts_agent = getattr(self, "enable_vts_agent", True)
-        self.enable_sl4a = getattr(self, "enable_sl4a", False)
-        self.enable_sl4a_ed = getattr(self, "enable_sl4a_ed", False)
         try:
             self.startAdbLogcat()
         except Exception as e:
@@ -1186,15 +1162,6 @@ class AndroidDevice(object):
                 host_command_port=self.host_command_port, adb=self.adb)
             self.shell.shell_default_nohup = self.shell_default_nohup
             self.resource = mirror_tracker.MirrorTracker(self.host_command_port)
-        if self.enable_sl4a:
-            try:
-                self.startSl4aClient(self.enable_sl4a_ed)
-            except Exception as e:
-                msg = "Failed to start SL4A!"
-                event.Remove(msg)
-                self.log.error(msg)
-                self.log.exception(e)
-                raise
         event.End()
 
     def Heal(self):
@@ -1219,9 +1186,6 @@ class AndroidDevice(object):
         """Stops long running services on the android device."""
         if self.adb_logcat_process:
             self.stopAdbLogcat()
-        if getattr(self, "enable_sl4a", False):
-            self._terminateAllSl4aSessions()
-            self.stopSl4a()
         if getattr(self, "enable_vts_agent", True):
             self.stopVtsAgent()
         if self.hal:
@@ -1336,69 +1300,6 @@ class AndroidDevice(object):
         """Gets the product type name."""
         return self._product_type
 
-    # Code for using SL4A client
-    def startSl4aClient(self, handle_event=True):
-        """Create an sl4a connection to the device.
-
-        Return the connection handler 'droid'. By default, another connection
-        on the same session is made for EventDispatcher, and the dispatcher is
-        returned to the caller as well.
-        If sl4a server is not started on the device, try to start it.
-
-        Args:
-            handle_event: True if this droid session will need to handle
-                          events.
-        """
-        self._sl4a_sessions = {}
-        self._sl4a_event_dispatchers = {}
-
-        for i in range(PORT_RETRY_COUNT):
-            try:
-                if self.isRogueSl4aRunning():
-                    self.log.info("Stop rogue sl4a")
-                    self.stopSl4a()
-                    time.sleep(15)
-                sl4a_client.start_sl4a(
-                    self.adb, device_side_port=self.sl4a_target_port)
-                time.sleep(5)
-
-                self.setupSl4aPort()
-                droid = self._createNewSl4aSession()
-                if handle_event:
-                    ed = self._getSl4aEventDispatcher(droid)
-                    ed.start()
-                break
-            except sl4a_client.Error as e:
-                logging.exception("error: %s", e)
-
-    def setupSl4aPort(self):
-        forward_success = False
-        last_error = None
-        for _ in range(PORT_RETRY_COUNT):
-            if not self.sl4a_host_port or not adb.is_port_available(
-                    self.sl4a_host_port):
-                self.sl4a_host_port = adb.get_available_host_port()
-            logging.debug("sl4a port host %s target %s", self.sl4a_host_port,
-                          self.sl4a_target_port)
-            try:
-                self.adb.tcp_forward(self.sl4a_host_port,
-                                     self.sl4a_target_port)
-                forward_success = True
-                break
-            except adb.AdbError as e:
-                last_error = e
-                pass
-        if not forward_success:
-            self.log.error(last_error)
-            raise last_error
-
-    def stopSl4a(self):
-        """Stops an SL4A apk on a target device."""
-        try:
-            self.adb.shell("am force-stop %s" % SL4A_APK_NAME)
-        except adb.AdbError as e:
-            self.log.warn("Fail to stop package %s: %s", SL4A_APK_NAME, e)
-
     def getPackagePid(self, package_name):
         """Gets the pid for a given package. Returns None if not running.
 
@@ -1434,96 +1335,6 @@ class AndroidDevice(object):
         self.log.debug("apk %s is not running", package_name)
         return None
 
-    def isRogueSl4aRunning(self):
-        """Returns true if SL4A was started by a process other than ACTS.
-
-        If SL4A is started by a process other than ACTS, the port will be set to
-        something other than sl4a_client.DEFAULT_DEVICE_SIDE_PORT. This causes
-        SL4A to be up and running, but nearly impossible to talk to.
-        """
-        sl4a_pid = self.getPackagePid(SL4A_APK_NAME)
-        if sl4a_pid is not None:
-            sl4a_port_hex = '{0:02x}'.format(
-                sl4a_client.DEFAULT_DEVICE_SIDE_PORT).upper()
-            port_is_open = (
-                # Get the tcp info
-                'cat /proc/%s/net/tcp | '
-                # Remove the space padding
-                'tr -s " " | '
-                # Grab the 4th column (rem_address)
-                'cut -d " " -f 4 | '
-                # Grab the port from that address
-                'cut -d ":" -f 2 | '
-                # Find the port we are looking for
-                'grep %s')
-            # If the resulting string from the command is empty, SL4A does not
-            # have a port open for ACTS to listen to.
-            return not bool(
-                self.adb.shell(port_is_open % (sl4a_pid, sl4a_port_hex)))
-        return False
-
-    @property
-    def droid(self):
-        """The default SL4A session to the device if exist, None otherwise."""
-        if not hasattr(self, "_sl4a_sessions") or len(
-                self._sl4a_sessions) == 0:
-            return None
-        try:
-            session_id = sorted(self._sl4a_sessions)[0]
-            result = self._sl4a_sessions[session_id][0]
-            logging.debug("key %s val %s", session_id, result)
-            return result
-        except IndexError as e:
-            logging.exception(e)
-            return None
-
-    @property
-    def droids(self):
-        """A list of the active SL4A sessions on this device."""
-        if not hasattr(self, "_sl4a_sessions") or len(
-                self._sl4a_sessions) == 0:
-            return None
-        keys = sorted(self._sl4a_sessions)
-        results = []
-        for key in keys:
-            results.append(self._sl4a_sessions[key][0])
-        return results
-
-    @property
-    def ed(self):
-        """The default SL4A session to the device if exist, None otherwise."""
-        if (not hasattr(self, "_sl4a_event_dispatchers")
-                or len(self._sl4a_event_dispatchers) == 0):
-            return None
-        logging.debug("self._sl4a_event_dispatchers: %s",
-                      self._sl4a_event_dispatchers)
-        try:
-            session_id = sorted(self._sl4a_event_dispatchers)[0]
-            return self._sl4a_event_dispatchers[session_id]
-        except IndexError:
-            return None
-
-    @property
-    def sl4a(self):
-        """The default SL4A session to the device if exist, None otherwise."""
-        try:
-            return self._sl4a_sessions[sorted(self._sl4a_sessions)[0]][0]
-        except IndexError:
-            return None
-
-    @property
-    def sl4as(self):
-        """A list of the active SL4A sessions on this device.
-
-        If multiple connections exist for the same session, only one connection
-        is listed.
-        """
-        keys = sorted(self._sl4a_sessions)
-        results = []
-        for key in keys:
-            results.append(self._sl4a_sessions[key][0])
-        return results
-
     def getVintfXml(self, use_lshal=True):
         """Reads the vendor interface manifest Xml.
 
@@ -1541,109 +1352,6 @@ class AndroidDevice(object):
             return str(stdout)
         except adb.AdbError as e:
             return None
-
-    def _getSl4aEventDispatcher(self, droid):
-        """Return an EventDispatcher for an sl4a session
-
-        Args:
-            droid: Session to create EventDispatcher for.
-
-        Returns:
-            ed: An EventDispatcher for specified session.
-        """
-        # TODO (angli): Move service-specific start/stop functions out of
-        # android_device, including VTS Agent, SL4A, and any other
-        # target-side services.
-        ed_key = self.serial + str(droid.uid)
-        if ed_key in self._sl4a_event_dispatchers:
-            if self._sl4a_event_dispatchers[ed_key] is None:
-                raise AndroidDeviceError("EventDispatcher Key Empty")
-            self.log.debug("Returning existing key %s for event dispatcher!",
-                           ed_key)
-            return self._sl4a_event_dispatchers[ed_key]
-        event_droid = self._addNewConnectionToSl4aSession(droid.uid)
-        ed = event_dispatcher.EventDispatcher(event_droid)
-        self._sl4a_event_dispatchers[ed_key] = ed
-        return ed
-
-    def _createNewSl4aSession(self):
-        """Start a new session in sl4a.
-
-        Also caches the droid in a dict with its uid being the key.
-
-        Returns:
-            An Android object used to communicate with sl4a on the android
-                device.
-
-        Raises:
-            sl4a_client.Error: Something is wrong with sl4a and it returned an
-            existing uid to a new session.
-        """
-        droid = sl4a_client.Sl4aClient(port=self.sl4a_host_port)
-        droid.open()
-        if droid.uid in self._sl4a_sessions:
-            raise sl4a_client.Error(
-                "SL4A returned an existing uid for a new session. Abort.")
-        logging.debug("set sl4a_session[%s]", droid.uid)
-        self._sl4a_sessions[droid.uid] = [droid]
-        return droid
-
-    def _addNewConnectionToSl4aSession(self, session_id):
-        """Create a new connection to an existing sl4a session.
-
-        Args:
-            session_id: UID of the sl4a session to add connection to.
-
-        Returns:
-            An Android object used to communicate with sl4a on the android
-                device.
-
-        Raises:
-            DoesNotExistError: Raised if the session it's trying to connect to
-            does not exist.
-        """
-        if session_id not in self._sl4a_sessions:
-            raise DoesNotExistError("Session %d doesn't exist." % session_id)
-        droid = sl4a_client.Sl4aClient(
-            port=self.sl4a_host_port, uid=session_id)
-        droid.open(cmd=sl4a_client.Sl4aCommand.CONTINUE)
-        return droid
-
-    def _terminateSl4aSession(self, session_id):
-        """Terminate a session in sl4a.
-
-        Send terminate signal to sl4a server; stop dispatcher associated with
-        the session. Clear corresponding droids and dispatchers from cache.
-
-        Args:
-            session_id: UID of the sl4a session to terminate.
-        """
-        if self._sl4a_sessions and (session_id in self._sl4a_sessions):
-            for droid in self._sl4a_sessions[session_id]:
-                droid.closeSl4aSession()
-                droid.close()
-            del self._sl4a_sessions[session_id]
-        ed_key = self.serial + str(session_id)
-        if ed_key in self._sl4a_event_dispatchers:
-            self._sl4a_event_dispatchers[ed_key].clean_up()
-            del self._sl4a_event_dispatchers[ed_key]
-
-    def _terminateAllSl4aSessions(self):
-        """Terminate all sl4a sessions on the AndroidDevice instance.
-
-        Terminate all sessions and clear caches.
-        """
-        if hasattr(self, "_sl4a_sessions") and self._sl4a_sessions:
-            session_ids = list(self._sl4a_sessions.keys())
-            for session_id in session_ids:
-                try:
-                    self._terminateSl4aSession(session_id)
-                except:
-                    self.log.exception("Failed to terminate session %d.",
-                                       session_id)
-            if self.sl4a_host_port:
-                self.adb.forward("--remove tcp:%d" % self.sl4a_host_port)
-                self.sl4a_host_port = None
 
 
 class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
