@@ -25,6 +25,8 @@ from vts.runners.host import const
 from vts.utils.python.common import cmd_utils
 
 
+DEFAULT_ADB_TIMEOUT = 300
+
 class AdbError(Exception):
     """Raised when there is an error in adb operations."""
 
@@ -118,7 +120,7 @@ class AdbProxy():
             self.adb_str = "adb"
         self.log = log
 
-    def _exec_cmd(self, cmd, no_except=False, timeout=None):
+    def _exec_cmd(self, cmd, no_except=False, timeout=DEFAULT_ADB_TIMEOUT):
         """Executes adb commands in a new shell.
 
         This is specific to executing adb binary because stderr is not a good
