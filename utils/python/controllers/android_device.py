@@ -405,6 +405,7 @@ class AndroidDevice(object):
         self.lib = None
         self.shell = None
         self.shell_default_nohup = shell_default_nohup
+        self.fatal_error = False
 
     def __del__(self):
         self.cleanUp()
@@ -416,7 +417,8 @@ class AndroidDevice(object):
         self.stopServices()
         self._StartLLKD()
         if self.host_command_port:
-            self.adb.forward("--remove tcp:%s" % self.host_command_port)
+            self.adb.forward("--remove tcp:%s" % self.host_command_port,
+                             timeout=adb.DEFAULT_ADB_SHORT_TIMEOUT)
             self.host_command_port = None
 
     @property
@@ -1074,7 +1076,7 @@ class AndroidDevice(object):
 
         self.adb.shell("setprop %s \"%s\"" % (name, value))
 
-    def getProp(self, name):
+    def getProp(self, name, timeout=adb.DEFAULT_ADB_SHORT_TIMEOUT):
         """Calls getprop shell command.
 
         Args:
@@ -1093,7 +1095,7 @@ class AndroidDevice(object):
             logging.error("name of system property should not be None.")
             return None
 
-        out = self.adb.shell("getprop %s" % name)
+        out = self.adb.shell("getprop %s" % name, timeout=timeout)
         return out.decode("utf-8").strip()
 
     def reboot(self, restart_services=True):
@@ -1177,8 +1179,20 @@ class AndroidDevice(object):
         if self.shell:
             res &= self.shell.Heal()
 
+        try:
+            self.getProp("ro.build.version.sdk")
+        except adb.AdbError:
+            if self.serial in list_adb_devices():
+                self.log.error(
+                    "Device is in adb devices, but is not responding!")
+            else:
+                self.log.error("Device is not in adb devices!")
+            self.fatal_error = True
+            res = False
+        else:
+            self.fatal_error = False
         if not res:
-            logging.error('Self diagnosis found problems in Android device %s', self.serial)
+            self.log.error('Self diagnosis found problem')
 
         return res
 
@@ -1193,6 +1207,9 @@ class AndroidDevice(object):
 
     def _StartLLKD(self):
         """Starts LLKD"""
+        if self.fatal_error:
+            self.log.error("Device in fatal error state, skip starting llkd")
+            return
         try:
             self.adb.shell('su root start %s' % LLKD)
         except adb.AdbError as e:
@@ -1200,6 +1217,9 @@ class AndroidDevice(object):
 
     def _StopLLKD(self):
         """Stops LLKD"""
+        if self.fatal_error:
+            self.log.error("Device in fatal error state, skip stop llkd")
+            return
         try:
             self.adb.shell('su root stop %s' % LLKD)
         except adb.AdbError as e:
