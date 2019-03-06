@@ -25,7 +25,12 @@ from vts.runners.host import const
 from vts.utils.python.common import cmd_utils
 
 
+# Default adb timeout 5 minutes
 DEFAULT_ADB_TIMEOUT = 300
+# Adb long timeout (10 minutes) for adb push/pull/bugreport/bugreportz
+DEFAULT_ADB_LONG_TIMEOUT = 600
+# Adb short timeout (30 seconds)
+DEFAULT_ADB_SHORT_TIMEOUT = 30
 
 class AdbError(Exception):
     """Raised when there is an error in adb operations."""
@@ -181,6 +186,9 @@ class AdbProxy():
             arg_str = ' '.join(str(elem) for elem in args)
             if clean_name == 'shell':
                 arg_str = self._quote_wrap_shell_command(arg_str)
+            elif "timeout" not in kwargs.keys():
+                # for non-shell command like adb pull/push/bugreport, set longer default timeout
+                kwargs["timeout"] = DEFAULT_ADB_LONG_TIMEOUT
             return self._exec_cmd(' '.join((self.adb_str, clean_name, arg_str)),
                                   **kwargs)
 

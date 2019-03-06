@@ -1013,7 +1013,7 @@ class BaseTestClass(object):
             raise signals.TestAbortAll, e, sys.exc_info()[2]
         except utils.TimeoutError as e:
             logging.exception(e)
-            # Mark current test case as failure and abort remaing  tests.
+            # Mark current test case as failure and abort remaining tests.
             tr_record.testFail(e)
             self._is_final_run = True
             finished = True
@@ -1027,20 +1027,12 @@ class BaseTestClass(object):
             raise
         except AdbError as e:
             logging.error(e)
-            for device in self.android_devices:
-                try:
-                    device.getProp("ro.build.version.sdk")
-                except AdbError:
-                    if device.serial in android_device.list_adb_devices():
-                        device.log.error(
-                            "Device is in adb devices, but is not responding, abort test!")
-                    else:
-                        device.log.error("Device is not in adb devices, abort test!")
-                    # Non-recoverable adb failure. Mark test failure and abort
-                    tr_record.testFail(e)
-                    self._is_final_run = True
-                    finished = True
-                    raise signals.TestAbortAll, e, sys.exc_info()[2]
+            if not self.Heal():
+                # Non-recoverable adb failure. Mark test failure and abort
+                tr_record.testFail(e)
+                self._is_final_run = True
+                finished = True
+                raise signals.TestAbortAll, e, sys.exc_info()[2]
             # error specific to the test case, mark test failure and continue with remaining test
             tr_record.testFail(e)
             self._exec_procedure_func(self._onFail)
@@ -1267,7 +1259,7 @@ class BaseTestClass(object):
         commands = ['ps aux | grep vts',
                     'cat /proc/meminfo']
         for cmd in commands:
-            results = device.adb.shell(cmd, no_except=True)
+            results = device.adb.shell(cmd, no_except=True, timeout=adb.DEFAULT_ADB_SHORT_TIMEOUT)
             logging.debug('device diagnosis command %s', cmd)
             logging.debug('                 output: %s', results[const.STDOUT])
 
@@ -1294,11 +1286,11 @@ class BaseTestClass(object):
 
             for device in self.android_devices:
                 if device.serial not in available_devices:
-                    logging.warn('device %s become unavailable after tests. recovering...',
-                                 device.serial)
+                    device.log.warn(
+                        "device become unavailable after tests. wait for device come back")
                     _timeout = timeout - time.time() + start
                     if _timeout < 0 or not device.waitForBootCompletion(timeout=_timeout):
-                        logging.error('failed to restore device %s', device.serial)
+                        device.log.error('failed to restore device %s')
                         return False
                     device.rootAdb()
                     device.stopServices()
@@ -1508,6 +1500,7 @@ class BaseTestClass(object):
             return
 
         for device in self.android_devices:
+            if device.fatal_error: continue
             file_name = (_BUG_REPORT_FILE_PREFIX
                          + prefix
                          + '_%s' % device.serial
@@ -1593,7 +1586,7 @@ class BaseTestClass(object):
             return
 
         for device in self.android_devices:
-            if not device.isAdbLogcatOn:
+            if (not device.isAdbLogcatOn) or device.fatal_error:
                 continue
             for buffer in LOGCAT_BUFFERS:
                 file_name = (_LOGCAT_FILE_PREFIX
