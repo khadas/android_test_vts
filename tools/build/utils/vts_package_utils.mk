@@ -20,15 +20,23 @@
 define target-native-copy-pairs
 $(foreach m,$(1),\
   $(eval _built_files := $(strip $(ALL_MODULES.$(m).BUILT_INSTALLED)\
-  $(ALL_MODULES.$(m)$(TARGET_2ND_ARCH_MODULE_SUFFIX).BUILT_INSTALLED)))\
+    $(ALL_MODULES.$(m)$(TARGET_2ND_ARCH_MODULE_SUFFIX).BUILT_INSTALLED)))\
+  $(eval _module_class_folder := $($(strip MODULE_CLASS_$(word 1, $(strip $(ALL_MODULES.$(m).CLASS)\
+    $(ALL_MODULES.$(m)$(TARGET_2ND_ARCH_MODULE_SUFFIX).CLASS))))))\
   $(foreach i, $(_built_files),\
     $(eval bui_ins := $(subst :,$(space),$(i)))\
     $(eval ins := $(word 2,$(bui_ins)))\
     $(if $(filter $(TARGET_OUT_ROOT)/%,$(ins)),\
       $(eval bui := $(word 1,$(bui_ins)))\
+      $(if $(filter $(_module_class_folder), nativetest benchmarktest),\
+        $(eval module_class_folder_stem := $(_module_class_folder)$(findstring 64, $(patsubst $(PRODUCT_OUT)/%,%,$(ins)))),\
+        $(eval module_class_folder_stem := $(_module_class_folder)))\
       $(eval my_copy_dest := $(patsubst data/%,DATA/%,\
-                               $(patsubst system/%,DATA/%,\
-                                   $(patsubst $(PRODUCT_OUT)/%,%,$(ins)))))\
+                               $(patsubst testcases/%,DATA/$(module_class_folder_stem)/%,\
+                                 $(patsubst testcases/$(m)/$(TARGET_ARCH)/%,DATA/$(module_class_folder_stem)/$(m)/%,\
+                                   $(patsubst testcases/$(m)/$(TARGET_2ND_ARCH)/%,DATA/$(module_class_folder_stem)/$(m)/%,\
+                                     $(patsubst system/%,DATA/%,\
+                                       $(patsubst $(PRODUCT_OUT)/%,%,$(ins))))))))\
       $(bui):$(2)/$(my_copy_dest))))
 endef
 
