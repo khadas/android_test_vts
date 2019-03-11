@@ -127,17 +127,19 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 if test_suite.endswith('.'):
                     test_suite = test_suite[:-1]
 
-        if not self.batch_mode:
-            return test_cases
+        #if not self.batch_mode:
+        # Avoid batch mode as it creates overly large filters
+        return test_cases
 
         # Gtest batch mode
-        test_names = map(lambda test: test.full_name, test_cases)
+        # test_names = map(lambda test: test.full_name, test_cases)
+        #test_names = {}
 
-        gtest_batch = gtest_test_case.GtestTestCase(
-            path, '', path, tag, self.PutTag, working_directory,
-            ld_library_path, profiling_library_path, envp=envp)
-        gtest_batch.full_name = ':'.join(test_names)
-        return [gtest_batch]
+        #gtest_batch = gtest_test_case.GtestTestCase(
+        #    path, '', path, tag, self.PutTag, working_directory,
+        #    ld_library_path, profiling_library_path, envp=envp)
+        #gtest_batch.full_name = ':'.join(test_names)
+        #return [gtest_batch]
 
     # @Override
     def VerifyTestResult(self, test_case, command_results):

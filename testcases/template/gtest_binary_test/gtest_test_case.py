@@ -61,7 +61,7 @@ class GtestTestCase(binary_test_case.BinaryTestCase):
         return [('{cmd} --gtest_filter={test} '
                  '--gtest_output=xml:{output_file_path}').format(
                      cmd=super(GtestTestCase, self).GetRunCommand(),
-                     test=test_name,
+                     test = test_name,
                      output_file_path=self.output_file_path),
                 'cat {output} && rm -rf {output}'.format(
                     output=self.output_file_path)]
