@@ -136,3 +136,9 @@ vts_test_lib_packages += \
 # for HAL interface hash test
 vts_test_lib_packages += \
     libhidl-gen-hash \
+
+# for VtsHalWifiSupplicantV1_0Target
+vts_test_lib_packages += \
+    libwifi-hal \
+    libwifi-system \
+
