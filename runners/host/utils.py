@@ -44,7 +44,7 @@ MAX_PATH_LEN = 4096
 
 
 class VTSUtilsError(Exception):
-    """Generic error raised for exceptions in ACTS utils."""
+    """Generic error raised for exceptions in VTS utils."""
 
 
 class NexusModelNames:
