@@ -99,8 +99,7 @@ int VtsProfilingInterface::CreateTraceFile(const string& package,
   int fd = open(file_path.c_str(), O_RDWR | O_CREAT | O_EXCL,
                 S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
   if (fd < 0) {
-    LOG(ERROR) << "Can not open trace file: " << file_path
-               << " error: " << std::strerror(errno);
+    PLOG(ERROR) << "Can not open trace file: " << file_path;
     return -1;
   }
   return fd;
@@ -134,7 +133,7 @@ void VtsProfilingInterface::AddTraceEvent(
       LOG(ERROR) << "Failed to write record.";
     }
     if (!trace_output.Flush()) {
-      LOG(ERROR) << "Failed to flush: " << std::strerror(errno);
+      PLOG(ERROR) << "Failed to flush";
     }
   }
   mutex_.unlock();
