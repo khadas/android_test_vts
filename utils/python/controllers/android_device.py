@@ -1185,6 +1185,9 @@ class AndroidDevice(object):
             if self.serial in list_adb_devices():
                 self.log.error(
                     "Device is in adb devices, but is not responding!")
+            elif self.isBootloaderMode:
+                self.log.info("Device is in bootloader/fastbootd mode")
+                return True
             else:
                 self.log.error("Device is not in adb devices!")
             self.fatal_error = True

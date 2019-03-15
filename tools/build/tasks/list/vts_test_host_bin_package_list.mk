@@ -8,3 +8,4 @@ vts_test_host_bin_packages := \
 vts_test_host_bin_packages += \
     mkdtboimg.py \
     fuzzy_fastboot \
+    fastboot \
