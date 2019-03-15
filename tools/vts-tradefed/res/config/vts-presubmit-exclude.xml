@@ -152,9 +152,6 @@
     <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.ftruncate04_64" />
     <option name="compatibility:exclude-filter" value="VtsKernelLtp syscalls.poll02" />
 
-    <!-- b/121039294: temporally disable kernel test cases that fail on specific devices -->
-    <option name="compatibility:exclude-filter" value="VtsKernelLtp io.aio02" />
-
     <!-- b/122260771: temporally disable kernel test cases that seems to cause device reboot -->
     <option name="compatibility:exclude-filter" value="VtsKernelLtp fs.inode02" />
 
