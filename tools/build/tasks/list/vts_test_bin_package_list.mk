@@ -105,3 +105,5 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     vts_compatibilityMatrix_validate_test \
     vts_halManifest_validate_test \
+    vts_mediaCodecs_validate_test \
+    vts_mediaProfiles_validate_test \
