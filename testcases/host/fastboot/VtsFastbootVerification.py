@@ -30,34 +30,59 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
     """Verifies userspace fastboot implementation."""
 
     def setUpClass(self):
-        """Initializes the DUT and places devices into fastboot mode."""
+        """Initializes the DUT and places devices into fastboot mode.
+
+        Attributes:
+            gtest_bin_path: Path to the fuzzy_fastboot gtest binary
+        """
         self.dut = self.android_devices[0]
         self.shell = self.dut.shell
+        self.gtest_bin_path = os.path.join("host", "nativetest64", "fuzzy_fastboot",
+                                           "fuzzy_fastboot")
         if self.dut.getProp(PROPERTY_LOGICAL_PARTITIONS) != "true":
             self.skipAllTests("Device does not support userspace fastboot")
         else:
             self.dut.cleanUp()
-            self.shell.Execute("reboot fastboot")
+            self.dut.adb.reboot_fastboot()
+            # The below command blocks until the device enters fastbootd mode to
+            # ensure that the device is in fastbootd mode when setUpClass exits.
+            # If this is not done, VTS self-diagnosis tries to recover the
+            # device.
+            self.dut.fastboot.getvar("is-userspace")
 
-    def testFastbootdImplementation(self):
-        """Runs fuzzy_fastboot to verify fastboot implementation."""
-        fastboot_gtest_bin_path = os.path.join(
-            "host", "nativetest64", "fuzzy_fastboot", "fuzzy_fastboot")
-        fastboot_gtest_cmd = [
-            "%s" % fastboot_gtest_bin_path, "--gtest_filter=Conformance*"
+    def testFastbootdSlotOperations(self):
+        """Runs fuzzy_fastboot gtest to verify slot operations in fastbootd implementation."""
+        # Test slot operations and getvar partition-type
+        fastboot_gtest_cmd_slot_operations = [
+            "%s" % self.gtest_bin_path, "--gtest_filter=Conformance.Slots:Conformance.SetActive"
         ]
-        #TODO(b/117181762): Add a serial number argument to fuzzy_fastboot.
-        retcode = subprocess.call(fastboot_gtest_cmd)
-        asserts.assertTrue(retcode == 0, "Fastboot implementation has errors")
+        # TODO(b/117181762): Add a serial number argument to fuzzy_fastboot.
+        retcode = subprocess.call(fastboot_gtest_cmd_slot_operations)
+        asserts.assertTrue(retcode == 0, "Incorrect slot operations")
+
+    def testLogicalPartitionCommands(self):
+        """Runs fuzzy_fastboot to verify getvar commands related to logical partitions."""
+        fastboot_gtest_cmd_logical_partition_compliance = [
+            "%s" % self.gtest_bin_path,
+            "--gtest_filter=LogicalPartitionCompliance.GetVarIsLogical:LogicalPartitionCompliance.SuperPartition"
+        ]
+        retcode = subprocess.call(fastboot_gtest_cmd_logical_partition_compliance)
+        asserts.assertTrue(retcode == 0, "Error in logical partition operations")
+
+    def testFastbootReboot(self):
+        """Runs fuzzy_fastboot to verify the commands to reboot into fastbootd and bootloader."""
+        fastboot_gtest_cmd_reboot_test = [
+            "%s" % self.gtest_bin_path,
+            "--gtest_filter=LogicalPartitionCompliance.FastbootRebootTest"
+        ]
+        retcode = subprocess.call(fastboot_gtest_cmd_reboot_test)
+        asserts.assertTrue(retcode == 0, "Error in fastbootd reboot test")
 
     def tearDownClass(self):
         """Reboot to Android."""
-        if self.isSkipAllTests():
-            return
         if self.dut.isBootloaderMode:
             self.dut.reboot()
             self.dut.waitForBootCompletion()
-
 
 if __name__ == "__main__":
     test_runner.main()
