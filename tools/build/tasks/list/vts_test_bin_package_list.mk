@@ -107,3 +107,5 @@ vts_test_bin_packages += \
     vts_halManifest_validate_test \
     vts_mediaCodecs_validate_test \
     vts_mediaProfiles_validate_test \
+    vts_defaultPermissions_validate_test \
+    vts_permission_validate_test \
