@@ -98,3 +98,8 @@ vts_test_bin_packages += \
 # libprocessgroup JSON schema tests
 vts_test_bin_packages += \
     vts_processgroup_validate_test \
+
+# configfile as API tests
+vts_test_bin_packages += \
+    vts_compatibilityMatrix_validate_test \
+    vts_halManifest_validate_test \
