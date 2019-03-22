@@ -187,6 +187,10 @@ VTF_TESTCASES_OUT := $(VTF_OUT_ROOT)/android-vts/testcases
 VTF_TOOLS_OUT := $(VTF_OUT_ROOT)/android-vts/tools
 VTF_EXTRA_SCRIPTS :=
 
+xsd_config_files := \
+  system/libvintf/xsd/compatibilityMatrix/compatibility_matrix.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/compatibility_matrix.xsd \
+  system/libvintf/xsd/halManifest/hal_manifest.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/hal_manifest.xsd
+
 include $(LOCAL_PATH)/framework/vtf_package.mk
 
 # finally back to the rules for VTS (Vendor Test Suite) packages
@@ -204,6 +208,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
+  $(call copy-many-files,$(xsd_config_files)) \
   $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt \
   $(vts_hidl_hals_dump) \
 
