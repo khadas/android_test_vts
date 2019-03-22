@@ -47,6 +47,7 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
         self.shell = self.dut.shell
         self.adb = self.dut.adb
         self.temp_dir = tempfile.mkdtemp()
+        self.launch_api_level = self.dut.getLaunchApiLevel()
         logging.info("Create %s", self.temp_dir)
         self.slot_suffix = self.dut.getProp(PROPERTY_SLOT_SUFFIX)
         if self.slot_suffix is None:
@@ -76,9 +77,14 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
                 image_file.read(8)  # read boot magic
                 host_image_header_version = unpack("10I",
                                                    image_file.read(10 * 4))[8]
-                asserts.assertEqual(
-                    host_image_header_version, 1,
-                    "Device does not have boot image of version 1")
+                if (self.launch_api_level > api.PLATFORM_API_LEVEL_P):
+                    asserts.assertTrue(
+                        host_image_header_version >= 2,
+                        "Device must atleast have a boot image of version 2")
+                else:
+                    asserts.assertTrue(
+                        host_image_header_version >= 1,
+                        "Device must atleast have a boot image of version 1")
                 image_file.seek(BOOT_HEADER_DTBO_SIZE_OFFSET)
                 recovery_dtbo_size = unpack("I", image_file.read(4))[0]
                 image_file.read(8)  # ignore recovery dtbo load address
@@ -88,6 +94,10 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
                         "recovery partition for non-A/B devices must contain the recovery DTBO"
                     )
                 boot_header_size = unpack("I", image_file.read(4))[0]
+                if (host_image_header_version > 1):
+                    dtb_size = unpack("I", image_file.read(4))[0]
+                    asserts.assertNotEqual(dtb_size, 0, "Boot/recovery image must contain DTB")
+                    image_file.read(8)  # ignore DTB physical load address
                 expected_header_size = image_file.tell()
                 asserts.assertEqual(
                     boot_header_size, expected_header_size,
