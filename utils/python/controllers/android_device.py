@@ -758,8 +758,6 @@ class AndroidDevice(object):
             try:
                 self.adb.root()
                 self.adb.wait_for_device()
-                self.adb.remount()
-                self.adb.wait_for_device()
             except adb.AdbError as e:
                 # adb wait-for-device is not always possible in the lab
                 # continue with an assumption it's done by the harness.
