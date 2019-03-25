@@ -26,6 +26,8 @@ vts_test_bin_packages := \
     libhwbinder_benchmark \
     libhwbinder_latency \
     libbinder_benchmark \
+    libdm_test \
+    liblp_test \
     vts_codelab_target_binary \
     vts_selftest_flaky_test \
     vts_selftest_zero_testcase_binary_test \
