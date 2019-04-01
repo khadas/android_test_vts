@@ -1330,7 +1330,7 @@ class BaseTestClass(object):
             self._is_final_run = count == self.max_retry_count
 
             try:
-                self.runTests(tests)
+                self._runTests(tests)
             except Exception as e:
                 if self._is_final_run:
                     raise e
@@ -1338,7 +1338,7 @@ class BaseTestClass(object):
             if self._is_final_run:
                 break
 
-    def runTests(self, tests):
+    def _runTests(self, tests):
         """Run tests and collect test results.
 
         Args:
