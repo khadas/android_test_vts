@@ -189,7 +189,9 @@ VTF_EXTRA_SCRIPTS :=
 
 xsd_config_files := \
   system/libvintf/xsd/compatibilityMatrix/compatibility_matrix.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/compatibility_matrix.xsd \
-  system/libvintf/xsd/halManifest/hal_manifest.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/hal_manifest.xsd
+  system/libvintf/xsd/halManifest/hal_manifest.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/hal_manifest.xsd \
+  frameworks/av/media/libstagefright/xmlparser/media_codecs.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/media_codecs.xsd \
+  frameworks/av/media/libmedia/xsd/media_profiles.xsd:$(VTS_TESTCASES_OUT)/DATA/etc/media_profiles.xsd
 
 include $(LOCAL_PATH)/framework/vtf_package.mk
 
