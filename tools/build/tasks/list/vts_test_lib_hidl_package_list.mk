@@ -264,6 +264,7 @@ vts_hal_test_bins := \
   VtsHalNeuralnetworksV1_0TargetTest \
   VtsHalNeuralnetworksV1_1TargetTest \
   VtsHalNeuralnetworksV1_2TargetTest \
+  VtsHalNeuralnetworksV1_2Benchmark \
   VtsHalNfcV1_0TargetTest \
   VtsHalNfcV1_1TargetTest \
   VtsHalOemLockV1_0TargetTest \
