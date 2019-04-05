@@ -141,6 +141,8 @@ endif
 vndk_test_res_copy_pairs := \
   $(LATEST_VNDK_LIB_LIST):$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/vndk-lib-list.txt \
   $(LATEST_VNDK_LIB_EXTRA_LIST):$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(PLATFORM_VNDK_VERSION)/vndk-lib-extra-list.txt \
+  $(foreach vndk_ver,$(PRODUCT_EXTRA_VNDK_VERSIONS),build/make/target/product/gsi/$(vndk_ver).txt:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(vndk_ver)/vndk-lib-list.txt) \
+  $(foreach vndk_ver,$(PRODUCT_EXTRA_VNDK_VERSIONS),development/vndk/tools/definition-tool/datasets/vndk-lib-extra-list-$(vndk_ver).txt:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(vndk_ver)/vndk-lib-extra-list.txt) \
 
 kernel_rootdir_test_rc_files := \
   $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
