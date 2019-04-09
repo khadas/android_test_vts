@@ -16,7 +16,9 @@
 vts_test_bin_packages := \
     android.hardware.tests.msgq@1.0-service-benchmark \
     android.hardware.tests.msgq@1.0-service-test \
+    fiemap_writer_test \
     fmq_test \
+    gsi_boot_test \
     hidl_test \
     hidl_test_client \
     hidl_test_helper \
