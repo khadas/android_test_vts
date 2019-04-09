@@ -17,6 +17,7 @@
 package com.android.tradefed.targetprep;
 
 import com.android.annotations.VisibleForTesting;
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.command.remote.DeviceDescriptor;
 import com.android.tradefed.config.Option;
@@ -37,6 +38,7 @@ import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -115,6 +117,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
     // A map of initially installed pip modules and versions. Newly installed modules are not
     // currently added automatically.
     private Map<String, String> mPipInstallList = null;
+    private CompatibilityBuildHelper mBuildHelper = null;
 
     /**
      * {@inheritDoc}
@@ -124,6 +127,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             throws TargetSetupError, BuildError, DeviceNotAvailableException {
         ++mNumOfInstances;
         mBuildInfo = context.getBuildInfos().get(0);
+        mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
         if (mNumOfInstances == 1) {
             CLog.i("Preparing python dependencies...");
             ITestDevice device = context.getDevices().get(0);
@@ -510,8 +514,14 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
      */
     protected boolean checkHostReuseVirtualenv(IBuildInfo buildInfo) throws IOException {
         if (mReuse) {
-            String tempDir = System.getProperty("java.io.tmpdir");
-            mVenvDir = new File(tempDir, "vts-virtualenv-" + mPythonVersion);
+            File workingDir;
+            try {
+                workingDir = mBuildHelper.getDir();
+            } catch (FileNotFoundException e) {
+                workingDir = new File(System.getProperty("java.io.tmpdir"));
+            }
+
+            mVenvDir = new File(workingDir, "vts-virtualenv-" + mPythonVersion);
             if (mVenvDir.exists()) {
                 if (createVirtualenv_waitForOtherProcessToCreateVirtualEnv()) {
                     CLog.d("Using existing virtualenv for version " + mPythonVersion);
