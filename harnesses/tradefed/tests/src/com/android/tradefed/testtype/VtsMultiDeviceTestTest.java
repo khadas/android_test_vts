@@ -62,28 +62,17 @@ public class VtsMultiDeviceTestTest {
     private ITestInvocationListener mMockInvocationListener = null;
     private VtsMultiDeviceTest mTest = null;
 
-    private File mWorkingDir = null;
     /**
      * Helper to initialize the various EasyMocks we'll need.
      */
     @Before
     public void setUp() throws Exception {
-        mWorkingDir = FileUtil.createTempDir("vts-multi-device-working-dir");
         mMockInvocationListener = EasyMock.createMock(ITestInvocationListener.class);
         mTest = new VtsMultiDeviceTest() {
             // TODO: Test this method.
             @Override
             protected void updateVtsRunnerTestConfig(JSONObject jsonObject) {
                 return;
-            }
-            @Override
-            protected VtsCompatibilityInvocationHelper createInvocationHelper() {
-                return new VtsCompatibilityInvocationHelper() {
-                    @Override
-                    public File getTestsDir() throws FileNotFoundException {
-                        return mWorkingDir;
-                    }
-                };
             }
             @Override
             protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
@@ -97,7 +86,6 @@ public class VtsMultiDeviceTestTest {
 
     @After
     public void tearDown() {
-        FileUtil.recursiveDelete(mWorkingDir);
     }
 
     /**
