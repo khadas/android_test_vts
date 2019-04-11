@@ -39,16 +39,14 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
         self.shell = self.dut.shell
         self.gtest_bin_path = os.path.join("host", "nativetest64", "fuzzy_fastboot",
                                            "fuzzy_fastboot")
-        if self.dut.getProp(PROPERTY_LOGICAL_PARTITIONS) != "true":
-            self.skipAllTests("Device does not support userspace fastboot")
-        else:
-            self.dut.cleanUp()
-            self.dut.adb.reboot_fastboot()
-            # The below command blocks until the device enters fastbootd mode to
-            # ensure that the device is in fastbootd mode when setUpClass exits.
-            # If this is not done, VTS self-diagnosis tries to recover the
-            # device.
-            self.dut.fastboot.getvar("is-userspace")
+        self.dut.cleanUp()
+        self.dut.adb.reboot_fastboot()
+        # The below command blocks until the device enters fastbootd mode to
+        # ensure that the device is in fastbootd mode when setUpClass exits.
+        # If this is not done, VTS self-diagnosis tries to recover the
+        # device as part of test case setup(currently the check returns
+        # immediately without a timeout).
+        self.dut.fastboot.getvar("is-userspace")
 
     def testFastbootdSlotOperations(self):
         """Runs fuzzy_fastboot gtest to verify slot operations in fastbootd implementation."""
