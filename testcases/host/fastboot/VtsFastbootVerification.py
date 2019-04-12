@@ -52,7 +52,8 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
         """Runs fuzzy_fastboot gtest to verify slot operations in fastbootd implementation."""
         # Test slot operations and getvar partition-type
         fastboot_gtest_cmd_slot_operations = [
-            "%s" % self.gtest_bin_path, "--gtest_filter=Conformance.Slots:Conformance.SetActive"
+            "%s" % self.gtest_bin_path, "--serial=%s" % self.dut.serial,
+            "--gtest_filter=Conformance.Slots:Conformance.SetActive"
         ]
         # TODO(b/117181762): Add a serial number argument to fuzzy_fastboot.
         retcode = subprocess.call(fastboot_gtest_cmd_slot_operations)
@@ -61,7 +62,7 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
     def testLogicalPartitionCommands(self):
         """Runs fuzzy_fastboot to verify getvar commands related to logical partitions."""
         fastboot_gtest_cmd_logical_partition_compliance = [
-            "%s" % self.gtest_bin_path,
+            "%s" % self.gtest_bin_path, "--serial=%s" % self.dut.serial,
             "--gtest_filter=LogicalPartitionCompliance.GetVarIsLogical:LogicalPartitionCompliance.SuperPartition"
         ]
         retcode = subprocess.call(fastboot_gtest_cmd_logical_partition_compliance)
@@ -70,7 +71,7 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
     def testFastbootReboot(self):
         """Runs fuzzy_fastboot to verify the commands to reboot into fastbootd and bootloader."""
         fastboot_gtest_cmd_reboot_test = [
-            "%s" % self.gtest_bin_path,
+            "%s" % self.gtest_bin_path, "--serial=%s" % self.dut.serial,
             "--gtest_filter=LogicalPartitionCompliance.FastbootRebootTest"
         ]
         retcode = subprocess.call(fastboot_gtest_cmd_reboot_test)
