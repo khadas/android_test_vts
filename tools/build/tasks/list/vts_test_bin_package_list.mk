@@ -111,3 +111,7 @@ vts_test_bin_packages += \
     vts_mediaProfiles_validate_test \
     vts_defaultPermissions_validate_test \
     vts_permission_validate_test \
+
+# AVB tests
+vts_test_bin_packages += \
+    VtsSecurityAvbTest
