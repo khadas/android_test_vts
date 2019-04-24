@@ -159,6 +159,10 @@ acts_testcases_copy_pairs := \
 system_property_compatibility_test_res_copy_pairs := \
   system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
 
+# For VtsSecurityAvb
+gsi_key_copy_pairs := \
+  system/core/rootdir/avb/q-gsi.avbpubkey:$(VTS_TESTCASES_OUT)/DATA/avb/q-gsi.avbpubkey
+
 $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt:
 	@echo -n $(PLATFORM_VNDK_VERSION) > $@
 
@@ -213,6 +217,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
   $(call copy-many-files,$(xsd_config_files)) \
+  $(call copy-many-files,$(gsi_key_copy_pairs)) \
   $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt \
   $(vts_hidl_hals_dump) \
 
