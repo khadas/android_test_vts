@@ -23,8 +23,7 @@ from vts.runners.host import asserts
 from vts.runners.host import base_test
 from vts.runners.host import test_runner
 
-PROPERTY_LOGICAL_PARTITIONS = "ro.boot.dynamic_partitions"
-
+FASTBOOT_VAR_SUPER_PARTITION_NAME = "super-partition-name"
 
 class VtsFastbootVerificationTest(base_test.BaseTestClass):
     """Verifies userspace fastboot implementation."""
@@ -67,6 +66,12 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
         ]
         retcode = subprocess.call(fastboot_gtest_cmd_logical_partition_compliance)
         asserts.assertTrue(retcode == 0, "Error in logical partition operations")
+
+    def testSuperPartitionName(self):
+        """Devices launching with DAP must have a super partition named 'super'"""
+        out = self.dut.fastboot.getvar("super-partition-name").strip()
+        asserts.assertTrue("%s: super" % FASTBOOT_VAR_SUPER_PARTITION_NAME in out,
+                           "Devices launching with DAP must have a 'super' partition")
 
     def testFastbootReboot(self):
         """Runs fuzzy_fastboot to verify the commands to reboot into fastbootd and bootloader."""
