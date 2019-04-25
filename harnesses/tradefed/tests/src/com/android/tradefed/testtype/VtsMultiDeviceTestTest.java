@@ -16,6 +16,7 @@
 package com.android.tradefed.testtype;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -189,5 +190,85 @@ public class VtsMultiDeviceTestTest {
     public void testRunNormalInput() throws Exception {
         mTest.setDevice(createMockDevice());
         mTest.run(mMockInvocationListener);
+    }
+
+    /**
+     * Test the run method without DNAE exception.
+     */
+    @Test
+    public void testRunWithoutDNAE() throws Exception {
+        class NewVtsMultiDeviceTest extends VtsMultiDeviceTest {
+            private File mVtsRunnerLogDir;
+            public File getVtsRunnerLogDir() {
+                return mVtsRunnerLogDir;
+            }
+            @Override
+            protected void updateVtsRunnerTestConfig(JSONObject jsonObject) {
+                return;
+            }
+            @Override
+            protected String createVtsRunnerTestConfigJsonFile(File vtsRunnerLogDir) {
+                mVtsRunnerLogDir = vtsRunnerLogDir;
+                return super.createVtsRunnerTestConfigJsonFile(vtsRunnerLogDir);
+            }
+            @Override
+            protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
+                return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS, workingDir);
+            }
+        };
+        NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
+        newTest.setBuild(createMockBuildInfo());
+        newTest.setTestCasePath(TEST_CASE_PATH);
+        newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+        newTest.setDevice(createMockDevice());
+        newTest.run(mMockInvocationListener);
+        assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
+                newTest.getVtsRunnerLogDir().exists());
+    }
+
+    /**
+     * Test the run method with DNAE exception.
+     */
+    @Test
+    public void testRunWithDNAE() throws Exception {
+        class NewVtsMultiDeviceTest extends VtsMultiDeviceTest {
+            private File mVtsRunnerLogDir;
+            public File getVtsRunnerLogDir() {
+                return mVtsRunnerLogDir;
+            }
+            @Override
+            protected void updateVtsRunnerTestConfig(JSONObject jsonObject) {
+                return;
+            }
+            @Override
+            protected String createVtsRunnerTestConfigJsonFile(File vtsRunnerLogDir) {
+                mVtsRunnerLogDir = vtsRunnerLogDir;
+                return super.createVtsRunnerTestConfigJsonFile(vtsRunnerLogDir);
+            }
+            @Override
+            protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
+                return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS, workingDir);
+            }
+            @Override
+            protected void printToDeviceLogcatAboutTestModuleStatus(String status)
+                    throws DeviceNotAvailableException {
+                if ("END".equals(status)) {
+                    throw new DeviceNotAvailableException();
+                }
+            }
+        };
+        NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
+        newTest.setBuild(createMockBuildInfo());
+        newTest.setTestCasePath(TEST_CASE_PATH);
+        newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+        newTest.setDevice(createMockDevice());
+        try {
+            newTest.run(mMockInvocationListener);
+            fail("DeviceNotAvailableException is expected");
+        } catch (DeviceNotAvailableException expected) {
+            // vtsRunnerLogDir should be deleted
+            assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
+                    newTest.getVtsRunnerLogDir().exists());
+        }
     }
 }
