@@ -671,7 +671,7 @@ class AndroidDevice(object):
         """The MAC address of the device.
         """
         try:
-            command = 'su root cat /sys/class/net/wlan0/address'
+            command = 'cat /sys/class/net/wlan0/address'
             response = self.adb.shell(command)
             return response.strip()
         except adb.AdbError as e:
@@ -1212,7 +1212,7 @@ class AndroidDevice(object):
             self.log.error("Device in fatal error state, skip starting llkd")
             return
         try:
-            self.adb.shell('su root start %s' % LLKD)
+            self.adb.shell('start %s' % LLKD)
         except adb.AdbError as e:
             logging.error('Failed to start llkd')
 
@@ -1222,7 +1222,7 @@ class AndroidDevice(object):
             self.log.error("Device in fatal error state, skip stop llkd")
             return
         try:
-            self.adb.shell('su root stop %s' % LLKD)
+            self.adb.shell('stop %s' % LLKD)
         except adb.AdbError as e:
             logging.error('Failed to stop llkd')
 
