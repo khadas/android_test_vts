@@ -354,6 +354,16 @@ public class VtsDevicePreparerTest {
     }
 
     /**
+     * Test tearDown is skipped when pre-existing DeviceNotAvailableException is seen.
+     */
+    @Test
+    public void test_tearDown_with_DNAE() throws Exception {
+        DeviceNotAvailableException exception =
+                new DeviceNotAvailableException("device not available");
+        mPreparer.tearDown(mockDevice, mockBuildInfo, exception);
+    }
+
+    /**
      * Tests the functionality of radio log restore option.
      * @throws DeviceNotAvailableException
      */
