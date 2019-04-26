@@ -21,6 +21,7 @@ import os
 import shutil
 from struct import unpack
 import tempfile
+import zlib
 
 from vts.runners.host import asserts
 from vts.runners.host import base_test
@@ -65,8 +66,35 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
                 "cut -d \"=\" -f 2 ").replace('\n','')
             asserts.skipIf((len(acpio_idx_string) == 0), "Skipping test for x86 NON-ACPI ABI")
 
+    def get_number_of_pages(self, image_size, page_size):
+        """Calculates the number of pages required for the image.
+
+        Args:
+            image_size: size of the image.
+            page_size : size of page.
+
+        Returns:
+            Number of pages required for the image
+        """
+        return (image_size + page_size - 1) / page_size
+
+    def checkValidRamdisk(self, ramdisk_image):
+        """Verifies that the ramdisk extracted from boot.img is a valid gzipped cpio archive.
+
+        Args:
+            ramdisk_image: ramdisk extracted from boot.img.
+        """
+        # Set wbits parameter to zlib.MAX_WBITS|16 to expect a gzip header and
+        # trailer.
+        unzipped_ramdisk = zlib.decompress(ramdisk_image, zlib.MAX_WBITS|16)
+        # The CPIO header magic can be "070701" or "070702" as per kernel
+        # documentation: Documentation/early-userspace/buffer-format.txt
+        cpio_header_magic = unzipped_ramdisk[0:6]
+        asserts.assertTrue(cpio_header_magic == "070701" or cpio_header_magic == "070702",
+                           "cpio archive header magic not found in ramdisk")
+
     def CheckImageHeader(self, boot_image, is_recovery=False):
-        """Verifies the boot image header version, header size and recovery dtbo size.
+        """Verifies the boot image format.
 
         Args:
             boot_image: Path to the boot image.
@@ -75,12 +103,24 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
         try:
             with open(boot_image, "rb") as image_file:
                 image_file.read(8)  # read boot magic
-                host_image_header_version = unpack("10I",
-                                                   image_file.read(10 * 4))[8]
-                if (self.launch_api_level > api.PLATFORM_API_LEVEL_P):
+                (kernel_size, _, ramdisk_size, _, _, _, _, page_size,
+                 host_image_header_version) = unpack("9I", image_file.read(9 * 4))
+
+                asserts.assertNotEqual(kernel_size, 0, "boot.img/recovery.img must contain kernel")
+
+                if self.launch_api_level > api.PLATFORM_API_LEVEL_P:
                     asserts.assertTrue(
                         host_image_header_version >= 2,
                         "Device must atleast have a boot image of version 2")
+
+                    asserts.assertNotEqual(ramdisk_size, 0, "boot.img must contain ramdisk")
+
+                    # ramdisk comes after the header and kernel pages
+                    num_kernel_pages = self.get_number_of_pages(kernel_size, page_size)
+                    ramdisk_offset = page_size * (1 + num_kernel_pages)
+                    image_file.seek(ramdisk_offset)
+                    ramdisk_buf = image_file.read(ramdisk_size)
+                    self.checkValidRamdisk(ramdisk_buf)
                 else:
                     asserts.assertTrue(
                         host_image_header_version >= 1,
@@ -94,7 +134,7 @@ class VtsFirmwareBootHeaderVerificationTest(base_test.BaseTestClass):
                         "recovery partition for non-A/B devices must contain the recovery DTBO"
                     )
                 boot_header_size = unpack("I", image_file.read(4))[0]
-                if (host_image_header_version > 1):
+                if host_image_header_version > 1:
                     dtb_size = unpack("I", image_file.read(4))[0]
                     asserts.assertNotEqual(dtb_size, 0, "Boot/recovery image must contain DTB")
                     image_file.read(8)  # ignore DTB physical load address
