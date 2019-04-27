@@ -18,7 +18,6 @@ package com.android.tradefed.testtype;
 
 import com.android.annotations.VisibleForTesting;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
-import com.android.compatibility.common.tradefed.build.VtsCompatibilityInvocationHelper;
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.config.Option;
 import com.android.tradefed.config.OptionClass;
@@ -26,6 +25,7 @@ import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
 import com.android.tradefed.log.LogUtil.CLog;
+import com.android.tradefed.metrics.proto.MetricMeasurement.Metric;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
 import com.android.tradefed.result.TestDescription;
@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -239,7 +240,7 @@ public class VtsMultiDeviceTest
 
     @Option(name = "enable-dashboard-uploading",
             description = "Enables the runner's dashboard result uploading feature.")
-    private Boolean mEnableDashboardUploading = null;
+    private boolean mEnableDashboardUploading = true;
 
     @Option(name = "enable-log-uploading",
             description = "Enables the runner's log uploading feature.")
@@ -519,12 +520,13 @@ public class VtsMultiDeviceTest
 
     private IBuildInfo mBuildInfo = null;
     private String mRunName = null;
-    // the path of a dir which contains the test data files.
-    private String mTestCaseDataDir = "./";
+    // the path to android-vts/testcases
+    private String mTestCaseDir = "./";
 
     private VtsVendorConfigFileUtil configReader = null;
     private IInvocationContext mInvocationContext = null;
     private OutputUtil mOutputUtil = null;
+    protected CompatibilityBuildHelper mBuildHelper = null;
 
     /**
      * {@inheritDoc}
@@ -734,6 +736,7 @@ public class VtsMultiDeviceTest
     @Override
     public void setBuild(IBuildInfo buildInfo) {
         mBuildInfo = buildInfo;
+        mBuildHelper = new CompatibilityBuildHelper(mBuildInfo);
     }
 
     /**
@@ -750,7 +753,8 @@ public class VtsMultiDeviceTest
     private void populateDefaultJsonFields(JSONObject jsonObject, String testCaseDataDir)
             throws IOException, JSONException {
         CLog.d("Populating default fields to json object from %s", DEFAULT_TESTCASE_CONFIG_PATH);
-        String content = FileUtil.readStringFromFile(new File(mTestCaseDataDir, DEFAULT_TESTCASE_CONFIG_PATH));
+        String content =
+                FileUtil.readStringFromFile(new File(mTestCaseDir, DEFAULT_TESTCASE_CONFIG_PATH));
         JSONObject defaultJsonObject = new JSONObject(content);
 
         JsonUtil.deepMergeJsonObjects(jsonObject, defaultJsonObject);
@@ -796,7 +800,7 @@ public class VtsMultiDeviceTest
      * @return the updated JSONObject as the new test config.
      */
     protected void updateVtsRunnerTestConfig(JSONObject jsonObject)
-            throws IOException, JSONException, RuntimeException {
+            throws IOException, JSONException {
         configReader = new VtsVendorConfigFileUtil();
         if (configReader.LoadVendorConfig(mBuildInfo)) {
             JSONObject vendorConfigJson = configReader.GetVendorConfigJson();
@@ -805,19 +809,19 @@ public class VtsMultiDeviceTest
             }
         }
 
-        CLog.d("Load original test config %s %s", mTestCaseDataDir, mTestConfigPath);
+        CLog.d("Load original test config %s %s", mTestCaseDir, mTestConfigPath);
         String content = null;
 
         if (mTestConfigPath != null) {
             content = FileUtil.readStringFromFile(
-                    new File(Paths.get(mTestCaseDataDir, mTestConfigPath).toString()));
+                    new File(Paths.get(mTestCaseDir, mTestConfigPath).toString()));
             CLog.d("Loaded original test config %s", content);
             if (content != null) {
                 JsonUtil.deepMergeJsonObjects(jsonObject, new JSONObject(content));
             }
         }
 
-        populateDefaultJsonFields(jsonObject, mTestCaseDataDir);
+        populateDefaultJsonFields(jsonObject, mTestCaseDir);
         CLog.d("Built a Json object using the loaded original test config");
 
         JSONArray deviceArray = new JSONArray();
@@ -891,8 +895,8 @@ public class VtsMultiDeviceTest
                     testBedArray.length());
             throw new RuntimeException("Failed to produce VTS runner test config");
         }
-        jsonObject.put(DATA_FILE_PATH, mTestCaseDataDir);
-        CLog.d("Added %s = %s to the Json object", DATA_FILE_PATH, mTestCaseDataDir);
+        jsonObject.put(DATA_FILE_PATH, mTestCaseDir);
+        CLog.d("Added %s = %s to the Json object", DATA_FILE_PATH, mTestCaseDir);
 
         JSONObject build = new JSONObject();
         build.put(BUILD_ID, mBuildInfo.getBuildId());
@@ -1220,15 +1224,48 @@ public class VtsMultiDeviceTest
      * @param status
      * @return true if succesful, false otherwise
      */
-    private boolean printToDeviceLogcatAboutTestModuleStatus(String status) {
+    @VisibleForTesting
+    protected void printToDeviceLogcatAboutTestModuleStatus(String status)
+            throws DeviceNotAvailableException {
+        mDevice.executeShellCommand(String.format(
+                "log -p i -t \"VTS\" \"[Test Module] %s %s\"", mTestModuleName, status));
+    }
+
+    /**
+     * Create vts python test runner test config json file.
+     *
+     * @param status
+     * @throws RuntimeException
+     * @return test config json file absolute path string
+     */
+    @VisibleForTesting
+    protected String createVtsRunnerTestConfigJsonFile(File vtsRunnerLogDir) {
+        JSONObject jsonObject = new JSONObject();
         try {
-            mDevice.executeShellCommand(String.format(
-                    "log -p i -t \"VTS\" \"[Test Module] %s %s\"", mTestModuleName, status));
-        } catch (DeviceNotAvailableException e) {
-            CLog.w("Device unavailable while trying to write a message to logcat.");
-            return false;
+            updateVtsRunnerTestConfig(jsonObject);
+
+            jsonObject.put(LOG_PATH, vtsRunnerLogDir.getAbsolutePath());
+            CLog.d("Added %s to the Json object", LOG_PATH);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read test config json file");
+        } catch (JSONException e) {
+            throw new RuntimeException("Failed to build updated test config json data");
         }
-        return true;
+
+        CLog.d("VTS python test config json: %s", jsonObject.toString());
+
+        String jsonFilePath = null;
+        try {
+            File tmpFile = FileUtil.createTempFile(
+                    mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json",
+                    vtsRunnerLogDir);
+            jsonFilePath = tmpFile.getAbsolutePath();
+            CLog.d("VTS test config json file path: %s", jsonFilePath);
+            FileUtil.writeToFile(jsonObject.toString(), tmpFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create vts test config json file");
+        }
+        return jsonFilePath;
     }
 
     private boolean AddTestModuleKeys(String test_module_name, long test_module_timestamp) {
@@ -1264,42 +1301,20 @@ public class VtsMultiDeviceTest
      * @throws IllegalArgumentException
      */
     private void doRunTest(ITestLifeCycleReceiver listener)
-            throws RuntimeException, IllegalArgumentException {
+            throws IllegalArgumentException, DeviceNotAvailableException {
         long methodStartTime = System.currentTimeMillis();
         CLog.d("Device serial number: " + mDevice.getSerialNumber());
 
-        setTestCaseDataDir();
+        setTestCaseDir();
 
         VtsMultiDeviceTestResultParser parser =
                 new VtsMultiDeviceTestResultParser(listener, deriveRunName());
 
-        JSONObject jsonObject = new JSONObject();
         File vtsRunnerLogDir = null;
         try {
             vtsRunnerLogDir = FileUtil.createTempDir("vts-runner-log");
-            updateVtsRunnerTestConfig(jsonObject);
-
-            jsonObject.put(LOG_PATH,  vtsRunnerLogDir.getAbsolutePath());
-            CLog.d("Added %s to the Json object", LOG_PATH);
         } catch(IOException e) {
-            throw new RuntimeException("Failed to read test config json file");
-        } catch(JSONException e) {
-            throw new RuntimeException("Failed to build updated test config json data");
-        }
-
-        CLog.d("config json: %s", jsonObject.toString());
-
-        String jsonFilePath = null;
-        try {
-            File tmpFile = FileUtil.createTempFile(
-                    mBuildInfo.getTestTag() + "-config-" + mBuildInfo.getDeviceSerial(), ".json");
-            jsonFilePath = tmpFile.getAbsolutePath();
-            CLog.d("config json file path: %s", jsonFilePath);
-            FileWriter fw = new FileWriter(jsonFilePath);
-            fw.write(jsonObject.toString());
-            fw.close();
-        } catch(IOException e) {
-            throw new RuntimeException("Failed to create device config json file");
+            throw new RuntimeException("Failed to creat temp vts-runner-log directory");
         }
 
         long timeout = mMaxTestTimeout;
@@ -1310,128 +1325,125 @@ public class VtsMultiDeviceTest
             CLog.w("max-test-timeout is less than test-timeout. Set max timeout to %dms.", timeout);
         }
 
-        // TODO: Stop relying on VtsCompatibilityInvocationHelper
-        File workingDir = null;
-        VtsCompatibilityInvocationHelper invocationHelper = createInvocationHelper();
         try {
-            workingDir = invocationHelper.getTestsDir();
-        } catch (FileNotFoundException e) {
-            CLog.e("VtsCompatibilityInvocationHelper cannot find test case directory. "
-                    + "Command working directory not set.");
-        }
-        VtsPythonRunnerHelper vtsPythonRunnerHelper = createVtsPythonRunnerHelper(workingDir);
+            String jsonFilePath = createVtsRunnerTestConfigJsonFile(vtsRunnerLogDir);
 
-        List<String> cmd = new ArrayList<>();
-        cmd.add("python");
-        if (mTestCasePathType != null && mTestCasePathType.toLowerCase().equals("file")) {
-            String testScript = mTestCasePath;
-            if (!testScript.endsWith(".py")) {
-                testScript += ".py";
-            }
-            cmd.add(testScript);
-        } else {
-            cmd.add("-m");
-            cmd.add(mTestCasePath.replace("/", "."));
-        }
-        cmd.add(jsonFilePath);
+            VtsPythonRunnerHelper vtsPythonRunnerHelper =
+                    createVtsPythonRunnerHelper(new File(mTestCaseDir));
 
-        printToDeviceLogcatAboutTestModuleStatus("BEGIN");
-
-        CommandResult commandResult = new CommandResult();
-        String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
-                cmd.toArray(new String[0]), commandResult, timeout);
-
-        if (commandResult != null) {
-            CommandStatus commandStatus = commandResult.getStatus();
-            if (commandStatus != CommandStatus.SUCCESS
-                && commandStatus != CommandStatus.TIMED_OUT) {
-                CLog.e("Python process failed");
-                CLog.e("Command stdout: " + commandResult.getStdout());
-                CLog.e("Command stderr: " + commandResult.getStderr());
-                CLog.e("Command status: " + commandStatus);
-                CLog.e("Python log: ");
-                mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
-                printToDeviceLogcatAboutTestModuleStatus("ERROR");
-                listener.testRunFailed("Failed to run VTS test. Python process failed.");
-                listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                        Collections.<String, String>emptyMap());
-                return;
-            }
-            printToDeviceLogcatAboutTestModuleStatus("END");
-        }
-
-        if (mUseStdoutLogs) {
-            if (commandResult.getStdout() == null) {
-                String msg = "The std:out is null for CommandResult.";
-                CLog.e(msg);
-                listener.testRunFailed(msg);
-                listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                        Collections.<String, String>emptyMap());
-                return;
-            }
-            parser.processNewLines(commandResult.getStdout().split("\n"));
-        } else {
-            // parse from test_run_summary.json instead of stdout
-            String jsonData = null;
-            JSONObject object = null;
-            File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
-            if (testRunSummary == null) {
-                CLog.e("Couldn't locate the file : " + TEST_RUN_SUMMARY_FILE_NAME);
-            } else {
-                try {
-                    jsonData = FileUtil.readStringFromFile(testRunSummary);
-                    CLog.d("Test Result Summary: %s", jsonData);
-                    object = new JSONObject(jsonData);
-                } catch (IOException e) {
-                    CLog.e("Error occurred in parsing Json file : %s", testRunSummary.toPath());
-                } catch (JSONException e) {
-                    CLog.e("Error occurred in parsing Json String : %s", jsonData);
+            List<String> cmd = new ArrayList<>();
+            cmd.add("python");
+            if (mTestCasePathType != null && mTestCasePathType.toLowerCase().equals("file")) {
+                String testScript = mTestCasePath;
+                if (!testScript.endsWith(".py")) {
+                    testScript += ".py";
                 }
-                if (object == null) {
-                    String msg = "Json object is null.";
+                cmd.add(testScript);
+            } else {
+                cmd.add("-m");
+                cmd.add(mTestCasePath.replace("/", "."));
+            }
+            cmd.add(jsonFilePath);
+
+            printToDeviceLogcatAboutTestModuleStatus("BEGIN");
+
+            CommandResult commandResult = new CommandResult();
+            String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
+                    cmd.toArray(new String[0]), commandResult, timeout);
+
+            if (commandResult != null) {
+                CommandStatus commandStatus = commandResult.getStatus();
+                if (commandStatus != CommandStatus.SUCCESS
+                        && commandStatus != CommandStatus.TIMED_OUT) {
+                    CLog.e("Python process failed");
+                    CLog.e("Command stdout: " + commandResult.getStdout());
+                    CLog.e("Command stderr: " + commandResult.getStderr());
+                    CLog.e("Command status: " + commandStatus);
+                    CLog.e("Python log: ");
+                    printToDeviceLogcatAboutTestModuleStatus("ERROR");
+                    listener.testRunFailed("Failed to run VTS test. Python process failed.");
+                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                            new HashMap<String, Metric>());
+                    return;
+                }
+                printToDeviceLogcatAboutTestModuleStatus("END");
+            }
+
+            if (mUseStdoutLogs) {
+                if (commandResult.getStdout() == null) {
+                    String msg = "The std:out is null for CommandResult.";
                     CLog.e(msg);
                     listener.testRunFailed(msg);
                     listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                            Collections.<String, String>emptyMap());
+                            new HashMap<String, Metric>());
                     return;
                 }
-                parser.processJsonFile(object);
-
-                try {
-                    JSONObject planObject = object.getJSONObject(TESTMODULE);
-                    String test_module_name = planObject.getString("Name");
-                    long test_module_timestamp = planObject.getLong("Timestamp");
-                    AddTestModuleKeys(test_module_name, test_module_timestamp);
-                } catch (JSONException e) {
-                    CLog.d("Key '%s' not found in result json summary", TESTMODULE);
+                parser.processNewLines(commandResult.getStdout().split("\n"));
+            } else {
+                // parse from test_run_summary.json instead of stdout
+                String errorMsg = null;
+                File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
+                if (testRunSummary == null) {
+                    errorMsg = String.format(
+                            "Couldn't locate the file : %s.", TEST_RUN_SUMMARY_FILE_NAME);
+                    CLog.e(errorMsg);
+                } else {
+                    JSONObject object = null;
+                    try {
+                        String jsonData = FileUtil.readStringFromFile(testRunSummary);
+                        CLog.d("Test Result Summary: %s", jsonData);
+                        object = new JSONObject(jsonData);
+                        parser.processJsonFile(object);
+                    } catch (IOException | JSONException e) {
+                        errorMsg = String.format(
+                                "Error occurred in parsing Json file %s.", testRunSummary.toPath());
+                        CLog.e(e);
+                    }
+                    try {
+                        JSONObject planObject = object.getJSONObject(TESTMODULE);
+                        String test_module_name = planObject.getString("Name");
+                        long test_module_timestamp = planObject.getLong("Timestamp");
+                        AddTestModuleKeys(test_module_name, test_module_timestamp);
+                    } catch (JSONException e) {
+                        errorMsg = String.format(
+                                "Key '%s' not found in result json summary", TESTMODULE);
+                        CLog.e(e);
+                    }
+                }
+                if (errorMsg != null) {
+                    CLog.e(errorMsg);
+                    listener.testRunFailed(errorMsg);
+                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                            new HashMap<String, Metric>());
+                    return;
                 }
             }
+
+            if (interruptMessage != null) {
+                throw new RuntimeException(interruptMessage);
+            }
+        } finally {
+            try {
+                mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
+
+                if (mEnableDashboardUploading) {
+                    File reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME);
+                    CLog.d("Report message path: %s", reportMsg);
+                    if (reportMsg == null) {
+                        CLog.e("Cannot find report message proto file.");
+                    } else if (reportMsg.length() > 0) {
+                        CLog.i("Uploading report message. File size: %s", reportMsg.length());
+                        VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
+                        dashboardUtil.Upload(reportMsg.getAbsolutePath());
+                    }
+                }
+            } finally {
+                CLog.d("Deleted the runner log dir, %s.", vtsRunnerLogDir);
+                FileUtil.recursiveDelete(vtsRunnerLogDir);
+            }
         }
-        mOutputUtil.ZipVtsRunnerOutputDir(vtsRunnerLogDir);
-
-        File reportMsg = FileUtil.findFile(vtsRunnerLogDir, REPORT_MESSAGE_FILE_NAME);
-        CLog.d("Report message path: %s", reportMsg);
-
-        if (reportMsg == null) {
-            CLog.e("Cannot find report message proto file.");
-        } else if (reportMsg.length() > 0
-                && (mEnableDashboardUploading == null || mEnableDashboardUploading)) {
-            CLog.i("Uploading report message. File size: %s", reportMsg.length());
-            VtsDashboardUtil dashboardUtil = new VtsDashboardUtil(configReader);
-            dashboardUtil.Upload(reportMsg.getAbsolutePath());
-        } else {
-            CLog.d("Dashboard result uploading is not enabled.");
-        }
-
-        FileUtil.recursiveDelete(vtsRunnerLogDir);
-        CLog.d("Deleted the runner log dir, %s.", vtsRunnerLogDir);
-        if (jsonFilePath != null) {
-            FileUtil.deleteFile(new File(jsonFilePath));
-            CLog.d("Deleted the runner json config file, %s.", jsonFilePath);
-        }
-
-        if (interruptMessage != null) {
-            throw new RunInterruptedException(interruptMessage);
+        for (ITestDevice device : mInvocationContext.getDevices()) {
+            device.waitForDeviceAvailable();
         }
     }
 
@@ -1468,16 +1480,11 @@ public class VtsMultiDeviceTest
     /**
      * Set the path for android-vts/testcases/ which keeps the VTS python code under vts.
      */
-    private void setTestCaseDataDir() {
-        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(mBuildInfo);
-        File testDir = null;
+    private void setTestCaseDir() {
         try {
-            testDir = buildHelper.getTestsDir();
+            mTestCaseDir = mBuildHelper.getTestsDir().getAbsolutePath();
         } catch (FileNotFoundException e) {
-            /* pass */
-        }
-        if (testDir != null) {
-            mTestCaseDataDir = testDir.getAbsolutePath();
+            CLog.e("Cannot get testcase dir. Tests may not run correctly.");
         }
     }
 
@@ -1495,13 +1502,5 @@ public class VtsMultiDeviceTest
     @VisibleForTesting
     protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
         return new VtsPythonRunnerHelper(mBuildInfo, workingDir);
-    }
-
-    /**
-     * Creates a {@link VtsCompatibilityInvocationHelper} to get the working directory.
-     */
-    @VisibleForTesting
-    protected VtsCompatibilityInvocationHelper createInvocationHelper() {
-        return new VtsCompatibilityInvocationHelper();
     }
 }

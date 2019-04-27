@@ -150,6 +150,10 @@ public class VtsDevicePreparer implements ITargetPreparer, ITargetCleaner {
     @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
+        if (e instanceof DeviceNotAvailableException) {
+            CLog.i("Skip tear down due to DeviceNotAvailableException");
+            return;
+        }
         // The order of the following steps matters.
 
         radioLogPreTearDown();
