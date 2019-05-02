@@ -91,6 +91,7 @@ vts_hal_driver_libs := \
   android.hardware.renderscript@1.0-vts.driver \
   android.hardware.secure_element@1.0-vts.driver \
   android.hardware.sensors@1.0-vts.driver \
+  android.hardware.sensors@2.0-vts.driver \
   android.hardware.soundtrigger@2.0-vts.driver \
   android.hardware.soundtrigger@2.1-vts.driver \
   android.hardware.soundtrigger@2.2-vts.driver \
@@ -202,6 +203,7 @@ vts_hal_profiler_libs := \
   android.hardware.renderscript@1.0-vts.profiler \
   android.hardware.secure_element@1.0-vts.profiler \
   android.hardware.sensors@1.0-vts.profiler \
+  android.hardware.sensors@2.0-vts.profiler \
   android.hardware.soundtrigger@2.0-vts.profiler \
   android.hardware.soundtrigger@2.1-vts.profiler \
   android.hardware.soundtrigger@2.2-vts.profiler \
@@ -305,6 +307,7 @@ vts_hal_test_bins := \
   VtsHalSapV1_0TargetTest \
   VtsHalSecureElementV1_0TargetTest \
   VtsHalSensorsV1_0TargetTest \
+  VtsHalSensorsV2_0TargetTest \
   VtsHalSoundtriggerV2_0TargetTest \
   VtsHalSoundtriggerV2_1TargetTest \
   VtsHalSoundtriggerV2_2TargetTest \
