@@ -101,6 +101,7 @@
   <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalDrmV1_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalDrmV1_2Target" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGnssV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsComposerV2_1Target" />
