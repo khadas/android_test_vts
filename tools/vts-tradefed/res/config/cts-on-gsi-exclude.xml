@@ -56,12 +56,6 @@
     <option name="compatibility:exclude-filter" value="CtsOsTestCases android.os.cts.UsbDebuggingTest#testUsbDebugging" />
 
     <!--
-        Exclude Verity tese cases, because we need to disable Verity to test with GSI
-    -->
-    <option name="compatibility:exclude-filter" value="CtsKeystoreTestCases android.keystore.cts.KeyAttestationTest#testEcAttestation" />
-    <option name="compatibility:exclude-filter" value="CtsKeystoreTestCases android.keystore.cts.KeyAttestationTest#testRsaAttestation" />
-
-    <!--
         Exclude testcases failing on Pixel devices
         TODO(jaeshin@): b/68300743
     -->
