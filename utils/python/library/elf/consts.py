@@ -83,9 +83,11 @@ SHT_FINI_ARRAY = 15
 SHT_PREINIT_ARRAY = 16
 SHT_GROUP = 17
 SHT_SYMTAB_SHNDX = 18
+SHT_RELR = 19
 SHT_LOOS = 0x60000000
 SHT_ANDROID_REL = SHT_LOOS + 1
 SHT_ANDROID_RELA = SHT_LOOS + 2
+SHT_ANDROID_RELR = SHT_LOOS + 0xfffff00
 
 # Android packed relocation flags
 RELOCATION_GROUPED_BY_INFO_FLAG = 1
@@ -198,3 +200,6 @@ DT_ANDROID_REL = DT_LOOS + 2      # d_ptr
 DT_ANDROID_RELSZ = DT_LOOS + 3    # d_val
 DT_ANRDOID_RELA = DT_LOOS + 4     # d_ptr
 DT_ANRDOID_RELASZ = DT_LOOS + 5   # d_val
+DT_RELR = 0x6fffe000              # d_ptr
+DT_RELRSZ = 0x6fffe001            # d_val
+DT_RELRENT = 0x6fffe003           # d_val
