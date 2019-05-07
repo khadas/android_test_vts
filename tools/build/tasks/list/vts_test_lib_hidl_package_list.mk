@@ -242,8 +242,10 @@ vts_hal_test_bins := \
   VtsHalAtraceV1_0TargetTest \
   VtsHalAudioV2_0TargetTest \
   VtsHalAudioV4_0TargetTest \
+  VtsHalAudioV5_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
   VtsHalAudioEffectV4_0TargetTest \
+  VtsHalAudioEffectV5_0TargetTest \
   VtsHalAuthSecretV1_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
   VtsHalBluetoothV1_0TargetTest \
