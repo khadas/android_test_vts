@@ -138,22 +138,29 @@ class VtableDumper(elf_parser.ElfParser):
         for rel_sh in self._RelocationSections():
             is_rela = rel_sh.sh_type in (consts.SHT_RELA,
                                          consts.SHT_ANDROID_RELA)
+            is_relr = rel_sh.sh_type in (consts.SHT_RELR,
+                                         consts.SHT_ANDROID_RELR)
             symtab = self.Shdr[rel_sh.sh_link]
             strtab = self.Shdr[symtab.sh_link]
             for reloc in self.GetRelocations(rel_sh):
-                if reloc.GetType() not in (rel_abs_type, rel_relative_type):
+                # RELR is relative and has no type.
+                is_absolute_type = (not is_relr and
+                                    reloc.GetType() == rel_abs_type)
+                is_relative_type = (is_relr or
+                                    reloc.GetType() == rel_relative_type)
+                if not is_absolute_type and not is_relative_type:
                     continue
                 # If relocation target is a vtable entry, find the vtable.
                 vtable = self._LocateVtable(vtables, reloc.r_offset)
                 if not vtable:
                     continue
                 # *_RELA sections have explicit addend.
-                # *_REL  sections have implicit addend.
+                # *_REL and *_RELR sections have implicit addend.
                 if is_rela:
                     addend = reloc.r_addend
                 else:
                     addend = self._ReadRelocationAddend(reloc)
-                if reloc.GetType() == rel_abs_type:
+                if is_absolute_type:
                     # Absolute relocations uses symbol value + addend.
                     sym = self.GetRelocationSymbol(symtab, reloc)
                     reloc_value = sym.st_value + addend
@@ -163,7 +170,7 @@ class VtableDumper(elf_parser.ElfParser):
                     else:
                         sym_name = self.GetString(strtab, sym.st_name)
                         entry_names = [sym_name]
-                elif reloc.GetType() == rel_relative_type:
+                elif is_relative_type:
                     # Relative relocations don't have symbol table entry,
                     # instead it uses a vaddr offset which is stored
                     # in the addend value.
@@ -294,8 +301,9 @@ class VtableDumper(elf_parser.ElfParser):
 
     def _RelocationSections(self):
         """Yields section headers that contain relocation data."""
-        sh_rel_types = (consts.SHT_REL, consts.SHT_RELA,
-                        consts.SHT_ANDROID_REL, consts.SHT_ANDROID_RELA)
+        sh_rel_types = (consts.SHT_REL, consts.SHT_RELA, consts.SHT_RELR,
+                        consts.SHT_ANDROID_REL, consts.SHT_ANDROID_RELA,
+                        consts.SHT_ANDROID_RELR)
         for sh in self.Shdr:
             if sh.sh_type in sh_rel_types:
                 yield sh

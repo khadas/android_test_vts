@@ -374,6 +374,55 @@ class ElfParser(object):
         """
         return self.GetSymbol(symtab, rel.GetSymbol())
 
+    def _CreateElfRel(self, offset, info):
+        """Creates an instance of Elf_Rel.
+
+        Args:
+            offset: The initial value of r_offset.
+            info: The initial value of r_info.
+
+        Returns:
+            An Elf_Rel.
+        """
+        elf_rel = self.Elf_Rel()
+        elf_rel.r_offset = offset
+        elf_rel.r_info = info
+        return elf_rel
+
+    def _DecodeAndroidRelr(self, rel):
+        """Decodes a SHT_RELR / SHT_ANDROID_RELR section.
+
+        Args:
+            rel: A relocation table.
+
+        Yields:
+            Elf_Rel.
+
+        Raises:
+            ElfError: Fails to seek and read.
+        """
+        if self.bitness == 32:
+            addr_size = 4
+            seek_read_entry = self._SeekRead32
+        else:
+            addr_size = 8
+            seek_read_entry = self._SeekRead64
+
+        rel_offset = 0
+        for ent_offset in range(rel.sh_offset, rel.sh_offset + rel.sh_size,
+                                rel.sh_entsize):
+            relr_entry = seek_read_entry(ent_offset)
+            if (relr_entry & 1) == 0:
+                # The entry is an address.
+                yield self._CreateElfRel(relr_entry, 0)
+                rel_offset = relr_entry + addr_size
+            else:
+                # The entry is a bitmap.
+                for bit_idx in range(1, rel.sh_entsize * 8):
+                    if (relr_entry >> bit_idx) & 1:
+                        yield self._CreateElfRel(rel_offset, 0)
+                    rel_offset += addr_size
+
     def GetRelocation(self, rel, idx):
         """Retrieves a Elf_Rel / Elf_Rela entry from relocation table.
 
@@ -410,6 +459,8 @@ class ElfParser(object):
                 return (self.Elf_Rel(r_offset=rela.r_offset, r_info=rela.r_info)
                         for rela in relocations)
             return relocations
+        elif rel.sh_type in (consts.SHT_RELR, consts.SHT_ANDROID_RELR):
+            return self._DecodeAndroidRelr(rel)
         else:
             num = int(rel.sh_size // rel.sh_entsize)
             return (self.GetRelocation(rel, i) for i in range(num))
