@@ -27,7 +27,10 @@ cc_library_shared {
         "VtsResourceControllerMessage.proto",
     ],
 
-    cflags: ["-Wall", "-Werror"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
 
     proto: {
         export_proto_headers: true,
@@ -65,4 +68,12 @@ cc_library_shared {
         "-Werror",
         "-Wno-unused-parameter",
     ],
+}
+
+java_library_host {
+    name: "libvts_protos_host",
+    srcs: ["**/*.proto"],
+    proto: {
+        type: "full",
+    },
 }
