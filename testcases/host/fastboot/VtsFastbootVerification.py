@@ -85,6 +85,15 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
         retcode = subprocess.call(fastboot_gtest_cmd_reboot_test)
         asserts.assertTrue(retcode == 0, "Error in fastbootd reboot test")
 
+    def testLogicalPartitionFlashing(self):
+        """Runs fuzzy_fastboot to verify the commands to reboot into fastbootd and bootloader."""
+        fastboot_gtest_cmd_lp_flashing = [
+            "%s" % self.gtest_bin_path, "--serial=%s" % self.dut.serial,
+            "--gtest_filter=LogicalPartitionCompliance.CreateResizeDeleteLP"
+        ]
+        retcode = subprocess.call(fastboot_gtest_cmd_lp_flashing)
+        asserts.assertTrue(retcode == 0, "Error in flashing logical partitions")
+
     def tearDownClass(self):
         """Reboot to Android."""
         if self.dut.isBootloaderMode:
