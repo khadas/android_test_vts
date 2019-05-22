@@ -33,7 +33,6 @@ import com.android.tradefed.util.EnvUtil;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
-import com.android.tradefed.util.VtsFileUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
 
@@ -481,7 +480,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         } else {
             try {
                 virtualEnvDir = FileUtil.createTempDir("vts-virtualenv-" + mPythonVersion + "-"
-                        + VtsFileUtil.normalizeFileName(buildInfo.getTestTag()) + "_");
+                        + normalizeName(buildInfo.getTestTag()) + "_");
             } catch (IOException e) {
                 throw new TargetSetupError(
                         "Failed to create a directory for the virtual env.", e, mDescriptor);
@@ -650,5 +649,18 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
         }
 
         return pipInstallList;
+    }
+
+    /**
+     * Replacing characters in a string to make it a valid file name.
+     *
+     * The current method is to replace any non-word character with '_' except '.' and '-'.
+     *
+     * @param name the potential name of a file to normalize.
+     *                 Do not use path here as path delimitor will be replaced
+     * @return normalized file name
+     */
+    private String normalizeName(String name) {
+        return name.replaceAll("[^\\w.-]", "_");
     }
 }
