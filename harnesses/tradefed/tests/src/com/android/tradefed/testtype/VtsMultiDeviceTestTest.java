@@ -25,6 +25,8 @@ import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.build.IFolderBuildInfo;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.invoker.IInvocationContext;
+import com.android.tradefed.metrics.proto.MetricMeasurement.Metric;
 import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
@@ -35,6 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
@@ -80,7 +83,7 @@ public class VtsMultiDeviceTestTest {
                 return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS, workingDir);
             }
         };
-        mTest.setBuild(createMockBuildInfo());
+        mTest.setInvocationContext(createMockInvocationContext());
         mTest.setTestCasePath(TEST_CASE_PATH);
         mTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
     }
@@ -163,6 +166,22 @@ public class VtsMultiDeviceTestTest {
     }
 
     /**
+     * Create a mock IInovationConext with necessary getter methods.
+     */
+    private static IInvocationContext createMockInvocationContext() {
+        IInvocationContext mockInvocationContext =
+                EasyMock.createNiceMock(IInvocationContext.class);
+        EasyMock.expect(mockInvocationContext.getDevices())
+                .andReturn(Arrays.asList(createMockDevice()))
+                .anyTimes();
+        EasyMock.expect(mockInvocationContext.getBuildInfos())
+                .andReturn(Arrays.asList(createMockBuildInfo()))
+                .anyTimes();
+        EasyMock.replay(mockInvocationContext);
+        return mockInvocationContext;
+    }
+
+    /**
      * Create a process helper which mocks status of a running process.
      */
     private VtsPythonRunnerHelper createMockVtsPythonRunnerHelper(
@@ -188,7 +207,6 @@ public class VtsMultiDeviceTestTest {
      */
     @Test
     public void testRunNormalInput() throws Exception {
-        mTest.setDevice(createMockDevice());
         mTest.run(mMockInvocationListener);
     }
 
@@ -217,10 +235,9 @@ public class VtsMultiDeviceTestTest {
             }
         };
         NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
-        newTest.setBuild(createMockBuildInfo());
+        newTest.setInvocationContext(createMockInvocationContext());
         newTest.setTestCasePath(TEST_CASE_PATH);
         newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
-        newTest.setDevice(createMockDevice());
         newTest.run(mMockInvocationListener);
         assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
                 newTest.getVtsRunnerLogDir().exists());
@@ -258,10 +275,9 @@ public class VtsMultiDeviceTestTest {
             }
         };
         NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
-        newTest.setBuild(createMockBuildInfo());
+        newTest.setInvocationContext(createMockInvocationContext());
         newTest.setTestCasePath(TEST_CASE_PATH);
         newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
-        newTest.setDevice(createMockDevice());
         try {
             newTest.run(mMockInvocationListener);
             fail("DeviceNotAvailableException is expected");
@@ -270,5 +286,43 @@ public class VtsMultiDeviceTestTest {
             assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
                     newTest.getVtsRunnerLogDir().exists());
         }
+    }
+
+    /**
+     * Test the run method with Python runner returning CommandStatus.FAILED.
+     */
+    @Test
+    public void testRunWithPythonCommandStatusFailed() throws Exception {
+        class NewVtsMultiDeviceTest extends VtsMultiDeviceTest {
+            private File mVtsRunnerLogDir;
+            public File getVtsRunnerLogDir() {
+                return mVtsRunnerLogDir;
+            }
+            @Override
+            protected void updateVtsRunnerTestConfig(JSONObject jsonObject) {
+                return;
+            }
+            @Override
+            protected String createVtsRunnerTestConfigJsonFile(File vtsRunnerLogDir) {
+                mVtsRunnerLogDir = vtsRunnerLogDir;
+                return super.createVtsRunnerTestConfigJsonFile(vtsRunnerLogDir);
+            }
+            @Override
+            protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
+                return createMockVtsPythonRunnerHelper(CommandStatus.FAILED, workingDir);
+            }
+        };
+        mMockInvocationListener.testRunFailed((String) EasyMock.anyObject());
+        mMockInvocationListener.testRunEnded(
+                EasyMock.anyLong(), (HashMap<String, Metric>) EasyMock.anyObject());
+        EasyMock.replay(mMockInvocationListener);
+        NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
+        newTest.setInvocationContext(createMockInvocationContext());
+        newTest.setTestCasePath(TEST_CASE_PATH);
+        newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+        newTest.run(mMockInvocationListener);
+        assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
+                newTest.getVtsRunnerLogDir().exists());
+        EasyMock.verify(mMockInvocationListener);
     }
 }

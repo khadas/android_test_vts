@@ -244,7 +244,7 @@ public class VtsMultiDeviceTest
 
     @Option(name = "enable-log-uploading",
             description = "Enables the runner's log uploading feature.")
-    private Boolean mEnableLogUploading = null;
+    private boolean mEnableLogUploading = false;
 
     @Option(name = "include-filter",
             description = "The positive filter of the test names to run.")
@@ -1206,10 +1206,9 @@ public class VtsMultiDeviceTest
             CLog.d("Added %s to the Json object", CONFIG_BOOL);
         }
 
-        if (mEnableLogUploading != null) {
-            jsonObject.put(ENABLE_LOG_UPLOADING, mEnableLogUploading);
-            CLog.d("Added %s to the Json object (value: %s)", ENABLE_LOG_UPLOADING,
-                    mEnableLogUploading);
+        if (mEnableLogUploading) {
+            jsonObject.put(ENABLE_LOG_UPLOADING, "true");
+            CLog.d("Added %s to the Json object with value: true)", ENABLE_LOG_UPLOADING);
         }
 
         if (mMaxRetryCount > 0) {
@@ -1351,42 +1350,28 @@ public class VtsMultiDeviceTest
             String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
                     cmd.toArray(new String[0]), commandResult, timeout);
 
+            List<String> errorMsgs = new ArrayList();
             if (commandResult != null) {
                 CommandStatus commandStatus = commandResult.getStatus();
                 if (commandStatus != CommandStatus.SUCCESS
                         && commandStatus != CommandStatus.TIMED_OUT) {
-                    CLog.e("Python process failed");
-                    CLog.e("Command stdout: " + commandResult.getStdout());
-                    CLog.e("Command stderr: " + commandResult.getStderr());
-                    CLog.e("Command status: " + commandStatus);
-                    CLog.e("Python log: ");
-                    printToDeviceLogcatAboutTestModuleStatus("ERROR");
-                    listener.testRunFailed("Failed to run VTS test. Python process failed.");
-                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                            new HashMap<String, Metric>());
-                    return;
+                    errorMsgs.add("Python process failed");
+                    errorMsgs.add("Command stdout: " + commandResult.getStdout());
+                    errorMsgs.add("Command stderr: " + commandResult.getStderr());
+                    errorMsgs.add("Command status: " + commandStatus);
                 }
-                printToDeviceLogcatAboutTestModuleStatus("END");
             }
 
             if (mUseStdoutLogs) {
                 if (commandResult.getStdout() == null) {
-                    String msg = "The std:out is null for CommandResult.";
-                    CLog.e(msg);
-                    listener.testRunFailed(msg);
-                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                            new HashMap<String, Metric>());
-                    return;
+                    errorMsgs.add("The stdout is null for CommandResult.");
                 }
                 parser.processNewLines(commandResult.getStdout().split("\n"));
             } else {
                 // parse from test_run_summary.json instead of stdout
-                String errorMsg = null;
                 File testRunSummary = getFileTestRunSummary(vtsRunnerLogDir);
                 if (testRunSummary == null) {
-                    errorMsg = String.format(
-                            "Couldn't locate the file : %s.", TEST_RUN_SUMMARY_FILE_NAME);
-                    CLog.e(errorMsg);
+                    errorMsgs.add("Couldn't locate the file : " + TEST_RUN_SUMMARY_FILE_NAME);
                 } else {
                     JSONObject object = null;
                     try {
@@ -1395,8 +1380,8 @@ public class VtsMultiDeviceTest
                         object = new JSONObject(jsonData);
                         parser.processJsonFile(object);
                     } catch (IOException | JSONException e) {
-                        errorMsg = String.format(
-                                "Error occurred in parsing Json file %s.", testRunSummary.toPath());
+                        errorMsgs.add(
+                                "Error occurred in parsing Json file " + testRunSummary.toPath());
                         CLog.e(e);
                     }
                     try {
@@ -1405,20 +1390,20 @@ public class VtsMultiDeviceTest
                         long test_module_timestamp = planObject.getLong("Timestamp");
                         AddTestModuleKeys(test_module_name, test_module_timestamp);
                     } catch (JSONException e) {
-                        errorMsg = String.format(
-                                "Key '%s' not found in result json summary", TESTMODULE);
+                        errorMsgs.add(String.format(
+                                "Key '%s' not found in result json summary", TESTMODULE));
                         CLog.e(e);
                     }
                 }
-                if (errorMsg != null) {
-                    CLog.e(errorMsg);
-                    listener.testRunFailed(errorMsg);
-                    listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
-                            new HashMap<String, Metric>());
-                    return;
-                }
+            }
+            if (errorMsgs.size() > 0) {
+                CLog.e(String.join(".\n", errorMsgs));
+                listener.testRunFailed(String.join(".\n", errorMsgs));
+                listener.testRunEnded(System.currentTimeMillis() - methodStartTime,
+                        new HashMap<String, Metric>());
             }
 
+            printToDeviceLogcatAboutTestModuleStatus("END");
             if (interruptMessage != null) {
                 throw new RuntimeException(interruptMessage);
             }
