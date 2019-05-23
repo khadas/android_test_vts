@@ -306,6 +306,7 @@ vts_hal_test_bins := \
   VtsHalRadioV1_2TargetTest \
   VtsHalRadioV1_3TargetTest \
   VtsHalRadioV1_4TargetTest \
+  VtsHalRadioConfigV1_0TargetTest \
   VtsHalRenderscriptV1_0TargetTest \
   VtsHalSapV1_0TargetTest \
   VtsHalSecureElementV1_0TargetTest \
