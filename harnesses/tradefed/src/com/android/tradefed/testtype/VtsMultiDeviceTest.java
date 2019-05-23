@@ -36,7 +36,6 @@ import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.FileUtil;
 import com.android.tradefed.util.JsonUtil;
 import com.android.tradefed.util.OutputUtil;
-import com.android.tradefed.util.RunInterruptedException;
 import com.android.tradefed.util.VtsDashboardUtil;
 import com.android.tradefed.util.VtsPythonRunnerHelper;
 import com.android.tradefed.util.VtsVendorConfigFileUtil;
@@ -55,7 +54,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -1350,7 +1348,7 @@ public class VtsMultiDeviceTest
             String interruptMessage = vtsPythonRunnerHelper.runPythonRunner(
                     cmd.toArray(new String[0]), commandResult, timeout);
 
-            List<String> errorMsgs = new ArrayList();
+            List<String> errorMsgs = new ArrayList<>();
             if (commandResult != null) {
                 CommandStatus commandStatus = commandResult.getStatus();
                 if (commandStatus != CommandStatus.SUCCESS
@@ -1390,8 +1388,7 @@ public class VtsMultiDeviceTest
                         long test_module_timestamp = planObject.getLong("Timestamp");
                         AddTestModuleKeys(test_module_name, test_module_timestamp);
                     } catch (JSONException e) {
-                        errorMsgs.add(String.format(
-                                "Key '%s' not found in result json summary", TESTMODULE));
+                        // Do not report this as part of errorMsgs. These are optional metadata
                         CLog.e(e);
                     }
                 }
