@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.android.tradefed.build.IBuildInfo;
 import com.android.tradefed.build.IFolderBuildInfo;
+import com.android.tradefed.config.OptionSetter;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.invoker.IInvocationContext;
@@ -64,6 +65,7 @@ public class VtsMultiDeviceTestTest {
 
     private ITestInvocationListener mMockInvocationListener = null;
     private VtsMultiDeviceTest mTest = null;
+    private ITestDevice mDevice = null;
 
     /**
      * Helper to initialize the various EasyMocks we'll need.
@@ -147,27 +149,22 @@ public class VtsMultiDeviceTestTest {
     /**
      * Create a mock ITestDevice with necessary getter methods.
      */
-    private static ITestDevice createMockDevice() {
+    private ITestDevice createMockDevice() throws DeviceNotAvailableException {
         // TestDevice
-        ITestDevice device = EasyMock.createNiceMock(ITestDevice.class);
-        try {
-            EasyMock.expect(device.getSerialNumber()).andReturn("1234567890ABCXYZ").anyTimes();
-            EasyMock.expect(device.getBuildAlias()).andReturn("BUILD_ALIAS").anyTimes();
-            EasyMock.expect(device.getBuildFlavor()).andReturn("BUILD_FLAVOR").anyTimes();
-            EasyMock.expect(device.getBuildId()).andReturn("BUILD_ID").anyTimes();
-            EasyMock.expect(device.getProductType()).andReturn("PRODUCT_TYPE").anyTimes();
-            EasyMock.expect(device.getProductVariant()).andReturn("PRODUCT_VARIANT").anyTimes();
-        } catch (DeviceNotAvailableException e) {
-            fail();
-        }
-        EasyMock.replay(device);
-        return device;
+        mDevice = EasyMock.createMock(ITestDevice.class);
+        EasyMock.expect(mDevice.getSerialNumber()).andReturn("1234567890ABCXYZ").anyTimes();
+        EasyMock.expect(mDevice.getBuildAlias()).andReturn("BUILD_ALIAS").anyTimes();
+        EasyMock.expect(mDevice.getBuildFlavor()).andReturn("BUILD_FLAVOR").anyTimes();
+        EasyMock.expect(mDevice.getBuildId()).andReturn("BUILD_ID").anyTimes();
+        EasyMock.expect(mDevice.getProductType()).andReturn("PRODUCT_TYPE").anyTimes();
+        EasyMock.expect(mDevice.getProductVariant()).andReturn("PRODUCT_VARIANT").anyTimes();
+        return mDevice;
     }
 
     /**
      * Create a mock IInovationConext with necessary getter methods.
      */
-    private static IInvocationContext createMockInvocationContext() {
+    private IInvocationContext createMockInvocationContext() throws DeviceNotAvailableException {
         IInvocationContext mockInvocationContext =
                 EasyMock.createNiceMock(IInvocationContext.class);
         EasyMock.expect(mockInvocationContext.getDevices())
@@ -206,7 +203,34 @@ public class VtsMultiDeviceTestTest {
      */
     @Test
     public void testRunNormalInput() throws Exception {
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null BEGIN\""))
+                .andReturn("");
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null END\""))
+                .andReturn("");
+        mDevice.waitForDeviceAvailable();
+        EasyMock.replay(mDevice);
         mTest.run(mMockInvocationListener);
+        EasyMock.verify(mDevice);
+    }
+
+    @Test
+    public void testRunNormalInput_restartFramework() throws Exception {
+        OptionSetter setter = new OptionSetter(mTest);
+        setter.setOptionValue("stop-native-servers", "true");
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null BEGIN\""))
+                .andReturn("");
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null END\""))
+                .andReturn("");
+        mDevice.waitForDeviceAvailable();
+        // We always restart the server at the end of the test
+        EasyMock.expect(mDevice.executeShellCommand("start")).andReturn("");
+        EasyMock.replay(mDevice);
+        mTest.run(mMockInvocationListener);
+        EasyMock.verify(mDevice);
     }
 
     /**
@@ -232,14 +256,24 @@ public class VtsMultiDeviceTestTest {
             protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
                 return createMockVtsPythonRunnerHelper(CommandStatus.SUCCESS, workingDir);
             }
-        };
+        }
         NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
         newTest.setInvocationContext(createMockInvocationContext());
         newTest.setTestCasePath(TEST_CASE_PATH);
         newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null BEGIN\""))
+                .andReturn("");
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null END\""))
+                .andReturn("");
+        mDevice.waitForDeviceAvailable();
+        EasyMock.replay(mDevice);
         newTest.run(mMockInvocationListener);
         assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
                 newTest.getVtsRunnerLogDir().exists());
+        EasyMock.verify(mDevice);
     }
 
     /**
@@ -272,7 +306,7 @@ public class VtsMultiDeviceTestTest {
                     throw new DeviceNotAvailableException();
                 }
             }
-        };
+        }
         NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
         newTest.setInvocationContext(createMockInvocationContext());
         newTest.setTestCasePath(TEST_CASE_PATH);
@@ -310,18 +344,28 @@ public class VtsMultiDeviceTestTest {
             protected VtsPythonRunnerHelper createVtsPythonRunnerHelper(File workingDir) {
                 return createMockVtsPythonRunnerHelper(CommandStatus.FAILED, workingDir);
             }
-        };
+        }
         mMockInvocationListener.testRunFailed((String) EasyMock.anyObject());
         mMockInvocationListener.testRunEnded(
-                EasyMock.anyLong(), (HashMap<String, Metric>) EasyMock.anyObject());
-        EasyMock.replay(mMockInvocationListener);
+                EasyMock.anyLong(), EasyMock.<HashMap<String, Metric>>anyObject());
+
         NewVtsMultiDeviceTest newTest = new NewVtsMultiDeviceTest();
         newTest.setInvocationContext(createMockInvocationContext());
         newTest.setTestCasePath(TEST_CASE_PATH);
         newTest.setTestConfigPath(VtsMultiDeviceTest.DEFAULT_TESTCASE_CONFIG_PATH);
+
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null BEGIN\""))
+                .andReturn("");
+        EasyMock.expect(mDevice.executeShellCommand(
+                                "log -p i -t \"VTS\" \"[Test Module] null END\""))
+                .andReturn("");
+        mDevice.waitForDeviceAvailable();
+
+        EasyMock.replay(mMockInvocationListener, mDevice);
         newTest.run(mMockInvocationListener);
         assertFalse("VtsMultiDeviceTest runner fails to delete vtsRunnerLogDir",
                 newTest.getVtsRunnerLogDir().exists());
-        EasyMock.verify(mMockInvocationListener);
+        EasyMock.verify(mMockInvocationListener, mDevice);
     }
 }
