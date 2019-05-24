@@ -1423,6 +1423,13 @@ public class VtsMultiDeviceTest
                 CLog.d("Deleted the runner log dir, %s.", vtsRunnerLogDir);
                 FileUtil.recursiveDelete(vtsRunnerLogDir);
             }
+            // If the framework was disabled in python, make sure we re-enable it no matter what.
+            // The python side never re-enable the framework.
+            if (mBinaryTestDisableFramework || mStopNativeServers) {
+                for (ITestDevice device : mInvocationContext.getDevices()) {
+                    device.executeShellCommand("start");
+                }
+            }
         }
         for (ITestDevice device : mInvocationContext.getDevices()) {
             device.waitForDeviceAvailable();
