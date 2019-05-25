@@ -15,7 +15,6 @@
  */
 package com.android.tradefed.testtype;
 
-import com.android.ddmlib.Log.LogLevel;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.result.ITestLifeCycleReceiver;
