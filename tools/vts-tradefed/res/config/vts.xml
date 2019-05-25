@@ -37,4 +37,6 @@
   <option name="compatibility:exclude-filter" value="VtsTrebleVintfTest" />
   <option name="compatibility:exclude-filter" value="VtsTrebleVintfTestOMr1" />
 
+  <!-- Tests for libraries not on GSI -->
+  <option name="compatibility:exclude-filter" value="VtsHalBufferHubV1_0Target" />
 </configuration>
