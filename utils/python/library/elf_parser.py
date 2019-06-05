@@ -59,6 +59,7 @@ class ElfParser(object):
         Elf_Rel: ELF relocation entry class.
         Elf_Rela: ELF relocation entry class with explicit addend.
         Elf_Phdr: ELF program header class.
+        Elf_Nhdr: ELF note header class.
     """
 
     def __init__(self, file_path, begin_offset=0):
@@ -114,6 +115,7 @@ class ElfParser(object):
             self.Elf_Rel = structs.Elf32_Rel
             self.Elf_Rela = structs.Elf32_Rela
             self.Elf_Phdr = structs.Elf32_Phdr
+            self.Elf_Nhdr = structs.Elf32_Nhdr
         else:
             self.bitness = 64
             self.Elf_Addr = structs.Elf64_Addr
@@ -128,6 +130,7 @@ class ElfParser(object):
             self.Elf_Rel = structs.Elf64_Rel
             self.Elf_Rela = structs.Elf64_Rela
             self.Elf_Phdr = structs.Elf64_Phdr
+            self.Elf_Nhdr = structs.Elf64_Nhdr
 
         try:
             self.Ehdr = self._SeekReadStruct(0, self.Elf_Ehdr)
@@ -521,6 +524,20 @@ class ElfParser(object):
     def IsExecutable(self):
         """Returns whether the ELF is executable."""
         return self.Ehdr.e_type == consts.ET_EXEC
+
+    def IsSharedObject(self):
+        """Returns whether the ELF is a shared object."""
+        return self.Ehdr.e_type == consts.ET_DYN
+
+    def HasAndroidIdent(self):
+        """Returns whether the ELF has a .note.android.ident section."""
+        for sh in self.GetSectionsByName(".note.android.ident"):
+            nh = self._SeekReadStruct(sh.sh_offset, self.Elf_Nhdr)
+            name = self._SeekRead(sh.sh_offset + ctypes.sizeof(self.Elf_Nhdr),
+                                  nh.n_namesz)
+            if name == b"Android\0":
+                return True
+        return False
 
     def MatchCpuAbi(self, abi):
         """Returns whether the ELF matches the ABI.
