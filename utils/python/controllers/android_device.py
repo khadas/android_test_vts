@@ -1356,25 +1356,6 @@ class AndroidDevice(object):
         self.log.debug("apk %s is not running", package_name)
         return None
 
-    def getVintfXml(self, use_lshal=True):
-        """Reads the vendor interface manifest Xml.
-
-        Args:
-            use_hal: bool, set True to use lshal command and False to fetch
-                     manifest.xml directly.
-
-        Returns:
-            Vendor interface manifest string.
-        """
-        if not use_lshal:
-            return None
-        try:
-            stdout = self.adb.shell('"lshal --init-vintf 2> /dev/null"')
-            return str(stdout)
-        except adb.AdbError as e:
-            return None
-
-
 class AndroidDeviceLoggerAdapter(logging.LoggerAdapter):
     """A wrapper class that attaches a prefix to all log lines from an
     AndroidDevice object.
