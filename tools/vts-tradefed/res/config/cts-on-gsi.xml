@@ -17,6 +17,8 @@
     <include name="common-preparers" />
     <target_preparer class="com.android.tradefed.targetprep.VtsDeviceInfoCollector" />
     <include name="cts-base" />
+    <!-- CTS-on-GSI is not expected to run parameterized modules -->
+    <option name="compatibility:enable-parameterized-modules" value="false" />
 
     <include name="cts-on-gsi-exclude" />
 
