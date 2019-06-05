@@ -15,6 +15,7 @@
  */
 package com.android.tradefed;
 
+import com.android.compatibility.common.tradefed.config.ConfigurationFactoryTest;
 import com.android.tradefed.device.metric.VtsCoverageCollectorTest;
 import com.android.tradefed.device.metric.VtsHalTraceCollectorTest;
 import com.android.tradefed.presubmit.VtsConfigLoadingTest;
@@ -45,6 +46,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
         // NOTE: please keep classes sorted lexicographically in each group
+        // config
+        ConfigurationFactoryTest.class,
         // device
         VtsCoverageCollectorTest.class,
         VtsDevicePreparerTest.class,
