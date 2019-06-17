@@ -1425,7 +1425,7 @@ public class VtsMultiDeviceTest
             }
             // If the framework was disabled in python, make sure we re-enable it no matter what.
             // The python side never re-enable the framework.
-            if (mBinaryTestDisableFramework || mStopNativeServers) {
+            if (mBinaryTestDisableFramework || mDisableFramework) {
                 for (ITestDevice device : mInvocationContext.getDevices()) {
                     device.executeShellCommand("start");
                 }
