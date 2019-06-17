@@ -40,7 +40,7 @@ vts_test_bin_packages := \
     binderThroughputTest \
     hwbinderThroughputTest \
     stressapptest \
-    libcutils_test \
+    libcutils_test_static \
     vts_test_binary_qtaguid_module \
     vts_test_binary_bpf_module \
 
