@@ -218,7 +218,7 @@ public class VtsMultiDeviceTestTest {
     @Test
     public void testRunNormalInput_restartFramework() throws Exception {
         OptionSetter setter = new OptionSetter(mTest);
-        setter.setOptionValue("stop-native-servers", "true");
+        setter.setOptionValue("disable-framework", "true");
         EasyMock.expect(mDevice.executeShellCommand(
                                 "log -p i -t \"VTS\" \"[Test Module] null BEGIN\""))
                 .andReturn("");
