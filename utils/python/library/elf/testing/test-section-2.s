@@ -22,3 +22,19 @@ nop
 
 .section .interp,"a",@progbits
 .string "/lib64/ld-linux-x86-64.so.2"
+
+# Test android identifier section:
+
+.section .note.android.ident,"a",@note
+.balign 4
+# Size of NAME
+.long ANDROID_API - NAME
+# Size of ANDROID_API
+.long NOTE_ANDROID_IDENT_END - ANDROID_API
+# Type is NT_VERSION
+.long 1
+NAME:
+.ascii "Android\0"
+ANDROID_API:
+.long 28
+NOTE_ANDROID_IDENT_END:
