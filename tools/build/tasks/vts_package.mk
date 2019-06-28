@@ -111,6 +111,13 @@ media_test_res_copy_pairs := \
   $(foreach f,$(media_test_res_files),\
     hardware/interfaces/media/res/$(f):$(VTS_TESTCASES_OUT)/DATA/media/res/$(f))
 
+media_c2_test_res_files := \
+  $(call find-files-in-subdirs,frameworks/av/media/codec2/hidl/1.0/vts/functional/res,"*.*" -and -type f,.) \
+
+media_c2_test_res_copy_pairs := \
+  $(foreach f,$(media_c2_test_res_files),\
+    frameworks/av/media/codec2/hidl/1.0/vts/functional/res/$(f):$(VTS_TESTCASES_OUT)/DATA/media/c2/res/$(f))
+
 nbu_p2p_apk_files := \
   $(call find-files-in-subdirs,test/vts-testcase/nbu/src,"*.apk" -and -type f,.)
 
@@ -211,6 +218,7 @@ vts_copy_pairs := \
   $(call copy-many-files,$(target_spec_copy_pairs)) \
   $(call copy-many-files,$(target_trace_copy_pairs)) \
   $(call copy-many-files,$(media_test_res_copy_pairs)) \
+  $(call copy-many-files,$(media_c2_test_res_copy_pairs)) \
   $(call copy-many-files,$(nbu_p2p_apk_copy_pairs)) \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
