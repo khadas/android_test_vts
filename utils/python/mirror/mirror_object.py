@@ -55,6 +55,7 @@ COMPONENT_TYPE_DICT = {
     "tests_msgq": 25,
     "tests_memory": 26,
     "dumpstate": 27,
+    "media_c2": 28,
     "bionic_libm": 1001,
     "bionic_libc": 1002,
     "vndk_libcutils": 1101
