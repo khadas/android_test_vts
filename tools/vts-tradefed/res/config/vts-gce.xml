@@ -27,6 +27,7 @@
   <option name="compatibility:include-filter" value="VtsFirmwareDtboVerification" />
   <option name="compatibility:include-filter" value="VtsHalAuthSecretV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBaseV1_0TargetTest" />
+  <option name="compatibility:include-filter" value="VtsHalBiometricsFaceV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
