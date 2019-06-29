@@ -25,6 +25,7 @@ vts_hal_driver_libs := \
   android.hardware.automotive.audiocontrol@1.0-vts.driver \
   android.hardware.automotive.evs@1.0-vts.driver \
   android.hardware.automotive.vehicle@2.0-vts.driver \
+  android.hardware.biometrics.face@1.0-vts.driver \
   android.hardware.biometrics.fingerprint@2.1-vts.driver \
   android.hardware.bluetooth@1.0-vts.driver \
   android.hardware.boot@1.0-vts.driver \
@@ -53,13 +54,17 @@ vts_hal_driver_libs := \
   android.hardware.gnss@1.0-vts.driver \
   android.hardware.gnss@1.1-vts.driver \
   android.hardware.graphics.allocator@2.0-vts.driver \
+  android.hardware.graphics.allocator@3.0-vts.driver \
   android.hardware.graphics.bufferqueue@1.0-vts.driver \
+  android.hardware.graphics.bufferqueue@2.0-vts.driver \
   android.hardware.graphics.common@1.0-vts.driver \
   android.hardware.graphics.common@1.1-vts.driver \
+  android.hardware.graphics.common@1.2-vts.driver \
   android.hardware.graphics.composer@2.1-vts.driver \
   android.hardware.graphics.composer@2.2-vts.driver \
   android.hardware.graphics.mapper@2.0-vts.driver \
   android.hardware.graphics.mapper@2.1-vts.driver \
+  android.hardware.graphics.mapper@3.0-vts.driver \
   android.hardware.health.storage@1.0-vts.driver \
   android.hardware.health@1.0-vts.driver \
   android.hardware.health@2.0-vts.driver \
@@ -68,8 +73,10 @@ vts_hal_driver_libs := \
   android.hardware.keymaster@4.0-vts.driver \
   android.hardware.light@2.0-vts.driver \
   android.hardware.media@1.0-vts.driver \
-  android.hardware.media.omx@1.0-vts.driver \
   android.hardware.media.bufferpool@1.0-vts.driver \
+  android.hardware.media.bufferpool@2.0-vts.driver \
+  android.hardware.media.c2@1.0-vts.driver \
+  android.hardware.media.omx@1.0-vts.driver \
   android.hardware.memtrack@1.0-vts.driver \
   android.hardware.neuralnetworks@1.0-vts.driver \
   android.hardware.neuralnetworks@1.1-vts.driver \
@@ -123,6 +130,7 @@ vts_hal_driver_libs := \
   android.hardware.wifi.supplicant@1.2-vts.driver \
   android.hidl.memory.block@1.0-vts.driver \
   android.hidl.memory.token@1.0-vts.driver \
+  android.hidl.safe_union@1.0-vts.driver \
   android.system.net.netd@1.0-vts.driver \
   android.system.net.netd@1.1-vts.driver \
 
@@ -138,6 +146,7 @@ vts_hal_profiler_libs := \
   android.hardware.automotive.audiocontrol@1.0-vts.profiler \
   android.hardware.automotive.evs@1.0-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
+  android.hardware.biometrics.face@1.0-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
   android.hardware.bluetooth@1.0-vts.profiler \
   android.hardware.boot@1.0-vts.profiler \
@@ -247,6 +256,7 @@ vts_hal_test_bins := \
   VtsHalAudioEffectV4_0TargetTest \
   VtsHalAudioEffectV5_0TargetTest \
   VtsHalAuthSecretV1_0TargetTest \
+  VtsHalBiometricsFaceV1_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
   VtsHalBluetoothV1_0TargetTest \
   VtsHalBootV1_0TargetTest \
@@ -281,6 +291,11 @@ vts_hal_test_bins := \
   VtsHalKeymasterV3_0TargetTest \
   VtsHalKeymasterV4_0TargetTest \
   VtsHalLightV2_0TargetTest \
+  VtsHalMediaC2V1_0TargetComponentTest \
+  VtsHalMediaC2V1_0TargetAudioEncTest \
+  VtsHalMediaC2V1_0TargetAudioDecTest \
+  VtsHalMediaC2V1_0TargetVideoEncTest \
+  VtsHalMediaC2V1_0TargetVideoDecTest \
   VtsHalMediaOmxV1_0TargetComponentTest \
   VtsHalMediaOmxV1_0TargetAudioEncTest \
   VtsHalMediaOmxV1_0TargetAudioDecTest \
