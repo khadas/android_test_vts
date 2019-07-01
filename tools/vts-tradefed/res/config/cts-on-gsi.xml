@@ -23,8 +23,4 @@
     <include name="cts-on-gsi-exclude" />
 
     <option name="plan" value="cts-on-gsi" />
-
-    <!-- Include vintf related tests which only belongs to cts-on-gsi -->
-    <option name="compatibility:module-metadata-include-filter" key="component" value="vintf" />
-    <option name="compatibility:module-metadata-include-filter" key="component" value="kernel" />
 </configuration>
