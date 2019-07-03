@@ -128,6 +128,16 @@ class ElfParserTest(unittest.TestCase):
         is_executable = self.elf_file.IsExecutable()
         self.assertFalse(is_executable)
 
+    def testIsSharedObject(self):
+        """Tests that IsSharedObject determines file type correctly."""
+        is_shared_object = self.elf_file.IsSharedObject()
+        self.assertTrue(is_shared_object)
+
+    def testHasAndroidIdent(self):
+        """Tests that HasAndroidIdent finds .note.android.ident section."""
+        has_android_ident = self.elf_file.HasAndroidIdent()
+        self.assertTrue(has_android_ident)
+
     def testMatchCpuAbi(self):
         """Tests that MatchCpuAbi determines machine type correctly."""
         self.assertTrue(self.elf_file.MatchCpuAbi("x86_64"))
