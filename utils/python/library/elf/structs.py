@@ -330,3 +330,17 @@ class Elf64_Phdr(CStructure):
                 ('p_filesz', Elf64_Xword),
                 ('p_memsz', Elf64_Xword),
                 ('p_align', Elf64_Xword)]
+
+
+class Elf32_Nhdr(CStructure):
+    """ELF 32-bit note header."""
+    _fields_ = [('n_namesz', Elf32_Word),
+                ('n_descsz', Elf32_Word),
+                ('n_type', Elf32_Word)]
+
+
+class Elf64_Nhdr(CStructure):
+    """ELF 64-bit note header."""
+    _fields_ = [('n_namesz', Elf64_Word),
+                ('n_descsz', Elf64_Word),
+                ('n_type', Elf64_Word)]
