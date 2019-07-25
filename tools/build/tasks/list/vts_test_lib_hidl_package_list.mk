@@ -24,6 +24,7 @@ vts_hal_driver_libs := \
   android.hardware.authsecret@1.0-vts.driver \
   android.hardware.automotive.audiocontrol@1.0-vts.driver \
   android.hardware.automotive.evs@1.0-vts.driver \
+  android.hardware.automotive.evs@1.1-vts.driver \
   android.hardware.automotive.vehicle@2.0-vts.driver \
   android.hardware.biometrics.face@1.0-vts.driver \
   android.hardware.biometrics.fingerprint@2.1-vts.driver \
@@ -145,6 +146,7 @@ vts_hal_profiler_libs := \
   android.hardware.authsecret@1.0-vts.profiler \
   android.hardware.automotive.audiocontrol@1.0-vts.profiler \
   android.hardware.automotive.evs@1.0-vts.profiler \
+  android.hardware.automotive.evs@1.1-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
   android.hardware.biometrics.face@1.0-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
@@ -274,6 +276,7 @@ vts_hal_test_bins := \
   VtsHalDrmV1_1TargetTest \
   VtsHalDumpstateV1_0TargetTest \
   VtsHalEvsV1_0TargetTest \
+  VtsHalEvsV1_1TargetTest \
   VtsHalGatekeeperV1_0TargetTest \
   VtsHalGnssV1_0TargetTest \
   VtsHalGnssV1_1TargetTest \
