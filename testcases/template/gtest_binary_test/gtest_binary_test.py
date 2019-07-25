@@ -274,8 +274,17 @@ class GtestBinaryTest(binary_test.BinaryTest):
 
     # @Override
     def generateAllTests(self):
-        '''Runs all binary tests.'''
-        if self.batch_mode:
+        '''Runs all binary tests.
+
+        If the test cases should run in batch mode, this method executes the
+        gtest commands without adding test records, and then parses the XML
+        reports to records.
+        If the test cases should run in batch mode but be skipped (e.g., HAL is
+        not implemented), this method applies the filters in base_test, skips
+        the batch test cases, and adds one record for each of them.
+        '''
+        if self.batch_mode and not self.isSkipAllTests():
+            # TODO(b/126412742): Convert filters to --gtest_filter.
             for test_case in self.testcases:
                 logging.info('Running %s test cases in batch.',
                              len(test_case.full_name.split(':')))
