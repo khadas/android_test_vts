@@ -315,4 +315,8 @@
     <!-- b/80466264: CtsAppSecurityHostTestCases#testDirectBoot* incompatible with devices without FBE -->
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootEmulated" />
     <option name="compatibility:exclude-filter" value="CtsAppSecurityHostTestCases android.appsecurity.cts.DirectBootHostTest#testDirectBootNone" />
+
+    <!-- b/72623893: CtsMediaTestCases#testRecorderTimelapsedVideo and #testRecorderPauseResumeOnTimeLapse failure flaky -->
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.MediaRecorderTest#testRecorderTimelapsedVideo" />
+    <option name="compatibility:exclude-filter" value="CtsMediaTestCases android.media.cts.MediaRecorderTest#testRecorderPauseResumeOnTimeLapse" />
 </configuration>
