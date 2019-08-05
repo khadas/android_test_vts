@@ -43,6 +43,7 @@
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_1Host" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantP2pV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantP2pV1_2Target" />
+  <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_3Host" />
 
   <option name="compatibility:include-filter" value="VtsHalAudioV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalAudioV4_0Target" />
