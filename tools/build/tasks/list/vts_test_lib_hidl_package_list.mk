@@ -23,6 +23,7 @@ vts_hal_driver_libs := \
   android.hardware.audio.effect@4.0-vts.driver \
   android.hardware.authsecret@1.0-vts.driver \
   android.hardware.automotive.audiocontrol@1.0-vts.driver \
+  android.hardware.automotive.can@1.0-vts.driver \
   android.hardware.automotive.evs@1.0-vts.driver \
   android.hardware.automotive.evs@1.1-vts.driver \
   android.hardware.automotive.vehicle@2.0-vts.driver \
@@ -145,6 +146,7 @@ vts_hal_profiler_libs := \
   android.hardware.audio.effect@4.0-vts.profiler \
   android.hardware.authsecret@1.0-vts.profiler \
   android.hardware.automotive.audiocontrol@1.0-vts.profiler \
+  android.hardware.automotive.can@1.0-vts.profiler \
   android.hardware.automotive.evs@1.0-vts.profiler \
   android.hardware.automotive.evs@1.1-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
@@ -267,6 +269,9 @@ vts_hal_test_bins := \
   VtsHalBroadcastradioV2_0TargetTest \
   VtsHalCameraProviderV2_4TargetTest \
   VtsHalCameraServiceV2_0TargetTest \
+  VtsHalCanBusV1_0TargetTest \
+  VtsHalCanBusVirtualV1_0TargetTest \
+  VtsHalCanControllerV1_0TargetTest \
   VtsHalCasV1_0TargetTest \
   VtsHalCasV1_1TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
