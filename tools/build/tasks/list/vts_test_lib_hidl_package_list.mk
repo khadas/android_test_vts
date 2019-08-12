@@ -97,6 +97,7 @@ vts_hal_driver_libs := \
   android.hardware.thermal@1.1-vts.driver \
   android.hardware.tv.cec@1.0-vts.driver \
   android.hardware.tv.input@1.0-vts.driver \
+  android.hardware.tv.tuner@1.0-vts.driver \
   android.hardware.usb@1.0-vts.driver \
   android.hardware.usb@1.1-vts.driver \
   android.hardware.usb.gadget@1.0-vts.driver \
@@ -200,6 +201,7 @@ vts_hal_profiler_libs := \
   android.hardware.thermal@1.1-vts.profiler \
   android.hardware.tv.cec@1.0-vts.profiler \
   android.hardware.tv.input@1.0-vts.profiler \
+  android.hardware.tv.tuner@1.0-vts.profiler \
   android.hardware.usb@1.0-vts.profiler \
   android.hardware.usb@1.1-vts.profiler \
   android.hardware.usb.gadget@1.0-vts.profiler \
@@ -294,6 +296,7 @@ vts_hal_test_bins := \
   VtsHalThermalV1_1TargetTest \
   thermal_hidl_stress_test \
   VtsHalTvInputV1_0TargetTest \
+  VtsHalTvTunerV1_0TargetTest \
   VtsHalUsbV1_0TargetTest \
   VtsHalUsbV1_1TargetTest \
   VtsHalVibratorV1_0TargetTest \
