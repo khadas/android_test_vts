@@ -268,7 +268,6 @@ vts_hal_test_bins := \
   VtsHalCasV1_0TargetTest \
   VtsHalCasV1_1TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
-  VtsHalConfigstoreV1_2TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDrmV1_1TargetTest \
