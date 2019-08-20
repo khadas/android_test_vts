@@ -110,13 +110,6 @@ target_script_copy_pairs := \
   $(foreach f,$(target_script_files),\
     test/vts/script/target/$(f):$(VTF_TESTCASES_OUT)/script/target/$(f))
 
-acts_framework_files := \
-  $(call find-files-in-subdirs,tools/test/connectivity/acts/framework/acts,"*.py" -and -type f,.)
-
-acts_framework_copy_pairs := \
-  $(foreach f,$(acts_framework_files),\
-    tools/test/connectivity/acts/framework/acts/$(f):$(VTF_TESTCASES_OUT)/acts/$(f))
-
 vtf_copy_pairs := \
   $(call copy-many-files,$(host_framework_copy_pairs)) \
   $(call copy-many-files,$(host_additional_deps_copy_pairs)) \
@@ -125,7 +118,6 @@ vtf_copy_pairs := \
   $(call copy-many-files,$(vtf_target_native_copy_pairs)) \
   $(call copy-many-files,$(target_hostdriven_copy_pairs)) \
   $(call copy-many-files,$(target_hal_hash_copy_pairs)) \
-  $(call copy-many-files,$(acts_framework_copy_pairs)) \
   $(call copy-many-files,$(target_script_copy_pairs)) \
 
 .PHONY: vts-test-core
