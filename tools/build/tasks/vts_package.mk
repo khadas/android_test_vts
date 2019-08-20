@@ -158,13 +158,6 @@ kernel_rootdir_test_rc_copy_pairs := \
   $(foreach f,$(kernel_rootdir_test_rc_files),\
     system/core/rootdir/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/api/rootdir/init_rc_files/$(f)) \
 
-acts_testcases_files := \
-  $(call find-files-in-subdirs,tools/test/connectivity/acts/tests/google,"*.py" -and -type f,.)
-
-acts_testcases_copy_pairs := \
-  $(foreach f,$(acts_testcases_files),\
-    tools/test/connectivity/acts/tests/google/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/acts/$(f))
-
 system_property_compatibility_test_res_copy_pairs := \
   system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
 
@@ -224,7 +217,6 @@ vts_copy_pairs := \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
   $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
   $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
-  $(call copy-many-files,$(acts_testcases_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
   $(call copy-many-files,$(xsd_config_files)) \
   $(call copy-many-files,$(gsi_key_copy_pairs)) \
