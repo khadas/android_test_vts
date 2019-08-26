@@ -93,6 +93,11 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
                     + "Example: \"2\", or \"3\".")
     private String mPythonVersion = "2";
 
+    @Option(name = "virtual-env-intallation-wait-time",
+            isTimeVal = true,
+            description = "The maximum wait time for virtual env installation.")
+    private long mVirtualEnvInstallationWaitTime = 600000L;
+
     private IBuildInfo mBuildInfo = null;
     private DeviceDescriptor mDescriptor = null;
     private IRunUtil mRunUtil = new RunUtil();
@@ -438,7 +443,7 @@ public class VtsPythonVirtualenvPreparer implements IMultiTargetPreparer {
             if (try_count > 0) {
                 getRunUtil().sleep(waitRetryCreate);
             }
-            CommandResult c = getRunUtil().runTimedCmd(3 * MINUTE_IN_MSECS, cmd);
+            CommandResult c = getRunUtil().runTimedCmd(mVirtualEnvInstallationWaitTime, cmd);
 
             if (!CommandStatus.SUCCESS.equals(c.getStatus())) {
                 String message_lower = (c.getStdout() + c.getStderr()).toLowerCase();
