@@ -30,8 +30,8 @@ vts_test_bin_packages := \
     libhwbinder_latency \
     libbinder_benchmark \
     libdm_test \
-    liblp_test_static \
     vts_codelab_target_binary \
+    vts_kernel_liblp_test \
     vts_selftest_flaky_test \
     vts_selftest_zero_testcase_binary_test \
     vts_test_binary_crash_app \
