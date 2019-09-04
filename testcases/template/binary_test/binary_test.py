@@ -106,7 +106,7 @@ class BinaryTest(base_test.BaseTestClass):
                 path = token
                 split = token.find(self.TAG_DELIMITER)
                 if split >= 0:
-                    tag, arg = token[:split], token[
+                    tag, path = token[:split], token[
                         split + len(self.TAG_DELIMITER):]
                 if tag in self.envp:
                     self.envp[tag] += ' %s' % path

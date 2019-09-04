@@ -23,5 +23,7 @@
   <option name="compatibility:include-filter" value="LibcTest" />
   <option name="compatibility:include-filter" value="VtsFmqUnitTests" />
   <option name="compatibility:include-filter" value="VtsHidlUnitTests" />
+  <option name="compatibility:include-filter" value="VtsVndkHidlBufferpoolV1_0Target" />
+  <option name="compatibility:include-filter" value="VtsVndkHidlBufferpoolV2_0Target" />
 
 </configuration>

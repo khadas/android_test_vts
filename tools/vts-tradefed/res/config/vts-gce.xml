@@ -27,6 +27,7 @@
   <option name="compatibility:include-filter" value="VtsFirmwareDtboVerification" />
   <option name="compatibility:include-filter" value="VtsHalAuthSecretV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBaseV1_0TargetTest" />
+  <option name="compatibility:include-filter" value="VtsHalBiometricsFaceV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1Target" />
   <option name="compatibility:include-filter" value="VtsHalBiometricsFingerprintV2_1TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalBluetoothV1_0Target" />
@@ -41,6 +42,7 @@
   <option name="compatibility:include-filter" value="VtsHalGatekeeperV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_0Target" />
   <option name="compatibility:include-filter" value="VtsHalGraphicsMapperV2_1Target" />
+  <option name="compatibility:include-filter" value="VtsHalInputClassifierV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalIrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalKeymasterV4_0Target" />
   <option name="compatibility:include-filter" value="VtsHalLightV2_0Target" />
@@ -70,6 +72,7 @@
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_1Target" />
   <option name="compatibility:include-filter" value="VtsHalVibratorV1_2Target" />
+  <option name="compatibility:include-filter" value="VtsHalVibratorV1_3Target" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalVrV1_0TargetReplay" />
   <option name="compatibility:include-filter" value="VtsHalWeaverV1_0Target" />
