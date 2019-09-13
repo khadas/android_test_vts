@@ -126,6 +126,7 @@ vts_hal_driver_libs := \
   android.hardware.wifi@1.0-vts.driver \
   android.hardware.wifi@1.1-vts.driver \
   android.hardware.wifi@1.2-vts.driver \
+  android.hardware.wifi@1.4-vts.driver \
   android.hardware.wifi.hostapd@1.0-vts.driver \
   android.hardware.wifi.offload@1.0-vts.driver \
   android.hardware.wifi.supplicant@1.0-vts.driver \
@@ -244,6 +245,7 @@ vts_hal_profiler_libs := \
   android.hardware.wifi@1.0-vts.profiler \
   android.hardware.wifi@1.1-vts.profiler \
   android.hardware.wifi@1.2-vts.profiler \
+  android.hardware.wifi@1.4-vts.profiler \
   android.hardware.wifi.hostapd@1.0-vts.profiler \
   android.hardware.wifi.offload@1.0-vts.profiler \
   android.hardware.wifi.supplicant@1.0-vts.profiler \
@@ -369,6 +371,7 @@ vts_hal_test_bins := \
   VtsHalWifiV1_1TargetTest \
   VtsHalWifiV1_2TargetTest \
   VtsHalWifiV1_3TargetTest \
+  VtsHalWifiV1_4TargetTest \
   VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiNanV1_2TargetTest \
   VtsHalWifiOffloadV1_0TargetTest \
