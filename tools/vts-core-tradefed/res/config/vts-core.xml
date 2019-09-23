@@ -14,6 +14,14 @@
      limitations under the License.
 -->
 <configuration description="Runs all tests in vts-core suite">
+    <include name="everything" />
+    <option name="compatibility:run-suite-tag" value="vts-core" />
+
     <option name="plan" value="vts-core" />
     <option name="test-tag" value="vts-core" />
+
+    <template-include name="reporters" default="basic-reporters" />
+
+    <!-- Include additional test metadata output. -->
+    <template-include name="metadata-reporters" default="empty" />
 </configuration>
