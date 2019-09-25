@@ -184,4 +184,4 @@ else
     VTS_TESTCASES=${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/${VENDOR}/testcases/
 fi
 
-cd ${VTS_TESTCASES}; VTS_TESTCASES=${VTS_TESTCASES} java -Xmx2048m $RDBG_FLAG -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "${ARGS[@]}"
+cd ${VTS_TESTCASES}; VTS_TESTCASES=${VTS_TESTCASES} java -Xmx4096m $RDBG_FLAG -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "${ARGS[@]}"
