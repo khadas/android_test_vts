@@ -22,4 +22,6 @@ java_library_host {
         "tradefed",
         "vts-core-tradefed",
     ],
+
+    static_libs: ["easymock"],
 }
