@@ -28,7 +28,7 @@ java_library_host {
 tradefed_binary_host {
     name: "vts-core-tradefed",
     wrapper: "etc/vts-core-tradefed",
-    short_name: "VTS-Core",
+    short_name: "VTS-CORE",
     full_name: "Vendor Core Test Suite",
     version: "1",
     static_libs: ["vts-core-tradefed-harness"],
