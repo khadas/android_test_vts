@@ -130,5 +130,5 @@ for j in $(find ${VTS_CORE_ROOT}/android-vts-core/testcases -type f -name '*.jar
     JAR_PATH=${JAR_PATH}:$j
 done
 
-java $RDBG_FLAG -Xmx6g -XX:+HeapDumpOnOutOfMemoryError -cp ${JAR_PATH} -DVTS_CORE_ROOT=${VTS_CORE_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "$@"
+java $RDBG_FLAG -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -cp ${JAR_PATH} -DVTS_CORE_ROOT=${VTS_CORE_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "$@"
 
