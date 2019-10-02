@@ -377,7 +377,5 @@ vts_test_lib_hidl_packages := \
   $(vts_hal_driver_libs) \
   $(vts_hal_profiler_libs) \
   $(vts_hal_test_bins) \
-  libhwbinder \
   libhidlbase \
-  libhidltransport \
   libvtswidevine_prebuilt \
