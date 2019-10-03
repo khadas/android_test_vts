@@ -222,6 +222,8 @@ vts_adapter_package_list := \
   android.hardware.vibrator@1.2-adapter-helper \
   android.hardware.vibrator@1.3-adapter \
   android.hardware.vibrator@1.3-adapter-helper \
+  android.hardware.vibrator@1.4-adapter \
+  android.hardware.vibrator@1.4-adapter-helper \
   android.hardware.vr@1.0-adapter \
   android.hardware.vr@1.0-adapter-helper \
   android.hardware.weaver@1.0-adapter \
