@@ -24,6 +24,9 @@ vts_hal_driver_libs := \
   android.hardware.audio@5.0-vts.driver \
   android.hardware.audio.common@5.0-vts.driver \
   android.hardware.audio.effect@5.0-vts.driver \
+  android.hardware.audio@6.0-vts.driver \
+  android.hardware.audio.common@6.0-vts.driver \
+  android.hardware.audio.effect@6.0-vts.driver \
   android.hardware.authsecret@1.0-vts.driver \
   android.hardware.automotive.audiocontrol@1.0-vts.driver \
   android.hardware.automotive.can@1.0-vts.driver \
@@ -152,6 +155,9 @@ vts_hal_profiler_libs := \
   android.hardware.audio@5.0-vts.profiler \
   android.hardware.audio.common@5.0-vts.profiler \
   android.hardware.audio.effect@5.0-vts.profiler \
+  android.hardware.audio@6.0-vts.profiler \
+  android.hardware.audio.common@6.0-vts.profiler \
+  android.hardware.audio.effect@6.0-vts.profiler \
   android.hardware.authsecret@1.0-vts.profiler \
   android.hardware.automotive.audiocontrol@1.0-vts.profiler \
   android.hardware.automotive.can@1.0-vts.profiler \
@@ -266,9 +272,11 @@ vts_hal_test_bins := \
   VtsHalAudioV2_0TargetTest \
   VtsHalAudioV4_0TargetTest \
   VtsHalAudioV5_0TargetTest \
+  VtsHalAudioV6_0TargetTest \
   VtsHalAudioEffectV2_0TargetTest \
   VtsHalAudioEffectV4_0TargetTest \
   VtsHalAudioEffectV5_0TargetTest \
+  VtsHalAudioEffectV6_0TargetTest \
   VtsHalAuthSecretV1_0TargetTest \
   VtsHalBiometricsFaceV1_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
