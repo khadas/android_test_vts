@@ -380,7 +380,8 @@ vts_hal_test_bins := \
   VtsHalWifiV1_1TargetTest \
   VtsHalWifiV1_2TargetTest \
   VtsHalWifiV1_3TargetTest \
-  VtsHalWifiV1_4TargetTest \
+  VtsHalWifiApV1_0TargetTest \
+  VtsHalWifiApV1_4TargetTest \
   VtsHalWifiNanV1_0TargetTest \
   VtsHalWifiNanV1_2TargetTest \
   VtsHalWifiOffloadV1_0TargetTest \

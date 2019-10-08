@@ -81,7 +81,7 @@
   <option name="compatibility:include-filter" value="VtsHalWifiOffloadV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiSupplicantV1_1Target" />
-  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Host" />
+  <option name="compatibility:include-filter" value="VtsHalWifiV1_0Target" />
   <option name="compatibility:include-filter" value="VtsHalWifiV1_2Target" />
   <option name="compatibility:include-filter" value="VtsHidlAllocatorV1_0Target" />
   <option name="compatibility:include-filter" value="VtsKernelBinderTest" />
