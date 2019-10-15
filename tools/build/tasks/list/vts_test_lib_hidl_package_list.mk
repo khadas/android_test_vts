@@ -290,6 +290,7 @@ vts_hal_test_bins := \
   VtsHalAudioEffectV4_0TargetTest \
   VtsHalAudioEffectV5_0TargetTest \
   VtsHalAudioEffectV6_0TargetTest \
+  VtsHalAudioPolicyV1_0TargetTest \
   VtsHalAuthSecretV1_0TargetTest \
   VtsHalBiometricsFaceV1_0TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
