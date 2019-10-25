@@ -1214,7 +1214,7 @@ class AndroidDevice(object):
         try:
             self.adb.shell('start %s' % LLKD)
         except adb.AdbError as e:
-            logging.error('Failed to start llkd')
+            logging.warn('Failed to start llkd')
 
     def _StopLLKD(self):
         """Stops LLKD"""
@@ -1224,7 +1224,7 @@ class AndroidDevice(object):
         try:
             self.adb.shell('stop %s' % LLKD)
         except adb.AdbError as e:
-            logging.error('Failed to stop llkd')
+            logging.warn('Failed to stop llkd')
 
     def startVtsAgent(self):
         """Start HAL agent on the AndroidDevice.
