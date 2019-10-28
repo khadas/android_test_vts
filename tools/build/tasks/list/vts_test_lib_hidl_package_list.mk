@@ -50,6 +50,7 @@ vts_hal_driver_libs := \
   android.hardware.camera.provider@2.4-vts.driver \
   android.hardware.cas@1.0-vts.driver \
   android.hardware.cas@1.1-vts.driver \
+  android.hardware.cas@1.2-vts.driver \
   android.hardware.cas.native@1.0-vts.driver \
   android.hardware.configstore@1.0-vts.driver \
   android.hardware.configstore@1.2-vts.driver \
@@ -183,6 +184,7 @@ vts_hal_profiler_libs := \
   android.hardware.camera.provider@2.4-vts.profiler \
   android.hardware.cas@1.0-vts.profiler \
   android.hardware.cas@1.1-vts.profiler \
+  android.hardware.cas@1.2-vts.profiler \
   android.hardware.cas.native@1.0-vts.profiler \
   android.hardware.configstore@1.0-vts.profiler \
   android.hardware.configstore@1.2-vts.profiler \
@@ -297,6 +299,7 @@ vts_hal_test_bins := \
   VtsHalCanControllerV1_0TargetTest \
   VtsHalCasV1_0TargetTest \
   VtsHalCasV1_1TargetTest \
+  VtsHalCasV1_2TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalContexthubV1_0TargetTest \
   VtsHalDrmV1_0TargetTest \
