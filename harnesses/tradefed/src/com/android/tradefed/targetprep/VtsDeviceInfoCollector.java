@@ -97,16 +97,25 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         // {build_brand}/{build_product}/{build_device}:{build_version_release}/{build_id}/
         // {build_version_incremental}:{build_type}/{build_tags}
         //
+        // cts:build_version_incremental should be the same as the {build_version_incremental} in
+        // cts:build_fingerprint. If ODM fingerprint exists, the value is
+        // {ro.odm.build.version.incremental}. Otherwise, it is
+        // {ro.vendor.build.version.incremental}.
+        //
         // The {build_device} in {ro.odm.build.fingerprint} can be {ro.product.device} or
         // {ro.product.odm.device}_{ro.boot.product.hardware.sku}. The latter one is rewritten as
         // {ro.product.odm.device}.
         String buildFingerprint = device.getProperty("ro.odm.build.fingerprint");
+        String buildVerisonIncremental = null;
         if (!Strings.isNullOrEmpty(buildFingerprint)) {
             String[] splitBuildFingerprint = buildFingerprint.split("/");
             if (splitBuildFingerprint.length <= 2) {
                 throw new TargetSetupError("Cannot parse ODM fingerprint: " + buildFingerprint,
                         device.getDeviceDescriptor());
             }
+
+            buildVerisonIncremental = device.getProperty("ro.odm.build.version.incremental");
+
             String odmDevice = device.getProperty("ro.product.odm.device");
             String sku = device.getProperty("ro.boot.product.hardware.sku");
             if (!Strings.isNullOrEmpty(odmDevice) && !Strings.isNullOrEmpty(sku)) {
@@ -119,8 +128,10 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
             }
         } else {
             buildFingerprint = device.getProperty("ro.vendor.build.fingerprint");
+            buildVerisonIncremental = device.getProperty("ro.vendor.build.version.incremental");
         }
 
         buildInfo.addBuildAttribute("cts:build_fingerprint", buildFingerprint);
+        buildInfo.addBuildAttribute("cts:build_version_incremental", buildVerisonIncremental);
     }
 }
