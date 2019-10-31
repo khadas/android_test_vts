@@ -19,7 +19,8 @@ cc_library_static {
     srcs : [
         "VtsHalHidlTargetTestBase.cpp",
         "VtsHalHidlTargetCallbackBase.cpp",
-        "VtsHalHidlTargetTestEnvBase.cpp"
+        "VtsHalHidlTargetTestEnvBase.cpp",
+        "VtsCoreUtil.cpp",
     ],
 
     cflags: ["-Wall", "-Werror"],
