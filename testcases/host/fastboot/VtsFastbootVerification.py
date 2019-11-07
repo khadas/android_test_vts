@@ -110,7 +110,7 @@ class VtsFastbootVerificationTest(base_test.BaseTestClass):
 
     def tearDownClass(self):
         """Reboot to Android."""
-        if self.dut.isBootloaderMode:
+        if self.dut.isBootloaderMode or self.dut.fastboot.isFastbootOverTcp(self.dut.serial):
             self.dut.reboot()
             self.dut.waitForBootCompletion()
 
