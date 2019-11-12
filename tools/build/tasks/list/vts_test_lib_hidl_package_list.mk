@@ -129,7 +129,6 @@ vts_hal_driver_libs := \
   android.hardware.vibrator@1.1-vts.driver \
   android.hardware.vibrator@1.2-vts.driver \
   android.hardware.vibrator@1.3-vts.driver \
-  android.hardware.vibrator@1.4-vts.driver \
   android.hardware.vr@1.0-vts.driver \
   android.hardware.weaver@1.0-vts.driver \
   android.hardware.wifi@1.0-vts.driver \
