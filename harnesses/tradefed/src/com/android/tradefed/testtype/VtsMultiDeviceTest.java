@@ -1109,7 +1109,7 @@ public class VtsMultiDeviceTest
      * @throws IllegalArgumentException
      */
     private void doRunTest(ITestLifeCycleReceiver listener)
-            throws RuntimeException, IllegalArgumentException {
+            throws RuntimeException, IllegalArgumentException, DeviceNotAvailableException {
         CLog.i("Device serial number: " + mDevice.getSerialNumber());
 
         setTestCaseDataDir();
@@ -1253,6 +1253,14 @@ public class VtsMultiDeviceTest
         if (jsonFilePath != null) {
           FileUtil.deleteFile(new File(jsonFilePath));
           CLog.i("Deleted the runner json config file, %s.", jsonFilePath);
+        }
+
+        // If the framework was disabled in python, make sure we re-enable it no matter what.
+        // The python side never re-enable the framework.
+        if (mBinaryTestDisableFramework) {
+            for (ITestDevice device : mInvocationContext.getDevices()) {
+                device.executeShellCommand("start");
+            }
         }
 
         if (interruptMessage != null) {
