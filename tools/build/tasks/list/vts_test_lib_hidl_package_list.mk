@@ -32,6 +32,7 @@ vts_hal_driver_libs := \
   android.hardware.automotive.can@1.0-vts.driver \
   android.hardware.automotive.evs@1.0-vts.driver \
   android.hardware.automotive.evs@1.1-vts.driver \
+  android.hardware.automotive.occupant_awareness@1.0-vts.driver \
   android.hardware.automotive.vehicle@2.0-vts.driver \
   android.hardware.biometrics.face@1.0-vts.driver \
   android.hardware.biometrics.fingerprint@2.1-vts.driver \
@@ -166,6 +167,7 @@ vts_hal_profiler_libs := \
   android.hardware.automotive.can@1.0-vts.profiler \
   android.hardware.automotive.evs@1.0-vts.profiler \
   android.hardware.automotive.evs@1.1-vts.profiler \
+  android.hardware.automotive.occupant_awareness@1.0-vts.profiler \
   android.hardware.automotive.vehicle@2.0-vts.profiler \
   android.hardware.biometrics.face@1.0-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
@@ -349,6 +351,7 @@ vts_hal_test_bins := \
   VtsHalNfcV1_0TargetTest \
   VtsHalNfcV1_1TargetTest \
   VtsHalNfcV1_2TargetTest \
+  VtsHalOccupantAwarenessV1_0TargetTest \
   VtsHalOemLockV1_0TargetTest \
   VtsHalPowerV1_0TargetTest \
   VtsHalPowerV1_1TargetTest \
