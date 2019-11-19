@@ -21,6 +21,7 @@ import com.android.tradefed.config.Option;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.util.ArrayUtil;
+import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,11 +56,7 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         BUILD_KEYS.put("cts:build_type", "ro.build.type");
         BUILD_KEYS.put("cts:build_tags", "ro.build.tags");
         /**
-         * build_fingerprint is used for certification
-         */
-        BUILD_KEYS.put("cts:build_fingerprint", "ro.odm.build.fingerprint");
-        /**
-         * Unaltered is for retry.
+         * build_fingerprint is used for certification; build_fingerprint_unaltered is for retry.
          */
         BUILD_KEYS.put("cts:build_fingerprint_unaltered", "ro.build.fingerprint");
         BUILD_KEYS.put("cts:build_abi", "ro.product.cpu.abi");
@@ -82,7 +79,6 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         BUILD_LEGACY_PROPERTIES.put(
                 "ro.product.vendor.manufacturer", "ro.vendor.product.manufacturer");
         BUILD_LEGACY_PROPERTIES.put("ro.product.vendor.model", "ro.vendor.product.model");
-        BUILD_LEGACY_PROPERTIES.put("ro.odm.build.fingerprint", "ro.vendor.build.fingerprint");
     }
 
     @Override
@@ -96,5 +92,35 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
             }
             buildInfo.addBuildAttribute(entry.getKey(), ArrayUtil.join(",", propertyValue));
         }
+
+        // cts:build_fingerprint in the report consists of:
+        // {build_brand}/{build_product}/{build_device}:{build_version_release}/{build_id}/
+        // {build_version_incremental}:{build_type}/{build_tags}
+        //
+        // The {build_device} in {ro.odm.build.fingerprint} can be {ro.product.device} or
+        // {ro.product.odm.device}_{ro.boot.product.hardware.sku}. The latter one is rewritten as
+        // {ro.product.odm.device}.
+        String buildFingerprint = device.getProperty("ro.odm.build.fingerprint");
+        if (!Strings.isNullOrEmpty(buildFingerprint)) {
+            String[] splitBuildFingerprint = buildFingerprint.split("/");
+            if (splitBuildFingerprint.length <= 2) {
+                throw new TargetSetupError("Cannot parse ODM fingerprint: " + buildFingerprint,
+                        device.getDeviceDescriptor());
+            }
+            String odmDevice = device.getProperty("ro.product.odm.device");
+            String sku = device.getProperty("ro.boot.product.hardware.sku");
+            if (!Strings.isNullOrEmpty(odmDevice) && !Strings.isNullOrEmpty(sku)) {
+                String odmDeviceAndSku = odmDevice + "_" + sku;
+                if (splitBuildFingerprint[2].startsWith(odmDeviceAndSku + ":")) {
+                    splitBuildFingerprint[2] = odmDevice
+                            + splitBuildFingerprint[2].substring(odmDeviceAndSku.length());
+                    buildFingerprint = String.join("/", splitBuildFingerprint);
+                }
+            }
+        } else {
+            buildFingerprint = device.getProperty("ro.vendor.build.fingerprint");
+        }
+
+        buildInfo.addBuildAttribute("cts:build_fingerprint", buildFingerprint);
     }
 }
