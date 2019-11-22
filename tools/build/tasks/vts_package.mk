@@ -44,6 +44,9 @@ VTS_TESTCASES_OUT := $(VTS_OUT_ROOT)/android-vts/testcases
 test_suite_name := vts
 test_suite_tradefed := vts-tradefed
 test_suite_readme := test/vts/README.md
+# Package vts-core libraries.
+test_suite_tools += $(HOST_OUT_JAVA_LIBRARIES)/vts-core-tradefed-harness.jar \
+    $(HOST_OUT_JAVA_LIBRARIES)/vts-core-tradefed-tests.jar
 
 include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 

@@ -13,4 +13,4 @@
 # limitations under the License.
 
 .PHONY: vts-tradefed-standalone
-vts-tradefed-standalone: vts-tradefed vts-tradefed-tests loganalysis hosttestlib compatibility-host-util tradefed
+vts-tradefed-standalone: vts-tradefed vts-tradefed-tests loganalysis hosttestlib compatibility-host-util tradefed vts-core-tradefed
