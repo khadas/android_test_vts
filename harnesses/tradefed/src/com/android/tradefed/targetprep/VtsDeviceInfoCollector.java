@@ -21,7 +21,7 @@ import com.android.tradefed.config.Option;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.util.ArrayUtil;
-import com.google.common.base.Strings;
+import com.google.api.client.util.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,15 +106,15 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
         // {ro.product.odm.device}_{ro.boot.product.hardware.sku}. The latter one is rewritten as
         // {ro.product.odm.device}.
         String buildFingerprint = device.getProperty("ro.odm.build.fingerprint");
-        String buildVerisonIncremental = null;
+        String buildVersionIncremental = null;
         if (!Strings.isNullOrEmpty(buildFingerprint)) {
             String[] splitBuildFingerprint = buildFingerprint.split("/");
             if (splitBuildFingerprint.length <= 2) {
                 throw new TargetSetupError("Cannot parse ODM fingerprint: " + buildFingerprint,
                         device.getDeviceDescriptor());
             }
-
-            buildVerisonIncremental = device.getProperty("ro.odm.build.version.incremental");
+            // Need root to read that property
+            buildVersionIncremental = device.getProperty("ro.odm.build.version.incremental");
 
             String odmDevice = device.getProperty("ro.product.odm.device");
             String sku = device.getProperty("ro.boot.product.hardware.sku");
@@ -128,10 +128,16 @@ public class VtsDeviceInfoCollector implements ITargetPreparer {
             }
         } else {
             buildFingerprint = device.getProperty("ro.vendor.build.fingerprint");
-            buildVerisonIncremental = device.getProperty("ro.vendor.build.version.incremental");
+            // Need root to read that property
+            buildVersionIncremental = device.getProperty("ro.vendor.build.version.incremental");
         }
 
-        buildInfo.addBuildAttribute("cts:build_fingerprint", buildFingerprint);
-        buildInfo.addBuildAttribute("cts:build_version_incremental", buildVerisonIncremental);
+        buildInfo.addBuildAttribute("cts:build_fingerprint", nullToEmpty(buildFingerprint));
+        buildInfo.addBuildAttribute(
+                "cts:build_version_incremental", nullToEmpty(buildVersionIncremental));
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 }
