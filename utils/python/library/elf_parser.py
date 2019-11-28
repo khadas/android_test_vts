@@ -19,7 +19,7 @@ Example usage:
     import elf_parser
     with elf_parser.ElfParser(file) as e:
         print('\n'.join(e.ListGlobalDynamicSymbols()))
-        print('\n'.join(e.ListDependencies()))
+        print('\n'.join(e.ListDependencies()[0]))
 """
 
 import ctypes
@@ -543,34 +543,42 @@ class ElfParser(object):
                 yield relocation
             current_count += group_size
 
-    def _LoadDtNeeded(self, dynamic):
-        """Reads DT_NEEDED entries from dynamic section.
+    def _LoadDynamicSection(self, dynamic):
+        """Reads entries from dynamic section.
 
         Args:
             dynamic: Section header of the dynamic section.
 
         Returns:
-            A list of strings, the names of libraries.
+            A dict of {DT_NEEDED: [libraries names], DT_RUNPATH: [paths]}
+            where the library names and the paths are strings.
 
         Raises:
             ElfError: Fails to find dynamic string table.
         """
         strtab_addr = None
-        name_offsets = []
+        dt_needed_offsets = []
+        dt_runpath_offsets = []
         for dyn in self.GetDynamic(dynamic):
             if dyn.d_tag == consts.DT_NEEDED:
-                name_offsets.append(dyn.d_un.d_val)
+                dt_needed_offsets.append(dyn.d_un.d_val)
+            elif dyn.d_tag == consts.DT_RUNPATH:
+                dt_runpath_offsets.append(dyn.d_un.d_val)
             elif dyn.d_tag == consts.DT_STRTAB:
                 strtab_addr = dyn.d_un.d_ptr
 
         if strtab_addr is None:
-            raise ElfError("Cannot find string table address in dynamic"
-                           " section.")
+            raise ElfError("Cannot find string table address in dynamic "
+                           "section.")
         try:
             strtab = next(sh for sh in self.Shdr if sh.sh_addr == strtab_addr)
         except StopIteration:
             raise ElfError("Cannot find dynamic string table.")
-        return [self.GetString(strtab, off) for off in name_offsets]
+        dt_needed = [self.GetString(strtab, off) for off in dt_needed_offsets]
+        dt_runpath = []
+        for off in dt_runpath_offsets:
+            dt_runpath.extend(self.GetString(strtab, off).split(":"))
+        return {consts.DT_NEEDED: dt_needed, consts.DT_RUNPATH: dt_runpath}
 
     def IsExecutable(self):
         """Returns whether the ELF is executable."""
@@ -613,13 +621,17 @@ class ElfParser(object):
         """Lists the shared libraries that the ELF depends on.
 
         Returns:
-            A list of strings, the names of the depended libraries.
+            2 lists of strings, the names of the depended libraries and the
+            search paths.
         """
         deps = []
+        runpaths = []
         for sh in self.Shdr:
             if sh.sh_type == consts.SHT_DYNAMIC:
-                deps.extend(self._LoadDtNeeded(sh))
-        return deps
+                dynamic = self._LoadDynamicSection(sh)
+                deps.extend(dynamic[consts.DT_NEEDED])
+                runpaths.extend(dynamic[consts.DT_RUNPATH])
+        return deps, runpaths
 
     def ListGlobalSymbols(self, include_weak=False,
                           symtab_name=consts.SYMTAB,
