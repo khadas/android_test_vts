@@ -27,7 +27,7 @@ import com.android.tradefed.log.LogUtil;
  * <p>For devices with an mSIM capable modem, this preparer configures the modem to function in mSIM
  * mode so that all slots can be tested, and then reverts the modem back in teardown.
  */
-public class VtsMultiSimPreparer extends BaseTargetPreparer implements ITargetCleaner {
+public class MultiSimPreparer extends BaseTargetPreparer implements ITargetCleaner {
     private ITestDevice mDevice;
     private int mOriginalSims;
 
