@@ -118,7 +118,8 @@ JARS="${TRADEFED_JAR}
   hosttestlib
   vts-tradefed
   vts-tradefed-tests
-  compatibility-host-util"
+  compatibility-host-util
+  vts-core-tradefed"
 
 for JAR in $JARS; do
     checkFile ${JAR_DIR}/${JAR}.jar

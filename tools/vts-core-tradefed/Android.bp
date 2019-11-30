@@ -14,7 +14,7 @@
 
 java_library_host {
     name: "vts-core-tradefed-harness",
-
+    srcs: ["src/**/*.java"],
     java_resource_dirs: ["res"],
     libs: [
         "tradefed",
