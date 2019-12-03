@@ -119,7 +119,7 @@ JARS="${TRADEFED_JAR}
   vts-tradefed
   vts-tradefed-tests
   compatibility-host-util
-  vts-core-tradefed"
+  vts-core-tradefed-harness"
 
 for JAR in $JARS; do
     checkFile ${JAR_DIR}/${JAR}.jar
