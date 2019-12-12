@@ -154,13 +154,6 @@ vndk_test_res_copy_pairs := \
   $(foreach vndk_ver,$(PRODUCT_EXTRA_VNDK_VERSIONS),build/make/target/product/gsi/$(vndk_ver).txt:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(vndk_ver)/vndk-lib-list.txt) \
   $(foreach vndk_ver,$(PRODUCT_EXTRA_VNDK_VERSIONS),development/vndk/tools/definition-tool/datasets/vndk-lib-extra-list-$(vndk_ver).txt:$(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/$(vndk_ver)/vndk-lib-extra-list.txt) \
 
-kernel_rootdir_test_rc_files := \
-  $(call find-files-in-subdirs,system/core/rootdir,"*.rc" -and -type f,.) \
-
-kernel_rootdir_test_rc_copy_pairs := \
-  $(foreach f,$(kernel_rootdir_test_rc_files),\
-    system/core/rootdir/$(f):$(VTS_TESTCASES_OUT)/vts/testcases/kernel/api/rootdir/init_rc_files/$(f)) \
-
 system_property_compatibility_test_res_copy_pairs := \
   system/sepolicy/public/property_contexts:$(VTS_TESTCASES_OUT)/vts/testcases/security/system_property/data/property_contexts
 
@@ -219,7 +212,6 @@ vts_copy_pairs := \
   $(call copy-many-files,$(performance_test_res_copy_pairs)) \
   $(call copy-many-files,$(audio_test_res_copy_pairs)) \
   $(call copy-many-files,$(vndk_test_res_copy_pairs)) \
-  $(call copy-many-files,$(kernel_rootdir_test_rc_copy_pairs)) \
   $(call copy-many-files,$(system_property_compatibility_test_res_copy_pairs)) \
   $(call copy-many-files,$(xsd_config_files)) \
   $(call copy-many-files,$(gsi_key_copy_pairs)) \
