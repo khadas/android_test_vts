@@ -31,7 +31,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 LOCAL_STATIC_JAVA_LIBRARIES += \
     gson-prebuilt-jar \
     google-api-java-client-min-repackaged \
-    cts-tradefed-harness \
+    cts-tradefed-harness
+
+LOCAL_JAVA_LIBRARIES += \
     vts-core-tradefed-harness
 
 LOCAL_JAR_MANIFEST := MANIFEST.mf
