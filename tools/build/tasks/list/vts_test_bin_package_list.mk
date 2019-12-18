@@ -67,6 +67,7 @@ vts_test_bin_packages += \
     vts_kernel_tun_test \
     vts_kernel_toolchain \
     vts_meminfo_test \
+    vts_virtual_ab_test \
 
 # Binder tests.
 vts_test_bin_packages += \
