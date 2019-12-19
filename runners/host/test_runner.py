@@ -25,6 +25,10 @@ import os
 import pkgutil
 import signal
 import sys
+try:
+    import thread
+except ImportError as e:
+    import _thread as thread
 import threading
 
 from vts.runners.host import base_test
@@ -102,12 +106,33 @@ def runTestClass(test_class):
     test_identifiers = [(test_cls_name, None)]
 
     for config in test_configs:
+        if keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT in config:
+            timeout_sec = int(config[
+                keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT]) / 1000.0
+        else:
+            timeout_sec = 60 * 60 * 3
+            logging.warning("%s unspecified. Set timeout to %s seconds.",
+                            keys.ConfigKeys.KEY_TEST_MAX_TIMEOUT, timeout_sec)
+
+        watcher_enabled = threading.Event()
+
         def watchStdin():
             while True:
                 line = sys.stdin.readline()
                 if not line:
                     break
-            utils.stop_current_process(base_test.TEARDOWN_CLASS_TIMEOUT_SECS)
+            watcher_enabled.wait()
+            logging.info("Attempt to interrupt runner thread.")
+            if not utils.is_on_windows():
+                # Default SIGINT handler sends KeyboardInterrupt to main thread
+                # and unblocks it.
+                os.kill(os.getpid(), signal.SIGINT)
+            else:
+                # On Windows, raising CTRL_C_EVENT, which is received as
+                # SIGINT, has no effect on non-console process.
+                # interrupt_main() behaves like SIGINT but does not unblock
+                # main thread immediately.
+                thread.interrupt_main()
 
         watcher_thread = threading.Thread(target=watchStdin, name="watchStdin")
         watcher_thread.daemon = True
@@ -116,6 +141,7 @@ def runTestClass(test_class):
         tr = TestRunner(config, test_identifiers)
         tr.parseTestConfig(config)
         try:
+            watcher_enabled.set()
             tr.runTestClass(test_class, None)
         except KeyboardInterrupt as e:
             logging.exception("Aborted")
@@ -123,6 +149,7 @@ def runTestClass(test_class):
             logging.error("Unexpected exception")
             logging.exception(e)
         finally:
+            watcher_enabled.clear()
             tr.stop()
             return tr.results
 

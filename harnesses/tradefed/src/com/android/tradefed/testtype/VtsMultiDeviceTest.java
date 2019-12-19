@@ -81,7 +81,7 @@ public class VtsMultiDeviceTest
     static final String TEST_BED = "test_bed";
     static final String TEST_PLAN_REPORT_FILE = "TEST_PLAN_REPORT_FILE";
     static final String TEST_SUITE = "test_suite";
-    static final String TEST_TIMEOUT = "test_timeout";
+    static final String TEST_MAX_TIMEOUT = "test_max_timeout";
     static final String VIRTUAL_ENV_PATH = "VIRTUALENVPATH";
     static final String ABI_NAME = "abi_name";
     static final String ABI_BITNESS = "abi_bitness";
@@ -144,23 +144,22 @@ public class VtsMultiDeviceTest
     static final String TEMPLATE_HAL_HIDL_GTEST_PATH = "vts/testcases/template/hal_hidl_gtest/hal_hidl_gtest";
     static final String TEMPLATE_HAL_HIDL_REPLAY_TEST_PATH = "vts/testcases/template/hal_hidl_replay_test/hal_hidl_replay_test";
     static final String TEMPLATE_HOST_BINARY_TEST_PATH = "vts/testcases/template/host_binary_test/host_binary_test";
+    static final long TEST_ABORT_TIMEOUT_MSECS = 1000 * 15;
     static final String TEST_RUN_SUMMARY_FILE_NAME = "test_run_summary.json";
     static final float DEFAULT_TARGET_VERSION = -1;
     static final String DEFAULT_TESTCASE_CONFIG_PATH =
             "vts/tools/vts-tradefed/res/default/DefaultTestCase.runner_conf";
-    // TODO(hsinyichen): Read max-test-timeout from configuration
-    static final long MAX_TEST_TIMEOUT_MSECS = 1000 * 60 * 60 * 10;
 
     private ITestDevice mDevice = null;
     private IAbi mAbi = null;
 
     @Option(name = "test-timeout",
             description = "The amount of time (in milliseconds) for a test invocation. "
-                    + "If the test cannot finish before timeout, it is interrupted. As some "
-                    + "classes generate test cases during setup, they can use the given timeout "
-                    + "value for each generated test set.",
+                    + "If the test cannot finish before timeout, it should interrupt itself and "
+                    + "clean up in " + TEST_ABORT_TIMEOUT_MSECS + "ms. Hence the actual timeout "
+                    + "is the specified value + " + TEST_ABORT_TIMEOUT_MSECS + "ms.",
             isTimeVal = true)
-    private long mTestTimeout = 1000 * 60 * 3;
+    private long mTestTimeout = 1000 * 60 * 60 * 3;
 
     @Option(name = "test-module-name",
         description = "The name for a test module.")
@@ -443,7 +442,7 @@ public class VtsMultiDeviceTest
 
     private IRunUtil mRunUtil = null;
     private IBuildInfo mBuildInfo = null;
-    private String mRunName = null;
+    private String mRunName = "VtsHostDrivenTest";
     // the path of a dir which contains the test data files.
     private String mTestCaseDataDir = "./";
 
@@ -669,34 +668,6 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * Derive mRunName from module name or test paths.
-     *
-     * @return the derived mRunName.
-     * @throws RuntimeException if mTestModuleName, mTestConfigPath, and mTestCasePath are null.
-     */
-    private String deriveRunName() throws RuntimeException {
-        if (mRunName != null) {
-            return mRunName;
-        }
-
-        if (mTestModuleName != null) {
-            mRunName = mTestModuleName;
-        } else {
-            CLog.w("--test-module-name not set (not recommended); deriving automatically");
-            if (mTestConfigPath != null) {
-                mRunName = new File(mTestConfigPath).getName();
-                mRunName = mRunName.replace(CONFIG_FILE_EXTENSION, "");
-            } else if (mTestCasePath != null) {
-                mRunName = new File(mTestCasePath).getName();
-            } else {
-                throw new RuntimeException(
-                        "Failed to derive test module name; use --test-module-name option");
-            }
-        }
-        return mRunName;
-    }
-
-    /**
      * This method reads the provided VTS runner test json config, adds or updates some of its
      * fields (e.g., to add build info and device serial IDs), and returns the updated json object.
      * This method calls populateDefaultJsonFields to populate the config JSONObject if the config file is missing
@@ -776,7 +747,21 @@ public class VtsMultiDeviceTest
         JSONArray testBedArray = (JSONArray) jsonObject.get(TEST_BED);
         if (testBedArray.length() == 0) {
             JSONObject testBedItemObject = new JSONObject();
-            String testName = deriveRunName();
+            String testName;
+            if (mTestModuleName != null) {
+                testName = mTestModuleName;
+            } else {
+                CLog.w("--test-module-name not set (not recommended); deriving automatically");
+                if (mTestConfigPath != null) {
+                    testName = new File(mTestConfigPath).getName();
+                    testName = testName.replace(CONFIG_FILE_EXTENSION, "");
+                } else if (mTestCasePath != null) {
+                    testName = new File(mTestCasePath).getName();
+                } else {
+                    throw new RuntimeException(
+                        "Failed to derive test module name; use --test-module-name option");
+                }
+            }
             CLog.logAndDisplay(LogLevel.INFO, "Setting test name as %s", testName);
             testBedItemObject.put(NAME, testName);
             testBedItemObject.put(ANDROIDDEVICE, deviceArray);
@@ -835,8 +820,8 @@ public class VtsMultiDeviceTest
         jsonObject.put(TEST_SUITE, suite);
         CLog.i("Added %s to the Json object", TEST_SUITE);
 
-        jsonObject.put(TEST_TIMEOUT, mTestTimeout);
-        CLog.i("Added %s to the Json object: %d", TEST_TIMEOUT, mTestTimeout);
+        jsonObject.put(TEST_MAX_TIMEOUT, mTestTimeout);
+        CLog.i("Added %s to the Json object: %d", TEST_MAX_TIMEOUT, mTestTimeout);
 
         if (!mLogSeverity.isEmpty()) {
             String logSeverity = mLogSeverity.toUpperCase();
@@ -1172,7 +1157,7 @@ public class VtsMultiDeviceTest
 
         CommandResult commandResult = new CommandResult();
         String interruptMessage =
-                vtsPythonRunnerHelper.runPythonRunner(cmd, commandResult, MAX_TEST_TIMEOUT_MSECS);
+                vtsPythonRunnerHelper.runPythonRunner(cmd, commandResult, mTestTimeout);
 
         if (commandResult != null) {
             CommandStatus commandStatus = commandResult.getStatus();
@@ -1192,7 +1177,7 @@ public class VtsMultiDeviceTest
         }
 
         VtsMultiDeviceTestResultParser parser =
-                new VtsMultiDeviceTestResultParser(listener, deriveRunName());
+                new VtsMultiDeviceTestResultParser(listener, mRunName);
 
         if (mUseStdoutLogs) {
             if (commandResult.getStdout() == null) {

@@ -54,7 +54,8 @@ class CpuFrequencyScalingController(object):
         """Creates a shell mirror object and reads the configuration values."""
         if self._init:
             return
-        self._shell = self._dut.shell
+        self._dut.shell.InvokeTerminal("cpu_frequency_scaling")
+        self._shell = self._dut.shell.cpu_frequency_scaling
         self._min_cpu_number, self._max_cpu_number = self._LoadMinAndMaxCpuNo()
         self._theoretical_max_frequency = {}
         self._perf_override = False

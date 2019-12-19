@@ -88,7 +88,6 @@ public class VtsMultiDeviceTestResultParser {
     static final String TEST_CLASS = "Test Class";
     static final String TEST_NAME = "Test Name";
     static final String RESULT = "Result";
-    static final String CLASS_ERRORS = "Class Errors";
 
     // default message for test failure
     static final String UNKNOWN_ERROR = "Unknown error.";
@@ -380,24 +379,24 @@ public class VtsMultiDeviceTestResultParser {
      * @param object
      * @throws RuntimeException
      */
-    public void processJsonFile(JSONObject object) throws RuntimeException {
-        try {
-            JSONArray results = object.getJSONArray(RESULTS);
-            if (results == null) {
-                results = new JSONArray();
-            }
-            for (ITestLifeCycleReceiver listener : mListeners) {
-                long elapsedTime;
-                if (results.length() > 0) {
-                    long beginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
-                    long endTime = (long) results.getJSONObject(results.length() - 1).get(END_TIME);
-                    elapsedTime = endTime - beginTime;
-                } else {
-                    elapsedTime = 0;
-                    CLog.e("JSONArray is null.");
-                }
+    public void processJsonFile(JSONObject object) throws RuntimeException{
+        long beginTime = -1, endTime = -1;
+        JSONArray results = null;
 
-                listener.testRunStarted(mRunName, results.length());
+        try {
+            results = object.getJSONArray(RESULTS);
+            for (ITestLifeCycleReceiver listener : mListeners) {
+                if (results == null || results.length() < 1) {
+                    CLog.e("JSONArray is null.");
+                    continue;
+                }
+                // calculate test run time
+                beginTime = (long) results.getJSONObject(0).get(BEGIN_TIME);
+                endTime = (long) results.getJSONObject(results.length() - 1).get(END_TIME);
+
+                // do testRunStarted
+                listener.testRunStarted((String) results.getJSONObject(0).get(TEST_CLASS),
+                        results.length());
 
                 for (int index = 0; index < results.length(); index++) {
                     JSONObject resultObject = results.getJSONObject(index);
@@ -456,11 +455,7 @@ public class VtsMultiDeviceTestResultParser {
                         }
                     }
                 }
-
-                if (!object.isNull(CLASS_ERRORS)) {
-                    listener.testRunFailed(object.getString(CLASS_ERRORS));
-                }
-                listener.testRunEnded(elapsedTime, Collections.<String, String>emptyMap());
+                listener.testRunEnded(endTime - beginTime, Collections.<String, String>emptyMap());
             }
         } catch (JSONException e) {
             CLog.e("Exception occurred: %s", e);

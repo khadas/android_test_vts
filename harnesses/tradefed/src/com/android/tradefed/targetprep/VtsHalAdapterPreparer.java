@@ -42,11 +42,10 @@ import java.util.function.Predicate;
 
 /**
  * Starts and stops a HAL (Hardware Abstraction Layer) adapter.
- * Only used for single-device testing or the primary device in multi-device
- * testing.
  */
 @OptionClass(alias = "vts-hal-adapter-preparer")
-public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
+public class VtsHalAdapterPreparer
+        implements ITargetPreparer, ITargetCleaner, IMultiTargetPreparer, IAbiReceiver {
     static final int THREAD_COUNT_DEFAULT = 1;
 
     static final String HAL_INTERFACE_SEP = "::";
@@ -61,7 +60,7 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
     static final String SCRIPT_PATH = "/data/local/tmp/vts_adapter.sh";
     // Command to list the registered instance for the given hal@version.
     static final String LIST_HAL_CMD =
-            "lshal -ti --neat 2>/dev/null | grep -E '^hwbinder' | awk '{print $2}' | grep %s";
+            "lshal -ti --neat | grep -E '^hwbinder' | awk '{print $2}' | grep %s";
 
     @Option(name = "adapter-binary-name",
             description = "Adapter binary file name (typically under /data/nativetest*/)")
@@ -92,9 +91,7 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
      */
     @Override
     public void setUp(ITestDevice device, IBuildInfo buildInfo)
-            throws TargetSetupError, BuildError, DeviceNotAvailableException {
-        // adb root.
-        device.enableAdbRoot();
+            throws TargetSetupError, BuildError, DeviceNotAvailableException, RuntimeException {
         String bitness =
                 (mAbi != null) ? ((mAbi.getBitness() == "32") ? "" : mAbi.getBitness()) : "";
         try {
@@ -111,11 +108,11 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
         for (String line : out.split("\n")) {
             if (!line.isEmpty()) {
                 if (!line.contains(HAL_INTERFACE_SEP)) {
-                    throw new TargetSetupError("HAL instance with wrong format.");
+                    throw new RuntimeException("HAL instance with wrong format.");
                 }
                 String interfaceInstance = line.split(HAL_INTERFACE_SEP, 2)[1];
                 if (!interfaceInstance.contains(HAL_INSTANCE_SEP)) {
-                    throw new TargetSetupError("HAL instance with wrong format.");
+                    throw new RuntimeException("HAL instance with wrong format.");
                 }
                 String interfaceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[0];
                 String instanceName = interfaceInstance.split(HAL_INSTANCE_SEP, 2)[1];
@@ -149,6 +146,15 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
      * {@inheritDoc}
      */
     @Override
+    public void setUp(IInvocationContext context)
+            throws TargetSetupError, BuildError, DeviceNotAvailableException {
+        setUp(context.getDevices().get(0), context.getBuildInfos().get(0));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable e)
             throws DeviceNotAvailableException {
         if (!mCommands.isEmpty()) {
@@ -162,6 +168,15 @@ public class VtsHalAdapterPreparer implements ITargetCleaner, IAbiReceiver {
             // TODO: cleanup the pushed adapter files.
             mCmdUtil.restartFramework(device);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void tearDown(IInvocationContext context, Throwable e)
+            throws DeviceNotAvailableException {
+        tearDown(context.getDevices().get(0), context.getBuildInfos().get(0), e);
     }
 
     /**
