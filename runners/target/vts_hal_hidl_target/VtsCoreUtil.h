@@ -18,6 +18,7 @@
 
 namespace testing {
 
+bool checkSubstringInCommandOutput(const char* cmd, const char* feature);
 bool deviceSupportsFeature(const char* feature);
 
 }  // namespace testing
