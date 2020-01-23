@@ -37,6 +37,7 @@ vts_hal_driver_libs := \
   android.hardware.biometrics.face@1.0-vts.driver \
   android.hardware.biometrics.face@1.1-vts.driver \
   android.hardware.biometrics.fingerprint@2.1-vts.driver \
+  android.hardware.biometrics.fingerprint@2.2-vts.driver \
   android.hardware.bluetooth@1.0-vts.driver \
   android.hardware.boot@1.0-vts.driver \
   android.hardware.broadcastradio@1.0-vts.driver \
@@ -175,6 +176,7 @@ vts_hal_profiler_libs := \
   android.hardware.biometrics.face@1.0-vts.profiler \
   android.hardware.biometrics.face@1.1-vts.profiler \
   android.hardware.biometrics.fingerprint@2.1-vts.profiler \
+  android.hardware.biometrics.fingerprint@2.2-vts.profiler \
   android.hardware.bluetooth@1.0-vts.profiler \
   android.hardware.boot@1.0-vts.profiler \
   android.hardware.broadcastradio@1.0-vts.profiler \
@@ -297,6 +299,7 @@ vts_hal_test_bins := \
   VtsHalBiometricsFaceV1_0TargetTest \
   VtsHalBiometricsFaceV1_1TargetTest \
   VtsHalBiometricsFingerprintV2_1TargetTest \
+  VtsHalBiometricsFingerprintV2_2TargetTest \
   VtsHalBluetoothV1_0TargetTest \
   VtsHalBootV1_0TargetTest \
   VtsHalBroadcastradioV1_0TargetTest \
