@@ -12,22 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-sh_binary_host {
-    name: "vtf",
-    src: "vtf",
-}
-
-sh_binary_host {
-    name: "vts-tradefed_win",
-    src: "vts-tradefed_win.bat",
-    filename_from_src: true,
-
-    target: {
-        not_windows: {
-            enabled: false,
-        },
-        windows: {
-            enabled: true,
-        },
-    },
+java_library_host {
+    name: "vts-tradefed-harness",
+    srcs: ["src/**/*.java"],
+    libs: [
+        "tradefed",
+        "compatibility-tradefed",
+        "compatibility-host-util",
+        "libvts_protos_host",
+    ],
 }
