@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-sh_binary_host {
-    name: "vtf",
-    src: "vtf",
-}
-
-sh_binary_host {
-    name: "vts-tradefed_win",
-    src: "vts-tradefed_win.bat",
-    filename_from_src: true,
-
-    target: {
-        not_windows: {
-            enabled: false,
-        },
-        windows: {
-            enabled: true,
-        },
-    },
+tradefed_binary_host {
+    name: "vts-tradefed",
+    wrapper: "etc/vts-tradefed",
+    short_name: "VTS",
+    full_name: "Vendor Test Suite",
+    version: "10_r1",
+    static_libs: [
+        "libvts_protos_host",
+        "gson-prebuilt-jar",
+        "google-api-java-client-min-repackaged",
+        "cts-tradefed-harness",
+        "vts-tradefed-harness",
+    ],
+    libs: ["vts-core-tradefed-harness"],
+    manifest: "MANIFEST.mf",
+    java_resource_dirs: ["res"],
 }
