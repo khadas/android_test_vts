@@ -12,22 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-sh_binary_host {
-    name: "vtf",
-    src: "vtf",
-}
+java_library_host {
+    name: "vts-tradefed-tests",
 
-sh_binary_host {
-    name: "vts-tradefed_win",
-    src: "vts-tradefed_win.bat",
-    filename_from_src: true,
+    srcs: ["src/**/*.java"],
 
-    target: {
-        not_windows: {
-            enabled: false,
-        },
-        windows: {
-            enabled: true,
-        },
-    },
+    static_libs: [
+        "easymock",
+        "mockito-host",
+        "objenesis",
+    ],
+    libs: [
+        "tradefed",
+        "vts-tradefed",
+    ],
+    java_resource_dirs: ["res"],
 }
