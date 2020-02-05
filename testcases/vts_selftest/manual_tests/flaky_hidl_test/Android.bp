@@ -14,17 +14,6 @@
 // limitations under the License.
 //
 
-cc_test {
-    name: "vts_selftest_flaky_test",
-    srcs: ["vts_selftest_flaky_test.cpp"],
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-O0",
-        "-g",
-    ],
-}
-
 vts_config {
-    name: "VtsSelfTestFlakyTest",
+    name: "VtsSelfTestFlakyHidlTest",
 }

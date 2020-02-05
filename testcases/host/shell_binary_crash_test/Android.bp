@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2016 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,36 @@
 // limitations under the License.
 //
 
-cc_test {
-    name: "vts_selftest_flaky_test",
-    srcs: ["vts_selftest_flaky_test.cpp"],
+cc_binary {
+    name: "vts_test_binary_crash_app",
+    srcs: ["crash_app.c"],
+    shared_libs: [
+        "libutils",
+        "libcutils",
+        "liblog",
+    ],
+    include_dirs: ["bionic"],
     cflags: [
-        "-Wall",
         "-Werror",
-        "-O0",
-        "-g",
+        "-Wall",
+    ],
+}
+
+cc_binary {
+    name: "vts_test_binary_seg_fault",
+    srcs: ["seg_fault.c"],
+    shared_libs: [
+        "libutils",
+        "libcutils",
+        "liblog",
+    ],
+    include_dirs: ["bionic"],
+    cflags: [
+        "-Werror",
+        "-Wall",
     ],
 }
 
 vts_config {
-    name: "VtsSelfTestFlakyTest",
+    name: "ShellBinaryCrashTest",
 }
