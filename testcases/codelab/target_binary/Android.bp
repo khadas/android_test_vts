@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,20 @@
 //
 
 cc_test {
-    name: "vts_selftest_flaky_test",
-    srcs: ["vts_selftest_flaky_test.cpp"],
+    name: "vts_codelab_target_binary",
+    srcs: ["vts_codelab_target_binary.c"],
+    shared_libs: [
+        "libutils",
+        "libcutils",
+        "liblog",
+    ],
+    include_dirs: ["bionic"],
     cflags: [
-        "-Wall",
         "-Werror",
-        "-O0",
-        "-g",
+        "-Wall",
     ],
 }
 
 vts_config {
-    name: "VtsSelfTestFlakyTest",
+    name: "VtsCodelabTargetBinary",
 }
