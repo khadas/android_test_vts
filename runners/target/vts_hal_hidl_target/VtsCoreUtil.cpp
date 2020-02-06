@@ -21,17 +21,21 @@
 
 namespace testing {
 
-// Runs "pm list features" and attempts to find the specified feature in its
+// Runs "cmd" and attempts to find the specified feature in its
 // output.
-bool deviceSupportsFeature(const char* feature) {
+bool checkSubstringInCommandOutput(const char* cmd, const char* feature) {
   bool hasFeature = false;
   // This is one of the best stable native interface. Calling AIDL directly
   // would be problematic if the binder interface changes.
-  FILE* p = popen("/system/bin/pm list features", "re");
+  FILE* p = popen(cmd, "re");
   if (p) {
     char* line = NULL;
     size_t len = 0;
+    __android_log_print(ANDROID_LOG_FATAL, LOG_TAG,
+                        "checkSubstringInCommandOutput check with cmd: %s",
+                        cmd);
     while (getline(&line, &len, p) > 0) {
+      // TODO: b/148904287, check if we should match the whole line
       if (strstr(line, feature)) {
         hasFeature = true;
         break;
@@ -45,6 +49,12 @@ bool deviceSupportsFeature(const char* feature) {
   __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Feature %s: %ssupported",
                       feature, hasFeature ? "" : "not ");
   return hasFeature;
+}
+
+// Runs "pm list features" and attempts to find the specified feature in its
+// output.
+bool deviceSupportsFeature(const char* feature) {
+  return checkSubstringInCommandOutput("/system/bin/pm list features", feature);
 }
 
 }  // namespace testing
