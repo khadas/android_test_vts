@@ -16,6 +16,7 @@
 
 import logging
 import os
+import re
 import tempfile
 import xml.etree.ElementTree
 
@@ -117,6 +118,9 @@ class GtestBinaryTest(binary_test.BinaryTest):
                 continue
             elif line.startswith(' '):  # Test case name
                 test_name = line.split('#')[0].strip()
+                # Skip any test that doesn't instantiate the parameterized gtest
+                if re.match('UninstantiatedParamaterizedTestSuite<(.*)>', test_name):
+                    continue
                 test_case = gtest_test_case.GtestTestCase(
                     test_suite, test_name, path, tag, self.PutTag,
                     working_directory, ld_library_path, profiling_library_path,
