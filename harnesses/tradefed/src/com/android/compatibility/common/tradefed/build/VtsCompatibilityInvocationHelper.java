@@ -34,19 +34,19 @@ public class VtsCompatibilityInvocationHelper {
     public File getTestsDir() throws FileNotFoundException {
         if (mTestCasesDir == null) {
             String testCasesRootDirPath;
-            testCasesRootDirPath = System.getenv(
-                    String.format("%s_TESTCASES", TestSuiteInfo.getInstance().getName()));
+            testCasesRootDirPath = System.getenv(String.format(
+                    "%s_TESTCASES", TestSuiteInfo.getInstance().getName().replace('-', '_')));
             File testCaseDir;
             if (testCasesRootDirPath != null && !testCasesRootDirPath.trim().equals("")) {
                 testCaseDir = new File(testCasesRootDirPath);
             } else {
                 String rootDirPath;
-                rootDirPath = System.getProperty(
-                        String.format("%s_ROOT", TestSuiteInfo.getInstance().getName()));
+                rootDirPath = System.getProperty(String.format(
+                        "%s_ROOT", TestSuiteInfo.getInstance().getName().replace('-', '_')));
                 if (rootDirPath == null || rootDirPath.trim().equals("")) {
                     throw new IllegalArgumentException(
                             String.format("Missing install path property %s_ROOT",
-                                    TestSuiteInfo.getInstance().getName()));
+                                    TestSuiteInfo.getInstance().getName().replace('-', '_')));
                 }
                 testCaseDir = new File(rootDirPath, "android-vts/testcases");
             }
