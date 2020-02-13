@@ -38,5 +38,6 @@
   <option name="compatibility:include-filter" value="VtsKernelLiblpTest" />
   <option name="compatibility:include-filter" value="VtsKernelLibdmTest" />
   <option name="compatibility:include-filter" value="VtsKernelDynamicPartitionsTest" />
+  <option name="compatibility:include-filter" value="VtsKernelLibIonTest" />
 
 </configuration>
