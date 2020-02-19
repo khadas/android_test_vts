@@ -59,6 +59,7 @@ vts_hal_driver_libs := \
   android.hardware.configstore@1.2-vts.driver \
   android.hardware.confirmationui@1.0-vts.driver \
   android.hardware.contexthub@1.0-vts.driver \
+  android.hardware.contexthub@1.1-vts.driver \
   android.hardware.drm@1.0-vts.driver \
   android.hardware.drm@1.1-vts.driver \
   android.hardware.drm@1.2-vts.driver \
@@ -200,6 +201,7 @@ vts_hal_profiler_libs := \
   android.hardware.configstore@1.2-vts.profiler \
   android.hardware.confirmationui@1.0-vts.profiler \
   android.hardware.contexthub@1.0-vts.profiler \
+  android.hardware.contexthub@1.1-vts.profiler \
   android.hardware.drm@1.0-vts.profiler \
   android.hardware.drm@1.1-vts.profiler \
   android.hardware.drm@1.2-vts.profiler \
@@ -321,6 +323,7 @@ vts_hal_test_bins := \
   VtsHalCasV1_2TargetTest \
   VtsHalConfigstoreV1_0TargetTest \
   VtsHalContexthubV1_0TargetTest \
+  VtsHalContexthubV1_1TargetTest \
   VtsHalDrmV1_0TargetTest \
   VtsHalDrmV1_1TargetTest \
   VtsHalDrmV1_2TargetTest \
