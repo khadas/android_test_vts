@@ -89,19 +89,19 @@ class ElfParser(object):
             if e_ident[:4] != consts.ELF_MAGIC_NUMBER:
                 raise ElfError('Unexpected magic bytes: {}'.format(e_ident[:4]))
 
-            if ord(e_ident[consts.EI_CLASS]) not in (consts.ELFCLASS32,
-                                                     consts.ELFCLASS64):
+            if utils.ByteToInt(e_ident[consts.EI_CLASS]) not in (
+                    consts.ELFCLASS32, consts.ELFCLASS64):
                 raise ElfError('Unexpected file class: {}'
                                .format(e_ident[consts.EI_CLASS]))
 
-            if ord(e_ident[consts.EI_DATA]) != consts.ELFDATA2LSB:
+            if utils.ByteToInt(e_ident[consts.EI_DATA]) != consts.ELFDATA2LSB:
                 raise ElfError('Unexpected data encoding: {}'
                                .format(e_ident[consts.EI_DATA]))
         except ElfError:
             self.Close()
             raise
 
-        if ord(e_ident[consts.EI_CLASS]) == consts.ELFCLASS32:
+        if utils.ByteToInt(e_ident[consts.EI_CLASS]) == consts.ELFCLASS32:
             self.bitness = 32
             self.Elf_Addr = structs.Elf32_Addr
             self.Elf_Off = structs.Elf32_Off
@@ -167,7 +167,7 @@ class ElfParser(object):
             read_size: An integer, number of bytes to read.
 
         Returns:
-            A byte string which is the file content.
+            A bytes object which is the file content.
 
         Raises:
             ElfError: Fails to seek and read.
@@ -203,12 +203,12 @@ class ElfParser(object):
             offset: The offset from the beginning of the ELF object.
 
         Returns:
-            A byte string, excluding the null character.
+            A string, excluding the null character.
 
         Raises:
             ElfError: String reaches end of file without null terminator.
         """
-        ret = ""
+        ret = b""
         buf_size = 16
         self._file.seek(self._begin_offset + offset)
         while True:
@@ -216,12 +216,12 @@ class ElfParser(object):
                 buf = self._file.read(buf_size)
             except IOError as e:
                 raise ElfError(e)
-            end_index = buf.find('\0')
+            end_index = buf.find(b"\0")
             if end_index < 0:
                 ret += buf
             else:
                 ret += buf[:end_index]
-                return ret
+                return utils.BytesToString(ret)
             if len(buf) != buf_size:
                 raise ElfError("Null-terminated string reaches end of file.")
 
@@ -482,7 +482,7 @@ class ElfParser(object):
         """
         data = self._SeekRead(android_rela.sh_offset, android_rela.sh_size)
         # Check packed section header.
-        if len(data) < 4 or data[:4] != 'APS2':
+        if len(data) < 4 or data[:4] != b'APS2':
             raise ElfError('Unexpected SHT_ANDROID_RELA header: {}'
                            .format(data[:4]))
         # Decode SLEB128 word stream.
