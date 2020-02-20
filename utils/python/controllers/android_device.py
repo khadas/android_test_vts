@@ -13,6 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# TODO(b/147454897): Keep the logic in sync with
+#                    test/vts-testcase/vndk/utils.py until this file is
+#                    removed.
 from builtins import str
 from builtins import open
 
