@@ -16,6 +16,7 @@
 
 cc_library_shared {
     name: "libvts_agent_app_jni",
+    sdk_version: "current",
 
     srcs: ["VtsAgentAppNativeMain.cpp"],
 
