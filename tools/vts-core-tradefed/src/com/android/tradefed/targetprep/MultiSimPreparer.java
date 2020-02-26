@@ -40,7 +40,9 @@ public class MultiSimPreparer extends BaseTargetPreparer implements ITargetClean
         mOriginalSims = getNumSims();
         int maxSims = getMaxPhones();
         if (mOriginalSims != maxSims) {
-            setSimCount(getMaxPhones());
+            if (!setSimCount(getMaxPhones())) {
+                LogUtil.CLog.w("Cannot set sim count before test");
+            }
         }
     }
 
@@ -48,7 +50,9 @@ public class MultiSimPreparer extends BaseTargetPreparer implements ITargetClean
     public void tearDown(ITestDevice device, IBuildInfo buildInfo, Throwable throwable)
             throws DeviceNotAvailableException {
         if (mOriginalSims != getNumSims()) {
-            setSimCount(mOriginalSims);
+            if (!setSimCount(mOriginalSims)) {
+                LogUtil.CLog.w("Cannot reset sim count after test");
+            }
         }
     }
 
@@ -63,22 +67,29 @@ public class MultiSimPreparer extends BaseTargetPreparer implements ITargetClean
 
     private int getNumSims() throws DeviceNotAvailableException {
         String config = executeCmd("telecom get-sim-config");
-        if ("SSSS".equals(config) || config.isEmpty()) {
+        if ("SSSS".equalsIgnoreCase(config) || config.isEmpty()) {
             return 1;
-        } else if ("DSDS".equals(config)) {
+        } else if ("DSDS".equalsIgnoreCase(config)) {
             return 2;
-        } else if ("TSTS".equals(config)) {
+        } else if ("TSTS".equalsIgnoreCase(config)) {
             return 3;
         }
         LogUtil.CLog.w("Could not get SIM config, assuming 1 sim");
         return 1;
     }
 
-    private void setSimCount(int sims) throws DeviceNotAvailableException {
+    // returns true if succeeded, false if failed
+    private boolean setSimCount(int sims) throws DeviceNotAvailableException {
+        if (getNumSims() == sims) {
+            LogUtil.CLog.d("SIM count already correct.");
+            return true;
+        }
+        // reboot and wait for device ready
         executeCmd("telecom set-sim-count " + sims);
-        // Setting the SIM count triggers a reboot
+        executeCmd("reboot");
         mDevice.waitForDeviceNotAvailable(SHUTDOWN_TIMEOUT_MS);
         mDevice.waitForDeviceAvailable();
+        return getNumSims() == sims;
     }
 
     private String executeCmd(String cmd) throws DeviceNotAvailableException {
