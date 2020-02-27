@@ -385,6 +385,7 @@ vts_hal_test_bins := \
   VtsHalRadioV1_2TargetTest \
   VtsHalRadioV1_3TargetTest \
   VtsHalRadioV1_4TargetTest \
+  VtsHalRadioV1_5TargetTest \
   VtsHalRadioConfigV1_0TargetTest \
   VtsHalRadioConfigV1_1TargetTest \
   VtsHalRadioConfigV1_2TargetTest \
