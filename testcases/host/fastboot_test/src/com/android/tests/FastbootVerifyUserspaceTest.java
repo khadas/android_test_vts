@@ -106,13 +106,4 @@ public class FastbootVerifyUserspaceTest extends BaseHostJUnit4Test {
                 "--gtest_filter=LogicalPartitionCompliance.CreateResizeDeleteLP");
         Assert.assertEquals(CommandStatus.SUCCESS, result.getStatus());
     }
-
-    /* Devices launching with DAP must export cpu-abi. */
-    @Test
-    public void testCpuAbiInfo() throws Exception {
-        final HashSet<String> allCpuAbis = new HashSet<String>(
-                Arrays.asList("armeabi-v7a", "arm64-v8a", "mips", "mips64", "x86", "x86_64"));
-        String cpuAbi = mDevice.getFastbootVariable("cpu-abi");
-        Assert.assertTrue(allCpuAbis.contains(cpuAbi));
-    }
 }
