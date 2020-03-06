@@ -159,7 +159,9 @@ system_property_compatibility_test_res_copy_pairs := \
 
 # For VtsSecurityAvb
 gsi_key_copy_pairs := \
-  system/core/rootdir/avb/r-gsi.avbpubkey:$(VTS_TESTCASES_OUT)/DATA/avb/r-gsi.avbpubkey
+  system/core/rootdir/avb/q-gsi.avbpubkey:$(VTS_TESTCASES_OUT)/DATA/avb/q-gsi.avbpubkey \
+  system/core/rootdir/avb/r-gsi.avbpubkey:$(VTS_TESTCASES_OUT)/DATA/avb/r-gsi.avbpubkey \
+  system/core/rootdir/avb/s-gsi.avbpubkey:$(VTS_TESTCASES_OUT)/DATA/avb/s-gsi.avbpubkey \
 
 $(VTS_TESTCASES_OUT)/vts/testcases/vndk/golden/platform_vndk_version.txt:
 	@echo -n $(PLATFORM_VNDK_VERSION) > $@
