@@ -64,6 +64,7 @@ vts_test_bin_packages += \
 vts_test_bin_packages += \
     dt_early_mount_test \
     kernel_net_tests \
+    vts_kernel_encryption_test \
     vts_kernel_loopconfig_test \
     vts_kernel_tun_test \
     vts_kernel_toolchain \
