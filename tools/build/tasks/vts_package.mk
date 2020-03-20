@@ -50,6 +50,9 @@ test_suite_tools += $(HOST_OUT_JAVA_LIBRARIES)/vts-core-tradefed-harness.jar \
 
 include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 
+# Add a phony target to preparer vts to be renamed to vts10
+.PHONY: vts10
+
 .PHONY: vts
 vts: $(compatibility_zip) vtslab adb
 $(call dist-for-goals, vts, $(compatibility_zip))
