@@ -13,17 +13,17 @@
 // limitations under the License.
 
 tradefed_binary_host {
-    name: "vts-tradefed",
-    wrapper: "etc/vts-tradefed",
-    short_name: "VTS",
-    full_name: "Vendor Test Suite",
+    name: "vts10-tradefed",
+    wrapper: "etc/vts10-tradefed",
+    short_name: "VTS10",
+    full_name: "Vendor Test Suite V10",
     version: "10_r1",
     static_libs: [
         "libvts_protos_host",
         "gson-prebuilt-jar",
         "google-api-java-client-min-repackaged",
         "cts-tradefed-harness",
-        "vts-tradefed-harness",
+        "vts10-tradefed-harness",
     ],
     libs: ["vts-core-tradefed-harness"],
     manifest: "MANIFEST.mf",

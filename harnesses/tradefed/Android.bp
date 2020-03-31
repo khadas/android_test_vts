@@ -13,7 +13,7 @@
 // limitations under the License.
 
 java_library_host {
-    name: "vts-tradefed-harness",
+    name: "vts10-tradefed-harness",
     srcs: ["src/**/*.java"],
     libs: [
         "tradefed",
