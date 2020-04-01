@@ -36,9 +36,9 @@ vts_target_native_modules := \
 vts_target_native_copy_pairs := \
   $(call target-native-copy-pairs,$(vts_target_native_modules),$(VTS_CORE_TESTCASES_OUT))
 
-# Package vts-tradefed jars
-test_suite_tools += $(HOST_OUT_JAVA_LIBRARIES)/vts-tradefed.jar \
-    $(HOST_OUT_JAVA_LIBRARIES)/vts-tradefed-tests.jar
+# Package vts10-tradefed jars
+test_suite_tools += $(HOST_OUT_JAVA_LIBRARIES)/vts10-tradefed.jar \
+    $(HOST_OUT_JAVA_LIBRARIES)/vts10-tradefed-tests.jar
 
 # Packaging rule for host-side Python logic, configs, and data files
 host_framework_files := \

@@ -85,7 +85,7 @@ if [ -z ${VTS_CORE_ROOT} ]; then
 fi;
 
 JAR_DIR=${VTS_CORE_ROOT}/android-vts-core/tools
-# TODO(b/149249068): Remove vts-tradefed* after all VTS tests are converted
+# TODO(b/149249068): Remove vts10-tradefed* after all VTS tests are converted
 JARS="tradefed
   loganalysis
   hosttestlib
@@ -93,8 +93,8 @@ JARS="tradefed
   compatibility-host-util-tests
   vts-core-tradefed
   vts-core-tradefed-tests
-  vts-tradefed
-  vts-tradefed-tests
+  vts10-tradefed
+  vts10-tradefed-tests
   compatibility-common-util-tests
   compatibility-tradefed-tests"
 

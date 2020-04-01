@@ -12,7 +12,7 @@
 :: See the License for the specific language governing permissions and
 :: limitations under the License.
 
-:: Launcher script for vts-tradefed harness
+:: Launcher script for vts10-tradefed harness
 :: Can be used from an Android build environment, or a standalone VTS zip
 :: Caution: Although this script can be used to run VTS on Windows,
 :: Windows host is not yet officially supported.
@@ -70,8 +70,8 @@ set JAR_PATH=%TRADEFED_JAR%
 set JARS=^
   loganalysis^
   hosttestlib^
-  vts-tradefed^
-  vts-tradefed-tests^
+  vts10-tradefed^
+  vts10-tradefed-tests^
   compatibility-host-util
 for %%J in (%JARS%) do (
     set JAR=%JAR_DIR%\%%J.jar
