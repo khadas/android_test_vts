@@ -63,7 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A Test that runs a vts multi device test package (part of Vendor Test Suite, VTS) on given
+ * A Test that runs a vts multi device test package (part of Vendor Test Suite, VTS10) on given
  * device.<p>
  * TODO: Complete unit tests
  */
@@ -516,7 +516,7 @@ public class VtsMultiDeviceTest
 
     private IBuildInfo mBuildInfo = null;
     private String mRunName = null;
-    // the path to android-vts/testcases
+    // the path to android-vts10/testcases
     private String mTestCaseDir = "./";
 
     private VtsVendorConfigFileUtil configReader = null;
@@ -1496,7 +1496,7 @@ public class VtsMultiDeviceTest
     }
 
     /**
-     * Set the path for android-vts/testcases/ which keeps the VTS python code under vts.
+     * Set the path for android-vts10/testcases/ which keeps the VTS python code under vts.
      */
     private void setTestCaseDir() {
         try {

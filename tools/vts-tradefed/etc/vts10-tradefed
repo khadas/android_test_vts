@@ -14,15 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# launcher script for vts-tradefed harness
+# launcher script for vts10-tradefed harness
 # can be used from an Android build environment, or a standalone vts zip
 #
 # Usage:
 #   # to test a device with system.img = v9.0 and vendor.img = v9.0
-#       $ vts-tradefed
+#       $ vts10-tradefed
 #
 #   # to test a device with system.img = v9.0 and vendor.img = v8.1
-#       $ vts-tradefed -v=8.1
+#       $ vts10-tradefed -v=8.1
 #
 #   # all other cases are unsupported
 #
@@ -71,30 +71,30 @@ else
 fi
 
 if [ "$VTF_BUILD_TARGET_NAME" != "vtf" ]; then
-    VTF_BUILD_TARGET_NAME="vts"
+    VTF_BUILD_TARGET_NAME="vts10"
 fi
 
 # check if in Android build env
 if [ ! -z "${ANDROID_BUILD_TOP}" ]; then
     if [ ! -z "${ANDROID_HOST_OUT}" ]; then
-      VTS_ROOT=${ANDROID_HOST_OUT}/${VTF_BUILD_TARGET_NAME}
+      VTS10_ROOT=${ANDROID_HOST_OUT}/${VTF_BUILD_TARGET_NAME}
     else
-      VTS_ROOT=${ANDROID_BUILD_TOP}/${OUT_DIR:-out}/host/${OS}/${VTF_BUILD_TARGET_NAME}
+      VTS10_ROOT=${ANDROID_BUILD_TOP}/${OUT_DIR:-out}/host/${OS}/${VTF_BUILD_TARGET_NAME}
     fi
-    if [ ! -d ${VTS_ROOT} ]; then
-        echo "Could not find $VTS_ROOT in Android build environment. Try 'make ${VTF_BUILD_TARGET_NAME}'"
+    if [ ! -d ${VTS10_ROOT} ]; then
+        echo "Could not find $VTS10_ROOT in Android build environment. Try 'make ${VTF_BUILD_TARGET_NAME}'"
         exit
     fi;
 fi;
 
-if [ -z ${VTS_ROOT} ]; then
+if [ -z ${VTS10_ROOT} ]; then
     # assume we're in an extracted vts install
-    VTS_ROOT="$(dirname $(readlink -e $0))/../.."
+    VTS10_ROOT="$(dirname $(readlink -e $0))/../.."
 fi;
 
-VTS_JAR_DIR=${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/tools
+VTS10_JAR_DIR=${VTS10_ROOT}/android-${VTF_BUILD_TARGET_NAME}/tools
 STANDALONE_JAR_DIR=${ANDROID_HOST_OUT}/framework
-JAR_DIRS="$VTS_JAR_DIR
+JAR_DIRS="$VTS10_JAR_DIR
   $STANDALONE_JAR_DIR"
 
 JAR_DIR=""
@@ -109,15 +109,15 @@ done
 
 # If we didn't find the TF jar, resort to tf prebuilt in VTS_JAR_DIR.
 if [ -z $JAR_DIR ]; then
-  JAR_DIR=$VTS_JAR_DIR
+  JAR_DIR=$VTS10_JAR_DIR
   TRADEFED_JAR="tradefed-prebuilt"
 fi
 
 JARS="${TRADEFED_JAR}
   loganalysis
   hosttestlib
-  vts-tradefed
-  vts-tradefed-tests
+  vts10-tradefed
+  vts10-tradefed-tests
   compatibility-host-util
   vts-core-tradefed-harness"
 
@@ -135,7 +135,7 @@ OPTIONAL_JARS="
   google-tradefed"
 
 for JAR in $OPTIONAL_JARS; do
-    for OPT_JAR_DIR in $VTS_ROOT $JAR_DIR; do
+    for OPT_JAR_DIR in $VTS10_ROOT $JAR_DIR; do
         if [ -f "${OPT_JAR_DIR}/${JAR}.jar" ]; then
             echo "Including optional JAR: ${OPT_JAR_DIR}/${JAR}.jar"
             JAR_PATH=${JAR_PATH}:${OPT_JAR_DIR}/${JAR}.jar
@@ -145,7 +145,7 @@ for JAR in $OPTIONAL_JARS; do
 done
 
 # load any shared libraries for host-side executables
-LIB_DIR=${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/lib
+LIB_DIR=${VTS10_ROOT}/android-${VTF_BUILD_TARGET_NAME}/lib
 if [ "$HOST" == "Linux" ]; then
     LD_LIBRARY_PATH=${LIB_DIR}:${LIB_DIR}64:${LD_LIBRARY_PATH}
     export LD_LIBRARY_PATH
@@ -155,7 +155,7 @@ elif [ "$HOST" == "Darwin" ]; then
 fi
 
 # include any host-side test jars
-for j in ${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/testcases/*.jar; do
+for j in ${VTS10_ROOT}/android-${VTF_BUILD_TARGET_NAME}/testcases/*.jar; do
     JAR_PATH=${JAR_PATH}:$j
 done
 
@@ -180,9 +180,9 @@ esac
 done
 
 if [ -z "${VENDOR}" ]; then
-    VTS_TESTCASES=${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/testcases/
+    VTS10_TESTCASES=${VTS10_ROOT}/android-${VTF_BUILD_TARGET_NAME}/testcases/
 else
-    VTS_TESTCASES=${VTS_ROOT}/android-${VTF_BUILD_TARGET_NAME}/${VENDOR}/testcases/
+    VTS10_TESTCASES=${VTS10_ROOT}/android-${VTF_BUILD_TARGET_NAME}/${VENDOR}/testcases/
 fi
 
-cd ${VTS_TESTCASES}; VTS_TESTCASES=${VTS_TESTCASES} java -Xmx4096m $RDBG_FLAG -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "${ARGS[@]}"
+cd ${VTS10_TESTCASES}; VTS10_TESTCASES=${VTS10_TESTCASES} java -Xmx4096m $RDBG_FLAG -cp ${JAR_PATH} -DVTS10_ROOT=${VTS10_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "${ARGS[@]}"

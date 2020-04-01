@@ -51,7 +51,7 @@ target_hostdriven_copy_pairs := \
   $(call host-native-copy-pairs,$(target_hostdriven_modules),$(VTF_TESTCASES_OUT))
 
 host_additional_deps_copy_pairs := \
-  test/vts/tools/vts-tradefed/etc/vts-tradefed_win.bat:$(VTF_TOOLS_OUT)/vts-tradefed_win.bat \
+  test/vts/tools/vts-tradefed/etc/vts10-tradefed_win.bat:$(VTF_TOOLS_OUT)/vts10-tradefed_win.bat \
   test/vts/tools/vts-tradefed/DynamicConfig.xml:$(VTF_TESTCASES_OUT)/cts.dynamic
 
 # Packaging rule for host-side Python logic, configs, and data files

@@ -54,7 +54,7 @@ import org.junit.runners.JUnit4;
  * The working directory is assumed to be
  * test/
  * which contains the same config as the build output
- * out/host/linux-x86/vts/android-vts/testcases/
+ * out/host/linux-x86/vts10/android-vts10/testcases/
  */
 @RunWith(JUnit4.class)
 public class VtsMultiDeviceTestTest {

@@ -17,4 +17,4 @@
 # launcher script for vts-tradefed harness
 # can be used from an Android build environment, or a standalone vts zip
 
-TF_GLOBAL_CONFIG=google/continuous/gce-global-config vts-tradefed
+TF_GLOBAL_CONFIG=google/continuous/gce-global-config vts10-tradefed
