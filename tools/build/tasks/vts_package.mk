@@ -49,17 +49,13 @@ test_suite_tradefed := vts10-tradefed
 test_suite_readme := test/vts/README.md
 # Package vts-core libraries.
 test_suite_tools += $(HOST_OUT_JAVA_LIBRARIES)/vts-core-tradefed-harness.jar \
-    $(HOST_OUT_JAVA_LIBRARIES)/vts-core-tradefed-tests.jar
+    $(HOST_OUT_JAVA_LIBRARIES)/vts-tradefed-tests.jar
 
 include $(BUILD_SYSTEM)/tasks/tools/compatibility.mk
 
 .PHONY: vts10
 vts10: $(compatibility_zip) vtslab adb
 $(call dist-for-goals, vts10, $(compatibility_zip))
-
-# Keep the old PHONY target until it's removed from all build configs.
-.PHONY: vts
-vts: vts10
 
 # Packaging rule for android-vts10.zip's testcases dir (DATA subdir).
 target_native_modules := \

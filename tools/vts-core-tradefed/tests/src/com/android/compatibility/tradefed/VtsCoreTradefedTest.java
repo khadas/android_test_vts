@@ -29,13 +29,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for vts-core-tradefed. */
+/** Tests for vts-tradefed. */
 @RunWith(JUnit4.class)
 public class VtsCoreTradefedTest {
-    private static final String PROPERTY_NAME = "VTS_CORE_ROOT";
-    private static final String SUITE_FULL_NAME = "Vendor Core Test Suite";
-    private static final String SUITE_NAME = "VTS-Core";
-    private static final String SUITE_PLAN = "vts-core";
+    private static final String PROPERTY_NAME = "VTS_ROOT";
+    private static final String SUITE_FULL_NAME = "Vendor Test Suite";
+    private static final String SUITE_NAME = "VTS";
+    private static final String SUITE_PLAN = "vts";
     private static final String DYNAMIC_CONFIG_URL = "";
 
     private String mOriginalProperty = null;
@@ -57,7 +57,7 @@ public class VtsCoreTradefedTest {
         // Test the values in the manifest can be loaded
         File root = FileUtil.createTempDir("root");
         System.setProperty(PROPERTY_NAME, root.getAbsolutePath());
-        File base = new File(root, "android-vts-core");
+        File base = new File(root, "android-vts");
         base.mkdirs();
         File tests = new File(base, "testcases");
         tests.mkdirs();
