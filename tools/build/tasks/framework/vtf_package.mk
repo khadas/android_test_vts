@@ -32,7 +32,7 @@ include $(build_list_dir)/vts_bin_package_list.mk
 include $(build_list_dir)/vts_lib_package_list.mk
 include $(build_utils_dir)/vts_package_utils.mk
 
-# Packaging rule for android-vts.zip's testcases dir (DATA subdir).
+# Packaging rule for android-vts10.zip's testcases dir (DATA subdir).
 vtf_target_native_modules := \
     $(vts_apk_packages) \
     $(vts_bin_packages) \

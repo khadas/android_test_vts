@@ -16,12 +16,15 @@
 <configuration description="Runs all tests in vts-core suite">
     <include name="everything" />
 
-    <option name="plan" value="vts-core" />
-    <option name="test-tag" value="vts-core" />
+    <!-- TODO(b/149249068): Clean up after all VTS tests are converted. -->
+    <!-- Include vts common preparers to set up Python Virtualenv. -->
+    <include name="common-preparers" />
+
+    <option name="plan" value="vts" />
+    <option name="test-tag" value="vts" />
 
     <option name="compatibility:skip-all-system-status-check" value="true" />
 
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsDeviceInfoCollector" />
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInfoCollector">
         <option name="apk" value="CtsDeviceInfo.apk"/>
         <option name="package" value="com.android.compatibility.common.deviceinfo"/>
@@ -30,6 +33,7 @@
         <option name="temp-dir" value="temp-device-info-files/"/>
         <option name="throw-error" value="false"/>
     </target_preparer>
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsDeviceInfoCollector" />
 
     <template-include name="reporters" default="basic-reporters" />
 

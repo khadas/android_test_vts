@@ -13,14 +13,14 @@
 // limitations under the License.
 
 java_library_host {
-    name: "vts-core-tradefed-tests",
+    name: "vts-tradefed-tests",
 
     srcs: ["src/**/*.java"],
     java_resource_dirs: ["res"],
 
     libs: [
         "tradefed",
-        "vts-core-tradefed",
+        "vts-core-tradefed-harness",
     ],
 
     static_libs: ["easymock"],
