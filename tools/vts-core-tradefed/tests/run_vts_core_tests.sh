@@ -18,7 +18,7 @@
 
 VTS_CORE_DIR=`dirname $0`/../etc
 
-${VTS_CORE_DIR}/vts-core-tradefed run singleCommand host -n \
+${VTS_CORE_DIR}/vts-tradefed run singleCommand host -n \
   --console-result-reporter:suppress-passed-tests \
   --class com.android.compatibility.common.tradefed.UnitTests \
   --class com.android.compatibility.common.util.HostUnitTests \

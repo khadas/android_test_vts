@@ -17,8 +17,8 @@
 -include external/linux-kselftest/android/kselftest_test_list.mk
 -include external/ltp/android/ltp_package_list.mk
 
-VTS_CORE_OUT_ROOT := $(HOST_OUT)/vts-core
-VTS_CORE_TESTCASES_OUT := $(VTS_CORE_OUT_ROOT)/android-vts-core/testcases
+VTS_CORE_OUT_ROOT := $(HOST_OUT)/vts
+VTS_CORE_TESTCASES_OUT := $(VTS_CORE_OUT_ROOT)/android-vts/testcases
 
 build_list_dir := test/vts/tools/build/tasks/list
 build_utils_dir := test/vts/tools/build/utils
