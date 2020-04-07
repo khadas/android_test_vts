@@ -15,8 +15,8 @@
 # TODO: Move this mk file to actual vts-core repo directory once it's created.
 
 # Test XMLs, native executables, and packages will be placed in this
-# directory before creating the final VTS-Core distribution.
-COMPATIBILITY_TESTCASES_OUT_vts-core := $(HOST_OUT)/vts-core/android-vts-core/testcases
+# directory before creating the final VTS distribution.
+COMPATIBILITY_TESTCASES_OUT_vts := $(HOST_OUT)/vts/android-vts/testcases
 # Force test binaries to be output to a hierarchical structure as
 # testcases/module_nanme/arch/, v.s., a flat list under testcases directory.
-COMPATIBILITY_TESTCASES_OUT_INCLUDE_MODULE_FOLDER_vts-core := true
+COMPATIBILITY_TESTCASES_OUT_INCLUDE_MODULE_FOLDER_vts := true
