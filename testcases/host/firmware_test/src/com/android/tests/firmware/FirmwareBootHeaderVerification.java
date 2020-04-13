@@ -126,7 +126,7 @@ public class FirmwareBootHeaderVerification extends BaseHostJUnit4Test {
                     "recovery partition for non-A/B devices must contain the recovery DTBO",
                     bootImgInfo.getRecoveryDtboSize(), 0);
         }
-        if (bootImgInfo.getImgHeaderVer() > 1) {
+        if (bootImgInfo.getImgHeaderVer() == 2) {
             Assert.assertNotEquals(
                     "Boot/recovery image must contain DTB", bootImgInfo.getDtbSize(), 0);
         }
