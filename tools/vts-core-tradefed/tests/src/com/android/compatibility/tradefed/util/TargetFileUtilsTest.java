@@ -17,12 +17,14 @@
 package com.android.compatibility.tradefed.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.TargetFileUtils;
+import com.android.tradefed.util.TargetFileUtils.FilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.easymock.EasyMock;
@@ -33,6 +35,41 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class TargetFileUtilsTest {
     private ITestDevice mMockDevice;
+
+    /** Test {@link TargetFileUtils#hasPermission()}. */
+    @Test
+    public void testHasPermission() throws DeviceNotAvailableException {
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                for (int z = 0; z <= 7; z++) {
+                    String permission = "" + x + y + z;
+                    // Determines if the permission bits grant read permission to any group.
+                    if (hasPermission(x, FilePermission.READ)
+                            || hasPermission(y, FilePermission.READ)
+                            || hasPermission(z, FilePermission.READ)) {
+                        assertTrue(TargetFileUtils.hasPermission(FilePermission.READ, permission));
+                    }
+                    // Determines if the permission bits grant write permission to any group.
+                    if (hasPermission(x, FilePermission.WRITE)
+                            || hasPermission(y, FilePermission.WRITE)
+                            || hasPermission(z, FilePermission.WRITE)) {
+                        assertTrue(TargetFileUtils.hasPermission(FilePermission.WRITE, permission));
+                    }
+                    // Determines if the permission bits grant EXECUTE permission to any group.
+                    if (hasPermission(x, FilePermission.EXECUTE)
+                            || hasPermission(y, FilePermission.EXECUTE)
+                            || hasPermission(z, FilePermission.EXECUTE)) {
+                        assertTrue(
+                                TargetFileUtils.hasPermission(FilePermission.EXECUTE, permission));
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean hasPermission(int bit, FilePermission permission) {
+        return (bit & permission.getPermissionNum()) != 0;
+    }
 
     /** Test {@link TargetFileUtils#findFile()} with NumberFormatException be asserted. */
     @Test
