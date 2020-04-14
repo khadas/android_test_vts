@@ -26,14 +26,23 @@ import java.util.Collections;
 import java.util.List;
 
 public class BootImageInfo implements AutoCloseable {
+    // Common definitions to all boot header versions.
     static int KERNEL_SIZE_OFFSET = 2 * 4;
+    static int HOST_IMG_HEADER_VER_OFFSET = 10 * 4;
+
+    // Definitions specific to boot header versions < 3.
     static int RAMDISK_SIZE_OFFSET = 4 * 4;
     static int PAGE_SIZE_OFFSET = 9 * 4;
-    static int HOST_IMG_HEADER_VER_OFFSET = 10 * 4;
     // Offset of recovery dtbo size in boot header of version 1.
     static int BOOT_HEADER_DTBO_SIZE_OFFSET = 1632;
     static int BOOT_HEADER_SIZE_OFFSET = BOOT_HEADER_DTBO_SIZE_OFFSET + 4 + 8;
     static int DTB_SIZE_OFFSET = BOOT_HEADER_SIZE_OFFSET + 4;
+
+    // Definitions specific to boot header version 3.
+    static int V3_RAMDISK_SIZE_OFFSET = 3 * 4;
+    static int V3_BOOT_HEADER_SIZE_OFFSET = 5 * 4;
+    static int V3_BOOT_HEADER_SIZE = 1580;
+
     private int mKernelSize = 0;
     private int mRamdiskSize = 0;
     private int mPageSize = 0;
@@ -49,38 +58,54 @@ public class BootImageInfo implements AutoCloseable {
     public BootImageInfo(String imagePath) throws IOException {
         File bootImg = new File(imagePath);
         mRaf = new RandomAccessFile(bootImg, "r");
-        byte[] tmpBytes = new byte[44];
         byte[] bytes = new byte[4];
-        mRaf.read(tmpBytes);
 
         mRaf.seek(KERNEL_SIZE_OFFSET);
         mRaf.read(bytes);
         mKernelSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
-        mRaf.seek(RAMDISK_SIZE_OFFSET);
-        mRaf.read(bytes);
-        mRamdiskSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
-        mRaf.seek(PAGE_SIZE_OFFSET);
-        mRaf.read(bytes);
-        mPageSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
         mRaf.seek(HOST_IMG_HEADER_VER_OFFSET);
         mRaf.read(bytes);
         mImgHeaderVer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
-        mRaf.seek(BOOT_HEADER_DTBO_SIZE_OFFSET);
+        if (mImgHeaderVer < 3) {
+            mRaf.seek(RAMDISK_SIZE_OFFSET);
+        } else {
+            mRaf.seek(V3_RAMDISK_SIZE_OFFSET);
+        }
         mRaf.read(bytes);
-        mRecoveryDtboSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        mRamdiskSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
-        mRaf.seek(BOOT_HEADER_SIZE_OFFSET);
+        if (mImgHeaderVer < 3) {
+            mRaf.seek(PAGE_SIZE_OFFSET);
+            mRaf.read(bytes);
+            mPageSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        } else {
+            mPageSize = 4096;
+        }
+
+        if (mImgHeaderVer < 3) {
+            mRaf.seek(BOOT_HEADER_DTBO_SIZE_OFFSET);
+            mRaf.read(bytes);
+            mRecoveryDtboSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        } else {
+            mRecoveryDtboSize = -1;
+        }
+
+        if (mImgHeaderVer < 3) {
+            mRaf.seek(BOOT_HEADER_SIZE_OFFSET);
+        } else {
+            mRaf.seek(V3_BOOT_HEADER_SIZE_OFFSET);
+        }
         mRaf.read(bytes);
         mBootHeaderSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
-        if (mImgHeaderVer > 1) {
+        if (mImgHeaderVer == 2) {
             mRaf.seek(DTB_SIZE_OFFSET);
             mRaf.read(bytes);
             mDtbSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        } else {
+            mDtbSize = -1;
         }
     }
 
@@ -181,11 +206,16 @@ public class BootImageInfo implements AutoCloseable {
      * @return the value of expected header size.
      */
     public int getExpectHeaderSize() {
-        int expectHeaderSize = BOOT_HEADER_SIZE_OFFSET + 4;
-        if (mImgHeaderVer > 1) {
-            expectHeaderSize = expectHeaderSize + 4 + 8;
+        switch (mImgHeaderVer) {
+            case 1:
+                return BOOT_HEADER_SIZE_OFFSET + 4;
+            case 2:
+                return BOOT_HEADER_SIZE_OFFSET + 16;
+            case 3:
+                return V3_BOOT_HEADER_SIZE;
+            default:
+                return -1;
         }
-        return expectHeaderSize;
     }
 
     /**
