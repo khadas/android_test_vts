@@ -23,6 +23,6 @@ java_test_host {
     srcs: ["src/**/*.java"],
     test_suites: [
         "general-tests",
-        "vts-core",
+        "vts",
     ],
 }
