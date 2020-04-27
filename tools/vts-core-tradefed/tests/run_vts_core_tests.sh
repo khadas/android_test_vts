@@ -23,5 +23,5 @@ ${VTS_CORE_DIR}/vts-tradefed run singleCommand host -n \
   --class com.android.compatibility.common.tradefed.UnitTests \
   --class com.android.compatibility.common.util.HostUnitTests \
   --class com.android.compatibility.common.util.UnitTests \
-  --class com.android.compatibility.tradefed.VtsCoreTradefedTest
+  --class com.android.compatibility.tradefed.VtsUnitTests
   "$@"
