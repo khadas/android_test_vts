@@ -50,7 +50,7 @@ public class TargetFileUtils {
      *
      * @param permission The specify permissions.
      * @param permissionBits The octal permissions string (e.g. 741).
-     * @return True if any group has the specify permission.
+     * @return True if any owner/group/global has the specify permission.
      */
     public static boolean hasPermission(FilePermission permission, String permissionBits) {
         for (int i = 0; i < PERMISSION_GROUPS; i++) {
@@ -157,5 +157,35 @@ public class TargetFileUtils {
         findedFiles = new ArrayList<>(Arrays.asList(result.getStdout().split("\n")));
         findedFiles.removeIf(s -> s.contentEquals(""));
         return findedFiles;
+    }
+
+    /**
+     * Check if the permission for a given path is readonly.
+     *
+     * @param filepath Path to a file or directory.
+     * @param device The test device.
+     * @return true if the path is readonly, false otherwise.
+     */
+    public static boolean isReadOnly(String filepath, ITestDevice device)
+            throws DeviceNotAvailableException {
+        String permissionBits = getPermission(filepath, device);
+        return (hasPermission(FilePermission.READ, permissionBits)
+                && !hasPermission(FilePermission.WRITE, permissionBits)
+                && !hasPermission(FilePermission.EXECUTE, permissionBits));
+    }
+
+    /**
+     * Check if the permission for a given path is readwrite.
+     *
+     * @param filepath Path to a file or directory.
+     * @param device The test device.
+     * @return true if the path is readwrite, false otherwise.
+     */
+    public static boolean isReadWriteOnly(String filepath, ITestDevice device)
+            throws DeviceNotAvailableException {
+        String permissionBits = getPermission(filepath, device);
+        return (hasPermission(FilePermission.READ, permissionBits)
+                && hasPermission(FilePermission.WRITE, permissionBits)
+                && !hasPermission(FilePermission.EXECUTE, permissionBits));
     }
 }
