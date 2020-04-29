@@ -103,7 +103,7 @@ class ProcSwapsTest(KernelProcFileTestBase.KernelProcFileTestBase):
     def parse_contents(self, contents):
         if len(contents) == 0 or contents[-1] != '\n':
             raise SyntaxError('Missing final newline')
-        return map(lambda x: x.split(), contents.split('\n')[:-1])
+        return list(map(lambda x: x.split(), contents.split('\n')[:-1]))
 
     def result_correct(self, result):
         return self.REQUIRED_COLUMNS.issubset(result[0])

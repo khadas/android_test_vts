@@ -166,4 +166,4 @@ def RunCommand(cmd, timeout=None):
     finally:
         _timer.cancel()
 
-    return out, err, proc.returncode
+    return out.decode('UTF-8', 'ignore'), err.decode('UTF-8', 'ignore'), proc.returncode
