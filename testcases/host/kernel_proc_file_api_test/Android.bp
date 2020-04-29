@@ -29,11 +29,11 @@ python_test_host {
     ],
     version: {
          py2: {
-             enabled: true,
+             enabled: false,
              embedded_launcher: false,
          },
          py3: {
-             enabled: false,
+             enabled: true,
              embedded_launcher: false,
          },
     },
