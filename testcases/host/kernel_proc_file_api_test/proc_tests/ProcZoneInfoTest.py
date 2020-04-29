@@ -21,7 +21,7 @@ from proc_tests.KernelProcFileTestBase import repeat_rule, literal_token
 class ProcZoneInfoTest(KernelProcFileTestBase.KernelProcFileTestBase):
     '''/proc/zoneinfo displays information about memory zones.'''
 
-    t_APAGES = literal_token(r'pages')
+    t_APAGES = literal_token(r'pages\s')
     t_PAGESETS = literal_token(r'pagesets')
     t_CPU = literal_token(r'cpu')
     t_VM = literal_token(r'vm')
