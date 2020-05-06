@@ -25,7 +25,7 @@ class ProcUidCpuPowerTimeInStateTest(
 
     def parse_contents(self, contents):
         size = struct.calcsize('I')
-        return [struct.unpack_from('I', contents, i)[0] for i in range(0, len(contents), size)]
+        return [struct.unpack_from('I', contents.encode(), i)[0] for i in range(0, len(contents), size)]
 
     def result_correct(self, result):
         if not result:
@@ -50,7 +50,7 @@ class ProcUidCpuPowerConcurrentActiveTimeTest(
 
     def parse_contents(self, contents):
         size = struct.calcsize('I')
-        return [struct.unpack_from('I', contents, i)[0] for i in range(0, len(contents), size)]
+        return [struct.unpack_from('I', contents.encode(), i)[0] for i in range(0, len(contents), size)]
 
     def result_correct(self, result):
         if not result:
@@ -75,7 +75,7 @@ class ProcUidCpuPowerConcurrentPolicyTimeTest(
 
     def parse_contents(self, contents):
         size = struct.calcsize('I')
-        return [struct.unpack_from('I', contents, i)[0] for i in range(0, len(contents), size)]
+        return [struct.unpack_from('I', contents.encode(), i)[0] for i in range(0, len(contents), size)]
 
     def result_correct(self, result):
         if not result:
