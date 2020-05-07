@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs all tests in vts-core suite">
+<configuration description="Runs all tests in vts suite">
     <include name="everything" />
 
     <!-- TODO(b/149249068): Clean up after all VTS tests are converted. -->
