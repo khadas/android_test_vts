@@ -166,4 +166,10 @@ def RunCommand(cmd, timeout=None):
     finally:
         _timer.cancel()
 
-    return out.decode('UTF-8', 'ignore'), err.decode('UTF-8', 'ignore'), proc.returncode
+    try:
+        return out.decode('UTF-8'), err.decode('UTF-8'), proc.returncode
+    except UnicodeDecodeError:
+        # ProcUidCpuPowerTimeInStateTest, ProcUidCpuPowerConcurrentActiveTimeTest,
+        # and ProcUidCpuPowerConcurrentPolicyTimeTest output could not be decode
+        # to UTF-8.
+        return out.decode('ISO-8859-1'), err.decode('ISO-8859-1'), proc.returncode
