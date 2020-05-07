@@ -93,8 +93,6 @@ JARS="tradefed
   compatibility-host-util-tests
   vts-tradefed
   vts-tradefed-tests
-  vts10-tradefed
-  vts10-tradefed-tests
   compatibility-common-util-tests
   compatibility-tradefed-tests"
 
@@ -134,5 +132,4 @@ for j in $(find ${VTS_ROOT}/android-vts/testcases -type f -name '*.jar'); do
 done
 
 VTS_TESTCASES=${VTS_ROOT}/android-vts/testcases/
-
 VTS_TESTCASES=${VTS_TESTCASES} java $RDBG_FLAG -Xmx4096m -XX:+HeapDumpOnOutOfMemoryError -cp ${JAR_PATH} -DVTS_ROOT=${VTS_ROOT} com.android.compatibility.common.tradefed.command.CompatibilityConsole "$@"
