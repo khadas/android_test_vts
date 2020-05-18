@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Excluded tests from vts-presubmit-* plan runs">
+
+    <!-- vts_ltp_test_arm_* test cases taking longer than 15 seconds -->
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 cve.cve-2011-0999_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 fs.linker01_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 nptl.nptl01_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 mm.mmapstress06_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 fs.fs_di_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio23_64bit" />
+
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 cve.cve-2011-0999_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 fs.linker01_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 nptl.nptl01_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 mm.mmapstress06_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 fs.fs_di_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 dio.dio23_32bit" />
+
+    <!-- b/118340949: temporally disable kernel test cases that takes 2+ minutes to finish -->
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio16_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio17_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio20_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio21_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio24_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio25_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio27_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio28_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 mm.mtest06_64bit" />
+
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio16_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio17_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio20_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio21_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio24_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio25_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio27_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm dio.dio28_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm mm.mtest06_32bit" />
+
+</configuration>
