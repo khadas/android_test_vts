@@ -56,7 +56,7 @@ class ProcVmallocInfoTest(KernelProcFileTestBase.KernelProcFileTestBase):
     p_nodes = repeat_rule('node')
 
     def p_line(self, p):
-        'line : addr_range NUMBER caller module pages phys ioremap vmalloc vmap user vpages vm_vm_area nodes NEWLINE'
+        'line : addr_range NUMBER caller module pages phys ioremap vmalloc vmap user dma_coherent vpages vm_vm_area nodes NEWLINE'
         p[0] = p[1:]
 
     def p_addr_range(self, p):
@@ -85,6 +85,11 @@ class ProcVmallocInfoTest(KernelProcFileTestBase.KernelProcFileTestBase):
 
     def p_vmalloc(self, p):
         '''vmalloc : VMALLOC
+                   | empty'''
+        p[0] = p[1]
+
+    def p_dma_coherent(self, p):
+        '''dma_coherent : DMA_COHERENT
                    | empty'''
         p[0] = p[1]
 
