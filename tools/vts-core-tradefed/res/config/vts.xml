@@ -16,10 +16,6 @@
 <configuration description="Runs all tests in vts suite">
     <include name="everything" />
 
-    <!-- TODO(b/149249068): Clean up after all VTS tests are converted. -->
-    <!-- Include vts common preparers to set up Python Virtualenv. -->
-    <include name="common-preparers" />
-
     <option name="plan" value="vts" />
     <option name="test-tag" value="vts" />
 
