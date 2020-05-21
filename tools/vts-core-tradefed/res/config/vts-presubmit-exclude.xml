@@ -17,6 +17,10 @@
 
     <!-- vts_ltp_test_arm_* test cases taking longer than 15 seconds -->
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 cve.cve-2011-0999_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 cve.cve-2015-7550_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 cve.cve-2016-7117_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 cve.cve-2017-2671_64bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 fs.fs_inod01_64bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 fs.linker01_64bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 nptl.nptl01_64bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 mm.mmapstress06_64bit" />
@@ -24,6 +28,10 @@
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_64 dio.dio23_64bit" />
 
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 cve.cve-2011-0999_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 cve.cve-2015-7550_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 cve.cve-2016-7117_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 cve.cve-2017-2671_32bit" />
+    <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 fs.fs_inod01_32bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 fs.linker01_32bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 nptl.nptl01_32bit" />
     <option name="compatibility:exclude-filter" value="vts_ltp_test_arm_32 mm.mmapstress06_32bit" />
