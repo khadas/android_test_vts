@@ -21,6 +21,7 @@
 
     <option name="compatibility:skip-all-system-status-check" value="true" />
 
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsDeviceInfoCollector" />
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInfoCollector">
         <option name="apk" value="CtsDeviceInfo.apk"/>
         <option name="package" value="com.android.compatibility.common.deviceinfo"/>
@@ -29,7 +30,6 @@
         <option name="temp-dir" value="temp-device-info-files/"/>
         <option name="throw-error" value="false"/>
     </target_preparer>
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsDeviceInfoCollector" />
 
     <template-include name="reporters" default="basic-reporters" />
 
