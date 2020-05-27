@@ -233,7 +233,7 @@ class VtsKernelProcFileApiTest(unittest.TestCase):
         can either generate an undefined instruction abort or use software emulation
         or hardware execution.
         """
-        if 'arm' in self.cpu_abi(self.dut) and self.is64Bit(self.dut):
+        if not ('arm' in self.cpu_abi(self.dut) and self.is64Bit(self.dut)):
             logging.info("file not present on non-ARM64 device")
             return
 
@@ -274,7 +274,7 @@ def run_proc_file_test(test_object):
         test_object: inherits KernelProcFileTestBase, contains the test functions
     """
     def test(self):
-        if test_object in TEST_OBJECTS_64 and 64 != self.dut.GetBinderBitness():
+        if test_object in TEST_OBJECTS_64 and not self.is64Bit(self.dut):
             logging.info("Skip test for 64-bit kernel.")
             return
         test_object.set_api_level(self.dut)
