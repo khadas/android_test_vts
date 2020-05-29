@@ -25,8 +25,14 @@
     <option name="compatibility:include-filter" value="binderSafeInterfaceTest  " />
     <option name="compatibility:include-filter" value="memunreachable_binder_test" />
     <option name="compatibility:include-filter" value="KernelLibcutilsTest" />
-    <option name="compatibility:include-filter" value="vts_ltp_test_arm_64" />
-    <option name="compatibility:include-filter" value="vts_ltp_test_arm" />
     <option name="compatibility:include-filter" value="vts_kernel_proc_file_api_test" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm_lowmem" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm_64" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm_64_hwasan" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm_64_lowmem" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_arm_64_lowmem_hwasan" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_x86" />
+    <option name="compatibility:include-filter" value="vts_ltp_test_x86_64" />
 
 </configuration>
