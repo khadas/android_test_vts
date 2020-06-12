@@ -89,21 +89,6 @@ public class FirmwareBootHeaderVerification extends BaseHostJUnit4Test {
         return true;
     }
 
-    private void checkValidRamdisk(BootImageInfo bootImgInfo) throws IOException {
-        byte[] compressedRamdisk = bootImgInfo.getRamdiskStream();
-        ByteArrayInputStream compressedStream = new ByteArrayInputStream(compressedRamdisk);
-        GZIPInputStream extractRamdisk = new GZIPInputStream(compressedStream);
-        // The CPIO header magic can be "070701" or "070702" as per kernel
-        // documentation: Documentation/early-userspace/buffer-format.txt
-        byte[] cpio_header = new byte[6];
-        extractRamdisk.read(cpio_header);
-        CLog.i("cpio_header_magic: %s", cpio_header);
-        String cpio_header_magic = new String(cpio_header);
-        CLog.i("cpio_header_magic: %s", cpio_header_magic);
-        Assert.assertTrue("cpio archive header magic not found in ramdisk",
-                (cpio_header_magic.equals("070701") || cpio_header_magic.equals("070702")));
-    }
-
     private void CheckImageHeader(String imagePath, boolean isRecovery) throws IOException {
         BootImageInfo bootImgInfo = new BootImageInfo(imagePath);
         // Check kernel size.
@@ -116,7 +101,6 @@ public class FirmwareBootHeaderVerification extends BaseHostJUnit4Test {
             // Check ramdisk size.
             Assert.assertNotEquals(
                     "boot.img must contain ramdisk", bootImgInfo.getRamdiskSize(), 0);
-            checkValidRamdisk(bootImgInfo);
         } else {
             Assert.assertTrue("Device must at least have a boot image of version 1",
                     (bootImgInfo.getImgHeaderVer() >= 1));
