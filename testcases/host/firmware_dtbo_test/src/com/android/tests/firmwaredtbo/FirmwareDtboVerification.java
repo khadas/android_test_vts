@@ -198,6 +198,12 @@ public class FirmwareDtboVerification extends BaseHostJUnit4Test {
     /* Verifies application of DT overlays. */
     @Test
     public void testVerifyOverlay() throws Exception {
+        // testVerifyOverlay depend on testCheckDTBOPartition, check if previous test artifacts
+        // exist, if not force run testCheckDTBOPartition().
+        File hostDtboImage = new File(mTemptFolder, "dtbo");
+        if (!hostDtboImage.exists()) {
+            testCheckDTBOPartition();
+        }
         String cmd = "cat /proc/cmdline |"
                 + "grep -o \"'androidboot.dtbo_idx=[^ ]*'\" |"
                 + "cut -d \"=\" -f 2 ";
@@ -213,7 +219,9 @@ public class FirmwareDtboVerification extends BaseHostJUnit4Test {
             String overlayFileName = "dumped_dtbo." + overlay_idx.replaceAll("\\s+$", "");
             File overlayFile = new File(mTemptFolder, overlayFileName);
             File remoteOverLayFile = new File(mDeviceTestRoot, overlayFileName);
-            mDevice.pushFile(overlayFile, remoteOverLayFile.getAbsolutePath());
+            if (!mDevice.pushFile(overlayFile, remoteOverLayFile.getAbsolutePath())) {
+                Assert.fail("Push " + overlayFile + "fail!");
+            }
             overlayArg.add(overlayFileName);
         }
         String verificationTestPath = null;
