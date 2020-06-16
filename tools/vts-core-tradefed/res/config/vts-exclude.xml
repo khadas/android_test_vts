@@ -13,11 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs all tests in VTS suite">
-    <include name="vts-ccd" />
-    <include name="vts-exclude" />
+<configuration description="Exclude certain tests in VTS suite with a reason specified">
 
-    <option name="plan" value="vts" />
-    <option name="test-tag" value="vts" />
+    <!-- b/154017337: The test is only applicable to vendor device with feature supported. -->
+    <option name="compatibility:exclude-filter" value="VirtualAbRequirementTest.EnabledOnLaunchR"/>
 
 </configuration>
