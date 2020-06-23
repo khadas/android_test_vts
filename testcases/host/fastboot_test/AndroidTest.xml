@@ -24,11 +24,6 @@
         <option name="logcat-on-failure" value="false" />
     </object>
 
-    <target_preparer class="com.android.tradefed.targetprep.FastbootCommandPreparer" >
-        <option name="fastboot-mode" value="fastbootd" />
-        <option name="stay-fastboot" value="true" />
-    </target_preparer>
-
     <test class="com.android.tradefed.testtype.HostTest" >
         <option name="jar" value="FastbootVerifyUserspaceTest.jar" />
     </test>

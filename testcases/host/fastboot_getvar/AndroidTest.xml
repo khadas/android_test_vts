@@ -22,11 +22,6 @@
         <option name="api-level-prop" value="ro.product.first_api_level" />
     </object>
 
-    <target_preparer class="com.android.tradefed.targetprep.FastbootCommandPreparer" >
-        <option name="fastboot-mode" value="fastbootd" />
-        <option name="stay-fastboot" value="true" />
-    </target_preparer>
-
     <test class="com.android.tradefed.testtype.HostTest" >
         <option name="jar" value="FastbootGetvarUserspaceTest.jar" />
     </test>
