@@ -19,18 +19,25 @@ package com.android.tests.fastboot;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.device.TestDeviceState;
+import com.android.tradefed.invoker.TestInformation;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
+import com.android.tradefed.testtype.junit4.AfterClassWithInfo;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
+import com.android.tradefed.util.AbiFormatter;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 import com.android.tradefed.util.IRunUtil;
 import com.android.tradefed.util.RunUtil;
 import java.io.File;
 import java.lang.Thread;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -51,6 +58,18 @@ public class FastbootVerifyUserspaceTest extends BaseHostJUnit4Test {
     public void setUp() throws Exception {
         mDevice = getDevice();
 
+        ArrayList<String> supportedAbis = new ArrayList<>(Arrays.asList(AbiFormatter.getSupportedAbis(mDevice, "")));
+        if (supportedAbis.contains("arm64-v8a")) {
+            String output = mDevice.executeShellCommand("uname -r");
+            Pattern p = Pattern.compile("^(\\d+)\\.(\\d+)");
+            Matcher m1 = p.matcher(output);
+            Assert.assertTrue(m1.find());
+            Assume.assumeTrue("Skipping test for fastbootd on GKI",
+                              Integer.parseInt(m1.group(1)) < 5 ||
+                              (Integer.parseInt(m1.group(1)) == 5 &&
+                               Integer.parseInt(m1.group(2)) < 4));
+        }
+
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         File file = buildHelper.getTestFile("fuzzy_fastboot", getAbi());
         Assert.assertNotNull(file);
@@ -61,6 +80,11 @@ public class FastbootVerifyUserspaceTest extends BaseHostJUnit4Test {
         if (!TestDeviceState.FASTBOOT.equals(mDevice.getDeviceState())) {
             mDevice.rebootIntoFastbootd();
         }
+    }
+
+    @AfterClassWithInfo
+    public static void tearDownClass(TestInformation testInfo) throws Exception {
+        testInfo.getDevice().reboot();
     }
 
     /* Runs fuzzy_fastboot gtest to verify slot operations in fastbootd implementation. */
