@@ -22,13 +22,21 @@ import static org.junit.Assert.fail;
 
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.device.TestDeviceState;
+import com.android.tradefed.invoker.TestInformation;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
+import com.android.tradefed.testtype.junit4.AfterClassWithInfo;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
+import com.android.tradefed.util.AbiFormatter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,10 +52,28 @@ public class FastbootGetvarUserspaceTest extends BaseHostJUnit4Test {
     @Before
     public void setUp() throws Exception {
         mDevice = getDevice();
+
+        ArrayList<String> supportedAbis = new ArrayList<>(Arrays.asList(AbiFormatter.getSupportedAbis(mDevice, "")));
+        if (supportedAbis.contains("arm64-v8a")) {
+            String output = mDevice.executeShellCommand("uname -r");
+            Pattern p = Pattern.compile("^(\\d+)\\.(\\d+)");
+            Matcher m1 = p.matcher(output);
+            Assert.assertTrue(m1.find());
+            Assume.assumeTrue("Skipping test for fastbootd on GKI",
+                              Integer.parseInt(m1.group(1)) < 5 ||
+                              (Integer.parseInt(m1.group(1)) == 5 &&
+                               Integer.parseInt(m1.group(2)) < 4));
+        }
+
         // Make sure the device is in fastbootd mode.
         if (!TestDeviceState.FASTBOOT.equals(mDevice.getDeviceState())) {
             mDevice.rebootIntoFastbootd();
         }
+    }
+
+    @AfterClassWithInfo
+    public static void tearDownClass(TestInformation testInfo) throws Exception {
+        testInfo.getDevice().reboot();
     }
 
     /* Devices launching in R and after must export cpu-abi. */
