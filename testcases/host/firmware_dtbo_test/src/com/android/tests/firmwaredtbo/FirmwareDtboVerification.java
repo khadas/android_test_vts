@@ -214,16 +214,6 @@ public class FirmwareDtboVerification extends BaseHostJUnit4Test {
         CLog.d("overlay_idx_string=%s", overlay_idx_string);
         Assert.assertNotEquals(
                 "Kernel command line missing androidboot.dtbo_idx", overlay_idx_string.length(), 0);
-        ArrayList<String> overlayArg = new ArrayList<>();
-        for (String overlay_idx : overlay_idx_string.split(",")) {
-            String overlayFileName = "dumped_dtbo." + overlay_idx.replaceAll("\\s+$", "");
-            File overlayFile = new File(mTemptFolder, overlayFileName);
-            File remoteOverLayFile = new File(mDeviceTestRoot, overlayFileName);
-            if (!mDevice.pushFile(overlayFile, remoteOverLayFile.getAbsolutePath())) {
-                Assert.fail("Push " + overlayFile + "fail!");
-            }
-            overlayArg.add(overlayFileName);
-        }
         String verificationTestPath = null;
         String ufdtVerifier = "ufdt_verify_overlay";
         ArrayList<String> matchedResults =
@@ -246,8 +236,20 @@ public class FirmwareDtboVerification extends BaseHostJUnit4Test {
         cmdResult = mDevice.executeShellV2Command(String.format(copyCommand));
         Assert.assertEquals("Unable to copy to " + remoteFinalDTPath, cmdResult.getStatus(),
                 CommandStatus.SUCCESS);
+        ArrayList<String> overlayArg = new ArrayList<>();
+        for (String overlay_idx : overlay_idx_string.split(",")) {
+            String overlayFileName = "dumped_dtbo." + overlay_idx.replaceAll("\\s+$", "");
+            File overlayFile = new File(mTemptFolder, overlayFileName);
+            // Push the dumped overlay dtbo files to the same direcly of ufdt_verify_overlay
+            File remoteOverLayFile = new File(ufdtVerifierParent, overlayFileName);
+            CLog.d("Push remoteOverLayFile %s", remoteOverLayFile);
+            if (!mDevice.pushFile(overlayFile, remoteOverLayFile.getAbsolutePath())) {
+                Assert.fail("Push " + overlayFile + "fail!");
+            }
+            overlayArg.add(overlayFileName);
+        }
         String verifyCmd = String.format("cd %s && ./ufdt_verify_overlay final_dt %s",
-                ufdtVerifierParent, remoteFinalDTPath);
+                ufdtVerifierParent, String.join(" ", overlayArg));
         CLog.d(verifyCmd);
         cmdResult = mDevice.executeShellV2Command(verifyCmd);
         Assert.assertEquals("Incorrect Overlay Application:" + cmdResult.getStderr(),
